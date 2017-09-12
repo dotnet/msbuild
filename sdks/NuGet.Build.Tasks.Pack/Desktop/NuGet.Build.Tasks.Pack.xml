@@ -27,7 +27,12 @@
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
@@ -54,9 +59,60 @@
             Log using basic methods to avoid missing methods on mono.
             </summary>
     </member>
+    <member name="T:NuGet.Build.Tasks.GetProjectTargetFrameworksTask">
+      <summary>
+            Determine the project's targetframework(s) based
+            on the available properties.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.ProjectPath">
+      <summary>
+            Full path to the msbuild project.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetFrameworkMoniker">
+      <summary>
+            Optional TargetFrameworkMoniker property value.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetPlatformIdentifier">
+      <summary>
+            Optional TargetPlatformIdentifier property value.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetPlatformMinVersion">
+      <summary>
+            Optional TargetPlatformMinVersion property value.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetPlatformVersion">
+      <summary>
+            Optional TargetPlatformVersion property value.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetFrameworks">
+      <summary>
+            Optional TargetFrameworks property value.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetFramework">
+      <summary>
+            Optional TargetFrameworks property value.
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.ProjectTargetFrameworks">
+      <summary>
+            ; delimited list of target frameworks for the project.
+            </summary>
+    </member>
     <member name="T:NuGet.Build.Tasks.Pack.MSBuildTaskItem">
       <summary>
             TaskItem wrapper
+            </summary>
+    </member>
+    <member name="P:NuGet.Build.Tasks.Pack.GetPackOutputItemsTask.OutputPackItems">
+      <summary>
+            Output items
             </summary>
     </member>
     <member name="T:NuGet.Build.Tasks.Pack.IPackTaskLogic">
@@ -276,7 +332,7 @@
             Indicates if this token will pro-actively raise callbacks. Callbacks are still guaranteed to fire, eventually.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands313497.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands317968.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -288,23 +344,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands313497.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands317968.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Commands313497.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Commands317968.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands313497.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Commands317968.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands313497.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands317968.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Commands317968.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -421,6 +482,11 @@
             This is the target framework for which this assembly was built.
             </summary>
     </member>
+    <member name="M:NuGet.Commands.CompatibilityChecker.GetErrorMessage(NuGet.Common.NuGetLogCode,NuGet.Commands.CompatibilityIssue,NuGet.Commands.RestoreTargetGraph)">
+      <summary>
+            Create an error message for the given issue.
+            </summary>
+    </member>
     <member name="M:NuGet.Commands.CompatibilityChecker.HasCompatibleAssets(NuGet.ProjectModel.LockFileTargetLibrary)">
       <summary>
             Check if the library contains assets.
@@ -532,6 +598,11 @@
             True if the range has an obtainable version for the lower bound.
             </summary>
     </member>
+    <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetDependencyTargetGraphs(NuGet.ProjectModel.PackageSpec,NuGet.LibraryModel.LibraryDependency)">
+      <summary>
+            Create target graph names for each framework the dependency exists under.
+            </summary>
+    </member>
     <member name="T:NuGet.Commands.UnresolvedMessages">
       <summary>
             Log errors for packages and projects that were missing.
@@ -641,6 +712,13 @@
             NuGetLogCode -&gt; LibraryId -&gt; Set of Frameworks.
             </summary>
     </member>
+    <member name="M:NuGet.Commands.PackageSpecificWarningProperties.CreatePackageSpecificWarningProperties(NuGet.ProjectModel.PackageSpec)">
+      <summary>
+            Extracts PackageSpecific WarningProperties from a PackageSpec
+            </summary>
+      <param name="packageSpec">PackageSpec containing the Dependencies with WarningProperties</param>
+      <returns>PackageSpecific WarningProperties extracted from a PackageSpec</returns>
+    </member>
     <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Add(NuGet.Common.NuGetLogCode,System.String,NuGet.Frameworks.NuGetFramework)">
       <summary>
             Adds a NuGetLogCode into the NoWarn Set for the specified library Id and target graph.
@@ -648,13 +726,6 @@
       <param name="code">NuGetLogCode for which no warning should be thrown.</param>
       <param name="libraryId">Library for which no warning should be thrown.</param>
       <param name="framework">Target graph for which no warning should be thrown.</param>
-    </member>
-    <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Add(NuGet.Common.NuGetLogCode,System.String)">
-      <summary>
-            Adds a NuGetLogCode into the NoWarn Set for the specified library Id with unconditional reference.
-            </summary>
-      <param name="code">NuGetLogCode for which no warning should be thrown.</param>
-      <param name="libraryId">Library for which no warning should be thrown.</param>
     </member>
     <member name="M:NuGet.Commands.PackageSpecificWarningProperties.AddRange(System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode},System.String,NuGet.Frameworks.NuGetFramework)">
       <summary>
@@ -664,13 +735,6 @@
       <param name="libraryId">Library for which no warning should be thrown.</param>
       <param name="framework">Target graph for which no warning should be thrown.</param>
     </member>
-    <member name="M:NuGet.Commands.PackageSpecificWarningProperties.AddRange(System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode},System.String)">
-      <summary>
-            Adds a list of NuGetLogCode into the NoWarn Set for the specified library Id with unconditional reference.
-            </summary>
-      <param name="codes">IEnumerable of NuGetLogCode for which no warning should be thrown.</param>
-      <param name="libraryId">Library for which no warning should be thrown.</param>
-    </member>
     <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Contains(NuGet.Common.NuGetLogCode,System.String,NuGet.Frameworks.NuGetFramework)">
       <summary>
             Checks if a NugetLogCode is part of the NoWarn list for the specified library Id and target graph.
@@ -679,14 +743,6 @@
       <param name="libraryId">library Id to be checked.</param>
       <param name="framework">target graph to be checked.</param>
       <returns>True iff the NugetLogCode is part of the NoWarn list for the specified libraryId and Target Graph.</returns>
-    </member>
-    <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Contains(NuGet.Common.NuGetLogCode,System.String)">
-      <summary>
-            Checks if a NugetLogCode is part of the NoWarn list for the specified library Id with uncoditional reference.
-            </summary>
-      <param name="code">NugetLogCode to be checked.</param>
-      <param name="libraryId">library Id to be checked.</param>
-      <returns>True iff the NugetLogCode is part of the NoWarn list for the specified libraryId with uncoditional reference.</returns>
     </member>
     <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,NuGet.Common.LogLevel,System.Boolean)">
       <summary>
@@ -729,7 +785,7 @@
     </member>
     <member name="T:NuGet.Commands.WarningPropertiesCollection">
       <summary>
-            Class to hold ProjectWIde and PackageSpecific WarningProperties
+            Class to hold ProjectWide and PackageSpecific WarningProperties.
             </summary>
     </member>
     <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyWarningProperties(NuGet.Common.IRestoreLogMessage)">
@@ -741,19 +797,18 @@
       <returns>Bool indicating is the warning should be suppressed or not. 
             If not then the param message sould have been mutated to an error</returns>
     </member>
-    <member name="M:NuGet.Commands.WarningPropertiesCollection.GetPackageSpecificWarningProperties(NuGet.ProjectModel.PackageSpec)">
-      <summary>
-            Extracts PackageSpecific WarningProperties from a PackageSpec
-            </summary>
-      <param name="packageSpec">PackageSpec containing the Dependencies with WarningProperties</param>
-      <returns>PackageSpecific WarningProperties extracted from a PackageSpec</returns>
-    </member>
     <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyProjectWideWarningProperties(NuGet.Common.ILogMessage)">
       <summary>
             Method is used to check is a warning should be suppressed and if not then if it should be treated as an error.
             </summary>
       <param name="logMessage">Message which should be mutated if needed.</param>
       <returns>bool indicating if the ILogMessage should be suppressed or not.</returns>
+    </member>
+    <member name="P:NuGet.Commands.WarningPropertiesCollection.ProjectFrameworks">
+      <summary>
+            Contains the target frameworks for the project.
+            These are used for no warn filtering in case of a log message without a target graph.
+            </summary>
     </member>
     <member name="P:NuGet.Commands.WarningPropertiesCollection.ProjectWideWarningProperties">
       <summary>
@@ -951,7 +1006,7 @@
             Feed providers
             </summary>
     </member>
-    <member name="M:NuGet.Commands.RestoreCommandProviders.#ctor(NuGet.Repositories.NuGetv3LocalRepository,System.Collections.Generic.IReadOnlyList{NuGet.Repositories.NuGetv3LocalRepository},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider})">
+    <member name="M:NuGet.Commands.RestoreCommandProviders.#ctor(NuGet.Repositories.NuGetv3LocalRepository,System.Collections.Generic.IReadOnlyList{NuGet.Repositories.NuGetv3LocalRepository},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider},NuGet.Protocol.LocalNuspecCache)">
       <summary>
             Providers used by the restore command. These can be shared across restores.
             </summary>
@@ -959,6 +1014,7 @@
       <param name="fallbackPackageFolders">Path to any fallback package folders.</param>
       <param name="localProviders">This is typically just a provider for the global packages folder.</param>
       <param name="remoteProviders">All dependency providers.</param>
+      <param name="nuspecCache">Nuspec cache.</param>
     </member>
     <member name="P:NuGet.Commands.RestoreCommandProviders.GlobalPackages">
       <summary>
@@ -1222,6 +1278,23 @@
         <c>true</c> to ignore failed sources; otherwise <c>false</c>.</param>
       <param name="ignoreWarning">
         <c>true</c> to ignore warnings; otherwise <c>false</c>.</param>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="sourceRepository" />
+            is <c>null</c>.</exception>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="cacheContext" /> is <c>null</c>.</exception>
+    </member>
+    <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.#ctor(NuGet.Protocol.Core.Types.SourceRepository,NuGet.Common.ILogger,NuGet.Protocol.Core.Types.SourceCacheContext,System.Boolean,System.Boolean,NuGet.Protocol.LocalNuspecCache)">
+      <summary>
+            Initializes a new <see cref="T:NuGet.Commands.SourceRepositoryDependencyProvider" /> class.
+            </summary>
+      <param name="sourceRepository">A source repository.</param>
+      <param name="logger">A logger.</param>
+      <param name="cacheContext">A source cache context.</param>
+      <param name="ignoreFailedSources">
+        <c>true</c> to ignore failed sources; otherwise <c>false</c>.</param>
+      <param name="ignoreWarning">
+        <c>true</c> to ignore warnings; otherwise <c>false</c>.</param>
+      <param name="nuspecCache">Optional nuspec cache.</param>
       <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="sourceRepository" />
             is <c>null</c>.</exception>
       <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
@@ -1529,6 +1602,17 @@
             </summary>
       <returns>True if an invalid combination exists.</returns>
     </member>
+    <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetWarningForUnsupportedProject(System.String)">
+      <summary>
+            Log warning NU1503
+            </summary>
+    </member>
+    <member name="M:NuGet.Commands.MSBuildRestoreUtility.AggregateSources(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
+      <summary>
+            Remove duplicates and excluded values a set of sources or fallback folders.
+            </summary>
+      <remarks>Compares with Ordinal, excludes must be exact matches.</remarks>
+    </member>
     <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetVersion(NuGet.Commands.IMSBuildItem)">
       <summary>
             Return the parsed version or 1.0.0 if the property does not exist.
@@ -1563,13 +1647,20 @@
             Ignores codes that are unknown.
             </summary>
     </member>
+    <member name="M:NuGet.Commands.MSBuildRestoreUtility.ReplayWarningsAndErrorsAsync(NuGet.ProjectModel.LockFile,NuGet.Common.ILogger)">
+      <summary>
+            Function used to display errors and warnings at the end of restore operation.
+            The errors and warnings are read from the assets file based on restore result.
+            </summary>
+      <param name="lockFile">LockFile generated by preview restore.</param>
+      <param name="logger">Logger used to display warnings and errors.</param>
+    </member>
     <member name="M:NuGet.Commands.NoOpRestoreUtilities.IsNoOpSupported(NuGet.Commands.RestoreRequest)">
       <summary>
             If the dependencyGraphSpec is not set, we cannot no-op on this project restore. 
-            No-Op restore is not supported for CLI Tools at this point
             </summary>
     </member>
-    <member name="M:NuGet.Commands.NoOpRestoreUtilities.GetBuildIntegratedProjectCacheFile(NuGet.Commands.RestoreRequest)">
+    <member name="M:NuGet.Commands.NoOpRestoreUtilities.GetBuildIntegratedProjectCacheFilePath(NuGet.Commands.RestoreRequest)">
       <summary>
             The cache file path is $(BaseIntermediateOutputPath)\$(project).nuget.cache
             </summary>
@@ -1599,6 +1690,7 @@
       <summary>
             Calculates the hash value, used for the no-op optimization, for the request
             This methods handles the deduping of tools
+            Handles the ignoring of RestoreSettings
             </summary>
     </member>
     <member name="M:NuGet.Commands.NoOpRestoreUtilities.UpdateRequestBestMatchingToolPathsIfAvailable(NuGet.Commands.RestoreRequest)">
@@ -1676,6 +1768,16 @@
     <member name="P:NuGet.Commands.Strings.Error_CannotFindMsbuild">
       <summary>
               Looks up a localized string similar to Cannot find version of msbuild..
+            </summary>
+    </member>
+    <member name="P:NuGet.Commands.Strings.Error_EmptySourceFilePath">
+      <summary>
+              Looks up a localized string similar to A source file was added with an empty path..
+            </summary>
+    </member>
+    <member name="P:NuGet.Commands.Strings.Error_EmptySourceFileProjectDirectory">
+      <summary>
+              Looks up a localized string similar to The project directory for the source file '{0}' could not be found..
             </summary>
     </member>
     <member name="P:NuGet.Commands.Strings.Error_InvalidATF">
@@ -1956,7 +2058,7 @@
     </member>
     <member name="P:NuGet.Commands.Strings.Log_ImportsFallbackWarning">
       <summary>
-              Looks up a localized string similar to Package '{0}' was restored using '{1}' instead the project target framework '{2}'. This may cause compatibility problems..
+              Looks up a localized string similar to Package '{0}' was restored using '{1}' instead of the project target framework '{2}'. This package may not be fully compatible with your project..
             </summary>
     </member>
     <member name="P:NuGet.Commands.Strings.Log_InstalledSummary">
@@ -2314,6 +2416,11 @@
               Looks up a localized string similar to Unable to find '{0}'. Make sure the project has been built..
             </summary>
     </member>
+    <member name="P:NuGet.Commands.Strings.UnsupportedProject">
+      <summary>
+              Looks up a localized string similar to Skipping restore for project '{0}'. The project file may be invalid or missing targets required for restore..
+            </summary>
+    </member>
     <member name="P:NuGet.Commands.Strings.UsingNuspecForMetadata">
       <summary>
               Looks up a localized string similar to Using '{0}' for metadata..
@@ -2438,6 +2545,14 @@
       <summary>
             Log all messages.
             </summary>
+    </member>
+    <member name="M:NuGet.Commands.Extensions.AsRestoreLogMessage(NuGet.ProjectModel.IAssetsLogMessage)">
+      <summary>
+            Converts an IAssetsLogMessage into a RestoreLogMessage.
+            This is needed when an IAssetsLogMessage needs to be logged and loggers do not have visibility to IAssetsLogMessage.
+            </summary>
+      <param name="logMessage">IAssetsLogMessage to be converted.</param>
+      <returns>RestoreLogMessage equivalent to the IAssetsLogMessage.</returns>
     </member>
     <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
       <summary>
@@ -2739,7 +2854,7 @@
             Folders that are expected to have .dll and .winmd files
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common447440.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common454784.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -2751,23 +2866,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common447440.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common454784.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Common447440.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Common454784.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common447440.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Common454784.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common447440.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common454784.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Common454784.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -3121,6 +3241,11 @@
     <member name="F:NuGet.Common.NuGetLogCode.NU1502">
       <summary>
             Unknown compatibility profile
+            </summary>
+    </member>
+    <member name="F:NuGet.Common.NuGetLogCode.NU1503">
+      <summary>
+            Skipping project that does not support restore.
             </summary>
     </member>
     <member name="F:NuGet.Common.NuGetLogCode.NU1601">
@@ -3688,7 +3813,7 @@
       <param name="path">Source path.</param>
       <returns>The absolute source path or the original source. Noops for non-file paths.</returns>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration474164.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration482868.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -3700,23 +3825,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration474164.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration482868.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Configuration474164.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Configuration482868.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration474164.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Configuration482868.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration474164.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration482868.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Configuration482868.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -4379,7 +4509,7 @@
             Throw if a path is relative.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core501840.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core511054.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -4391,23 +4521,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core501840.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core511054.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.DependencyResolver.Core501840.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.DependencyResolver.Core511054.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core501840.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core511054.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core501840.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core511054.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core511054.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -4664,7 +4799,7 @@
               Looks up a localized string similar to The feed '{0}' lists package '{1}' but multiple attempts to download the nupkg have failed. The feed is either invalid or required packages were removed while the current operation was in progress. Verify the package exists on the feed and try again..
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks520234.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks532049.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -4676,23 +4811,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks520234.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks532049.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Frameworks520234.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Frameworks532049.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks520234.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Frameworks532049.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks520234.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks532049.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Frameworks532049.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -5250,16 +5390,6 @@
             A keyvalue pair specific to a framework identifier
             </summary>
     </member>
-    <member name="T:NuGet.Frameworks.HashCodeCombiner">
-      <summary>
-            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
-            </summary>
-    </member>
-    <member name="M:NuGet.Frameworks.HashCodeCombiner.GetHashCode(System.Object[])">
-      <summary>
-            Create a unique hash code for the given set of items
-            </summary>
-    </member>
     <member name="T:NuGet.Frameworks.NuGetFramework">
       <summary>
             A portable implementation of the .NET FrameworkName type with added support for NuGet folder names.
@@ -5512,7 +5642,7 @@
               Looks up a localized string similar to Invalid portable frameworks for '{0}'. A portable framework must have at least one framework in the profile..
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel556053.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel567970.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -5524,23 +5654,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel556053.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel567970.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.LibraryModel556053.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.LibraryModel567970.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel556053.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel567970.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel556053.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel567970.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.LibraryModel567970.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -5679,7 +5814,7 @@
             Indicates that the library could not be resolved
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core568089.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core580227.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -5691,23 +5826,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core568089.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core580227.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Packaging.Core568089.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Packaging.Core580227.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core568089.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core580227.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core568089.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core580227.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core580227.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -6398,7 +6538,7 @@
               Looks up a localized string similar to String argument '{0}' cannot be null or empty.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging582522.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging595204.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -6410,23 +6550,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging582522.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging595204.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Packaging582522.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Packaging595204.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging582522.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Packaging595204.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging582522.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging595204.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Packaging595204.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -6712,6 +6857,24 @@
       <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
     </member>
+    <member name="M:NuGet.Packaging.IPackageDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+      <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+      <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+      <param name="handleExceptionAsync">An exception handler.</param>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+    </member>
+    <member name="M:NuGet.Packaging.IPackageDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+      <summary>
+            Sets a throttle for package downloads.
+            </summary>
+      <param name="throttle">A throttle.  Can be <c>null</c>.</param>
+    </member>
     <member name="P:NuGet.Packaging.IPackageDownloader.ContentReader">
       <summary>
             Gets an asynchronous package content reader.
@@ -6878,6 +7041,24 @@
             is either <c>null</c> or empty.</exception>
       <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
+    </member>
+    <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+      <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+      <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+      <param name="handleExceptionAsync">An exception handler.</param>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+    </member>
+    <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+      <summary>
+            Sets a throttle for package downloads.
+            </summary>
+      <param name="throttle">A throttle.  Can be <c>null</c>.</param>
     </member>
     <member name="P:NuGet.Packaging.LocalPackageArchiveDownloader.ContentReader">
       <summary>
@@ -8194,7 +8375,7 @@
             Pattern used to identify content files
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel675087.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel689503.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -8206,23 +8387,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel675087.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel689503.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.ProjectModel675087.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.ProjectModel689503.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel675087.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel689503.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel675087.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel689503.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.ProjectModel689503.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -8469,6 +8655,8 @@
       <summary>
             Get target graphs for the current log message.
             </summary>
+      <remarks>If the message does not contain target graphs all graphs in the file
+            will be returned.</remarks>
     </member>
     <member name="M:NuGet.ProjectModel.LockFileExtensions.GetTargetLibraries(NuGet.ProjectModel.IAssetsLogMessage,NuGet.ProjectModel.LockFile)">
       <summary>
@@ -8704,7 +8892,7 @@
     </member>
     <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.SkipContentFileWrite">
       <summary>
-            True if this is an XPlat PackageReference project.
+            True if this is a Legacy Package Reference project
             </summary>
     </member>
     <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectWideWarningProperties">
@@ -8937,7 +9125,7 @@
             Indicates if all warnings should be ignored.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol728824.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol743886.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -8949,23 +9137,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol728824.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol743886.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Protocol728824.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Protocol743886.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol728824.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Protocol743886.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol728824.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol743886.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Protocol743886.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -9918,6 +10111,13 @@
       <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
     </member>
+    <member name="P:NuGet.Protocol.LocalV3FindPackageByIdResource.NuspecCache">
+      <summary>
+            Nuspec files read from disk.
+            This is exposed to allow sharing the cache with other components
+            that are reading the same files.
+            </summary>
+    </member>
     <member name="T:NuGet.Protocol.LocalV3FindPackageByIdResourceProvider">
       <summary>
             A v3-style package repository that has expanded packages.
@@ -9957,6 +10157,26 @@
     <member name="P:NuGet.Protocol.ServiceIndexEntry.ClientVersion">
       <summary>
             Client version
+            </summary>
+    </member>
+    <member name="T:NuGet.Protocol.LocalNuspecCache">
+      <summary>
+            Allow .nuspec files on disk to be cached across v3 folder readers.
+            </summary>
+      <remarks>Nuspecs that do not exist are returned as null. It is expected that the caller has already verified
+            the that folder and paths are valid.</remarks>
+    </member>
+    <member name="M:NuGet.Protocol.LocalNuspecCache.GetOrAdd(System.String,System.String)">
+      <summary>
+            Read a nuspec file from disk. The nuspec is expected to exist.
+            </summary>
+    </member>
+    <member name="M:NuGet.Protocol.LocalNuspecCache.GetNuspec(System.String,System.String)">
+      <summary>
+            Search for a nuspec using the given path, or by the expanded folder path.
+            The manifest path here is a shortcut to use the already constructed well
+            known location, if this doesn't exist the folder reader will find the nuspec
+            if it exists.
             </summary>
     </member>
     <member name="T:NuGet.Protocol.DependencyInfoResourceV3Provider">
@@ -10051,6 +10271,24 @@
             is either <c>null</c> or empty.</exception>
       <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
+    </member>
+    <member name="M:NuGet.Protocol.RemotePackageArchiveDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+      <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+      <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+      <param name="handleExceptionAsync">An exception handler.</param>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+    </member>
+    <member name="M:NuGet.Protocol.RemotePackageArchiveDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+      <summary>
+            Sets a throttle for package downloads.
+            </summary>
+      <param name="throttle">A throttle.  Can be <c>null</c>.</param>
     </member>
     <member name="P:NuGet.Protocol.RemotePackageArchiveDownloader.ContentReader">
       <summary>
@@ -10810,6 +11048,11 @@
     <member name="P:NuGet.Protocol.Strings.Log_InvalidNupkgFromUrl">
       <summary>
               Looks up a localized string similar to The nupkg at '{0}' is not valid..
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Strings.Log_LocalSourceNotExist">
+      <summary>
+              Looks up a localized string similar to The local source '{0}' doesn't exist..
             </summary>
     </member>
     <member name="P:NuGet.Protocol.Strings.Log_RetryingFindPackagesById">
@@ -14049,6 +14292,24 @@
       <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
     </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginPackageDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+      <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+      <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+      <param name="handleExceptionAsync">An exception handler.</param>
+      <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+    </member>
+    <member name="M:NuGet.Protocol.Plugins.PluginPackageDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+      <summary>
+            Sets a throttle for package downloads.
+            </summary>
+      <param name="throttle">A throttle.  Can be <c>null</c>.</param>
+    </member>
     <member name="P:NuGet.Protocol.Plugins.PluginPackageDownloader.ContentReader">
       <summary>
             Gets an asynchronous package content reader.
@@ -16124,7 +16385,7 @@
             </summary>
       <param name="client">Http client</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning979523.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning996404.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -16136,23 +16397,28 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning979523.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning996404.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Versioning979523.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Versioning996404.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning979523.HashCodeCombiner.GetHashCode(System.Object[])">
+    <member name="M:NuGet.Shared.NuGet.Versioning996404.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning979523.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning996404.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+      <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+    </member>
+    <member name="M:NuGet.Shared.NuGet.Versioning996404.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
@@ -16228,6 +16494,11 @@
     <member name="P:NuGet.Versioning.FloatRange.FloatBehavior">
       <summary>
             Defined float behavior
+            </summary>
+    </member>
+    <member name="P:NuGet.Versioning.FloatRange.OriginalReleasePrefix">
+      <summary>
+            The original release label. Invalid labels are allowed here.
             </summary>
     </member>
     <member name="T:NuGet.Versioning.INuGetVersionable">

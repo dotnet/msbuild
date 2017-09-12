@@ -20,14 +20,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OptionCompare Condition=" '$(OptionCompare)' == '' ">Binary</OptionCompare>
     <OptionStrict Condition=" '$(OptionStrict)' == '' ">Off</OptionStrict>
     <OptionInfer Condition=" '$(OptionInfer)' == '' ">On</OptionInfer>
+
+    <!-- Remove the line below once https://github.com/Microsoft/visualfsharp/issues/3207 gets fixed -->
+    <WarningsAsErrors Condition=" '$(WarningsAsErrors)' == '' ">NU1605</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
+    <DefineDebug Condition=" '$(DefineDebug)' == '' ">true</DefineDebug>
+    <DefineTrace Condition=" '$(DefineTrace)' == '' ">true</DefineTrace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineTrace>true</DefineTrace>
+    <DefineTrace Condition=" '$(DefineTrace)' == '' ">true</DefineTrace>
   </PropertyGroup>
 
 </Project>

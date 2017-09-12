@@ -13,8 +13,19 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <!--
+      Indicate to other targets that Microsoft.NET.Sdk is being used.
+
+      This must be set here (as early as possible, before Microsoft.Common.props)
+      so that everything that follows can depend on it.
+
+      In particular, Directory.Build.props and nuget package props need to be able
+      to use this flag and they are imported by Microsoft.Common.props.
+    -->
+    <UsingMicrosoftNETSdk>true</UsingMicrosoftNETSdk>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)..\build\Microsoft.NET.Sdk.props"  />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\build\Microsoft.NET.Sdk.props"  />  
 </Project>

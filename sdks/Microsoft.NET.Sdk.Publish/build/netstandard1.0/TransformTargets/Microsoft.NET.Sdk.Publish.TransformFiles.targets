@@ -16,12 +16,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="TransformWebConfig" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="TransformAppSettings" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="GenerateEFSQLScripts" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="GenerateRunCommandFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
 
   <PropertyGroup>
     <_DotNetPublishTransformFiles>
       _TransformWebConfig;
       _TransformAppSettings;
-      _GenerateEFSQLScripts
+      _GenerateEFSQLScripts;
+      _GenerateRunCommandFile;
     </_DotNetPublishTransformFiles>
   </PropertyGroup>
 
@@ -33,29 +35,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_TransformWebConfig">
 
     <PropertyGroup>
-      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
-      
-      <_IsPortable Condition=" '$(_IsPortable)' == '' 
-                   And '$(_IsManagedProject)' == 'true' 
-                   And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' 
-                   And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
-      
-      <_IsPortable Condition=" '$(_IsPortable)' == '' 
-                   And '$(_IsManagedProject)' == 'true' 
-                   And '$(TargetFrameworkIdentifier)' == '.NETFramework' ">false</_IsPortable>
-      
+      <_IsPortable Condition=" '$(_IsPortable)' == '' And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
       <_IsPortable Condition=" '$(_IsPortable)' == ''">true</_IsPortable>
-      
+      <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
       <_TransformWebConfigForAzure Condition=" '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
     </PropertyGroup>
     
 
     <TransformWebConfig
-        Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true'"
+        Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true'"
         TargetPath="$(TargetPath)"
         PublishDir="$(PublishIntermediateOutputPath)"
         IsPortable="$(_IsPortable)"
+        ExecutableExtension="$(_ExecutableExtension)"
         IsAzure="$(_TransformWebConfigForAzure)"
         ProjectGuid="$(ProjectGuid)"
         IgnoreProjectGuid="$(IgnoreProjectGuid)" 
@@ -71,12 +64,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
   <Target Name="_TransformAppSettings">
     <PropertyGroup>
-      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
     </PropertyGroup>
 
     <TransformAppSettings
-      Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformAppSettingsDisabled)' != 'true' And @(DestinationConnectionStrings) != ''"
+      Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformAppSettingsDisabled)' != 'true' And @(DestinationConnectionStrings) != ''"
       PublishDirectory="$(PublishIntermediateOutputPath)"
       ProjectDirectory="$(MSBuildProjectDirectory)"
       DestinationConnectionStrings="@(DestinationConnectionStrings)"
@@ -93,20 +85,43 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_GenerateEFSQLScripts">
     <PropertyGroup>
-      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
       <_EFPublishDirectory Condition="'$(CopyEFSQLScriptsToOutputFolder)' == 'true'">$(PublishIntermediateOutputPath)</_EFPublishDirectory>
       <_EFPublishDirectory Condition="'$(_EFPublishDirectory)' == ''">$(PublishIntermediateTempPath)</_EFPublishDirectory>
     </PropertyGroup>
 
     <GenerateEFSQLScripts
-      Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true' And '$(IsGenerateEFSQLScriptsDisabled)' != 'true' And @(EfMigrations) != ''"
+      Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsGenerateEFSQLScriptsDisabled)' != 'true' And @(EfMigrations) != ''"
       ProjectDirectory="$(MSBuildProjectDirectory)"
       EFPublishDirectory="$(_EFPublishDirectory)"
       EFSQLScriptsFolderName="$(EFSQLScriptsFolderName)"
-      EFMigrations="@(EFMigrations)">
+      EFMigrations="@(EFMigrations)"
+      EFMigrationsAdditionalArgs="$(EFMigrationsAdditionalArgs)">
       <Output TaskParameter="EFSQLScripts" ItemName="_EFSQLScripts" />
     </GenerateEFSQLScripts>
   </Target>
-  
+
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _GenerateRunCommandFile
+  ***********************************************************************************************
+ -->
+  <Target Name="_GenerateRunCommandFile">
+
+    <PropertyGroup>
+      <_IsWebJobProject Condition="'$(_IsWebJobProject)' == '' and '$(WebJobName)' != '' and '$(WebJobType)' != ''">true</_IsWebJobProject>
+      <_IsPortable Condition=" '$(_IsPortable)' == '' And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
+      <_IsPortable Condition=" '$(_IsPortable)' == ''">true</_IsPortable>
+      <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
+    </PropertyGroup>
+
+    <GenerateRunCommandFile
+        Condition="'$(_IsWebJobProject)' == 'true' And '$(IsGenerateRunCommandFileDisabled)' != 'true'"
+        ProjectDirectory="$(MSBuildProjectDirectory)"
+        TargetPath="$(TargetPath)"
+        WebJobsDirectory="$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\"
+        IsPortable="$(_IsPortable)"
+        ExecutableExtension="$(_ExecutableExtension)" />
+  </Target>
 </Project>

@@ -4,6 +4,49 @@
         <name>NuGet.Frameworks</name>
     </assembly>
     <members>
+        <member name="T:NuGet.Frameworks.AssetTargetFallbackFramework">
+            <summary>
+            AssetTargetFallbackFramework only fallback when zero assets are selected. These do not 
+            auto fallback during GetNearest as FallbackFramework would.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.AssetTargetFallbackFramework.Fallback">
+            <summary>
+            List framework to fall back to.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.AssetTargetFallbackFramework.RootFramework">
+            <summary>
+            Root project framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.AssetTargetFallbackFramework.AsFallbackFramework">
+            <summary>
+            Create a FallbackFramework from the current AssetTargetFallbackFramework.
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.FrameworkPrecedenceSorter">
+            <summary>
+            Sorts frameworks according to the framework mappings
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.NuGetFrameworkFullComparer">
+            <summary>
+            A case insensitive compare of the framework, version, and profile
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.NuGetFrameworkNameComparer">
+            <summary>
+            A case insensitive compare of the framework name only
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.NuGetFrameworkSorter">
+            <summary>
+            Sorts NuGet Frameworks in a consistent way for package readers.
+            The order is not particularly useful here beyond making things deterministic
+            since it compares completely different frameworks.
+            </summary>
+        </member>
         <member name="T:NuGet.Frameworks.CompatibilityCacheKey">
             <summary>
             Internal cache key used to store framework compatibility.
@@ -67,458 +110,6 @@
         <member name="P:NuGet.Frameworks.DefaultPortableFrameworkMappings.Instance">
             <summary>
             Static instance of the portable framework mappings
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.FallbackFramework.Fallback">
-            <summary>
-            List framework to fall back to.
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.FrameworkConstants.CommonFrameworks">
-            <summary>
-            Interned frameworks that are commonly used in NuGet
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.FrameworkExpander">
-            <summary>
-            FrameworkExpander finds all equivalent and compatible frameworks for a NuGetFramework
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkExpander.Expand(NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Return all possible equivalent, subset, and known compatible frameworks.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkExpander.ExpandInternal(NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Finds all expansions using the mapping provider
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkExtensions.IsDesktop(NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            True if the Framework is .NETFramework
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkExtensions.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Return the item with the target framework nearest the project framework
-            </summary>
-        </member>
-        <member name="F:NuGet.Frameworks.FrameworkNameProvider._identifierSynonyms">
-            <summary>
-            Contains identifier -> identifier
-            Ex: .NET Framework -> .NET Framework
-            Ex: NET Framework -> .NET Framework
-            This includes self mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkNameProvider.TryConvertOrNormalize(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.Collections.Generic.IDictionary{System.String,System.String},System.String@)">
-            <summary>
-            Converts a key using the mappings, or if the key is already converted, finds the normalized form.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkNameProvider.GetAllEquivalentFrameworks(NuGet.Frameworks.NuGetFramework)">
-            <summary>  
-            Get all equivalent frameworks including the given framework  
-            </summary>  
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkNameProvider.AddEquivalentProfiles(System.Collections.Generic.IEnumerable{NuGet.Frameworks.FrameworkSpecificMapping})">
-            <summary>
-            2 way per framework profile equivalence
-            </summary>
-            <param name="mappings"></param>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkNameProvider.AddEquivalentFrameworks(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.NuGetFramework}})">
-            <summary>
-            2 way framework equivalence
-            </summary>
-            <param name="mappings"></param>
-        </member>
-        <member name="T:NuGet.Frameworks.FrameworkRange">
-            <summary>
-            An inclusive range of frameworks
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.FrameworkRange.Min">
-            <summary>
-            Minimum Framework
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.FrameworkRange.Max">
-            <summary>
-            Maximum Framework
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.FrameworkRange.IncludeMin">
-            <summary>
-            Minimum version inclusiveness.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.FrameworkRange.IncludeMax">
-            <summary>
-            Maximum version inclusiveness.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.FrameworkRange.FrameworkIdentifier">
-            <summary>
-            Framework Identifier of both the Min and Max
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkRange.Satisfies(NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            True if the framework version falls between the min and max
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.FrameworkReducer">
-            <summary>
-            Reduces a list of frameworks into the smallest set of frameworks required.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.#ctor">
-            <summary>
-            Creates a FrameworkReducer using the default framework mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.#ctor(NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
-            <summary>
-            Creates a FrameworkReducer using custom framework mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.GetNearest(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Returns the nearest matching framework that is compatible.
-            </summary>
-            <param name="framework">Project target framework</param>
-            <param name="possibleFrameworks">Possible frameworks to narrow down</param>
-            <returns>Nearest compatible framework. If no frameworks are compatible null is returned.</returns>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceEquivalent(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Remove duplicates found in the equivalence mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceUpwards(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Reduce to the highest framework
-            Ex: net45, net403, net40 -> net45
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceDownwards(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Reduce to the lowest framework
-            Ex: net45, net403, net40 -> net40
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.ExplodePortableFrameworks(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Boolean)">
-            <summary>
-            Create lookup of the given PCLs to their actual frameworks
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.ExplodePortableFramework(NuGet.Frameworks.NuGetFramework,System.Boolean)">
-            <summary>
-            portable-net45+win8 -> net45, win8
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.GetBestPCL(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Order PCLs when there is no other way to decide.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.FrameworkReducer.IsBetterPCL(NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Sort PCLs using these criteria
-            1. Lowest number of frameworks (highest surface area) wins first
-            2. Profile with the highest version numbers wins next
-            3. String compare is used as a last resort
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.FrameworkSpecificMapping">
-            <summary>
-            A keyvalue pair specific to a framework identifier
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.HashCodeCombiner">
-            <summary>
-            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.HashCodeCombiner.GetHashCode(System.Object[])">
-            <summary>
-            Create a unique hash code for the given set of items
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.NuGetFramework">
-            <summary>
-            A portable implementation of the .NET FrameworkName type with added support for NuGet folder names.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.Framework">
-            <summary>
-            Target framework
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.Version">
-            <summary>
-            Target framework version
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.HasProfile">
-            <summary>
-            True if the profile is non-empty
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.Profile">
-            <summary>
-            Target framework profile
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.DotNetFrameworkName">
-            <summary>
-            Formatted to a System.Versioning.FrameworkName
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.GetDotNetFrameworkName(NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Formatted to a System.Versioning.FrameworkName
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.GetShortFolderName">
-            <summary>
-            Creates the shortened version of the framework using the default mappings.
-            Ex: net45
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.GetShortFolderName(NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Creates the shortened version of the framework using the given mappings.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.IsPCL">
-            <summary>
-            Portable class library check
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.IsPackageBased">
-            <summary>
-            True if the framework is packages based.
-            Ex: dotnet, dnxcore, netcoreapp, netstandard, uap, netcore50
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.AllFrameworkVersions">
-            <summary>
-            True if this framework matches for all versions.
-            Ex: net
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.IsUnsupported">
-            <summary>
-            True if this framework was invalid or unknown. This framework is only compatible with Any and Agnostic.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.IsAgnostic">
-            <summary>
-            True if this framework is non-specific. Always compatible.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.IsAny">
-            <summary>
-            True if this is the any framework. Always compatible.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.NuGetFramework.IsSpecificFramework">
-            <summary>
-            True if this framework is real and not one of the special identifiers.
-            </summary>
-        </member>
-        <member name="F:NuGet.Frameworks.NuGetFramework.Comparer">
-            <summary>
-            Full framework comparison of the identifier, version, profile, platform, and platform version
-            </summary>
-        </member>
-        <member name="F:NuGet.Frameworks.NuGetFramework.FrameworkNameComparer">
-            <summary>
-            Framework name only comparison.
-            </summary>
-        </member>
-        <member name="F:NuGet.Frameworks.NuGetFramework._packagesBased">
-            <summary>
-            Frameworks that are packages based across all versions.
-            </summary>
-        </member>
-        <member name="F:NuGet.Frameworks.NuGetFramework.UnsupportedFramework">
-            <summary>
-            An unknown or invalid framework
-            </summary>
-        </member>
-        <member name="F:NuGet.Frameworks.NuGetFramework.AgnosticFramework">
-            <summary>
-            A framework with no specific target framework. This can be used for content only packages.
-            </summary>
-        </member>
-        <member name="F:NuGet.Frameworks.NuGetFramework.AnyFramework">
-            <summary>
-            A wildcard matching all frameworks
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.Parse(System.String)">
-            <summary>
-            Creates a NuGetFramework from a folder name using the default mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.Parse(System.String,NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Creates a NuGetFramework from a folder name using the given mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.ParseFrameworkName(System.String,NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Creates a NuGetFramework from a .NET FrameworkName
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.ParseFolder(System.String)">
-            <summary>
-            Creates a NuGetFramework from a folder name using the default mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.ParseFolder(System.String,NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Creates a NuGetFramework from a folder name using the given mappings.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.TryParseDeprecatedFramework(System.String,NuGet.Frameworks.NuGetFramework@)">
-            <summary>
-            Attempt to parse a common but deprecated framework using an exact string match
-            Support for these should be dropped as soon as possible.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFramework.TryParseCommonFramework(System.String,NuGet.Frameworks.NuGetFramework@)">
-            <summary>
-            A set of special and common frameworks that can be returned from the list of constants without parsing
-            Using the interned frameworks here optimizes comparisons since they can be checked by reference.
-            This is designed to optimize
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework,System.Func{``0,NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Find the most compatible group based on target framework
-            </summary>
-            <param name="items">framework specific groups or items</param>
-            <param name="framework">project target framework</param>
-            <param name="selector">retrieves the framework from the group</param>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider,System.Func{``0,NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Find the most compatible group based on target framework
-            </summary>
-            <param name="items">framework specific groups or items</param>
-            <param name="framework">project target framework</param>
-            <param name="selector">retrieves the framework from the group</param>
-            <param name="frameworkMappings">framework mappings</param>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Find the most compatible group based on target framework
-            </summary>
-            <param name="items">framework specific groups or items</param>
-            <param name="framework">project target framework</param>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
-            <summary>
-            Find the most compatible group based on target framework
-            </summary>
-            <param name="items">framework specific groups or items</param>
-            <param name="framework">project target framework</param>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.IsCompatibleWithFallbackCheck(NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Check compatibility with additional checks for the fallback framework.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.IsNetCore50AndUp(NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            True if the framework is netcore50 or higher. This is where the framework
-            becomes packages based.
-            </summary>
-        </member>
-        <member name="M:NuGet.Frameworks.OneWayCompatibilityMappingEntry.#ctor(NuGet.Frameworks.FrameworkRange,NuGet.Frameworks.FrameworkRange)">
-            <summary>
-            Creates a one way compatibility mapping.
-            Ex: net -supports-> native
-            </summary>
-            <param name="targetFramework">Project framework</param>
-            <param name="supportedFramework">Framework that is supported by the project framework</param>
-        </member>
-        <member name="P:NuGet.Frameworks.OneWayCompatibilityMappingEntry.TargetFrameworkRange">
-            <summary>
-            Primary framework range or project target framework that supports the SuppportedFrameworkRange
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.OneWayCompatibilityMappingEntry.SupportedFrameworkRange">
-            <summary>
-            Framework range that is supported by the TargetFrameworkRange
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.Strings">
-            <summary>
-               A strongly-typed resource class, for looking up localized strings, etc.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.Strings.ResourceManager">
-            <summary>
-               Returns the cached ResourceManager instance used by this class.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.Strings.Culture">
-            <summary>
-               Overrides the current thread's CurrentUICulture property for all
-               resource lookups using this strongly typed resource class.
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.Strings.FrameworkMismatch">
-            <summary>
-               Looks up a localized string similar to Frameworks must have the same identifier, profile, and platform..
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.Strings.InvalidFrameworkIdentifier">
-            <summary>
-               Looks up a localized string similar to Invalid framework identifier &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.Strings.InvalidFrameworkVersion">
-            <summary>
-               Looks up a localized string similar to Invalid framework version &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.Strings.InvalidPortableFrameworksDueToHyphen">
-            <summary>
-               Looks up a localized string similar to Invalid portable frameworks &apos;{0}&apos;. A hyphen may not be in any of the portable framework names..
-            </summary>
-        </member>
-        <member name="P:NuGet.Frameworks.Strings.MissingPortableFrameworks">
-            <summary>
-               Looks up a localized string similar to Invalid portable frameworks for &apos;{0}&apos;. A portable framework must have at least one framework in the profile..
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.FrameworkPrecedenceSorter">
-            <summary>
-            Sorts frameworks according to the framework mappings
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.NuGetFrameworkFullComparer">
-            <summary>
-            A case insensitive compare of the framework, version, and profile
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.NuGetFrameworkNameComparer">
-            <summary>
-            A case insensitive compare of the framework name only
-            </summary>
-        </member>
-        <member name="T:NuGet.Frameworks.NuGetFrameworkSorter">
-            <summary>
-            Sorts NuGet Frameworks in a consistent way for package readers.
-            The order is not particularly useful here beyond making things deterministic
-            since it compares completely different frameworks.
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkCompatibilityListProvider.GetFrameworksSupporting(NuGet.Frameworks.NuGetFramework)">
@@ -794,6 +385,426 @@
             <see cref="P:NuGet.Frameworks.IFrameworkMappings.CompatibilityMappings"/>.
             </summary>
         </member>
+        <member name="P:NuGet.Frameworks.FallbackFramework.Fallback">
+            <summary>
+            List framework to fall back to.
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.FrameworkConstants.CommonFrameworks">
+            <summary>
+            Interned frameworks that are commonly used in NuGet
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.FrameworkExpander">
+            <summary>
+            FrameworkExpander finds all equivalent and compatible frameworks for a NuGetFramework
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkExpander.Expand(NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Return all possible equivalent, subset, and known compatible frameworks.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkExpander.ExpandInternal(NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Finds all expansions using the mapping provider
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkExtensions.IsDesktop(NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            True if the Framework is .NETFramework
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkExtensions.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Return the item with the target framework nearest the project framework
+            </summary>
+        </member>
+        <member name="F:NuGet.Frameworks.FrameworkNameProvider._identifierSynonyms">
+            <summary>
+            Contains identifier -> identifier
+            Ex: .NET Framework -> .NET Framework
+            Ex: NET Framework -> .NET Framework
+            This includes self mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkNameProvider.TryConvertOrNormalize(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.Collections.Generic.IDictionary{System.String,System.String},System.String@)">
+            <summary>
+            Converts a key using the mappings, or if the key is already converted, finds the normalized form.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkNameProvider.GetAllEquivalentFrameworks(NuGet.Frameworks.NuGetFramework)">
+            <summary>  
+            Get all equivalent frameworks including the given framework  
+            </summary>  
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkNameProvider.AddEquivalentProfiles(System.Collections.Generic.IEnumerable{NuGet.Frameworks.FrameworkSpecificMapping})">
+            <summary>
+            2 way per framework profile equivalence
+            </summary>
+            <param name="mappings"></param>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkNameProvider.AddEquivalentFrameworks(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.NuGetFramework}})">
+            <summary>
+            2 way framework equivalence
+            </summary>
+            <param name="mappings"></param>
+        </member>
+        <member name="T:NuGet.Frameworks.FrameworkRange">
+            <summary>
+            An inclusive range of frameworks
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.FrameworkRange.Min">
+            <summary>
+            Minimum Framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.FrameworkRange.Max">
+            <summary>
+            Maximum Framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.FrameworkRange.IncludeMin">
+            <summary>
+            Minimum version inclusiveness.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.FrameworkRange.IncludeMax">
+            <summary>
+            Maximum version inclusiveness.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.FrameworkRange.FrameworkIdentifier">
+            <summary>
+            Framework Identifier of both the Min and Max
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkRange.Satisfies(NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            True if the framework version falls between the min and max
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.FrameworkReducer">
+            <summary>
+            Reduces a list of frameworks into the smallest set of frameworks required.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.#ctor">
+            <summary>
+            Creates a FrameworkReducer using the default framework mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.#ctor(NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Creates a FrameworkReducer using custom framework mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.GetNearest(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Returns the nearest matching framework that is compatible.
+            </summary>
+            <param name="framework">Project target framework</param>
+            <param name="possibleFrameworks">Possible frameworks to narrow down</param>
+            <returns>Nearest compatible framework. If no frameworks are compatible null is returned.</returns>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceEquivalent(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Remove duplicates found in the equivalence mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceUpwards(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Reduce to the highest framework
+            Ex: net45, net403, net40 -> net45
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceDownwards(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Reduce to the lowest framework
+            Ex: net45, net403, net40 -> net40
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.ExplodePortableFrameworks(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Boolean)">
+            <summary>
+            Create lookup of the given PCLs to their actual frameworks
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.ExplodePortableFramework(NuGet.Frameworks.NuGetFramework,System.Boolean)">
+            <summary>
+            portable-net45+win8 -> net45, win8
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.GetBestPCL(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Order PCLs when there is no other way to decide.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.FrameworkReducer.IsBetterPCL(NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Sort PCLs using these criteria
+            1. Lowest number of frameworks (highest surface area) wins first
+            2. Profile with the highest version numbers wins next
+            3. String compare is used as a last resort
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.FrameworkSpecificMapping">
+            <summary>
+            A keyvalue pair specific to a framework identifier
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.NuGetFramework">
+            <summary>
+            A portable implementation of the .NET FrameworkName type with added support for NuGet folder names.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.Framework">
+            <summary>
+            Target framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.Version">
+            <summary>
+            Target framework version
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.HasProfile">
+            <summary>
+            True if the profile is non-empty
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.Profile">
+            <summary>
+            Target framework profile
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.DotNetFrameworkName">
+            <summary>
+            Formatted to a System.Versioning.FrameworkName
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.GetDotNetFrameworkName(NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Formatted to a System.Versioning.FrameworkName
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.GetShortFolderName">
+            <summary>
+            Creates the shortened version of the framework using the default mappings.
+            Ex: net45
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.GetShortFolderName(NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Creates the shortened version of the framework using the given mappings.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.IsPCL">
+            <summary>
+            Portable class library check
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.IsPackageBased">
+            <summary>
+            True if the framework is packages based.
+            Ex: dotnet, dnxcore, netcoreapp, netstandard, uap, netcore50
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.AllFrameworkVersions">
+            <summary>
+            True if this framework matches for all versions.
+            Ex: net
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.IsUnsupported">
+            <summary>
+            True if this framework was invalid or unknown. This framework is only compatible with Any and Agnostic.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.IsAgnostic">
+            <summary>
+            True if this framework is non-specific. Always compatible.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.IsAny">
+            <summary>
+            True if this is the any framework. Always compatible.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.NuGetFramework.IsSpecificFramework">
+            <summary>
+            True if this framework is real and not one of the special identifiers.
+            </summary>
+        </member>
+        <member name="F:NuGet.Frameworks.NuGetFramework.Comparer">
+            <summary>
+            Full framework comparison of the identifier, version, profile, platform, and platform version
+            </summary>
+        </member>
+        <member name="F:NuGet.Frameworks.NuGetFramework.FrameworkNameComparer">
+            <summary>
+            Framework name only comparison.
+            </summary>
+        </member>
+        <member name="F:NuGet.Frameworks.NuGetFramework._packagesBased">
+            <summary>
+            Frameworks that are packages based across all versions.
+            </summary>
+        </member>
+        <member name="F:NuGet.Frameworks.NuGetFramework.UnsupportedFramework">
+            <summary>
+            An unknown or invalid framework
+            </summary>
+        </member>
+        <member name="F:NuGet.Frameworks.NuGetFramework.AgnosticFramework">
+            <summary>
+            A framework with no specific target framework. This can be used for content only packages.
+            </summary>
+        </member>
+        <member name="F:NuGet.Frameworks.NuGetFramework.AnyFramework">
+            <summary>
+            A wildcard matching all frameworks
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.Parse(System.String)">
+            <summary>
+            Creates a NuGetFramework from a folder name using the default mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.Parse(System.String,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Creates a NuGetFramework from a folder name using the given mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.ParseFrameworkName(System.String,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Creates a NuGetFramework from a .NET FrameworkName
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.ParseFolder(System.String)">
+            <summary>
+            Creates a NuGetFramework from a folder name using the default mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.ParseFolder(System.String,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Creates a NuGetFramework from a folder name using the given mappings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.TryParseDeprecatedFramework(System.String,NuGet.Frameworks.NuGetFramework@)">
+            <summary>
+            Attempt to parse a common but deprecated framework using an exact string match
+            Support for these should be dropped as soon as possible.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFramework.TryParseCommonFramework(System.String,NuGet.Frameworks.NuGetFramework@)">
+            <summary>
+            A set of special and common frameworks that can be returned from the list of constants without parsing
+            Using the interned frameworks here optimizes comparisons since they can be checked by reference.
+            This is designed to optimize
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework,System.Func{``0,NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Find the most compatible group based on target framework
+            </summary>
+            <param name="items">framework specific groups or items</param>
+            <param name="framework">project target framework</param>
+            <param name="selector">retrieves the framework from the group</param>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider,System.Func{``0,NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Find the most compatible group based on target framework
+            </summary>
+            <param name="items">framework specific groups or items</param>
+            <param name="framework">project target framework</param>
+            <param name="selector">retrieves the framework from the group</param>
+            <param name="frameworkMappings">framework mappings</param>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Find the most compatible group based on target framework
+            </summary>
+            <param name="items">framework specific groups or items</param>
+            <param name="framework">project target framework</param>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.GetNearest``1(System.Collections.Generic.IEnumerable{``0},NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Find the most compatible group based on target framework
+            </summary>
+            <param name="items">framework specific groups or items</param>
+            <param name="framework">project target framework</param>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.IsCompatibleWithFallbackCheck(NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Check compatibility with additional checks for the fallback framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.NuGetFrameworkUtility.IsNetCore50AndUp(NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            True if the framework is netcore50 or higher. This is where the framework
+            becomes packages based.
+            </summary>
+        </member>
+        <member name="M:NuGet.Frameworks.OneWayCompatibilityMappingEntry.#ctor(NuGet.Frameworks.FrameworkRange,NuGet.Frameworks.FrameworkRange)">
+            <summary>
+            Creates a one way compatibility mapping.
+            Ex: net -supports-> native
+            </summary>
+            <param name="targetFramework">Project framework</param>
+            <param name="supportedFramework">Framework that is supported by the project framework</param>
+        </member>
+        <member name="P:NuGet.Frameworks.OneWayCompatibilityMappingEntry.TargetFrameworkRange">
+            <summary>
+            Primary framework range or project target framework that supports the SuppportedFrameworkRange
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.OneWayCompatibilityMappingEntry.SupportedFrameworkRange">
+            <summary>
+            Framework range that is supported by the TargetFrameworkRange
+            </summary>
+        </member>
+        <member name="T:NuGet.Frameworks.Strings">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.Strings.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.Strings.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.Strings.FrameworkMismatch">
+            <summary>
+              Looks up a localized string similar to Frameworks must have the same identifier, profile, and platform..
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.Strings.InvalidFrameworkIdentifier">
+            <summary>
+              Looks up a localized string similar to Invalid framework identifier &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.Strings.InvalidFrameworkVersion">
+            <summary>
+              Looks up a localized string similar to Invalid framework version &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.Strings.InvalidPortableFrameworksDueToHyphen">
+            <summary>
+              Looks up a localized string similar to Invalid portable frameworks &apos;{0}&apos;. A hyphen may not be in any of the portable framework names..
+            </summary>
+        </member>
+        <member name="P:NuGet.Frameworks.Strings.MissingPortableFrameworks">
+            <summary>
+              Looks up a localized string similar to Invalid portable frameworks for &apos;{0}&apos;. A portable framework must have at least one framework in the profile..
+            </summary>
+        </member>
         <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
@@ -817,10 +828,22 @@
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
         </member>
-        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
             <summary>
             Create a unique hash code for the given set of items
             </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
         </member>
     </members>
 </doc>

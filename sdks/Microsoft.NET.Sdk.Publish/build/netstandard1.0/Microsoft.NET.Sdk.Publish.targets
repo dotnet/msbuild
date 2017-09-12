@@ -20,11 +20,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- We want to force this property to be true, hence not adding a condition check -->
     <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
     <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</_PublishTaskFramework>
-    <_PublishTaskNameSuffix Condition=" '$(MSBuildRuntimeType)' == 'Core'">Core</_PublishTaskNameSuffix>
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
-    <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET$(_PublishTaskNameSuffix).Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
-    <_BeforePublishTargetsDir Condition=" '$(_BeforePublishTargetsDir)' == ''">$(MSBuildThisFileDirectory)BeforePublishTargets\</_BeforePublishTargetsDir>
+    <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
     <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
     <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
@@ -46,7 +44,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</_PublishProfileRootFolder>
     <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</_PublishProfileRootFolder>
-    <PublishProfile Condition="'$(PublishProfile)' ==''">DefaultProfile</PublishProfile>
+    <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystem</PublishProfile>
     <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
     <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
     <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(_PublishProfilesDir)$(PublishProfileName).pubxml</PublishProfileFullPath>
@@ -78,31 +76,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishConfiguration Condition="'$(PublishConfiguration)' == ''">$(Configuration)</PublishConfiguration>
     <_PublishConfigurationPath Condition="'$(_PublishConfigurationPath)' == '' And '$(PublishConfiguration)' != ''">$(PublishConfiguration)\</_PublishConfigurationPath>
 
-    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFramework)</PublishFramework>
-    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFrameworks)</PublishFramework>
-    <_PublishFrameworkPath Condition="'$(_PublishFrameworkPath)' == '' And '$(PublishFramework)' != ''">$(PublishFramework)\</_PublishFrameworkPath>
-
+    <_TargetFrameworkPath Condition="'$(_TargetFrameworkPath)' == '' And '$(TargetFramework)' != ''">$(TargetFramework)\</_TargetFrameworkPath>
     <_RuntimeIdentifierPath Condition="'$(_RuntimeIdentifierPath)' == '' And '$(RuntimeIdentifier)' != '' ">$(RuntimeIdentifier)\</_RuntimeIdentifierPath>
 
     <BaseIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
 
-    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)$(_RuntimeIdentifierPath)PubTmp\))</PublishIntermediateTempPath>
+    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_TargetFrameworkPath)$(_RuntimeIdentifierPath)PubTmp\))</PublishIntermediateTempPath>
     <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)Out\</PublishIntermediateOutputPath>
     <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
     
     <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
   </PropertyGroup>
 
-  <!--
-  ***********************************************************************************************
-  Import the BeforePublish target
-  ***********************************************************************************************
- -->
-
-  <Import Project="$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets" Condition="Exists('$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets')" />
-
-  
   <!--
   ***********************************************************************************************
   Import the Compute target

@@ -4,6 +4,395 @@
         <name>NuGet.Packaging</name>
     </assembly>
     <members>
+        <member name="T:NuGet.Client.AnyFramework">
+            <summary>
+            An internal NuGetFramework marker for ManagedCodeConventions.
+            Most conventions disallow the string 'any' as a txm, so to allow
+            it for conventions with no txm in the path we use this special type.
+            </summary>
+        </member>
+        <member name="T:NuGet.Client.ManagedCodeConventions">
+            <summary>
+            Defines all the package conventions used by Managed Code packages
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.AnyTargettedFile">
+            <summary>
+            Pattern used to locate all files targetted at a specific runtime and/or framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.RuntimeAssemblies">
+            <summary>
+            Pattern used to locate all files designed for loading as managed code assemblies at run-time
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.CompileRefAssemblies">
+            <summary>
+            Pattern used to locate ref assemblies for compile.
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.CompileLibAssemblies">
+            <summary>
+            Pattern used to locate lib assemblies for compile.
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.NativeLibraries">
+            <summary>
+            Pattern used to locate all files designed for loading as native code libraries at run-time
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.ResourceAssemblies">
+            <summary>
+            Pattern used to locate all files designed for loading as managed code resource assemblies at run-time
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.MSBuildFiles">
+            <summary>
+            Pattern used to identify MSBuild targets and props files
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.MSBuildMultiTargetingFiles">
+            <summary>
+            Pattern used to identify MSBuild global targets and props files
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.ContentFiles">
+            <summary>
+            Pattern used to identify content files
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.ContentPropertyDefinition">
+            <summary>
+            Defines a property that can be used in Content Model query patterns
+            <seealso cref="T:NuGet.ContentModel.PatternSet" />
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.ContentPropertyDefinition.CompareTest">
+            <summary>
+            Find the nearest compatible candidate.
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.PatternSet">
+            <summary>
+            A set of patterns that can be used to query a set of file paths for items matching a provided criteria.
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.GroupPatterns">
+            <summary>
+            Patterns used to select a group of items that matches the criteria
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.PathPatterns">
+            <summary>
+            Patterns used to select individual items that match the criteria
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.PropertyDefinitions">
+            <summary>
+            Property definitions used for matching patterns
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.PatternDefinition">
+            <summary>
+            A pattern that can be used to match file paths given a provided criteria.
+            </summary>
+            <remarks>
+            The pattern is defined as a sequence of literal path strings that must match exactly and property
+            references,
+            wrapped in {} characters, which are tested for compatibility with the consumer-provided criteria.
+            <seealso cref="T:NuGet.ContentModel.ContentPropertyDefinition" />
+            </remarks>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternDefinition.Table">
+            <summary>
+            Replacement token table.
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.PatternTable">
+            <summary>
+            Replacement token table organized by property.
+            </summary>
+        </member>
+        <member name="M:NuGet.ContentModel.PatternTable.TryLookup(System.String,System.String,System.Object@)">
+            <summary>
+            Lookup a token and get the replacement if it exists.
+            </summary>
+            <param name="propertyName">Property moniker</param>
+            <param name="name">Token name</param>
+            <param name="value">Replacement value</param>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternTableEntry.PropertyName">
+            <summary>
+            PropertyName moniker
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternTableEntry.Name">
+            <summary>
+            Item name
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternTableEntry.Value">
+            <summary>
+            Item replacement value
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.IAsyncPackageContentReader">
+            <summary>
+            An asynchronous package content reader.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetFrameworkItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all framework references found in the nuspec.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetBuildItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all items under the build folder.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetToolItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all items under the tools folder.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetContentItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all items found in the content folder.
+            </summary>
+            <remarks>
+            Some legacy behavior has been dropped here due to the mix of content folders and target framework
+            folders here.
+            </remarks>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetLibItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all lib items without any filtering.
+            </summary>
+            <remarks>Use GetReferenceItemsAsync(...) for the filtered list.</remarks>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetReferenceItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns lib items + filtering based on the nuspec and other NuGet rules.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetPackageDependenciesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns package dependencies.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="T:NuGet.Packaging.INuspecReader">
+            <summary>
+            A development package nuspec reader
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.INuspecReader.GetLanguage">
+            <summary>
+            The locale ID for the package, such as en-us.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetFrameworkItems">
+            <summary>
+            Returns all framework references found in the nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetBuildItems">
+            <summary>
+            Returns all items under the build folder.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetToolItems">
+            <summary>
+            Returns all items under the tools folder.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetContentItems">
+            <summary>
+            Returns all items found in the content folder.
+            </summary>
+            <remarks>
+            Some legacy behavior has been dropped here due to the mix of content folders and target framework
+            folders here.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetLibItems">
+            <summary>
+            Returns all lib items without any filtering. Use GetReferenceItems for the filtered list.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetReferenceItems">
+            <summary>
+            Returns lib items + filtering based on the nuspec and other NuGet rules.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetPackageDependencies">
+            <summary>
+            Returns package dependencies.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.IPackageDownloader">
+            <summary>
+            A package downloader.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageDownloader.ContentReader">
+            <summary>
+            Gets an asynchronous package content reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageDownloader.CoreReader">
+            <summary>
+            Gets an asynchronous package core reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.CopyNupkgFileToAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously copies a .nupkg to a target file path.
+            </summary>
+            <param name="destinationFilePath">The destination file path.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the copy was successful.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="destinationFilePath" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.GetPackageHashAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a package hash.
+            </summary>
+            <param name="hashAlgorithm">The hash algorithm.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.String" />
+            representing the package hash.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="hashAlgorithm" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+            <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+            <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+            <param name="handleExceptionAsync">An exception handler.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+            <summary>
+            Sets a throttle for package downloads.
+            </summary>
+            <param name="throttle">A throttle.  Can be <c>null</c>.</param>
+        </member>
+        <member name="T:NuGet.Packaging.IPackageResolver">
+            <summary>
+            Core package resolver
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageIdentity},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">All relevant packages. This list must include the target packages.</param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageIdentity},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Collections.Generic.IEnumerable{NuGet.Packaging.PackageReference},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">
+            All relevant packages. This list must include the target packages and
+            installed packages.
+            </param>
+            <param name="installedPackages">
+            Packages already installed into the project. These will be favored as
+            dependency options.
+            </param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">All relevant packages. This list must include the target packages.</param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Collections.Generic.IEnumerable{NuGet.Packaging.PackageReference},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">
+            All relevant packages. This list must include the target packages and
+            installed packages.
+            </param>
+            <param name="installedPackages">
+            Packages already installed into the project. These will be favored as
+            dependency options.
+            </param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="T:NuGet.Packaging.MinClientVersionException">
+            <summary>
+            Custom exception type for a package that has a higher minClientVersion than the current client.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.FallbackPackagePathInfo.PathResolver">
             <summary>
             Path resolver for the root package folder containing this package.
@@ -48,6 +437,90 @@
             <param name="packageId">Package id.</param>
             <param name="version">Package version.</param>
             <returns>Returns the package info if the package exists in any of the folders. Null if the package does not exist.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.LocalPackageArchiveDownloader">
+            <summary>
+            A package downloader for local archive packages.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.LocalPackageArchiveDownloader.ContentReader">
+            <summary>
+            Gets an asynchronous package content reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="P:NuGet.Packaging.LocalPackageArchiveDownloader.CoreReader">
+            <summary>
+            Gets an asynchronous package core reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.#ctor(System.String,NuGet.Packaging.Core.PackageIdentity,NuGet.Common.ILogger)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.Packaging.LocalPackageArchiveDownloader" /> class.
+            </summary>
+            <param name="packageFilePath">A source package archive file path.</param>
+            <param name="packageIdentity">A package identity.</param>
+            <param name="logger">A logger.</param>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="packageFilePath" />
+            is either <c>null</c> or an empty string.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="packageIdentity" />
+            is either <c>null</c> or an empty string.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or an empty string.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.Dispose">
+            <summary>
+            Disposes of this instance.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.CopyNupkgFileToAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously copies a .nupkg to a target file path.
+            </summary>
+            <param name="destinationFilePath">The destination file path.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the copy was successful.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="destinationFilePath" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.GetPackageHashAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a package hash.
+            </summary>
+            <param name="hashAlgorithm">The hash algorithm.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.String" />
+            representing the package hash.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="hashAlgorithm" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+            <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+            <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+            <param name="handleExceptionAsync">An exception handler.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+            <summary>
+            Sets a throttle for package downloads.
+            </summary>
+            <param name="throttle">A throttle.  Can be <c>null</c>.</param>
         </member>
         <member name="T:NuGet.Packaging.MinClientVersionUtility">
             <summary>
@@ -116,6 +589,11 @@
             <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
         </member>
         <member name="M:NuGet.Packaging.NuspecReader.GetDependencyGroups">
+            <summary>
+            Read package dependencies for all frameworks
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetDependencyGroups(System.Boolean)">
             <summary>
             Read package dependencies for all frameworks
             </summary>
@@ -248,637 +726,6 @@
             <param name="zipArchive">ZipArchive containing the nupkg data.</param>
             <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
             <param name="compatibilityProvider">Framework compatibility provider.</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackageExtractor.InstallFromSourceAsync(System.Func{System.IO.Stream,System.Threading.Tasks.Task},NuGet.Packaging.VersionFolderPathContext,System.Threading.CancellationToken)">
-            <summary>
-            Uses a copy function to install a package to a global packages directory.
-            </summary>
-            <param name="copyToAsync">
-            A function which should copy the package to the provided destination stream.
-            </param>
-            <param name="versionFolderPathContext">
-            The version folder path context, which encapsulates all of the parameters to observe
-            while installing the package.
-            </param>
-            <param name="token">The cancellation token.</param>
-            <returns>
-            True if the package was installed. False if the package already exists and therefore
-            resulted in no copy operation.
-            </returns>
-        </member>
-        <member name="T:NuGet.Packaging.PackageFolderReader">
-            <summary>
-            Reads an unzipped nupkg folder.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.String)">
-            <summary>
-            Package folder reader
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.IO.DirectoryInfo)">
-            <summary>
-            Package folder reader
-            </summary>
-            <param name="folder">root directory of an extracted nupkg</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.String,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
-            <summary>
-            Package folder reader
-            </summary>
-            <param name="folderPath">root directory of an extracted nupkg</param>
-            <param name="frameworkProvider">framework mappings</param>
-            <param name="compatibilityProvider">framework compatibility provider</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.IO.DirectoryInfo,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
-            <summary>
-            Package folder reader
-            </summary>
-            <param name="folder">root directory of an extracted nupkg</param>
-            <param name="frameworkProvider">framework mappings</param>
-            <param name="compatibilityProvider">framework compatibility provider</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackageFolderReader.GetStream(System.String)">
-            <summary>
-            Opens a local file in read only mode.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageFolderReader.GetRelativePath(System.IO.DirectoryInfo,System.IO.FileInfo)">
-            <summary>
-            Build the relative path in the same format that ZipArchive uses
-            </summary>
-        </member>
-        <member name="T:NuGet.Packaging.PackageReaderBase">
-            <summary>
-            Abstract class that both the zip and folder package readers extend
-            This class contains the path conventions for both zip and folder readers
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReaderBase.#ctor(NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Core package reader
-            </summary>
-            <param name="frameworkProvider">framework mapping provider</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReaderBase.#ctor(NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
-            <summary>
-            Core package reader
-            </summary>
-            <param name="frameworkProvider">framework mapping provider</param>
-            <param name="compatibilityProvider">framework compatibility provider</param>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReaderBase.NuspecReader">
-            <summary>
-            Nuspec reader
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReaderBase.GetSupportedFrameworks">
-            <summary>
-            Frameworks mentioned in the package.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReaderBase.IsAllowedBuildFile(System.String,System.String)">
-            <summary>
-            only packageId.targets and packageId.props should be used from the build folder
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReaderBase.IsReferenceAssembly(System.String)">
-            <summary>
-            True only for assemblies that should be added as references to msbuild projects
-            </summary>
-        </member>
-        <member name="T:NuGet.Packaging.PackageReference">
-            <summary>
-            Represents a package element in the packages.config file
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Creates a new packages config entry
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean)">
-            <summary>
-            Creates a new packages config entry
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean,System.Boolean,System.Boolean)">
-            <summary>
-            Creates a new packages config entry
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean,System.Boolean,System.Boolean,NuGet.Versioning.VersionRange)">
-            <summary>
-            Creates a new packages config entry
-            </summary>
-            <param name="identity">Package id and version</param>
-            <param name="targetFramework">Package target framework installed to the project</param>
-            <param name="userInstalled">True if the user installed this package directly</param>
-            <param name="developmentDependency">True if the package is a development dependency</param>
-            <param name="requireReinstallation">True if this package needs to be reinstalled</param>
-            <param name="allowedVersions">Restrict package versions to the allowedVersions range</param>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReference.PackageIdentity">
-            <summary>
-            Id and Version of the package
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReference.AllowedVersions">
-            <summary>
-            The allowed range of versions that this package can be upgraded/downgraded to.
-            </summary>
-            <remarks>This is null if unbounded</remarks>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReference.HasAllowedVersions">
-            <summary>
-            True if allowedVersions exists.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReference.TargetFramework">
-            <summary>
-            Installed target framework version of the package.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReference.IsDevelopmentDependency">
-            <summary>
-            Development dependency
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReference.IsUserInstalled">
-            <summary>
-            True if the user installed or updated this package directly.
-            False if this package was installed as a dependency by another package.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.PackageReference.RequireReinstallation">
-            <summary>
-            Require reinstallation
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackageReference.ToString">
-            <summary>
-            Displays the identity and target framework of the reference.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfig.HasAttributeValue(System.Xml.Linq.XElement,System.String,System.String,System.Xml.Linq.XElement@)">
-            <summary>
-            Determine if the package node has the attribute value as the targetValue.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfig.BoolAttribute(System.Xml.Linq.XElement,System.String,System.Boolean)">
-            <summary>
-            Get a boolean attribute value, or false if it does not exist
-            </summary>
-        </member>
-        <member name="T:NuGet.Packaging.PackagesConfigReader">
-            <summary>
-            Reads packages.config
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.Xml.Linq.XDocument)">
-            <summary>
-            Packages.config reader
-            </summary>
-            <param name="xml">Packages.config XML</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(NuGet.Frameworks.IFrameworkNameProvider,System.Xml.Linq.XDocument)">
-            <summary>
-            Packages.config reader
-            </summary>
-            <param name="frameworkMappings">Additional target framework mappings for parsing target frameworks</param>
-            <param name="xml">Packages.config XML</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.IO.Stream)">
-            <summary>
-            Packages.config reader
-            </summary>
-            <param name="stream">Stream containing packages.config</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.IO.Stream,System.Boolean)">
-            <summary>
-            Packages.config reader
-            </summary>
-            <param name="stream">Stream containing packages.config</param>
-            <param name="leaveStreamOpen">True will leave the stream open</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(NuGet.Frameworks.IFrameworkNameProvider,System.IO.Stream,System.Boolean)">
-            <summary>
-            Packages.config reader
-            </summary>
-            <param name="stream">Stream containing packages.config</param>
-            <param name="leaveStreamOpen">True will leave the stream open</param>
-            <param name="frameworkMappings">Additional target framework mappings for parsing target frameworks</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.GetMinClientVersion">
-            <summary>
-            Reads the minimum client version from packages.config
-            </summary>
-            <returns>Minimum client version or the default of 2.5.0</returns>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.GetPackages">
-            <summary>
-            Reads all package node entries in the config.
-            If duplicate package ids exist an exception will be thrown.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigReader.GetPackages(System.Boolean)">
-            <summary>
-            Reads all package node entries in the config.
-            </summary>
-            <param name="allowDuplicatePackageIds">If True validation will be performed to ensure that 
-            only one entry exists for each unique package id.</param>
-        </member>
-        <member name="T:NuGet.Packaging.PackagesConfigWriter">
-            <summary>
-            Writes the packages.config XML file to a stream
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.String,System.Boolean)">
-            <summary>
-            Create a packages.config writer using file path
-            </summary>
-            <param name="fullPath">The full path to write the XML packages.config file into, or load existing packages.config from</param>
-            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.String,System.Boolean,NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Create a packages.config writer using file path
-            </summary>
-            <param name="fullPath">The full path to write the XML packages.config file into, or load existing packages.config from</param>
-            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
-            <param name="frameworkMappings">Framework mappings</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.IO.Stream,System.Boolean)">
-            <summary>
-            Create a packages.config writer using stream
-            </summary>
-            <param name="stream">Stream to write the XML packages.config file into, or load existing packages.config from</param>
-            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.IO.Stream,System.Boolean,NuGet.Frameworks.IFrameworkNameProvider)">
-            <summary>
-            Create a packages.config writer using stream
-            </summary>
-            <param name="stream">Stream to write the XML packages.config file into, or load existing packages.config from</param>
-            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
-            <param name="frameworkMappings">Framework mappings</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.WriteMinClientVersion(NuGet.Versioning.NuGetVersion)">
-            <summary>
-            Write a minimum client version to packages.config
-            </summary>
-            <param name="version">Minumum version of the client required to parse and use this file.</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(System.String,NuGet.Versioning.NuGetVersion,NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Add a package entry
-            </summary>
-            <param name="packageId">Package Id</param>
-            <param name="version">Package Version</param>
-            <param name="targetFramework">Package targetFramework that's compatible with current project</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Adds a basic package entry to the file
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(NuGet.Packaging.PackageReference)">
-            <summary>
-            Adds a package entry to the file
-            </summary>
-            <param name="entry">Package reference entry</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.UpdatePackageEntry(NuGet.Packaging.PackageReference,NuGet.Packaging.PackageReference)">
-            <summary>
-            Update a package entry to the file
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.UpdateOrAddPackageEntry(System.Xml.Linq.XDocument,NuGet.Packaging.PackageReference)">
-            <summary>
-            Update a package entry using the original entry as a base if it exists.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(System.String,NuGet.Versioning.NuGetVersion,NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Remove a package entry
-            </summary>
-            <param name="packageId">Package Id</param>
-            <param name="version">Package version</param>
-            <param name="targetFramework">Package targetFramework</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
-            <summary>
-            Remove a package identity from the file
-            </summary>
-            <param name="identity">Package identity</param>
-            <param name="targetFramework">Package targetFramework</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(NuGet.Packaging.PackageReference)">
-            <summary>
-            Removes a package entry from the file
-            </summary>
-            <param name="entry">Package reference entry</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.WriteFile(System.String)">
-            <summary>
-            Write the XDocument to the packages.config and disallow further changes.
-            </summary>
-            <param name="fullPath">the full path to packages.config file</param>
-        </member>
-        <member name="M:NuGet.Packaging.PackagesConfigWriter.Dispose">
-            <summary>
-            Write the XDocument to the stream and close it to disallow further changes.
-            </summary>
-        </member>
-        <member name="F:NuGet.Packaging.PackagingConstants.ManifestExtension">
-            <summary>
-            Represents the ".nuspec" extension.
-            </summary>
-        </member>
-        <member name="T:NuGet.Packaging.Strings">
-            <summary>
-               A strongly-typed resource class, for looking up localized strings, etc.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ResourceManager">
-            <summary>
-               Returns the cached ResourceManager instance used by this class.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.Culture">
-            <summary>
-               Overrides the current thread's CurrentUICulture property for all
-               resource lookups using this strongly typed resource class.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.Error_InvalidTargetFramework">
-            <summary>
-               Looks up a localized string similar to Unsupported targetFramework value &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorDuplicatePackages">
-            <summary>
-               Looks up a localized string similar to There are duplicate packages: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorInvalidAllowedVersions">
-            <summary>
-               Looks up a localized string similar to Invalid allowedVersions for package id &apos;{0}&apos;: &apos;{1}&apos;.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorInvalidMinClientVersion">
-            <summary>
-               Looks up a localized string similar to Invalid minClientVersion: &apos;{0}&apos;.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageVersion">
-            <summary>
-               Looks up a localized string similar to Invalid package version for package id &apos;{0}&apos;: &apos;{1}&apos;.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorNullOrEmptyPackageId">
-            <summary>
-               Looks up a localized string similar to Null or empty package id.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
-            <summary>
-               Looks up a localized string similar to Unable to delete temporary file &apos;{0}&apos;. Error: &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.FailedFileTime">
-            <summary>
-               Looks up a localized string similar to Failed to update file time for {0}: {1}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.FailToLoadPackagesConfig">
-            <summary>
-               Looks up a localized string similar to Fail to load packages.config as XML file. Please check it. .
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.FailToWritePackagesConfig">
-            <summary>
-               Looks up a localized string similar to Failed to write packages.config as XML file &apos;{0}&apos;. Error: &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.FallbackFolderNotFound">
-            <summary>
-               Looks up a localized string similar to Unable to find fallback package folder &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.InvalidNuspecElement">
-            <summary>
-               Looks up a localized string similar to {0} This validation error occurred in a &apos;{1}&apos; element..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.InvalidNuspecEntry">
-            <summary>
-               Looks up a localized string similar to The nuspec contains an invalid entry &apos;{0}&apos; in package &apos;{1}&apos; ..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.InvalidPackageFrameworkFolderName">
-            <summary>
-               Looks up a localized string similar to The framework in the folder name of &apos;{0}&apos; in package &apos;{1}&apos; could not be parsed..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.Log_InstallingPackage">
-            <summary>
-               Looks up a localized string similar to Installing {0} {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.MinClientVersionAlreadyExist">
-            <summary>
-               Looks up a localized string similar to MinClientVersion already exists in packages.config.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.MissingNuspec">
-            <summary>
-               Looks up a localized string similar to Nuspec file does not exist in package..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.MultipleNuspecFiles">
-            <summary>
-               Looks up a localized string similar to Package contains multiple nuspec files..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.MustContainAbsolutePath">
-            <summary>
-               Looks up a localized string similar to &apos;{0}&apos; must contain an absolute path &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.PackageEntryAlreadyExist">
-            <summary>
-               Looks up a localized string similar to Package entry already exists in packages.config. Id: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.PackageEntryNotExist">
-            <summary>
-               Looks up a localized string similar to Package entry does not exists in packages.config. Id: {0}, Version: {1}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.PackageMinVersionNotSatisfied">
-            <summary>
-               Looks up a localized string similar to The &apos;{0}&apos; package requires NuGet client version &apos;{1}&apos; or above, but the current NuGet version is &apos;{2}&apos;. To upgrade NuGet, please go to http://docs.nuget.org/consume/installing-nuget.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.PackagesNodeNotExist">
-            <summary>
-               Looks up a localized string similar to Packages node does not exists in packages.config at {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.PackageStreamShouldBeSeekable">
-            <summary>
-               Looks up a localized string similar to Package stream should be seekable.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.StringCannotBeNullOrEmpty">
-            <summary>
-               Looks up a localized string similar to String argument &apos;{0}&apos; cannot be null or empty.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.UnableToAddEntry">
-            <summary>
-               Looks up a localized string similar to An error occurred while updating packages.config. The file was closed before the entry could be added..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.UnableToParseClientVersion">
-            <summary>
-               Looks up a localized string similar to Unable to parse the current NuGet client version..
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo})">
-            <summary>
-            Order dependencies by children first.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.VersionFolderPathResolver.RootPath">
-            <summary>
-            Packages directory root folder.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.VersionFolderPathResolver.IsLowerCase">
-            <summary>
-            True if package id and versions are made lowercase.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String)">
-            <summary>
-            VersionFolderPathResolver
-            </summary>
-            <param name="rootPath">Packages directory root folder.</param>
-        </member>
-        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String,System.Boolean)">
-            <summary>
-            VersionFolderPathResolver
-            </summary>
-            <param name="rootPath">Packages directory root folder.</param>
-            <param name="isLowercase">True if package id and versions are made lowercase.</param>
-        </member>
-        <member name="T:NuGet.Packaging.INuspecReader">
-            <summary>
-            A development package nuspec reader
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.INuspecReader.GetLanguage">
-            <summary>
-            The locale ID for the package, such as en-us.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageContentReader.GetFrameworkItems">
-            <summary>
-            Returns all framework references found in the nuspec.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageContentReader.GetBuildItems">
-            <summary>
-            Returns all items under the build folder.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageContentReader.GetToolItems">
-            <summary>
-            Returns all items under the tools folder.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageContentReader.GetContentItems">
-            <summary>
-            Returns all items found in the content folder.
-            </summary>
-            <remarks>
-            Some legacy behavior has been dropped here due to the mix of content folders and target framework
-            folders here.
-            </remarks>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageContentReader.GetLibItems">
-            <summary>
-            Returns all lib items without any filtering. Use GetReferenceItems for the filtered list.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageContentReader.GetReferenceItems">
-            <summary>
-            Returns lib items + filtering based on the nuspec and other NuGet rules.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageContentReader.GetPackageDependencies">
-            <summary>
-            Returns package dependencies.
-            </summary>
-        </member>
-        <member name="T:NuGet.Packaging.IPackageResolver">
-            <summary>
-            Core package resolver
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageIdentity},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Threading.CancellationToken)">
-            <summary>
-            Resolve a set of packages
-            </summary>
-            <param name="targets">Package or packages to install</param>
-            <param name="availablePackages">All relevant packages. This list must include the target packages.</param>
-            <returns>A set of packages meeting the package dependency requirements</returns>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageIdentity},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Collections.Generic.IEnumerable{NuGet.Packaging.PackageReference},System.Threading.CancellationToken)">
-            <summary>
-            Resolve a set of packages
-            </summary>
-            <param name="targets">Package or packages to install</param>
-            <param name="availablePackages">
-            All relevant packages. This list must include the target packages and
-            installed packages.
-            </param>
-            <param name="installedPackages">
-            Packages already installed into the project. These will be favored as
-            dependency options.
-            </param>
-            <returns>A set of packages meeting the package dependency requirements</returns>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Threading.CancellationToken)">
-            <summary>
-            Resolve a set of packages
-            </summary>
-            <param name="targets">Package or packages to install</param>
-            <param name="availablePackages">All relevant packages. This list must include the target packages.</param>
-            <returns>A set of packages meeting the package dependency requirements</returns>
-        </member>
-        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Collections.Generic.IEnumerable{NuGet.Packaging.PackageReference},System.Threading.CancellationToken)">
-            <summary>
-            Resolve a set of packages
-            </summary>
-            <param name="targets">Package or packages to install</param>
-            <param name="availablePackages">
-            All relevant packages. This list must include the target packages and
-            installed packages.
-            </param>
-            <param name="installedPackages">
-            Packages already installed into the project. These will be favored as
-            dependency options.
-            </param>
-            <returns>A set of packages meeting the package dependency requirements</returns>
-        </member>
-        <member name="T:NuGet.Packaging.MinClientVersionException">
-            <summary>
-            Custom exception type for a package that has a higher minClientVersion than the current client.
-            </summary>
         </member>
         <member name="T:NuGet.Packaging.EmptyFrameworkFolderFile">
             <summary>
@@ -1171,14 +1018,14 @@
             even for new installs.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.PackageHelper.IsSatellitePackage(NuGet.Packaging.Core.IPackageCoreReader,NuGet.Packaging.Core.PackageIdentity@,System.String@)">
+        <member name="M:NuGet.Packaging.PackageHelper.GetSatellitePackageInfoAsync(NuGet.Packaging.Core.IAsyncPackageCoreReader,System.Threading.CancellationToken)">
             <summary>
             A package is deemed to be a satellite package if it has a language property set, the id of the package is
             of the format [.*].[Language]
             and it has at least one dependency with an id that maps to the runtime package .
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.PackageHelper.GetInstalledPackageFiles(NuGet.Packaging.PackageArchiveReader,NuGet.Packaging.Core.PackageIdentity,NuGet.Packaging.PackagePathResolver,NuGet.Packaging.PackageSaveMode)">
+        <member name="M:NuGet.Packaging.PackageHelper.GetInstalledPackageFilesAsync(NuGet.Packaging.PackageArchiveReader,NuGet.Packaging.Core.PackageIdentity,NuGet.Packaging.PackagePathResolver,NuGet.Packaging.PackageSaveMode,System.Threading.CancellationToken)">
             <summary>
             This returns all the installed package files (does not include satellite files)
             </summary>
@@ -1215,6 +1062,743 @@
             Nupkg reading helper methods
             </summary>
         </member>
+        <member name="M:NuGet.Packaging.PackageExtractor.InstallFromSourceAsync(System.Func{System.IO.Stream,System.Threading.Tasks.Task},NuGet.Packaging.VersionFolderPathContext,System.Threading.CancellationToken)">
+            <summary>
+            Uses a copy function to install a package to a global packages directory.
+            </summary>
+            <param name="copyToAsync">
+            A function which should copy the package to the provided destination stream.
+            </param>
+            <param name="versionFolderPathContext">
+            The version folder path context, which encapsulates all of the parameters to observe
+            while installing the package.
+            </param>
+            <param name="token">The cancellation token.</param>
+            <returns>
+            True if the package was installed. False if the package already exists and therefore
+            resulted in no copy operation.
+            </returns>
+        </member>
+        <member name="T:NuGet.Packaging.PackageFolderReader">
+            <summary>
+            Reads an unzipped nupkg folder.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.String)">
+            <summary>
+            Package folder reader
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.IO.DirectoryInfo)">
+            <summary>
+            Package folder reader
+            </summary>
+            <param name="folder">root directory of an extracted nupkg</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.String,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Package folder reader
+            </summary>
+            <param name="folderPath">root directory of an extracted nupkg</param>
+            <param name="frameworkProvider">framework mappings</param>
+            <param name="compatibilityProvider">framework compatibility provider</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.IO.DirectoryInfo,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Package folder reader
+            </summary>
+            <param name="folder">root directory of an extracted nupkg</param>
+            <param name="frameworkProvider">framework mappings</param>
+            <param name="compatibilityProvider">framework compatibility provider</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.GetStream(System.String)">
+            <summary>
+            Opens a local file in read only mode.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.GetRelativePath(System.IO.DirectoryInfo,System.IO.FileInfo)">
+            <summary>
+            Build the relative path in the same format that ZipArchive uses
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackagePathResolver">
+            <summary>
+            A V2 path resolver.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageReaderBase">
+            <summary>
+            Abstract class that both the zip and folder package readers extend
+            This class contains the path conventions for both zip and folder readers
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.#ctor(NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Instantiates a new <see cref="T:NuGet.Packaging.PackageReaderBase" /> class.
+            </summary>
+            <param name="frameworkProvider">A framework mapping provider.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="frameworkProvider" /> is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.#ctor(NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Instantiates a new <see cref="T:NuGet.Packaging.PackageReaderBase" /> class.
+            </summary>
+            <param name="frameworkProvider">A framework mapping provider.</param>
+            <param name="compatibilityProvider">A framework compatibility provider.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="frameworkProvider" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="compatibilityProvider" /> is <c>null</c>.</exception>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReaderBase.NuspecReader">
+            <summary>
+            Nuspec reader
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.GetSupportedFrameworks">
+            <summary>
+            Frameworks mentioned in the package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.IsAllowedBuildFile(System.String,System.String)">
+            <summary>
+            only packageId.targets and packageId.props should be used from the build folder
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.IsReferenceAssembly(System.String)">
+            <summary>
+            True only for assemblies that should be added as references to msbuild projects
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageReference">
+            <summary>
+            Represents a package element in the packages.config file
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean,System.Boolean,System.Boolean,NuGet.Versioning.VersionRange)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+            <param name="identity">Package id and version</param>
+            <param name="targetFramework">Package target framework installed to the project</param>
+            <param name="userInstalled">True if the user installed this package directly</param>
+            <param name="developmentDependency">True if the package is a development dependency</param>
+            <param name="requireReinstallation">True if this package needs to be reinstalled</param>
+            <param name="allowedVersions">Restrict package versions to the allowedVersions range</param>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.PackageIdentity">
+            <summary>
+            Id and Version of the package
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.AllowedVersions">
+            <summary>
+            The allowed range of versions that this package can be upgraded/downgraded to.
+            </summary>
+            <remarks>This is null if unbounded</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.HasAllowedVersions">
+            <summary>
+            True if allowedVersions exists.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.TargetFramework">
+            <summary>
+            Installed target framework version of the package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.IsDevelopmentDependency">
+            <summary>
+            Development dependency
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.IsUserInstalled">
+            <summary>
+            True if the user installed or updated this package directly.
+            False if this package was installed as a dependency by another package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.RequireReinstallation">
+            <summary>
+            Require reinstallation
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.ToString">
+            <summary>
+            Displays the identity and target framework of the reference.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfig.HasAttributeValue(System.Xml.Linq.XElement,System.String,System.String,System.Xml.Linq.XElement@)">
+            <summary>
+            Determine if the package node has the attribute value as the targetValue.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfig.BoolAttribute(System.Xml.Linq.XElement,System.String,System.Boolean)">
+            <summary>
+            Get a boolean attribute value, or false if it does not exist
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackagesConfigReader">
+            <summary>
+            Reads packages.config
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="xml">Packages.config XML</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(NuGet.Frameworks.IFrameworkNameProvider,System.Xml.Linq.XDocument)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="frameworkMappings">Additional target framework mappings for parsing target frameworks</param>
+            <param name="xml">Packages.config XML</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.IO.Stream)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="stream">Stream containing packages.config</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="stream">Stream containing packages.config</param>
+            <param name="leaveStreamOpen">True will leave the stream open</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(NuGet.Frameworks.IFrameworkNameProvider,System.IO.Stream,System.Boolean)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="stream">Stream containing packages.config</param>
+            <param name="leaveStreamOpen">True will leave the stream open</param>
+            <param name="frameworkMappings">Additional target framework mappings for parsing target frameworks</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.GetMinClientVersion">
+            <summary>
+            Reads the minimum client version from packages.config
+            </summary>
+            <returns>Minimum client version or the default of 2.5.0</returns>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.GetPackages">
+            <summary>
+            Reads all package node entries in the config.
+            If duplicate package ids exist an exception will be thrown.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.GetPackages(System.Boolean)">
+            <summary>
+            Reads all package node entries in the config.
+            </summary>
+            <param name="allowDuplicatePackageIds">If True validation will be performed to ensure that 
+            only one entry exists for each unique package id.</param>
+        </member>
+        <member name="T:NuGet.Packaging.PackagesConfigWriter">
+            <summary>
+            Writes the packages.config XML file to a stream
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.String,System.Boolean)">
+            <summary>
+            Create a packages.config writer using file path
+            </summary>
+            <param name="fullPath">The full path to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.String,System.Boolean,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Create a packages.config writer using file path
+            </summary>
+            <param name="fullPath">The full path to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+            <param name="frameworkMappings">Framework mappings</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Create a packages.config writer using stream
+            </summary>
+            <param name="stream">Stream to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.IO.Stream,System.Boolean,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Create a packages.config writer using stream
+            </summary>
+            <param name="stream">Stream to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+            <param name="frameworkMappings">Framework mappings</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.WriteMinClientVersion(NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Write a minimum client version to packages.config
+            </summary>
+            <param name="version">Minumum version of the client required to parse and use this file.</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(System.String,NuGet.Versioning.NuGetVersion,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Add a package entry
+            </summary>
+            <param name="packageId">Package Id</param>
+            <param name="version">Package Version</param>
+            <param name="targetFramework">Package targetFramework that's compatible with current project</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Adds a basic package entry to the file
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(NuGet.Packaging.PackageReference)">
+            <summary>
+            Adds a package entry to the file
+            </summary>
+            <param name="entry">Package reference entry</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.UpdatePackageEntry(NuGet.Packaging.PackageReference,NuGet.Packaging.PackageReference)">
+            <summary>
+            Update a package entry to the file
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.UpdateOrAddPackageEntry(System.Xml.Linq.XDocument,NuGet.Packaging.PackageReference)">
+            <summary>
+            Update a package entry using the original entry as a base if it exists.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(System.String,NuGet.Versioning.NuGetVersion,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Remove a package entry
+            </summary>
+            <param name="packageId">Package Id</param>
+            <param name="version">Package version</param>
+            <param name="targetFramework">Package targetFramework</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Remove a package identity from the file
+            </summary>
+            <param name="identity">Package identity</param>
+            <param name="targetFramework">Package targetFramework</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(NuGet.Packaging.PackageReference)">
+            <summary>
+            Removes a package entry from the file
+            </summary>
+            <param name="entry">Package reference entry</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.WriteFile(System.String)">
+            <summary>
+            Write the XDocument to the packages.config and disallow further changes.
+            </summary>
+            <param name="fullPath">the full path to packages.config file</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.Dispose">
+            <summary>
+            Write the XDocument to the stream and close it to disallow further changes.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.PackagingConstants.ManifestExtension">
+            <summary>
+            Represents the ".nuspec" extension.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Strings">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_InvalidTargetFramework">
+            <summary>
+              Looks up a localized string similar to Unsupported targetFramework value &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorDuplicatePackages">
+            <summary>
+              Looks up a localized string similar to There are duplicate packages: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidAllowedVersions">
+            <summary>
+              Looks up a localized string similar to Invalid allowedVersions for package id &apos;{0}&apos;: &apos;{1}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidMinClientVersion">
+            <summary>
+              Looks up a localized string similar to Invalid minClientVersion: &apos;{0}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageVersion">
+            <summary>
+              Looks up a localized string similar to Invalid package version for package id &apos;{0}&apos;: &apos;{1}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageVersionForDependency">
+            <summary>
+              Looks up a localized string similar to Invalid package version for a dependency with id &apos;{0}&apos; in package &apos;{1}&apos;: &apos;{2}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorNullOrEmptyPackageId">
+            <summary>
+              Looks up a localized string similar to Null or empty package id.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
+            <summary>
+              Looks up a localized string similar to Unable to delete temporary file &apos;{0}&apos;. Error: &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FailedFileTime">
+            <summary>
+              Looks up a localized string similar to Failed to update file time for {0}: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FailToLoadPackagesConfig">
+            <summary>
+              Looks up a localized string similar to Fail to load packages.config as XML file. Please check it. .
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FailToWritePackagesConfig">
+            <summary>
+              Looks up a localized string similar to Failed to write packages.config as XML file &apos;{0}&apos;. Error: &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FallbackFolderNotFound">
+            <summary>
+              Looks up a localized string similar to Unable to find fallback package folder &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidNuspecElement">
+            <summary>
+              Looks up a localized string similar to {0} This validation error occurred in a &apos;{1}&apos; element..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidNuspecEntry">
+            <summary>
+              Looks up a localized string similar to The nuspec contains an invalid entry &apos;{0}&apos; in package &apos;{1}&apos; ..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageFrameworkFolderName">
+            <summary>
+              Looks up a localized string similar to The framework in the folder name of &apos;{0}&apos; in package &apos;{1}&apos; could not be parsed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Log_InstallingPackage">
+            <summary>
+              Looks up a localized string similar to Installing {0} {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MinClientVersionAlreadyExist">
+            <summary>
+              Looks up a localized string similar to MinClientVersion already exists in packages.config.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MissingNuspec">
+            <summary>
+              Looks up a localized string similar to Nuspec file does not exist in package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MultipleNuspecFiles">
+            <summary>
+              Looks up a localized string similar to Package contains multiple nuspec files..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MustContainAbsolutePath">
+            <summary>
+              Looks up a localized string similar to &apos;{0}&apos; must contain an absolute path &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageEntryAlreadyExist">
+            <summary>
+              Looks up a localized string similar to Package entry already exists in packages.config. Id: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageEntryNotExist">
+            <summary>
+              Looks up a localized string similar to Package entry does not exists in packages.config. Id: {0}, Version: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageMinVersionNotSatisfied">
+            <summary>
+              Looks up a localized string similar to The &apos;{0}&apos; package requires NuGet client version &apos;{1}&apos; or above, but the current NuGet version is &apos;{2}&apos;. To upgrade NuGet, please go to http://docs.nuget.org/consume/installing-nuget.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackagesNodeNotExist">
+            <summary>
+              Looks up a localized string similar to Packages node does not exists in packages.config at {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageStreamShouldBeSeekable">
+            <summary>
+              Looks up a localized string similar to Package stream should be seekable.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.StringCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to String argument &apos;{0}&apos; cannot be null or empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnableToAddEntry">
+            <summary>
+              Looks up a localized string similar to An error occurred while updating packages.config. The file was closed before the entry could be added..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnableToParseClientVersion">
+            <summary>
+              Looks up a localized string similar to Unable to parse the current NuGet client version..
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo})">
+            <summary>
+            Order dependencies by children first.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.VersionFolderPathResolver">
+            <summary>
+            A V3 path resolver.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.VersionFolderPathResolver.RootPath">
+            <summary>
+            Gets the packages directory root folder.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.VersionFolderPathResolver.IsLowerCase">
+            <summary>
+            Gets a flag indicating whether or not package ID's and versions are made lowercase.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.Packaging.VersionFolderPathResolver" /> class.
+            </summary>
+            <param name="rootPath">The packages directory root folder.</param>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String,System.Boolean)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.Packaging.VersionFolderPathResolver" /> class.
+            </summary>
+            <param name="rootPath">The packages directory root folder.</param>
+            <param name="isLowercase"><c>true</c> if package ID's and versions are made lowercase;
+            otherwise <c>false</c>.</param>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetInstallPath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package install path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package install path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetVersionListPath(System.String)">
+            <summary>
+            Gets the package version list path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <returns>The package version list path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageFilePath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package file path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetManifestFilePath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the manifest file path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The manifest file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetHashPath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the hash file path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The hash file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetHashFileName(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the hash file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The hash file name.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetVersionListDirectory(System.String)">
+            <summary>
+            Gets the version list directory.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <returns>The version list directory.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageDirectory(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package directory.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package directory.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageFileName(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package file name.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageDownloadMarkerFileName(System.String)">
+            <summary>
+            Gets the package download marker file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <returns>The package download marker file name.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetManifestFileName(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the manifest file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The manifest file name.</returns>
+        </member>
+        <member name="T:NuGet.RuntimeModel.IObjectWriter">
+            <summary>
+            Provides functionality for writing an object graph.
+            The output format is defined by implementors.
+            </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteObjectStart(System.String)">
+             <summary>
+             Writes the start of a nested object.
+            
+             This new object becomes the scope for all other method calls until either WriteObjectStart
+             is called again to start a new nested object or WriteObjectEnd is called.
+            
+             Every call to WriteObjectStart must be balanced by a corresponding call to WriteObjectEnd.
+             </summary>
+             <param name="name">The name of the object.  Throws if <c>null</c>.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteObjectEnd">
+             <summary>
+             Writes the end of a nested object.
+            
+             The parent object for this object becomes the scope for subsequent method calls.
+             If this object is the root object, no further writing is allowed.
+            
+             Every call to WriteObjectStart must be balanced by a corresponding call to WriteObjectEnd.
+             </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.Int32)">
+            <summary>
+            Writes a name-value pair.
+            </summary>
+            <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
+            <param name="value">The datum.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.Boolean)">
+            <summary>
+            Writes a name-value pair.
+            </summary>
+            <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
+            <param name="value">The datum.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.String)">
+            <summary>
+            Writes a name-value pair.
+            </summary>
+            <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
+            <param name="value">The datum.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameArray(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Writes a name-collection pair.
+            </summary>
+            <param name="name">The name of the data.  Throws if <c>null</c>.</param>
+            <param name="values">The data.</param>
+        </member>
+        <member name="T:NuGet.RuntimeModel.JsonObjectWriter">
+             <summary>
+             Generates JSON from an object graph.
+            
+             This is non-private only to facilitate unit testing.
+             </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.JsonObjectWriter.GetJson">
+             <summary>
+             Gets the JSON for the object.
+            
+             Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJson"/> is called, no further writing is allowed.
+             </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.JsonObjectWriter.GetJObject">
+            <summary>
+            Gets the JObject (in-memory JSON model) for the object.
+            
+            Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJObject"/> is called, no further writing is allowed.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.RuntimeModel.JsonObjectWriter.WriteTo(Newtonsoft.Json.JsonTextWriter)">
+             <summary>
+             Writes the result to a <c>JsonTextWriter</c>.
+            
+             Once WriteTo is called, no further writing is allowed.
+             </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeDescription.Merge(NuGet.RuntimeModel.RuntimeDescription,NuGet.RuntimeModel.RuntimeDescription)">
+            <summary>
+            Merges the content of the other runtime description in to this runtime description
+            </summary>
+            <param name="other">The other description to merge in to this description</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.Merge(NuGet.RuntimeModel.RuntimeGraph,NuGet.RuntimeModel.RuntimeGraph)">
+            <summary>
+            Merges the content of the other runtime graph in to this runtime graph
+            </summary>
+            <param name="other">The other graph to merge in to this graph</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.AreCompatible(System.String,System.String)">
+            <summary>
+            Determines if two runtime identifiers are compatible, based on the import graph
+            </summary>
+            <param name="criteria">The criteria being tested</param>
+            <param name="provided">The value the criteria is being tested against</param>
+            <returns>
+            true if an asset for the runtime in <paramref name="provided" /> can be installed in a project
+            targetting <paramref name="criteria" />, false otherwise
+            </returns>
+        </member>
         <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
@@ -1238,10 +1822,22 @@
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
         </member>
-        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
             <summary>
             Create a unique hash code for the given set of items
             </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
         </member>
     </members>
 </doc>

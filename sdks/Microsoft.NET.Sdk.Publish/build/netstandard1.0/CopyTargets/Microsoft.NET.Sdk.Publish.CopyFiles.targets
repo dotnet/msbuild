@@ -18,7 +18,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _RemoveExcludeFiles;
       _DeletePublishIntermediateOutputPath;
       _CopyFilesToPublishIntermediateOutputPath;
-      _CopyManagedProjectFilesToPublishIntermediateOutputPath;
+      _CopyAspNetCoreFilesToIntermediateOutputPath;
+      _CopyWebJobFilesToIntermediateOutputPath;
     </_DotNetPublishCopyFiles>
   </PropertyGroup>
 
@@ -62,31 +63,55 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     DestinationFiles="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)%(DestinationRelativePath)')"  />
     
   </Target>
-
-
+  
   <!--********************************************************************-->
-  <!-- Target _CopyManagedProjectFilesToPublishIntermediateOutputPath -->
+  <!-- Target _CopyAspNetCoreFilesToIntermediateOutputPath -->
   <!--********************************************************************-->
   <PropertyGroup>
-    <_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn>
-      $(_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn);
-      _PrepareForManagedProjectSystemPublish;
+    <_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn>
+      $(_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn);
+      _PrepareForAspNetCoreProjectSystemPublish;
       Publish;
-    </_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn>
+    </_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn>
   </PropertyGroup>
   
-  <Target Name="_CopyManagedProjectFilesToPublishIntermediateOutputPath" 
-    Condition="'$(_PublishProjectType)' == 'Managed'"
-    DependsOnTargets="$(_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn)">
+  <Target Name="_CopyAspNetCoreFilesToIntermediateOutputPath" 
+    Condition="'$(_PublishProjectType)' == 'AspNetCore'"
+    DependsOnTargets="$(_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn)">
   </Target>
 
   <!--********************************************************************-->
-  <!-- Target _PrepareForManagedProjectSystemPublish -->
+  <!-- Target _PrepareForAspNetCoreProjectSystemPublish -->
   <!--********************************************************************-->
-  <Target Name="_PrepareForManagedProjectSystemPublish">
+  <Target Name="_PrepareForAspNetCoreProjectSystemPublish">
     <PropertyGroup>
       <PublishDir>$(PublishIntermediateOutputPath)</PublishDir>
-      <TargetFramework>$(PublishFramework)</TargetFramework>
+      <Configuration>$(PublishConfiguration)</Configuration>
+    </PropertyGroup>
+  </Target>
+  
+   <!--********************************************************************-->
+  <!-- Target _CopyWebJobFilesToIntermediateOutputPath -->
+  <!--********************************************************************-->
+  <PropertyGroup>
+    <_CopyWebJobFilesToIntermediateOutputPathDependsOn>
+      $(_CopyWebJobFilesToIntermediateOutputPathDependsOn);
+      _PrepareForWebJobPublish;
+      Publish;
+    </_CopyWebJobFilesToIntermediateOutputPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_CopyWebJobFilesToIntermediateOutputPath"
+    Condition="'$(_PublishProjectType)' == 'WebJob'"
+    DependsOnTargets="$(_CopyWebJobFilesToIntermediateOutputPathDependsOn)">
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- Target _PrepareForWebJobPublish -->
+  <!--********************************************************************-->
+  <Target Name="_PrepareForWebJobPublish">
+    <PropertyGroup>
+      <PublishDir>$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\</PublishDir>
       <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
   </Target>
