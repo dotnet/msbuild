@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
             int numShown = 0;
 
-            IReadOnlyList<IFilteredTemplateInfo> bestMatchedTemplates = templateResolutionResult.BestTemplateMatchList
+            IReadOnlyList<IFilteredTemplateInfo> bestMatchedTemplates = templateResolutionResult.GetBestTemplateMatchList()
                                                                         .Where(x => !x.HasNameMismatch).ToList();
             if (bestMatchedTemplates.Count == 0)
             {

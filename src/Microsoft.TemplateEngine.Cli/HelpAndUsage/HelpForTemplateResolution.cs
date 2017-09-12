@@ -15,9 +15,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
     {
         public static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemeteryLogger, TemplateCreator templateCreator, string defaultLanguage)
         {
+            // this is just checking if there is an unambiguous group.
+            // the called methods decide whether to get the default language filtered lists, based on what they're doing.
             if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup))
             {
-                return DisplayHelpForUnambiguousTemplateGroup(templateResolutionResult, unambiguousTemplateGroup, environmentSettings, commandInput, hostDataLoader, templateCreator, defaultLanguage);
+                return DisplayHelpForUnambiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, templateCreator, defaultLanguage);
             }
             else
             {
@@ -25,19 +27,33 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, string defaultLanguage)
+        private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, string defaultLanguage)
         {
+            // filter on the default language if needed, the details display should be for a single language group
+            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroupForDetailDisplay))
+            {
+                // this is really an error
+                unambiguousTemplateGroupForDetailDisplay = new List<IFilteredTemplateInfo>();
+            }
+
             if (commandInput.IsListFlagSpecified)
             {
                 // because the list flag is present, don't display help for the template group, even though an unambiguous group was resolved.
-                if (!AreAllParamsValidForAnyTemplateInList(unambiguousTemplateGroup)
-                    && TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup) != null)
+                if (!AreAllParamsValidForAnyTemplateInList(unambiguousTemplateGroupForDetailDisplay)
+                    && TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroupForDetailDisplay) != null)
                 {
                     DisplayHelpForAcceptedParameters(commandInput.CommandName);
                     return CreationResultStatus.InvalidParamValues;
                 }
 
-                DisplayTemplateList(unambiguousTemplateGroup, environmentSettings, commandInput.Language, defaultLanguage);
+                // get the group without filtering on default language
+                if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroupForList, true))
+                {
+                    // this is really an error
+                    unambiguousTemplateGroupForList = new List<IFilteredTemplateInfo>();
+                }
+
+                DisplayTemplateList(unambiguousTemplateGroupForList, environmentSettings, commandInput.Language, defaultLanguage);
                 // list flag specified, so no usage examples or detailed help
                 return CreationResultStatus.Success;
             }
@@ -45,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 // not in list context, but Unambiguous
                 // this covers whether or not --help was input, they do the same thing in the unambiguous case
-                return TemplateDetailedHelpForSingularTemplateGroup(unambiguousTemplateGroup, environmentSettings, commandInput, hostDataLoader, templateCreator);
+                return TemplateDetailedHelpForSingularTemplateGroup(unambiguousTemplateGroupForDetailDisplay, environmentSettings, commandInput, hostDataLoader, templateCreator);
             }
         }
 
@@ -77,8 +93,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private static CreationResultStatus DisplayHelpForAmbiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string defaultLanguage)
         {
             if (!string.IsNullOrEmpty(commandInput.TemplateName)
-                && templateResolutionResult.BestTemplateMatchList.Count > 0
-                && templateResolutionResult.BestTemplateMatchList.All(x => x.MatchDisposition.Any(d => d.Location == MatchLocation.Language && d.Kind == MatchKind.Mismatch)))
+                && templateResolutionResult.GetBestTemplateMatchList(true).Count > 0
+                && templateResolutionResult.GetBestTemplateMatchList(true).All(x => x.MatchDisposition.Any(d => d.Location == MatchLocation.Language && d.Kind == MatchKind.Mismatch)))
             {
                 string errorMessage = GetLanguageMismatchErrorMessage(commandInput);
                 Reporter.Error.WriteLine(errorMessage.Bold().Red());
@@ -98,7 +114,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             bool hasInvalidParameters = false;
-            IReadOnlyList<IFilteredTemplateInfo> templatesForDisplay = templateResolutionResult.BestTemplateMatchList;
+            IReadOnlyList<IFilteredTemplateInfo> templatesForDisplay = templateResolutionResult.GetBestTemplateMatchList(true);
             GetParametersInvalidForTemplatesInList(templatesForDisplay, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
             if (invalidForAllTemplates.Any() || invalidForSomeTemplates.Any())
             {
@@ -266,7 +282,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Dictionary<string, List<IFilteredTemplateInfo>> remainingPartialMatches = new Dictionary<string, List<IFilteredTemplateInfo>>();
 
             // this filtering / grouping ignores language differences.
-            foreach (IFilteredTemplateInfo template in templateResolutionResult.BestTemplateMatchList)
+            foreach (IFilteredTemplateInfo template in templateResolutionResult.GetBestTemplateMatchList(true))
             {
                 if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
                 {
@@ -303,12 +319,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (contextProblemMatchGroups.Count + remainingPartialMatchGroups.Count > 1)
             {
                 // Unable to determine the desired template from the input template name: {0}..
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AmbiguousInputTemplateName, templateName));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AmbiguousInputTemplateName, templateName).Bold().Red());
             }
             else if (contextProblemMatchGroups.Count + remainingPartialMatchGroups.Count == 0)
             {
                 // No templates matched the input template name: {0}
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchName, templateName));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchName, templateName).Bold().Red());
                 Reporter.Error.WriteLine();
                 return;
             }

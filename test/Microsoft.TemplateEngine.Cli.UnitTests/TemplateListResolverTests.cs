@@ -179,8 +179,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
 
-            Assert.Equal(1, matchResult.BestTemplateMatchList.Count);
-            Assert.Equal("Template2", matchResult.BestTemplateMatchList[0].Info.Identity);
+            Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
+            Assert.Equal("Template2", matchResult.GetBestTemplateMatchList()[0].Info.Identity);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(1, unambiguousGroup.Count);
             Assert.Equal("Template2", unambiguousGroup[0].Info.Identity);
@@ -221,7 +221,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
 
             TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
-            Assert.Equal(1, matchResult.BestTemplateMatchList.Count);
+            Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(1, unambiguousGroup.Count);
             Assert.Equal("foo.test.Perl", unambiguousGroup[0].Info.Identity);
@@ -264,7 +264,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
 
-            Assert.Equal(1, matchResult.BestTemplateMatchList.Count);
+            Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(1, unambiguousGroup.Count);
             Assert.Equal("foo.test.Lisp", unambiguousGroup[0].Info.Identity);
@@ -311,7 +311,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
 
             TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.Equal(2, matchResult.BestTemplateMatchList.Count);
+            Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(2, unambiguousGroup.Count);
             Assert.True(unambiguousGroup.Any(x => string.Equals(x.Info.Identity, "foo.test.old")));
@@ -494,7 +494,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(2, unambiguousGroup.Count);
-            Assert.Equal(2, matchResult.BestTemplateMatchList.Count);
+            Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
 
             Assert.True(unambiguousGroup[0].MatchDisposition.Any(x => x.Kind == MatchKind.InvalidParameterValue));
             Assert.True(unambiguousGroup[1].MatchDisposition.Any(x => x.Kind == MatchKind.InvalidParameterValue));
