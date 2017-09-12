@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
 using System.IO;
@@ -101,7 +102,7 @@ namespace Microsoft.Build.BackEnd
         /// Operations on this queue must be synchronized since it is accessible by multiple threads.
         /// Use a lock on the packetQueue itself.
         /// </remarks>
-        private Queue<INodePacket> _packetQueue;
+        private ConcurrentQueue<INodePacket> _packetQueue;
 
         /// <summary>
         /// Per-node shared read buffer.
@@ -316,11 +317,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue is null");
             ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable is null");
 
-            lock (_packetQueue)
-            {
-                _packetQueue.Enqueue(packet);
-                _packetAvailable.Set();
-            }
+            _packetQueue.Enqueue(packet);
+            _packetAvailable.Set();
         }
 
         /// <summary>
@@ -335,7 +333,7 @@ namespace Microsoft.Build.BackEnd
                 _packetPump.Name = "OutOfProc Endpoint Packet Pump";
                 _packetAvailable = new AutoResetEvent(false);
                 _terminatePacketPump = new AutoResetEvent(false);
-                _packetQueue = new Queue<INodePacket>();
+                _packetQueue = new ConcurrentQueue<INodePacket>();
                 _packetPump.Start();
             }
         }
@@ -358,7 +356,7 @@ namespace Microsoft.Build.BackEnd
 
             AutoResetEvent localPacketAvailable = _packetAvailable;
             AutoResetEvent localTerminatePacketPump = _terminatePacketPump;
-            Queue<INodePacket> localPacketQueue = _packetQueue;
+            ConcurrentQueue<INodePacket> localPacketQueue = _packetQueue;
 
             DateTime originalWaitStartTime = DateTime.UtcNow;
             bool gotValidConnection = false;
@@ -535,7 +533,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
-            Queue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
+            ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
         {
             // Ordering of the wait handles is important.  The first signalled wait handle in the array 
             // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
@@ -633,17 +631,10 @@ namespace Microsoft.Build.BackEnd
                     case 2:
                         try
                         {
-                            int packetCount = localPacketQueue.Count;
-
                             // Write out all the queued packets.
-                            while (packetCount > 0)
+                            INodePacket packet;
+                            while (localPacketQueue.TryDequeue(out packet))
                             {
-                                INodePacket packet;
-                                lock (_packetQueue)
-                                {
-                                    packet = localPacketQueue.Dequeue();
-                                }
-
                                 MemoryStream packetStream = new MemoryStream();
                                 INodePacketTranslator writeTranslator = NodePacketTranslator.GetWriteTranslator(packetStream);
 
@@ -672,8 +663,6 @@ namespace Microsoft.Build.BackEnd
                                     localWritePipe.Write(packetStream.ToArray(), 0, (int)packetStream.Length);
                                 }
 #endif
-
-                                packetCount--;
                             }
                         }
                         catch (Exception e)
