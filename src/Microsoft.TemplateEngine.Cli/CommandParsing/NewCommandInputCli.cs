@@ -201,6 +201,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
+        public string CommandName => _commandName;
+
         public string TemplateName => _templateNameArg;
 
         public string Alias => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "alias" });

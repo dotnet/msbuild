@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
@@ -8,6 +8,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     public interface INewCommandInput
     {
+        string CommandName { get; }
+
         string TemplateName { get; }
 
         IReadOnlyList<string> Tokens { get; }

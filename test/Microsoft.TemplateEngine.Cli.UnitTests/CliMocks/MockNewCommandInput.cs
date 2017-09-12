@@ -30,6 +30,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         private IReadOnlyDictionary<string, string> _rawParameterInputs;
 
+        public string CommandName => "MockNew";
+
         public string TemplateName { get; set; }
 
         public IReadOnlyList<string> Tokens { get; set; }

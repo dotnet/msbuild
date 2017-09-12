@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 
@@ -11,6 +12,29 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public static class AliasSupport
     {
+        public static CreationResultStatus CoordinateAliasExpansion(INewCommandInput commandInput, AliasRegistry aliasRegistry, ITelemetryLogger telemetryLogger)
+        {
+            AliasExpansionStatus aliasExpansionStatus = AliasSupport.TryExpandAliases(commandInput, aliasRegistry);
+            if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
+            {
+                Reporter.Output.WriteLine(LocalizableStrings.AliasExpansionError);
+                return CreationResultStatus.InvalidParamValues;
+            }
+            else if (aliasExpansionStatus == AliasExpansionStatus.Expanded)
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCommandAfterExpansion, string.Join(" ", commandInput.Tokens)));
+
+                if (commandInput.HasParseError)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
+                    return HelpForTemplateResolution.HandleParseError(commandInput, telemetryLogger);
+                }
+            }
+
+            // this is both for success and for no action.
+            return CreationResultStatus.Success;
+        }
+
         public static AliasExpansionStatus TryExpandAliases(INewCommandInput commandInput, AliasRegistry aliasRegistry)
         {
             List<string> inputTokens = commandInput.Tokens.ToList();

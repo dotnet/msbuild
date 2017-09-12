@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Cli.PostActionProcessors;
+using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
@@ -226,8 +225,8 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.OperationNotSpecified:
                     break;
                 case CreationResultStatus.InvalidParamValues:
-                    IReadOnlyList<InvalidParameterInfo> invalidParameterList = GetTemplateUsageInformation(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues, out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner);
-                    string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(invalidParameterList);
+                    TemplateUsageInformation usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, EnvironmentSettings, _commandInput, _hostDataLoader, _templateCreator);
+                    string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.InvalidParameters);
                     Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
                     break;
@@ -236,99 +235,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return instantiateResult.Status;
-        }
-
-        // TODO: rework this method... it's a bit of a god-method, for very specific purposes.
-        // Number of times I've deferred on reworking this method: 3
-        private IReadOnlyList<InvalidParameterInfo> GetTemplateUsageInformation(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues,
-                                                    out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner)
-        {
-            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo, _commandInput.BaselineName);
-            TemplateListResolver.ParseTemplateArgs(templateInfo, _hostDataLoader, _commandInput);
-            allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
-            _templateCreator.ResolveUserParameters(template, allParams, _commandInput.InputTemplateParams, out userParamsWithInvalidValues);
-            hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template);
-            _templateCreator.ReleaseMountPoints(template);
-
-            List<InvalidParameterInfo> invalidParameters = new List<InvalidParameterInfo>();
-
-            if (userParamsWithInvalidValues.Any())
-            {
-                // Lookup the input param formats - userParamsWithInvalidValues has canonical.
-                foreach (string canonical in userParamsWithInvalidValues)
-                {
-                    _commandInput.InputTemplateParams.TryGetValue(canonical, out string specifiedValue);
-                    string inputFormat = _commandInput.TemplateParamInputFormat(canonical);
-                    InvalidParameterInfo invalidParam = new InvalidParameterInfo(inputFormat, specifiedValue, canonical);
-                    invalidParameters.Add(invalidParam);
-                }
-            }
-
-            if (_templateCreator.AnyParametersWithInvalidDefaultsUnresolved(defaultParamsWithInvalidValues, userParamsWithInvalidValues, _commandInput.InputTemplateParams, out IReadOnlyList<string> defaultsWithUnresolvedInvalidValues))
-            {
-                IParameterSet templateParams = template.Generator.GetParametersForTemplate(EnvironmentSettings, template);
-
-                foreach (string defaultParamName in defaultsWithUnresolvedInvalidValues)
-                {
-                    ITemplateParameter param = templateParams.ParameterDefinitions.FirstOrDefault(x => string.Equals(x.Name, defaultParamName, StringComparison.Ordinal));
-
-                    if (param != null)
-                    {
-                        // Get the best input format available.
-                        IReadOnlyList<string> inputVariants = _commandInput.VariantsForCanonical(param.Name);
-                        string displayName = inputVariants.FirstOrDefault(x => x.Contains(param.Name))
-                            ?? inputVariants.Aggregate("", (max, cur) => max.Length > cur.Length ? max : cur)
-                            ?? param.Name;
-
-                        InvalidParameterInfo invalidParam = new InvalidParameterInfo(displayName, param.DefaultValue, displayName, true);
-                        invalidParameters.Add(invalidParam);
-                    }
-                }
-            }
-
-            // get all the flags
-            // get all the user input params that have the default value
-            Dictionary<string, IReadOnlyList<string>> inputFlagVariants = new Dictionary<string, IReadOnlyList<string>>();
-            userParamsWithDefaultValues = new HashSet<string>();
-            foreach (string paramName in allParams.ParameterDefinitions.Select(x => x.Name))
-            {
-                inputFlagVariants[paramName] = _commandInput.VariantsForCanonical(paramName);
-
-                if (_commandInput.TemplateParamHasValue(paramName) && string.IsNullOrEmpty(_commandInput.TemplateParamValue(paramName)))
-                {
-                    userParamsWithDefaultValues.Add(paramName);
-                }
-            }
-            variantsForCanonicals = inputFlagVariants;
-
-            return invalidParameters;
-        }
-
-        private bool CheckIfTemplateHasScriptRunningPostActions(ITemplate template)
-        {
-            // use a throwaway set of params for getting the creation effects - it makes changes to them.
-            string targetDir = _commandInput.OutputPath ?? EnvironmentSettings.Host.FileSystem.GetCurrentDirectory();
-            IParameterSet paramsForCreationEffects = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> throwaway);
-            _templateCreator.ResolveUserParameters(template, paramsForCreationEffects, _commandInput.InputTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
-            ICreationEffects creationEffects = template.Generator.GetCreationEffects(EnvironmentSettings, template, paramsForCreationEffects, EnvironmentSettings.SettingsLoader.Components, targetDir);
-            return creationEffects.CreationResult.PostActions.Any(x => x.ActionId == ProcessStartPostActionProcessor.ActionProcessorId);
-        }
-
-        private string GetLanguageMismatchErrorMessage(string inputLanguage)
-        {
-            string inputFlagForm;
-            if (_commandInput.Tokens.Contains("-lang"))
-            {
-                inputFlagForm = "-lang";
-            }
-            else
-            {
-                inputFlagForm = "--language";
-            }
-
-            string invalidLanguageErrorText = LocalizableStrings.InvalidTemplateParameterValues;
-            invalidLanguageErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, inputFlagForm, inputLanguage, "language");
-            return invalidLanguageErrorText;
         }
 
         private void HandlePostActions(TemplateCreationResult creationResult)
@@ -361,180 +267,6 @@ namespace Microsoft.TemplateEngine.Cli
             postActionDispatcher.Process(() => Console.ReadLine());
         }
 
-        // Checks the result of TemplatesToDisplayInfoAbout()
-        // If they all have the same group identity, return them.
-        // Otherwise retun an empty list.
-        private IEnumerable<ITemplateInfo> GetTemplateGroupToShowDetailedHelpAbout(TemplateListResolutionResult templateResolutionResult)
-        {
-            IReadOnlyList<ITemplateMatchInfo> candidateTemplates = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
-
-            if (TemplateListResolver.AreAllTemplatesSameGroupIdentity(candidateTemplates))
-            {
-                return candidateTemplates.Select(x => x.Info);
-            }
-
-            return new List<ITemplateInfo>();
-        }
-
-        // If there are secondary matches, return them
-        // Else if there are primary matches, return them
-        // Otherwise return all templates in the current context
-        private IReadOnlyList<ITemplateMatchInfo> GetTemplatesToDisplayInfoAbout(TemplateListResolutionResult templateResolutionResult)
-        {
-            IEnumerable<ITemplateMatchInfo> templateList;
-
-            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousList))
-            {
-                templateList = unambiguousList;
-            }
-            else if (!string.IsNullOrEmpty(TemplateName) && templateResolutionResult.TryGetAllInvokableTemplates(out IReadOnlyList<ITemplateMatchInfo> invokableTemplates))
-            {
-                templateList = invokableTemplates;
-            }
-            else if (templateResolutionResult.HasCoreMatchedTemplatesWithDisposition(x => x.IsMatch))
-            {
-                templateList = templateResolutionResult.CoreMatchedTemplates.Where(x => x.IsMatch);
-            }
-            else if (templateResolutionResult.HasCoreMatchedTemplatesWithDisposition(x => x.IsPartialMatch))
-            {
-                templateList = templateResolutionResult.CoreMatchedTemplates.Where(x => x.IsPartialMatch);
-            }
-            else
-            {
-                templateList = TemplateListResolver.PerformAllTemplatesInContextQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput.TypeFilter?.ToLowerInvariant())
-                                                                    .Where(x => x.IsMatch);
-            }
-
-            return templateList.ToList();
-        }
-
-        private void DisplayTemplateList(TemplateListResolutionResult templateResolutionResult)
-        {
-            IReadOnlyList<ITemplateMatchInfo> results = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
-            IEnumerable<IGrouping<string, ITemplateMatchInfo>> grouped = results.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity));
-            Dictionary<ITemplateInfo, string> templatesVersusLanguages = new Dictionary<ITemplateInfo, string>();
-
-            foreach (IGrouping<string, ITemplateMatchInfo> grouping in grouped)
-            {
-                List<string> languageForDisplay = new List<string>();
-                HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                string defaultLanguageDisplay = string.Empty;
-
-                foreach (ITemplateMatchInfo template in grouping)
-                {
-                    if (template.Info.Tags != null && template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
-                    {
-                        foreach (string lang in languageTag.ChoicesAndDescriptions.Keys)
-                        {
-                            if (uniqueLanguages.Add(lang))
-                            {
-                                if (string.IsNullOrEmpty(_commandInput.Language) && string.Equals(_defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    defaultLanguageDisplay = $"[{lang}]";
-                                }
-                                else
-                                {
-                                    languageForDisplay.Add(lang);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                languageForDisplay.Sort(StringComparer.OrdinalIgnoreCase);
-                if (!string.IsNullOrEmpty(defaultLanguageDisplay))
-                {
-                    languageForDisplay.Insert(0, defaultLanguageDisplay);
-                }
-
-                templatesVersusLanguages[grouping.First().Info] = string.Join(", ", languageForDisplay);
-            }
-
-            HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = HelpFormatter.For(EnvironmentSettings, templatesVersusLanguages, 6, '-', false)
-                .DefineColumn(t => t.Key.Name, LocalizableStrings.Templates)
-                .DefineColumn(t => t.Key.ShortName, LocalizableStrings.ShortName)
-                .DefineColumn(t => t.Value, out object languageColumn, LocalizableStrings.Language)
-                .DefineColumn(t => t.Key.Classifications != null ? string.Join("/", t.Key.Classifications) : null, out object tagsColumn, LocalizableStrings.Tags)
-                .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())
-                .OrderBy(tagsColumn);
-            Reporter.Output.WriteLine(formatter.Layout());
-
-            if (!_commandInput.IsListFlagSpecified)
-            {
-                Reporter.Output.WriteLine();
-                ShowInvocationExamples(templateResolutionResult);
-                IList<ITemplateInfo> templatesToShow = GetTemplateGroupToShowDetailedHelpAbout(templateResolutionResult).ToList();
-                ShowTemplateGroupHelp(templatesToShow);
-            }
-        }
-
-        private CreationResultStatus EnterAmbiguousTemplateManipulationFlow(TemplateListResolutionResult templateResolutionResult)
-        {
-            if (!string.IsNullOrEmpty(TemplateName)
-                && templateResolutionResult.CoreMatchedTemplates.Count > 0
-                && templateResolutionResult.CoreMatchedTemplates.All(x => x.MatchDisposition.Any(d => d.Location == MatchLocation.Language && d.Kind == MatchKind.Mismatch)))
-            {
-                string errorMessage = GetLanguageMismatchErrorMessage(_commandInput.Language);
-                Reporter.Error.WriteLine(errorMessage.Bold().Red());
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
-                return CreationResultStatus.NotFound;
-            }
-
-            // handling when there are parameter mismatches. There may be other issues too.
-            IReadOnlyList<ITemplateMatchInfo> templatesForDisplay = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
-            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(templatesForDisplay, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
-            if (invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0)
-            {
-                HelpForTemplateResolution.DisplayInvalidParameters(invalidForAllTemplates);
-                HelpForTemplateResolution.DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates);
-                HelpForTemplateResolution.ShowTemplateNameMismatchHelp(TemplateName, DetermineTemplateContext(), templateResolutionResult);
-                DisplayTemplateList(templateResolutionResult);
-                return CreationResultStatus.NotFound;
-            }
-
-            // handling when there are context problems
-            //
-            // This isn't quite right. We'll need some rework for context mismatches in the core query before this can be correct.
-            // Currently, context mismatches are not part of the core matches.
-            //
-            // Without this, we're closer to parity with the state of things prior to the template matching rework (August 2017).
-            //
-            //if (HelpForTemplateResolution.ShowTemplateNameMismatchHelp(TemplateName, DetermineTemplateContext(), templateResolutionResult))
-            //{
-            //    DisplayTemplateList(templateResolutionResult);
-            //    return CreationResultStatus.NotFound;
-            //}
-
-            if (!string.IsNullOrWhiteSpace(_commandInput.Alias))
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
-                Reporter.Error.WriteLine("  " + _commandInput.TemplateParamInputFormat("--alias").Bold().Red());
-                return CreationResultStatus.NotFound;
-            }
-
-            if (_commandInput.IsHelpFlagSpecified)
-            {
-                _telemetryLogger.TrackEvent(CommandName + "-Help");
-                ShowUsageHelp();
-                DisplayTemplateList(templateResolutionResult);
-                return CreationResultStatus.Success;
-            }
-            else
-            {
-                DisplayTemplateList(templateResolutionResult);
-
-                //If we're showing the list because we were asked to, exit with success, otherwise, exit with failure
-                if (_commandInput.IsListFlagSpecified)
-                {
-                    return CreationResultStatus.Success;
-                }
-                else
-                {
-                    return CreationResultStatus.OperationNotSpecified;
-                }
-            }
-        }
-
         private CreationResultStatus EnterInstallFlow()
         {
             _telemetryLogger.TrackEvent(CommandName + "-Install", new Dictionary<string, string> { { "CountOfThingsToInstall", _commandInput.ToInstallList.Count.ToString() } });
@@ -546,6 +278,7 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
+        // TODO: make sure help / usage works right in these cases.
         private CreationResultStatus EnterMaintenanceFlow()
         {
             if (!TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
@@ -554,7 +287,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (_commandInput.IsHelpFlagSpecified)
                 {
                     _telemetryLogger.TrackEvent(CommandName + "-Help");
-                    ShowUsageHelp();
+                    HelpForTemplateResolution.ShowUsageHelp(_commandInput);
                 }
                 else
                 {
@@ -587,119 +320,19 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     _settingsLoader.Reload();
                     TemplateListResolutionResult resolutionResult = QueryForTemplateMatches();
-                    DisplayTemplateList(resolutionResult);
+                    HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(resolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
                 }
 
                 return installResult;
             }
 
             //No other cases specified, we've fallen through to "Usage help + List"
-            ShowUsageHelp();
+            HelpForTemplateResolution.ShowUsageHelp(_commandInput);
             TemplateListResolutionResult templateResolutionResult = QueryForTemplateMatches();
-            DisplayTemplateList(templateResolutionResult);
-
+            HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
             return CreationResultStatus.Success;
         }
 
-        // Used when the inputs resolve to a single template group, and the list flag is specified.
-        private CreationResultStatus SingularGroupDisplayTemplateListIfAnyAreValid(TemplateListResolutionResult templateResolutionResult)
-        {
-            bool anyValid = false;
-
-            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
-            {
-                unambiguousTemplateGroup = new List<ITemplateMatchInfo>();
-            }
-
-            foreach (ITemplateMatchInfo templateInfo in unambiguousTemplateGroup)
-            {
-                if (templateInfo.GetInvalidParameterNames().Count == 0)
-                {
-                    anyValid = true;
-                    break;
-                }
-            }
-
-            if (!anyValid)
-            {
-                // There were no templates in the group that all parameters were valid for.
-                // Display an appropriate error message.
-                ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
-
-                if (highestPrecedenceTemplate != null)
-                {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
-                    return CreationResultStatus.InvalidParamValues;
-                }
-            }
-
-            DisplayTemplateList(templateResolutionResult);
-            return CreationResultStatus.Success;
-        }
-
-        private CreationResultStatus DisplayTemplateHelpForSingularGroup(TemplateListResolutionResult templateResolutionResult)
-        {
-            bool anyArgsErrors = false;
-            ShowUsageHelp();
-
-            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
-            {
-                unambiguousTemplateGroup = new List<ITemplateMatchInfo>();
-            }
-
-            bool showImplicitlyHiddenParams = unambiguousTemplateGroup.Count > 1;
-
-            IList<ITemplateInfo> templatesToShowHelpOn = new List<ITemplateInfo>();
-            HashSet<string> argsInvalidForAllTemplatesInGroup = new HashSet<string>();
-            bool firstTemplate = true;
-
-            foreach (ITemplateMatchInfo templateInfo in unambiguousTemplateGroup.OrderByDescending(x => x.Info.Precedence))
-            {
-                bool argsError = false;
-                string commandParseFailureMessage = null;
-
-                if (templateInfo.HasParseError())
-                {
-                    commandParseFailureMessage = templateInfo.GetParseError();
-                    argsError = true;
-                }
-                else
-                {
-                    IReadOnlyList<string> invalidParamsForTemplate = templateInfo.GetInvalidParameterNames();
-                    argsError = invalidParamsForTemplate.Any();
-
-                    if (argsError)
-                    {
-                        if (firstTemplate)
-                        {
-                            argsInvalidForAllTemplatesInGroup.UnionWith(invalidParamsForTemplate);
-                        }
-                        else
-                        {
-                            argsInvalidForAllTemplatesInGroup.IntersectWith(invalidParamsForTemplate);
-                        }
-                    }
-                }
-
-                if (commandParseFailureMessage != null)
-                {
-                    Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
-                }
-
-                templatesToShowHelpOn.Add(templateInfo.Info);
-                anyArgsErrors |= argsError;
-                firstTemplate = false;
-            }
-
-            if (argsInvalidForAllTemplatesInGroup.Count > 0)
-            {
-                HelpForTemplateResolution.DisplayInvalidParameters(argsInvalidForAllTemplatesInGroup.ToList());
-            }
-
-            ShowTemplateGroupHelp(templatesToShowHelpOn, showImplicitlyHiddenParams);
-
-            return anyArgsErrors ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
-        }
 
         private bool CheckForArgsError(ITemplateMatchInfo template, out string commandParseFailureMessage)
         {
@@ -807,50 +440,33 @@ namespace Microsoft.TemplateEngine.Cli
         {
             TemplateListResolutionResult templateResolutionResult = QueryForTemplateMatches();
 
-            // There must be an unambiguous group to perform singular group actions.
-            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
+            if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
             {
-                if (_commandInput.IsListFlagSpecified)
-                {
-                    return SingularGroupDisplayTemplateListIfAnyAreValid(templateResolutionResult);
-                }
-                else if (_commandInput.IsHelpFlagSpecified)
-                {
-                    _telemetryLogger.TrackEvent(CommandName + "-Help");
-                    return DisplayTemplateHelpForSingularGroup(templateResolutionResult);
-                }
-
-                if (templateResolutionResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo templateToInvoke)
-                    && !unambiguousTemplateGroup.Any(x => x.HasParameterMismatch())
-                    && !unambiguousTemplateGroup.Any(x => x.HasAmbiguousParameterValueMatch()))
-                {
-                    // If any template in the group has any ambiguous params, then don't invoke.
-                    // The check is for an example like:
-                    // "dotnet new mvc -f netcore"
-                    //      - '-f netcore' is ambiguous in the 1.x version (2 begins-with matches)
-                    //      - '-f netcore' is not ambiguous in the 2.x version (1 begins-with match)
-                    return await EnterTemplateInvocationFlowAsync(templateToInvoke).ConfigureAwait(false);
-                }
-                else
-                {
-                    _telemetryLogger.TrackEvent(CommandName + "-Help");
-                    return DisplayTemplateHelpForSingularGroup(templateResolutionResult);
-                }
-                // There used to be code for allowing an interactive verification, but we've never used it.
-                // The verification call was stubbed to return true, and masked other resolution issues.
-                // Its only param is a template name, and if we already know the name, we could invoke it.
-                // ... or it's uninvokable for other reasons - in which case the confirmation wouldn't help.
-                // The use cases what flowed through interactive verification would always cause invocation errors.
-                // Those types of errors are now handled without having to invoke.
+                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
             }
 
-            return EnterAmbiguousTemplateManipulationFlow(templateResolutionResult);
+            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup)
+                && templateResolutionResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo templateToInvoke)
+                && !unambiguousTemplateGroup.Any(x => x.HasParameterMismatch())
+                //&& !unambiguousTemplateGroup.Any(x => x.HasAmbiguousParameterValueMatch()))
+            {
+                // If any template in the group has any ambiguous params, then don't invoke.
+                // The check for HasAmbiguousParameterValueMatch is for an example like:
+                // "dotnet new mvc -f netcore"
+                //      - '-f netcore' is ambiguous in the 1.x version (2 begins-with matches)
+                //      - '-f netcore' is not ambiguous in the 2.x version (1 begins-with match)
+                return await EnterTemplateInvocationFlowAsync(templateToInvoke).ConfigureAwait(false);
+            }
+            else
+            {
+                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
+            }
         }
 
         // Attempts to match templates against the inputs.
         private TemplateListResolutionResult QueryForTemplateMatches()
         {
-            return TemplateListResolver.PerformCoreTemplateQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+            return TemplateListResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
         }
 
         private async Task<CreationResultStatus> ExecuteAsync()
@@ -858,7 +474,7 @@ namespace Microsoft.TemplateEngine.Cli
             // this is checking the initial parse, which is template agnostic.
             if (_commandInput.HasParseError)
             {
-                return HandleParseError();
+                return HelpForTemplateResolution.HandleParseError(_commandInput, _telemetryLogger);
             }
 
             if (_commandInput.ShowAliasesSpecified)
@@ -873,25 +489,15 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             if (string.IsNullOrEmpty(_commandInput.Alias))
-            {   // The --alias param is for creating / updating / deleting aliases.
+            {
+                // The --alias param is for creating / updating / deleting aliases.
                 // If it's not present, try expanding aliases now.
-                AliasExpansionStatus aliasExpansionStatus = AliasSupport.TryExpandAliases(_commandInput, _aliasRegistry);
-                if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.AliasExpansionError);
-                    return CreationResultStatus.InvalidParamValues;
-                }
-                else if (aliasExpansionStatus == AliasExpansionStatus.Expanded)
-                {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCommandAfterExpansion, string.Join(" ", _commandInput.Tokens)));
+                CreationResultStatus aliasExpansionResult = AliasSupport.CoordinateAliasExpansion(_commandInput, _aliasRegistry, _telemetryLogger);
 
-                    if (_commandInput.HasParseError)
-                    {
-                        Reporter.Output.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
-                        return HandleParseError();
-                    }
+                if (aliasExpansionResult != CreationResultStatus.Success)
+                {
+                    return aliasExpansionResult;
                 }
-                // else NoChange... no special action necessary
             }
 
             if (!ConfigureLocale())
@@ -924,25 +530,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private CreationResultStatus HandleParseError()
-        {
-            TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams);
-            HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
-
-            // TODO: get a meaningful error message from the parser
-            if (_commandInput.IsHelpFlagSpecified)
-            {
-                _telemetryLogger.TrackEvent(CommandName + "-Help");
-                ShowUsageHelp();
-            }
-            else
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
-            }
-
-            return CreationResultStatus.InvalidParamValues;
-        }
-
         private bool ConfigureLocale()
         {
             if (!string.IsNullOrEmpty(_commandInput.Locale))
@@ -959,85 +546,6 @@ namespace Microsoft.TemplateEngine.Cli
                 _settingsLoader.Reload();
             }
 
-            return true;
-        }
-
-        // Note: This method explicitly filters out "type" and "language", in addition to other filtering.
-        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false, bool hasPostActionScriptRunner = false)
-        {
-            IList<ITemplateParameter> filteredParams = parameterDefinitions
-                .Where(x => x.Priority != TemplateParameterPriority.Implicit
-                        && !hiddenParams.Contains(x.Name) && !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase) && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
-                        && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1)).ToList();    // for filtering "tags"
-
-            if (hasPostActionScriptRunner)
-            {
-                ITemplateParameter allowScriptsParam = new TemplateParameter()
-                {
-                    Documentation = LocalizableStrings.WhetherToAllowScriptsToRun,
-                    Name = "allow-scripts",
-                    DataType = "choice",
-                    DefaultValue = "prompt",
-                    Choices = new Dictionary<string, string>()
-                    {
-                        { "yes", LocalizableStrings.AllowScriptsYesChoice },
-                        { "no", LocalizableStrings.AllowScriptsNoChoice },
-                        { "prompt", LocalizableStrings.AllowScriptsPromptChoice }
-                    }
-                };
-
-                filteredParams.Add(allowScriptsParam);
-            }
-
-            return filteredParams;
-        }
-
-        private bool GenerateUsageForTemplate(ITemplateInfo templateInfo)
-        {
-            HostSpecificTemplateData hostTemplateData = _hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
-
-            if(hostTemplateData.UsageExamples != null)
-            {
-                if(hostTemplateData.UsageExamples.Count == 0)
-                {
-                    return false;
-                }
-
-                Reporter.Output.WriteLine($"    dotnet {CommandName} {templateInfo.ShortName} {hostTemplateData.UsageExamples[0]}");
-                return true;
-            }
-
-            Reporter.Output.Write($"    dotnet {CommandName} {templateInfo.ShortName}");
-            IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames);
-
-            foreach (ITemplateParameter parameter in filteredParams)
-            {
-                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                else if (string.Equals(parameter.DataType, "string", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                else if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase) && parameter.Choices.Count == 1)
-                {
-                    continue;
-                }
-
-                string displayParameter = hostTemplateData.DisplayNameForParameter(parameter.Name);
-
-                Reporter.Output.Write($" --{displayParameter}");
-
-                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                {
-                    Reporter.Output.Write($" {parameter.DefaultValue}");
-                }
-            }
-
-            Reporter.Output.WriteLine();
             return true;
         }
 
@@ -1087,136 +595,6 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
-        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> explicitlyHiddenParams,
-                    IReadOnlyDictionary<string, IReadOnlyList<string>> groupVariantsForCanonicals, HashSet<string> groupUserParamsWithDefaultValues, bool showImplicitlyHiddenParams, bool hasPostActionScriptRunner)
-        {
-            if (!string.IsNullOrEmpty(additionalInfo))
-            {
-                Reporter.Error.WriteLine(additionalInfo.Bold().Red());
-                Reporter.Output.WriteLine();
-            }
-
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams.ParameterDefinitions, explicitlyHiddenParams, showImplicitlyHiddenParams, hasPostActionScriptRunner);
-
-            if (filteredParams.Any())
-            {
-                HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(EnvironmentSettings, filteredParams, 2, null, true);
-
-                formatter.DefineColumn(
-                    param =>
-                    {
-                        string options;
-                        if (string.Equals(param.Name, "allow-scripts", StringComparison.OrdinalIgnoreCase))
-                        {
-                            options = "--" + param.Name;
-                        }
-                        else
-                        {
-                            // the key is guaranteed to exist
-                            IList<string> variants = groupVariantsForCanonicals[param.Name].ToList();
-                            options = string.Join("|", variants.Reverse());
-                        }
-
-                        return "  " + options;
-                    },
-                    LocalizableStrings.Options
-                );
-
-                formatter.DefineColumn(delegate (ITemplateParameter param)
-                {
-                    StringBuilder displayValue = new StringBuilder(255);
-                    displayValue.AppendLine(param.Documentation);
-
-                    if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase))
-                    {
-                        int longestChoiceLength = param.Choices.Keys.Max(x => x.Length);
-
-                        foreach (KeyValuePair<string, string> choiceInfo in param.Choices)
-                        {
-                            displayValue.Append("    " + choiceInfo.Key.PadRight(longestChoiceLength + 4));
-
-                            if (!string.IsNullOrWhiteSpace(choiceInfo.Value))
-                            {
-                                displayValue.Append("- " + choiceInfo.Value);
-                            }
-
-                            displayValue.AppendLine();
-                        }
-                    }
-                    else
-                    {
-                        displayValue.Append(param.DataType ?? "string");
-                        displayValue.AppendLine(" - " + param.Priority.ToString());
-                    }
-
-                    // display the configured value if there is one
-                    string configuredValue = null;
-                    if (allParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
-                    {
-                        string resolvedValue = resolvedValueObject as string;
-
-                        if (!string.IsNullOrEmpty(resolvedValue)
-                            && !string.IsNullOrEmpty(param.DefaultValue)
-                            && !string.Equals(param.DefaultValue, resolvedValue))
-                        {
-                            configuredValue = resolvedValue;
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(configuredValue))
-                    {
-                        // this will catch when the user inputs the default value. The above deliberately skips it on the resolved values.
-                        if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                            && groupUserParamsWithDefaultValues.Contains(param.Name))
-                        {
-                            configuredValue = "true";
-                        }
-                        else
-                        {
-                            inputParams.TryGetValue(param.Name, out configuredValue);
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(configuredValue))
-                    {
-                        string realValue = configuredValue;
-
-                        if (invalidParams.Contains(param.Name) ||
-                            (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase)
-                                && !param.Choices.ContainsKey(configuredValue)))
-                        {
-                            realValue = realValue.Bold().Red();
-                        }
-                        else if (allParams.TryGetRuntimeValue(EnvironmentSettings, param.Name, out object runtimeVal) && runtimeVal != null)
-                        {
-                            realValue = runtimeVal.ToString();
-                        }
-
-                        displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, realValue));
-                    }
-
-                    // display the default value if there is one
-                    if (!string.IsNullOrEmpty(param.DefaultValue))
-                    {
-                        displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
-                    }
-
-                    return displayValue.ToString();
-                }, string.Empty);
-
-                Reporter.Output.WriteLine(formatter.Layout());
-            }
-            else
-            {
-                Reporter.Output.WriteLine(LocalizableStrings.NoParameters);
-            }
-        }
-
-        private string DetermineTemplateContext()
-        {
-            return _commandInput.TypeFilter?.ToLowerInvariant();
-        }
-
         private HashSet<string> AllTemplateShortNames
         {
             get
@@ -1252,177 +630,6 @@ namespace Microsoft.TemplateEngine.Cli
                 {LocalizableStrings.Type, x => x.GetType().FullName},
                 {LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
-        }
-
-        private void ShowInvocationExamples(TemplateListResolutionResult templateResolutionResult)
-        {
-            const int ExamplesToShow = 2;
-            IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
-            int numShown = 0;
-
-            if (templateResolutionResult.CoreMatchedTemplates.Count == 0)
-            {
-                return;
-            }
-
-            List<ITemplateInfo> templateList = templateResolutionResult.CoreMatchedTemplates.Select(x => x.Info).ToList();
-            Reporter.Output.WriteLine("Examples:");
-            HashSet<string> usedGroupIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string preferredName in preferredNameList)
-            {
-                ITemplateInfo template = templateList.FirstOrDefault(x => string.Equals(x.ShortName, preferredName, StringComparison.OrdinalIgnoreCase));
-
-                if (template != null)
-                {
-                    string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
-                    if (usedGroupIds.Add(identity))
-                    {
-                        GenerateUsageForTemplate(template);
-                        numShown++;
-                    }
-                }
-
-                templateList.Remove(template);  // remove it so it won't get chosen again
-            }
-
-            // show up to 2 examples (total, including the above)
-            Random rnd = new Random();
-            for (int i = numShown; i < ExamplesToShow && templateList.Count > 0; i++)
-            {
-                int index = rnd.Next(0, templateList.Count - 1);
-                ITemplateInfo template = templateList[index];
-                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
-                if (usedGroupIds.Add(identity) && !GenerateUsageForTemplate(template))
-                {
-                    --i;
-                }
-
-                templateList.Remove(template);  // remove it so it won't get chosen again
-            }
-
-            // show a help example
-            Reporter.Output.WriteLine($"    dotnet {CommandName} --help");
-        }
-
-        private void ShowTemplateGroupHelp(IList<ITemplateInfo> templateGroup, bool showImplicitlyHiddenParams = false)
-        {
-            if (templateGroup.Count == 0)
-            {
-                return;
-            }
-
-            // Use the highest precedence template for most of the output
-            ITemplateInfo preferredTemplate = templateGroup.OrderByDescending(x => x.Precedence).First();
-
-            // use all templates to get the language choices
-            HashSet<string> languages = new HashSet<string>();
-            foreach (ITemplateInfo templateInfo in templateGroup)
-            {
-                if (templateInfo.Tags != null && templateInfo.Tags.TryGetValue("language", out ICacheTag languageTag))
-                {
-                    languages.UnionWith(languageTag.ChoicesAndDescriptions.Keys.Where(x => !string.IsNullOrWhiteSpace(x)).ToList());
-                }
-            }
-
-            if (languages != null && languages.Any())
-            {
-                Reporter.Output.WriteLine($"{preferredTemplate.Name} ({string.Join(", ", languages)})");
-            }
-            else
-            {
-                Reporter.Output.WriteLine(preferredTemplate.Name);
-            }
-
-            if (!string.IsNullOrWhiteSpace(preferredTemplate.Author))
-            {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Author, preferredTemplate.Author));
-            }
-
-            if (!string.IsNullOrWhiteSpace(preferredTemplate.Description))
-            {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, preferredTemplate.Description));
-            }
-
-            if (!string.IsNullOrEmpty(preferredTemplate.ThirdPartyNotices))
-            {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, preferredTemplate.ThirdPartyNotices));
-            }
-
-            HashSet<string> groupUserParamsWithInvalidValues = new HashSet<string>(StringComparer.Ordinal);
-            bool groupHasPostActionScriptRunner = false;
-            List<IParameterSet> parameterSetsForAllTemplatesInGroup = new List<IParameterSet>();
-            IDictionary<string, InvalidParameterInfo> invalidParametersForGroup = new Dictionary<string, InvalidParameterInfo>(StringComparer.Ordinal);
-            bool firstInList = true;
-
-            Dictionary<string, IReadOnlyList<string>> groupVariantsForCanonicals = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
-            HashSet<string> groupUserParamsWithDefaultValues = new HashSet<string>(StringComparer.Ordinal);
-            Dictionary<string, bool> parameterHidingDisposition = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (ITemplateInfo templateInfo in templateGroup)
-            {
-                IReadOnlyList<InvalidParameterInfo> invalidParamsForTemplate = GetTemplateUsageInformation(templateInfo, out IParameterSet allParamsForTemplate, out IReadOnlyList<string> userParamsWithInvalidValues, out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner);
-                HostSpecificTemplateData hostSpecificTemplateData = _hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
-                HashSet<string> parametersToExplicitlyHide = hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>(StringComparer.Ordinal);
-
-                foreach (ITemplateParameter parameter in allParamsForTemplate.ParameterDefinitions)
-                {
-                    //If the parameter has previously been encountered...
-                    if (parameterHidingDisposition.TryGetValue(parameter.Name, out bool isCurrentlyHidden))
-                    {
-                        //...and it was hidden, but it's not hidden in this template in the group,
-                        //  remove its hiding, otherwise leave it as is
-                        if (isCurrentlyHidden && !parametersToExplicitlyHide.Contains(parameter.Name))
-                        {
-                            parameterHidingDisposition[parameter.Name] = false;
-                        }
-                    }
-                    //...otherwise, since this is the first time the parameter has been seen,
-                    //  its hiding state should be used as the current disposition
-                    else
-                    {
-                        parameterHidingDisposition[parameter.Name] = parametersToExplicitlyHide.Contains(parameter.Name);
-                    }
-                }
-
-                if (firstInList)
-                {
-                    invalidParametersForGroup = invalidParamsForTemplate.ToDictionary(x => x.Canonical, x => x);
-                    firstInList = false;
-                }
-                else
-                {
-                    invalidParametersForGroup = InvalidParameterInfo.IntersectWithExisting(invalidParametersForGroup, invalidParamsForTemplate);
-                }
-
-                groupUserParamsWithInvalidValues.IntersectWith(userParamsWithInvalidValues);    // intersect because if the value is valid for any version, it's valid.
-                groupHasPostActionScriptRunner |= hasPostActionScriptRunner;
-                parameterSetsForAllTemplatesInGroup.Add(allParamsForTemplate);
-
-                // take the variants from the first template that has the canonical
-                foreach (KeyValuePair<string, IReadOnlyList<string>> canonicalAndVariants in variantsForCanonicals)
-                {
-                    if (!groupVariantsForCanonicals.ContainsKey(canonicalAndVariants.Key))
-                    {
-                        groupVariantsForCanonicals[canonicalAndVariants.Key] = canonicalAndVariants.Value;
-                    }
-                }
-
-                // If any template says the user input value is the default, include it here.
-                groupUserParamsWithDefaultValues.UnionWith(userParamsWithDefaultValues);
-            }
-
-            IParameterSet allGroupParameters = new TemplateGroupParameterSet(parameterSetsForAllTemplatesInGroup);
-            string parameterErrors = InvalidParameterInfo.InvalidParameterListToString(invalidParametersForGroup.Values.ToList());
-            HashSet<string> parametersToHide = new HashSet<string>(parameterHidingDisposition.Where(x => x.Value).Select(x => x.Key), StringComparer.Ordinal);
-            ShowParameterHelp(_commandInput.InputTemplateParams, allGroupParameters, parameterErrors, groupUserParamsWithInvalidValues.ToList(), parametersToHide, groupVariantsForCanonicals,
-                                groupUserParamsWithDefaultValues, showImplicitlyHiddenParams, groupHasPostActionScriptRunner);
-        }
-
-        private void ShowUsageHelp()
-        {
-            Reporter.Output.WriteLine(_commandInput.HelpText);
-            Reporter.Output.WriteLine();
         }
 
         private static bool ValidateLocaleFormat(string localeToCheck)

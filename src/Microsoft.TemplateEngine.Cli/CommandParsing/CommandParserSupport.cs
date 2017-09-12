@@ -44,6 +44,23 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                            combinedArgs);
         }
 
+        public static HashSet<string> ArgsForBuiltInCommands
+        {
+            get
+            {
+                if (_argsForBuiltInCommands == null)
+                {
+                    Option[] allBuiltInArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, NewCommandReservedArgs, DebuggingCommandArgs);
+
+                    _argsForBuiltInCommands = VariantsForOptions(allBuiltInArgs);
+                }
+
+                // return a copy so the original doesn't get modified.
+                return new HashSet<string>(_argsForBuiltInCommands);
+            }
+        }
+        private static HashSet<string> _argsForBuiltInCommands = null;
+
         // Creates a command setup with the args for "new", plus args for the input template parameters.
         public static Command CreateNewCommandWithArgsForTemplate(string commandName, string templateName,
                     IReadOnlyList<ITemplateParameter> parameterDefinitions,
@@ -52,9 +69,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     out IReadOnlyDictionary<string, IReadOnlyList<string>> templateParamMap)
         {
             IList<Option> paramOptionList = new List<Option>();
-            Option[] allBuiltInArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, NewCommandReservedArgs, DebuggingCommandArgs);
+            HashSet<string> initiallyTakenAliases = ArgsForBuiltInCommands;
 
-            HashSet<string> initiallyTakenAliases = VariantsForOptions(allBuiltInArgs);
             Dictionary<string, IReadOnlyList<string>> canonicalToVariantMap = new Dictionary<string, IReadOnlyList<string>>();
             AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameterDefinitions, longNameOverrides, shortNameOverrides, initiallyTakenAliases);
 
