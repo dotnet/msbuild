@@ -23,25 +23,6 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        // https://github.com/dotnet/sdk/issues/1327
-        [CoreMSBuildOnlyTheory]
-        [InlineData("netstandard2.0", "OptIn", "net45 net451 net46 net461", true, true)]
-        [InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
-        public void Nuget_reference_compat_core_only(
-            string referencerTarget,
-            string testDescription,
-            string rawDependencyTargets,
-            bool restoreSucceeds,
-            bool buildSucceeds)
-        {
-            Nuget_reference_compat(
-                referencerTarget,
-                testDescription,
-                rawDependencyTargets,
-                restoreSucceeds,
-                buildSucceeds);
-        }
-
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
         [InlineData("net451", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true, true)]
@@ -59,6 +40,10 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp1.0", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0", true, true)]
         [InlineData("netcoreapp1.1", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1", true, true)]
         [InlineData("netcoreapp2.0", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
+
+        [InlineData("netstandard2.0", "OptIn", "net45 net451 net46 net461", true, true)]
+        [InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
+
         public void Nuget_reference_compat(string referencerTarget, string testDescription, string rawDependencyTargets,
                 bool restoreSucceeds, bool buildSucceeds)
         {
