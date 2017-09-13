@@ -380,7 +380,7 @@ public static class Program
 
             var outputDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().NotHaveFile("Humanizer.resources.dll");
-            outputDirectory.Should().HaveFile(@"fr\Humanizer.resources.dll");
+            outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));
         }
 
         [Fact]
