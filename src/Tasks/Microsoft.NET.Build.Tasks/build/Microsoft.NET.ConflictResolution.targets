@@ -37,9 +37,9 @@ Copyright (c) .NET Foundation. All rights reserved.
            for conflicts). -->
       <_RuntimeTargetItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeTarget'))" />
       <__RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(_RuntimeTargetItems)" />
-      <_RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(__RuntimeTargetPublishItems)" 
-                                  DestinationSubPath="%(FileDefinitions.Path)"
-                                  />
+      <_RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(__RuntimeTargetPublishItems)" />
+      <_RuntimeTargetPublishItems Update="@(_RuntimeTargetPublishItems)"
+                                  DestinationSubPath="%(Path)" />
 
       <_LockFileAssemblies Include="@(_RuntimeTargetPublishItems->WithMetadataValue('Type', 'assembly')->'%(ResolvedPath)')">
         <Private>false</Private>
