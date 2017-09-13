@@ -333,8 +333,48 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
+<<<<<<< HEAD
 
         private bool CheckForArgsError(ITemplateMatchInfo template, out string commandParseFailureMessage)
+=======
+        // Used when the inputs resolve to a single template group, and the list flag is specified.
+        private CreationResultStatus SingularGroupDisplayTemplateListIfAnyAreValid(TemplateListResolutionResult templateResolutionResult)
+        {
+            bool anyValid = false;
+
+            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup))
+            {
+                unambiguousTemplateGroup = new List<IFilteredTemplateInfo>();
+            }
+
+            foreach (IFilteredTemplateInfo templateInfo in unambiguousTemplateGroup)
+            {
+                if (templateInfo.InvalidParameterNames.Count == 0)
+                {
+                    anyValid = true;
+                    break;
+                }
+            }
+
+            if (!anyValid)
+            {
+                // There were no templates in the group that all parameters were valid for.
+                // Display an appropriate error message.
+                IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
+
+                if (highestPrecedenceTemplate != null)
+                {
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+                    return CreationResultStatus.InvalidParamValues;
+                }
+            }
+>>>>>>> Stashed changes
+
+            return CreationResultStatus.Success;
+        }
+
+        private bool CheckForArgsError(IFilteredTemplateInfo template, out string commandParseFailureMessage)
+>>>>>>> replaying stashed changes 1
         {
             bool argsError;
 
