@@ -104,7 +104,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(invokableMatches);
-
             if (highestInGroupIfSingleGroup != null)
             {
                 template = highestInGroupIfSingleGroup;
