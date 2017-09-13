@@ -52,7 +52,7 @@ if ($Verbosity -eq 'diagnostic') {
 }
 
 # Install a stage 0
-$DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1"
+$DOTNET_INSTALL_SCRIPT_URL="https://dot.net/v1/dotnet-install.ps1"
 Invoke-WebRequest $DOTNET_INSTALL_SCRIPT_URL -OutFile "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1"
 
 & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version $DotnetCLIVersion $dotnetInstallVerbosity
@@ -69,14 +69,14 @@ if (Test-Path $NETBuildExtensionsTargets)
 # Install 1.0.4 shared framework
 if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.0.5"))
 {
-    & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Channel "Preview" -Version 1.0.5 -SharedRuntime
+    & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version 1.0.5 -SharedRuntime
     if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 }
 
 # Install 1.1.1 shared framework
 if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.1.2"))
 {
-    & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Channel "Release/1.1.0" -Version 1.1.2 -SharedRuntime
+    & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version 1.1.2 -SharedRuntime
     if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 }
 
