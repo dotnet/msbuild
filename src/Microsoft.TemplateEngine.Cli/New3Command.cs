@@ -152,9 +152,9 @@ namespace Microsoft.TemplateEngine.Cli
 
         // Attempts to invoke the template.
         // Warning: The _commandInput cannot be assumed to be in a state that is parsed for the template being invoked.
-        //      So be sure to only get template-agnostic information from it. Anything specific to the template must be gotten from the IFilteredTemplateInfo
+        //      So be sure to only get template-agnostic information from it. Anything specific to the template must be gotten from the ITemplateMatchInfo
         //      Or do a reparse if necessary (currently occurs in one error case).
-        private async Task<CreationResultStatus> CreateTemplateAsync(IFilteredTemplateInfo templateMatchDetails)
+        private async Task<CreationResultStatus> CreateTemplateAsync(ITemplateMatchInfo templateMatchDetails)
         {
             ITemplateInfo template = templateMatchDetails.Info;
 
@@ -169,7 +169,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, templateMatchDetails.ValidTemplateParameters, _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified, _commandInput.BaselineName).ConfigureAwait(false);
+                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, templateMatchDetails.GetValidTemplateParameters(), _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified, _commandInput.BaselineName).ConfigureAwait(false);
             }
             catch (ContentGenerationException cx)
             {
@@ -212,7 +212,7 @@ namespace Microsoft.TemplateEngine.Cli
                     else
                     {
                         // TODO: rework to avoid having to reparse.
-                        // The canonical info could be in the IFilteredTemplateInfo, but currently isn't.
+                        // The canonical info could be in the ITemplateMatchInfo, but currently isn't.
                         TemplateListResolver.ParseTemplateArgs(template, _hostDataLoader, _commandInput);
 
                         IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.Message.Split(new[] { ',' })
@@ -366,7 +366,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Otherwise retun an empty list.
         private IEnumerable<ITemplateInfo> GetTemplateGroupToShowDetailedHelpAbout(TemplateListResolutionResult templateResolutionResult)
         {
-            IReadOnlyList<IFilteredTemplateInfo> candidateTemplates = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
+            IReadOnlyList<ITemplateMatchInfo> candidateTemplates = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
 
             if (TemplateListResolver.AreAllTemplatesSameGroupIdentity(candidateTemplates))
             {
@@ -379,15 +379,15 @@ namespace Microsoft.TemplateEngine.Cli
         // If there are secondary matches, return them
         // Else if there are primary matches, return them
         // Otherwise return all templates in the current context
-        private IReadOnlyList<IFilteredTemplateInfo> GetTemplatesToDisplayInfoAbout(TemplateListResolutionResult templateResolutionResult)
+        private IReadOnlyList<ITemplateMatchInfo> GetTemplatesToDisplayInfoAbout(TemplateListResolutionResult templateResolutionResult)
         {
-            IEnumerable<IFilteredTemplateInfo> templateList;
+            IEnumerable<ITemplateMatchInfo> templateList;
 
-            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousList))
+            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousList))
             {
                 templateList = unambiguousList;
             }
-            else if (!string.IsNullOrEmpty(TemplateName) && templateResolutionResult.TryGetAllInvokableTemplates(out IReadOnlyList<IFilteredTemplateInfo> invokableTemplates))
+            else if (!string.IsNullOrEmpty(TemplateName) && templateResolutionResult.TryGetAllInvokableTemplates(out IReadOnlyList<ITemplateMatchInfo> invokableTemplates))
             {
                 templateList = invokableTemplates;
             }
@@ -410,17 +410,17 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void DisplayTemplateList(TemplateListResolutionResult templateResolutionResult)
         {
-            IReadOnlyList<IFilteredTemplateInfo> results = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
-            IEnumerable<IGrouping<string, IFilteredTemplateInfo>> grouped = results.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity));
+            IReadOnlyList<ITemplateMatchInfo> results = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
+            IEnumerable<IGrouping<string, ITemplateMatchInfo>> grouped = results.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity));
             Dictionary<ITemplateInfo, string> templatesVersusLanguages = new Dictionary<ITemplateInfo, string>();
 
-            foreach (IGrouping<string, IFilteredTemplateInfo> grouping in grouped)
+            foreach (IGrouping<string, ITemplateMatchInfo> grouping in grouped)
             {
                 List<string> languageForDisplay = new List<string>();
                 HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 string defaultLanguageDisplay = string.Empty;
 
-                foreach (IFilteredTemplateInfo template in grouping)
+                foreach (ITemplateMatchInfo template in grouping)
                 {
                     if (template.Info.Tags != null && template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
                     {
@@ -481,7 +481,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             // handling when there are parameter mismatches. There may be other issues too.
-            IReadOnlyList<IFilteredTemplateInfo> templatesForDisplay = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
+            IReadOnlyList<ITemplateMatchInfo> templatesForDisplay = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(templatesForDisplay, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
             if (invalidForAllTemplates.Any() || invalidForSomeTemplates.Any())
             {
@@ -606,14 +606,14 @@ namespace Microsoft.TemplateEngine.Cli
         {
             bool anyValid = false;
 
-            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup))
+            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
             {
-                unambiguousTemplateGroup = new List<IFilteredTemplateInfo>();
+                unambiguousTemplateGroup = new List<ITemplateMatchInfo>();
             }
 
-            foreach (IFilteredTemplateInfo templateInfo in unambiguousTemplateGroup)
+            foreach (ITemplateMatchInfo templateInfo in unambiguousTemplateGroup)
             {
-                if (templateInfo.InvalidParameterNames.Count == 0)
+                if (templateInfo.GetInvalidParameterNames().Count == 0)
                 {
                     anyValid = true;
                     break;
@@ -624,7 +624,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 // There were no templates in the group that all parameters were valid for.
                 // Display an appropriate error message.
-                IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
+                ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
 
                 if (highestPrecedenceTemplate != null)
                 {
@@ -642,9 +642,9 @@ namespace Microsoft.TemplateEngine.Cli
             bool anyArgsErrors = false;
             ShowUsageHelp();
 
-            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup))
+            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
             {
-                unambiguousTemplateGroup = new List<IFilteredTemplateInfo>();
+                unambiguousTemplateGroup = new List<ITemplateMatchInfo>();
             }
 
             bool showImplicitlyHiddenParams = unambiguousTemplateGroup.Count > 1;
@@ -653,19 +653,19 @@ namespace Microsoft.TemplateEngine.Cli
             HashSet<string> argsInvalidForAllTemplatesInGroup = new HashSet<string>();
             bool firstTemplate = true;
 
-            foreach (IFilteredTemplateInfo templateInfo in unambiguousTemplateGroup.OrderByDescending(x => x.Info.Precedence))
+            foreach (ITemplateMatchInfo templateInfo in unambiguousTemplateGroup.OrderByDescending(x => x.Info.Precedence))
             {
                 bool argsError = false;
                 string commandParseFailureMessage = null;
 
-                if (templateInfo.HasParseError)
+                if (templateInfo.HasParseError())
                 {
-                    commandParseFailureMessage = templateInfo.ParseError;
+                    commandParseFailureMessage = templateInfo.GetParseError();
                     argsError = true;
                 }
                 else
                 {
-                    IReadOnlyList<string> invalidParamsForTemplate = templateInfo.InvalidParameterNames;
+                    IReadOnlyList<string> invalidParamsForTemplate = templateInfo.GetInvalidParameterNames();
                     argsError = invalidParamsForTemplate.Any();
 
                     if (argsError)
@@ -701,19 +701,19 @@ namespace Microsoft.TemplateEngine.Cli
             return anyArgsErrors ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
         }
 
-        private bool CheckForArgsError(IFilteredTemplateInfo template, out string commandParseFailureMessage)
+        private bool CheckForArgsError(ITemplateMatchInfo template, out string commandParseFailureMessage)
         {
             bool argsError;
 
-            if (template.HasParseError)
+            if (template.HasParseError())
             {
-                commandParseFailureMessage = template.ParseError;
+                commandParseFailureMessage = template.GetParseError();
                 argsError = true;
             }
             else
             {
                 commandParseFailureMessage = null;
-                IReadOnlyList<string> invalidParams = template.InvalidParameterNames;
+                IReadOnlyList<string> invalidParams = template.GetInvalidParameterNames();
 
                 if (invalidParams.Count > 0)
                 {
@@ -729,7 +729,7 @@ namespace Microsoft.TemplateEngine.Cli
             return argsError;
         }
 
-        private async Task<CreationResultStatus> EnterTemplateInvocationFlowAsync(IFilteredTemplateInfo templateToInvoke)
+        private async Task<CreationResultStatus> EnterTemplateInvocationFlowAsync(ITemplateMatchInfo templateToInvoke)
         {
             templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag language);
             _commandInput.InputTemplateParams.TryGetValue("framework", out string framework);
@@ -808,7 +808,7 @@ namespace Microsoft.TemplateEngine.Cli
             TemplateListResolutionResult templateResolutionResult = QueryForTemplateMatches();
 
             // There must be an unambiguous group to perform singular group actions.
-            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup))
+            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
             {
                 if (_commandInput.IsListFlagSpecified)
                 {
@@ -820,9 +820,9 @@ namespace Microsoft.TemplateEngine.Cli
                     return DisplayTemplateHelpForSingularGroup(templateResolutionResult);
                 }
 
-                if (templateResolutionResult.TryGetSingularInvokableMatch(out IFilteredTemplateInfo templateToInvoke)
-                    && !unambiguousTemplateGroup.Any(x => x.HasParameterMismatch)
-                    && !unambiguousTemplateGroup.Any(x => x.HasAmbiguousParameterValueMatch))
+                if (templateResolutionResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo templateToInvoke)
+                    && !unambiguousTemplateGroup.Any(x => x.HasParameterMismatch())
+                    && !unambiguousTemplateGroup.Any(x => x.HasAmbiguousParameterValueMatch()))
                 {
                     // If any template in the group has any ambiguous params, then don't invoke.
                     // The check is for an example like:
@@ -1221,7 +1221,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                IReadOnlyCollection<IFilteredTemplateInfo> allTemplates = TemplateListResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
+                IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateListResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
                 HashSet<string> allShortNames = new HashSet<string>(allTemplates.Select(x => x.Info.ShortName));
                 return allShortNames;
             }

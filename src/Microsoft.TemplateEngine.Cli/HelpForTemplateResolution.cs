@@ -37,23 +37,23 @@ namespace Microsoft.TemplateEngine.Cli
         // get a better name for this, it's unclear what it's doing.
         public static bool ShowTemplateNameMismatchHelp(string templateName, string context, TemplateListResolutionResult templateResolutionResult)
         {
-            GetContextBasedAndOtherPartialMatches(templateResolutionResult, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> remainingPartialMatchGroups);
+            GetContextBasedAndOtherPartialMatches(templateResolutionResult, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups);
             return DisplayPartialNameMatchAndContextProblems(templateName, context, contextProblemMatchGroups, remainingPartialMatchGroups);
         }
 
-        private static void GetContextBasedAndOtherPartialMatches(TemplateListResolutionResult templateResolutionResult, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> remainingPartialMatchGroups)
+        private static void GetContextBasedAndOtherPartialMatches(TemplateListResolutionResult templateResolutionResult, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups)
         {
-            Dictionary<string, List<IFilteredTemplateInfo>> contextProblemMatches = new Dictionary<string, List<IFilteredTemplateInfo>>();
-            Dictionary<string, List<IFilteredTemplateInfo>> remainingPartialMatches = new Dictionary<string, List<IFilteredTemplateInfo>>();
+            Dictionary<string, List<ITemplateMatchInfo>> contextProblemMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
+            Dictionary<string, List<ITemplateMatchInfo>> remainingPartialMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
 
             // this filtering / grouping ignores language differences.
-            foreach (IFilteredTemplateInfo template in templateResolutionResult.CoreMatchedTemplates)
+            foreach (ITemplateMatchInfo template in templateResolutionResult.CoreMatchedTemplates)
             {
                 if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
                 {
-                    if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<IFilteredTemplateInfo> templateGroup))
+                    if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
                     {
-                        templateGroup = new List<IFilteredTemplateInfo>();
+                        templateGroup = new List<ITemplateMatchInfo>();
                         contextProblemMatches.Add(template.Info.GroupIdentity, templateGroup);
                     }
 
@@ -61,9 +61,9 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else if (template.MatchDisposition.Any(t => t.Location != MatchLocation.Context && t.Kind != MatchKind.Mismatch && t.Kind != MatchKind.Unspecified))
                 {
-                    if (!remainingPartialMatches.TryGetValue(template.Info.GroupIdentity, out List<IFilteredTemplateInfo> templateGroup))
+                    if (!remainingPartialMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
                     {
-                        templateGroup = new List<IFilteredTemplateInfo>();
+                        templateGroup = new List<ITemplateMatchInfo>();
                         remainingPartialMatches.Add(template.Info.GroupIdentity, templateGroup);
                     }
 
@@ -75,7 +75,7 @@ namespace Microsoft.TemplateEngine.Cli
             remainingPartialMatchGroups = remainingPartialMatches.Values.ToList();
         }
 
-        private static bool DisplayPartialNameMatchAndContextProblems(string templateName, string context, IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> contextProblemMatchGroups, IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> remainingPartialMatchGroups)
+        private static bool DisplayPartialNameMatchAndContextProblems(string templateName, string context, IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups)
         {
             bool anythingReported = false;
             if (contextProblemMatchGroups.Count + remainingPartialMatchGroups.Count > 1)
@@ -91,7 +91,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             // scp (2017-08-28): not certain anything in this loop can happen anymore, due to the way filtering occurs.
-            foreach (IReadOnlyList<IFilteredTemplateInfo> templateGroup in contextProblemMatchGroups)
+            foreach (IReadOnlyList<ITemplateMatchInfo> templateGroup in contextProblemMatchGroups)
             {
                 // all templates in a group should have the same context & name
                 if (templateGroup[0].Info.Tags != null && templateGroup[0].Info.Tags.TryGetValue("type", out ICacheTag typeTag))
@@ -121,13 +121,13 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Returns a list of the parameter names that are invalid for every template in the input group.
-        public static void GetParametersInvalidForTemplatesInList(IReadOnlyList<IFilteredTemplateInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
+        public static void GetParametersInvalidForTemplatesInList(IReadOnlyList<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
         {
             IDictionary<string, int> invalidCounts = new Dictionary<string, int>();
 
-            foreach (IFilteredTemplateInfo template in templateList)
+            foreach (ITemplateMatchInfo template in templateList)
             {
-                foreach (string paramName in template.InvalidParameterNames)
+                foreach (string paramName in template.GetInvalidParameterNames())
                 {
                     if (!invalidCounts.ContainsKey(paramName))
                     {

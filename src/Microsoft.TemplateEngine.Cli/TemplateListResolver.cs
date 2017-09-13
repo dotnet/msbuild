@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli
             commandInput.ReparseForTemplate(templateInfo, hostData);
         }
 
-        public static bool AreAllTemplatesSameGroupIdentity(IEnumerable<IFilteredTemplateInfo> templateList)
+        public static bool AreAllTemplatesSameGroupIdentity(IEnumerable<ITemplateMatchInfo> templateList)
         {
             if (!templateList.Any())
             {
@@ -64,23 +64,23 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // This version is preferred, its clear which template the results are in the context of.
-        public static bool ValidateRemainingParameters(IFilteredTemplateInfo template, out IReadOnlyList<string> invalidParams)
+        public static bool ValidateRemainingParameters(ITemplateMatchInfo template, out IReadOnlyList<string> invalidParams)
         {
-            invalidParams = template.InvalidParameterNames;
+            invalidParams = template.GetInvalidParameterNames();
 
             return !invalidParams.Any();
         }
 
-        public static IFilteredTemplateInfo FindHighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<IFilteredTemplateInfo> templateList)
+        public static ITemplateMatchInfo FindHighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<ITemplateMatchInfo> templateList)
         {
             if (!AreAllTemplatesSameGroupIdentity(templateList))
             {
                 return null;
             }
 
-            IFilteredTemplateInfo highestPrecedenceTemplate = null;
+            ITemplateMatchInfo highestPrecedenceTemplate = null;
 
-            foreach (IFilteredTemplateInfo template in templateList)
+            foreach (ITemplateMatchInfo template in templateList)
             {
                 if (highestPrecedenceTemplate == null)
                 {
@@ -96,9 +96,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, unfiltered - except the ones hidden by their host file.
-        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader)
+        public static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader)
         {
-            IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
+            IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
             (
                 templateInfo,
                 false,
@@ -110,9 +110,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, filtered only by the context (item, project, etc) - and the host file.
-        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, string context)
+        public static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, string context)
         {
-            IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
+            IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
             (
                 templateInfo,
                 false,
@@ -127,7 +127,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Query for template matches, filtered by everything available: name, language, context, parameters, and the host file.
         public static TemplateListResolutionResult PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
-            IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
+            IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
             (
                 templateInfo,
                 false,
@@ -139,7 +139,7 @@ namespace Microsoft.TemplateEngine.Cli
             )
             .Where(x => !IsTemplateHiddenByHostFile(x.Info, hostDataLoader)).ToList();
 
-            IReadOnlyList<IFilteredTemplateInfo> coreMatchedTemplates = templates.Where(x => x.IsMatch).ToList();
+            IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = templates.Where(x => x.IsMatch).ToList();
             TemplateListResolutionResult matchResults;
 
             if (coreMatchedTemplates.Count == 0)
@@ -152,7 +152,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                IReadOnlyList<IFilteredTemplateInfo> matchesWithExactDispositionsInNameFields = coreMatchedTemplates.Where(x => x.MatchDisposition.Any(y => NameFields.Contains(y.Location) && y.Kind == MatchKind.Exact)).ToList();
+                IReadOnlyList<ITemplateMatchInfo> matchesWithExactDispositionsInNameFields = coreMatchedTemplates.Where(x => x.MatchDisposition.Any(y => NameFields.Contains(y.Location) && y.Kind == MatchKind.Exact)).ToList();
                 if (matchesWithExactDispositionsInNameFields.Count > 0)
                 {
                     // Start the exact name matches, if there are any.
@@ -175,14 +175,14 @@ namespace Microsoft.TemplateEngine.Cli
             return matchResults;
         }
 
-        private static void AddDefaultLanguageMatchingToTemplates(IReadOnlyList<IFilteredTemplateInfo> listToFilter, string language)
+        private static void AddDefaultLanguageMatchingToTemplates(IReadOnlyList<ITemplateMatchInfo> listToFilter, string language)
         {
             if (string.IsNullOrEmpty(language))
             {
                 return;
             }
 
-            foreach (IFilteredTemplateInfo template in listToFilter)
+            foreach (ITemplateMatchInfo template in listToFilter)
             {
                 MatchKind matchKind;
 
@@ -197,7 +197,7 @@ namespace Microsoft.TemplateEngine.Cli
                     matchKind = MatchKind.Mismatch;
                 }
 
-                template.AddDefaultDisposition(new MatchInfo
+                template.AddDisposition(new MatchInfo
                 {
                     Location = MatchLocation.DefaultLanguage,
                     Kind = matchKind
@@ -206,9 +206,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // adds dispositions to the templates based on matches between the input parameters & the template parameters.
-        private static void AddParameterMatchingToTemplates(IReadOnlyList<IFilteredTemplateInfo> templatesToFilter, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
+        private static void AddParameterMatchingToTemplates(IReadOnlyList<ITemplateMatchInfo> templatesToFilter, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
-            foreach (IFilteredTemplateInfo template in templatesToFilter)
+            foreach (ITemplateMatchInfo template in templatesToFilter)
             {
                 try
                 {
