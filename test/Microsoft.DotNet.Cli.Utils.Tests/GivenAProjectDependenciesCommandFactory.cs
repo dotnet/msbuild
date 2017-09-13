@@ -8,6 +8,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using Xunit;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
@@ -189,7 +190,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .Should().Pass();
 
             var factory = new ProjectDependenciesCommandFactory(
-                FrameworkConstants.CommonFrameworks.NetCoreApp20,
+                NuGetFrameworks.NetCoreApp21,
                 configuration,
                 null,
                 null,
@@ -198,7 +199,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var command = factory.Create("dotnet-tool-with-output-name", null);
 
             command.CommandArgs.Should().Contain(
-                Path.Combine("toolwithoutputname", "1.0.0", "lib", "netcoreapp2.0", "dotnet-tool-with-output-name.dll"));
+                Path.Combine("toolwithoutputname", "1.0.0", "lib", "netcoreapp2.1", "dotnet-tool-with-output-name.dll"));
         }
     }
 }

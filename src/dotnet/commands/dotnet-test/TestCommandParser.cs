@@ -85,6 +85,11 @@ namespace Microsoft.DotNet.Cli
                         Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.cmdCollectFriendlyName)
                               .ForwardAsSingle(o => $"/p:VSTestCollect=\"{string.Join(";", o.Arguments)}\"")),
+                  Create.Option(
+                        "--blame",
+                        LocalizableStrings.CmdBlameDescription,
+                        Accept.NoArguments()
+                              .ForwardAsSingle(o => "/p:VSTestBlame=true")),
                   CommonOptions.NoRestoreOption(),
                   CommonOptions.VerbosityOption());
 

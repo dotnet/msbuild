@@ -121,7 +121,7 @@ namespace SevenZip
 		/// </summary>
 		MatchFinder,
 		/// <summary>
-		/// Specifies the number of match finder cyckes.
+		/// Specifies the number of match finder cycles.
 		/// </summary>
 		MatchFinderCycles,
 		/// <summary>

@@ -19,7 +19,7 @@ namespace SevenZip.Compression.LZ
 		public UInt32 _bufferOffset;
 
 		public UInt32 _blockSize; // Size of Allocated memory block
-		public UInt32 _pos; // offset (from _buffer) of curent byte
+		public UInt32 _pos; // offset (from _buffer) of current byte
 		UInt32 _keepSizeBefore; // how many BYTEs must be kept in buffer before _pos
 		UInt32 _keepSizeAfter; // how many BYTEs must be kept buffer after _pos
 		public UInt32 _streamPos; // offset (from _buffer) of first not read byte from Stream
