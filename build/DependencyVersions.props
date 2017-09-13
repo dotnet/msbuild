@@ -32,6 +32,7 @@
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <SpaTemplateVersion>1.0.417</SpaTemplateVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
+    <DotNetCliArchiverVersion>0.2.0-beta-000059</DotNetCliArchiverVersion>
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
     <AspNetCoreRuntimePackageFolderName>dev-26623</AspNetCoreRuntimePackageFolderName>
     <AspNetCoreRuntimePackageVersion>2.1.0-preview1-26623</AspNetCoreRuntimePackageVersion>
