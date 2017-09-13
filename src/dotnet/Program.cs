@@ -167,7 +167,12 @@ namespace Microsoft.DotNet.Cli
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(command, out var builtIn))
             {
-                TelemetryEventEntry.SendFiltered(Parser.Instance.ParseFrom($"dotnet {command}", appArgs.ToArray()));
+                var parseResult = Parser.Instance.ParseFrom($"dotnet {command}", appArgs.ToArray());
+                if (!parseResult.Errors.Any())
+                {
+                    TelemetryEventEntry.SendFiltered(parseResult);
+                }
+
                 exitCode = builtIn.Command(appArgs.ToArray());
             }
             else
