@@ -31,6 +31,7 @@
     <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkDebug>
     <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
     <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkLanguagePack>
-    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(HostMonikerRid)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
+    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>
+    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid)$(HostMonikerRid)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
   </PropertyGroup>
 </Project>

@@ -11,7 +11,6 @@
   <Target Name="Publish"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
           DependsOnTargets="Init;
-                            Package;
                             EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
