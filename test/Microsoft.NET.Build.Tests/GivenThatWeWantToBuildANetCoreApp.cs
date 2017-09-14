@@ -313,6 +313,77 @@ public static class Program
         }
 
         [Fact]
+        public void There_are_no_conflicts_when_targeting_netcoreapp_1_1()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NetCoreApp1.1_Conflicts",
+                TargetFrameworks = "netcoreapp1.1",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:normal")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_publishes_package_satellites_correctly(bool crossTarget)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AppUsingPackageWithSatellites",
+                TargetFrameworks = "netcoreapp2.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            if (crossTarget)
+            {
+                testProject.Name += "_cross";
+            }
+
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer.Core.fr", "2.2.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer.Core.pt", "2.2.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    if (crossTarget)
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        propertyGroup.Element(ns + "TargetFramework").Name += "s";
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+                .Execute("/v:normal", $"/p:TargetFramework={testProject.TargetFrameworks}")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                ;
+
+            var outputDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().NotHaveFile("Humanizer.resources.dll");
+            outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));
+        }
+
+        [Fact]
         public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
         {
             var testProject = new TestProject()

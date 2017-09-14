@@ -415,7 +415,7 @@ namespace DefaultReferences
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .Execute("/v:diag")
+                .Execute("/v:normal")
                 .Should()
                 .Pass()
                 .And
@@ -455,11 +455,54 @@ namespace DefaultReferences
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .Execute("/v:diag")
+                .Execute("/v:normal")
                 .Should()
                 .Pass()
                 .And
                 .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        [WindowsOnlyFact]
+        public void It_does_not_report_conflicts_with_runtime_specific_items()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopConflictsRuntimeTargets",
+                TargetFrameworks = "net461",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.AdditionalProperties["PlatformTarget"] = "AnyCPU";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                                    new XAttribute("Include", "System.Security.Cryptography.Algorithms"),
+                                    new XAttribute("Version", "4.3.0")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var buildResult = buildCommand
+                .Execute("/v:normal");
+
+            buildResult.Should().Pass();
+
+            //  Correct asset should be copied to output folder. Before fixing https://github.com/dotnet/sdk/issues/1510,
+            //  the runtimeTargets items would win conflict resolution, and then would not be copied to the output folder,
+            //  so there'd be no copy of the DLL in the output folder.
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().HaveFile("System.Security.Cryptography.Algorithms.dll");
+
+            //  There should be no conflicts
+            buildResult.Should().NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
         [Fact]
@@ -495,31 +538,42 @@ namespace DefaultReferences
         [InlineData(false)]
         public void It_places_package_satellites_correctly(bool crossTarget)
         {
-            var testAsset = _testAssetsManager
-              .CopyTestAsset(
-                  "DesktopUsingPackageWithSatellites", 
-                  identifier: crossTarget ? "_cross" : "")
-              .WithSource();
+            var testProject = new TestProject()
+            {
+                Name = "DesktopUsingPackageWithSatellites",
+                TargetFrameworks = "net46",
+                IsSdkProject = true,
+                IsExe = true
+            };
 
             if (crossTarget)
             {
-                 testAsset = testAsset.WithProjectChanges(project =>
-                 {
-                     var ns = project.Root.Name.Namespace;
-                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                     propertyGroup.Element(ns + "TargetFramework").Name += "s";
-                 });
+                testProject.Name += "_cross";
             }
 
-            testAsset.Restore(Log);
+            testProject.PackageReferences.Add(new TestPackageReference("FluentValidation", "5.5.0"));
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    if (crossTarget)
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        propertyGroup.Element(ns + "TargetFramework").Name += "s";
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand
-                .Execute()
+                .Execute("/v:normal")
                 .Should()
-                .Pass();
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-            var outputDirectory = buildCommand.GetOutputDirectory("net46");
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().NotHaveFile("FluentValidation.resources.dll");
             outputDirectory.Should().HaveFile(@"fr\FluentValidation.resources.dll");
         }
