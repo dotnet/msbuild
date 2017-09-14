@@ -21,6 +21,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- Mono's resgen doesn't support all the command line args, like /r:
              So, don't use the tool -->
 	    <ExecuteAsTool Condition="'$(ExecuteAsTool)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">false</ExecuteAsTool>
+
+        <!-- Disable generation of serialization assemblies for now. workaround for bxc #55697 -->
+        <GenerateSerializationAssemblies Condition="'$(GenerateSerializationAssemblies)' == ''">Off</GenerateSerializationAssemblies>
     </PropertyGroup>
 
 </Project>
