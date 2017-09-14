@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         // If a single template group can be resolved, return it.
         // If the user input a language, default language results are not considered.
-        // ignoreDefaultLanguageFiltering = true will also cause default language filtering to be ignored.
+        // ignoreDefaultLanguageFiltering = true will also cause default language filtering to be ignored. Be careful when using this option.
         public bool TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup, bool ignoreDefaultLanguageFiltering = false)
         {
             if (_coreMatchedTemplates.Count == 0)
@@ -55,15 +55,16 @@ namespace Microsoft.TemplateEngine.Cli
             if (!_hasUserInputLanguage && !ignoreDefaultLanguageFiltering)
             {
                 // only consider default language match dispositions if the user did not specify a language.
-                List<ITemplateMatchInfo> defaultLanguageMatchedTemplates = _coreMatchedTemplates.Where(x => x.DispositionOfDefaults
-                                                                            .Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact))
+                List<ITemplateMatchInfo> defaultLanguageMatchedTemplates = _coreMatchedTemplates.Where(x =>
+                                                                x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact)
+                                                                && !x.MatchDisposition.Any(z => z.Location == MatchLocation.Context && z.Kind == MatchKind.Mismatch))
                                                                             .ToList();
 
                 if (TemplateListResolver.AreAllTemplatesSameGroupIdentity(defaultLanguageMatchedTemplates))
                 {
-                    if (defaultLanguageMatchedTemplates.Any(x => !x.HasParameterMismatch()))
+                    if (defaultLanguageMatchedTemplates.Any(x => !x.HasParameterMismatch() && !x.HasContextMismatch()))
                     {
-                        unambiguousTemplateGroup = defaultLanguageMatchedTemplates.Where(x => !x.HasParameterMismatch()).ToList();
+                        unambiguousTemplateGroup = defaultLanguageMatchedTemplates.Where(x => !x.HasParameterMismatch() && !x.HasContextMismatch()).ToList();
                         return true;
                     }
                     else
@@ -74,7 +75,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            List<ITemplateMatchInfo> paramFiltered = _coreMatchedTemplates.Where(x => !x.HasParameterMismatch()).ToList();
+            List<ITemplateMatchInfo> paramFiltered = _coreMatchedTemplates.Where(x => !x.HasParameterMismatch() && !x.HasContextMismatch()).ToList();
             if (TemplateListResolver.AreAllTemplatesSameGroupIdentity(paramFiltered))
             {
                 unambiguousTemplateGroup = paramFiltered;
@@ -183,7 +184,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                Console.WriteLine("all in context");
                 templateList = _allTemplatesInContext.ToList();
                 _usingContextMatches = true;
                 return templateList;

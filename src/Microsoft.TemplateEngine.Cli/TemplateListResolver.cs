@@ -36,6 +36,39 @@ namespace Microsoft.TemplateEngine.Cli
             return templateList.AllAreTheSame((x) => x.Info.GroupIdentity, StringComparer.OrdinalIgnoreCase);
         }
 
+        public static bool AreAllTemplatesSameLanguage(IEnumerable<ITemplateMatchInfo> templateList)
+        {
+            if (!templateList.Any())
+            {
+                return false;
+            }
+
+            HashSet<string> languagesFound = new HashSet<string>();
+            foreach (ITemplateMatchInfo template in templateList)
+            {
+                string language;
+
+                if (template.Info.Tags != null && template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
+                {
+                    language = languageTag.ChoicesAndDescriptions.Keys.FirstOrDefault();
+                }
+                else
+                {
+                    language = string.Empty;
+                }
+
+                //add & check
+                languagesFound.Add(language);
+
+                if (languagesFound.Count > 1)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private static bool IsTemplateHiddenByHostFile(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader)
         {
             HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
@@ -152,25 +185,26 @@ namespace Microsoft.TemplateEngine.Cli
             if (coreMatchedTemplates.Count == 0)
             {
                 // No exact matches, take the partial matches and be done.
-                return templates.Where(x => x.IsPartialMatch).ToList();
+                coreMatchedTemplates = templates.Where(x => x.IsPartialMatch).ToList();
             }
             else
             {
                 IReadOnlyList<ITemplateMatchInfo> matchesWithExactDispositionsInNameFields = coreMatchedTemplates.Where(x => x.MatchDisposition.Any(y => NameFields.Contains(y.Location) && y.Kind == MatchKind.Exact)).ToList();
+
                 if (matchesWithExactDispositionsInNameFields.Count > 0)
                 {
                     // Start with the exact name matches, if there are any.
                     coreMatchedTemplates = matchesWithExactDispositionsInNameFields;
                 }
-
-                if (string.IsNullOrEmpty(commandInput.Language) && !string.IsNullOrEmpty(defaultLanguage))
-                {
-                    // default language matching only makes sense if the user didn't specify a language.
-                    AddDefaultLanguageMatchingToTemplates(coreMatchedTemplates, defaultLanguage);
-                }
-
-                AddParameterMatchingToTemplates(coreMatchedTemplates, hostDataLoader, commandInput);
             }
+
+            if (string.IsNullOrEmpty(commandInput.Language) && !string.IsNullOrEmpty(defaultLanguage))
+            {
+                // default language matching only makes sense if the user didn't specify a language.
+                AddDefaultLanguageMatchingToTemplates(coreMatchedTemplates, defaultLanguage);
+            }
+
+            AddParameterMatchingToTemplates(coreMatchedTemplates, hostDataLoader, commandInput);
 
             return coreMatchedTemplates;
         }

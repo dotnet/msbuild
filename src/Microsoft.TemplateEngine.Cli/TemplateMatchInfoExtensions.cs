@@ -19,6 +19,11 @@ namespace Microsoft.TemplateEngine.Cli
                                        && (x.Kind != MatchKind.Exact && x.Kind != MatchKind.AmbiguousParameterValue));
         }
 
+        public static bool HasContextMismatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind == MatchKind.Mismatch);
+        }
+
         public static bool HasAmbiguousParameterValueMatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.AmbiguousParameterValue);
@@ -58,6 +63,24 @@ namespace Microsoft.TemplateEngine.Cli
         { 
             return templateMatchInfo.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.Exact)
                                     .ToDictionary(x => x.ChoiceIfLocationIsOtherChoice, x => x.ParameterValue);
+        }
+
+        public static bool IsContextOnlyMatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            return templateMatchInfo.MatchDisposition.All(x => (x.Location == MatchLocation.Context && x.Kind == MatchKind.Exact)
+                                                                || (x.Kind == MatchKind.Mismatch));
+        }
+
+        public static bool IsNameOnlyMatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            return templateMatchInfo.MatchDisposition.All(x => (x.Location == MatchLocation.Name && x.Kind == MatchKind.Exact)
+                                                                || (x.Kind == MatchKind.Mismatch));
+        }
+
+        public static bool IsNameOrContextMatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            return templateMatchInfo.MatchDisposition.Any(x => (x.Location == MatchLocation.Name && x.Kind == MatchKind.Exact)
+                                                                || (x.Location == MatchLocation.Context && x.Kind == MatchKind.Exact));
         }
 
         public static bool IsMatchExceptContext(this ITemplateMatchInfo templateMatchInfo)

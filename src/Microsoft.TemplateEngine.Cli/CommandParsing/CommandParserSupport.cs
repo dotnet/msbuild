@@ -138,10 +138,9 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
                     Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
                     Create.Option("-lang|--language", LocalizableStrings.LanguageParameter,
-                                    // TODO: dynamically get the language set for all installed templates.
                                     Accept.ExactlyOneArgument()
-                                        .WithSuggestionsFrom("C#", "F#")
-                                        .With(defaultValue: () => "C#")),
+                                        .WithSuggestionsFrom("C#", "F#")),
+                                        // don't give this a default, otherwise 'new -lang' is valid and assigns the default. User should have to explicitly give the value.
                 };
             }
         }

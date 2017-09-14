@@ -164,7 +164,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Mismatch });
             Assert.False(TemplateMatchInfo.IsMatch);
             Assert.True(TemplateMatchInfo.IsMatchExceptContext());
-            Assert.False(TemplateMatchInfo.IsPartialMatch);
+            Assert.True(TemplateMatchInfo.IsPartialMatch);
             Assert.True(TemplateMatchInfo.IsPartialMatchExceptContext());
             Assert.False(TemplateMatchInfo.IsInvokableMatch());
             Assert.False(TemplateMatchInfo.HasAmbiguousParameterValueMatch());
@@ -181,7 +181,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Mismatch });
             Assert.False(TemplateMatchInfo.IsMatch);
             Assert.True(TemplateMatchInfo.IsMatchExceptContext());
-            Assert.False(TemplateMatchInfo.IsPartialMatch);
+            Assert.True(TemplateMatchInfo.IsPartialMatch);
             Assert.True(TemplateMatchInfo.IsPartialMatchExceptContext());
             Assert.False(TemplateMatchInfo.IsInvokableMatch());
             Assert.False(TemplateMatchInfo.HasAmbiguousParameterValueMatch());
