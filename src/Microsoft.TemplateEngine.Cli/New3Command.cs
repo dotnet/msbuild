@@ -482,7 +482,7 @@ namespace Microsoft.TemplateEngine.Cli
             if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup)
                 && templateResolutionResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo templateToInvoke)
                 && !unambiguousTemplateGroup.Any(x => x.HasParameterMismatch())
-                //&& !unambiguousTemplateGroup.Any(x => x.HasAmbiguousParameterValueMatch()))
+                && !unambiguousTemplateGroup.Any(x => x.HasAmbiguousParameterValueMatch()))
             {
                 // If any template in the group has any ambiguous params, then don't invoke.
                 // The check for HasAmbiguousParameterValueMatch is for an example like:

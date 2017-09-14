@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         {
             // this is just checking if there is an unambiguous group.
             // the called methods decide whether to get the default language filtered lists, based on what they're doing.
-            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup))
+            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
             {
                 return DisplayHelpForUnambiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, templateCreator, defaultLanguage);
             }
@@ -30,10 +30,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, string defaultLanguage)
         {
             // filter on the default language if needed, the details display should be for a single language group
-            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroupForDetailDisplay))
+            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroupForDetailDisplay))
             {
                 // this is really an error
-                unambiguousTemplateGroupForDetailDisplay = new List<IFilteredTemplateInfo>();
+                unambiguousTemplateGroupForDetailDisplay = new List<ITemplateMatchInfo>();
             }
 
             if (commandInput.IsListFlagSpecified)
@@ -47,10 +47,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
 
                 // get the group without filtering on default language
-                if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroupForList, true))
+                if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroupForList, true))
                 {
                     // this is really an error
-                    unambiguousTemplateGroupForList = new List<IFilteredTemplateInfo>();
+                    unambiguousTemplateGroupForList = new List<ITemplateMatchInfo>();
                 }
 
                 DisplayTemplateList(unambiguousTemplateGroupForList, environmentSettings, commandInput.Language, defaultLanguage);
@@ -65,12 +65,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static CreationResultStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
+        private static CreationResultStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
         {
             ShowUsageHelp(commandInput);
 
             // (scp 2017-09-06): parse errors probably can't happen in this context.
-            foreach (string parseErrorMessage in unambiguousTemplateGroup.Where(x => x.HasParseError).Select(x => x.ParseError).ToList())
+            foreach (string parseErrorMessage in unambiguousTemplateGroup.Where(x => x.HasParseError()).Select(x => x.GetParseError()).ToList())
             {
                 Reporter.Error.WriteLine(parseErrorMessage.Bold().Red());
             }
@@ -114,7 +114,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             bool hasInvalidParameters = false;
-            IReadOnlyList<IFilteredTemplateInfo> templatesForDisplay = templateResolutionResult.GetBestTemplateMatchList(true);
+            IReadOnlyList<ITemplateMatchInfo> templatesForDisplay = templateResolutionResult.GetBestTemplateMatchList(true);
             GetParametersInvalidForTemplatesInList(templatesForDisplay, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
             if (invalidForAllTemplates.Any() || invalidForSomeTemplates.Any())
             {
@@ -153,13 +153,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns true if any of the input templates has a valid parameter parse result.
-        private static bool AreAllParamsValidForAnyTemplateInList(IReadOnlyList<IFilteredTemplateInfo> templateList)
+        private static bool AreAllParamsValidForAnyTemplateInList(IReadOnlyList<ITemplateMatchInfo> templateList)
         {
             bool anyValidTemplate = false;
 
-            foreach (IFilteredTemplateInfo templateInfo in templateList)
+            foreach (ITemplateMatchInfo templateInfo in templateList)
             {
-                if (templateInfo.InvalidParameterNames.Count == 0)
+                if (templateInfo.GetInvalidParameterNames().Count == 0)
                 {
                     anyValidTemplate = true;
                     break;
@@ -183,7 +183,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         //  - Short Name
         //  - Language: All languages supported by the group are displayed, with the default language in brackets, e.g.: [C#]
         //  - Tags
-        private static void DisplayTemplateList(IReadOnlyList<IFilteredTemplateInfo> templates, IEngineEnvironmentSettings environmentSettings, string language, string defaultLanguage)
+        private static void DisplayTemplateList(IReadOnlyList<ITemplateMatchInfo> templates, IEngineEnvironmentSettings environmentSettings, string language, string defaultLanguage)
         {
             IReadOnlyDictionary<ITemplateInfo, string> templateGroupsLanguages = GetLanguagesForTemplateGroups(templates, language, defaultLanguage);
 
@@ -197,18 +197,18 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine(formatter.Layout());
         }
 
-        private static IReadOnlyDictionary<ITemplateInfo, string> GetLanguagesForTemplateGroups(IReadOnlyList<IFilteredTemplateInfo> templateList, string language, string defaultLanguage)
+        private static IReadOnlyDictionary<ITemplateInfo, string> GetLanguagesForTemplateGroups(IReadOnlyList<ITemplateMatchInfo> templateList, string language, string defaultLanguage)
         {
-            IEnumerable<IGrouping<string, IFilteredTemplateInfo>> grouped = templateList.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity));
+            IEnumerable<IGrouping<string, ITemplateMatchInfo>> grouped = templateList.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity));
             Dictionary<ITemplateInfo, string> templateGroupsLanguages = new Dictionary<ITemplateInfo, string>();
 
-            foreach (IGrouping<string, IFilteredTemplateInfo> grouping in grouped)
+            foreach (IGrouping<string, ITemplateMatchInfo> grouping in grouped)
             {
                 List<string> languageForDisplay = new List<string>();
                 HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 string defaultLanguageDisplay = string.Empty;
 
-                foreach (IFilteredTemplateInfo template in grouping)
+                foreach (ITemplateMatchInfo template in grouping)
                 {
                     if (template.Info.Tags != null && template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
                     {
@@ -272,23 +272,23 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 return;
             }
 
-            GetContextBasedAndOtherPartialMatches(templateResolutionResult, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> remainingPartialMatchGroups);
+            GetContextBasedAndOtherPartialMatches(templateResolutionResult, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups);
             DisplayPartialNameMatchAndContextProblems(templateName, context, contextProblemMatchGroups, remainingPartialMatchGroups);
         }
 
-        private static void GetContextBasedAndOtherPartialMatches(TemplateListResolutionResult templateResolutionResult, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> remainingPartialMatchGroups)
+        private static void GetContextBasedAndOtherPartialMatches(TemplateListResolutionResult templateResolutionResult, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups)
         {
-            Dictionary<string, List<IFilteredTemplateInfo>> contextProblemMatches = new Dictionary<string, List<IFilteredTemplateInfo>>();
-            Dictionary<string, List<IFilteredTemplateInfo>> remainingPartialMatches = new Dictionary<string, List<IFilteredTemplateInfo>>();
+            Dictionary<string, List<ITemplateMatchInfo>> contextProblemMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
+            Dictionary<string, List<ITemplateMatchInfo>> remainingPartialMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
 
             // this filtering / grouping ignores language differences.
-            foreach (IFilteredTemplateInfo template in templateResolutionResult.GetBestTemplateMatchList(true))
+            foreach (ITemplateMatchInfo template in templateResolutionResult.GetBestTemplateMatchList(true))
             {
                 if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
                 {
-                    if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<IFilteredTemplateInfo> templateGroup))
+                    if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
                     {
-                        templateGroup = new List<IFilteredTemplateInfo>();
+                        templateGroup = new List<ITemplateMatchInfo>();
                         contextProblemMatches.Add(template.Info.GroupIdentity, templateGroup);
                     }
 
@@ -297,9 +297,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 else if (!templateResolutionResult.UsingContextMatches
                     && template.MatchDisposition.Any(t => t.Location != MatchLocation.Context && t.Kind != MatchKind.Mismatch && t.Kind != MatchKind.Unspecified))
                 {
-                    if (!remainingPartialMatches.TryGetValue(template.Info.GroupIdentity, out List<IFilteredTemplateInfo> templateGroup))
+                    if (!remainingPartialMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
                     {
-                        templateGroup = new List<IFilteredTemplateInfo>();
+                        templateGroup = new List<ITemplateMatchInfo>();
                         remainingPartialMatches.Add(template.Info.GroupIdentity, templateGroup);
                     }
 
@@ -314,7 +314,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             remainingPartialMatchGroups = remainingPartialMatches.Values.ToList();
         }
 
-        private static void DisplayPartialNameMatchAndContextProblems(string templateName, string context, IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> contextProblemMatchGroups, IReadOnlyList<IReadOnlyList<IFilteredTemplateInfo>> remainingPartialMatchGroups)
+        private static void DisplayPartialNameMatchAndContextProblems(string templateName, string context, IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups)
         {
             if (contextProblemMatchGroups.Count + remainingPartialMatchGroups.Count > 1)
             {
@@ -331,7 +331,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             bool anythingReported = false;
 
-            foreach (IReadOnlyList<IFilteredTemplateInfo> templateGroup in contextProblemMatchGroups)
+            foreach (IReadOnlyList<ITemplateMatchInfo> templateGroup in contextProblemMatchGroups)
             {
                 // all templates in a group should have the same context & name
                 if (templateGroup[0].Info.Tags != null && templateGroup[0].Info.Tags.TryGetValue("type", out ICacheTag typeTag))
@@ -368,13 +368,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns a list of the parameter names that are invalid for every template in the input group.
-        private static void GetParametersInvalidForTemplatesInList(IReadOnlyList<IFilteredTemplateInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
+        private static void GetParametersInvalidForTemplatesInList(IReadOnlyList<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
         {
             IDictionary<string, int> invalidCounts = new Dictionary<string, int>();
 
-            foreach (IFilteredTemplateInfo template in templateList)
+            foreach (ITemplateMatchInfo template in templateList)
             {
-                foreach (string paramName in template.InvalidParameterNames)
+                foreach (string paramName in template.GetInvalidParameterNames())
                 {
                     if (!invalidCounts.ContainsKey(paramName))
                     {

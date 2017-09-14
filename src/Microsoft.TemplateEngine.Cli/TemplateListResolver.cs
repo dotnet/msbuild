@@ -111,7 +111,8 @@ namespace Microsoft.TemplateEngine.Cli
         // Lists all the templates, filtered only by the context (item, project, etc) - and the host file.
         public static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, string context)
         {
-            Func<IFilteredTemplateInfo, bool> contextFilter = x => x.MatchDisposition.All(d => d.Location != MatchLocation.Context || d.Kind == MatchKind.Exact);
+            // If there is a context match, it must be exact. Other dispositions are irrelevant.
+            Func<ITemplateMatchInfo, bool> contextFilter = x => x.MatchDisposition.All(d => d.Location != MatchLocation.Context || d.Kind == MatchKind.Exact);
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
             (
                 templateInfo,

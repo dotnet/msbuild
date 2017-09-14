@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     public static class TemplateDetailsDisplay
     {
-        public static void ShowTemplateGroupHelp(IReadOnlyList<IFilteredTemplateInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
+        public static void ShowTemplateGroupHelp(IReadOnlyList<ITemplateMatchInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
         {
             if (templateGroup.Count == 0 || !TemplateListResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
             {
@@ -198,13 +198,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns a composite of the input parameters and values which are valid for any template in the group.
-        private static IReadOnlyDictionary<string, string> CoalesceInputParameterValuesFromTemplateGroup(IReadOnlyList<IFilteredTemplateInfo> templateGroup)
+        private static IReadOnlyDictionary<string, string> CoalesceInputParameterValuesFromTemplateGroup(IReadOnlyList<ITemplateMatchInfo> templateGroup)
         {
             Dictionary<string, string> inputValues = new Dictionary<string, string>();
 
-            foreach (IFilteredTemplateInfo template in templateGroup.OrderBy(x => x.Info.Precedence))
+            foreach (ITemplateMatchInfo template in templateGroup.OrderBy(x => x.Info.Precedence))
             {
-                foreach (KeyValuePair<string, string> paramAndValue in template.ValidTemplateParameters)
+                foreach (KeyValuePair<string, string> paramAndValue in template.GetValidTemplateParameters())
                 {
                     inputValues[paramAndValue.Key] = paramAndValue.Value;
                 }

@@ -6,6 +6,13 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public static class TemplateMatchInfoExtensions
     {
+        // True if name is explicitly mismatched.
+        // Partial matches are ok. No disposition on name is also ok.
+        public static bool HasNameMismatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Name && x.Kind == MatchKind.Mismatch);
+        }
+
         public static bool HasParameterMismatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter
@@ -51,6 +58,71 @@ namespace Microsoft.TemplateEngine.Cli
         { 
             return templateMatchInfo.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.Exact)
                                     .ToDictionary(x => x.ChoiceIfLocationIsOtherChoice, x => x.ParameterValue);
+        }
+
+        public static bool IsMatchExceptContext(this ITemplateMatchInfo templateMatchInfo)
+        {
+            if (templateMatchInfo.MatchDisposition.Count == 0)
+            {
+                return false;
+            }
+
+            bool hasContextMismatch = false;
+
+            foreach (MatchInfo disposition in templateMatchInfo.MatchDisposition)
+            {
+                if (disposition.Location == MatchLocation.Context)
+                {
+                    if (disposition.Kind == MatchKind.Exact)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        hasContextMismatch = true;
+                    }
+                }
+                else if (disposition.Kind == MatchKind.Mismatch)
+                {
+                    return false;
+                }
+            }
+
+            return hasContextMismatch;
+        }
+
+        // Returns true if there is a context mismatch and no other mismatches, false otherwise.
+        // Note: there must be at least one disposition that is not mismatch, in addition to the context mismatch.
+        public static bool IsPartialMatchExceptContext(this ITemplateMatchInfo templateMatchInfo)
+        {
+            if (templateMatchInfo.MatchDisposition.Count == 0)
+            {
+                return false;
+            }
+
+            bool hasContextMismatch = false;
+            bool hasOtherThanMismatch = false;
+
+            foreach (MatchInfo disposition in templateMatchInfo.MatchDisposition)
+            {
+                if (disposition.Location == MatchLocation.Context)
+                {
+                    if (disposition.Kind == MatchKind.Exact)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        hasContextMismatch = true;
+                    }
+                }
+                else if (disposition.Kind != MatchKind.Mismatch)
+                {
+                    hasOtherThanMismatch = true;
+                }
+            }
+
+            return hasOtherThanMismatch && hasContextMismatch;
         }
     }
 }
