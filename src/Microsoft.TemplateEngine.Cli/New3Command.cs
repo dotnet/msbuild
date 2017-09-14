@@ -333,18 +333,14 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
-<<<<<<< HEAD
-
-        private bool CheckForArgsError(ITemplateMatchInfo template, out string commandParseFailureMessage)
-=======
         // Used when the inputs resolve to a single template group, and the list flag is specified.
         private CreationResultStatus SingularGroupDisplayTemplateListIfAnyAreValid(TemplateListResolutionResult templateResolutionResult)
         {
             bool anyValid = false;
 
-            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<IFilteredTemplateInfo> unambiguousTemplateGroup))
+            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
             {
-                unambiguousTemplateGroup = new List<IFilteredTemplateInfo>();
+                unambiguousTemplateGroup = new List<ITemplateMatchInfo>();
             }
 
             foreach (IFilteredTemplateInfo templateInfo in unambiguousTemplateGroup)
@@ -360,7 +356,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 // There were no templates in the group that all parameters were valid for.
                 // Display an appropriate error message.
-                IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
+                ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
 
                 if (highestPrecedenceTemplate != null)
                 {
@@ -368,13 +364,11 @@ namespace Microsoft.TemplateEngine.Cli
                     return CreationResultStatus.InvalidParamValues;
                 }
             }
->>>>>>> Stashed changes
 
             return CreationResultStatus.Success;
         }
 
-        private bool CheckForArgsError(IFilteredTemplateInfo template, out string commandParseFailureMessage)
->>>>>>> replaying stashed changes 1
+        private bool CheckForArgsError(ITemplateMatchInfo template, out string commandParseFailureMessage)
         {
             bool argsError;
 
