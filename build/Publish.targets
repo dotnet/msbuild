@@ -6,9 +6,18 @@
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/RuntimeCoherence.targets" />
-  
+
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
+          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
+          DependsOnTargets="Init;
+                            SetBadgeProps;
+                            Package;
+                            EvaluateRuntimeCoherence;
+                            PublishArtifacts;
+                            FinishBuild" />
+
+  <Target Name="PublishWithoutPackage"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
           DependsOnTargets="Init;
                             SetBadgeProps;

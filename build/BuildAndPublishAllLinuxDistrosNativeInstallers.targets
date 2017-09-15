@@ -14,7 +14,7 @@
             " />
   </Target>
 
-  <Target Name="MultiPublish" DependsOnTargets="AddAllGeneratedInstaller;Publish" />
+  <Target Name="MultiPublish" DependsOnTargets="AddAllGeneratedInstaller;PublishWithoutPackage" />
 
   <Target Name="AddAllGeneratedInstaller">
     <ItemGroup>
