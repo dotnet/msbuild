@@ -11,6 +11,7 @@
   <Target Name="Publish"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
           DependsOnTargets="Init;
+                            SetBadgeProps;
                             EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />

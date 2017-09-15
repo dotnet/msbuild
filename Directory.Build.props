@@ -57,7 +57,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <Import Project="build/BundledTemplates.props" />
 
     <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/VersionBadge.props" />
     <Import Project="build/BundledRuntimes.props" />
     <Import Project="build/CrossGen.props" />
     <Import Project="build/BackwardsCompatibilityRuntimes.props" />
