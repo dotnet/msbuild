@@ -1656,6 +1656,10 @@ namespace Microsoft.Build.Execution
                         // cache on child nodes because the OutOfProcNode class sets "autoReloadFromDisk" to "true" which handles the case when a restore modifies
                         // part of the import graph.
                         _buildParameters?.ProjectRootElementCache?.Clear();
+
+                        FileMatcher.ClearFileEnumerationsCache();
+
+                        FileUtilities.ClearFileExistenceCache();
                     }
 
                     _noActiveSubmissionsEvent.Set();

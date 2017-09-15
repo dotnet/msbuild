@@ -1179,5 +1179,13 @@ namespace Microsoft.Build.Shared
 
             return false;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal static void ClearFileExistenceCache()
+        {
+            FileExistenceCache.Clear();
+        }
     }
 }
