@@ -1180,12 +1180,14 @@ namespace Microsoft.Build.Shared
             return false;
         }
 
+#if !CLR2COMPATIBILITY
         /// <summary>
-        /// 
+        /// Clears the file existence cache.
         /// </summary>
         internal static void ClearFileExistenceCache()
         {
             FileExistenceCache.Clear();
         }
+#endif
     }
 }
