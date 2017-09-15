@@ -18,12 +18,12 @@
   <ItemGroup>
     <PackageReference Include="NuGet.Common" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="NuGet.Configuration" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(DotNetCliArchiverVersion)" />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />
   </ItemGroup>
 </Project>
