@@ -16,6 +16,8 @@
     <file src="$X86BinPath$Microsoft.Common.props" target="\Extensions\15.0" />
     <file src="$X86BinPath$Microsoft.VisualStudioVersion.v15.Common.props" target="\Extensions\15.0" />
 
+    <!-- x86 -->
+
     <file src="$X86BinPath$MSBuild.exe" target="v15.0/bin" />
     <file src="$X86BinPath$MSBuildTaskHost.exe" target="v15.0/bin" />
     <file src="$X86BinPath$MSBuildTaskHost.exe.config" target="v15.0/bin" />
@@ -25,9 +27,24 @@
     <file src="$X86BinPath$Microsoft.Build.Framework.dll" target="v15.0/bin" />
     <file src="$X86BinPath$Microsoft.Build.Tasks.Core.dll" target="v15.0/bin" />
     <file src="$X86BinPath$Microsoft.Build.Utilities.Core.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$MSBuild.rsp" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Collections.Immutable.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Console.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Diagnostics.Process.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.IO.Compression.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.IO.FileSystem.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.IO.FileSystem.Primitives.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.IO.Pipes.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Security.AccessControl.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Security.Cryptography.Algorithms.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Security.Cryptography.Primitives.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Security.Principal.Windows.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Threading.Tasks.Dataflow.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Threading.Thread.dll" target="v15.0/bin" />
+
     <file src="$X86BinPath$Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
     <file src="$X86BinPath$Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
+    <file src="$X86BinPath$MSBuild.rsp" target="v15.0/bin" />
     <file src="$X86BinPath$Microsoft.CSharp.targets" target="v15.0/bin" />
     <file src="$X86BinPath$Microsoft.VisualBasic.targets" target="v15.0/bin" />
     <file src="$X86BinPath$Microsoft.Common.CrossTargeting.targets" target="v15.0/bin" />
@@ -51,6 +68,8 @@
     <file src="$X86BinPath$Microsoft.NetFramework.props" target="v15.0/bin" />
     <file src="$X86BinPath$Microsoft.NetFramework.targets" target="v15.0/bin" />
 
+    <!-- x64 -->
+
     <file src="$X64BinPath$MSBuild.exe" target="v15.0/bin/amd64" />
     <file src="$X64BinPath$MSBuildTaskHost.exe" target="v15.0/bin/amd64" />
     <file src="$X64BinPath$MSBuildTaskHost.exe.config" target="v15.0/bin/amd64" />
@@ -60,9 +79,24 @@
     <file src="$X86BinPath$Microsoft.Build.Framework.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$Microsoft.Build.Tasks.Core.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$Microsoft.Build.Utilities.Core.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$MSBuild.rsp" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Collections.Immutable.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$System.Console.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Diagnostics.Process.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.IO.Compression.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.IO.FileSystem.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.IO.FileSystem.Primitives.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.IO.Pipes.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Security.AccessControl.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Security.Cryptography.Algorithms.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Security.Cryptography.Primitives.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Security.Principal.Windows.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Threading.Tasks.Dataflow.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$System.Threading.Thread.dll" target="v15.0/bin/amd64" />
+
     <file src="$X86BinPath$Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
     <file src="$X86BinPath$Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />
+    <file src="$X86BinPath$MSBuild.rsp" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$Microsoft.CSharp.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$Microsoft.VisualBasic.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$Microsoft.Common.CrossTargeting.targets" target="v15.0/bin/amd64" />
@@ -85,5 +119,6 @@
     <file src="$X86BinPath$Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$Microsoft.NetFramework.props" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$Microsoft.NetFramework.targets" target="v15.0/bin/amd64" />
+    
   </files>
 </package>
