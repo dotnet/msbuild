@@ -150,7 +150,7 @@ export VSTEST_TRACE_BUILD=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 # Install a stage 0
-(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --version "2.1.0-preview1-007199" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
