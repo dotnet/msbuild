@@ -172,24 +172,28 @@ function GetHTTPResponse([Uri] $Uri)
             # HttpClient is used vs Invoke-WebRequest in order to support Nano Server which doesn't support the Invoke-WebRequest cmdlet.
             Load-Assembly -Assembly System.Net.Http
 
+            if( -not $ProxyAddress) {
+                try {
+                    # Despite no proxy being explicitly specified, we may still be behind a default proxy
+                    $DefaultProxy = [System.Net.WebRequest]::DefaultWebProxy;
+                    if($DefaultProxy -and (-not $DefaultProxy.IsBypassed($Uri))) {
+                        $ProxyAddress = $DefaultProxy.GetProxy($Uri).OriginalString
+                        $ProxyUseDefaultCredentials = $true
+                    }
+                } catch {
+                    # Eat the exception and move forward as the above code is an attempt
+                    #    at resolving the DefaultProxy that may not have been a problem.
+                    $ProxyAddress = $null
+                    Say-Verbose("Exception ignored: $_.Exception.Message - moving forward...")
+                }
+            }
+
             if($ProxyAddress) {
                 $HttpClientHandler = New-Object System.Net.Http.HttpClientHandler
                 $HttpClientHandler.Proxy =  New-Object System.Net.WebProxy -Property @{Address=$ProxyAddress;UseDefaultCredentials=$ProxyUseDefaultCredentials}
                 $HttpClient = New-Object System.Net.Http.HttpClient -ArgumentList $HttpClientHandler
             }
             else {
-                try {
-                    # Despite no proxy being explicitly specified, we may still be behind a default proxy
-                    $DefaultProxy = [System.Net.WebRequest]::DefaultWebProxy;
-                    if($DefaultProxy -and (-not $DefaultProxy.IsBypassed($Uri))) {
-                        $ProxyAddress =  $DefaultProxy.GetProxy($Uri).OriginalString
-                        $ProxyUseDefaultCredentials = $true
-                    }
-                } catch {
-                    # Eat the exception and move forward as the above code is an attempt
-                    #    at resolving the DefaultProxy that may not have been a problem.
-                    Say-Verbose("Exception ignored: $_.Exception.Message - moving forward...")
-                }
 
                 $HttpClient = New-Object System.Net.Http.HttpClient
             }
