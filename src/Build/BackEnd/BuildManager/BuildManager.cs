@@ -1650,12 +1650,17 @@ namespace Microsoft.Build.Execution
 
                 if (_buildSubmissions.Count == 0)
                 {
-                    if (submission.BuildRequestData != null && submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ClearProjectRootElementCacheAfterBuild))
+                    if (submission.BuildRequestData != null && submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ClearCachesAfterBuild))
                     {
                         // Reset the project root element cache if specified which ensures that projects will be re-loaded from disk.  We do not need to reset the
                         // cache on child nodes because the OutOfProcNode class sets "autoReloadFromDisk" to "true" which handles the case when a restore modifies
                         // part of the import graph.
                         _buildParameters?.ProjectRootElementCache?.Clear();
+
+                        FileMatcher.ClearFileEnumerationsCache();
+#if !CLR2COMPATIBILITY
+                        FileUtilities.ClearFileExistenceCache();
+#endif
                     }
 
                     _noActiveSubmissionsEvent.Set();

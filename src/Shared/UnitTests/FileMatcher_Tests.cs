@@ -712,7 +712,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                FileMatcher.TestClearCaches();
+                FileMatcher.ClearFileEnumerationsCache();
             }
         }
 

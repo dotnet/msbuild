@@ -623,7 +623,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             finally
             {
-                FileMatcher.TestClearCaches();
+                FileMatcher.ClearFileEnumerationsCache();
             }
         }
     }

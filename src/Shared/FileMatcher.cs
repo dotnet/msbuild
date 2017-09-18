@@ -74,10 +74,17 @@ namespace Microsoft.Build.Shared
         /// <returns>The array of filesystem entries.</returns>
         internal delegate string[] GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
 
-        internal static void TestClearCaches()
+        internal static void ClearFileEnumerationsCache()
         {
-            s_cachedFileEnumerations.Value.Clear();
-            s_cachedFileEnumerationsLock.Value.Clear();
+            if (s_cachedFileEnumerations.IsValueCreated)
+            {
+                s_cachedFileEnumerations.Value.Clear();
+            }
+
+            if (s_cachedFileEnumerationsLock.IsValueCreated)
+            {
+                s_cachedFileEnumerationsLock.Value.Clear();
+            }
         }
 
         /// <summary>

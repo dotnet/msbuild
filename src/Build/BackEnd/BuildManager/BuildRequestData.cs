@@ -57,11 +57,11 @@ namespace Microsoft.Build.Execution
         IgnoreExistingProjectState = 0x4,
 
         /// <summary>
-        /// When this flag is present, the <see cref="ProjectRootElementCache"/> will be cleared after the
-        /// build request completes.  This is used when the build request is known to modify a lot of state
-        /// such as restoring packages or generating parts of the import graph.
+        /// When this flag is present, caches including the <see cref="ProjectRootElementCache"/> will be cleared
+        /// after the build request completes.  This is used when the build request is known to modify a lot of
+        /// state such as restoring packages or generating parts of the import graph.
         /// </summary>
-        ClearProjectRootElementCacheAfterBuild = 0x8,
+        ClearCachesAfterBuild = 0x8,
     }
 
     /// <summary>
