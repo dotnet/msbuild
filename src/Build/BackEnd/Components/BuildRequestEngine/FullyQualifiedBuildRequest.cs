@@ -5,9 +5,6 @@
 // <summary>Build request which has not had its configuration resolved yet.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -25,21 +22,6 @@ namespace Microsoft.Build.BackEnd
     internal class FullyQualifiedBuildRequest
     {
         /// <summary>
-        /// The request's configuration.
-        /// </summary>
-        private BuildRequestConfiguration _requestConfiguration;
-
-        /// <summary>
-        /// The set of targets to build.
-        /// </summary>
-        private string[] _targets;
-
-        /// <summary>
-        /// Whether or not we need to wait for results before completing this request.
-        /// </summary>
-        private bool _resultsNeeded;
-
-        /// <summary>
         /// Initializes a build request.
         /// </summary>
         /// <param name="config">The configuration to use for the request.</param>
@@ -50,43 +32,25 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(config, "config");
             ErrorUtilities.VerifyThrowArgumentNull(targets, "targets");
 
-            _requestConfiguration = config;
-            _targets = targets;
-            _resultsNeeded = resultsNeeded;
+            Config = config;
+            Targets = targets;
+            ResultsNeeded = resultsNeeded;
         }
 
         /// <summary>
         /// Returns the configuration for this request.
         /// </summary>
-        public BuildRequestConfiguration Config
-        {
-            get
-            {
-                return _requestConfiguration;
-            }
-        }
+        public BuildRequestConfiguration Config { get; }
 
         /// <summary>
         /// Returns the set of targets to be satisfied for this request.
         /// </summary>
-        public string[] Targets
-        {
-            get
-            {
-                return _targets;
-            }
-        }
+        public string[] Targets { get; }
 
         /// <summary>
         /// Returns true if this request must wait for its results in order to complete.
         /// </summary>
-        public bool ResultsNeeded
-        {
-            get
-            {
-                return _resultsNeeded;
-            }
-        }
+        public bool ResultsNeeded { get; }
 
         /// <summary>
         /// Implementation of the equality operator.
@@ -96,28 +60,12 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects are equivalent, false otherwise.</returns>
         public static bool operator ==(FullyQualifiedBuildRequest left, FullyQualifiedBuildRequest right)
         {
-            if (Object.ReferenceEquals(left, null))
+            if (ReferenceEquals(left, null))
             {
-                if (Object.ReferenceEquals(right, null))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return ReferenceEquals(right, null);
             }
-            else
-            {
-                if (Object.ReferenceEquals(right, null))
-                {
-                    return false;
-                }
-                else
-                {
-                    return left.InternalEquals(right);
-                }
-            }
+
+            return !ReferenceEquals(right, null) && left.InternalEquals(right);
         }
 
         /// <summary>
@@ -132,12 +80,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns the hashcode for this object.
+        /// Returns the hash code for this object.
         /// </summary>
-        /// <returns>The hashcode</returns>
+        /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return _requestConfiguration.GetHashCode();
+            return Config.GetHashCode();
         }
 
         /// <summary>
@@ -147,17 +95,12 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects are equivalent, false otherwise.</returns>
         public override bool Equals(object obj)
         {
-            if (null == obj)
+            if (obj == null)
             {
                 return false;
             }
 
-            if (this.GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            return InternalEquals((FullyQualifiedBuildRequest)obj);
+            return GetType() == obj.GetType() && InternalEquals((FullyQualifiedBuildRequest) obj);
         }
 
         /// <summary>
@@ -167,29 +110,29 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects are equivalent, false otherwise.</returns>
         private bool InternalEquals(FullyQualifiedBuildRequest other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
 
-            if (_requestConfiguration != other._requestConfiguration)
+            if (Config != other.Config)
             {
                 return false;
             }
 
-            if (_resultsNeeded != other._resultsNeeded)
+            if (ResultsNeeded != other.ResultsNeeded)
             {
                 return false;
             }
 
-            if (_targets.Length != other._targets.Length)
+            if (Targets.Length != other.Targets.Length)
             {
                 return false;
             }
 
-            for (int i = 0; i < _targets.Length; ++i)
+            for (int i = 0; i < Targets.Length; ++i)
             {
-                if (_targets[i] != other._targets[i])
+                if (Targets[i] != other.Targets[i])
                 {
                     return false;
                 }

@@ -390,7 +390,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task ProcessTargetStack(ITaskBuilder taskBuilder)
         {
-            // Keep building while we have targets to build and haven't been cancelled.
+            // Keep building while we have targets to build and haven't been canceled.
             bool stopProcessingStack = false;
             while
                 (

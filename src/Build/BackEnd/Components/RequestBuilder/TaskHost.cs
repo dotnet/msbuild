@@ -778,7 +778,7 @@ namespace Microsoft.Build.BackEnd
                 _targetBuilderCallback = null;
 
                 // Clear out the sponsor (who is responsible for keeping the EngineProxy remoting lease alive until the task is done)
-                // this will be null if the engineproxy was never sent across an appdomain boundry.
+                // this will be null if the engine proxy was never sent across an AppDomain boundary.
                 if (_sponsor != null)
                 {
                     ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
@@ -845,8 +845,10 @@ namespace Microsoft.Build.BackEnd
 
                     if (returnTargetOutputs)
                     {
-                        targetOutputsPerProject = new List<IDictionary<string, ITaskItem[]>>(1);
-                        targetOutputsPerProject.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
+                        targetOutputsPerProject = new List<IDictionary<string, ITaskItem[]>>(1)
+                        {
+                            new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase)
+                        };
                     }
 
                     for (int i = 0; i < targetNames.Length; i++)
@@ -878,7 +880,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // Finally, remove any which were requested to be removed.
-                        if (undefineProperties != null && undefineProperties[i] != null)
+                        if (undefineProperties?[i] != null)
                         {
                             foreach (string property in undefineProperties[i])
                             {

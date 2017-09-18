@@ -133,14 +133,7 @@ namespace Microsoft.Build.BackEnd
             _buildEventContext = BuildEventContext.Invalid;
             _parentBuildEventContext = parentBuildEventContext;
             _globalRequestId = InvalidGlobalRequestId;
-            if (null != parentRequest)
-            {
-                _parentGlobalRequestId = parentRequest.GlobalRequestId;
-            }
-            else
-            {
-                _parentGlobalRequestId = InvalidGlobalRequestId;
-            }
+            _parentGlobalRequestId = parentRequest?.GlobalRequestId ?? InvalidGlobalRequestId;
 
             _nodeRequestId = nodeRequestId;
             _buildRequestDataFlags = buildRequestDataFlags;
@@ -337,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new BuildRequest(translator);
         }
