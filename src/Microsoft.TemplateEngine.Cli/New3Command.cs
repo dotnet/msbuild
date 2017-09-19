@@ -139,6 +139,13 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void ConfigureEnvironment()
         {
+            // delete everything from previous attempts for this install when doing first run setup.
+            // don't want to leave partial setup if it's in a bad state.
+            if (_paths.Exists(_paths.User.BaseDir))
+            {
+                _paths.DeleteDirectory(_paths.User.BaseDir);
+            }
+
             _onFirstRun?.Invoke(EnvironmentSettings, Installer);
 
             foreach (Type type in typeof(New3Command).GetTypeInfo().Assembly.GetTypes())
