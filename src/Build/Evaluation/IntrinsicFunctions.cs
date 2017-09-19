@@ -283,8 +283,8 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Searches upward for a directory containing the specified file, beginning in the specified directory.
         /// </summary>
-        /// <param name="file">The name of the file to search for.</param>
         /// <param name="startingDirectory">The directory to start the search in.</param>
+        /// <param name="fileName">The name of the file to search for.</param>
         /// <returns>The full path of the directory containing the file if it is found, otherwise an empty string. </returns>
         internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
         {
