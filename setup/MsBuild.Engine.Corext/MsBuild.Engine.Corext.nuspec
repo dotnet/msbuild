@@ -10,99 +10,99 @@
   </metadata>
 
   <files>
-    <file src="$repoRoot$setup/MsBuild.Engine.Corext/MsBuild.Engine.Corext.cxspec" target=""/>
-    <file src="$repoRoot$setup/MsBuild.Engine.Corext/.readme.txt" target=""/>
-    <file src="$repoRoot$THIRDPARTYNOTICES" target="v15.0/bin/THIRDPARTYNOTICES" />
-    <file src="$X86BinPath$Microsoft.Common.props" target="\Extensions\15.0" />
-    <file src="$X86BinPath$Microsoft.VisualStudioVersion.v15.Common.props" target="\Extensions\15.0" />
+    <file src="$repoRoot$/setup/MsBuild.Engine.Corext/MsBuild.Engine.Corext.cxspec" target=""/>
+    <file src="$repoRoot$/setup/MsBuild.Engine.Corext/.readme.txt" target=""/>
+    <file src="$repoRoot$/THIRDPARTYNOTICES" target="v15.0/bin/THIRDPARTYNOTICES" />
+    <file src="$X86BinPath$/Microsoft.Common.props" target="\Extensions\15.0" />
+    <file src="$X86BinPath$/Microsoft.VisualStudioVersion.v15.Common.props" target="\Extensions\15.0" />
 
     <!-- x86 -->
 
-    <file src="$X86BinPath$MSBuild.exe" target="v15.0/bin" />
-    <file src="$X86BinPath$MSBuildTaskHost.exe" target="v15.0/bin" />
-    <file src="$X86BinPath$MSBuildTaskHost.exe.config" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Build.Conversion.Core.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Build.Engine.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Build.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Build.Framework.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Build.Tasks.Core.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Build.Utilities.Core.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$System.Collections.Immutable.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$System.Diagnostics.Process.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$System.IO.Compression.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$System.Security.Cryptography.Algorithms.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$System.Threading.Tasks.Dataflow.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/MSBuild.exe" target="v15.0/bin" />
+    <file src="$X86BinPath$/MSBuildTaskHost.exe" target="v15.0/bin" />
+    <file src="$X86BinPath$/MSBuildTaskHost.exe.config" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Build.Conversion.Core.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Build.Engine.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Build.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Build.Framework.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Build.Tasks.Core.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Build.Utilities.Core.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.Collections.Immutable.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.Diagnostics.Process.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.IO.Compression.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.Security.Cryptography.Algorithms.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin" />
 
-    <file src="$X86BinPath$Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
-    <file src="$X86BinPath$Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
-    <file src="$X86BinPath$MSBuild.rsp" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.CSharp.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.VisualBasic.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Common.CrossTargeting.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Common.CurrentVersion.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Common.overridetasks" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Common.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Common.tasks" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.CSharp.CrossTargeting.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.CSharp.CurrentVersion.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Data.Entity.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.ServiceModel.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.VisualBasic.CrossTargeting.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.VisualBasic.CurrentVersion.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.WinFx.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.WorkflowBuildExtensions.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.Xaml.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Workflow.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Workflow.VisualBasic.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.NetFramework.props" target="v15.0/bin" />
-    <file src="$X86BinPath$Microsoft.NetFramework.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
+    <file src="$X86BinPath$/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
+    <file src="$X86BinPath$/MSBuild.rsp" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.CSharp.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.VisualBasic.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Common.CrossTargeting.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Common.CurrentVersion.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Common.overridetasks" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Common.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Common.tasks" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.CSharp.CrossTargeting.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.CSharp.CurrentVersion.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Data.Entity.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.ServiceModel.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.VisualBasic.CrossTargeting.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.VisualBasic.CurrentVersion.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.WinFx.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.WorkflowBuildExtensions.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Workflow.VisualBasic.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.props" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.targets" target="v15.0/bin" />
 
     <!-- x64 -->
 
-    <file src="$X64BinPath$MSBuild.exe" target="v15.0/bin/amd64" />
-    <file src="$X64BinPath$MSBuildTaskHost.exe" target="v15.0/bin/amd64" />
-    <file src="$X64BinPath$MSBuildTaskHost.exe.config" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Build.Conversion.Core.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Build.Engine.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Build.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Build.Framework.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Build.Tasks.Core.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Build.Utilities.Core.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$System.Collections.Immutable.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$System.Diagnostics.Process.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$System.IO.Compression.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$System.Security.Cryptography.Algorithms.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$System.Threading.Tasks.Dataflow.dll" target="v15.0/bin/amd64" />
+    <file src="$X64BinPath$/MSBuild.exe" target="v15.0/bin/amd64" />
+    <file src="$X64BinPath$/MSBuildTaskHost.exe" target="v15.0/bin/amd64" />
+    <file src="$X64BinPath$/MSBuildTaskHost.exe.config" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Build.Conversion.Core.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Build.Engine.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Build.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Build.Framework.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Build.Tasks.Core.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Build.Utilities.Core.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/System.Collections.Immutable.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.Diagnostics.Process.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/System.IO.Compression.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/System.Security.Cryptography.Algorithms.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin/amd64" />
 
-    <file src="$X86BinPath$Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
-    <file src="$X86BinPath$Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />
-    <file src="$X86BinPath$MSBuild.rsp" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.CSharp.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.VisualBasic.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Common.CrossTargeting.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Common.CurrentVersion.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Common.overridetasks" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Common.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Common.tasks" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.CSharp.CrossTargeting.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.CSharp.CurrentVersion.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Data.Entity.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.ServiceModel.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.VisualBasic.CrossTargeting.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.VisualBasic.CurrentVersion.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.WinFx.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.WorkflowBuildExtensions.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.Xaml.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Workflow.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Workflow.VisualBasic.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.NetFramework.props" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$Microsoft.NetFramework.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
+    <file src="$X86BinPath$/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />
+    <file src="$X86BinPath$/MSBuild.rsp" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.CSharp.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.VisualBasic.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Common.CrossTargeting.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Common.CurrentVersion.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Common.overridetasks" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Common.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Common.tasks" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.CSharp.CrossTargeting.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.CSharp.CurrentVersion.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Data.Entity.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.ServiceModel.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.VisualBasic.CrossTargeting.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.VisualBasic.CurrentVersion.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.WinFx.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.WorkflowBuildExtensions.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Workflow.VisualBasic.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.props" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.NetFramework.targets" target="v15.0/bin/amd64" />
     
   </files>
 </package>
