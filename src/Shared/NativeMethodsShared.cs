@@ -475,7 +475,7 @@ namespace Microsoft.Build.Shared
                 var env = Environment.OSVersion.Platform;
                 return env == PlatformID.MacOSX || env == PlatformID.Unix;
 #else
-                return IsLinux || IsOSX;
+                return IsLinux || IsOSX || IsBSD;
 #endif
             }
         }
@@ -491,6 +491,23 @@ namespace Microsoft.Build.Shared
                 return Environment.OSVersion.Platform == PlatformID.Unix;
 #else
                 return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Gets a flag indicating if we are running under flavor of BSD (NetBSD, OpenBSD, FreeBSD)
+        /// </summary>
+        internal static bool IsBSD
+        {
+            get
+            {
+#if FEATURE_OSVERSION
+                return Environment.OSVersion.Platform == PlatformID.Unix;
+#else
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ||
+                       RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ||
+                       RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENBSD"));
 #endif
             }
         }
@@ -573,7 +590,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetOSNameForExtensionsPath()
         {
-            return IsOSX ? "osx" : (IsLinux ? "unix" : "windows");
+            return IsOSX ? "osx" : ((IsLinux || IsBSD) ? "unix" : "windows");
         }
 
         /// <summary>
