@@ -3,6 +3,7 @@ using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,37 +14,46 @@ namespace Microsoft.Build.Evaluation
     {
         public struct EvaluationLocation
         {
+            public readonly double EvaluationPassOrdinal;
             public readonly string EvaluationPass;
             public readonly string File;
             public readonly int? Line;
             public readonly string ElementName;
+            public readonly object ElementOrCondition;
 
-            private EvaluationLocation(string evaluationPass, string file, int? line, string elementName)
+            private EvaluationLocation(double evaluationPassOrdinal, string evaluationPass, string file, int? line, string elementName, object elementOrCondition)
             {
+                EvaluationPassOrdinal = evaluationPassOrdinal;
                 EvaluationPass = evaluationPass;
                 File = file;
                 Line = line;
                 ElementName = elementName;
+                ElementOrCondition = elementOrCondition;
             }
 
-            public EvaluationLocation WithEvaluationPass(string evaluationPass)
+            public EvaluationLocation WithEvaluationPass(double ordinal, string evaluationPass)
             {
-                return new EvaluationLocation(evaluationPass, this.File, this.Line, this.ElementName);
+                return new EvaluationLocation(ordinal, evaluationPass, this.File, this.Line, this.ElementName, this.ElementOrCondition);
             }
 
             public EvaluationLocation WithFile(string file)
             {
-                return new EvaluationLocation(this.EvaluationPass, file, this.Line, this.ElementName);
+                return new EvaluationLocation(this.EvaluationPassOrdinal, this.EvaluationPass, file, this.Line, this.ElementName, this.ElementOrCondition);
             }
 
             public EvaluationLocation WithLine(int? line)
             {
-                return new EvaluationLocation(this.EvaluationPass, this.File, line, this.ElementName);
+                return new EvaluationLocation(this.EvaluationPassOrdinal, this.EvaluationPass, this.File, line, this.ElementName, this.ElementOrCondition);
             }
 
-            public EvaluationLocation WithElementName(string elementName)
+            public EvaluationLocation WithElement(ProjectElement element)
             {
-                return new EvaluationLocation(this.EvaluationPass, this.File, this.Line, elementName);
+                return new EvaluationLocation(this.EvaluationPassOrdinal, this.EvaluationPass, this.File, this.Line, element?.ElementName, element);
+            }
+
+            public EvaluationLocation WithElementOrCondition(string elementOrCondition)
+            {
+                return new EvaluationLocation(this.EvaluationPassOrdinal, this.EvaluationPass, this.File, this.Line, "Condition", elementOrCondition);
             }
 
             public override bool Equals(object obj)
@@ -51,7 +61,7 @@ namespace Microsoft.Build.Evaluation
                 if (obj is EvaluationLocation other)
                 {
                     return EvaluationPass == other.EvaluationPass &&
-                        File == other.File &&
+                        String.Equals(File, other.File, StringComparison.OrdinalIgnoreCase) &&
                         Line == other.Line &&
                         ElementName == other.ElementName;
                 }
@@ -77,7 +87,7 @@ namespace Microsoft.Build.Evaluation
 
         Stack<EvaluationFrame> _evaluationStack = new Stack<EvaluationFrame>();
 
-        public Dictionary<EvaluationLocation, Tuple<TimeSpan, TimeSpan>> TimeSpent { get; } = new Dictionary<EvaluationPerformanceCounter.EvaluationLocation, Tuple<TimeSpan, TimeSpan>>();
+        public Dictionary<EvaluationLocation, Tuple<TimeSpan, TimeSpan, int>> TimeSpent { get; } = new Dictionary<EvaluationPerformanceCounter.EvaluationLocation, Tuple<TimeSpan, TimeSpan, int>>();
 
         //Dictionary<EvaluationLocation, TimeSpan> _inclusiveTimeSpent = new Dictionary<EvaluationLocation, TimeSpan>();
         //Dictionary<EvaluationLocation, TimeSpan> _exclusiveTimeSpent = new Dictionary<EvaluationLocation, TimeSpan>();
@@ -102,14 +112,17 @@ namespace Microsoft.Build.Evaluation
 
         
 
-        public IDisposable TrackPass(string pass)
+        public IDisposable TrackPass(double ordinal, string pass)
         {
-            return new EvaluationFrame(this, CurrentLocation.WithEvaluationPass(pass));
+            return new EvaluationFrame(this, CurrentLocation.WithEvaluationPass(ordinal, pass));
         }
 
         public IDisposable TrackFile(string file)
         {
-            return new EvaluationFrame(this, CurrentLocation.WithFile(file));
+            return new EvaluationFrame(this, CurrentLocation.WithFile(file)
+                                                            .WithLine(null)
+                                                            .WithElement(null)
+                                                            );
         }
 
         public IDisposable TrackElement(ProjectElement element)
@@ -117,14 +130,15 @@ namespace Microsoft.Build.Evaluation
             return new EvaluationFrame(this, CurrentLocation
                                                 .WithFile(element.Location.File)
                                                 .WithLine(element.Location.Line)
-                                                .WithElementName(element.ElementName));
+                                                .WithElement(element));
         }
 
-        public IDisposable TrackLocation(IElementLocation location)
+        public IDisposable TraceCondition(IElementLocation location, string condition)
         {
             return new EvaluationFrame(this, CurrentLocation
                                                 .WithFile(location.File)
-                                                .WithLine(location.Line));
+                                                .WithLine(location.Line)
+                                                .WithElementOrCondition(condition));
         }
 
         class EvaluationFrame : IDisposable
@@ -167,15 +181,16 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 //  Add elapsed times to evalution counter dictionaries
-                Tuple<TimeSpan, TimeSpan> previousTimeSpent;
+                Tuple<TimeSpan, TimeSpan, int> previousTimeSpent;
                 if (!_perfCounter.TimeSpent.TryGetValue(Location, out previousTimeSpent))
                 {
-                    previousTimeSpent = new Tuple<TimeSpan, TimeSpan>(TimeSpan.Zero, TimeSpan.Zero);
+                    previousTimeSpent = new Tuple<TimeSpan, TimeSpan, int>(TimeSpan.Zero, TimeSpan.Zero, 0);
                 }
                 
-                Tuple<TimeSpan, TimeSpan> updatedTimeSpent = new Tuple<TimeSpan, TimeSpan>(
+                Tuple<TimeSpan, TimeSpan, int> updatedTimeSpent = new Tuple<TimeSpan, TimeSpan, int>(
                         previousTimeSpent.Item1 + _inclusiveTime.Elapsed,
-                        previousTimeSpent.Item2 + _exclusiveTime.Elapsed
+                        previousTimeSpent.Item2 + _exclusiveTime.Elapsed,
+                        0
                     );
 
                 _perfCounter.TimeSpent[Location] = updatedTimeSpent;

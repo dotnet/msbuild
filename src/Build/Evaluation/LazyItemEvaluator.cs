@@ -80,7 +80,7 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            using (lazyEvaluator._evaluationPerformanceCounter.TrackLocation(element.ConditionLocation))
+            using (lazyEvaluator._evaluationPerformanceCounter.TraceCondition(element.ConditionLocation, condition))
             {
                 bool result = ConditionEvaluator.EvaluateCondition
                     (

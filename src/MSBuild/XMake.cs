@@ -224,6 +224,8 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(false /* log to console */);
             }
 
+            Profiler.WriteFile();
+
             return exitCode;
         }
 
