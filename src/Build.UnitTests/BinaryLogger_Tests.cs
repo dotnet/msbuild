@@ -64,5 +64,25 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable(MSBUILDTARGETOUTPUTLOGGING, originalTargetOutputLogging);
             }
         }
+
+        [Fact]
+        public void NonExistingDirectory()
+        {
+            string directory = Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"));
+            string log = Path.Combine(directory, "build.binlog");
+            Assert.False(Directory.Exists(directory));
+            Assert.False(File.Exists(log));
+
+            var binaryLogger = new BinaryLogger { Parameters = log };
+
+            try
+            {
+                ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteDirectory(directory);
+            }
+        }
     }
 }
