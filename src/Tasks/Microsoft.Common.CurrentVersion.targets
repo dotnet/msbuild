@@ -806,16 +806,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
-                                        Restore
-
-    This empty target is defined so that all projects can run Restore.  Most package management systems like
-    NuGet will override this target.
-    ============================================================
-    -->
-  <Target Name="Restore"/>
-
-  <!--
-    ============================================================
                                         CoreBuild
 
     The core build step calls each of the build targets.
