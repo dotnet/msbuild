@@ -129,22 +129,22 @@ namespace Microsoft.Build.BackEnd
 
             ITaskItem[] singleProject = new ITaskItem[1];
             singleProject[0] = null;
+
             // Build the specified targets in the current project.
-            return MSBuild.ExecuteTargets
-                (
-                singleProject,  // project = null (current project)
-                null,           // propertiesTable = null
-                null,           // undefineProperties
-                targetLists,    // list of targets to build
-                false,          // stopOnFirstFailure = false
-                false,          // rebaseOutputs = false
-                this.BuildEngine3,
-                this.Log,
-                _targetOutputs,
-                this.UseResultsCache,
-                false,
-                null            // toolsVersion = null
-                );
+            return MSBuild.ExecuteTargets(
+                projects: singleProject,
+                propertiesTable: null,
+                undefineProperties: null,
+                targetLists: targetLists,
+                stopOnFirstFailure: false,
+                rebaseOutputs: false,
+                buildEngine: this.BuildEngine3,
+                log: this.Log,
+                targetOutputs: _targetOutputs,
+                useResultsCache: this.UseResultsCache,
+                unloadProjectsOnCompletion: false,
+                toolsVersion: null,
+                skipNonexistentTargets: false);
         }
 
         #endregion

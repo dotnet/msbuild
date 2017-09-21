@@ -655,7 +655,7 @@ namespace Microsoft.Build.BackEnd
         /// Called by the internal MSBuild task.
         /// Does not take the lock because it is called by another request builder thread.
         /// </summary>
-        public async Task<BuildEngineResult> InternalBuildProjects(string[] projectFileNames, string[] targetNames, System.Collections.IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs)
+        public async Task<BuildEngineResult> InternalBuildProjects(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
@@ -690,13 +690,14 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 // Post the request, then yield up the thread.
-                result = await BuildProjectFilesInParallelAsync(projectFileNames, targetNames, globalProperties, undefineProperties, toolsVersion, true /* ask that target outputs are returned in the buildengineresult */);
+                result = await BuildProjectFilesInParallelAsync(projectFileNames, targetNames, globalProperties, undefineProperties, toolsVersion, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
             }
 
             return result;
         }
 
 #if FEATURE_APPDOMAIN
+        /// <inheritdoc />
         /// <summary>
         /// InitializeLifetimeService is called when the remote object is activated. 
         /// This method will determine how long the lifetime for the object will be.
@@ -823,8 +824,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="undefineProperties">The list of global properties to undefine</param>
         /// <param name="toolsVersion">The tools versions to use</param>
         /// <param name="returnTargetOutputs">Should the target outputs be returned in teh BuildEngineResult</param>
+        /// <param name="skipNonexistentTargets">If set, skip targets that are not defined in the projects to be built.</param>
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
-        private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, System.Collections.IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs)
+        private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
@@ -890,14 +892,13 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
-                    BuildResult[] results = await builderCallback.BuildProjects
-                        (
+                    BuildResult[] results = await builderCallback.BuildProjects(
                         projectFileNames,
                         propertyDictionaries,
                         toolsVersion ?? Array.Empty<string>(),
                         targetNames ?? Array.Empty<string>(),
-                        true
-                        );
+                        waitForResults: true,
+                        skipNonexistentTargets: skipNonexistentTargets);
 
                     // Even if one of the projects fails to build and therefore has no outputs, it should still have an entry in the results array (albeit with an empty list in it)
                     ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length, "{0}!={1}.", results.Length, projectFileNames.Length);

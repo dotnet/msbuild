@@ -222,6 +222,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string[] TargetAndPropertyListSeparators { get; set; } = null;
 
+        /// <summary>
+        /// If set, MSBuild will skip the targets specified in this build request if they are not defined in the
+        /// <see cref="Projects"/> to build. This only applies to this build request (if another target calls the
+        /// "missing target" later this will still result in an error).
+        /// <remarks>
+        /// This could be useful when implementing a breaking protocol change between projects or stubbing behavior 
+        /// which may not make sense in all project types (e.g. Restore).
+        /// </remarks>
+        /// </summary>
+        public bool SkipNonexistentTargets { get; set; }
         #endregion
 
         #region ITask Members
@@ -360,7 +370,8 @@ namespace Microsoft.Build.BackEnd
                                                 _targetOutputs,
                                                 UseResultsCache,
                                                 UnloadProjectsOnCompletion,
-                                                ToolsVersion
+                                                ToolsVersion,
+                                                SkipNonexistentTargets
                                                 );
 
                         if (!executeResult)
@@ -430,7 +441,8 @@ namespace Microsoft.Build.BackEnd
                 _targetOutputs,
                 UseResultsCache,
                 UnloadProjectsOnCompletion,
-                ToolsVersion
+                ToolsVersion,
+                SkipNonexistentTargets
             );
 
             if (!executeResult)
@@ -522,8 +534,7 @@ namespace Microsoft.Build.BackEnd
         /// 
         /// </summary>
         /// <returns>True if the operation was successful</returns>
-        internal static async Task<bool> ExecuteTargets
-            (
+        internal static async Task<bool> ExecuteTargets(
             ITaskItem[] projects,
             Hashtable propertiesTable,
             string[] undefineProperties,
@@ -535,8 +546,8 @@ namespace Microsoft.Build.BackEnd
             ArrayList targetOutputs,
             bool useResultsCache,
             bool unloadProjectsOnCompletion,
-            string toolsVersion
-            )
+            string toolsVersion,
+            bool skipNonexistentTargets)
         {
             bool success = true;
 
@@ -666,7 +677,7 @@ namespace Microsoft.Build.BackEnd
                 bool currentTargetResult = true;
 
                 TaskHost taskHost = (TaskHost)buildEngine;
-                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */);
+                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
 
                 currentTargetResult = result.Result;
                 targetOutputsPerProject = result.TargetOutputsPerProject;

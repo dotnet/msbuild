@@ -169,7 +169,16 @@ namespace Microsoft.Build.BackEnd
 
             foreach (string targetName in targetNames)
             {
-                targets.Add(new TargetSpecification(targetName, _projectInstance.Targets.ContainsKey(targetName) ? _projectInstance.Targets[targetName].Location : _projectInstance.ProjectFileLocation));
+                var targetExists = _projectInstance.Targets.ContainsKey(targetName);
+                if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
+                {
+                    _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
+                        "TargetSkippedWhenSkipNonexistentTargets", targetName);
+
+                    continue;
+                }
+
+                targets.Add(new TargetSpecification(targetName, targetExists ? _projectInstance.Targets[targetName].Location : _projectInstance.ProjectFileLocation));
             }
 
             // Push targets onto the stack.  This method will reverse their push order so that they
@@ -328,9 +337,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Forwarding implementation of BuildProjects
         /// </summary>
-        async Task<BuildResult[]> IRequestBuilderCallback.BuildProjects(string[] projectFiles, Microsoft.Build.Collections.PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults)
+        async Task<BuildResult[]> IRequestBuilderCallback.BuildProjects(string[] projectFiles, Microsoft.Build.Collections.PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets)
         {
-            return await _requestBuilderCallback.BuildProjects(projectFiles, properties, toolsVersions, targets, waitForResults);
+            return await _requestBuilderCallback.BuildProjects(projectFiles, properties, toolsVersions, targets, waitForResults, skipNonexistentTargets);
         }
 
         /// <summary>

@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Mock of the BuildProjects method on the callback.
             /// </summary>
-            public Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults)
+            public Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets)
             {
                 return Task<BuildResult[]>.FromResult(_buildResultsToReturn);
             }

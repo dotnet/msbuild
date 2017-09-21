@@ -1000,6 +1000,7 @@ namespace Microsoft.Build.Execution
         None = 0,
         ProvideProjectStateAfterBuild = 2,
         ReplaceExistingProjectInstance = 1,
+        SkipNonexistentTargets = 16,
     }
     public partial class BuildResult
     {

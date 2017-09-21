@@ -922,7 +922,11 @@
   </data>
   <data name="TargetSkippedFalseCondition" UESanitized="false" Visibility="Public">
     <value>Target "{0}" skipped, due to false condition; ({1}) was evaluated as ({2}).</value>
-  </data>  
+  </data>
+  <data name="TargetSkippedWhenSkipNonexistentTargets" UESanitized="false" Visibility="Public">
+    <value>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</value>
+    <comment>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</comment>
+  </data>
   
   <!-- ====================================================================== -->
   

@@ -1244,6 +1244,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["_Error1"].ResultCode);
         }
 
+        [Fact]
+        public void SkipNonexistentTargetsDoesNotExecuteOrCacheTargetResult()
+        {
+            string projectContents = @"<Target Name=""Build"" />";
+
+            var project = CreateTestProject(projectContents, string.Empty, "Build");
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
+            taskBuilder.FailTaskNumber = 1;
+
+            IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, new[] { "NotFound" }, BuildRequestDataFlags.SkipNonexistentTargets), cache[1]);
+            var buildResult = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
+
+            IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
+
+            // This should throw because the results cache should not contain the results for the target that was not
+            // executed. This is different than when a target is skipped due to condition not met where the result
+            // would be in the cache. In this case we can't cache the result because it is only valid for the single
+            // request.
+            Assert.Throws<InternalErrorException>(() => resultsCache.GetResultForRequest(entry.Request));
+        }
+
         #region IRequestBuilderCallback Members
 
         /// <summary>
@@ -1254,8 +1277,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="toolsVersions">N/A</param>
         /// <param name="targets">N/A</param>
         /// <param name="waitForResults">N/A</param>
+        /// <param name="skipNonexistentTargets">N/A</param>
         /// <returns>N/A</returns>
-        Task<BuildResult[]> IRequestBuilderCallback.BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults)
+        Task<BuildResult[]> IRequestBuilderCallback.BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets)
         {
             throw new NotImplementedException();
         }
@@ -1318,9 +1342,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Creates a new build request
         /// </summary>
-        private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
+        private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets, BuildRequestDataFlags flags = BuildRequestDataFlags.None)
         {
-            return new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);
+            return new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null, flags);
         }
 
         /// <summary>

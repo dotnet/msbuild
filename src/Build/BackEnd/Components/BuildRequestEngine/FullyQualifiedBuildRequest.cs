@@ -5,6 +5,7 @@
 // <summary>Build request which has not had its configuration resolved yet.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -27,7 +28,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to use for the request.</param>
         /// <param name="targets">The set of targets to build.</param>
         /// <param name="resultsNeeded">Whether or not to wait for the results of this request.</param>
-        public FullyQualifiedBuildRequest(BuildRequestConfiguration config, string[] targets, bool resultsNeeded)
+        /// <param name="flags">Flags specified for the build request.</param>
+        public FullyQualifiedBuildRequest(BuildRequestConfiguration config, string[] targets, bool resultsNeeded, BuildRequestDataFlags flags = BuildRequestDataFlags.None)
         {
             ErrorUtilities.VerifyThrowArgumentNull(config, "config");
             ErrorUtilities.VerifyThrowArgumentNull(targets, "targets");
@@ -35,6 +37,7 @@ namespace Microsoft.Build.BackEnd
             Config = config;
             Targets = targets;
             ResultsNeeded = resultsNeeded;
+            BuildRequestDataFlags = flags;
         }
 
         /// <summary>
@@ -51,6 +54,11 @@ namespace Microsoft.Build.BackEnd
         /// Returns true if this request must wait for its results in order to complete.
         /// </summary>
         public bool ResultsNeeded { get; }
+
+        /// <summary>
+        /// The set of flags specified in the BuildRequestData for this request.
+        /// </summary>
+        public BuildRequestDataFlags BuildRequestDataFlags { get; set; }
 
         /// <summary>
         /// Implementation of the equality operator.
@@ -121,6 +129,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             if (ResultsNeeded != other.ResultsNeeded)
+            {
+                return false;
+            }
+
+            if (BuildRequestDataFlags != other.BuildRequestDataFlags)
             {
                 return false;
             }
