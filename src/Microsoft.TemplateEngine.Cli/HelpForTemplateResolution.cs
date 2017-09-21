@@ -1,10 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -34,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        // get a better name for this, it's unclear what it's doing.
+        // TODO: get a better name for this, it's unclear what it's doing.
         public static bool ShowTemplateNameMismatchHelp(string templateName, string context, TemplateListResolutionResult templateResolutionResult)
         {
             GetContextBasedAndOtherPartialMatches(templateResolutionResult, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups);
@@ -116,7 +118,10 @@ namespace Microsoft.TemplateEngine.Cli
                 anythingReported = true;
             }
 
-            Reporter.Error.WriteLine();
+            if (anythingReported)
+            {
+                Reporter.Error.WriteLine();
+            }
             return anythingReported;
         }
 
@@ -135,13 +140,23 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     else
                     {
-                        invalidCounts[paramName]++;
+                        ++invalidCounts[paramName];
                     }
                 }
             }
 
-            invalidForAllTemplates = invalidCounts.Where(x => x.Value == templateList.Count).Select(x => x.Key).ToList();
-            invalidForSomeTemplates = invalidCounts.Where(x => x.Value != templateList.Count).Select(x => x.Key).ToList();
+            IEnumerable<IGrouping<string, string>> countGroups = invalidCounts.GroupBy(x => x.Value == templateList.Count ? "all" : "some", x => x.Key);
+            invalidForAllTemplates = countGroups.FirstOrDefault(x => string.Equals(x.Key, "all", StringComparison.Ordinal))?.ToList();
+            if (invalidForAllTemplates == null)
+            {
+                invalidForAllTemplates = new List<string>();
+            }
+
+            invalidForSomeTemplates = countGroups.FirstOrDefault(x => string.Equals(x.Key, "some", StringComparison.Ordinal))?.ToList();
+            if (invalidForSomeTemplates == null)
+            {
+                invalidForSomeTemplates = new List<string>();
+            }
         }
     }
 }

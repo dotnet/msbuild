@@ -95,9 +95,9 @@ namespace Microsoft.TemplateEngine.Cli
         public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template)
         {
             IReadOnlyList<ITemplateMatchInfo> invokableMatches = CoreMatchedTemplates.Where(x => x.IsInvokableMatch()).ToList();
-            if (invokableMatches.Count() == 1)
+            if (invokableMatches.Count == 1)
             {
-                template = invokableMatches.First();
+                template = invokableMatches[0];
                 return true;
             }
 
