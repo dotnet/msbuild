@@ -51,7 +51,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 REPOROOT="$DIR"
 
 ARCHITECTURE="x64"
-BOOTSTRAP_CLI=
+STAGE0_SOURCE_DIR=
 
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 
@@ -98,8 +98,8 @@ while [[ $# > 0 ]]; do
             LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
             CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\" /p:IslinuxPortable=\"true\""
             ;;
-        --bootstrap-cli)
-            BOOTSTRAP_CLI=$2
+        --stage0)
+            STAGE0_SOURCE_DIR=$2
             shift
             ;;
         --help)
@@ -112,24 +112,18 @@ while [[ $# > 0 ]]; do
             echo "  --nobuild                           Skip building, showing the command that would be used to build"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --linux-portable                    Builds the Linux portable .NET Tools instead of a distro-specific version."
+            echo "  --stage0                            Set the stage0 source directory. The default is to download it from Azure."
             echo "  --help                              Display this help message"
             exit 0
             ;;
         *)
-            args=(${args[@]} $1)
+            args=$@
             break
             ;;
     esac
 
     shift
 done
-
-# $args array may have empty elements in it.
-# The easiest way to remove them is to cast to string and back to array.
-# This will actually break quoted arguments, arguments like
-# -test "hello world" will be broken into three arguments instead of two, as it should.
-temp="${args[@]}"
-args=($temp)
 
 # Create an install directory for the stage 0 CLI
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$ARCHITECTURE
@@ -146,11 +140,11 @@ export VSTEST_TRACE_BUILD=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 # Install a stage 0
-if [ "$BOOTSTRAP_CLI" == "" ]; then
+if [ "$STAGE0_SOURCE_DIR" == "" ]; then
     (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --version "2.1.0-preview1-007172" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 else
     echo "Copying bootstrap cli from $BOOTSTRAP_CLI"
-    cp -r $BOOTSTRAP_CLI/* "$DOTNET_INSTALL_DIR"
+    cp -r $STAGE0_SOURCE_DIR/* "$DOTNET_INSTALL_DIR"
 fi
 
 EXIT_CODE=$?
