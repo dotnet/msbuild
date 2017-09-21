@@ -51,6 +51,8 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 REPOROOT="$DIR"
 
 ARCHITECTURE="x64"
+BOOTSTRAP_CLI=
+
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 
 BUILD=1
@@ -61,51 +63,44 @@ CUSTOM_BUILD_ARGS=
 # Set nuget package cache under the repo
 [ -z $NUGET_PACKAGES ] && export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
 
-args=( "$@" )
+args=( )
 
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
     case $lowerI in
         -c|--configuration)
             export CONFIGURATION=$2
-            args=( "${args[@]/$1}" )
-            args=( "${args[@]/$2}" )
             shift
             ;;
         --nopackage)
             export DOTNET_BUILD_SKIP_PACKAGING=1
-            args=( "${args[@]/$1}" )
             ;;
         --skip-prereqs)
             # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
             export DOTNET_INSTALL_SKIP_PREREQS=1
-            args=( "${args[@]/$1}" )
             ;;
         --nobuild)
             BUILD=0
             ;;
         --architecture)
             ARCHITECTURE=$2
-            args=( "${args[@]/$1}" )
-            args=( "${args[@]/$2}" )
             shift
             ;;
         --runtime-id)
             CUSTOM_BUILD_ARGS="/p:Rid=\"$2\""
-            args=( "${args[@]/$1}" )
-            args=( "${args[@]/$2}" )
             shift
             ;;
         # This is here just to eat away this parameter because CI still passes this in.
         --targets)            
-            args=( "${args[@]/$1}" )
-            args=( "${args[@]/$2}" )
             shift
             ;;
         --linux-portable)
             LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
             CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\" /p:IslinuxPortable=\"true\""
-            args=( "${args[@]/$1}" )
+            ;;
+        --bootstrap-cli)
+            BOOTSTRAP_CLI=$2
+            shift
             ;;
         --help)
             echo "Usage: $0 [--configuration <CONFIGURATION>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help]"
@@ -121,6 +116,7 @@ while [[ $# > 0 ]]; do
             exit 0
             ;;
         *)
+            args=(${args[@]} $1)
             break
             ;;
     esac
@@ -150,7 +146,12 @@ export VSTEST_TRACE_BUILD=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 # Install a stage 0
-(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+if [ "$BOOTSTRAP_CLI" == "" ]; then
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --version "2.1.0-preview1-007172" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+else
+    echo "Copying bootstrap cli from $BOOTSTRAP_CLI"
+    cp -r $BOOTSTRAP_CLI/* "$DOTNET_INSTALL_DIR"
+fi
 
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
