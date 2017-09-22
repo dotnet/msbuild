@@ -273,6 +273,10 @@ namespace Microsoft.TemplateEngine.Cli
                 {   // if we do actually throw, add a non-match
                     template.AddDisposition(new MatchInfo { Location = MatchLocation.Unspecified, Kind = MatchKind.Unspecified, AdditionalInformation = ex.Message });
                 }
+                catch (Exception ex)
+                {
+                    template.AddDisposition(new MatchInfo { Location = MatchLocation.Unspecified, Kind = MatchKind.Unspecified, AdditionalInformation = $"Unexpected error: {ex.Message}" });
+                }
             }
         }
     }

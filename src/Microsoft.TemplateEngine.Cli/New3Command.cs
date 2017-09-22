@@ -483,7 +483,7 @@ namespace Microsoft.TemplateEngine.Cli
             // handling when there are parameter mismatches. There may be other issues too.
             IReadOnlyList<ITemplateMatchInfo> templatesForDisplay = GetTemplatesToDisplayInfoAbout(templateResolutionResult);
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(templatesForDisplay, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
-            if (invalidForAllTemplates.Any() || invalidForSomeTemplates.Any())
+            if (invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0)
             {
                 HelpForTemplateResolution.DisplayInvalidParameters(invalidForAllTemplates);
                 HelpForTemplateResolution.DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates);
