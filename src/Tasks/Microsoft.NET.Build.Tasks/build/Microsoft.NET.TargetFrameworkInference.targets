@@ -102,6 +102,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
   </Target>
 
+  <Target Name="_CollectTargetFrameworkForTelemetry" AfterTargets="_CheckForUnsupportedTargetFramework">
+    <Telemetry EventName="TargetFramework" EventData="version=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
+  </Target>
+
   <!-- 
     Don't leave TargetFrameworkVersion empty if it still hasn't been determined. We will trigger the error above,
     but we need this to be a valid version so that our error message does not get pre-empted by failure to interpret

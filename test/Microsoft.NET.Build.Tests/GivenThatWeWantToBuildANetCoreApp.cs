@@ -48,15 +48,20 @@ namespace Microsoft.NET.Build.Tests
 
         //  Test behavior when implicit version differs for framework-dependent and self-contained apps
         [Theory]
-        [InlineData(false, true, "1.1.1")]
-        [InlineData(true, true, "1.1.2")]
-        [InlineData(false, false, "1.1.1")]
-        public void It_targets_the_right_framework_depending_on_output_type(bool selfContained, bool isExe, string expectedFrameworkVersion)
+        [InlineData("netcoreapp1.0", false, true, "1.0.5")]
+        [InlineData("netcoreapp1.0", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)]
+        [InlineData("netcoreapp1.0", false, false, "1.0.5")]
+        [InlineData("netcoreapp1.1", false, true, "1.1.2")]
+        [InlineData("netcoreapp1.1", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)]
+        [InlineData("netcoreapp1.1", false, false, "1.1.2")]
+        [InlineData("netcoreapp2.0", false, true, "2.0.0")]
+        [InlineData("netcoreapp2.0", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)]
+        [InlineData("netcoreapp2.0", false, false, "2.0.0")]
+        public void It_targets_the_right_framework_depending_on_output_type(string targetFramework, bool selfContained, bool isExe, string expectedFrameworkVersion)
         {
             string testIdentifier = "Framework_targeting_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
 
-            It_targets_the_right_framework(testIdentifier, "netcoreapp1.1", null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion,
-                "/p:ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1=1.1.1");
+            It_targets_the_right_framework(testIdentifier, targetFramework, null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion);
         }
 
         private void It_targets_the_right_framework(
@@ -310,6 +315,77 @@ public static class Program
                     .And
                     .HaveNoDuplicateNativeAssets(""); ;
             }
+        }
+
+        [Fact]
+        public void There_are_no_conflicts_when_targeting_netcoreapp_1_1()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NetCoreApp1.1_Conflicts",
+                TargetFrameworks = "netcoreapp1.1",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:normal")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_publishes_package_satellites_correctly(bool crossTarget)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AppUsingPackageWithSatellites",
+                TargetFrameworks = "netcoreapp2.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            if (crossTarget)
+            {
+                testProject.Name += "_cross";
+            }
+
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer.Core.fr", "2.2.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer.Core.pt", "2.2.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    if (crossTarget)
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        propertyGroup.Element(ns + "TargetFramework").Name += "s";
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+                .Execute("/v:normal", $"/p:TargetFramework={testProject.TargetFrameworks}")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                ;
+
+            var outputDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().NotHaveFile("Humanizer.resources.dll");
+            outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));
         }
 
         [Fact]
