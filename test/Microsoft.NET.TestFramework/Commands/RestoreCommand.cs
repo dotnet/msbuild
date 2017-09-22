@@ -38,7 +38,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
-        protected override ICommand CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(params string[] args)
         {
             var newArgs = new List<string>();
 

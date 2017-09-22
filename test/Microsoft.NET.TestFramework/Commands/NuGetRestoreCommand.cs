@@ -47,7 +47,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
-        protected override ICommand CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(params string[] args)
         {
             var newArgs = new List<string>();
 
@@ -63,7 +63,13 @@ namespace Microsoft.NET.TestFramework.Commands
 
             newArgs.AddRange(args);
 
-            return Command.Create(RepoInfo.NuGetExePath, newArgs);
+            SdkCommandSpec ret = new SdkCommandSpec()
+            {
+                FileName = RepoInfo.NuGetExePath,
+                Arguments = newArgs
+            };
+
+            return ret;
         }
     }
 }

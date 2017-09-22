@@ -19,7 +19,7 @@ namespace Microsoft.NET.TestFramework.Commands
             DotNetHostPath = dotNetHostPath;
         }
 
-        public ICommand CreateCommandForTarget(string target, params string[] args)
+        public SdkCommandSpec CreateCommandForTarget(string target, params string[] args)
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, $"/t:{target}");
@@ -27,27 +27,29 @@ namespace Microsoft.NET.TestFramework.Commands
             return CreateCommand(newArgs.ToArray());
         }
 
-        private ICommand CreateCommand(params string[] args)
+        private SdkCommandSpec CreateCommand(params string[] args)
         {
-            ICommand command;
+            SdkCommandSpec ret = new SdkCommandSpec();
 
             //  Run tests on full framework MSBuild if environment variable is set pointing to it
             string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
             if (!string.IsNullOrEmpty(msbuildPath))
             {
-                command = Command.Create(msbuildPath, args);
+                ret.FileName = msbuildPath;
+                ret.Arguments = args.ToList();
             }
             else
             {
                 var newArgs = args.ToList();
                 newArgs.Insert(0, $"msbuild");
 
-                command = Command.Create(DotNetHostPath, newArgs);
+                ret.FileName = DotNetHostPath;
+                ret.Arguments = newArgs;
             }
 
-            command = RepoInfo.AddTestEnvironmentVariables(command);
+            RepoInfo.AddTestEnvironmentVariables(ret);
 
-            return command;
+            return ret;
         }
     }
 }

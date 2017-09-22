@@ -18,7 +18,7 @@ namespace Microsoft.NET.TestFramework.Commands
             Log = log;
         }
 
-        protected abstract ICommand CreateCommand(string[] args);
+        protected abstract SdkCommandSpec CreateCommand(string[] args);
 
         public TestCommand WithEnvironmentVariable(string name, string value)
         {
@@ -29,6 +29,7 @@ namespace Microsoft.NET.TestFramework.Commands
         public CommandResult Execute(params string[] args)
         {
             var command = CreateCommand(args)
+                .ToCommand()
                 .CaptureStdOut()
                 .CaptureStdErr();
 

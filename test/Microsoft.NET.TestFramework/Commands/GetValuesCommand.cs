@@ -39,7 +39,7 @@ namespace Microsoft.NET.TestFramework.Commands
             _valueType = valueType;
         }
 
-        protected override ICommand CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(params string[] args)
         {
             var newArgs = new List<string>(args.Length + 2);
             newArgs.Add(FullPathProjectFile);

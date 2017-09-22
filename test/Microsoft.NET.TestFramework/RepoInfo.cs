@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -154,32 +155,27 @@ namespace Microsoft.NET.TestFramework
             return directory;
         }
 
-        public static ICommand AddTestEnvironmentVariables(ICommand command)
+        public static void AddTestEnvironmentVariables(SdkCommandSpec command)
         {
             //  Set NUGET_PACKAGES environment variable to match value from build.ps1
-            command = command.EnvironmentVariable("NUGET_PACKAGES", RepoInfo.NuGetCachePath);
+            command.Environment["NUGET_PACKAGES"] = RepoInfo.NuGetCachePath;
 
-            command = command.EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
+            command.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
+            command.Environment["MSBuildSDKsPath"] = RepoInfo.SdksPath;
+            command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR"] = RepoInfo.SdksPath;
 
-            command = command.EnvironmentVariable("MSBuildSDKsPath", RepoInfo.SdksPath);
-            command = command.EnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR", RepoInfo.SdksPath);
-
-            command = command.EnvironmentVariable("NETCoreSdkBundledVersionsProps", Path.Combine(RepoInfo.CliSdkPath, "Microsoft.NETCoreSdk.BundledVersions.props"));
+            command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(RepoInfo.CliSdkPath, "Microsoft.NETCoreSdk.BundledVersions.props");
 
             if (UsingFullMSBuildWithoutExtensionsTargets())
             {
-                command = command.EnvironmentVariable("CustomAfterMicrosoftCommonTargets", Path.Combine(RepoInfo.BuildExtensionsSdkPath,
-                    "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets"));
+                command.Environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(RepoInfo.BuildExtensionsSdkPath,
+                    "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
             }
+            command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets");
 
-            command = command.EnvironmentVariable("MicrosoftNETBuildExtensionsTargets", Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets"));
-
-            command = command
-                .EnvironmentVariable(nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0), ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)
-                .EnvironmentVariable(nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1), ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)
-                .EnvironmentVariable(nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0), ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0);
-
-            return command;
+            command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0;
+            command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1;
+            command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0;
         }
 
         private static bool UsingFullMSBuildWithoutExtensionsTargets()

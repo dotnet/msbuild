@@ -88,7 +88,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
-        protected override ICommand CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(params string[] args)
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, FullPathProjectFile);
