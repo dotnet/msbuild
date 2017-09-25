@@ -281,9 +281,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Locate a file in either the directory specified or a location in the
-        /// direcorty structure above that directory.
+        /// Searches upward for a directory containing the specified file, beginning in the specified directory.
         /// </summary>
+        /// <param name="startingDirectory">The directory to start the search in.</param>
+        /// <param name="fileName">The name of the file to search for.</param>
+        /// <returns>The full path of the directory containing the file if it is found, otherwise an empty string. </returns>
         internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
         {
             // Canonicalize our starting location
@@ -316,11 +318,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Searches for a file based on the specified <see cref="IElementLocation"/>.
+        /// Searches upward for the specified file, beginning in the specified <see cref="IElementLocation"/>.
         /// </summary>
-        /// <param name="file">The file to search for.</param>
+        /// <param name="file">The name of the file to search for.</param>
         /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
-        /// of the file containing the property funciton.</param>
+        /// of the file containing the property function.</param>
         /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
         internal static string GetPathOfFileAbove(string file, string startingDirectory)
         {
