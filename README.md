@@ -23,7 +23,7 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Windows x64 |Windows x86 |Mac OS X |Linux x64 |Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8 |RHEL 7.2 |
+|Windows x64 |Windows x86 |macOS |Linux x64 |Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8 |RHEL 7.2 |
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 |[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][debian-8-build-badge]][debian-8-build]|[![][rhel-build-badge]][rhel-build]|
 
@@ -65,7 +65,7 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | -------- | :-------------------------------------: |
 | **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
 | **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
-| **Mac OS X** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
+| **macOS** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
 | **Linux x64** | [tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
 | **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
