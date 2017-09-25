@@ -147,11 +147,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             _onFirstRun?.Invoke(EnvironmentSettings, Installer);
-
-            foreach (Type type in typeof(New3Command).GetTypeInfo().Assembly.GetTypes())
-            {
-                EnvironmentSettings.SettingsLoader.Components.Register(type);
-            }
+            EnvironmentSettings.SettingsLoader.Components.RegisterMany(typeof(New3Command).GetTypeInfo().Assembly.GetTypes());
         }
 
         private async Task<CreationResultStatus> CreateTemplateAsync(ITemplateInfo template)

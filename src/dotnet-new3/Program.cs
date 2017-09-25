@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -79,35 +79,28 @@ namespace dotnet_new3
                 Environment.SetEnvironmentVariable("DN3", path);
             }
 
-            string[] packageList;
+            List<string> toInstallList = new List<string>();
             Paths paths = new Paths(environmentSettings);
 
             if (paths.FileExists(paths.Global.DefaultInstallPackageList))
             {
-                packageList = paths.ReadAllText(paths.Global.DefaultInstallPackageList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (packageList.Length > 0)
-                {
-                    for (int i = 0; i < packageList.Length; ++i)
-                    {
-                        packageList[i] = packageList[i].Replace('\\', Path.DirectorySeparatorChar);
-                    }
-
-                    installer.InstallPackages(packageList);
-                }
+                toInstallList.AddRange(paths.ReadAllText(paths.Global.DefaultInstallPackageList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
             }
 
             if (paths.FileExists(paths.Global.DefaultInstallTemplateList))
             {
-                packageList = paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (packageList.Length > 0)
-                {
-                    for (int i = 0; i < packageList.Length; ++i)
-                    {
-                        packageList[i] = packageList[i].Replace('\\', Path.DirectorySeparatorChar);
-                    }
+                toInstallList.AddRange(paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            }
 
-                    installer.InstallPackages(packageList);
+            if (toInstallList.Count > 0)
+            {
+                for (int i = 0; i < toInstallList.Count; i++)
+                {
+                    toInstallList[i] = toInstallList[i].Replace("\r", "")
+                                                        .Replace('\\', Path.DirectorySeparatorChar);
                 }
+
+                installer.InstallPackages(toInstallList);
             }
         }
     }
