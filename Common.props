@@ -30,6 +30,7 @@
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.1.0</VersionPrefix>
     <BuildEpoch>20170101</BuildEpoch>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">preview1</VersionPrereleasePrefix>
+
     <!-- When running on VSO (for official builds) use a real number. -->
     <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
     <BuildNumber Condition="'$(BuildNumber)' == ''">00000001-01</BuildNumber>

@@ -16,14 +16,14 @@ namespace Microsoft.NET.TestFramework.Commands
         {
         }
 
-        public string GetIntermediateNuspecPath(string packageId = null, string packageVersion = "1.0.0")
+        public string GetIntermediateNuspecPath(string packageId = null, string configuration = "Debug", string packageVersion = "1.0.0")
         {
             if (packageId == null)
             {
                 packageId = Path.GetFileNameWithoutExtension(ProjectFile);
             }
 
-            return Path.Combine(GetBaseIntermediateDirectory().FullName, $"{packageId}.{packageVersion}.nuspec");
+            return Path.Combine(GetBaseIntermediateDirectory().FullName, configuration, $"{packageId}.{packageVersion}.nuspec");
         }
     }
 }

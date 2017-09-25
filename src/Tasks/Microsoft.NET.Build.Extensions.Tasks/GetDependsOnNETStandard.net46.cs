@@ -129,6 +129,16 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         assemblyImport.CloseEnum(asmRefEnum);
                     }
+
+                    if (assemblyImport != null)
+                    {
+                        Marshal.ReleaseComObject(assemblyImport);
+                    }
+
+                    if (metadataDispenser != null)
+                    {
+                        Marshal.ReleaseComObject(metadataDispenser);
+                    }
                 }
             }
             return false;
