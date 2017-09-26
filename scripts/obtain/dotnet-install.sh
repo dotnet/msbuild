@@ -318,7 +318,7 @@ get_normalized_architecture_from_architecture() {
 get_version_from_version_info() {
     eval $invocation
     
-    cat | tail -n 1 |  sed 's/\r$//'
+    cat | tail -n 1 | sed 's/\r$//'
     return 0
 }
 
@@ -327,7 +327,7 @@ get_version_from_version_info() {
 get_commit_hash_from_version_info() {
     eval $invocation
     
-    cat | head -n 1
+    cat | head -n 1 | sed 's/\r$//'
     return 0
 }
 
