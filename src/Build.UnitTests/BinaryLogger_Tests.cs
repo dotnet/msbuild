@@ -78,6 +78,8 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
+                Assert.True(Directory.Exists(directory));
+                Assert.True(File.Exists(log));
             }
             finally
             {
