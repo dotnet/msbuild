@@ -2,8 +2,8 @@
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>0</VersionMinor>
-    <VersionPatch>2</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">vspre</ReleaseSuffix>
+    <VersionPatch>3</VersionPatch>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">servicing</ReleaseSuffix>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
     <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 
