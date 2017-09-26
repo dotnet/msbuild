@@ -1305,7 +1305,7 @@ namespace Microsoft.Build.Evaluation
 
                 object propertyValue;
 
-                if (property == null && MSBuildNameIgnoreCaseComparer.Equals("MSBuild", propertyName, startIndex, 7))
+                if (property == null && ((endIndex - startIndex) >= 7) && MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7))
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
                     // whose values vary according to the file they are in.
@@ -1330,7 +1330,7 @@ namespace Microsoft.Build.Evaluation
                     if (usedUninitializedProperties.Warn && usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName != null)
                     {
                         // Check to see if the property name does not match the property we are currently evaluating, note the property we are currently evaluating in the element name, this means no $( or )
-                        if (!MSBuildNameIgnoreCaseComparer.Equals(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, propertyName, startIndex, endIndex - startIndex + 1))
+                        if (!MSBuildNameIgnoreCaseComparer.Default.Equals(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, propertyName, startIndex, endIndex - startIndex + 1))
                         {
                             string propertyTrimed = propertyName.Substring(startIndex, endIndex - startIndex + 1);
                             if (!usedUninitializedProperties.Properties.ContainsKey(propertyTrimed))

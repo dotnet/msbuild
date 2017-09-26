@@ -63,7 +63,7 @@ namespace Microsoft.Build.Collections
         public CopyOnWritePropertyDictionary()
         {
             // Tracing.Record("New COWD1");
-            _properties = new CopyOnWriteDictionary<string, T>(MSBuildNameIgnoreCaseComparer.Mutable);
+            _properties = new CopyOnWriteDictionary<string, T>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Collections
         public CopyOnWritePropertyDictionary(int capacity)
         {
             // Tracing.Record("New COWD2");
-            _properties = new CopyOnWriteDictionary<string, T>(capacity, MSBuildNameIgnoreCaseComparer.Mutable);
+            _properties = new CopyOnWriteDictionary<string, T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>

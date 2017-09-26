@@ -369,7 +369,7 @@ namespace Microsoft.Build.Collections
                 throw new ArgumentOutOfRangeException("index");
 
             if (_constrainedComparer == null)
-                throw new InvalidOperationException("Cannot do a constrained lookup on this colleciton.");
+                throw new InvalidOperationException("Cannot do a constrained lookup on this collection.");
         
             return Get(new KeyedObject(key), index, length);
         }
