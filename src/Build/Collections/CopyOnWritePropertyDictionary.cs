@@ -456,11 +456,24 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name)
         {
+            return Remove(name, clearIfEmpty: false);
+        }
+
+        /// <summary>
+        /// Removes any property with the specified name.
+        /// Returns true if the property was in the collection, otherwise false.
+        /// </summary>
+        internal bool Remove(string name, bool clearIfEmpty)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(name, "name");
 
             lock (_properties)
             {
                 bool result = _properties.Remove(name);
+                if (clearIfEmpty && _properties.Count == 0)
+                {
+                    _properties.Clear();
+                }
                 return result;
             }
         }
