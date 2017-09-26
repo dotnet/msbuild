@@ -318,7 +318,7 @@ get_normalized_architecture_from_architecture() {
 get_version_from_version_info() {
     eval $invocation
     
-    cat | tail -n 1
+    cat | tail -n 1 |  sed 's/\r$//'
     return 0
 }
 
