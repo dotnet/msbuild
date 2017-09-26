@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -66,13 +65,12 @@ namespace Microsoft.Build.Evaluation
 
             private static bool ItemSpecOnlyReferencesOneItemType(ItemSpec<P, I> itemSpec, string itemType)
             {
-                if (itemSpec.Fragments.Count() != 1)
+                if (itemSpec.Fragments.Count != 1)
                 {
                     return false;
                 }
 
-                var itemExpressionFragment = itemSpec.Fragments.Single() as ItemExpressionFragment<P, I>;
-
+                var itemExpressionFragment = itemSpec.Fragments[0] as ItemExpressionFragment<P, I>;
                 if (itemExpressionFragment == null)
                 {
                     return false;
