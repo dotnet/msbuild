@@ -49,7 +49,7 @@ namespace Microsoft.Build.Evaluation
                         excludePatterns.AddRange(excludeSplits);
                     }
 
-                    if (excludePatterns.Any())
+                    if (excludePatterns.Count > 0)
                     {
                         excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
                     }
