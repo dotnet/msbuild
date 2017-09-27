@@ -1,5 +1,6 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <Import Project="..\DependencyVersions.props" />
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -9,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="$(DependencyPackageName)" Version="$(DependencyPackageVersion)" />
+    <PackageReference Condition="'$(DependencyPackageName)' == 'Microsoft.NET.Sdk.Web'" Include="Microsoft.NET.Sdk" Version="$(CLI_NETSDK_Version)" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
