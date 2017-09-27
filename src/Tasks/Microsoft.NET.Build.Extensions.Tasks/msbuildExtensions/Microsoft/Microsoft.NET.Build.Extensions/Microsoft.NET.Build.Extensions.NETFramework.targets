@@ -76,10 +76,14 @@ Copyright (c) .NET Foundation. All rights reserved.
            targets. -->
       <Reference Remove="%(_NETStandardLibraryNETFrameworkLib.FileName)" />
 
-      <Reference Include="@(_NETStandardLibraryNETFrameworkLib)">
-        <!-- netfx.force.conflicts is only needed at compile time. -->
-        <Private Condition="'%(FileName)' == 'netfx.force.conflicts'">false</Private>
+      <Reference Include="@(_NETStandardLibraryNETFrameworkLib.FileName)">
+        <HintPath>%(_NETStandardLibraryNETFrameworkLib.Identity)</HintPath>
+        <Private>false</Private>
       </Reference>
+      <!-- netfx.force.conflicts is only needed at compile time. -->
+      <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)" Condition="'%(FileName)' != 'netfx.force.conflicts'">
+        <Private>false</Private>
+      </ReferenceCopyLocalPaths>
     </ItemGroup>
   </Target>
 </Project>
