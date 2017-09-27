@@ -330,40 +330,6 @@ namespace Microsoft.TemplateEngine.Cli
             HelpForTemplateResolution.ShowUsageHelp(_commandInput);
             TemplateListResolutionResult templateResolutionResult = QueryForTemplateMatches();
             HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
-            return CreationResultStatus.Success;
-        }
-
-        // Used when the inputs resolve to a single template group, and the list flag is specified.
-        private CreationResultStatus SingularGroupDisplayTemplateListIfAnyAreValid(TemplateListResolutionResult templateResolutionResult)
-        {
-            bool anyValid = false;
-
-            if (!templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup))
-            {
-                unambiguousTemplateGroup = new List<ITemplateMatchInfo>();
-            }
-
-            foreach (IFilteredTemplateInfo templateInfo in unambiguousTemplateGroup)
-            {
-                if (templateInfo.InvalidParameterNames.Count == 0)
-                {
-                    anyValid = true;
-                    break;
-                }
-            }
-
-            if (!anyValid)
-            {
-                // There were no templates in the group that all parameters were valid for.
-                // Display an appropriate error message.
-                ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
-
-                if (highestPrecedenceTemplate != null)
-                {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
-                    return CreationResultStatus.InvalidParamValues;
-                }
-            }
 
             return CreationResultStatus.Success;
         }

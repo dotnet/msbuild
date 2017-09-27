@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests

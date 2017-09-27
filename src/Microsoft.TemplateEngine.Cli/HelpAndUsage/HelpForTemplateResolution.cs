@@ -370,7 +370,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns a list of the parameter names that are invalid for every template in the input group.
-        private static void GetParametersInvalidForTemplatesInList(IReadOnlyList<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
+        public static void GetParametersInvalidForTemplatesInList(IReadOnlyList<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
         {
             IDictionary<string, int> invalidCounts = new Dictionary<string, int>();
 
@@ -389,8 +389,18 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
             }
 
-            invalidForAllTemplates = invalidCounts.Where(x => x.Value == templateList.Count).Select(x => x.Key).ToList();
-            invalidForSomeTemplates = invalidCounts.Where(x => x.Value != templateList.Count).Select(x => x.Key).ToList();
+            IEnumerable<IGrouping<string, string>> countGroups = invalidCounts.GroupBy(x => x.Value == templateList.Count ? "all" : "some", x => x.Key);
+            invalidForAllTemplates = countGroups.FirstOrDefault(x => string.Equals(x.Key, "all", StringComparison.Ordinal))?.ToList();
+            if (invalidForAllTemplates == null)
+            {
+                invalidForAllTemplates = new List<string>();
+            }
+
+            invalidForSomeTemplates = countGroups.FirstOrDefault(x => string.Equals(x.Key, "some", StringComparison.Ordinal))?.ToList();
+            if (invalidForSomeTemplates == null)
+            {
+                invalidForSomeTemplates = new List<string>();
+            }
         }
 
         public static void ShowUsageHelp(INewCommandInput commandInput)
