@@ -2474,6 +2474,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="RebaseOutputs" type="msb:boolean" />
                     <xs:attribute name="RunEachTargetSeparately" type="msb:boolean" />
                     <xs:attribute name="SkipNonexistentProjects" type="msb:boolean" />
+                    <xs:attribute name="SkipNonexistentTargets" type="msb:boolean" />
                     <xs:attribute name="StopOnFirstFailure" type="msb:boolean" />
                     <xs:attribute name="TargetAndPropertyListSeparators" />
                     <xs:attribute name="Targets" />
