@@ -12,12 +12,12 @@
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
          explicitly use different versions. -->
-    <CLI_NETSDK_Version>2.1.0-preview1-20170818-1</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>2.1.0-preview1-20170927-2</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
 
-    <CLI_NuGet_Version>4.4.0-preview1-4365</CLI_NuGet_Version>
+    <CLI_NuGet_Version>4.4.0-preview3-4475</CLI_NuGet_Version>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.0-preview3-25514-04</CLI_NETStandardLibraryNETFrameworkVersion>
-    <CLI_WEBSDK_Version>2.0.0-rel-20170815-630</CLI_WEBSDK_Version>
+    <CLI_WEBSDK_Version>2.0.0-rel-20170908-653</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.5.0-preview-20170914-09</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
