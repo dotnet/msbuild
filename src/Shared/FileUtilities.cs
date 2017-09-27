@@ -1040,12 +1040,24 @@ namespace Microsoft.Build.Shared
             return s.Replace('\\', '/');
         }
 
+        /// <summary>
+        /// Ensure all slashes are the current platform's slash
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        internal static string ToPlatformSlash(this string s)
+        {
+            var separator = Path.DirectorySeparatorChar;
+
+            return s.Replace(separator == '/' ? '\\' : '/', separator);
+        }
+
         internal static string WithTrailingSlash(this string s)
         {
             return EnsureTrailingSlash(s);
         }
 
-        internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();
+        internal static string NormalizeForPathComparison(this string s) => s.ToPlatformSlash().TrimTrailingSlashes();
 
         // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
         internal static bool PathsEqual(string path1, string path2)

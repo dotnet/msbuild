@@ -739,40 +739,55 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"src/**/*.cs",
             new[]
             {
-                @"src\a.cs",
-                @"src\a\b\b.cs",
+                @"src/a.cs",
+                @"src/a/b/b.cs",
             },
             new[]
             {
                 @"src/a.cs",
-                @"src/a\b\b.cs",
+                @"src/a/b/b.cs",
             })]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/test/**/*.cs",
             new[]
             {
-                @"src\test\a.cs",
-                @"src\test\a\b\c.cs",
+                @"src/test/a.cs",
+                @"src/test/a/b/c.cs",
             },
             new[]
             {
                 @"src/test/a.cs",
-                @"src/test/a\b\c.cs",
+                @"src/test/a/b/c.cs",
             })]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/test/**/a/b/**/*.cs",
             new[]
             {
-                @"src\test\dir\a\b\a.cs",
-                @"src\test\dir\a\b\c\a.cs",
+                @"src/test/dir/a/b/a.cs",
+                @"src/test/dir/a/b/c/a.cs",
             },
             new[]
             {
-                @"src/test/dir\a\b\a.cs",
-                @"src/test/dir\a\b\c\a.cs",
+                @"src/test/dir/a/b/a.cs",
+                @"src/test/dir/a/b/c/a.cs",
             })]
-        public void IncludeWithWildcardShouldPreserveUserSlashesInFixedDirPart(string projectContents, string includeString, string[] inputFiles, string[] expectedInclude)
+        public void IncludeWithWildcardShouldNotPreserveUserSlashesInFixedDirectoryPart(string projectContents, string includeString, string[] inputFiles, string[] expectedInclude)
         {
+            Func<string, char, string> setSlashes = (s, c) => s.Replace('/', c).Replace('\\', c);
+
+            // set the include string slashes to the opposite orientation relative to the OS default slash
+            if (NativeMethodsShared.IsWindows)
+            {
+                includeString = setSlashes(includeString, '/');
+            }
+            else
+            {
+                includeString = setSlashes(includeString, '\\');
+            }
+
+            // all the slashes in the expected items should be platform specific
+            expectedInclude = expectedInclude.Select(p => setSlashes(p, Path.DirectorySeparatorChar)).ToArray();
+
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, "");
         }
 
