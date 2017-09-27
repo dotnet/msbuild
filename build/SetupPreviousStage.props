@@ -1,0 +1,13 @@
+<Project>
+    <PropertyGroup Condition="'$(PreviousStageProps)' == ''">
+      <PreviousStageDirectory>$(RepoRoot)/.dotnet_stage0/$(Architecture)</PreviousStageDirectory>
+      <PreviousStageDotnet>$(PreviousStageDirectory)/dotnet$(ExeExtension)</PreviousStageDotnet>
+    </PropertyGroup>
+
+    <Import Project="$(PreviousStageProps)" Condition="'$(PreviousStageProps)' != ''" />
+
+    <PropertyGroup>
+      <IsDesktopAvailable>False</IsDesktopAvailable>
+      <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
+    </PropertyGroup>
+</Project>

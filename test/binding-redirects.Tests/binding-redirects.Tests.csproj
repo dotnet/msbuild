@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
@@ -7,6 +6,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>binding-redirects.Tests</AssemblyName>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
+    <RestoreAdditionalProjectSources>$(TestOutputDir)/packages</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
