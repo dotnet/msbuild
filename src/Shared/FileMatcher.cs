@@ -1585,7 +1585,11 @@ namespace Microsoft.Build.Shared
             return SearchAction.RunSearch;
         }
 
-        // Replace all slashes to the OS slash, collapse multiple slashes into one, trim trailing slashes
+        /// <summary>
+        /// Replace all slashes to the OS slash, collapse multiple slashes into one, trim trailing slashes
+        /// </summary>
+        /// <param name="aString">A string</param>
+        /// <returns>The normalized string</returns>
         internal static string Normalize(string aString)
         {
             if (string.IsNullOrEmpty(aString))
