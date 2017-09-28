@@ -31,6 +31,7 @@
     <ItemGroup>
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
+      <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\**\*.*" />
       <InstalledSdks Include="$(MSBuildExtensionsPath)\Sdks\**\*.*" />
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
@@ -61,6 +62,8 @@
     <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
     <Copy SourceFiles="@(InstalledVersionedExtensions)"
           DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(SdkResolverFiles)"
+          DestinationFiles="@(SdkResolverFiles->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
           DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(InstalledSdks)"
