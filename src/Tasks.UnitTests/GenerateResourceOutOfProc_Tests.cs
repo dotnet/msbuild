@@ -2325,6 +2325,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;

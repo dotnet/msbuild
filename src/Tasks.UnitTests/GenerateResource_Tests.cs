@@ -2330,6 +2330,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "Does not support strongly typed resources on netcore")]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void BadStronglyTypedFilename()
         {
             string txtFile = null;
