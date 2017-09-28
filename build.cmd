@@ -5,6 +5,10 @@ if not defined MSBUILDLOGPATH (
     set MSBUILDLOGPATH=%~dp0msbuild.log
 )
 
+if not defined MSBUILDBINARYLOGPATH (
+	set MSBUILDBINARYLOGPATH=%~dp0msbuild.binlog
+)
+
 :: Check for a custom MSBuild path. If not defined, default to the one in your path.
 if not defined MSBUILD_CUSTOM_PATH (
     set MSBUILD_CUSTOM_PATH=MSBuild.exe
@@ -15,7 +19,7 @@ if not defined MSBUILD_ARGS (
 )
 
 :: Add a the file logger with diagnostic verbosity to the msbuild args
-set MSBUILD_ARGS=%MSBUILD_ARGS% /fileloggerparameters:Verbosity=diag;LogFile="%MSBUILDLOGPATH%"
+set MSBUILD_ARGS=%MSBUILD_ARGS% /fileloggerparameters:Verbosity=diag;LogFile="%MSBUILDLOGPATH%" /bl:"%MSBUILDBINARYLOGPATH%"
 
 :: Check for a runtime host. If not defined, do not use a host
 if not defined RUNTIME_HOST (

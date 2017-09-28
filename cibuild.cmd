@@ -107,6 +107,7 @@ echo.
 echo ** Rebuilding MSBuild with downloaded binaries
 
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build-%HOST%.log
+set MSBUILDBINARYLOGPATH=%~dp0msbuild_bootstrap_build-%HOST%.binlog
 call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT% %SYNC_XLF_ARGUMENT% %RUNTIMETYPE_ARGUMENT% %SOURCE_LINK_ARGUMENT%
 
 if %ERRORLEVEL% NEQ 0 (
@@ -125,6 +126,7 @@ echo ** Moving bootstrapped MSBuild to the bootstrap folder
 taskkill /F /IM vbcscompiler.exe
 
 set MSBUILDLOGPATH=%~dp0msbuild_move_bootstrap-%HOST%.log
+set MSBUILDBINARYLOGPATH=%~dp0msbuild_move_bootstrap-%HOST%.binlog
 set MSBUILD_ARGS=/verbosity:minimal targets\BootStrapMSbuild.proj /p:Configuration=%BUILD_CONFIGURATION% %RUNTIMETYPE_ARGUMENT%
 
 call "%~dp0build.cmd"
@@ -139,6 +141,7 @@ set MSBUILD_ARGS=
 
 :: Rebuild with bootstrapped msbuild
 set MSBUILDLOGPATH=%~dp0msbuild_local_build-%HOST%.log
+set MSBUILDBINARYLOGPATH=%~dp0msbuild_local_build-%HOST%.binlog
 
 :: Only CoreCLR requires an override--it should use the host
 :: downloaded as part of its NuGet package references, rather
