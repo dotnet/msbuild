@@ -225,11 +225,6 @@
         <target state="translated">MSB4142: MSBuildToolsPath не соответствует MSBuildBinPath для версии ToolsVersion "{0}", определенной в "{1}". Если заданы оба пути, они должны иметь одинаковое значение.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
-      <trans-unit id="CustomNamespaceNotAllowedOnThisChildElement">
-        <source>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</source>
-        <target state="translated">MSB4097: элемент &lt;{0}&gt; в элементе &lt;{1}&gt; не может иметь пользовательского пространства имен XML.</target>
-        <note>{StrBegin="MSB4097: "}</note>
-      </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
         <source>MSB4009: The default tasks file could not be successfully loaded. {0}</source>
         <target state="translated">MSB4009: не удалось успешно загрузить файл задач. {0}</target>
@@ -2046,6 +2041,16 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
         <target state="translated">Импортируется проект "{0}" в проект "{1}" в ({2},{3}).</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
+        <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
+        <target state="new">Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryTaskTypeIsNotSet">
+        <source>The task factory must return a value for the "TaskType" property.</source>
+        <target state="new">The task factory must return a value for the "TaskType" property.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>
