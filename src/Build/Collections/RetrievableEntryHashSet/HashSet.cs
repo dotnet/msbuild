@@ -126,6 +126,7 @@ namespace Microsoft.Build.Collections
         private int _lastIndex;
         private int _freeList;
         private IEqualityComparer<IKeyed> _comparer;
+        private IConstrainedEqualityComparer<IKeyed> _constrainedComparer;
         private int _version;
         private bool _readOnly;
 
@@ -146,6 +147,7 @@ namespace Microsoft.Build.Collections
             }
 
             _comparer = comparer;
+            _constrainedComparer = comparer as IConstrainedEqualityComparer<IKeyed>;
             _lastIndex = 0;
             _count = 0;
             _freeList = -1;
@@ -348,7 +350,28 @@ namespace Microsoft.Build.Collections
         /// <returns>true if item contained; false if not</returns>
         public T Get(string key)
         {
-            return Get(new KeyedObject(key));
+            return Get(new KeyedObject(key), 0, key?.Length ?? 0);
+        }
+
+        /// <summary>
+        /// Gets the item if any with the given name
+        /// </summary>
+        /// <param name="key">key to check for containment</param>
+        /// <param name="index">The position of the substring within <paramref name="key"/>.</param>
+        /// <param name="length">The maximum number of characters in the <paramref name="key"/> to lookup.</param>
+        /// <returns>true if item contained; false if not</returns>
+        public T Get(string key, int index, int length)
+        {
+            if (length < 0)
+                throw new ArgumentOutOfRangeException("length");
+
+            if (index < 0 || index > (key == null ? 0 : key.Length) - length)
+                throw new ArgumentOutOfRangeException("index");
+
+            if (_constrainedComparer == null)
+                throw new InvalidOperationException("Cannot do a constrained lookup on this collection.");
+        
+            return Get(new KeyedObject(key), index, length);
         }
 
         /// <summary>
@@ -358,13 +381,25 @@ namespace Microsoft.Build.Collections
         /// <returns>true if item contained; false if not</returns>
         public T Get(IKeyed item)
         {
+            return Get(item, 0, item?.Key?.Length ?? 0);
+        }
+
+        /// <summary>
+        /// Gets the item if any with the given name
+        /// </summary>
+        /// <param name="item">item to check for containment</param>
+        /// <param name="index">The position of the substring within <paramref name="item"/>.</param>
+        /// <param name="length">The maximum number of characters in the <paramref name="item"/> to lookup.</param>
+        /// <returns>true if item contained; false if not</returns>
+        private T Get(IKeyed item, int index, int length)
+        {
             if (_buckets != null)
             {
-                int hashCode = InternalGetHashCode(item);
+                int hashCode = InternalGetHashCode(item, index, length);
                 // see note at "HashSet" level describing why "- 1" appears in for loop
                 for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
                 {
-                    if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, item))
+                    if (_slots[i].hashCode == hashCode && _constrainedComparer != null ? _constrainedComparer.Equals(_slots[i].value, item, index, length) : _comparer.Equals(_slots[i].value, item))
                     {
                         return _slots[i].value;
                     }
@@ -558,6 +593,7 @@ namespace Microsoft.Build.Collections
 
             int capacity = _siInfo.GetInt32(CapacityName);
             _comparer = (IEqualityComparer<IKeyed>)_siInfo.GetValue(ComparerName, typeof(IEqualityComparer<IKeyed>));
+            _constrainedComparer = _comparer as IConstrainedEqualityComparer<IKeyed>;
             _freeList = -1;
 
             if (capacity != 0)
@@ -1708,6 +1744,16 @@ namespace Microsoft.Build.Collections
                                                                                                                                                                 return set1.Comparer.Equals(set2.Comparer);
         }
 #endif
+       
+        private int InternalGetHashCode(IKeyed item, int index, int length)
+        {
+            // No need to check for null 'item' as we own all comparers
+            if (_constrainedComparer != null)
+                return _constrainedComparer.GetHashCode(item, index, length) & Lower31BitMask;
+
+            return InternalGetHashCode(item);
+        }
+
         /// <summary>
         /// Workaround Comparers that throw ArgumentNullException for GetHashCode(null).
         /// </summary>

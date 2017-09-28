@@ -6,6 +6,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -109,15 +110,26 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             internal override IList<SdkResolver> LoadResolvers(LoggingContext loggingContext, ElementLocation location)
             {
-                return _includeErrorResolver
-                    ? new List<SdkResolver> {new MockSdkResolverThrows(),new MockSdkResolver1(),new MockSdkResolver2()}
-                    : new List<SdkResolver> {new MockSdkResolver1(), new MockSdkResolver2()};
+                List<SdkResolver> resolvers = new List<SdkResolver>
+                {
+                    new MockSdkResolver1(),
+                    new MockSdkResolver2(),
+                    new MockResolverReturnsNull()
+                };
+
+                if (_includeErrorResolver)
+                {
+                    resolvers.Add(new MockSdkResolverThrows());
+                }
+
+                return resolvers.OrderBy(i => i.Priority).ToList();
             }
         }
 
         private class MockSdkResolver1 : SdkResolver
         {
-            public override string Name => "MockSdkResolver1";
+            public override string Name => nameof(MockSdkResolver1);
+
             public override int Priority => 1;
 
             public override SdkResult Resolve(SdkReference sdk, SdkResolverContext resolverContext, SdkResultFactory factory)
@@ -133,7 +145,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         private class MockSdkResolver2 : SdkResolver
         {
-            public override string Name => "MockSdkResolver2";
+            public override string Name => nameof(MockSdkResolver2);
+
             public override int Priority => 2;
 
             public override SdkResult Resolve(SdkReference sdk, SdkResolverContext resolverContext, SdkResultFactory factory)
@@ -149,7 +162,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         private class MockSdkResolverThrows : SdkResolver
         {
-            public override string Name => "MockSdkResolverThrows";
+            public override string Name => nameof(MockSdkResolverThrows);
             public override int Priority => 0;
 
             public override SdkResult Resolve(SdkReference sdk, SdkResolverContext resolverContext, SdkResultFactory factory)
@@ -158,6 +171,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 throw new ArithmeticException("EXMESSAGE");
             }
+        }
+
+        private class MockResolverReturnsNull : SdkResolver
+        {
+            public override string Name => nameof(MockResolverReturnsNull);
+
+            public override int Priority => -1;
+
+            public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory) => null;
         }
     }
 }

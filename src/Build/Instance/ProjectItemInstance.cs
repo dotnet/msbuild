@@ -1235,7 +1235,6 @@ namespace Microsoft.Build.Execution
 
                 if (_directMetadata != null)
                 {
-                    Debug.Assert(_directMetadata.Count != 0, "We should not waste a dictionary for no metadata");
                     metadatum = _directMetadata[metadataName];
                     if (metadatum != null)
                     {
@@ -1296,16 +1295,8 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                if (_directMetadata != null)
-                {
-                    _directMetadata.Remove(metadataName);
-
-                    // If the metadata was all removed, toss the dictionary
-                    if (_directMetadata.Count == 0)
-                    {
-                        _directMetadata = null;
-                    }
-                }
+                // If the metadata was all removed, toss the dictionary
+                _directMetadata?.Remove(metadataName, clearIfEmpty: true);
             }
 
             /// <summary>
@@ -1353,8 +1344,7 @@ namespace Microsoft.Build.Execution
                     ProjectInstance.VerifyThrowNotImmutable(destinationAsTaskItem._isImmutable);
 
                     // This optimized path is hit most often
-                    Debug.Assert(_directMetadata == null || _directMetadata.Count != 0, "We should not waste a dictionary for no metadata");
-                    destinationAsTaskItem._directMetadata = (_directMetadata == null) ? null : _directMetadata.DeepClone(); // copy on write!
+                    destinationAsTaskItem._directMetadata = _directMetadata?.DeepClone(); // copy on write!
 
                     // If the destination item already has item definitions then we want to maintain them
                     // But ours will be of less precedence than those already on the item

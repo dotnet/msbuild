@@ -49,7 +49,7 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class CopyOnWritePropertyDictionary<T> : IEnumerable<T>, IEquatable<CopyOnWritePropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>
+    internal sealed class CopyOnWritePropertyDictionary<T> : IEnumerable<T>, IEquatable<CopyOnWritePropertyDictionary<T>>, IDictionary<string, T>
         where T : class, IKeyed, IValued, IEquatable<T>, IImmutable
     {
         /// <summary>
@@ -58,17 +58,12 @@ namespace Microsoft.Build.Collections
         private readonly CopyOnWriteDictionary<string, T> _properties;
 
         /// <summary>
-        /// Comparer whose start and end indexes we can manipulate as necessary.
-        /// </summary>
-        private readonly MSBuildNameIgnoreCaseComparer _comparer = MSBuildNameIgnoreCaseComparer.Mutable;
-
-        /// <summary>
         /// Creates empty dictionary
         /// </summary>
         public CopyOnWritePropertyDictionary()
         {
             // Tracing.Record("New COWD1");
-            _properties = new CopyOnWriteDictionary<string, T>(_comparer);
+            _properties = new CopyOnWriteDictionary<string, T>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -77,7 +72,7 @@ namespace Microsoft.Build.Collections
         public CopyOnWritePropertyDictionary(int capacity)
         {
             // Tracing.Record("New COWD2");
-            _properties = new CopyOnWriteDictionary<string, T>(capacity, _comparer);
+            _properties = new CopyOnWriteDictionary<string, T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -315,32 +310,6 @@ namespace Microsoft.Build.Collections
 
         #endregion
 
-        /// <summary>
-        /// Get the property with the specified name or null if it is not present
-        /// </summary>
-        T IPropertyProvider<T>.GetProperty(string name)
-        {
-            return this[name];
-        }
-
-        /// <summary>
-        /// Get the property with the specified name or null if it is not present.
-        /// Name is the segment of the provided string with the provided start and end indexes.
-        /// </summary>
-        T IPropertyProvider<T>.GetProperty(string name, int startIndex, int endIndex)
-        {
-            lock (_properties)
-            {
-                if (startIndex == 0 && endIndex == name.Length - 1)
-                {
-                    return this[name];
-                }
-
-                T returnValue = _comparer.GetValueWithConstraints<T>(this, name, startIndex, endIndex);
-                return returnValue;
-            }
-        }
-
         #region IDictionary<string,T> Members
 
         /// <summary>
@@ -456,11 +425,24 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name)
         {
+            return Remove(name, clearIfEmpty: false);
+        }
+
+        /// <summary>
+        /// Removes any property with the specified name.
+        /// Returns true if the property was in the collection, otherwise false.
+        /// </summary>
+        internal bool Remove(string name, bool clearIfEmpty)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(name, "name");
 
             lock (_properties)
             {
                 bool result = _properties.Remove(name);
+                if (clearIfEmpty && _properties.Count == 0)
+                {
+                    _properties.Clear();
+                }
                 return result;
             }
         }

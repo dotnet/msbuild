@@ -349,7 +349,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
   <PropertyGroup>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
-    <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(MSBuildProjectFile).$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
+    <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
   </PropertyGroup>
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
@@ -803,16 +803,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="AfterBuild"/>
-
-  <!--
-    ============================================================
-                                        Restore
-
-    This empty target is defined so that all projects can run Restore.  Most package management systems like
-    NuGet will override this target.
-    ============================================================
-    -->
-  <Target Name="Restore"/>
 
   <!--
     ============================================================
@@ -1386,6 +1376,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
       Name="ResolveReferences"
+      Returns="@(ReferencePath)"
       DependsOnTargets="$(ResolveReferencesDependsOn)"/>
 
   <!--
