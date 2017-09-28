@@ -819,6 +819,7 @@ namespace Microsoft.TemplateEngine.Cli
             return anyArgsErrors ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
         }
 
+
         private async Task<CreationResultStatus> EnterSingularTemplateManipulationFlowAsync()
         {
             if (_commandInput.IsListFlagSpecified)
@@ -858,14 +859,23 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             highestPrecedenceTemplate.Info.Tags.TryGetValue("language", out ICacheTag language);
-            _commandInput.AllTemplateParams.TryGetValue("framework", out string framework);
-            _commandInput.AllTemplateParams.TryGetValue("auth", out string auth);
             bool isMicrosoftAuthored = string.Equals(highestPrecedenceTemplate.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
-            string templateName = isMicrosoftAuthored ? highestPrecedenceTemplate.Info.Identity : "(3rd Party)";
+            string framework = null;
+            string auth = null;
+            string templateName = null;
 
-            if (!isMicrosoftAuthored)
+            if (isMicrosoftAuthored)
             {
-                auth = null;
+                templateName = highestPrecedenceTemplate.Info.Identity;
+                _commandInput.AllTemplateParams.TryGetValue("Framework", out string inputFrameworkValue);
+                framework = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "Framework", inputFrameworkValue);
+
+                _commandInput.AllTemplateParams.TryGetValue("auth", out string inputAuthValue);
+                auth = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "auth", inputAuthValue);
+            }
+            else
+            {
+                templateName = "(3rd Party)";
             }
 
             if (argsError)
