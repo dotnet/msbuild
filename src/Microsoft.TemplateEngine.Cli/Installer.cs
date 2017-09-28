@@ -127,6 +127,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 //Find all of the things that refer to any of the mount points we've got
                 _environmentSettings.SettingsLoader.RemoveMountPoints(mountPoints);
+                ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.RemoveDescriptorsForLocationList(mountPoints);
                 _environmentSettings.SettingsLoader.Save();
 
                 foreach (MountPointInfo mountPoint in rootMountPoints)
@@ -219,12 +220,22 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         string fullDirectory = new DirectoryInfo(pkg).FullName;
                         string fullPathGlob = Path.Combine(fullDirectory, pattern);
-                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(fullPathGlob);
+                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(fullPathGlob, out IReadOnlyList<Guid> contentMountPointIds);
+
+                        foreach (Guid mountPointId in contentMountPointIds)
+                        {
+                            ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
+                        }
                     }
                     else if (_environmentSettings.Host.FileSystem.DirectoryExists(pkg) || _environmentSettings.Host.FileSystem.FileExists(pkg))
                     {
                         string packageLocation = new DirectoryInfo(pkg).FullName;
-                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(packageLocation);
+                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(packageLocation, out IReadOnlyList<Guid> contentMountPointIds);
+
+                        foreach (Guid mountPointId in contentMountPointIds)
+                        {
+                            ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
+                        }
                     }
                     else
                     {
