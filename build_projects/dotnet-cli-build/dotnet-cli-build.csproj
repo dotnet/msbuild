@@ -21,6 +21,7 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
     <PackageReference Include="WindowsAzure.Storage" Version="7.2.1" />
+    <PackageReference Include="NuGet.Protocol" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="NuGet.CommandLine.XPlat" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(CLI_MSBuild_Version)" />
     <!-- This dependency was added due to an issue in restore where a lower version of this package coming from nuget.commandline.xplat
