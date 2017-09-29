@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.11.2290",
+    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.14.114",
     "PdbGit": "3.0.41",
     "SourceLink.Create.CommandLine": "2.1.2"
   },
