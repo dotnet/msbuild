@@ -153,15 +153,15 @@ namespace Microsoft.Build.UnitTests
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1250")]
 #else
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2569")]
 #endif
         [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void GetUnversionedSDKUnionMetadataLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
-
             string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14393.0", "10.0.14393.0", "UnionMetadata");
-            returnValue.Contains("10.0.14393.0").ShouldBeFalse();
+
+            returnValue.ShouldNotContain("10.0.14393.0");
             returnValue.ShouldBe(Path.Combine(sdkRootPath, "UnionMetadata"));
         }
 
