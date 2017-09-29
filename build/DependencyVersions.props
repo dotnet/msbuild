@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.1.0-preview1-25727-05</CLI_SharedFrameworkVersion>
+    <CLI_SharedFrameworkVersion>2.1.0-preview1-25728-02</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.5.0-preview-000090-0999971</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.2-beta1-61921-05</CLI_Roslyn_Version>
     <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170727-1</CLI_Roslyn_Satellites_Version>
@@ -25,8 +25,8 @@
     <TemplateEngineVersion>1.0.0-beta2-20170828-305</TemplateEngineVersion>
     <TemplateEngineTemplateVersion>1.0.0-beta2-20170828-305</TemplateEngineTemplateVersion>
     <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170828-305</TemplateEngineTemplate2_0Version>
-    <PlatformAbstractionsVersion>2.1.0-preview1-25727-05</PlatformAbstractionsVersion>
-    <DependencyModelVersion>2.1.0-preview1-25727-05</DependencyModelVersion>
+    <PlatformAbstractionsVersion>2.1.0-preview1-25728-02</PlatformAbstractionsVersion>
+    <DependencyModelVersion>2.1.0-preview1-25728-02</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
