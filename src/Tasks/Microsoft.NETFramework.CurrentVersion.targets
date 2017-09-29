@@ -93,6 +93,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- Does one of our dependencies reference a System.Runtime-based portable library? -->
       <_HasReferenceToSystemRuntime Condition="'$(DependsOnSystemRuntime)' == 'true'">true</_HasReferenceToSystemRuntime>
+      <_HasReferenceToSystemRuntime Condition="'$(DependsOnNETStandard)' == 'true'">true</_HasReferenceToSystemRuntime>
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetPlatformIdentifier)' == 'Portable'">true</_HasReferenceToSystemRuntime>
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetFrameworkIdentifier)' == '.NETStandard' and '%(_ResolvedProjectReferencePaths.TargetFrameworkVersion)' &lt; '2.0'">true</_HasReferenceToSystemRuntime>
     </PropertyGroup>

@@ -37,6 +37,11 @@ namespace Microsoft.Build.Tasks
         private const string SystemRuntimeAssemblyName = "System.Runtime";
 
         /// <summary>
+        /// additional key assembly used to trigger inclusion of facade references. 
+        /// </summary>
+        private const string NETStandardAssemblyName = "netstandard";
+
+        /// <summary>
         /// Delegate to a method that takes a targetFrameworkDirectory and returns an array of redist or subset list paths
         /// </summary>
         /// <param name="targetFrameworkDirectory">TargetFramework directory to search for redist or subset list</param>
@@ -881,6 +886,17 @@ namespace Microsoft.Build.Tasks
             get;
             private set;
         }
+
+        /// <summary>
+        /// Whether the assembly or any of its primary references depends on netstandard
+        /// </summary>
+        [Output]
+        public String DependsOnNETStandard
+        {
+            get;
+            private set;
+        }
+
 
         #endregion
         #region Logging
@@ -2242,16 +2258,25 @@ namespace Microsoft.Build.Tasks
                     }
 
                     bool useSystemRuntime = false;
+                    bool useNetStandard = false;
                     foreach (var reference in dependencyTable.References.Keys)
                     {
                         if (string.Equals(SystemRuntimeAssemblyName, reference.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             useSystemRuntime = true;
+                        }
+                        if (string.Equals(NETStandardAssemblyName, reference.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            useNetStandard = true;
+                        }
+                        if (useSystemRuntime && useNetStandard)
+                        {
                             break;
                         }
                     }
 
-                    if (!useSystemRuntime && !FindDependencies)
+
+                    if ((!useSystemRuntime || !useNetStandard) && !FindDependencies)
                     {
                         // when we are not producing the dependency graph look for direct dependencies of primary references.
                         foreach (var resolvedReference in dependencyTable.References.Values)
@@ -2266,10 +2291,15 @@ namespace Microsoft.Build.Tasks
                                         useSystemRuntime = true;
                                         break;
                                     }
+                                    if (string.Equals(NETStandardAssemblyName, dependentReference.Name, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        useNetStandard = true;
+                                        break;
+                                    }
                                 }
                             }
 
-                            if (useSystemRuntime)
+                            if (useSystemRuntime && useNetStandard)
                             {
                                 break;
                             }
@@ -2277,6 +2307,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     this.DependsOnSystemRuntime = useSystemRuntime.ToString();
+                    this.DependsOnNETStandard = useNetStandard.ToString();
 
 #if FEATURE_BINARY_SERIALIZATION
                     WriteStateFile();
