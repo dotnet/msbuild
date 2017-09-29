@@ -23,7 +23,7 @@
 
   <Target Name="EnsureTemplateRestored"
           Condition="!Exists('$(TemplateNuPkgPath)/$(TemplatePackageName.ToLower()).nuspec')">
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="$(MSBuildThisFileDirectory)/templates/templates.csproj"
                    AdditionalParameters="/p:TemplatePackageName=$(TemplatePackageName) /p:TemplatePackageVersion=$(TemplatePackageVersion)" />
   </Target>

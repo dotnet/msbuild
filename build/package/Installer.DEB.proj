@@ -64,7 +64,7 @@
         Mode="u+x" />
 
       <!-- Build SDK Deb package -->
-      <DotNetDebTool ToolPath="$(Stage0Directory)"
+      <DotNetDebTool ToolPath="$(PreviousStageDirectory)"
                      InputDirectory="$(LayoutDirectory)"
                      OutputDirectory="$(DotNetDebToolOutputDirectory)"
                      PackageName="$(SdkDebianPackageName)"
@@ -156,20 +156,10 @@
     <MakeDir Directories="$(DotNetDebToolOutputDirectory)" />
   </Target>
 
-  <Target Name="PrepareDotnetDebTool"
-          DependsOnTargets="WriteDotnetDebToolProject">
+  <Target Name="PrepareDotnetDebTool">
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    WorkingDirectory="$(DotnetDebToolDir)" />
-  </Target>
-
-  <Target Name="WriteDotnetDebToolProject"
-          Inputs="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
-          Outputs="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)">
-
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
-          DestinationFiles="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)" />
-
   </Target>
 
   <Target Name="TestDebuild">

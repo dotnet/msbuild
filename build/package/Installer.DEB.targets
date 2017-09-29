@@ -8,8 +8,7 @@
 
     <!-- dotnet deb-tool -->
     <PropertyGroup>
-      <DotnetDebToolConsumerProjectName>dotnet-deb-tool-consumer.csproj</DotnetDebToolConsumerProjectName>
-      <DotnetDebToolDir>$(IntermediateDirectory)/$(DotnetDebToolConsumerProjectName)</DotnetDebToolDir>
+      <DotnetDebToolDir>$(MSBuildThisFileDirectory)/dotnet-deb-tool-consumer</DotnetDebToolDir>
       <PackageTool>$(NuGetPackagesDir)/dotnet-deb-tool/$(DotnetDebToolVersion)/lib/netcoreapp2.0/tool/package_tool</PackageTool>
     </PropertyGroup>
 
@@ -114,6 +113,9 @@
 
     <ItemGroup>
       <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
+      <TestSdkDebTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
+      <TestSdkDebTaskEnvironmentVariables Include="TEST_PACKAGES=$(TestPackagesDir)" />
+      <TestSdkDebTaskEnvironmentVariables Include="PreviousStageProps=$(NextStagePropsPath)" />
 
       <!-- Consumed By Publish -->
       <GeneratedInstallers Include="$(SdkInstallerFile)" />

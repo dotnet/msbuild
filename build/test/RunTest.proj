@@ -11,7 +11,13 @@
   <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDllPath)" /> 
   
   <Target Name="RunTest">
-    <DotNetTest EnvironmentVariables="$(EnvironmentVariables)"
+    <ItemGroup>
+      <EnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
+      <EnvironmentVariables Include="TEST_PACKAGES=$(TestPackagesDir)" />
+      <EnvironmentVariables Include="PreviousStageProps=$(PreviousStageProps)" />
+    </ItemGroup>
+
+    <DotNetTest EnvironmentVariables="@(EnvironmentVariables)"
                 ToolPath="$(ToolPath)"
                 Configuration="$(Configuration)"
                 NoBuild="True"

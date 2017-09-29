@@ -15,13 +15,15 @@ namespace Microsoft.DotNet.TestFramework
 
         public string AssetName { get; private set; }
 
-        public FileInfo DotnetExeFile { get; private set; }
+        public FileInfo DotnetExeFile => _testAssets.DotnetCsprojExe;
 
-        public string ProjectFilePattern { get; private set; }
+        public string ProjectFilePattern => "*.csproj";
 
         public DirectoryInfo Root { get; private set; }
 
-        internal TestAssetInfo(DirectoryInfo root, string assetName, FileInfo dotnetExeFile, string projectFilePattern)
+        private TestAssets _testAssets { get; }
+
+        internal TestAssetInfo(DirectoryInfo root, string assetName, TestAssets testAssets)
         {
             if (root == null)
             {
@@ -33,23 +35,16 @@ namespace Microsoft.DotNet.TestFramework
                 throw new ArgumentException("Argument cannot be null or whitespace", nameof(assetName));
             }
 
-            if (dotnetExeFile == null)
+            if (testAssets == null)
             {
-                throw new ArgumentNullException(nameof(dotnetExeFile));
-            }
-
-            if (string.IsNullOrWhiteSpace(projectFilePattern))
-            {
-                throw new ArgumentException("Argument cannot be null or whitespace", nameof(projectFilePattern));
+                throw new ArgumentNullException(nameof(testAssets));
             }
 
             Root = root;
 
             AssetName = assetName;
 
-            DotnetExeFile = dotnetExeFile;
-
-            ProjectFilePattern = projectFilePattern;
+            _testAssets = testAssets;
         }
 
         public TestAssetInstance CreateInstance([CallerMemberName] string callingMethod = "", string identifier = "")
@@ -71,12 +66,7 @@ namespace Microsoft.DotNet.TestFramework
 
         private DirectoryInfo GetTestDestinationDirectory(string callingMethod, string identifier)
         {
-#if NET451
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-#else
-            string baseDirectory = AppContext.BaseDirectory;
-#endif
-            return new DirectoryInfo(Path.Combine(baseDirectory, callingMethod + identifier, AssetName));
+            return _testAssets.CreateTestDirectory(AssetName, callingMethod, identifier);
         }
 
         private void ThrowIfTestAssetDoesNotExist()
