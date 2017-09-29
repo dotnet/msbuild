@@ -30,6 +30,7 @@
   <Target Name="SetBadgeProps">
     <PropertyGroup>
       <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker>
+      <VersionBadgeMoniker Condition=" '$(Rid)' == 'rhel.6-x64' ">rhel.6_x64</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(IslinuxPortable)' == 'true' ">linux_x64</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(IsBuildingAndPublishingAllLinuxDistrosNativeInstallers)' == 'true' ">all_linux_distros_native_installer</VersionBadgeMoniker>
 
