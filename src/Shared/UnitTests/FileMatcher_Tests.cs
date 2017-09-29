@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -72,6 +73,130 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(false, "Unexpected input into GetFileSystemEntries");
             }
             return new string[] { "<undefined>" };
+        }
+
+        private static readonly char S = Path.DirectorySeparatorChar;
+
+        public static IEnumerable<object[]> NormalizeTestData()
+        {
+            yield return new object[]
+            {
+                null,
+                null
+            };
+            yield return new object[]
+            {
+                "",
+                ""
+            };
+            yield return new object[]
+            {
+                " ",
+                " "
+            };
+
+            yield return new object[]
+            {
+                @"\\",
+                @"\\"
+            };
+            yield return new object[]
+            {
+                @"\\/\//",
+                @"\\"
+            };
+            yield return new object[]
+            {
+                @"\\a/\b/\",
+                $@"\\a{S}b"
+            };
+
+            yield return new object[]
+            {
+                @"\",
+                @"\"
+            };
+            yield return new object[]
+            {
+                @"\/\/\/",
+                @"\"
+            };
+            yield return new object[]
+            {
+                @"\a/\b/\",
+                $@"\a{S}b"
+            };
+
+            yield return new object[]
+            {
+                "/",
+                "/"
+            };
+            yield return new object[]
+            {
+                @"/\/\",
+                "/"
+            };
+            yield return new object[]
+            {
+                @"/a\/b/\\",
+                $@"/a{S}b"
+            };
+
+            yield return new object[]
+            {
+                @"c:\",
+                @"c:\"
+            };
+            yield return new object[]
+            {
+                @"c:/",
+                @"c:\"
+            };
+            yield return new object[]
+            {
+                @"c:/\/\/",
+                @"c:\"
+            };
+            yield return new object[]
+            {
+                @"c:/ab",
+                @"c:\ab"
+            };
+            yield return new object[]
+            {
+                @"c:\/\a//b",
+                $@"c:\a{S}b"
+            };
+            yield return new object[]
+            {
+                @"c:\/\a//b\/",
+                $@"c:\a{S}b"
+            };
+
+            yield return new object[]
+            {
+                @"..\/a\../.\b\/",
+                $@"..{S}a{S}..{S}.{S}b"
+            };
+            yield return new object[]
+            {
+                @"**/\foo\/**\/",
+                $@"**{S}foo{S}**"
+            };
+
+            yield return new object[]
+            {
+                "AbCd",
+                "AbCd"
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(NormalizeTestData))]
+        public void NormalizeTest(string inputString, string expectedString)
+        {
+            FileMatcher.Normalize(inputString).ShouldBe(expectedString);
         }
 
         /// <summary>

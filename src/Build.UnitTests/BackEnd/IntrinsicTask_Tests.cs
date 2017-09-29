@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -10,6 +11,7 @@ using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -2087,35 +2089,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void RemoveWithWildcards()
         {
-            string[] files = null;
-
-            try
+            using (var env = TestEnvironment.Create())
             {
-                files = ObjectModelHelpers.GetTempFiles(2, DateTime.Now);
+                var projectDirectory = env.CreateFolder();
+                env.SetCurrentDirectory(projectDirectory.FolderPath);
+
+                var file1 = env.CreateFile(projectDirectory).Path;
+                var file2 = env.CreateFile(projectDirectory).Path;
 
                 string content = ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                 <Target Name='t'>
                     <ItemGroup>
-                        <i1 Include='" + files.First() + ";" + files.ElementAt(1) + @";other'/>
-                        <i1 Remove='$(temp)" + Path.DirectorySeparatorChar + @"*.tmp'/>
+                        <i1 Include='" + file1 + ";" + file2 + @";other'/>
+                        <i1 Remove='" + projectDirectory.FolderPath + Path.DirectorySeparatorChar + @"*.tmp'/>
                     </ItemGroup>
                 </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
-                properties.Set(
-                    ProjectPropertyInstance.Create(
-                        "TEMP",
-                        NativeMethodsShared.IsWindows ? Environment.GetEnvironmentVariable("TEMP") : Path.GetTempPath()));
                 Lookup lookup = LookupHelpers.CreateLookup(properties);
                 ExecuteTask(task, lookup);
 
                 Assert.Equal(1, lookup.GetItems("i1").Count);
                 Assert.Equal("other", lookup.GetItems("i1").First().EvaluatedInclude);
-            }
-            finally
-            {
-                ObjectModelHelpers.DeleteTempFiles(files);
             }
         }
 

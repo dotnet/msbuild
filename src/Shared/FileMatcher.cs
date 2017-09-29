@@ -701,7 +701,7 @@ namespace Microsoft.Build.Shared
                         //  We are matching files based on a filespec and not a regular expression
                         searchToExclude.SearchData.Filespec != null &&
                         //  The wildcard path portion of the excluded search matches the include search
-                        FileUtilities.PathsEqual(searchToExclude.RemainingWildcardDirectory, recursionState.RemainingWildcardDirectory) &&
+                        searchToExclude.RemainingWildcardDirectory == recursionState.RemainingWildcardDirectory &&
                         //  The exclude search will match ALL filenames OR
                         (searchToExclude.SearchData.Filespec == "*" || searchToExclude.SearchData.Filespec == "*.*" ||
                             //  The exclude search filename pattern matches the include search's pattern
@@ -780,7 +780,7 @@ namespace Microsoft.Build.Shared
                         for (int i = 0; i < excludeNextSteps.Length; i++)
                         {
                             if (excludeNextSteps[i].Subdirs != null &&
-                                excludeNextSteps[i].Subdirs.Any(excludedDir => FileUtilities.PathsEqual(excludedDir, subdir)))
+                                excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir == subdir))
                             {
                                 RecursionState thisExcludeStep = searchesToExclude[i];
                                 thisExcludeStep.BaseDirectory = subdir;
@@ -794,9 +794,7 @@ namespace Microsoft.Build.Shared
                     {
                         List<RecursionState> searchesForSubdir;
 
-                        // The normalization fixes https://github.com/Microsoft/msbuild/issues/917
-                        // and is a partial fix for https://github.com/Microsoft/msbuild/issues/724
-                        if (searchesToExcludeInSubdirs.TryGetValue(subdir.NormalizeForPathComparison(), out searchesForSubdir))
+                        if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
                         {
                             //  We've found the base directory that these exclusions apply to.  So now add them as normal searches
                             if (newSearchesToExclude == null)
@@ -893,9 +891,8 @@ namespace Microsoft.Build.Shared
                 if (!IsRecursiveDirectoryMatch(recursionState.RemainingWildcardDirectory))
                 {
                     int indexOfNextSlash = recursionState.RemainingWildcardDirectory.IndexOfAny(directorySeparatorCharacters);
-                    ErrorUtilities.VerifyThrow(indexOfNextSlash != -1, "Slash should be guaranteed.");
 
-                    pattern = recursionState.RemainingWildcardDirectory.Substring(0, indexOfNextSlash);
+                    pattern = indexOfNextSlash != -1 ? recursionState.RemainingWildcardDirectory.Substring(0, indexOfNextSlash) : recursionState.RemainingWildcardDirectory;
 
                     if (pattern == recursiveDirectoryMatch)
                     {
@@ -917,7 +914,7 @@ namespace Microsoft.Build.Shared
                         // back into remainingWildcardDirectory.
                         // This is a performance optimization. We don't want to enumerate everything if we 
                         // don't have to.
-                        recursionState.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory.Substring(indexOfNextSlash + 1);
+                        recursionState.RemainingWildcardDirectory = indexOfNextSlash != -1 ? recursionState.RemainingWildcardDirectory.Substring(indexOfNextSlash + 1) : string.Empty;
                     }
                 }
 
@@ -1582,10 +1579,110 @@ namespace Microsoft.Build.Shared
                 needsRecursion);
 
             result.SearchData = searchData;
-            result.BaseDirectory = fixedDirectoryPart;
-            result.RemainingWildcardDirectory = wildcardDirectoryPart;
+            result.BaseDirectory = Normalize(fixedDirectoryPart);
+            result.RemainingWildcardDirectory = Normalize(wildcardDirectoryPart);
 
             return SearchAction.RunSearch;
+        }
+
+        /// <summary>
+        /// Replace all slashes to the OS slash, collapse multiple slashes into one, trim trailing slashes
+        /// </summary>
+        /// <param name="aString">A string</param>
+        /// <returns>The normalized string</returns>
+        internal static string Normalize(string aString)
+        {
+            if (string.IsNullOrEmpty(aString))
+            {
+                return aString;
+            }
+
+            var sb = new StringBuilder(aString.Length);
+            var index = 0;
+
+            // preserve meaningful roots and their slashes
+            if (aString.Length >= 2 && IsValidDriveChar(aString[0]) && aString[1] == ':')
+            {
+                sb.Append(aString[0]);
+                sb.Append(aString[1]);
+
+                var i = SkipCharacters(aString, 2, c => IsSlash(c));
+
+                if (index != i)
+                {
+                    sb.Append('\\');
+                }
+
+                index = i;
+            }
+            else if (aString.StartsWith("/", StringComparison.Ordinal))
+            {
+                sb.Append('/');
+                index = SkipCharacters(aString, 1, c => IsSlash(c));
+            }
+            else if (aString.StartsWith(@"\\", StringComparison.Ordinal))
+            {
+                sb.Append(@"\\");
+                index = SkipCharacters(aString, 2, c => IsSlash(c));
+            }
+            else if (aString.StartsWith(@"\", StringComparison.Ordinal))
+            {
+                sb.Append(@"\");
+                index = SkipCharacters(aString, 1, c => IsSlash(c));
+            }
+
+            while (index < aString.Length)
+            {
+                var afterSlashesIndex = SkipCharacters(aString, index, c => IsSlash(c));
+
+                // do not append separator at the end of the string
+                if (afterSlashesIndex >= aString.Length)
+                {
+                    break;
+                }
+                // replace multiple slashes with the OS separator
+                else if (afterSlashesIndex > index)
+                {
+                    sb.Append(s_directorySeparator);
+                }
+
+                var afterNonSlashIndex = SkipCharacters(aString, afterSlashesIndex, c => !IsSlash(c));
+
+                sb.Append(aString, afterSlashesIndex, afterNonSlashIndex - afterSlashesIndex);
+
+                index = afterNonSlashIndex;
+            }
+
+            return sb.ToString();
+        }
+
+        private static bool IsSlash(char c) => c == '/' || c == '\\';
+
+        /// <summary>
+        /// Skips characters that satisfy the condition <param name="jumpOverCharacter"></param>
+        /// </summary>
+        /// <param name="aString">The working string</param>
+        /// <param name="startingIndex">Offset in string to start the search in</param>
+        /// <returns>First index that does not satisfy the condition. Returns the string's length if end of string is reached</returns>
+        private static int SkipCharacters(string aString, int startingIndex, Func<char, bool> jumpOverCharacter)
+        {
+            var index = startingIndex;
+
+            while (index < aString.Length && jumpOverCharacter(aString[index]))
+            {
+                index++;
+            }
+
+            return index;
+        }
+
+        // copied from https://github.com/dotnet/corefx/blob/master/src/Common/src/System/IO/PathInternal.Windows.cs#L77-L83
+        /// <summary>
+        /// Returns true if the given character is a valid drive letter
+        /// </summary>
+        internal static bool IsValidDriveChar(char value)
+        {
+            return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
         }
 
         static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, IEnumerable<string> excludeSpecsUnescaped)
@@ -1708,24 +1805,24 @@ namespace Microsoft.Build.Shared
                         throw new NotSupportedException(excludeAction.ToString());
                     }
 
-                    var excludeBaseDirectoryNormalized = excludeState.BaseDirectory.NormalizeForPathComparison();
-                    var includeBaseDirectoryNormalized = state.BaseDirectory.NormalizeForPathComparison();
+                    var excludeBaseDirectory = excludeState.BaseDirectory;
+                    var includeBaseDirectory = state.BaseDirectory;
 
-                    if (excludeBaseDirectoryNormalized != includeBaseDirectoryNormalized)
+                    if (excludeBaseDirectory != includeBaseDirectory)
                     {
                         //  What to do if the BaseDirectory for the exclude search doesn't match the one for inclusion?
                         //  - If paths don't match (one isn't a prefix of the other), then ignore the exclude search.  Examples:
                         //      - c:\Foo\ - c:\Bar\
                         //      - c:\Foo\Bar\ - C:\Foo\Baz\
                         //      - c:\Foo\ - c:\Foo2\
-                        if (excludeBaseDirectoryNormalized.Length == includeBaseDirectoryNormalized.Length)
+                        if (excludeBaseDirectory.Length == includeBaseDirectory.Length)
                         {
                             //  Same length, but different paths.  Ignore this exclude search
                             continue;
                         }
-                        else if (excludeBaseDirectoryNormalized.Length > includeBaseDirectoryNormalized.Length)
+                        else if (excludeBaseDirectory.Length > includeBaseDirectory.Length)
                         {
-                            if (!excludeBaseDirectoryNormalized.StartsWith(includeBaseDirectoryNormalized))
+                            if (!excludeBaseDirectory.StartsWith(includeBaseDirectory))
                             {
                                 //  Exclude path is longer, but doesn't start with include path.  So ignore it.
                                 continue;
@@ -1743,13 +1840,11 @@ namespace Microsoft.Build.Shared
                                 searchesToExcludeInSubdirs = new Dictionary<string, List<RecursionState>>();
                             }
                             List<RecursionState> listForSubdir;
-                            if (!searchesToExcludeInSubdirs.TryGetValue(excludeBaseDirectoryNormalized, out listForSubdir))
+                            if (!searchesToExcludeInSubdirs.TryGetValue(excludeBaseDirectory, out listForSubdir))
                             {
                                 listForSubdir = new List<RecursionState>();
 
-                                // The normalization fixes https://github.com/Microsoft/msbuild/issues/917
-                                // and is a partial fix for https://github.com/Microsoft/msbuild/issues/724
-                                searchesToExcludeInSubdirs[excludeBaseDirectoryNormalized] = listForSubdir;
+                                searchesToExcludeInSubdirs[excludeBaseDirectory] = listForSubdir;
                             }
                             listForSubdir.Add(excludeState);
                         }
