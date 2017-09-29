@@ -3174,17 +3174,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         GenerateTargetFrameworkMonikerAttribute
 
-    Emit the target framework moniker attribute as  a code fragment into a temporary source file for the compiler.
+    Emit the target framework moniker attribute as  a code fragment into a source file for the compiler.
     ============================================================
     -->
   <PropertyGroup Condition="'$(TargetFrameworkMoniker)' != ''">
-    <!-- Do not clean if we are going to default the path to the temp directory -->
-    <TargetFrameworkMonikerAssemblyAttributesFileClean Condition="'$(TargetFrameworkMonikerAssemblyAttributesFileClean)' == '' and '$(TargetFrameworkMonikerAssemblyAttributesPath)' != ''">true</TargetFrameworkMonikerAssemblyAttributesFileClean>
-    <TargetFrameworkMonikerAssemblyAttributesPath Condition="'$(TargetFrameworkMonikerAssemblyAttributesPath)' == ''">$([System.IO.Path]::Combine('$([System.IO.Path]::GetTempPath())','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <GenerateTargetFrameworkAttribute Condition="'$(GenerateTargetFrameworkAttribute)' == '' and '$(TargetFrameworkMoniker)' != '' and '$(TargetingClr2Framework)' != 'true'">true</GenerateTargetFrameworkAttribute>
+    <GenerateTargetFrameworkAttribute Condition="'$(GenerateTargetFrameworkAttribute)' == '' And '$(TargetingClr2Framework)' != 'true'">true</GenerateTargetFrameworkAttribute>
+    <TargetFrameworkMonikerAssemblyAttributesPath Condition="'$(TargetFrameworkMonikerAssemblyAttributesPath)' == ''">$([System.IO.Path]::Combine('$(BaseIntermediateOutputPath)','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
+    <TargetFrameworkMonikerAssemblyAttributesFileClean Condition="'$(TargetFrameworkMonikerAssemblyAttributesFileClean)' == '' And '$(GenerateTargetFrameworkAttribute)' == 'true'">true</TargetFrameworkMonikerAssemblyAttributesFileClean>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkMonikerAssemblyAttributesFileClean)' == 'true'">
@@ -3198,19 +3194,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)"
           Condition="'$(GenerateTargetFrameworkAttribute)' == 'true'">
 
-    <!-- This is a file shared between projects so we have to take care to handle simultaneous writes (by ContinueOnError)
-             and a race between clean from one project and build from another (by not adding to FilesWritten so it doesn't clean) -->
     <WriteLinesToFile
         File="$(TargetFrameworkMonikerAssemblyAttributesPath)"
         Lines="$(TargetFrameworkMonikerAssemblyAttributeText)"
         Overwrite="true"
-        ContinueOnError="true"
         Condition="'@(Compile)' != '' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''"
         />
 
     <ItemGroup Condition="'@(Compile)' != '' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''">
       <Compile Include="$(TargetFrameworkMonikerAssemblyAttributesPath)"/>
-      <!-- Do not put in FileWrites: this is a file shared between projects in %temp%, and cleaning it would create a race between projects during rebuild -->
     </ItemGroup>
   </Target>
 
