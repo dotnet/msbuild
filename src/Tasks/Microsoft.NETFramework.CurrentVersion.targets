@@ -97,7 +97,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetPlatformIdentifier)' == 'Portable'">true</_HasReferenceToSystemRuntime>
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetFrameworkIdentifier)' == '.NETStandard' and '%(_ResolvedProjectReferencePaths.TargetFrameworkVersion)' &lt; '2.0'">true</_HasReferenceToSystemRuntime>
 
-      <_HasReferenceToNETStandard Condition="'$(DependsOnNETStandard)' == 'true'">true</_HasReferenceToNETStandard>
+      <_HasReferenceToNETStandard Condition="'$(_DependsOnNETStandard)' == 'true'">true</_HasReferenceToNETStandard>
       <_HasReferenceToNETStandard Condition="'%(_ResolvedProjectReferencePaths.TargetFrameworkIdentifier)' == '.NETStandard' and '%(_ResolvedProjectReferencePaths.TargetFrameworkVersion)' &gt;= '2.0'">true</_HasReferenceToNETStandard>
     </PropertyGroup>
 

@@ -2040,7 +2040,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="SuggestedRedirects" ItemName="SuggestedBindingRedirects"/>
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="DependsOnSystemRuntime" PropertyName="DependsOnSystemRuntime"/>
-      <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard"/>
+      <Output TaskParameter="DependsOnNETStandard" PropertyName="_DependsOnNETStandard"/>
     </ResolveAssemblyReference>
   </Target>
 
