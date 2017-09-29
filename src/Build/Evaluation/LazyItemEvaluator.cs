@@ -10,6 +10,7 @@ using Microsoft.Build.Debugging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -44,6 +45,11 @@ namespace Microsoft.Build.Evaluation
         private Dictionary<string, LazyItemList> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Cache used for caching IO operation results
+        /// </summary>
+        private readonly ConcurrentDictionary<string, ImmutableArray<string>> _entriesCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext)
         {

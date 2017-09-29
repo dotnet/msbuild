@@ -99,7 +99,8 @@ namespace Microsoft.Build.Evaluation
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                             _rootDirectory,
                             glob,
-                            excludePatternsForGlobs
+                            excludePatternsForGlobs,
+                            entriesCache: EntriesCache
                             );
 
                         // itemsToAdd might grow 0 or more times during the following iteration. Proactively increase its capacity to ensure only one growth happens

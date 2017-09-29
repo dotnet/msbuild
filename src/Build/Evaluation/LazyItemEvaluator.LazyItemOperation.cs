@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -43,6 +44,11 @@ namespace Microsoft.Build.Evaluation
 
                 _itemSpec.Expander = _expander;
             }
+
+            /// <summary>
+            /// Cache used for caching IO operation results
+            /// </summary>
+            protected ConcurrentDictionary<string, ImmutableArray<string>> EntriesCache => _lazyEvaluator._entriesCache;
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {

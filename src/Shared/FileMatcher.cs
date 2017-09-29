@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
@@ -15,6 +16,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Threading.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Shared
@@ -71,8 +74,8 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern">The file pattern.</param>
         /// <param name="projectDirectory"></param>
         /// <param name="stripProjectDirectory"></param>
-        /// <returns>The array of filesystem entries.</returns>
-        internal delegate string[] GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
+        /// <returns>An immutable array of filesystem entries.</returns>
+        internal delegate ImmutableArray<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
 
         internal static void ClearFileEnumerationsCache()
         {
@@ -119,39 +122,39 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectory">The directory for the project within which the call is made</param>
         /// <param name="stripProjectDirectory">If true the project directory should be stripped</param>
         /// <returns></returns>
-        private static string[] GetAccessibleFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        private static ImmutableArray<string> GetAccessibleFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
             path = FileUtilities.FixFilePath(path);
-            string[] files = null;
             switch (entityType)
             {
-                case FileSystemEntity.Files: files = GetAccessibleFiles(path, pattern, projectDirectory, stripProjectDirectory); break;
-                case FileSystemEntity.Directories: files = GetAccessibleDirectories(path, pattern); break;
-                case FileSystemEntity.FilesAndDirectories: files = GetAccessibleFilesAndDirectories(path, pattern); break;
+                case FileSystemEntity.Files: return GetAccessibleFiles(path, pattern, projectDirectory, stripProjectDirectory);
+                case FileSystemEntity.Directories: return GetAccessibleDirectories(path, pattern);
+                case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(path, pattern);
                 default:
                     ErrorUtilities.VerifyThrow(false, "Unexpected filesystem entity type.");
                     break;
             }
-
-            return files;
+            return ImmutableArray<string>.Empty;
         }
 
         /// <summary>
-        /// Returns an array of file system entries matching the specified search criteria. Inaccessible or non-existent file
+        /// Returns an immutable array of file system entries matching the specified search criteria. Inaccessible or non-existent file
         /// system entries are skipped.
         /// </summary>
         /// <param name="path"></param>
         /// <param name="pattern"></param>
-        /// <returns>Array of matching file system entries (can be empty).</returns>
-        private static string[] GetAccessibleFilesAndDirectories(string path, string pattern)
+        /// <returns>An immutable array of matching file system entries (can be empty).</returns>
+        private static ImmutableArray<string> GetAccessibleFilesAndDirectories(string path, string pattern)
         {
-            string[] entries = null;
-
             if (Directory.Exists(path))
             {
                 try
                 {
-                    entries = Directory.GetFileSystemEntries(path, pattern);
+                    return (ShouldEnforceMatching(pattern)
+                        ? Directory.EnumerateFileSystemEntries(path, pattern)
+                            .Where(o => IsMatch(Path.GetFileName(o), pattern, true))
+                        : Directory.EnumerateFileSystemEntries(path, pattern)
+                    ).ToImmutableArray();
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -164,17 +167,37 @@ namespace Microsoft.Build.Shared
                     // do nothing
                 }
             }
-
-            if (entries == null)
-            {
-                entries = Array.Empty<string>();
-            }
-
-            return entries;
+            return ImmutableArray<string>.Empty;
         }
 
         /// <summary>
-        /// Same as Directory.GetFiles(...) except that files that
+        /// Determine if the given search pattern will match loosely on Windows
+        /// </summary>
+        /// <param name="searchPattern">The search pattern to check</param>
+        /// <returns></returns>
+        private static bool ShouldEnforceMatching(string searchPattern)
+        {
+            if (!NativeMethodsShared.IsWindows || searchPattern == null)
+            {
+                return false;
+            }
+            // NOTE: Windows matches loosely in three cases (in the absence of the * wildcard in the extension):
+            // 1) if the extension ends with the ? wildcard, it matches files with shorter extensions also e.g. "file.tx?" would
+            //    match both "file.txt" and "file.tx"
+            // 2) if the extension is three characters, and the filename contains the * wildcard, it matches files with longer
+            //    extensions that start with the same three characters e.g. "*.htm" would match both "file.htm" and "file.html"
+            // 3) if the ? wildcard is to the left of a period, it matches files with shorter name e.g. ???.txt would match
+            //    foo.txt, fo.txt and also f.txt
+            return searchPattern.IndexOf("?.", StringComparison.Ordinal) != -1 ||
+                   (
+                       Path.GetExtension(searchPattern).Length == (3 + 1 /* +1 for the period */) &&
+                       searchPattern.IndexOf('*') != -1
+                   ) ||
+                   searchPattern.EndsWith("?", StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Same as Directory.EnumerateFiles(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
         /// 
         /// Other exceptions are passed through.
@@ -184,7 +207,7 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectory">The project directory</param>
         /// <param name="stripProjectDirectory"></param>
         /// <returns>Files that can be accessed.</returns>
-        private static string[] GetAccessibleFiles
+        private static ImmutableArray<string> GetAccessibleFiles
         (
             string path,
             string filespec,     // can be null
@@ -198,15 +221,24 @@ namespace Microsoft.Build.Shared
                 string dir = ((path.Length == 0) ? s_thisDirectory : path);
 
                 // get all files in specified directory, unless a file-spec has been provided
-                string[] files = (filespec == null)
-                    ? Directory.GetFiles(dir)
-                    : Directory.GetFiles(dir, filespec);
-
+                IEnumerable<string> files;
+                if (filespec == null)
+                {
+                    files = Directory.EnumerateFiles(dir);
+                }
+                else
+                {
+                    files = Directory.EnumerateFiles(dir, filespec);
+                    if (ShouldEnforceMatching(filespec))
+                    {
+                        files = files.Where(o => IsMatch(Path.GetFileName(o), filespec, true));
+                    }
+                }
                 // If the Item is based on a relative path we need to strip
                 // the current directory from the front
                 if (stripProjectDirectory)
                 {
-                    RemoveProjectDirectory(files, projectDirectory);
+                    files = RemoveProjectDirectory(files, projectDirectory);
                 }
                 // Files in the current directory are coming back with a ".\"
                 // prepended to them.  We need to remove this; it breaks the
@@ -215,25 +247,25 @@ namespace Microsoft.Build.Shared
                 // didn't itself contain a ".\".
                 else if (!path.StartsWith(s_thisDirectory, StringComparison.Ordinal))
                 {
-                    RemoveInitialDotSlash(files);
+                    files = RemoveInitialDotSlash(files);
                 }
 
-                return files;
+                return files.ToImmutableArray();
             }
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return Array.Empty<string>();
+                return ImmutableArray<string>.Empty;
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return Array.Empty<string>();
+                return ImmutableArray<string>.Empty;
             }
         }
 
         /// <summary>
-        /// Same as Directory.GetDirectories(...) except that files that
+        /// Same as Directory.EnumerateDirectories(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
         /// 
         /// Other exceptions are passed through.
@@ -241,7 +273,7 @@ namespace Microsoft.Build.Shared
         /// <param name="path">The path.</param>
         /// <param name="pattern">Pattern to match</param>
         /// <returns>Accessible directories.</returns>
-        private static string[] GetAccessibleDirectories
+        private static ImmutableArray<string> GetAccessibleDirectories
         (
             string path,
             string pattern
@@ -249,15 +281,19 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                string[] directories = null;
+                IEnumerable<string> directories = null;
 
                 if (pattern == null)
                 {
-                    directories = Directory.GetDirectories((path.Length == 0) ? s_thisDirectory : path);
+                    directories = Directory.EnumerateDirectories((path.Length == 0) ? s_thisDirectory : path);
                 }
                 else
                 {
-                    directories = Directory.GetDirectories((path.Length == 0) ? s_thisDirectory : path, pattern);
+                    directories = Directory.EnumerateDirectories((path.Length == 0) ? s_thisDirectory : path, pattern);
+                    if (ShouldEnforceMatching(pattern))
+                    {
+                        directories = directories.Where(o => IsMatch(Path.GetFileName(o), pattern, true));
+                    }
                 }
 
                 // Subdirectories in the current directory are coming back with a ".\"
@@ -267,20 +303,20 @@ namespace Microsoft.Build.Shared
                 // didn't itself contain a ".\".
                 if (!path.StartsWith(s_thisDirectory, StringComparison.Ordinal))
                 {
-                    RemoveInitialDotSlash(directories);
+                    directories = RemoveInitialDotSlash(directories);
                 }
 
-                return directories;
+                return directories.ToImmutableArray();
             }
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return Array.Empty<string>();
+                return ImmutableArray<string>.Empty;
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return Array.Empty<string>();
+                return ImmutableArray<string>.Empty;
             }
         }
 
@@ -372,7 +408,7 @@ namespace Microsoft.Build.Shared
                     else
                     {
                         // getFileSystemEntries(...) returns an empty array if longPath doesn't exist.
-                        string[] entries = getFileSystemEntries(FileSystemEntity.FilesAndDirectories, longPath, parts[i], null, false);
+                        ImmutableArray<string> entries = getFileSystemEntries(FileSystemEntity.FilesAndDirectories, longPath, parts[i], null, false);
 
                         if (0 == entries.Length)
                         {
@@ -547,16 +583,20 @@ namespace Microsoft.Build.Shared
         /// Removes the leading ".\" from all of the paths in the array. 
         /// </summary>
         /// <param name="paths">Paths to remove .\ from.</param>
-        private static void RemoveInitialDotSlash
+        private static IEnumerable<string> RemoveInitialDotSlash
         (
-            string[] paths
+            IEnumerable<string> paths
         )
         {
-            for (int i = 0; i < paths.Length; i++)
+            foreach (string path in paths)
             {
-                if (paths[i].StartsWith(s_thisDirectory, StringComparison.Ordinal))
+                if (path.StartsWith(s_thisDirectory, StringComparison.Ordinal))
                 {
-                    paths[i] = paths[i].Substring(2);
+                    yield return path.Substring(2);
+                }
+                else
+                {
+                    yield return path;
                 }
             }
         }
@@ -576,53 +616,58 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="paths">Paths to remove current directory from.</param>
         /// <param name="projectDirectory"></param>
-        internal static void RemoveProjectDirectory
+        internal static IEnumerable<string> RemoveProjectDirectory
         (
-            string[] paths,
+            IEnumerable<string> paths,
             string projectDirectory
         )
         {
             bool directoryLastCharIsSeparator = IsDirectorySeparator(projectDirectory[projectDirectory.Length - 1]);
-            for (int i = 0; i < paths.Length; i++)
+            foreach (string path in paths)
             {
-                if (paths[i].StartsWith(projectDirectory, StringComparison.Ordinal))
+                if (path.StartsWith(projectDirectory, StringComparison.Ordinal))
                 {
                     // If the project directory did not end in a slash we need to check to see if the next char in the path is a slash
                     if (!directoryLastCharIsSeparator)
                     {
                         //If the next char after the project directory is not a slash, skip this path
-                        if (paths[i].Length <= projectDirectory.Length || !IsDirectorySeparator(paths[i][projectDirectory.Length]))
+                        if (path.Length <= projectDirectory.Length || !IsDirectorySeparator(path[projectDirectory.Length]))
                         {
+                            yield return path;
                             continue;
                         }
-                        paths[i] = paths[i].Substring(projectDirectory.Length + 1);
+                        yield return path.Substring(projectDirectory.Length + 1);
                     }
                     else
                     {
-                        paths[i] = paths[i].Substring(projectDirectory.Length);
+                        yield return path.Substring(projectDirectory.Length);
                     }
+                }
+                else
+                {
+                    yield return path;
                 }
             }
         }
 
         struct RecursiveStepResult
         {
-            public string[] Files;
-            public string[] Subdirs;
             public string RemainingWildcardDirectory;
+            public bool ConsiderFiles;
+            public bool NeedsToProcessEachFile;
+            public string DirectoryPattern;
+            public bool NeedsDirectoryRecursion;
         }
 
         class FilesSearchData
         {
             public FilesSearchData(
                 string filespec,                // can be null
-                int extensionLengthToEnforce,   // only relevant when filespec is not null
                 Regex regexFileMatch,           // can be null
                 bool needsRecursion
                 )
             {
                 Filespec = filespec;
-                ExtensionLengthToEnforce = extensionLengthToEnforce;
                 RegexFileMatch = regexFileMatch;
                 NeedsRecursion = needsRecursion;
             }
@@ -631,7 +676,6 @@ namespace Microsoft.Build.Shared
             /// The filespec.
             /// </summary>
             public string Filespec { get; }
-            public int ExtensionLengthToEnforce { get; }
             /// <summary>
             /// Wild-card matching.
             /// </summary>
@@ -668,15 +712,17 @@ namespace Microsoft.Build.Shared
         /// <param name="getFileSystemEntries">Delegate.</param>
         /// <param name="searchesToExclude">Patterns to exclude from the results</param>
         /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Keys assume paths are normalized with forward slashes and no trailing slashes</param>
+        /// <param name="taskOptions">Options for tuning the parallelization of subdirectories</param>
         private static void GetFilesRecursive
         (
-            IList<string> listOfFiles,
+            ConcurrentStack<List<string>> listOfFiles,
             RecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
             GetFileSystemEntries getFileSystemEntries,
             IList<RecursionState> searchesToExclude,
-            Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs
+            Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
+            TaskOptions taskOptions
         )
         {
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec== null) || (recursionState.SearchData.RegexFileMatch == null),
@@ -687,14 +733,19 @@ namespace Microsoft.Build.Shared
 
             ErrorUtilities.VerifyThrow(recursionState.RemainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
 
+            RecursiveStepResult[] excludeNextSteps = null;
             //  Determine if any of searchesToExclude is necessarily a superset of the results that will be returned.
             //  This means all results will be excluded and we should bail out now.
             if (searchesToExclude != null)
             {
-                foreach (var searchToExclude in searchesToExclude)
+                excludeNextSteps = new RecursiveStepResult[searchesToExclude.Count];
+                for (int i = 0; i < searchesToExclude.Count; i++)
                 {
+                    RecursionState searchToExclude = searchesToExclude[i];
                     //  The BaseDirectory of all the exclude searches should be the same as the include one
                     Debug.Assert(FileUtilities.PathsEqual(searchToExclude.BaseDirectory, recursionState.BaseDirectory), "Expected exclude search base directory to match include search base directory");
+
+                    excludeNextSteps[i] = GetFilesRecursiveStep(searchesToExclude[i]);
 
                     //  We can exclude all results in this folder if:
                     if (
@@ -705,8 +756,7 @@ namespace Microsoft.Build.Shared
                         //  The exclude search will match ALL filenames OR
                         (searchToExclude.SearchData.Filespec == "*" || searchToExclude.SearchData.Filespec == "*.*" ||
                             //  The exclude search filename pattern matches the include search's pattern
-                            (searchToExclude.SearchData.Filespec == recursionState.SearchData.Filespec &&
-                            searchToExclude.SearchData.ExtensionLengthToEnforce == recursionState.SearchData.ExtensionLengthToEnforce)))
+                            searchToExclude.SearchData.Filespec == recursionState.SearchData.Filespec))
                     {
                         //  We won't get any results from this search that we would end up keeping
                         return;
@@ -714,117 +764,191 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            RecursiveStepResult nextStep = GetFilesRecursiveStep(
-                recursionState,
-                projectDirectory,
-                stripProjectDirectory,
-                getFileSystemEntries);
+            RecursiveStepResult nextStep = GetFilesRecursiveStep(recursionState);
 
-            RecursiveStepResult[] excludeNextSteps = null;
-            if (searchesToExclude != null)
+            List<string> files = null;
+            foreach (string file in GetFilesForStep(nextStep, recursionState, projectDirectory,
+                stripProjectDirectory, getFileSystemEntries))
             {
-                excludeNextSteps = new RecursiveStepResult[searchesToExclude.Count];
-                for (int i = 0; i < searchesToExclude.Count; i++)
-                {
-                    excludeNextSteps[i] = GetFilesRecursiveStep(
-                        searchesToExclude[i],
-                        projectDirectory,
-                        stripProjectDirectory,
-                        getFileSystemEntries);
-                }
-            }
-
-            if (nextStep.Files != null)
-            {
-                HashSet<string> filesToExclude = null;
                 if (excludeNextSteps != null)
                 {
-                    filesToExclude = new HashSet<string>();
-                    foreach (var excludeStep in excludeNextSteps)
+                    bool exclude = false;
+                    for (int i = 0; i < excludeNextSteps.Length; i++)
                     {
-                        if (excludeStep.Files != null)
+                        RecursiveStepResult excludeNextStep = excludeNextSteps[i];
+                        if (excludeNextStep.ConsiderFiles && MatchFileRecursionStep(searchesToExclude[i], file))
                         {
-                            foreach (var file in excludeStep.Files)
-                            {
-                                filesToExclude.Add(file);
-                            }
+                            exclude = true;
+                            break;
+                        }
+                    }
+                    if (exclude)
+                    {
+                        continue;
+                    }
+                }
+                files = files ?? new List<string>();
+                files.Add(file);
+            }
+            // Add all matched files at once to reduce thread contention
+            if (files?.Count > 0)
+            {
+                listOfFiles.Push(files);
+            }
+
+            if (!nextStep.NeedsDirectoryRecursion)
+            {
+                return;
+            }
+
+            Action<string> processSubdirectory = subdir =>
+            {
+                //  RecursionState is a struct so this copies it
+                var newRecursionState = recursionState;
+
+                newRecursionState.BaseDirectory = subdir;
+                newRecursionState.RemainingWildcardDirectory = nextStep.RemainingWildcardDirectory;
+
+                List<RecursionState> newSearchesToExclude = null;
+
+                if (excludeNextSteps != null)
+                {
+                    newSearchesToExclude = new List<RecursionState>();
+
+                    for (int i = 0; i < excludeNextSteps.Length; i++)
+                    {
+                        if (excludeNextSteps[i].NeedsDirectoryRecursion &&
+                            (excludeNextSteps[i].DirectoryPattern == null || IsMatch(Path.GetFileName(subdir), excludeNextSteps[i].DirectoryPattern, true)))
+                        {
+                            RecursionState thisExcludeStep = searchesToExclude[i];
+                            thisExcludeStep.BaseDirectory = subdir;
+                            thisExcludeStep.RemainingWildcardDirectory = excludeNextSteps[i].RemainingWildcardDirectory;
+                            newSearchesToExclude.Add(thisExcludeStep);
                         }
                     }
                 }
 
-                foreach (var file in nextStep.Files)
+                if (searchesToExcludeInSubdirs != null)
                 {
-                    if (filesToExclude == null || !filesToExclude.Contains(file))
+                    List<RecursionState> searchesForSubdir;
+
+                    if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
                     {
-                        listOfFiles.Add(file);
+                        //  We've found the base directory that these exclusions apply to.  So now add them as normal searches
+                        if (newSearchesToExclude == null)
+                        {
+                            newSearchesToExclude = new List<RecursionState>();
+                        }
+                        newSearchesToExclude.AddRange(searchesForSubdir);
+                    }
+                }
+
+                // We never want to strip the project directory from the leaves, because the current 
+                // process directory maybe different
+                GetFilesRecursive(
+                    listOfFiles,
+                    newRecursionState,
+                    projectDirectory,
+                    stripProjectDirectory,
+                    getFileSystemEntries,
+                    newSearchesToExclude,
+                    searchesToExcludeInSubdirs,
+                    taskOptions);
+            };
+
+            // Calcuate the MaxDegreeOfParallelism value in order to prevent too much tasks being running concurrently.
+            int dop = 0;
+            // Lock only when we may be dealing with multiple threads
+            if (taskOptions.MaxTasks > 1 && taskOptions.MaxTasksPerIteration > 1)
+            {
+                // We don't need to lock when there will be only one Parallel.ForEach running
+                // If the condition is true, means that we are going to iterate though the project root folder
+                // by using only one Parallel.ForEach
+                if (taskOptions.MaxTasks == taskOptions.MaxTasksPerIteration)
+                {
+                    dop = taskOptions.AvailableTasks;
+                    taskOptions.AvailableTasks = 0;
+                }
+                else
+                {
+                    lock (taskOptions)
+                    {
+                        dop = Math.Min(taskOptions.MaxTasksPerIteration, taskOptions.AvailableTasks);
+                        taskOptions.AvailableTasks -= dop;
                     }
                 }
             }
-
-            if (nextStep.Subdirs != null)
+            // Use a foreach to reduce the overhead of Parallel.ForEach when we are not running in parallel
+            if (dop < 2)
             {
-                foreach (string subdir in nextStep.Subdirs)
+                foreach (var subdir in getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false))
                 {
-                    //  RecursionState is a struct so this copies it
-                    var newRecursionState = recursionState;
-
-                    newRecursionState.BaseDirectory = subdir;
-                    newRecursionState.RemainingWildcardDirectory = nextStep.RemainingWildcardDirectory;
-
-                    List<RecursionState> newSearchesToExclude = null;
-
-                    if (excludeNextSteps != null)
-                    {
-                        newSearchesToExclude = new List<RecursionState>();
-
-                        for (int i = 0; i < excludeNextSteps.Length; i++)
-                        {
-                            if (excludeNextSteps[i].Subdirs != null &&
-                                excludeNextSteps[i].Subdirs.Any(excludedDir => excludedDir == subdir))
-                            {
-                                RecursionState thisExcludeStep = searchesToExclude[i];
-                                thisExcludeStep.BaseDirectory = subdir;
-                                thisExcludeStep.RemainingWildcardDirectory = excludeNextSteps[i].RemainingWildcardDirectory;
-                                newSearchesToExclude.Add(thisExcludeStep);
-                            }
-                        }
-                    }
-
-                    if (searchesToExcludeInSubdirs != null)
-                    {
-                        List<RecursionState> searchesForSubdir;
-
-                        if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
-                        {
-                            //  We've found the base directory that these exclusions apply to.  So now add them as normal searches
-                            if (newSearchesToExclude == null)
-                            {
-                                newSearchesToExclude = new List<RecursionState>();
-                            }
-                            newSearchesToExclude.AddRange(searchesForSubdir);
-                        }
-                    }
-
-                    // We never want to strip the project directory from the leaves, because the current 
-                    // process directory maybe different
-                    GetFilesRecursive(
-                        listOfFiles,
-                        newRecursionState,
-                        projectDirectory,
-                        stripProjectDirectory,
-                        getFileSystemEntries,
-                        newSearchesToExclude,
-                        searchesToExcludeInSubdirs);
+                    processSubdirectory(subdir);
                 }
+            }
+            else
+            {
+                Parallel.ForEach(
+                    getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false),
+                    new ParallelOptions {MaxDegreeOfParallelism = dop},
+                    processSubdirectory);
+            }
+            if (dop <= 0)
+            {
+                return;
+            }
+            // We don't need to lock if there was only one Parallel.ForEach running
+            // If the condition is true, means that we finished the iteration though the project root folder and
+            // all its subdirectories
+            if (taskOptions.MaxTasks == taskOptions.MaxTasksPerIteration)
+            {
+                taskOptions.AvailableTasks = taskOptions.MaxTasks;
+                return;
+            }
+            lock (taskOptions)
+            {
+                taskOptions.AvailableTasks += dop;
             }
         }
 
-        private static RecursiveStepResult GetFilesRecursiveStep
+        private static IEnumerable<string> GetFilesForStep
         (
+            RecursiveStepResult stepResult,
             RecursionState recursionState,
             string projectDirectory,
             bool stripProjectDirectory,
             GetFileSystemEntries getFileSystemEntries
+        )
+        {
+            if (!stepResult.ConsiderFiles)
+            {
+                return Enumerable.Empty<string>();
+            }
+            IEnumerable<string> files = getFileSystemEntries(FileSystemEntity.Files, recursionState.BaseDirectory,
+                recursionState.SearchData.Filespec, projectDirectory, stripProjectDirectory);
+
+            if (!stepResult.NeedsToProcessEachFile)
+            {
+                return files;
+            }
+            return files.Where(o => MatchFileRecursionStep(recursionState, o));
+        }
+
+        private static bool MatchFileRecursionStep(RecursionState recursionState, string file)
+        {
+            if (recursionState.SearchData.Filespec != null)
+            {
+                return IsMatch(Path.GetFileName(file), recursionState.SearchData.Filespec, true);
+            }
+
+            // if no file-spec provided, match the file to the regular expression
+            // PERF NOTE: Regex.IsMatch() is an expensive operation, so we avoid it whenever possible
+            return recursionState.SearchData.RegexFileMatch.IsMatch(file);
+        }
+
+        private static RecursiveStepResult GetFilesRecursiveStep
+        (
+            RecursionState recursionState
         )
         {
             RecursiveStepResult ret = new RecursiveStepResult();
@@ -845,39 +969,10 @@ namespace Microsoft.Build.Shared
                 // or, we've reached a "**" so everything else is matched recursively.
                 considerFiles = true;
             }
-
+            ret.ConsiderFiles = considerFiles;
             if (considerFiles)
             {
-                string[] files = getFileSystemEntries(FileSystemEntity.Files, recursionState.BaseDirectory,
-                    recursionState.SearchData.Filespec, projectDirectory, stripProjectDirectory);
-
-                bool needToProcessEachFile = recursionState.SearchData.Filespec == null || recursionState.SearchData.ExtensionLengthToEnforce != 0;
-                if (needToProcessEachFile)
-                {
-                    List<string> listOfFiles = new List<string>();
-                    foreach (string file in files)
-                    {
-                        if ((recursionState.SearchData.Filespec != null) ||
-                            // if no file-spec provided, match the file to the regular expression
-                            // PERF NOTE: Regex.IsMatch() is an expensive operation, so we avoid it whenever possible
-                            recursionState.SearchData.RegexFileMatch.IsMatch(file))
-                        {
-                            if ((recursionState.SearchData.Filespec == null) ||
-                                // if we used a file-spec with a "loosely" defined extension
-                                (recursionState.SearchData.ExtensionLengthToEnforce == 0) ||
-                                // discard all files that do not have extensions of the desired length
-                                (Path.GetExtension(file).Length == recursionState.SearchData.ExtensionLengthToEnforce))
-                            {
-                                listOfFiles.Add(file);
-                            }
-                        }
-                    }
-                    ret.Files = listOfFiles.ToArray(); 
-                }
-                else
-                {
-                    ret.Files = files;
-                }
+                ret.NeedsToProcessEachFile = recursionState.SearchData.Filespec == null;
             }
 
             /*
@@ -918,8 +1013,9 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
+                ret.NeedsDirectoryRecursion = true;
                 ret.RemainingWildcardDirectory = recursionState.RemainingWildcardDirectory;
-                ret.Subdirs = getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, pattern, null, false);
+                ret.DirectoryPattern = pattern;
             }
 
             return ret;
@@ -1328,6 +1424,177 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// A wildcard (* and ?) matching algorithm that tests whether the input string matches against the pattern.
+        /// </summary>
+        /// <param name="input">String which is matched against the pattern.</param>
+        /// <param name="pattern">Pattern against which string is matched.</param>
+        /// <param name="ignoreCase">Determines whether ignoring case when comparing two characters</param>
+        internal static bool IsMatch(string input, string pattern, bool ignoreCase)
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+            if (pattern == null)
+            {
+                throw new ArgumentNullException(nameof(pattern));
+            }
+
+            // Parameter lengths
+            int patternLength = pattern.Length;
+            int inputLength = input.Length;
+
+            // Used to save the location when a * wildcard is found in the input string
+            int patternTmpIndex = -1;
+            int inputTmpIndex = -1;
+
+            // Current indexes
+            int patternIndex = 0;
+            int inputIndex = 0;
+
+            // Store the information whether the tail was checked when a pattern "*?" occurred
+            bool tailChecked = false;
+
+#if MONO    // MONO doesn't support local functions
+            Func<char, char, int, int, bool> CompareIgnoreCase = (inputChar, patternChar, iIndex, pIndex) =>
+#else
+            // Function for comparing two characters, ignoring case
+            // PERF NOTE:
+            // Having a local function instead of a variable increases the speed by approx. 2 times.
+            // Passing inputChar and patternChar increases the speed by approx. 10%, when comparing
+            // to using the string indexer. The iIndex and pIndex parameters are only used
+            // when we have to compare two non ASCII characters. Using just string.Compare for
+            // character comparison, would reduce the speed by approx. 5 times.
+            bool CompareIgnoreCase(char inputChar, char patternChar, int iIndex, int pIndex)
+#endif
+            {
+                // We will mostly be comparing ASCII characters, check this first
+                if (inputChar < 128 && patternChar < 128)
+                {
+                    if (inputChar >= 'A' && inputChar <= 'Z' && patternChar >= 'a' && patternChar <= 'z')
+                    {
+                        return inputChar + 32 == patternChar;
+                    }
+                    if (inputChar >= 'a' && inputChar <= 'z' && patternChar >= 'A' && patternChar <= 'Z')
+                    {
+                        return inputChar == patternChar + 32;
+                    }
+                    return inputChar == patternChar;
+                }
+                if (inputChar > 128 && patternChar > 128)
+                {
+                    return string.Compare(input, iIndex, pattern, pIndex, 1, StringComparison.OrdinalIgnoreCase) == 0;
+                }
+                // We don't need to compare, an ASCII character cannot have its lowercase/uppercase outside the ASCII table
+                // and a non ASCII character cannot have its lowercase/uppercase inside the ASCII table
+                return false;
+            }
+#if MONO
+            ; // The end of the CompareIgnoreCase anonymous function
+#endif
+
+            while (inputIndex < inputLength)
+            {
+                if (patternIndex < patternLength)
+                {
+                    // Check if there is a * wildcard first as we can have it also in the input string
+                    if (pattern[patternIndex] == '*')
+                    {
+                        // Skip all * wildcards if there are more than one
+                        while (++patternIndex < patternLength && pattern[patternIndex] == '*') { }
+
+                        // Return if the last character is a * wildcard
+                        if (patternIndex >= patternLength)
+                        {
+                            return true;
+                        }
+
+                        // Mostly, we will be dealing with a file extension pattern e.g. "*.ext", so try to check the tail first
+                        if (!tailChecked)
+                        {
+                            // Iterate from the end of the pattern to the current pattern index
+                            // and hope that there is no * wildcard in order to return earlier
+                            int inputTailIndex = inputLength;
+                            int patternTailIndex = patternLength;
+                            while (patternIndex < patternTailIndex && inputTailIndex > 0)
+                            {
+                                patternTailIndex--;
+                                inputTailIndex--;
+                                // If we encountered a * wildcard we are not sure if it matches as there can be zero or more than one characters
+                                // so we have to fallback to the standard procedure e.g. ("aaaabaaad", "*?b*d")
+                                if (pattern[patternTailIndex] == '*')
+                                {
+                                    break;
+                                }
+                                // If the tail doesn't match, we can safely return e.g. ("aaa", "*b")
+                                if ((
+                                        (!ignoreCase && input[inputTailIndex] != pattern[patternTailIndex]) ||
+                                        (ignoreCase && !CompareIgnoreCase(input[inputTailIndex], pattern[patternTailIndex], patternTailIndex, inputTailIndex))
+                                    ) &&
+                                    pattern[patternTailIndex] != '?')
+                                {
+                                    return false;
+                                }
+                                if (patternIndex == patternTailIndex)
+                                {
+                                    return true;
+                                }
+                            }
+                            // Alter the lengths to the last valid match so that we don't need to match them again
+                            inputLength = inputTailIndex + 1;
+                            patternLength = patternTailIndex + 1;
+                            tailChecked = true; // Make sure that the tail is checked only once
+                        }
+
+                        // Skip to the first character that matches after the *, e.g. ("abcd", "*d")
+                        // The ? wildcard cannot be skipped as we will have a wrong result for e.g. ("aab" "*?b")
+                        if (pattern[patternIndex] != '?')
+                        {
+                            while (
+                                (!ignoreCase && input[inputIndex] != pattern[patternIndex]) ||
+                                (ignoreCase && !CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex)))
+                            {
+                                // Return if there is no character that match e.g. ("aa", "*b")
+                                if (++inputIndex >= inputLength)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                        patternTmpIndex = patternIndex;
+                        inputTmpIndex = inputIndex;
+                        continue;
+                    }
+
+                    // If we have a match, step to the next character
+                    if (
+                        (!ignoreCase && input[inputIndex] == pattern[patternIndex]) ||
+                        (ignoreCase && CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex)) ||
+                        pattern[patternIndex] == '?')
+                    {
+                        patternIndex++;
+                        inputIndex++;
+                        continue;
+                    }
+                }
+                // No match found, if we didn't found a location of a * wildcard, return false e.g. ("ab", "?ab")
+                // otherwise set the location after the previous * wildcard and try again with the next character in the input
+                if (patternTmpIndex < 0)
+                {
+                    return false;
+                }
+                patternIndex = patternTmpIndex;
+                inputIndex = inputTmpIndex++;
+            }
+            // When we reach the end of the input we have to skip all * wildcards as they match also zero characters
+            while (patternIndex < patternLength && pattern[patternIndex] == '*')
+            {
+                patternIndex++;
+            }
+            return patternIndex >= patternLength;
+        }
+
+        /// <summary>
         /// Given a pattern (filespec) and a candidate filename (fileToMatch)
         /// return matching information.
         /// </summary>
@@ -1391,6 +1658,28 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        class TaskOptions
+        {
+            public TaskOptions(int maxTasks)
+            {
+                MaxTasks = maxTasks;
+            }
+            /// <summary>
+            /// The maximum number of tasks that are allowed to run concurrently
+            /// </summary>
+            public readonly int MaxTasks;
+
+            /// <summary>
+            /// The number of currently available tasks
+            /// </summary>
+            public int AvailableTasks;
+
+            /// <summary>
+            /// The maximum number of tasks that Parallel.ForEach may use
+            /// </summary>
+            public int MaxTasksPerIteration;
+        }
+
         /// <summary>
         /// Given a filespec, find the files that match. 
         /// Will never throw IO exceptions: if there is no match, returns the input verbatim.
@@ -1398,14 +1687,30 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
+        /// <param name="entriesCache">Cache used for caching IO operation results</param>
         /// <returns>The array of files.</returns>
         internal static string[] GetFiles
         (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IEnumerable<string> excludeSpecsUnescaped = null
+            IEnumerable<string> excludeSpecsUnescaped = null,
+            ConcurrentDictionary<string, ImmutableArray<string>> entriesCache = null
         )
         {
+            var getFileSystemEntries = entriesCache == null
+                ? s_defaultGetFileSystemEntries
+                : (type, path, pattern, directory, projectDirectory) =>
+                {
+                    // Cache only directories, for files we won't ever hit the cache while open a project
+                    if (type == FileSystemEntity.Directories)
+                    {
+                        return entriesCache.GetOrAdd($"{path};{pattern ?? "*"}",
+                            s => s_defaultGetFileSystemEntries(type, path, pattern,
+                                directory, projectDirectory));
+                    }
+                    return s_defaultGetFileSystemEntries(type, path, pattern, directory, projectDirectory);
+                };
+
             // Possible future improvement: make sure file existence caching happens only at evaluation time, and maybe only within a build session. https://github.com/Microsoft/msbuild/issues/2306
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -1427,7 +1732,7 @@ namespace Microsoft.Build.Shared
                                             projectDirectoryUnescaped,
                                             filespecUnescaped,
                                             excludeSpecsUnescaped,
-                                            s_defaultGetFileSystemEntries,
+                                            getFileSystemEntries,
                                             s_defaultDirectoryExists));
                         }
                     }
@@ -1444,7 +1749,7 @@ namespace Microsoft.Build.Shared
                     projectDirectoryUnescaped,
                     filespecUnescaped,
                     excludeSpecsUnescaped,
-                    s_defaultGetFileSystemEntries,
+                    getFileSystemEntries,
                     s_defaultDirectoryExists);
                 return files;
             }
@@ -1551,29 +1856,9 @@ namespace Microsoft.Build.Shared
                 !IsRecursiveDirectoryMatch(wildcardDirectoryPart);
             // then we need to use the regular expression
 
-            // if we're not using the regular expression, get the file pattern extension
-            string extensionPart = matchWithRegex
-                ? null
-                : Path.GetExtension(filenamePart);
-
-            // check if the file pattern would cause Windows to match more loosely on the extension
-            // NOTE: Windows matches loosely in two cases (in the absence of the * wildcard in the extension):
-            // 1) if the extension ends with the ? wildcard, it matches files with shorter extensions also e.g. "file.tx?" would
-            //    match both "file.txt" and "file.tx"
-            // 2) if the extension is three characters, and the filename contains the * wildcard, it matches files with longer
-            //    extensions that start with the same three characters e.g. "*.htm" would match both "file.htm" and "file.html"
-            bool needToEnforceExtensionLength =
-                    (extensionPart != null) &&
-                    (extensionPart.IndexOf('*') == -1)
-                &&
-                    (extensionPart.EndsWith("?", StringComparison.Ordinal)
-                ||
-                    ((extensionPart.Length == (3 + 1 /* +1 for the period */)) &&
-                    (filenamePart.IndexOf('*') != -1)));
-
             var searchData = new FilesSearchData(
                 // if using the regular expression, ignore the file pattern
-                (matchWithRegex ? null : filenamePart), (needToEnforceExtensionLength ? extensionPart.Length : 0),
+                (matchWithRegex ? null : filenamePart),
                 // if using the file pattern, ignore the regular expression
                 (matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null),
                 needsRecursion);
@@ -1808,7 +2093,7 @@ namespace Microsoft.Build.Shared
                     var excludeBaseDirectory = excludeState.BaseDirectory;
                     var includeBaseDirectory = state.BaseDirectory;
 
-                    if (excludeBaseDirectory != includeBaseDirectory)
+                    if (string.Compare(excludeBaseDirectory, includeBaseDirectory, StringComparison.OrdinalIgnoreCase) != 0)
                     {
                         //  What to do if the BaseDirectory for the exclude search doesn't match the one for inclusion?
                         //  - If paths don't match (one isn't a prefix of the other), then ignore the exclude search.  Examples:
@@ -1822,7 +2107,7 @@ namespace Microsoft.Build.Shared
                         }
                         else if (excludeBaseDirectory.Length > includeBaseDirectory.Length)
                         {
-                            if (!excludeBaseDirectory.StartsWith(includeBaseDirectory))
+                            if (!excludeBaseDirectory.StartsWith(includeBaseDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 //  Exclude path is longer, but doesn't start with include path.  So ignore it.
                                 continue;
@@ -1837,7 +2122,7 @@ namespace Microsoft.Build.Shared
 
                             if (searchesToExcludeInSubdirs == null)
                             {
-                                searchesToExcludeInSubdirs = new Dictionary<string, List<RecursionState>>();
+                                searchesToExcludeInSubdirs = new Dictionary<string, List<RecursionState>>(StringComparer.OrdinalIgnoreCase);
                             }
                             List<RecursionState> listForSubdir;
                             if (!searchesToExcludeInSubdirs.TryGetValue(excludeBaseDirectory, out listForSubdir))
@@ -1851,7 +2136,7 @@ namespace Microsoft.Build.Shared
                         else
                         {
                             //  Exclude base directory length is less than include base directory length.
-                            if (!state.BaseDirectory.StartsWith(excludeState.BaseDirectory))
+                            if (!state.BaseDirectory.StartsWith(excludeState.BaseDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 //  Include path is longer, but doesn't start with the exclude path.  So ignore exclude path
                                 //  (since it won't match anything under the include path)
@@ -1901,17 +2186,27 @@ namespace Microsoft.Build.Shared
             }
 
             /*
-             * Even though we return a string[] we work internally with an IList.
-             * This is because it's cheaper to add items to an IList and this code
+             * Even though we return a string[] we work internally with a ConcurrentStack.
+             * This is because it's cheaper to add items to a ConcurrentStack and this code
              * might potentially do a lot of that.
              */
-            var listOfFiles = new List<string>();
+            var listOfFiles = new ConcurrentStack<List<string>>();
 
             /*
              * Now get the files that match, starting at the lowest fixed directory.
              */
             try
             {
+                // Setup the values for calculating the MaxDegreeOfParallelism option of Parallel.ForEach
+                // Set to use only half processors when we have 4 or more of them, in order to not be too aggresive
+                // By setting MaxTasksPerIteration to the maximum amount of tasks, which means that only one
+                // Parallel.ForEach will run at once, we get a stable number of threads being created.
+                var maxTasks = Math.Max(1, Environment.ProcessorCount / 2);
+                var taskOptions = new TaskOptions(maxTasks)
+                {
+                    AvailableTasks = maxTasks,
+                    MaxTasksPerIteration = maxTasks
+                };
                 GetFilesRecursive(
                     listOfFiles,
                     state,
@@ -1919,7 +2214,18 @@ namespace Microsoft.Build.Shared
                     stripProjectDirectory,
                     getFileSystemEntries,
                     searchesToExclude,
-                    searchesToExcludeInSubdirs);
+                    searchesToExcludeInSubdirs,
+                    taskOptions);
+            }
+            // Catch exceptions that are thrown inside the Parallel.ForEach
+            catch (AggregateException ex)
+            {
+                // Flatten to get exceptions than are thrown inside a nested Parallel.ForEach
+                if (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
+                {
+                    return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                }
+                throw;
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
@@ -1931,8 +2237,8 @@ namespace Microsoft.Build.Shared
              * Build the return array.
              */
             var files = resultsToExclude != null
-                ? listOfFiles.Where(f => !resultsToExclude.Contains(f)).ToArray()
-                : listOfFiles.ToArray();
+                ? listOfFiles.SelectMany(list => list).Where(f => !resultsToExclude.Contains(f)).ToArray()
+                : listOfFiles.SelectMany(list => list).ToArray();
 
             return files;
         }
