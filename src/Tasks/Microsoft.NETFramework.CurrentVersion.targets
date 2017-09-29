@@ -105,7 +105,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)*.dll"/>
     </ItemGroup>
     <ItemGroup Condition="'$(_HasReferenceToNETStandard)' == 'true' And '$(_HasReferenceToSystemRuntime)' != 'true'">
-      <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)netstandard.dll"/>
+      <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)netstandard.dll"
+                                   Condition="Exists('%(DesignTimeFacadeDirectories.Identity)netstandard.dll')"/>
     </ItemGroup>
     <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true' Or '$(_HasReferenceToNETStandard)' == 'true' ">
       <_DesignTimeFacadeAssemblies_Names Include="@(_DesignTimeFacadeAssemblies->'%(FileName)')">
