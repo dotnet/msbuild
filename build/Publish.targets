@@ -39,9 +39,9 @@
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)"
-                     Condition=" '$(IslinuxPortable)' != 'true' "/>
+                     Condition=" '$(PublishNativeInstallers)' == 'true' "/>
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
-                     Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
+                     Condition=" '$(PublishArchives)' == 'true' "/>
       <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg"
                      Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture)*.nupkg"
