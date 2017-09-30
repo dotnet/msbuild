@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
@@ -22,6 +23,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         public ITaskItem[] OtherRuntimeItems { get; set; }
 
         public ITaskItem[] PlatformManifests { get; set; }
+
+        public ITaskItem[] TargetFrameworkDirectories { get; set; }
 
         /// <summary>
         /// NuGet3 and later only.  In the case of a conflict with identical file version information a file from the most preferred package will be chosen.
@@ -75,6 +78,15 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             // we only commit the platform items since its not a conflict if other items share the same filename.
             var platformConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
             var platformItems = PlatformManifests?.SelectMany(pm => PlatformManifestReader.LoadConflictItems(pm.ItemSpec, log)) ?? Enumerable.Empty<ConflictItem>();
+
+            //  Also treat assemblies from FrameworkList.xml as platform assemblies
+            if (TargetFrameworkDirectories != null && TargetFrameworkDirectories.Any())
+            {
+                platformItems = platformItems.Concat(TargetFrameworkDirectories.SelectMany(tfd =>
+                {
+                    return FrameworkListReader.LoadConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
+                }));
+            }
 
             platformConflictScope.ResolveConflicts(platformItems, pi => pi.FileName, pi => { });
             platformConflictScope.ResolveConflicts(referenceItems.Where(ri => !referenceConflicts.Contains(ri.OriginalItem)),
