@@ -332,6 +332,11 @@
         <target state="translated">Die RuntimeIdentifier-Plattform und PlatformTarget müssen übereinstimmen.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorParsingFrameworkListInvalidValue">
+        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="new">Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
