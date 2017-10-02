@@ -886,7 +886,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsSolutionFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".sln", PathComparison));
+            return HasExtension(filename, ".sln");
         }
 
         /// <summary>
@@ -894,7 +894,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", PathComparison));
+            return HasExtension(filename, ".vcproj");
         }
 
         /// <summary>
@@ -902,12 +902,20 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsMetaprojectFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".metaproj", PathComparison));
+            return HasExtension(filename, ".metaproj");
         }
 
         internal static bool IsBinaryLogFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".binlog", PathComparison));
+            return HasExtension(filename, ".binlog");
+        }
+
+        private static bool HasExtension(string filename, string extension)
+        {
+            if (String.IsNullOrEmpty(filename))
+                return false;
+
+            return filename.EndsWith(extension, PathComparison);
         }
 
         /// <summary>
