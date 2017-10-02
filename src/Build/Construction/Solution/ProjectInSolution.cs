@@ -323,8 +323,23 @@ namespace Microsoft.Build.Construction
 
                 if (mainProjectElement != null && mainProjectElement.LocalName == "Project")
                 {
-                    _canBeMSBuildProjectFile = true;
-                    return _canBeMSBuildProjectFile;
+                    // MSBuild supports project files with an empty (supported in Visual Studio 2017) or the default MSBuild
+                    // namespace.
+                    bool emptyNamespace = string.IsNullOrEmpty(mainProjectElement.NamespaceURI);
+                    bool defaultNamespace = String.Compare(mainProjectElement.NamespaceURI,
+                                                XMakeAttributes.defaultXmlNamespace,
+                                                StringComparison.OrdinalIgnoreCase) == 0;
+
+                    // This is a bit of a special case, but an rptproj file will contain a Project with no schema that is
+                    // not an MSBuild file. It will however have ToolsVersion="2.0" which is not supported with an empty
+                    // schema. This is not a great solution, but it should cover the customer reported issue. See:
+                    // https://github.com/Microsoft/msbuild/issues/2064
+                    if (defaultNamespace ||
+                        emptyNamespace && mainProjectElement.GetAttribute("ToolsVersion") != "2.0")
+                    {
+                        _canBeMSBuildProjectFile = true;
+                        return _canBeMSBuildProjectFile;
+                    }
                 }
             }
             // catch all sorts of exceptions - if we encounter any problems here, we just assume the project file is not
