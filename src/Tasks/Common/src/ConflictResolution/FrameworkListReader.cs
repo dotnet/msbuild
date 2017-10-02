@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                 if (string.IsNullOrEmpty(assemblyName))
                 {
-                    string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingFrameworkListInvalidValue,
+                    string errorMessage = string.Format(CultureInfo.CurrentCulture, Strings.ErrorParsingFrameworkListInvalidValue,
                         frameworkListPath,
                         "AssemblyName",
                         assemblyName);
@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 Version assemblyVersion;
                 if (string.IsNullOrEmpty(assemblyVersionString) || !Version.TryParse(assemblyVersionString, out assemblyVersion))
                 {
-                    string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingFrameworkListInvalidValue,
+                    string errorMessage = string.Format(CultureInfo.CurrentCulture, Strings.ErrorParsingFrameworkListInvalidValue,
                         frameworkListPath,
                         "Version",
                         assemblyVersionString);
