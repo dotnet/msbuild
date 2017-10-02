@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Protocol;
+using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Cli.Build.UploadToLinuxPackageRepository
 {
@@ -34,13 +34,13 @@ namespace Microsoft.DotNet.Cli.Build.UploadToLinuxPackageRepository
 
         public async Task<string> Execute(HttpClient client, Uri baseAddress)
         {
-            var debianUploadJsonContent = new Dictionary<string, string>
+            var debianUploadJsonContent = JsonConvert.SerializeObject(new Dictionary<string, string>
             {
                 ["name"] = _packageName,
                 ["version"] = AppendDebianRevisionNumber(_packageVersion),
                 ["fileId"] = _idInRepositoryService.Id,
                 ["repositoryId"] = _repositoryId
-            }.ToJson();
+            });
             var content = new StringContent(debianUploadJsonContent,
                 Encoding.UTF8,
                 "application/json");
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.Build.UploadToLinuxPackageRepository
             {
                 if (!response.IsSuccessStatusCode)
                     throw new FailedToAddPackageToPackageRepositoryException(
-                        $"request:{debianUploadJsonContent} response:{response.ToJson()}");
+                        $"request:{debianUploadJsonContent} response:{JsonConvert.SerializeObject(response)}");
                 return response.Headers.GetValues("Location").Single();
             }
         }

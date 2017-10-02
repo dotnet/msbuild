@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using NuGet.Protocol;
+using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Cli.Build.UploadToLinuxPackageRepository
 {
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Build.UploadToLinuxPackageRepository
                     if (!message.IsSuccessStatusCode)
                     {
                         throw new FailedToAddPackageToPackageRepositoryException(
-                            $"{message.ToJson()} failed to post file to {url} file name:{fileName} pathToPackageToUpload:{_pathToPackageToUpload}");
+                            $"{JsonConvert.SerializeObject(message)} failed to post file to {url} file name:{fileName} pathToPackageToUpload:{_pathToPackageToUpload}");
                     }
                     return await message.Content.ReadAsStringAsync();
                 }
