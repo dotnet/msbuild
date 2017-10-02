@@ -560,6 +560,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\DirectoryContainstwoWinmd\c.winmd",
             @"C:\SystemRuntime\System.Runtime.dll",
             @"C:\SystemRuntime\Portable.dll",
+            @"C:\NetStandard\netstandardlibrary.dll",
+            @"C:\NetStandard\netstandard.dll",
             @"C:\SystemRuntime\Regular.dll",
         };
 
@@ -2401,13 +2403,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Compare(path, @"C:\SystemRuntime\Portable.dll", StringComparison.OrdinalIgnoreCase) == 0)
             {
-                // Simulate a strongly named assembly.
+                // Simulate a portable assembly with a reference to System.Runtime
                 return new AssemblyNameExtension[]
                 {
                     GetAssemblyName(@"C:\SystemRuntime\System.Runtime.dll")
                 };
             }
 
+            if (String.Compare(path, @"C:\NetStandard\netstandardlibrary.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                // Simulate a .NET Standard assembly
+                return new AssemblyNameExtension[]
+                {
+                    GetAssemblyName(@"C:\NetStandard\netstandard.dll")
+                };
+            }
 
             // Use a default list.
             return new AssemblyNameExtension[]

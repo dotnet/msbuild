@@ -93,13 +93,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- Does one of our dependencies reference a System.Runtime-based portable library? -->
       <_HasReferenceToSystemRuntime Condition="'$(DependsOnSystemRuntime)' == 'true'">true</_HasReferenceToSystemRuntime>
+
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetPlatformIdentifier)' == 'Portable'">true</_HasReferenceToSystemRuntime>
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetFrameworkIdentifier)' == '.NETStandard' and '%(_ResolvedProjectReferencePaths.TargetFrameworkVersion)' &lt; '2.0'">true</_HasReferenceToSystemRuntime>
+
+      <_HasReferenceToNETStandard Condition="'$(_DependsOnNETStandard)' == 'true'">true</_HasReferenceToNETStandard>
+      <_HasReferenceToNETStandard Condition="'%(_ResolvedProjectReferencePaths.TargetFrameworkIdentifier)' == '.NETStandard' and '%(_ResolvedProjectReferencePaths.TargetFrameworkVersion)' &gt;= '2.0'">true</_HasReferenceToNETStandard>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true'">
       <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)*.dll"/>
-
+    </ItemGroup>
+    <ItemGroup Condition="'$(_HasReferenceToNETStandard)' == 'true' And '$(_HasReferenceToSystemRuntime)' != 'true'">
+      <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)netstandard.dll"
+                                   Condition="Exists('%(DesignTimeFacadeDirectories.Identity)netstandard.dll')"/>
+    </ItemGroup>
+    <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true' Or '$(_HasReferenceToNETStandard)' == 'true' ">
       <_DesignTimeFacadeAssemblies_Names Include="@(_DesignTimeFacadeAssemblies->'%(FileName)')">
           <OriginalIdentity>%(_DesignTimeFacadeAssemblies.Identity)</OriginalIdentity>
       </_DesignTimeFacadeAssemblies_Names>
