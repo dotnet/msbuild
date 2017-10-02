@@ -17,15 +17,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="NuGet.Build.Tasks" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(CLI_TestPlatform_Version)" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(CLI_TestPlatform_Version)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(CLI_NuGet_Version)" />
-    <!-- The project json migration commands depend on an older version of Roslyn.
-         Lift the version here to match what tool_roslyn depends on (otherwise an older version will
-         be added to the TPA when we crossgen and we won't be able to crossgen tool_roslyn -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
+    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(CLI_Roslyn_Version)">
+      <ExcludeAssets>All</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="CliDeps.Satellites.Roslyn" Version="$(CLI_Roslyn_Satellites_Version)">
+      <ExcludeAssets>All</ExcludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -74,9 +75,25 @@
   <Target Name="PublishRoslyn"
           BeforeTargets="Publish">
           
-    <DotNetPublish ToolPath="$(Stage0Directory)"
-                   Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
+    <ItemGroup>
+      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(CLI_Roslyn_Version)/tools/**/*" />
+      <RoslynSatelliteBits Include="$(NuGetPackagesDir)/clideps.satellites.roslyn/$(CLI_Roslyn_Satellites_Version)/lib/netstandard1.0/**/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(RoslynSatelliteBits)" DestinationFiles="@(RoslynSatelliteBits->'$(RoslynDirectory)/bincore/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <RetargetRuntimeConfigPaths Include="$(RoslynDirectory)/bincore/csc.runtimeconfig.json" />
+      <RetargetRuntimeConfigPaths Include="$(RoslynDirectory)/bincore/vbc.runtimeconfig.json" />
+    </ItemGroup>
+    <PropertyGroup>
+      <ReplacementPattern>"version": ".*"</ReplacementPattern>
+      <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
+    </PropertyGroup>
+    <ReplaceFileContents
+      InputFile="%(RetargetRuntimeConfigPaths.Identity)"
+      DestinationFile="%(RetargetRuntimeConfigPaths.Identity)"
+      ReplacementPatterns="$(ReplacementPattern)"
+      ReplacementStrings="$(ReplacementString)" />
   </Target>
 
   <Target Name="PublishFSharp"
@@ -200,41 +217,72 @@
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
           AfterTargets="PublishMSBuildExtensions">
     <ItemGroup>
+      <RoslynFiles Include="$(PublishDir)Roslyn\bincore\**\*" />
+      <FSharpFiles Include="$(PublishDir)FSharp\**\*" Exclude="$(PublishDir)FSharp\FSharp.Build.dll" />
+      <RemainingFiles Include="$(PublishDir)**\*" Exclude="@(RoslynFiles);@(FSharpFiles)" />
+
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
-      <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
+      <RemainingFiles Remove="$(PublishDir)TestHost*\**\*" />
+      <RemainingFiles Remove="$(PublishDir)Sdks\**\*" />
 
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
-      <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
+      <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
 
       <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
-      <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
+      <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
     </ItemGroup>
 
-    <AddMetadataIsPE Items="@(SdkFiles)">
-      <Output TaskParameter="ResultItems" ItemName="SdkFilesWithPEMarker" />
+    <AddMetadataIsPE Items="@(RoslynFiles)">
+      <Output TaskParameter="ResultItems" ItemName="RoslynFilesWithPEMarker" />
+    </AddMetadataIsPE>
+    <AddMetadataIsPE Items="@(FSharpFiles)">
+      <Output TaskParameter="ResultItems" ItemName="FSharpFilesWithPEMarker" />
+    </AddMetadataIsPE>
+    <AddMetadataIsPE Items="@(RemainingFiles)">
+      <Output TaskParameter="ResultItems" ItemName="RemainingFilesWithPEMarker" />
     </AddMetadataIsPE>
 
     <ItemGroup>
-      <CrossgenTargets Include="%(SdkFilesWithPEMarker.FullPath)" Condition=" '%(SdkFilesWithPEMarker.IsPE)' == 'True' " />
-    </ItemGroup>
+      <RoslynTargets Include="%(RoslynFilesWithPEMarker.FullPath)" Condition=" '%(RoslynFilesWithPEMarker.IsPE)' == 'True' " />
+      <FSharpTargets Include="%(FSharpFilesWithPEMarker.FullPath)" Condition=" '%(FSharpFilesWithPEMarker.IsPE)' == 'True' " />
+      <RemainingTargets Include="%(RemainingFilesWithPEMarker.FullPath)" Condition=" '%(RemainingFilesWithPEMarker.IsPE)' == 'True' " />
 
-    <RemoveDuplicates Inputs="@(SdkFiles->'%(RootDir)%(Directory)')">
-      <Output TaskParameter="Filtered" ItemName="PublishDirSubDirectories" />
-    </RemoveDuplicates>
+      <RoslynFolders Include="@(RoslynTargets-&gt;DirectoryName()-&gt;Distinct())" />
+      <FSharpFolders Include="@(FSharpTargets-&gt;DirectoryName()-&gt;Distinct())" />
+      <RemainingFolders Include="@(RemainingTargets-&gt;DirectoryName()-&gt;Distinct())" />
+
+      <!-- FSharp.Build.dll causes the FSharp folder to be included. Remove it, as we don't want other FSharp dlls being included in the crossgen. -->
+      <RemainingFolders Remove="$(PublishDir)FSharp\**\*" />
+    </ItemGroup>
 
     <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
     <Chmod Condition=" '$(OSName)' != 'win' "
            Glob="$(CrossgenPath)"
            Mode="u+x" />
 
-    <Crossgen SourceAssembly="%(CrossgenTargets.FullPath)"
-              DestinationPath="%(CrossgenTargets.FullPath)"
-              JITPath="$(LibCLRJitPath)"
-              CrossgenPath="$(CrossgenPath)"
-              ReadyToRun="True"
-              PlatformAssemblyPaths="@(PlatformAssemblies);
-                                     @(PublishDirSubDirectories);
-                                     $(SharedFrameworkNameVersionPath)" />
+    <Crossgen
+        SourceAssembly="%(RoslynTargets.FullPath)"
+        DestinationPath="%(RoslynTargets.FullPath)"
+        JITPath="$(LibCLRJitPath)"
+        CrossgenPath="$(CrossgenPath)"
+        ReadyToRun="True"
+        PlatformAssemblyPaths="@(PlatformAssemblies);@(RoslynFolders);$(SharedFrameworkNameVersionPath)" />
+
+    <Crossgen
+        SourceAssembly="%(FSharpTargets.FullPath)"
+        DestinationPath="%(FSharpTargets.FullPath)"
+        JITPath="$(LibCLRJitPath)"
+        CrossgenPath="$(CrossgenPath)"
+        ReadyToRun="True"
+        PlatformAssemblyPaths="@(PlatformAssemblies);@(FSharpFolders);$(SharedFrameworkNameVersionPath)" />
+
+    <Crossgen
+        SourceAssembly="%(RemainingTargets.FullPath)"
+        DestinationPath="%(RemainingTargets.FullPath)"
+        JITPath="$(LibCLRJitPath)"
+        CrossgenPath="$(CrossgenPath)"
+        ReadyToRun="True"
+        PlatformAssemblyPaths="@(PlatformAssemblies);@(RemainingFolders);$(SharedFrameworkNameVersionPath)" />
   </Target>
 
   <Target Name="ChmodPublishDir"
@@ -243,8 +291,8 @@
     
     <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
-    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
-    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunVbc.sh" />
+    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/bincore/RunCsc" />
+    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/bincore/RunVbc" />
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
   </Target>
 
