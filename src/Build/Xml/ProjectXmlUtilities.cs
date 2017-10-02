@@ -13,7 +13,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// Project-related Xml utilities
     /// </summary>
-    internal class ProjectXmlUtilities
+    internal static class ProjectXmlUtilities
     {
         /// <summary>
         /// Gets child elements, ignoring whitespace and comments.
