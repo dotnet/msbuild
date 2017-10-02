@@ -17,8 +17,7 @@ namespace Microsoft.Build.Internal
     {
         /// <summary>
         /// Gets child elements, ignoring whitespace and comments.
-        /// Verifies xml namespace of elements is the MSBuild namespace.
-        /// Throws InvalidProjectFileException for elements in the wrong namespace, and unexpected XML node types
+        /// Throws InvalidProjectFileException for unexpected XML node types.
         /// </summary>
         internal static List<XmlElementWithLocation> GetVerifyThrowProjectChildElements(XmlElementWithLocation element)
         {
@@ -27,8 +26,7 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// Gets child elements, ignoring whitespace and comments.
-        /// Verifies xml namespace of elements is the MSBuild namespace.
-        /// Throws InvalidProjectFileException for elements in the wrong namespace, and (if parameter is set) unexpected XML node types
+        /// Throws InvalidProjectFileException for unexpected XML node types if parameter is set.
         /// </summary>
         private static List<XmlElementWithLocation> GetChildElements(XmlElementWithLocation element, bool throwForInvalidNodeTypes)
         {
