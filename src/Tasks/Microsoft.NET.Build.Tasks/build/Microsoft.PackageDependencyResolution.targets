@@ -278,9 +278,13 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeActiveTFMFileDependencies">
     <ItemGroup>
       <_ContentFileDeps Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
-      <__ContentFileDefs Include="@(FileDefinitions)" Exclude="@(_ContentFileDeps)" />
-      <_ContentFileDefs Include="@(FileDefinitions)" Exclude="@(__ContentFileDefs)" />
     </ItemGroup>
+    <JoinItems Left="@(_ContentFileDeps)"
+               Right="@(FileDefinitions)"
+               RightMetadata="*"
+                 >
+      <Output TaskParameter="JoinResult" ItemName="_ContentFileDefs" />
+    </JoinItems>
 
     <ProduceContentAssets
       ContentFileDefinitions="@(_ContentFileDefs)"
@@ -382,11 +386,15 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
       <_CompileFileItems Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
-
-      <!-- Get corresponding file definitions -->
-      <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
-      <_CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(__CompileFileDefinitions)" />
-
+    </ItemGroup>
+    <!-- Get corresponding file definitions -->
+    <JoinItems Left="@(_CompileFileItems)"
+               Right="@(FileDefinitions)"
+               RightMetadata="*"
+                 >
+      <Output TaskParameter="JoinResult" ItemName="_CompileFileDefinitions" />
+    </JoinItems>
+    <ItemGroup>
       <ResolvedCompileFileDefinitions Include="@(_CompileFileDefinitions->'%(ResolvedPath)')">
         <Private>false</Private>
         <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
@@ -468,11 +476,15 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="_TransitiveProjectReferences">
     <ItemGroup>
       <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
-
-      <!-- Get corresponding package definitions -->
-      <__TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(_TransitiveProjectDependencies)" />
-      <_TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(__TransitiveProjectDefinitions)" />
-      
+    </ItemGroup>
+    <!-- Get corresponding package definitions -->
+    <JoinItems Left="@(_TransitiveProjectDependencies)"
+               Right="@(PackageDefinitions)"
+               RightMetadata="*"
+                 >
+      <Output TaskParameter="JoinResult" ItemName="_TransitiveProjectDefinitions" />
+    </JoinItems>
+    <ItemGroup>
       <_TransitiveProjectReferences Include="%(_TransitiveProjectDefinitions.Path)">
         <ResolvedPath>%(_TransitiveProjectDefinitions.ResolvedPath)</ResolvedPath>
       </_TransitiveProjectReferences>
