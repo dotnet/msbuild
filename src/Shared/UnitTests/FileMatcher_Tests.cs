@@ -913,9 +913,9 @@ namespace Microsoft.Build.UnitTests
                 @"src/test/dir\a\b\c\a.cs",
             }
             )]
-        public void IncludePatternShouldPreserveUserSlashesInFixedDirPart(string include, string[] matching)
+        public void IncludePatternShouldNotPreserveUserSlashesInFixedDirPart(string include, string[] matching)
         {
-            MatchDriver(include, null, matching, null, null, normalizePaths: false);
+            MatchDriver(include, null, matching, null, null, normalizeAllPaths: false, normalizeExpectedMatchingFiles: true);
         }
 
         [Theory]
@@ -1212,7 +1212,7 @@ namespace Microsoft.Build.UnitTests
                             )
                             {
                                 ++hits;
-                                files.Add(candidate);
+                                files.Add(FileMatcher.Normalize(candidate));
                             }
                             else if (pattern.Substring(0, 2) == "*.") // Match patterns like *.cs
                             {
@@ -1221,7 +1221,7 @@ namespace Microsoft.Build.UnitTests
                                 if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
                                 {
                                     ++hits;
-                                    files.Add(candidate);
+                                    files.Add(FileMatcher.Normalize(candidate));
                                 }
                             }
                             else if (pattern.Substring(pattern.Length - 4, 2) == ".?") // Match patterns like foo.?xt
@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.UnitTests
                                     if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
                                     {
                                         ++hits;
-                                        files.Add(candidate);
+                                        files.Add(FileMatcher.Normalize(candidate));
                                     }
                                 }
                             }
@@ -1293,7 +1293,7 @@ namespace Microsoft.Build.UnitTests
                                     || pattern == null
                                 )
                                 {
-                                    directories.Add(match);
+                                    directories.Add(FileMatcher.Normalize(match));
                                 }
                                 else if    // Match patterns like ?emp
                                     (
@@ -1305,7 +1305,7 @@ namespace Microsoft.Build.UnitTests
                                     string baseMatchTail = baseMatch.Substring(1);
                                     if (String.Compare(tail, baseMatchTail, StringComparison.OrdinalIgnoreCase) == 0)
                                     {
-                                        directories.Add(match);
+                                        directories.Add(FileMatcher.Normalize(match));
                                     }
                                 }
                                 else
@@ -1534,7 +1534,7 @@ namespace Microsoft.Build.UnitTests
             MatchDriver(forwardSlashFileSpec, forwardSlashExcludeSpecs, matchingFiles, nonmatchingFiles, untouchableFiles);
         }
 
-        private static void MatchDriver(string filespec, string[] excludeFilespecs, string[] matchingFiles, string[] nonmatchingFiles, string[] untouchableFiles, bool normalizePaths = true)
+        private static void MatchDriver(string filespec, string[] excludeFilespecs, string[] matchingFiles, string[] nonmatchingFiles, string[] untouchableFiles, bool normalizeAllPaths = true, bool normalizeExpectedMatchingFiles = false)
         {
             MockFileSystem mockFileSystem = new MockFileSystem(matchingFiles, nonmatchingFiles, untouchableFiles);
             string[] files = FileMatcher.GetFiles
@@ -1546,14 +1546,15 @@ namespace Microsoft.Build.UnitTests
                 new DirectoryExists(mockFileSystem.DirectoryExists)
             );
 
-            Func<string[], string[]> normalize = (paths => normalizePaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
+            Func<string[], string[]> normalizeAllFunc = (paths => normalizeAllPaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
+            Func<string[], string[]> normalizeMatching = (paths => normalizeExpectedMatchingFiles ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
 
-            string[] normalizedFiles = normalize(files);
+            string[] normalizedFiles = normalizeAllFunc(files);
 
             // Validate the matching files.
             if (matchingFiles != null)
             {
-                string[] normalizedMatchingFiles = normalize(matchingFiles);
+                string[] normalizedMatchingFiles = normalizeAllFunc(normalizeMatching(matchingFiles));
 
                 foreach (string matchingFile in normalizedMatchingFiles)
                 {
@@ -1572,7 +1573,7 @@ namespace Microsoft.Build.UnitTests
             // Validate the non-matching files
             if (nonmatchingFiles != null)
             {
-                string[] normalizedNonMatchingFiles = normalize(nonmatchingFiles);
+                string[] normalizedNonMatchingFiles = normalizeAllFunc(nonmatchingFiles);
 
                 foreach (string nonmatchingFile in normalizedNonMatchingFiles)
                 {
