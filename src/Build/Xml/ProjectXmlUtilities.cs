@@ -13,13 +13,13 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// Project-related Xml utilities
     /// </summary>
-    internal static class ProjectXmlUtilities
+    internal static partial class ProjectXmlUtilities
     {
         /// <summary>
         /// Gets child elements, ignoring whitespace and comments.
         /// Throws InvalidProjectFileException for unexpected XML node types.
         /// </summary>
-        internal static List<XmlElementWithLocation> GetVerifyThrowProjectChildElements(XmlElementWithLocation element)
+        internal static XmlElementChildIterator GetVerifyThrowProjectChildElements(XmlElementWithLocation element)
         {
             return GetChildElements(element, true /*throw for unexpected node types*/);
         }
@@ -28,40 +28,9 @@ namespace Microsoft.Build.Internal
         /// Gets child elements, ignoring whitespace and comments.
         /// Throws InvalidProjectFileException for unexpected XML node types if parameter is set.
         /// </summary>
-        private static List<XmlElementWithLocation> GetChildElements(XmlElementWithLocation element, bool throwForInvalidNodeTypes)
+        private static XmlElementChildIterator GetChildElements(XmlElementWithLocation element, bool throwForInvalidNodeTypes)
         {
-            List<XmlElementWithLocation> children = new List<XmlElementWithLocation>();
-
-            foreach (XmlNode child in element)
-            {
-                switch (child.NodeType)
-                {
-                    case XmlNodeType.Comment:
-                    case XmlNodeType.Whitespace:
-                        // These are legal, and ignored
-                        break;
-
-                    case XmlNodeType.Element:
-                        XmlElementWithLocation childElement = (XmlElementWithLocation)child;
-                        children.Add(childElement);
-                        break;
-
-                    default:
-                        if (child.NodeType == XmlNodeType.Text && String.IsNullOrWhiteSpace(child.InnerText))
-                        {
-                            // If the text is greather than 4k and only contains whitespace, the XML reader will assume it's a text node
-                            // instead of ignoring it.  Our call to String.IsNullOrWhiteSpace() can be a little slow if the text is
-                            // large but this should be extremely rare.
-                            break;
-                        }
-                        if (throwForInvalidNodeTypes)
-                        {
-                            ThrowProjectInvalidChildElement(child.Name, element.Name, element.Location);
-                        }
-                        break;
-                }
-            }
-            return children;
+            return new XmlElementChildIterator(element, throwForInvalidNodeTypes);
         }
 
         /// <summary>
@@ -69,8 +38,8 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectNoChildElements(XmlElementWithLocation element)
         {
-            List<XmlElementWithLocation> childElements = GetVerifyThrowProjectChildElements(element);
-            if (childElements.Count > 0)
+            var iterator = GetVerifyThrowProjectChildElements(element);
+            if (iterator.MoveNext())
             {
                 ThrowProjectInvalidChildElement(element.FirstChild.Name, element.Name, element.Location);
             }
