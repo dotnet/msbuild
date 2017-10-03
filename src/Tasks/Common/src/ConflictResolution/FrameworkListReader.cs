@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             }
 
             var frameworkList = XDocument.Load(frameworkListPath);
-            foreach (var file in frameworkList.Elements("File"))
+            foreach (var file in frameworkList.Root.Elements("File"))
             {
                 var assemblyName = file.Attribute("AssemblyName")?.Value;
                 var assemblyVersionString = file.Attribute("Version")?.Value;
