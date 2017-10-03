@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks
         public string RightKey { get; set; }
 
 
-        //  LeftMetadata and RightMetadata: The metadata names to include in the result.  If not specified, all will be included
+        //  LeftMetadata and RightMetadata: The metadata names to include in the result.  Specify "*" to include all metadata
         public string[] LeftMetadata { get; set; }
 
         public string[] RightMetadata { get; set; }
@@ -36,24 +36,41 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            bool useAllLeftMetadata = LeftMetadata.Length == 1 && LeftMetadata[0] == "*";
-            bool useAllRightMetadata = RightMetadata.Length == 1 && RightMetadata[0] == "*";
+            bool useAllLeftMetadata = LeftMetadata != null && LeftMetadata.Length == 1 && LeftMetadata[0] == "*";
+            bool useAllRightMetadata = RightMetadata != null && RightMetadata.Length == 1 && RightMetadata[0] == "*";
 
             JoinResult = Left.Join(Right,
                 item => GetKeyValue(LeftKey, item),
                 item => GetKeyValue(RightKey, item),
                 (left, right) =>
                 {
-                    var ret = new TaskItem(GetKeyValue(LeftKey, left));
+                    //  If including all metadata from left items and none from right items, just return left items directly
+                    if (useAllLeftMetadata &&
+                        string.IsNullOrEmpty(LeftKey) &&
+                        (RightMetadata == null || RightMetadata.Length == 0))
+                    {
+                        return left;
+                    }
 
+                    //  If including all metadata from right items and none from left items, just return the right items directly
+                    if (useAllRightMetadata &&
+                        string.IsNullOrEmpty(RightKey) &&
+                        (LeftMetadata == null || LeftMetadata.Length == 0))
+                    {
+                        return right;
+                    }
+
+                    var ret = new TaskItem(GetKeyValue(LeftKey, left));
 
                     //  Weird ordering here is to prefer left metadata in all cases, as CopyToMetadata doesn't overwrite any existing metadata
                     if (useAllLeftMetadata)
                     {
+                        //  CopyMetadata adds an OriginalItemSpec, which we don't want.  So we subsequently remove it
                         left.CopyMetadataTo(ret);
+                        ret.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                     }
 
-                    if (!useAllRightMetadata)
+                    if (!useAllRightMetadata && RightMetadata != null)
                     {
                         foreach (string name in RightMetadata)
                         {
@@ -61,7 +78,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
 
-                    if (!useAllLeftMetadata)
+                    if (!useAllLeftMetadata && LeftMetadata != null)
                     {
                         foreach (string name in LeftMetadata)
                         {
@@ -71,7 +88,9 @@ namespace Microsoft.NET.Build.Tasks
 
                     if (useAllRightMetadata)
                     {
+                        //  CopyMetadata adds an OriginalItemSpec, which we don't want.  So we subsequently remove it
                         right.CopyMetadataTo(ret);
+                        ret.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                     }
 
                     return (ITaskItem)ret;

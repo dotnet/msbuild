@@ -526,29 +526,43 @@ Copyright (c) .NET Foundation. All rights reserved.
         DependsOnTargets="_ComputeActiveTFMFileDependencies;RunProduceContentAssets"
         Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
     <ItemGroup>
-      <!--NativeLibrary-->
       <_NativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
-      <__NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_NativeFileItems)" />
-      <_NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__NativeCopyLocalItems)" />
-      <NativeCopyLocalItems Include="%(_NativeCopyLocalItems.ResolvedPath)" />
-
-      <!--RuntimeAssembly-->
       <_RuntimeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeAssembly'))" />
-      <__RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_RuntimeFileItems)" />
-      <_RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__RuntimeCopyLocalItems)" />
-      <RuntimeCopyLocalItems Include="%(_RuntimeCopyLocalItems.ResolvedPath)" />
-
-      <!--ResourceAssembly-->
       <_ResourceFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ResourceAssembly'))" />
-      <__ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_ResourceFileItems)" />
+    </ItemGroup>
+    
+    <!--NativeLibrary-->
+    <JoinItems Left="@(_NativeFileItems)"
+                 Right="@(FileDefinitions)"
+                 RightMetadata="*"
+                 >
+      <Output TaskParameter="JoinResult" ItemName="_NativeCopyLocalItems" />
+    </JoinItems>
+
+    <!--RuntimeAssembly-->
+    <JoinItems Left="@(_RuntimeFileItems)"
+               Right="@(FileDefinitions)"
+               RightMetadata="*"
+                 >
+      <Output TaskParameter="JoinResult" ItemName="_RuntimeCopyLocalItems" />
+    </JoinItems>
+
+    <!--ResourceAssembly-->
+    <JoinItems Left="@(_ResourceFileItems)"
+               Right="@(FileDefinitions)"
+               RightMetadata="*"
+                 >
+      <Output TaskParameter="JoinResult" ItemName="_ResourceCopyLocalItems" />
+    </JoinItems>
+    
+    <ItemGroup>
+     
+      <NativeCopyLocalItems Include="%(_NativeCopyLocalItems.ResolvedPath)" />
+      <RuntimeCopyLocalItems Include="%(_RuntimeCopyLocalItems.ResolvedPath)" />
       
       <!-- These resource items are in folders with names which correspond to the locale.  Here, set the DestinationSubDirectory to the
            folder name so that it will be copied to the right target path and so conflict resolution won't think there are conflicts
-           between satellite assemblies in different languages. 
-           
-           This is done in two steps because if it was done all at once, MSBuild would try te evaluate the metadata even if there weren't
-           any items, which would result in an error trying to call Directory.GetParent() without any arguments. -->
-      <_ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__ResourceCopyLocalItems)" />
+           between satellite assemblies in different languages. -->
       <_ResourceCopyLocalItems Update="@(_ResourceCopyLocalItems)" Condition="'@(_ResourceCopyLocalItems)' != ''">
         <DestinationSubDirectory>$([System.IO.Directory]::GetParent(%(ResolvedPath)).get_Name())\</DestinationSubDirectory>
       </_ResourceCopyLocalItems>
