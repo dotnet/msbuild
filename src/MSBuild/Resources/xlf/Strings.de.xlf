@@ -152,12 +152,12 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="updated">  @&lt;Datei&gt;            Fügt Befehlszeileneinstellungen aus einer Textdatei ein. Um mehrere
+        <target state="translated">  @&lt;Datei&gt;            Fügt Befehlszeileneinstellungen aus einer Textdatei ein. Um mehrere
                      Antwortdateien anzugeben, geben Sie jede Antwortdatei
                      gesondert an.
                      
-                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch 
-                     in den folgenden Speicherorten verwendet: 
+                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch
+                     in den folgenden Speicherorten verwendet:
                      (1) Verzeichnis von "msbuild.exe"
                      (2) Verzeichnis des ersten erstellten Projekts oder Projektmappe
 </target>
@@ -328,7 +328,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="updated">  /consoleloggerparameters:&lt;Parameter&gt;
+        <target state="translated">  /consoleloggerparameters:&lt;Parameter&gt;
                      Parameter für die Konsolenprotokollierung. (Kurzform: /clp)
                      Folgende Parameter sind verfügbar:
                         PerformanceSummary – Zeigt die in Aufgaben, Zielen und
@@ -339,10 +339,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                         ErrorsOnly – Zeigt nur Fehler an.
                         WarningsOnly – Zeigt nur Warnungen an.
                         NoItemAndPropertyList – Zeigt keine Liste der Elemente
-                            und Eigenschaften am Anfang jeder Projekterstellung an.    
-                        ShowCommandLine – Zeigt TaskCommandLineEvent-Meldungen an.  
+                            und Eigenschaften am Anfang jeder Projekterstellung an.
+                        ShowCommandLine – Zeigt TaskCommandLineEvent-Meldungen an.
                         ShowTimestamp – Zeigt den Timestamp als Präfix einer
-                            Meldung an.                                           
+                            Meldung an.
                         ShowEventId – Zeigt die eventId für gestartete 
                             Ereignisse, abgeschlossene Ereignisse und Meldungen an.
                         ForceNoAlign – Richtet den Text nicht an der Größe des
@@ -350,11 +350,11 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                         DisableConsoleColor – Verwendet die Standardkonsolenfarben
                             für alle Protokollierungsmeldungen.
                         DisableMPLogging – Deaktiviert die Ausgabe wie
-                            bei der Mehrprozessorprotokollierung im Modus 
+                            bei der Mehrprozessorprotokollierung im Modus
                             mit nur einem Prozessor.
                         EnableMPLogging – Aktiviert das Format der
                             Mehrprozessorprotokollierung auch bei der Ausführung
-                            im Modus mit nur einem Prozessor. Dieses Protokollierungsformat ist standardmäßig aktiviert. 
+                            im Modus mit nur einem Prozessor. Dieses Protokollierungsformat ist standardmäßig aktiviert.
                         ForceConsoleColor – Verwendet selbst dann ANSI-Konsolenfarben, wenn
                             die Konsole dies nicht unterstützt.
                         Verbosity – Überschreibt die Einstellung für /verbosity
@@ -421,10 +421,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="updated">  /maxcpucount:[n]   Gibt die maximale Anzahl gleichzeitiger Prozesse an, 
+        <target state="translated">  /maxcpucount:[n]   Gibt die maximale Anzahl gleichzeitiger Prozesse an,
                      mit denen die Erstellung ausgeführt werden soll. Ohne den
                      Schalter wird der Standardwert 1 verwendet. Wenn der Schalter ohne einen Wert angegeben wird,
-                     verwendet MSBuild 
+                     verwendet MSBuild
                      alle Prozessoren des Computers. (Kurzform: /m[:n])
       </target>
         <note>
@@ -439,10 +439,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
         MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="updated">Beispiele:
+        <target state="translated">Beispiele:
 
         MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean 
+        MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -478,10 +478,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="updated">  /distributedlogger:&lt;Zentrale Protokollierung&gt;*&lt;Weiterleitende Protokollierung&gt;                     
+        <target state="translated">  /distributedlogger:&lt;Zentrale Protokollierung&gt;*&lt;Weiterleitende Protokollierung&gt;
                      Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert,
                      wobei an jeden Knoten eine andere Protokollierungsinstanz angefügt wird. Um mehrere
-                     Protokollierungen anzugeben, wird jede Protokollierung gesondert angegeben. 
+                     Protokollierungen anzugeben, wird jede Protokollierung gesondert angegeben.
                      (Kurzform: /dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
                        [&lt;Protokollierungsklasse&gt;,]&lt;Protokollierungsassembly&gt;[;&lt;Protokollierungsparameter&gt;]
@@ -513,9 +513,9 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="updated">  /ignoreprojectextensions:&lt;Erweiterungen&gt;
-                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende 
-                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma, 
+        <target state="translated">  /ignoreprojectextensions:&lt;Erweiterungen&gt;
+                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende
+                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma,
                      um mehrere Erweiterungen voneinander zu trennen.
                      (Kurzform: /ignore)
                      Beispiel:
@@ -539,10 +539,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="updated">  /toolsversion:&lt;Version&gt;
+        <target state="translated">  /toolsversion:&lt;Version&gt;
                      Die Version des MSBuild-Toolsets (Aufgaben, Ziele usw.),
-                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die 
-                     von einzelnen Projekten angegebenen Versionen. (Kurzform: 
+                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die
+                     von einzelnen Projekten angegebenen Versionen. (Kurzform:
                      /tv)
                      Beispiel:
                        /toolsversion:3.5
@@ -566,13 +566,13 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="updated">  /fileLogger[n]     Protokolliert die Erstellungsausgabe in eine Datei. Standardmäßig
-                     befindet sich diese im aktuellen Verzeichnis, 
+        <target state="translated">  /fileLogger[n]     Protokolliert die Erstellungsausgabe in eine Datei. Standardmäßig
+                     befindet sich diese im aktuellen Verzeichnis,
                      der Dateiname lautet "msbuild[n].log". Ereignisse aller Knoten
                      werden in einem einzigen Protokoll zusammengefasst. Der Speicherort der Datei und andere Parameter für fileLogger
-                     können durch das Hinzufügen des Schalters 
+                     können durch das Hinzufügen des Schalters
                      "/fileLoggerParameters[n]" angegeben werden.
-                     "n" (optional) kann eine Zahl von 1-9 sein, sodass bis zu 
+                     "n" (optional) kann eine Zahl von 1-9 sein, sodass bis zu
                      10 Dateiprotokollierungen angefügt werden können. (Kurzform: /fl[n])
     </target>
         <note>
@@ -598,17 +598,17 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="updated">  /distributedFileLogger                                                       
+        <target state="translated">  /distributedFileLogger
                      Protokolliert die Erstellungsausgabe in mehrere Dateien, eine Protokolldatei
                      pro MSBuild-Knoten. Der anfängliche Speicherort für diese Dateien ist
-                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien 
+                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien
                      "MSBuild&lt; Knoten-ID&gt;.log" benannt. Der Speicherort der Datei und
-                     andere Parameter für fileLogger können durch das Hinzufügen 
+                     andere Parameter für fileLogger können durch das Hinzufügen
                      des Schalters "/fileLoggerParameters" angegeben werden.
 
                      Wenn mithilfe des fileLoggerParameters-Parameters ein Protokolldateiname
-                     festgelegt wurde, verwendet die verteilte Protokollierung den Dateinamen als 
-                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an, 
+                     festgelegt wurde, verwendet die verteilte Protokollierung den Dateinamen als
+                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an,
                      um für jeden Knoten eine Protokolldatei zu erstellen.
     </target>
         <note>
@@ -650,13 +650,13 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="updated">  /fileloggerparameters[n]:&lt;Parameter&gt;                                
+        <target state="translated">  /fileloggerparameters[n]:&lt;Parameter&gt;
                      Gibt zusätzliche Parameter für Dateiprotokollierungen an.
-                     Dieser Schalter bedeutet, dass der entsprechende Schalter 
-                     "/filelogger[n]" ebenfalls vorhanden ist.
+                     Dieser Schalter bedeutet, dass der entsprechende Schalter
+                     "lelogger[n]" ebenfalls vorhanden ist.
                      "n" (optional) kann eine Zahl von 1-9 sein.
                      "/fileloggerparameters" wird auch von verteilten Dateiprotokollierungen
-                     verwendet (siehe Beschreibung zu " /distributedFileLogger" ).
+                     verwendet (siehe Beschreibung zu " /distributedFileLogger").
                      (Kurzform: /flp[n])
                      Es sind dieselben Parameter wie für die Konsolenprotokollierung
                      verfügbar. Einige zusätzliche Parameter:
@@ -665,10 +665,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                         Append – Gibt an, ob das Buildprotokoll erweitert
                             oder überschrieben wird. Mit diesem Schalter
                             wird das Buildprotokoll an die Protokolldatei angefügt.
-                            Ohne diesen Schalter wird der Inhalt 
-                            der vorhandenen Protokolldatei überschrieben. 
+                            Ohne diesen Schalter wird der Inhalt
+                            der vorhandenen Protokolldatei überschrieben.
                             Standardmäßig wird die Protokolldatei nicht erweitert.
-                        Encoding - Gibt die Codierung der Datei an, 
+                        Encoding - Gibt die Codierung der Datei an,
                             z.B. UTF-8, Unicode oder ASCII.
                      Die Standardeinstellung für "verbosity" ist "Detailed".
                      Beispiele:
@@ -725,20 +725,20 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="updated">  /preprocess[:file] 
+        <target state="translated">  /preprocess[:file] 
                      Erstellt eine einzelne, zusammengesetzte Projektdatei
                      durch Einbeziehen aller Dateien, die beim Erstellen
                      importiert werden würden, mit gekennzeichneten Grenzen. Dies kann
                      sinnvoll sein, um zu ermitteln, welche Dateien
                      importiert werden und woher sowie worin
                      ihr Beitrag zum Erstellen besteht. Die Ausgabe wird standardmäßig
-                     im Konsolenfenster angezeigt. Wenn der Pfad zu einer Ausgabedatei bereitgestellt wird, 
-                     wird dieser verwendet.
+                     im Konsolenfenster angezeigt. Wenn der Pfad zu einer Ausgabedatei
+                     bereitgestellt wird, wird dieser verwendet.
                      (Kurzform: /pp)
                      Beispiel:
                        /pp:out.txt
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -747,13 +747,13 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="updated">  /detailedsummary 
+        <target state="translated">  /detailedsummary 
                      Zeigt am Ende der Erstellung detaillierte Informationen
                      zu den erstellten Konfigurationen an und enthält eine Erläuterung, wie sie
-                     in Knoten geplant wurden. 
+                     in Knoten geplant wurden.
                      (Kurzform: /ds)
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -761,12 +761,12 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <target state="updated">  /debug
-                     Sorgt dafür, dass ein Debugger umgehend angezeigt wird, 
-                     damit Visual Studio angefügt werden kann, um die MSBuild-XML 
+        <target state="translated">  /debug
+                     Sorgt dafür, dass ein Debugger umgehend angezeigt wird,
+                     damit Visual Studio angefügt werden kann, um die MSBuild-XML
                      und alle dafür verwendeten Aufgaben und Protokollierungen zu debuggen.
    </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -1308,7 +1308,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serialisiert alle Buildereignisse in eine komprimierte Binärdatei.
                      Standardmäßig befindet sich die Datei im aktuellen Verzeichnis und hat den Namen
                      "msbuild.binlog". Das binäre Protokoll ist eine detaillierte Beschreibung
@@ -1369,14 +1369,14 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      override a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="new">  /restore[:True|False]
-                     Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
-                     (Short form: /r)
+        <target state="translated">  /restore[:True|False]
+                     Führt vor der Erstellung anderer Ziele ein Ziel namens
+                     "Restore" aus. Dies ist hilfreich, wenn Pakete in Ihrer
+                     Projektstruktur wiederhergestellt werden müssen, bevor sie
+                     erstellt werden können. Die Angabe von /restore ist identisch mit
+                     der Angabe von /restore:True. Verwenden Sie den Parameter, um
+                     einen Wert außer Kraft zu setzen, der aus einer Antwortdatei stammt.
+                     (Kurzform: /r)
     </target>
         <note>
       LOCALIZATION: "/restore" and "/r" should not be localized.
@@ -1385,7 +1385,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="new">MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</target>
+        <target state="translated">MSBUILD: Fehler MSB1042: Der Wert für die Knotenwiederverwendung ist ungültig. Diese Version von MSBuild unterstützt keine Knotenwiederverwendung. Wenn angegeben, muss der Wert für die Option zur Knotenwiederverwendung FALSE lauten.</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1394,7 +1394,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1052: Restore value is not valid. {0}</target>
+        <target state="translated">MSBUILD: Fehler MSB1052: Der Wert für die Wiederherstellung ist nicht gültig. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.

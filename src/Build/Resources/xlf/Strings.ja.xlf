@@ -2044,13 +2044,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="new">Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</target>
+        <target state="translated">ターゲット "{0}" はスキップされました。ターゲットがプロジェクトに存在しないので、SkipNonexistentTargets が true に設定されます。</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
         <source>The task factory must return a value for the "TaskType" property.</source>
-        <target state="new">The task factory must return a value for the "TaskType" property.</target>
-        <note></note>
+        <target state="translated">タスク ファクトリは、"TaskType" プロパティの値を返す必要があります。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

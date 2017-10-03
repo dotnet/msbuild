@@ -222,7 +222,7 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: MSBuildToolsPath не соответствует MSBuildBinPath для версии ToolsVersion "{0}", определенной в "{1}". Если заданы оба пути, они должны иметь одинаковое значение.</target>
+        <target state="translated">MSB4142: MSBuildToolsPath не соответствует MSBuildBinPath для ToolsVersion "{0}", определенной в "{1}". Если установлены оба пути, они должны иметь одинаковое значение.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
@@ -2044,13 +2044,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="new">Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</target>
+        <target state="translated">Целевой объект "{0}" пропущен. Целевой объект не существует в проекте, а SkipNonexistentTargets имеет значение "Истина".</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
         <source>The task factory must return a value for the "TaskType" property.</source>
-        <target state="new">The task factory must return a value for the "TaskType" property.</target>
-        <note></note>
+        <target state="translated">Фабрика задач должна вернуть значение для свойства TaskType.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

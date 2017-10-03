@@ -2044,13 +2044,13 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="new">Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</target>
+        <target state="translated">Cíl {0} byl vynechán. Cíl neexistuje v projektu a SkipNonexistentTargets je nastaveno na true.</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
         <source>The task factory must return a value for the "TaskType" property.</source>
-        <target state="new">The task factory must return a value for the "TaskType" property.</target>
-        <note></note>
+        <target state="translated">Objekt pro vytváření úloh musí vrátit hodnotu pro vlastnost TaskType.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
