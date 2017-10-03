@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Xml;
 using Microsoft.Build.Construction;
+using System.Diagnostics;
 
 namespace Microsoft.Build.Internal
 {
@@ -20,21 +21,29 @@ namespace Microsoft.Build.Internal
             private readonly XmlElementWithLocation _element;
             private readonly bool _throwForInvalidNodeTypes;
             private XmlElementWithLocation _current;
-            private bool _isFirst;
+
+            // -1: Not yet called GetEnumerator
+            //  0: First element
+            //  1: After first element
+            private int _state;
 
             internal XmlElementChildIterator(XmlElementWithLocation element, bool throwForInvalidNodeTypes)
             {
+                Debug.Assert(element != null);
+
                 _element = element;
                 _throwForInvalidNodeTypes = throwForInvalidNodeTypes;
                 _current = null;
-                _isFirst = true;
+                _state = -1;
             }
 
             public bool MoveNext()
             {
-                if (_isFirst)
+                Debug.Assert(_state > -1);
+
+                if (_state == 0)
                 {
-                    _isFirst = false;
+                    _state = 1;
                     _current = GetNextNode(_element.FirstChild);
                 }
                 else if (_current != null)
@@ -47,6 +56,9 @@ namespace Microsoft.Build.Internal
 
             public XmlElementChildIterator GetEnumerator()
             {
+                Debug.Assert(_state == -1);
+
+                _state = 0;
                 return this;
             }
 
@@ -54,8 +66,7 @@ namespace Microsoft.Build.Internal
             {
                 get
                 {
-                    if (_isFirst || _current == null)
-                        throw new InvalidOperationException();
+                    Debug.Assert(_state == 1 && _current != null);
 
                     return _current;
                 }

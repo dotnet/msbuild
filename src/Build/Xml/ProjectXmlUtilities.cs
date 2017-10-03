@@ -38,8 +38,8 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectNoChildElements(XmlElementWithLocation element)
         {
-            var iterator = GetVerifyThrowProjectChildElements(element);
-            if (iterator.MoveNext())
+            var enumerator = GetVerifyThrowProjectChildElements(element).GetEnumerator();
+            if (enumerator.MoveNext())
             {
                 ThrowProjectInvalidChildElement(element.FirstChild.Name, element.Name, element.Location);
             }
