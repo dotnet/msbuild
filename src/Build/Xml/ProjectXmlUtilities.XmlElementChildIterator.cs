@@ -61,11 +61,6 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            public void Reset()
-            {
-                throw new NotSupportedException();
-            }
-
             private XmlElementWithLocation GetNextNode(XmlNode child)
             {
                 while (child != null)
