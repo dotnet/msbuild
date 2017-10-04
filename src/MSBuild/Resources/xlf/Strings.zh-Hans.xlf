@@ -152,11 +152,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="updated">  @&lt;file&gt;            从文本文件插入命令行设置。若要指定
+        <target state="translated">  @&lt;file&gt;            从文本文件插入命令行设置。若要指定
                     多个响应文件，请分别指定每个响应
                     文件。
-                     
-                    自动从以下位置使用任何名为“msbuild.rsp”的
+
+                    自动从以下位置使用任何名为 "msbuild.rsp" 的
                     响应文件:
                     (1) msbuild.exe 的目录
                     (2) 生成的第一个项目或解决方案的目录
@@ -328,40 +328,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="updated">  /consoleloggerparameters:&lt;parameters&gt;
-                    控制台记录器的参数。(缩写: /clp)
-                    可用的参数有:
-                       PerformanceSummary -- 显示在任务、目标和项目上
-                           花费的时间。
-                       Summary -- 结束时显示错误和警告的摘要。
-                       NoSummary -- 结束时不显示错误和警告
-                           的摘要。
-                       ErrorsOnly -- 仅显示错误。
-                       WarningsOnly -- 仅显示警告。
-                       NoItemAndPropertyList -- 在开始生成每个项目时不显示
-                           项和属性的列表。   
-                       ShowCommandLine -- 显示 TaskCommandLineEvent 消息 
-                       ShowTimestamp -- 将时间戳作为所有消息的前缀
-                           显示。                                          
-                       ShowEventId -- 显示已开始事件、已完成事件和消息
-                           的事件 ID
-                       ForceNoAlign -- 不将文本与控制台缓冲区的大小
-                           匹配
-                       DisableConsoleColor -- 将默认控制台颜色
-                           用于所有记录消息。
-                       DisableMPLogging -- 在非多处理器
-                           模式下运行时，禁用输出的多处理器
-                           日志记录样式。
-                       EnableMPLogging -- 即使在非多处理器
-                           模式下运行，也启用多处理器
-                           日志记录样式。默认情况下启用此日志记录样式。
-                       ForceConsoleColor--使用 ANSI 控制台颜色，即使
-                           控制台不支持它
-                       Verbosity -- 重写此记录器的 /verbosity
-                           设置。
-                    示例:
-                       /consoleloggerparameters:PerformanceSummary;NoSummary;
-                                                Verbosity=minimal
+        <target state="translated">  /consoleloggerparameters:&lt;parameters&gt;
+                     控制台记录器的参数。(缩写: /clp)
+                     可用的参数有:
+                        PerformanceSummary -- 显示在任务、目标和项目上
+                            花费的时间。
+                        Summary -- 结束时显示错误和警告的摘要。
+                        NoSummary -- 结束时不显示错误和警告
+                            的摘要。
+                        ErrorsOnly -- 仅显示错误。
+                        WarningsOnly -- 仅显示警告。
+                        NoItemAndPropertyList -- 在开始生成每个项目时不显示
+                            项和属性的列表。
+                        ShowCommandLine -- 显示 TaskCommandLineEvent 消息
+                        ShowTimestamp -- 将时间戳作为所有消息的前缀
+                            显示。
+                        ShowEventId -- 显示已开始事件、已完成事件和消息
+                            的事件 ID
+                        ForceNoAlign -- 不将文本与控制台缓冲区的大小
+                            匹配
+                        DisableConsoleColor -- 将默认控制台颜色
+                            用于所有记录消息。
+                        DisableMPLogging -- 在非多处理器
+                            模式下运行时，禁用输出的多处理器
+                            日志记录样式。
+                        EnableMPLogging -- 即使在非多处理器
+                            模式下运行，也启用多处理器
+                            日志记录样式。默认情况下启用此日志记录样式。
+                        ForceConsoleColor -- 使用 ANSI 控制台颜色，即使
+                            控制台不支持它
+                        Verbosity -- 重写此记录器的 /verbosity
+                            设置。
+                     示例:
+                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+                                                 Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -421,7 +421,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="updated">  /maxcpucount[:n]   指定用于生成的最大
+        <target state="translated">  /maxcpucount[:n]   指定用于生成的最大
                     并发进程数。如果未使用开关，则使用的默认值
                     为 1。如果使用开关时不带值，
                     MSBuild 将最多使用计算机上的
@@ -439,7 +439,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="updated">示例:
+        <target state="translated">示例:
 
        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
        MSBuild MyApp.csproj /t:Clean
@@ -478,7 +478,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="updated">  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;                    
+        <target state="translated">  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
                     使用此记录器来记录 MSBuild 中的事件，向每个节点
                     附加不同的记录器实例。若要指定
                     多个记录器，请分别指定每个记录器。
@@ -513,7 +513,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="updated">  /ignoreprojectextensions:&lt;extensions&gt;
+        <target state="translated">  /ignoreprojectextensions:&lt;extensions&gt;
                     确定要生成的项目文件时要忽略的
                     扩展名的列表。使用分号或逗号来分隔
                     多个扩展名。
@@ -539,7 +539,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="updated">  /toolsversion:&lt;version&gt;
+        <target state="translated">  /toolsversion:&lt;version&gt;
                     要在生成过程中使用的 MSBuild 工具集(任务、目标等)
                     的版本。此版本将重写
                     个别项目指定的版本。(缩写:
@@ -566,13 +566,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="updated">  /fileLogger[n]     将生成输出记录到文件中。默认情况下，
+        <target state="translated">  /fileLogger[n]     将生成输出记录到文件中。默认情况下，
                     该文件在当前目录中，名称为
-                    “msbuild[n].log”。所有节点中的事件合并到
+                    "msbuild[n].log"。所有节点中的事件合并到
                     单个日志中。fileLogger 的文件和
                     其他参数的位置可以通过添加
-                    “/fileLoggerParameters[n]”开关来指定。
-                    “n”(如果存在)可以为 1-9 的数字，允许最多附加
+                    "/fileLoggerParameters[n]" 开关来指定。
+                    "n" (如果存在)可以为 1-9 的数字，允许最多附加
                     10 个文件记录器。(缩写: /fl[n])
     </target>
         <note>
@@ -598,12 +598,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="updated">  /distributedFileLogger                                                      
+        <target state="translated">  /distributedFileLogger
                     将生成输出记录到多个日志文件，每个 MSBuild 节点
                     一个日志文件。这些文件的初始位置为
                     当前目录。默认情况下，这些文件名为
-                    “MSBuild&lt;nodeid&gt;.log”。可通过添加
-                    “/fileLoggerParameters”开关来指定
+                    "MSBuild&lt;nodeid&gt;.log"。可通过添加
+                    "/fileLoggerParameters" 开关来指定
                     这些文件的位置和 fileLogger 的其他参数。
 
                     如果日志文件名是通过 fileLoggerParameters
@@ -650,11 +650,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="updated">  /fileloggerparameters[n]:&lt;parameters&gt;                               
+        <target state="translated">  /fileloggerparameters[n]:&lt;parameters&gt;
                     为文件记录器提供任何额外的参数。
                     存在此开关意味着
                     存在对应的 /filelogger[n] 开关。
-                    “n”(如果存在)可以为 1-9 的数字。
+                    "n" (如果存在)可以为 1-9 的数字。
                     任何分布式文件记录器也可以使用 /fileloggerparameters，
                     具体可参阅 /distributedFileLogger 的说明。
                     (缩写: /flp[n])
@@ -725,7 +725,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="updated">  /preprocess[:file]
+        <target state="translated">  /preprocess[:file]
                     通过嵌入将在生成过程中导入的
                     所有文件并标记其边界，
                     创建一个聚合的项目文件。这对于
@@ -738,7 +738,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                     示例:
                       /pp:out.txt
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -747,13 +747,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="updated">  /detailedsummary
+        <target state="translated">  /detailedsummary
                     在生成的结尾显示有关
                     所生成的配置以及如何向节点安排
                     这些配置的详细信息。
                     (缩写: /ds)
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -761,12 +761,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <target state="updated">  /debug
+        <target state="translated">  /debug
                     使调试器提示立即出现，以便
-                    可以附加 Visual Studio，供您调试
+                    可以附加 Visual Studio，供用户调试
                     MSBuild XML 及其使用的任何任务和记录器。
    </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -1308,9 +1308,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      将所有生成事件序列化为压缩的二进制文件。
-                     默认情况下该文件位于当前目录并且名为“msbuild.binlog”。
+                     默认情况下该文件位于当前目录并且名为 "msbuild.binlog"。
                      二进制日志是生成过程的详细描述，
                      以后可将其于重新构建文本日志
                      并由其他分析工具所使用。
@@ -1335,7 +1335,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
                      ProjectImports 的默认设置为 Embed。
                      注意: 记录器不会收集非 MSBuild 源文件，
-                     例如 .cs、 .cpp 等。
+                     例如 .cs、.cpp 等。
 
                      可将 .binlog 文件以参数（而不是项目/解决方案）的形式传递给
                      msbuild.exe 对其进行“播放”。
@@ -1370,14 +1370,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      override a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="new">  /restore[:True|False]
-                     Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
-                     (Short form: /r)
+        <target state="translated">  /restore[:True|False]
+                     在生成其他目标前，运行名为 Restore 的目标。
+                     当系统树需要先将包还原才能生成包时，
+                     将会用到此操作。
+                     指定 /restore 与指定
+                     /restore:True 等同。请使用此参数
+                     替代来自响应文件的值。
+                     (缩写: /r)
     </target>
         <note>
       LOCALIZATION: "/restore" and "/r" should not be localized.
@@ -1386,7 +1386,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="new">MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</target>
+        <target state="translated">MSBUILD: 错误 MSB1042: 节点重复使用值无效。此版本的 MSBuild 不支持节点重复使用。若已指定，则节点重复使用开关值必须为 false。</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1395,7 +1395,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1052: Restore value is not valid. {0}</target>
+        <target state="translated">MSBUILD: 错误 MSB1052: 还原值无效。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.

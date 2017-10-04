@@ -151,12 +151,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="updated">  @&lt;файл&gt;            Вставить настройки командной строки из текстового файла. Чтобы указать
-                     несколько файлов ответов, укажите каждый файл ответов
+        <target state="translated">  @&lt;файл&gt;            Вставьте параметры командной строки из текстового файла. Чтобы указать
+                     несколько файлов ответов, укажите каждый из них
                      по отдельности.
                      
-                     Любые файлы ответов "msbuild.rsp" автоматически 
-                     используются из следующих расположений: 
+                     Любые файлы ответов с именем "msbuild.rsp" автоматически 
+                     используются из следующих расположений:
                      (1) каталог msbuild.exe;
                      (2) каталог первого собираемого проекта или решения.
 </target>
@@ -327,37 +327,37 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="updated">  /consoleloggerparameters:&lt;параметры&gt;
-                     Параметры для средства ведения журнала консоли. (Краткая форма: /clp)
-                     Доступные параметры:
-                        PerformanceSummary — отобразить время, проведенное в задачах, целевых объектах
+        <target state="translated">  /consoleloggerparameters:&lt;параметры&gt;
+                     Параметры для журнала консоли. (Краткая форма: /clp)
+                     Доступные параметры
+                        PerformanceSummary — отобразить время, проведенное в задачах, целевых объектах
                             и проектах.
-                        Summary — показать сводку ошибок и предупреждений в конце.
-                        NoSummary — не показывать сводку ошибок и предупреждений в
+                        Summary — показать сводку ошибок и предупреждений в конце.
+                        NoSummary — не показывать сводку ошибок и предупреждений в
                             конце.
-                        ErrorsOnly — показывать только ошибки.
-                        WarningsOnly — показывать только предупреждения.
-                        NoItemAndPropertyList — не показывать список элементов и
-                            свойств в начале сборки каждого проекта.    
-                        ShowCommandLine — показывать сообщения TaskCommandLineEvent  
-                        ShowTimestamp — отображать Timestamp в виде префикса к любому
-                            сообщению.                                           
-                        ShowEventId — показывать eventId для начатых событий, завершенных 
-                            событий и сообщений
-                        ForceNoAlign — не выравнивать текст в соответствии с размером
-                            буфера консоли
-                        DisableConsoleColor — использовать цвета консоли по умолчанию
+                        ErrorsOnly — показывать только ошибки.
+                        WarningsOnly — показывать только предупреждения.
+                        NoItemAndPropertyList — не показывать список элементов и
+                            свойств в начале сборки каждого проекта.
+                        ShowCommandLine — показывать сообщения TaskCommandLineEvent.
+                        ShowTimestamp — отображать метку времени в виде префикса к любому
+                            сообщению.
+                        ShowEventId — показывать код события (eventId) для начатых событий, завершенных
+                            событий и сообщений.
+                        ForceNoAlign — не выравнивать текст в соответствии с размером
+                            буфера консоли.
+                        DisableConsoleColor — использовать цвета консоли по умолчанию
                             для всех сообщений журнала.
-                        DisableMPLogging — отключить многопроцессорный
-                            стиль ведения журнала в ходе записи выходных данных при работе в 
+                        DisableMPLogging — отключить многопроцессорный
+                            стиль ведения журнала выходных данных при работе в
                             немногопроцессорном режиме.
-                        EnableMPLogging — включить многопроцессорный стиль
-                            ведения журнала при работе в немногопроцессорном
-                            режиме. Этот стиль ведения журнала включен по умолчанию. 
-                        ForceConsoleColor — использовать цвета консоли ANSI, даже если
-                            консоль не поддерживает их
-                        Verbosity — переопределяет настройку /verbosity для этого
-                            средства ведения журнала.
+                        EnableMPLogging — включить многопроцессорный стиль
+                            ведения журнала даже при работе в немногопроцессорном
+                            режиме. Этот стиль используется по умолчанию.
+                        ForceConsoleColor — использовать цвета консоли ANSI, даже если
+                            консоль их не поддерживает.
+                        Verbosity — переопределяет настройку /verbosity для этого
+                            журнала.
                      Пример:
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
@@ -420,10 +420,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="updated">  /maxcpucount[:n]   Указывает максимальное число одновременных процессов, 
+        <target state="translated">  /maxcpucount[:n]   Указывает максимальное число одновременных процессов,
                      с помощью которых выполняется сборка. Если параметр не используется, значение
-                     по умолчанию — 1. Если параметр используется без значения,
-                     MSBuild может использовать все или часть процессоров на 
+                     по умолчанию — 1. Если параметр используется без значения,
+                     MSBuild сможет использовать число процессов вплоть до количества процессоров на
                      компьютере. (Краткая форма: /m[:n])
       </target>
         <note>
@@ -438,10 +438,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="updated">Примеры:
+        <target state="translated">Примеры:
 
         MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean 
+        MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -477,19 +477,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="updated">  /distributedlogger:&lt;центральное_средство&gt;*&lt;перенаправляющее_средство&gt;                     
-                     Использовать это средство ведения журнала для записи событий из MSBuild, прикрепляя
-                     разные экземпляры средств ведения журнала к каждому узлу. Чтобы указать
-                     несколько средств ведения журнала, задайте каждое средство отдельно. 
+        <target state="translated">  /distributedlogger:&lt;центральный_журнал&gt;*&lt;перенаправляющий_журнал&gt; 
+                     Используйте это средство ведения журнала для записи событий из MSBuild с прикреплением
+                     разных экземпляров к каждому узлу. Чтобы указать
+                     несколько журналов, задавайте каждый из них по отдельности.
                      (Краткая форма: /dl)
-                     Синтаксис &lt;средство&gt;:
-                       [&lt;класс_средства&gt;,]&lt;сборка_средства&gt;[;&lt;параметры_средства&gt;]
-                     Синтаксис &lt;класс_средства&gt;:
-                       [&lt;частичное_или_полное_пространство_имен&gt;.]&lt;имя_класс_средства&gt;
-                     Синтаксис &lt;сборка_средства&gt;:
+                     Синтаксис &lt;журнала&gt;:
+                       [&lt;класс_журнала&gt;,]&lt;сборка_журнала&gt;[;&lt;параметры_журнала&gt;]
+                     Синтаксис &lt;класс_журнала&gt;:
+                       [&lt;частичное_или_полное_пространство_имен&gt;.]&lt;имя_класса_журнала&gt;
+                     Синтаксис &lt;сборки_журнала&gt;:
                        {&lt;имя_сборки&gt;[,&lt;строгое_имя&gt;] | &lt;файл_сборки&gt;}
-                     &lt;Параметры_средства&gt; являются необязательными и передаются
-                     в средство ведения журнала в том виде, в каком были введены. (Краткая форма: /l)
+                     &lt;Параметры_журнала&gt; являются необязательными и передаются
+                     в средство ведения журнала точно в том виде, в котором они введены. (Краткая форма: /l)
                      Примеры:
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -512,10 +512,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="updated">  /ignoreprojectextensions:&lt;расширения&gt;
-                     Список расширений, которые пропускаются при определении 
-                     файла проекта для сборки. Используйте точку с запятой или запятую 
-                     для разделения нескольких расширений.
+        <target state="translated">  /ignoreprojectextensions:&lt;расширения&gt;
+                     Список расширений, которые пропускаются при определении
+                     файла проекта для сборки. Используйте точку с запятой или запятую,
+                     чтобы отделять разные расширения.
                      (Краткая форма: /ignore)
                      Пример:
                        /ignoreprojectextensions:.sln
@@ -538,10 +538,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="updated">  /toolsversion:&lt;версия&gt;
+        <target state="translated">  /toolsversion:&lt;версия&gt;
                      Версия набора инструментов MSBuild (задачи, целевые объекты и т. д.),
-                     используемая во время сборки. Эта версия переопределит 
-                     версии, указанные отдельными проектами. (Краткая форма: 
+                     используемая во время сборки. Эта версия переопределит
+                     версии, указанные отдельными проектами. (Краткая форма:
                      /tv)
                      Пример:
                        /toolsversion:3.5
@@ -565,14 +565,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="updated">  /fileLogger[n]     Записывает выходные данные сборки в файл. По умолчанию
-                     файл находится в текущем каталоге и называется 
-                     "msbuild[n].log". События из всех узлов совмещаются в
-                     одном журнале. Расположение файла и других
-                     параметров для fileLogger можно указать, 
+        <target state="translated">  /fileLogger[n]     Записывает выходные данные сборки в файл. По умолчанию
+                     файл находится в текущем каталоге и называется
+                     "msbuild[n].log". События из всех узлов объединяются в
+                     один журнал. Расположение файла и других
+                     параметров для fileLogger можно указать,
                      добавив параметр "/fileLoggerParameters[n]".
-                     Значение "n" (если есть) может быть цифрой от 1 до 9 и позволяет 
-                     прикрепить до 10 средств ведения журнала в файле. (Краткая форма: /fl[n])
+                     Значение "n" (при наличии) может быть цифрой от 1 до 9 и позволяет
+                     прикрепить до 10 средств ведения файловых журналов. (Краткая форма: /fl[n])
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -597,18 +597,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="updated">  /distributedFileLogger                                                       
-                     Записывает выходные данные сборки в несколько файлов журнала: один файл журнала
-                     на узел MSBuild. Начальное расположение для этих файлов —
-                     текущий каталог. По умолчанию файлы называются 
-                     "MSBuild&lt;ИД_узла&gt;.log". Расположение файлов и
-                     других параметров для fileLogger можно указать, 
+        <target state="translated">  /distributedFileLogger
+                     Записывает выходные данные сборки в несколько файлов журнала: по одному файлу журнала
+                     на узел MSBuild. Начальное расположение для этих файлов —
+                     текущий каталог. По умолчанию файлы называются
+                     "MSBuild&lt;идентификатор_узла&gt;.log". Расположение файлов и
+                     других параметров для fileLogger можно указать,
                      добавив параметр "/fileLoggerParameters".
 
-                     Если имя файла журнала задано в параметре fileLoggerParameters,
-                     распределенное средство ведения журнала будет использовать fileName в качестве 
-                     шаблона и добавит идентификатор узла к fileName, чтобы 
-                     создать файл журнала для каждого узла.
+                     Если с помощью параметра fileLoggerParameters задано имя файла журнала (fileName),
+                     распределенное средство ведения журнала будет использовать это имя в качестве
+                     шаблона и добавлять к нему идентификаторы узлов, чтобы
+                     создать файл журнала на каждый узел.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -649,33 +649,33 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="updated">  /fileloggerparameters[n]:&lt;параметры&gt;                                
-                     Предоставляет любые дополнительные параметры для средств ведения журнала в файле.
-                     Присутствие этого параметра подразумевает использование 
+        <target state="translated">  /fileloggerparameters[n]:&lt;параметры&gt;
+                     Предоставляет дополнительные параметры для средств ведения журналов в виде файла.
+                     Присутствие этого параметра подразумевает использование
                      соответствующего параметра /filelogger[n].
-                     Значение "n" (если есть) может быть цифрой от 1 до 9.
-                     /fileloggerparameters также используется любым распределенным
-                     средством ведения журнала в файле, см. описание /distributedFileLogger.
+                     Значение "n" (при наличии) может быть цифрой от 1 до 9.
+                     Свойство /fileloggerparameters также может использоваться любыми распределенными
+                     средствами ведения файловых журналов. См. описание /distributedFileLogger.
                      (Краткая форма: /flp[n])
-                     Доступны те же параметры, которые перечислены для средства ведения журнала
-                     консоли. Доступны некоторые дополнительные параметры:
-                        LogFile — путь к файлу журнала, в который будет
+                     Доступны те же параметры, что перечислены для средства ведения журнала
+                     консоли. Вот некоторые дополнительные параметры.
+                        LogFile — путь к файлу журнала, в который будет
                             записан журнал сборки.
-                        Append — определяет, будет ли журнал сборки добавлен
-                            в файл журнала или перезапишет его. При задании
-                            параметра журнал сборки добавляется в файл сборки;
-                            Если параметр не задан, перезаписывается 
-                            содержимое существующего файла журнала. 
-                            Значение по умолчанию — не добавлять данные в файл журнала.
-                        Encoding — указывает кодировку для файла, 
-                            например UTF-8, Юникод или ASCII
-                     Детализация по умолчанию — подробная.
+                        Append — определяет, будет ли журнал сборки добавлен
+                            в файл журнала или перезапишет его. При включении этого
+                            параметра журнал сборки добавляется к файлу журнала;
+                            если параметр не задан, то содержимое
+                            существующего файла журнала перезаписывается.
+                            Значение по умолчанию — не добавлять данные в файл журнала.
+                        Encoding — указывает для файла кодировку,
+                            например UTF-8, Юникод или ASCII.
+                     Детализация по умолчанию — подробная.
                      Примеры:
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       /flp1:warningsonly;logfile=msbuild.wrn 
+                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -724,20 +724,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="updated">  /preprocess[:file] 
+        <target state="translated">  /preprocess[:file]
                      Создает один объединенный файл проекта,
-                     встраивая все файлы, которые были бы импортированы во время сборки,
-                     с отметкой границ. Это может быть
+                     встраивая в него все файлы, которые были бы импортированы во время сборки,
+                     и отмечая их границы. Это может быть
                      полезно, чтобы узнать, какие файлы импортируются
-                     и откуда, а также что они добавят в
+                     и откуда, и что они добавят в
                      сборку. По умолчанию выходные данные записываются в
-                     окно консоли. Если путь к файлу выходных данных 
-                     указан, будет использоваться указанное значение.
+                     окно консоли. Если указан путь к файлу выходных
+                     данных, то будет использоваться этот файл.
                      (Краткая форма: /pp)
                      Пример:
                        /pp:out.txt
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -746,13 +746,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="updated">  /detailedsummary 
+        <target state="translated">  /detailedsummary
                      Показывает в конце сборки подробные сведения
                      о созданных конфигурациях и графике их передачи
-                     на узлы. 
+                     на узлы.
                      (Краткая форма: /ds)
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -760,12 +760,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <target state="updated">  /debug
-                     Вызывает мгновенное отображение запроса отладчика, чтобы 
-                     Visual Studio можно было прикрепить для отладки 
+        <target state="translated">  /debug
+                     Вызывает мгновенное отображение запроса отладчика, чтобы
+                     Visual Studio можно было подключить к отладке
                      XML-кода MSBuild и любых используемых им задач и средств ведения журнала.
    </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -1309,38 +1309,38 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Сериализует все события сборки в сжатый двоичный
-                     файл. По умолчанию файл находится в текущем каталоге
-                     и называется "msbuild.binlog". Двоичный журнал включает подробное
-                     описание процесса сборки, которое можно потом использовать для
-                     воссоздания текстовых журналов. Также он используется другими
-                     средствами анализа. Двоичный журнал обычно в 10–20 раз меньше
-                     самого подробного текстового журнала уровня диагностики,
-                     но содержит больше информации. (Краткая форма: /bl)
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Сериализует все события сборки в сжатый двоичный файл.
+                     По умолчанию файл находится в текущем каталоге и называется
+                     "msbuild.binlog". Двоичный журнал включает подробное описание
+                     процесса сборки, которое затем можно использовать для воссоздания
+                     текстовых журналов. Он также может использоваться другими средствами анализа. Двоичный журнал
+                     обычно в 10–20 раз меньше самого подробного текстового
+                     журнала уровня диагностики, но содержит больше информации.
+                     (Краткая форма: /bl)
 
-                     Средство ведения двоичного журнала по умолчанию собирает
-                     исходный текст файлов проекта, включая все импортированные
-                     проекты и целевые файлы, найденные во время сборки.
-                     Дополнительный параметр ProjectImports управляет этим поведением:
+                     Средство ведения двоичного журнала по умолчанию собирает исходный текст
+                     файлов проекта, включая все импортированные проекты и целевые
+                     файлы, найденные во время сборки. Дополнительный
+                     параметр ProjectImports управляет этим поведением.
 
-                      ProjectImports=None     — Не собирать импортированные файлы
+                      ProjectImports=None — не собирать импортированные файлы
                                                 проекта.
-                      ProjectImports=Embed    — Внедрять импортированные файлы проекта в
+                      ProjectImports=Embed — внедрять импортированные файлы проекта в
                                                 файл журнала.
-                      ProjectImports=ZipFile  — Сохранять файлы проекта в 
-                                                output.projectimports.zip,
-                                                где выходные файлы имеют то же имя,
-                                                что и файл двоичного журнала.
+                      ProjectImports=ZipFile — сохранять файлы проекта в
+                                                &lt;вывод&gt;.projectimports.zip,
+                                                где &lt;вывод&gt; — это то же имя,
+                                                что и у двоичного файла журнала.
 
-                     Параметр по умолчанию для ProjectImports — Embed.
-                     Примечание. Средство ведения журнала не собирает исходные файлы,
-                     отличные от MSBuild, например с расширением CS, CPP и др.
+                     Значение по умолчанию для ProjectImports — Embed.
+                     Примечание. Средство ведения журнала не собирает исходные файлы
+                     не от MSBuild, например с расширениями CS, CPP и др.
 
-                     BINLOG-файл можно "воспроизвести", передав в
+                     BINLOG-файл можно "воспроизвести", передав его в
                      msbuild.exe в качестве аргумента вместо проекта или решения.
-                     Другие средства ведения журнала получат сведения
-                     в файле журнала, как при оригинальной сборке.
+                     Другие средства ведения журнала получат содержащиеся
+                     в файле журнала сведения, как если бы происходила собственно сборка.
                      Дополнительные сведения о двоичных журналах и их использовании:
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
@@ -1370,14 +1370,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      override a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="new">  /restore[:True|False]
-                     Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
-                     (Short form: /r)
+        <target state="translated">  /restore[:True|False]
+                     Запускает целевой объект с именем "Восстановление" перед сборкой
+                     других целевых объектов. Это может быть полезно, если дереву
+                     проектов нужно восстановить пакеты перед
+                     их сборкой. Параметры /restore и /restore:True
+                     взаимозаменяемы. Используйте один из параметров, чтобы
+                     переопределить значение, полученное из файла ответа.
+                     (Краткая форма: /r)
     </target>
         <note>
       LOCALIZATION: "/restore" and "/r" should not be localized.
@@ -1386,7 +1386,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="new">MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</target>
+        <target state="translated">MSBUILD: ошибка MSB1042 — значение повторного использования узла является недопустимым. Эта версия MSBuild не поддерживает повторное использование узла. Значение должно быть "Ложь".</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1395,7 +1395,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1052: Restore value is not valid. {0}</target>
+        <target state="translated">MSBUILD: ошибка MSB1052 — значение восстановления является недопустимым. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.

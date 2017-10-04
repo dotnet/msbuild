@@ -152,14 +152,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="updated">  @&lt;檔案&gt;            從文字檔插入命令列設定。若要指定
-                    多個回應檔，請個別指定
-                    每個回應檔。
-                     
-                    任何名為 "msbuild.rsp" 的回應檔
-                    都會從下列位置自動取用:
-                    (1) msbuild.exe 的目錄
-                    (2) 第一個建置之專案或解決方案的目錄
+        <target state="translated">  @&lt;檔案&gt;            從文字檔插入命令列設定。若要指定
+                     多個回應檔，請個別指定
+                     每個回應檔。
+
+                     任何名為 "msbuild.rsp" 的回應檔都會自動
+                     從下列位置取用:
+                     (1) msbuild.exe 的目錄
+                     (2) 第一個建置之專案或解決方案的目錄
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -328,40 +328,40 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="updated">  /consoleloggerparameters:&lt;參數&gt;
-                    主控台記錄器的參數。(簡短形式: /clp)
-                    可用的參數有:
-                       PerformanceSummary--顯示在工作、目標和專案
-                           花費的時間。
-                       Summary--在結尾顯示錯誤及警告摘要。
-                       NoSummary--不在結尾顯示錯誤及警告
-                           摘要。
-                       ErrorsOnly--僅顯示錯誤。
-                       WarningsOnly--僅顯示警告。
-                       NoItemAndPropertyList--不在每個專案組建開頭
-                           顯示項目及屬性清單。   
-                       ShowCommandLine--顯示 TaskCommandLineEvent 訊息 
-                       ShowTimestamp--顯示時間戳記，作為任何訊息的
-                           前置詞。                                          
-                       ShowEventId--顯示啟動事件、結束事件及訊息的 
-                           eventId
-                       ForceNoAlign--不將文字與主控台緩衝區的大小
-                           對齊
-                       DisableConsoleColor--在所有記錄訊息
-                           使用預設主控台色彩。
-                       DisableMPLogging--在非多處理器模式中執行時，
-                           停用多處理器的
-                           輸出記錄樣式。
-                       EnableMPLogging--即使在非多處理器模式中執行，
-                           也啟用多處理器的
-                           記錄樣式。預設會使用此記錄樣式。
-                       ForceConsoleColor--即使主控台不支援 ANSI 主控台
-                           色彩，也予以使用
-                       Verbosity--覆寫此記錄器的 /verbosity 
-                           設定。
-                    範例:
-                       /consoleloggerparameters:PerformanceSummary;NoSummary;
-                                                Verbosity=minimal
+        <target state="translated">  /consoleloggerparameters:&lt;參數&gt;
+                     主控台記錄器的參數. (簡短形式: /clp)
+                     可用的參數有:
+                        PerformanceSummary--顯示花費在工作、目標和專案
+                            的時間。
+                        Summary--在結尾顯示錯誤和警告摘要。
+                        NoSummary--不在結尾顯示錯誤和警告
+                            摘要。
+                        ErrorsOnly--僅顯示錯誤。
+                        WarningsOnly--僅顯示警告。
+                        NoItemAndPropertyList--不在每個專案組建開頭顯示
+                            項目和屬性的清單。
+                        ShowCommandLine--顯示 TaskCommandLineEvent 訊息
+                        ShowTimestamp--將時間戳記顯示為任何訊息的
+                            前置詞。
+                        ShowEventId--顯示已啟動事件、已完成事件和訊息的
+                            eventId
+                        ForceNoAlign--不將文字與主控台緩衝區的大小
+                            對齊
+                        DisableConsoleColor--對所有記錄訊息
+                            使用預設主控台色彩。
+                        DisableMPLogging--在非多處理器模式中執行時，
+                            停用輸出的
+                            多處理器記錄樣式。
+                        EnableMPLogging--即使在非多處理器模式中執行，
+                            也啟用多處理器記錄樣式。
+                            根據預設，會開啟此記錄樣式。
+                        ForceConsoleColor--即使主控台不支援 ANSI 主控台色彩，
+                            也予以使用。
+                        Verbosity--覆寫此記錄器的 /verbosity
+                            設定。
+                     範例:
+                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+                                                 Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -421,10 +421,10 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="updated">  /maxcpucount[:n]   指定建置時並行處理序
-                    的最大數目。如果未指定參數，會使用
+        <target state="translated">  /maxcpucount[:n]   指定要一同建置的並行處理序
+                    最大數目。如果未使用參數，會使用
                     預設值 1。如果使用了參數但未提供值，
-                    MSBuild 會使用電腦上的所有
+                    MSBuild 會使用電腦上的最大
                     處理器數目。(簡短形式: /m[:n])
       </target>
         <note>
@@ -439,11 +439,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="updated">範例:
+        <target state="translated">範例:
 
-       MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-       MSBuild MyApp.csproj /t:Clean
-                            /p:Configuration=Debug;TargetFrameworkVersion=v3.5
+        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
+        MSBuild MyApp.csproj /t:Clean
+                             /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -478,22 +478,22 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="updated">  /distributedlogger:&lt;中央記錄器&gt;*&lt;轉送記錄器&gt;                    
-                    使用此記錄器，記錄來自 MSBuild 的事件，
-                    將其他記錄器執行個體連結到每個節點。若要指定
-                    多個記錄檔，請個別指定每個記錄檔。
-                    (簡短形式 /dl)
-                    &lt;記錄器&gt; 語法為:
-                      [&lt;記錄器類別&gt;,]&lt;記錄器組件&gt;[;&lt;記錄器參數&gt;]
-                    &lt;記錄器類別&gt; 語法為:
-                      [&lt;部分或完整命名空間&gt;.]&lt;記錄器類別名稱&gt;
-                    &lt;記錄器組件&gt; 語法為:
-                      {&lt;組件名稱&gt;[,&lt;強式名稱&gt;] | &lt;組件檔&gt;}
-                    &lt;記錄器參數&gt; 為選擇性，
-                    並且會在您輸入的同時傳遞到記錄器。(簡短形式: /l)
-                    範例:
-                      /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                      /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+        <target state="translated">  /distributedlogger:&lt;中央記錄器&gt;*&lt;轉送記錄器&gt;
+                     使用此記錄器，記錄來自 MSBuild 的事件，
+                     將其他記錄器執行個體連結到各個節點。若要指定
+                     多個記錄器，請個別指定每個記錄器。
+                     (簡短形式 /dl)
+                     &lt;記錄器&gt; 語法為:
+                       [&lt;記錄器類別&gt;,]&lt;記錄器組件&gt;[;&lt;記錄器參數&gt;]
+                     &lt;記錄器類別&gt; 語法為:
+                       [&lt;部分或完整命名空間&gt;.]&lt;記錄器類別名稱&gt;
+                     &lt;記錄器組件&gt; 語法為:
+                       {&lt;組件名稱&gt;[,&lt;強式名稱&gt;] | &lt;組件檔&gt;}
+                     &lt;記錄器參數&gt; 為選擇性，
+                     並且會在您將其鍵入的同時傳遞到記錄器。(簡短形式: /l)
+                     範例:
+                       /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -513,13 +513,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="updated">  /ignoreprojectextensions:&lt;副檔名&gt;
-                    決定要建置哪個專案檔時，
-                    要略過的副檔名清單。使用分號或逗號
-                    分隔多個副檔名。
-                    (簡短形式: /ignore)
-                    範例:
-                      /ignoreprojectextensions:.sln
+        <target state="translated">  /ignoreprojectextensions:&lt;副檔名&gt;
+                     在決定要建置哪個專案檔時，
+                     要略過的副檔名清單。請使用分號或逗號
+                     分隔多個副檔名。
+                     (簡短形式: /ignore)
+                     範例:
+                       /ignoreprojectextensions:.sln
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -539,13 +539,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="updated">  /toolsversion:&lt;版本&gt;
-                    在建置期間要使用的 
-                    MSBuild 工作組 (工作、目標等) 版本。此版本會覆寫
-                    個別專案指定的版本。(簡短形式:
-                    /tv)
-                    範例:
-                      /toolsversion:3.5
+        <target state="translated">  /toolsversion:&lt;版本&gt;
+                     在建置期間要使用的 
+                    MSBuild 工具組 (工作、目標等) 版本。此版本會覆寫
+                     個別專案指定的版本。(簡短形式:
+                     /tv)
+                     範例:
+                       /toolsversion:3.5
    </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -566,14 +566,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="updated">  /fileLogger[n]     將建置輸出記錄到檔案。根據預設，
-                    此檔案位於目前的目錄中，
-                    名為 "msbuild[n].log"。來自所有節點的事件會合併成
-                    單一記錄。透過新增 "/fileLoggerParameters[n]" 參數，
-                    可以指定 fileLogger 的檔案位置及
-                    其他參數。
-                    如果 "n" 存在，可以是 1-9 之間的數字，
-                    允許連結最多 10 個檔案記錄器。(簡短形式: /fl[n])
+        <target state="translated">  /fileLogger[n]     將建置輸出記錄到檔案。根據預設，
+                     此檔案位於目前的目錄中，
+                     且名為 "msbuild[n].log"。來自所有節點的事件會合併成
+                     單一記錄。透過新增 "/fileLoggerParameters[n]" 參數，
+                     可以指定 fileLogger 的檔案位置及
+                     其他參數。
+                     如果 "n" 存在，可以是 1-9 之間的數字，
+                     最多允許連結 10 個檔案記錄器。(簡短形式: /fl[n])
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -598,18 +598,18 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="updated">  /distributedFileLogger                                                      
-                    將建置輸出記錄到多個記錄檔，
-                    每個 MSBuild 節點各一個記錄檔。這些檔案的初始位置為
-                    目前的目錄。根據預設，檔案名稱為
-                    "MSBuild&lt;nodeid&gt;.log"。透過新增 "/fileLoggerParameters" 參數，
-                    可以指定 fileLogger 的檔案位置
-                    及其他參數。
+        <target state="translated">  /distributedFileLogger
+                     將建置輸出記錄到多個記錄檔，
+                     每個 MSBuild 節點各一個記錄檔。這些檔案的初始位置為
+                     目前的目錄。根據預設，檔案名稱為
+                     "MSBuild&lt;節點識別碼&gt;.log"。透過新增 "/fileLoggerParameters" 參數，
+                     可以指定 fileLogger 的檔案位置
+                     及其他參數。
 
-                    如果透過 fileLoggerParameters 參數設定記錄檔名稱，
-                    分散式記錄器會使用 fileName 當作範本，
-                    並將節點識別碼附加到此 fileName，
-                    以替每個節點建立記錄檔。
+                     如果透過 fileLoggerParameters 參數設定記錄檔名稱，
+                     分散式記錄器會使用 fileName 作為範本，
+                     並將節點識別碼附加到此 fileName，
+                     以替每個節點建立記錄檔。
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -650,34 +650,34 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="updated">  /fileloggerparameters[n]:&lt;參數&gt;                               
-                    為檔案記錄器提供任何額外參數。
-                    此參數的存在表示有
-                    對應的 /filelogger[n] 參數。
-                    如果 "n" 存在，可以是 1-9 之間的數字。
-                    任何分散式檔案記錄器也都會使用 /fileloggerparameters，
-                    請查看 /distributedFileLogger 的描述。
-                    (簡短形式: /flp[n])
-                    為主控台記錄器列出的相同參數
-                    均可用。其他幾個可用的參數有:
-                       LogFile--將會寫入組建記錄檔的記錄檔
-                           路徑。
-                       Append--決定組建記錄檔會附加到記錄檔
-                           還是加以覆寫。設定
-                           參數會將組建記錄檔附加到記錄檔;
-                           未設定參數則會覆寫
-                           現有記錄檔的內容。
-                           預設為不附加到記錄檔。
-                       Encoding--指定檔案的編碼，
-                           例如 UTF-8、Unicode 或 ASCII
-                    預設詳細資訊為 Detailed。
-                    範例:
-                      /fileLoggerParameters:LogFile=MyLog.log;Append;
-                                          Verbosity=diagnostic;Encoding=UTF-8
+        <target state="translated">  /fileloggerparameters[n]:&lt;參數&gt;
+                     為檔案記錄器提供任何額外參數。
+                     此參數的存在表示有
+                     對應的 /filelogger[n] 參數。
+                     如果 "n" 存在，可以是 1-9 之間的數字。
+                     任何分散式檔案記錄器也都會使用 /fileloggerparameters，
+                     請查看 /distributedFileLogger 的描述。
+                     (簡短形式: /flp[n])
+                     為主控台記錄器列出的相同參數
+                     均可用。其他可用的參數有:
+                        LogFile--會寫入組建記錄檔的記錄檔
+                            路徑。
+                        Append--決定組建記錄檔會附加到記錄檔
+                            還是覆寫記錄檔。設定
+                            參數會將組建記錄檔附加到記錄檔;
+                            未設定參數則會覆寫
+                            現有記錄檔的內容。
+                            預設為不附加到記錄檔。
+                        Encoding--指定檔案的編碼，
+                            例如 UTF-8、Unicode 或 ASCII
+                     預設詳細資訊為 Detailed。
+                     範例:
+                       /fileLoggerParameters:LogFile=MyLog.log;Append;
+                                           Verbosity=diagnostic;Encoding=UTF-8
 
-                      /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                      /flp1:warningsonly;logfile=msbuild.wrn
-                      /flp2:errorsonly;logfile=msbuild.err
+                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       /flp1:warningsonly;logfile=msbuild.wrn
+                       /flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -725,20 +725,20 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        /pp:out.txt
     </source>
-        <target state="updated">  /preprocess[:file]
-                    藉由內嵌所有會在建置期間匯入的檔案
-                    建置單一的彙總專案檔，
-                    並標記這些檔案的界限。要找出匯入的檔案有哪些、
-                    來自何處，
-                    以及檔案將對建置有哪些貢獻時，
-                    這會很實用。根據預設，輸出會寫入
-                    主控台視窗。如有提供輸出檔的路徑，
-                    則改用該路徑。
-                    (簡短形式: /pp)
-                    範例:
-                      /pp:out.txt
+        <target state="translated">  /preprocess[:file]
+                     藉由內嵌所有會在建置期間匯入的檔案
+                     建立單一的彙總專案檔，
+                     並標記這些檔案的界限。要找出匯入的檔案有哪些、
+                     來自何處，
+                     以及檔案將對建置有哪些貢獻時，
+                     這會很實用。根據預設，輸出會寫入
+                     主控台視窗。如有提供輸出檔的路徑，
+                     則會改用該路徑。
+                     (簡短形式: /pp)
+                     範例:
+                       /pp:out.txt
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -747,13 +747,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="updated">  /detailedsummary
-                    在建置結束時顯示詳細資訊，
-                    內容為建置的組態，
-                    以及將組態排程到節點的方式。
-                    (簡短形式: /ds)
+        <target state="translated">  /detailedsummary
+                     在建置結束時顯示詳細資訊，
+                     內容為建置的組態，
+                     以及將組態排程到節點的方式。
+                     (簡短形式: /ds)
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -761,12 +761,12 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <target state="updated">  /debug
-                    造成偵錯工具提示立即顯示，
-                    讓 Visual Studio 得以連結，以供您
-                    對 MSBuild XML 與任何工作及其使用的記錄器偵錯。
+        <target state="translated">  /debug
+                     使偵錯工具提示立即顯示，
+                     讓 Visual Studio 得以連結，以供您
+                     對 MSBuild XML 及其使用的任何工作與記錄器進行偵錯。
    </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -1308,11 +1308,11 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     將所有建置事件序列化成壓縮的二進位檔。
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                    將所有建置事件序列化成壓縮的二進位檔案。
                      根據預設，此檔案存放在目前的目錄下，
                      並會命名為 "msbuild.binlog"。此二進位記錄檔是
-                     建置流程的詳細描述，之後可用於重建文字記錄，
+                     建置程序的詳細描述，之後可用於重建文字記錄，
                      以及供其他分析工具使用。二進位記錄檔
                      的大小通常會比大部分的詳細文字
                      診斷層級記錄小 10-20 倍，但包含了更多資訊。
@@ -1321,22 +1321,22 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      根據預設，二進位記錄器會收集專案檔的
                      原始程式文字，包括在建置期間遇到的
                      匯入專案及目標檔案。選擇性的 ProjectImports 參數
-                     會控制這此行為:
+                     會控制此行為:
 
                       ProjectImports=None     - 不收集專案
                                                 匯入。
                       ProjectImports=Embed    - 在記錄檔中內嵌
                                                 專案匯入。
-                      ProjectImports=ZipFile  - 將專案檔儲存到 
+                      ProjectImports=ZipFile  - 將專案檔儲存到
                                                 output.projectimports.zip，
                                                 其中輸出的名稱與
                                                 二進位記錄檔名稱相同。
 
                      ProjectImports 的預設設定為 Embed。
-                     注意: 記錄器不會收集非 MSBuild 的原始程式檔，
+                     注意: 記錄器不會收集非 MSBuild 的來源檔案，
                      例如 .cs、.cpp 等。
 
-                     將 .binlog file 傳遞到 msbuild.exe 作為引數而非
+                     將 .binlog 檔案傳遞到 msbuild.exe 作為引數而非
                      專案/解決方案，即可加以「播放」。
                      其他記錄器會收到記錄檔中包含的資訊，
                      就如同原始組建發生時的情況。
@@ -1369,14 +1369,14 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      override a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="new">  /restore[:True|False]
-                     Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
-                     (Short form: /r)
+        <target state="translated">  /restore[:True|False]
+                     在建置其他目標前，會先執行名為
+                     Restore 的目標。當您專案樹狀結構的
+                     套件必須先還原才可加以建置時，這會很實用。
+                     指定 /restore 的方式與指定
+                     /restore:True 的方式相同。  使用該參數來
+                     覆寫來自回應檔的值。
+                     (簡短形式: /r)
     </target>
         <note>
       LOCALIZATION: "/restore" and "/r" should not be localized.
@@ -1385,7 +1385,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="new">MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</target>
+        <target state="translated">MSBUILD : error MSB1042: 節點重複使用值無效。此版 MSBuild 不支援節點重複使用。若已指定，節點重複使用參數值必為 false。</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1394,7 +1394,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1052: Restore value is not valid. {0}</target>
+        <target state="translated">MSBUILD : 錯誤 MSB1052: 還原值無效。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.

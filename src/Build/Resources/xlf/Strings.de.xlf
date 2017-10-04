@@ -222,7 +222,7 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: MSBuildToolsPath ist nicht identisch mit MSBuildBinPath für die bei "{1}" definierte ToolsVersion "{0}". Falls beide vorhanden sind, müssen sie den identischen Wert haben.</target>
+        <target state="translated">MSB4142: MSBuildToolsPath ist nicht identisch mit MSBuildBinPath für die bei "{1}" definierte ToolsVersion {0}. Wenn beide Pfade vorhanden sind, müssen sie identische Werte haben.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
@@ -2044,13 +2044,13 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="new">Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</target>
+        <target state="translated">Das Ziel "{0}" wurde übersprungen. Das Ziel ist im Projekt nicht vorhanden, und "SkipNonexistentTargets" ist auf TRUE festgelegt.</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
         <source>The task factory must return a value for the "TaskType" property.</source>
-        <target state="new">The task factory must return a value for the "TaskType" property.</target>
-        <note></note>
+        <target state="translated">Die Aufgabenfactory muss einen Wert für die Eigenschaft "TaskType" zurückgeben.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

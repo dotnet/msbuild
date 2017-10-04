@@ -152,14 +152,14 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="updated">  @&lt;ファイル&gt;            コマンド ライン設定をテキスト ファイルから挿入します。複数の
-                    応答ファイルがある場合は、各応答ファイルを個別に指定
-                    します。
-                     
-                    「msbuild.rsp」 という名前の応答ファイルは、
-                    次の場所から自動的に利用されます:
-                    (1) msbuild.exe のディレクトリ
-                    (2) プロジェクトまたはソリューションが最初にビルドされたディレクトリ
+        <target state="translated">  @&lt;ファイル&gt;            コマンド ライン設定をテキスト ファイルから挿入します。複数の
+                     応答ファイルがある場合は各応答ファイルを個別に
+                     指定します。
+
+                     "msbuild.rsp" という名前の応答ファイルは、
+                     次の場所から自動的に利用されます:
+                     (1) msbuild.exe のディレクトリ
+                     (2) プロジェクトまたはソリューションが最初にビルドされたディレクトリ
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -328,7 +328,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="updated">  /consoleloggerparameters:&lt;パラメーター&gt;
+        <target state="translated">  /consoleloggerparameters:&lt;パラメーター&gt;
                     コンソール ロガーへのパラメーターです。(短い形式: /clp)
                     使用できるパラメーター:
                        PerformanceSummary--タスク、ターゲット、プロジェクトに
@@ -339,10 +339,10 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        ErrorsOnly--エラーのみを表示します。
                        WarningsOnly--警告のみを表示します。
                        NoItemAndPropertyList--各プロジェクト ビルドの開始時に
-                           項目とプロパティの一覧を表示しません。   
-                       ShowCommandLine--TaskCommandLineEvent メッセージを表示します。 
+                           項目とプロパティの一覧を表示しません。
+                       ShowCommandLine--TaskCommandLineEvent メッセージを表示します。
                        ShowTimestamp--タイムスタンプを
-                           メッセージの先頭に表示します。                                          
+                           メッセージの先頭に表示します。
                        ShowEventId--開始したイベント、終了したイベント、
                            およびメッセージの eventId を表示します。
                        ForceNoAlign--テキストを
@@ -421,7 +421,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="updated">  /maxcpucount[:n]   ビルド時の同時実行プロセスの最大数を指定
+        <target state="translated">  /maxcpucount[:n]   ビルド時の同時実行プロセスの最大数を指定
                     します。スイッチが使用されない場合、
                     既定値は 1 です。値を指定することなくスイッチが使用される場合、
                     MSBuild は最大でコンピューターのプロセッサ数を使用
@@ -439,7 +439,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
         MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="updated">例:
+        <target state="translated">例:
 
        MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
        MSBuild MyApp.csproj /t:Clean
@@ -478,10 +478,10 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="updated">  /distributedlogger:&lt;中心ロガー&gt;*&lt;転送ロガー&gt;                    
+        <target state="translated">  /distributedlogger:&lt;中心ロガー&gt;*&lt;転送ロガー&gt;
                     MSBuild のイベントを記録して、各ノードに異なる
                     ロガー インスタンスをアタッチするロガーです。複数の
-                    ロガーがある場合は、各ロガーを個別に指定します
+                    ロガーがある場合は、各ロガーを個別に指定します。
                     (短い形式 /dl)。
                     &lt;ロガー&gt; の構文:
                       [&lt;ロガー クラス&gt;,]&lt;ロガー アセンブリ&gt;[;&lt;ロガー パラメーター&gt;]
@@ -513,8 +513,8 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="updated">  /ignoreprojectextensions:&lt;拡張子&gt;
-                    ビルドするプロジェクトを決定するときに除外する
+        <target state="translated">  /ignoreprojectextensions:&lt;拡張子&gt;
+                    ビルドするプロジェクト ファイルを決定するときに除外する
                     拡張子の一覧です。複数の拡張子はセミコロン
                     またはコンマで区切ります。
                     (短い形式: /ignore)
@@ -539,7 +539,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="updated">  /toolsversion:&lt;バージョン&gt;
+        <target state="translated">  /toolsversion:&lt;バージョン&gt;
                     ビルド中に使用する MSBuild Toolset (タスク、ターゲットなど)
                      のバージョンです。このバージョンは、
                     個別のプロジェクトで指定されたバージョンをオーバーライドします。(短い形式:
@@ -566,13 +566,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="updated">  /fileLogger[n]     ビルド出力のログをファイルに記録します。既定では、
-                    このファイルは「msbuild[n].log」という形式の名前で現在の
+        <target state="translated">  /fileLogger[n]     ビルド出力のログをファイルに記録します。既定では、
+                    このファイルは "msbuild[n].log" という形式の名前で現在の
                     ディレクトリに置かれます。すべてのノードのイベントは
                      1 つのログに統合されます。ファイルの場所と、
                     fileLogger の他のパラメーターは、
                     /fileLoggerParameters[n] スイッチを追加して指定できます。
-                    「n」は (存在する場合は) 1 から 9 の数値で、最大
+                    "n" は (存在する場合は) 1 から 9 の数値で、最大
                     10 のファイル ロガーをアタッチできます(短い形式:/fl[n])。
     </target>
         <note>
@@ -598,13 +598,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="updated">  /distributedFileLogger                                                      
+        <target state="translated">  /distributedFileLogger
                     ビルド出力のログを MSBuild ノードごとに 1 つずつ、全体で
                     複数のログ ファイルに記録します。これらのファイルが最初に
                     置かれる場所は、現在のディレクトリです。既定では、これらの
-                    ファイル名は「MSBuild&lt;nodeid&gt;.log」のようになります。ファイルの場所と
+                    ファイル名は "MSBuild&lt;nodeid&gt;.log" のようになります。ファイルの場所と
                     fileLogger の他のパラメーターは、
-                    「/fileLoggerParameters」スイッチを追加して指定できます。
+                    "/fileLoggerParameters" スイッチを追加して指定できます。
 
                     fileLoggerParameters スイッチでログ ファイル名を設定した場合、
                     分散ロガーは fileName をテンプレートとして使用し、
@@ -650,11 +650,11 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="updated">  /fileloggerparameters[n]:&lt;パラメーター&gt;                               
+        <target state="translated">  /fileloggerparameters[n]:&lt;パラメーター&gt;
                     ファイル ロガーの追加のパラメーターを提供します。
                     このスイッチの存在は、対応する
                     /filelogger[n] スイッチの存在を暗示します。
-                    "n" は (存在する場合は) 1 ～ 9 の数値です。
+                    "n" は (存在する場合は) 1 から 9 の数値です。
                     /fileloggerparameters も分散ファイル ロガーによって使用されます。
                     /distributedFileLogger の説明を参照してください 
                     (短い形式: /flp[n])。
@@ -725,11 +725,11 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="updated">  /preprocess[:file]
+        <target state="translated">  /preprocess[:file]
                     ビルド中にインポートされるすべてのファイルを
                     インライン展開することで、単一の
                     集約されたプロジェクト ファイルを作成します。ファイルの境界にはマークが挿入されます。これは、
-                    インポートされるファイルとそれが存在する場所および、
+                    インポートされるファイルとそれが存在する場所、および
                     ビルドに対するファイルの関係を明らかにするのに
                     役立ちます。既定では、出力はコンソール
                     ウィンドウに表示されます。出力ファイルのパスを指定すると、
@@ -738,7 +738,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                     例:
                       /pp:out.txt
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -747,13 +747,13 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="updated">  /detailedsummary
+        <target state="translated">  /detailedsummary
                     ビルドの最後に、ビルド構成と、ノードに対して
                     どのようにスケジュールされたかについて、
                     詳細情報が表示されます。
                     (短い形式: /ds)
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -761,12 +761,12 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <target state="updated">  /debug
+        <target state="translated">  /debug
                     デバッガー プロンプトを直ちに表示します。
                     Visual Studio がアタッチされ、MSBuild XML と、
                     使用されるすべてのタスクおよびロガーをデバッグできます。
    </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -1308,7 +1308,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      すべてのビルド イベントを圧縮バイナリ ファイルにシリアル化します。
                      既定では、このファイルは "msbuild.binlog" という名前で
                      現在のディレクトリに置かれます。バイナリ ログはビルド プロセスの
@@ -1318,7 +1318,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      20 分の 1 の大きさですが、より多くの情報を含んでいます。
                      (短い形式: /bl)
 
-                     既定では、バイナリー ロガーはプロジェクト ファイルのソース テキストを
+                     既定では、バイナリ ロガーはプロジェクト ファイルのソース テキストを
                      収集します。それには、ビルド中に検出された、すべてのインポート済み
                      プロジェクトとターゲット ファイルが含まれます。オプションの
                      ProjectImports スイッチは次のように動作を制御します。
@@ -1340,7 +1340,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      msbuild.exe に渡すと、そのファイルを "再生" することができます。
                      他のロガーは、オリジナルのビルドが行われたときのように、
                      ログ ファイルに含まれる情報を受け取ることができます。
-                     バイナリ― ログとその使用法の詳細については、以下をお読みください。
+                     バイナリ ログとその使用法の詳細については、以下をお読みください。
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      例:
@@ -1369,14 +1369,14 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      override a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="new">  /restore[:True|False]
-                     Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
-                     (Short form: /r)
+        <target state="translated">  /restore[:True|False]
+                     他のターゲットをビルドする前に Restore という名前のターゲットを
+                     実行します。これは、プロジェクト ツリーで
+                     パッケージをビルドする前に復元する必要がある場合に
+                     役立ちます。/restore を指定する操作は、
+                     /restore:True を指定する操作と同じです。このパラメーター使用すると、
+                     応答ファイルからの値を上書きできます。
+                     (短い形式： /r)
     </target>
         <note>
       LOCALIZATION: "/restore" and "/r" should not be localized.
@@ -1385,7 +1385,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="new">MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</target>
+        <target state="translated">MSBUILD : エラー MSB1042: ノードの再利用値が無効です。このバージョンの MSBuild はノードの再利用をサポートしていません。指定する場合には、ノードの再利用スイッチ値を false にする必要があります。</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1394,7 +1394,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1052: Restore value is not valid. {0}</target>
+        <target state="translated">MSBUILD : エラー MSB1052: 復元値が無効です。 {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.

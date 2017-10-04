@@ -152,11 +152,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="updated">  @&lt;file&gt;            Vloží nastavení příkazového řádku z textového souboru. Pokud chcete
+        <target state="translated">  @&lt;file&gt;            Vloží nastavení příkazového řádku z textového souboru. Pokud chcete
                      zadat více souborů odpovědí, uveďte každý soubor odpovědí
                      zvlášť.
-                     
-                     Automaticky se použijí všechny soubory s názvem msbuild.rsp, 
+
+                     Automaticky se použijí všechny soubory s názvem msbuild.rsp,
                      které se nacházejí v následujících umístěních: 
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
@@ -328,7 +328,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="updated">  /consoleloggerparameters:&lt;parametry&gt;
+        <target state="translated">  /consoleloggerparameters:&lt;parametry&gt;
                      Parametry protokolovacího nástroje konzoly. (Short form: /clp)
                      Dostupné parametry:
                         PerformanceSummary – zobrazí dobu zpracování úloh,
@@ -339,11 +339,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                         ErrorsOnly – zobrazí jenom chyby.
                         WarningsOnly – zobrazí jenom upozornění.
                         NoItemAndPropertyList – nezobrazí na začátku sestavení každého
-                            projektu seznamy položek a vlastností.    
+                            projektu seznamy položek a vlastností.
                         ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.  
                         ShowTimestamp – před každou zprávou zobrazí časové
-                            razítko.                                           
-                        ShowEventId – zobrazí ID události pro spuštěné a dokončené 
+                            razítko.
+                        ShowEventId – zobrazí ID události pro spuštěné a dokončené
                             události a zprávy.
                         ForceNoAlign – nenastavuje text podle velikosti
                             vyrovnávací paměti konzoly.
@@ -421,10 +421,10 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="updated">  /maxcpucount[:n]   Určuje maximální počet souběžných procesů 
+        <target state="translated">  /maxcpucount[:n]   Určuje maximální počet souběžných procesů
                      pro sestavení. Není-li přepínač zadán, je použita
                      výchozí hodnota 1. Je-li přepínač zadán bez hodnoty,
-                     MSBuild použije nejvýše tolik procesorů, kolik jich je 
+                     MSBuild použije nejvýše tolik procesorů, kolik jich je
                      v počítači dostupných. (Krátký tvar: /m[:n])
       </target>
         <note>
@@ -439,10 +439,10 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="updated">Příklady:
+        <target state="translated">Příklady:
 
         MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean 
+        MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -478,10 +478,10 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="updated">  /distributedlogger:&lt;centrální_protokolovací_nástroj&gt;*&lt;předávací_protokolovací_nástroj&gt;                     
+        <target state="translated">  /distributedlogger:&lt;centrální_protokolovací_nástroj&gt;*&lt;předávací_protokolovací_nástroj&gt; 
                      Použije tento protokolovací nástroj k protokolování událostí z nástroje MSBuild.
                      Ke každému uzlu připojí jinou instanci protokolovacího nástroje. Pokud chcete
-                     zadat několik protokolovacích nástrojů, musíte je zadat jednotlivě. 
+                     zadat několik protokolovacích nástrojů, musíte je zadat jednotlivě.
                      (Krátký tvar: /dl)
                      Syntaxe hodnoty &lt;protokolovací_nástroj&gt;:
                        [&lt;třída_protokolovacího_nástroje&gt;,]&lt;sestavení_protokolovacího_nástroje&gt;[;&lt;parametry_protokolovacího_nástroje&gt;]
@@ -513,9 +513,9 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="updated">  /ignoreprojectextensions:&lt;rozšíření&gt;
-                     Seznam přípon, které se mají ignorovat při určování souboru 
-                     projektu, který bude sestaven. K oddělení více rozšíření 
+        <target state="translated">  /ignoreprojectextensions:&lt;rozšíření&gt;
+                     Seznam přípon, které se mají ignorovat při určování souboru
+                     projektu, který bude sestaven. K oddělení více rozšíření
                      použijte středníky nebo čárky.
                      (Krátký tvar: /ignore)
                      Příklad:
@@ -539,10 +539,10 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="updated">  /toolsversion:&lt;verze&gt;
+        <target state="translated">  /toolsversion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.),
-                     která se má použít při sestavení. Tato verze má přednost před 
-                     verzemi uvedenými v jednotlivých projektech. (Krátký tvar: 
+                     která se má použít při sestavení. Tato verze má přednost před
+                     verzemi uvedenými v jednotlivých projektech. (Krátký tvar:
                      /tv)
                      Příklad:
                        /toolsversion:3.5
@@ -566,11 +566,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="updated">  /fileLogger[n]     Uloží výstup sestavení do souboru protokolu. Ve výchozím nastavení
-                     je tento soubor umístěný v aktuálním adresáři a má název 
+        <target state="translated">  /fileLogger[n]     Uloží výstup sestavení do souboru protokolu. Ve výchozím nastavení
+                     je tento soubor umístěný v aktuálním adresáři a má název
                      msbuild[n].log. Události ze všech uzlů jsou kombinovány
-                     do jednoho protokolu. Umístění souboru a další 
-                     parametry možnosti fileLogger je možné nastavit  
+                     do jednoho protokolu. Umístění souboru a další
+                     parametry možnosti fileLogger je možné nastavit
                      přidáním přepínače /fileLoggerParameters[n].
                      Je-li uvedeno n, může nabývat hodnot 1-9, 
                      takže celkem je možné připojit až 10 souborů protokolu. (Krátký tvar: /fl[n])
@@ -598,17 +598,17 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="updated">  /distributedFileLogger                                                       
+        <target state="translated">  /distributedFileLogger  
                      Uloží výstup sestavení do několika souborů protokolu,
                      po jednom pro každý uzel nástroje MSBuild. Tyto soubory jsou na počátku umístěny
-                     v aktuálním adresáři. Ve výchozím nastavení mají tyto soubory 
+                     v aktuálním adresáři. Ve výchozím nastavení mají tyto soubory
                      název MSBuild&lt;id_uzlu&gt;.log. Umístění souborů
-                     a další parametry možnosti fileLogger lze nastavit  
+                     a další parametry možnosti fileLogger lze nastavit
                      přidáním přepínače /fileLoggerParameters.
 
                      Je-li název souboru protokolu nastaven přepínačem fileLoggerParameters,
-                     distribuovaný protokolovací nástroj použije hodnotu fileName 
-                     jako šablonu a při vytváření souboru protokolu 
+                     distribuovaný protokolovací nástroj použije hodnotu fileName
+                     jako šablonu a při vytváření souboru protokolu
                      připojí k hodnotě fileName ID uzlu.
     </target>
         <note>
@@ -650,33 +650,33 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="updated">  /fileloggerparameters[n]:&lt;parametry&gt;                                
+        <target state="translated">  /fileloggerparameters[n]:&lt;parametry&gt;    
                      Poskytuje doplňující parametry pro protokolovací nástroje.
-                     Přítomnost tohoto přepínače implikuje 
+                     Přítomnost tohoto přepínače implikuje
                      odpovídající přepínač (filelogger[n].
                      Je-li uvedeno n, může nabývat hodnot 1-9.
                      /fileloggerparameters využívají také všechny distribuované
                      protokolovací nástroje - viz popis přepínače /distributedFileLogger.
                      (Krátký tvar: /flp[n])
-                     K dispozici jsou stejné parametry jako ty, 
+                     K dispozici jsou stejné parametry jako ty,
                      které jsou uvedeny u protokolovacího nástroje konzoly. Některé další dostupné parametry:
                         LogFile – cesta k souboru protokolu,
                             do kterého se zapíše protokol sestavení.
                         Append – určuje, jestli se protokol sestavení připojí
                             k souboru protokolu, nebo ho přepíše. Při nastavení přepínače se
                             protokol sestavení připojí k souboru protokolu.
-                            Pokud přepínač není nastavený, přepíše se obsah 
-                            existujícího souboru. 
+                            Pokud přepínač není nastavený, přepíše se obsah
+                            existujícího souboru.
                             Ve výchozím nastavení se soubor protokolu přepíše.
-                        Encoding – určuje kódování souboru, 
+                        Encoding – určuje kódování souboru,
                             například UTF-8, Unicode nebo ASCII.
                      Výchozí úroveň podrobností je Detailed.
                      Příklady:
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       /flp1:warningsonly;logfile=msbuild.wrn 
+                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -725,7 +725,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="updated">  /preprocess[:soubor] 
+        <target state="translated">  /preprocess[:soubor]
                      Vytvoří jeden agregovaný soubor projektu
                      vložením všech souborů, které by byly importovány během
                      sestavení, s označením jejich hranic. To může být
@@ -738,7 +738,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Příklad:
                        /pp:out.txt
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -747,13 +747,13 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="updated">  /detailedsummary 
+        <target state="translated">  /detailedsummary
                      Při dokončení sestavení zobrazí podrobné informace
                      o sestavených konfiguracích a způsobu jejich
-                     naplánování do uzlů. 
+                     naplánování do uzlů.
                      (Krátký tvar: /ds)
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -761,12 +761,12 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <target state="updated">  /debug
-                     Způsobí okamžité zobrazení příkazového řádku ladicího programu, 
-                     takže je možné připojit sadu Visual Studio k ladění souboru XML MSBuild 
+        <target state="translated">  /debug
+                     Způsobí okamžité zobrazení příkazového řádku ladicího programu,
+                     takže je možné připojit sadu Visual Studio k ladění souboru XML MSBuild
                      a používaných úloh a protokolovacích nástrojů.
    </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -1308,7 +1308,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje všechny události sestavení do komprimovaného
                      binárního souboru. Tento soubor se standardně nachází
                      v aktuálním adresáři a má název msbuild.binlog. Binární
@@ -1374,14 +1374,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      override a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="new">  /restore[:True|False]
-                     Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
-                     (Short form: /r)
+        <target state="translated">  /restore[:True|False]
+                     Před sestavením jiných cílů spustí cíl s názvem
+                     Restore. Je to užitečné, když váš strom
+                     projektů vyžaduje obnovení balíčků, aby je bylo možné
+                     sestavit. Zadání parametru /restore je stejné jako
+                     zadání /restore:True. Pomocí tohoto parametru
+                     přepíšete hodnotu pocházející ze souboru odpovědí.
+                     (Krátký tvar: /r)
     </target>
         <note>
       LOCALIZATION: "/restore" and "/r" should not be localized.
@@ -1390,7 +1390,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="new">MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</target>
+        <target state="translated">MSBUILD : error MSB1042: Hodnota opakovaného použití uzlu není platná. Tato verze nástroje MSBuild opakované použití uzlu nepodporuje. Pokud je zadána, hodnota přepínače opakovaného použití uzlu musí být false.</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1399,7 +1399,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1052: Restore value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1052: Hodnota obnovení není platná. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.

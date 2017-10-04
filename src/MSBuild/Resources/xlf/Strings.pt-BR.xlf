@@ -152,7 +152,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="updated">  @&lt;file&gt;            Insere as configurações de linha de comando com base em um arquivo de texto. Para especificar
+        <target state="translated">  @&lt;file&gt;            Insere as configurações de linha de comando com base em um arquivo de texto. Para especificar
                      vários arquivos de resposta, especifique cada arquivo de resposta
                      separadamente.
                      
@@ -328,7 +328,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="updated">  /consoleloggerparameters:&lt;parâmetros&gt;
+        <target state="translated">  /consoleloggerparameters:&lt;parâmetros&gt;
                      Parâmetros do agente do console. (Forma abreviada: /clp)
                      Os parâmetros disponíveis são:
                         PerformanceSummary – mostra o tempo gasto em tarefas, destinos
@@ -353,10 +353,10 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                             do multiprocessador durante a execução no 
                             modo não multiprocessador.
                         EnableMPLogging – habilita o estilo de log multiprocessador
-                            mesmo durante a execução no modo não
+                            mesmo durante a execução no modo de não
                             multiprocessador. Esse estilo de log está ativado por padrão. 
                         ForceConsoleColor – usa as cores de console ANSI mesmo se
-                            o console não dá suporte para elas
+                            o console não der suporte para elas
                         Verbosity – substitui a configuração /verbosity para este
                             agente.
                      Exemplo:
@@ -421,7 +421,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="updated">  /maxcpucount[:n] Especifica o número máximo de processos simultâneos a serem 
+        <target state="translated">  /maxcpucount[:n] Especifica o número máximo de processos simultâneos a serem 
                      compilados. Se a opção não for usada, o valor padrão
                      usado será 1. Se a opção for usada sem um valor, o
                      MSBuild usará o número de processadores do 
@@ -439,7 +439,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
         MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
-        <target state="updated">Exemplos:
+        <target state="translated">Exemplos:
 
         MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
         MSBuild MyApp.csproj /t:Clean 
@@ -478,16 +478,16 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="updated">  /distributedlogger:&lt;agente central&gt;*&lt;agente de encaminhamento&gt;                     
+        <target state="translated">  /distributedlogger:&lt;agente central&gt;*&lt;agente de encaminhamento&gt;                     
                      Use esse agente para registrar eventos do MSBuild, anexando uma
                      instância diferente do agente a cada nó. Para especificar
                      vários agentes, especifique cada agente separadamente. 
                      (Forma abreviada: /dl)
                      A sintaxe &lt;agente&gt; é:
                        [&lt;classe de agente&gt;,]&lt;assembly de agente&gt;[;&lt;parâmetros de agente&gt;]
-                     A sintaxe da &lt;classe de agente&gt; é:
-                       [&lt;namespace completo ou parcial&gt;.]&lt;nome da classe de agente&gt;
-                     A sintaxe do &lt;assembly de agente&gt; é:
+                     A sintaxe &lt;classe de agente&gt; é:
+                       [&lt;namespace completo ou parcial&gt;.]&lt;nome de classe de agente&gt;
+                     A sintaxe &lt;assembly de agente&gt; é:
                        {&lt;nome do assembly&gt;[,&lt;nome forte&gt;] | &lt;arquivo do assembly&gt;}
                      Os &lt;parâmetros de agente&gt; são opcionais e são passados
                      ao agente exatamente da mesma forma que foram digitados. (Forma abreviada: /l)
@@ -513,7 +513,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
-        <target state="updated">  /ignoreprojectextensions:&lt;extensões&gt;
+        <target state="translated">  /ignoreprojectextensions:&lt;extensões&gt;
                      Lista de extensões a serem ignoradas ao determinar qual 
                      arquivo de projeto será compilado. Use um ponto e vírgula ou uma vírgula 
                      para separar várias extensões.
@@ -539,9 +539,9 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      Example:
                        /toolsversion:3.5
    </source>
-        <target state="updated">  /toolsversion:&lt;versão&gt;
-                     A versão do MSBuild Toolset (tarefas, destinos, etc.)
-                     para usar durante o build. Essa versão substituirá as 
+        <target state="translated">  /toolsversion:&lt;versão&gt;
+                     A versão do MSBuild Toolset (tarefas, destinos etc.)
+                     a ser usada durante o build. Essa versão substituirá as 
                      versões especificadas por projetos individuais. (Forma abreviada: 
                      /tv)
                      Exemplo:
@@ -566,12 +566,12 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="updated">  /fileLogger[n] Registra a saída do build em um arquivo. Por padrão,
+        <target state="translated">  /fileLogger[n] Registra a saída do build em um arquivo. Por padrão,
                      o arquivo está no diretório atual e tem o nome 
                      "msbuild[n].log". Os eventos de todos os nós são combinados em
                      um único log. A localização do arquivo e outros
-                     parâmetros do fileLogger podem ser especificados com 
-                     o acréscimo da opção "/fileLoggerParameters[n]".
+                     parâmetros do fileLogger pode ser especificada por meio 
+                     do acréscimo da opção "/fileLoggerParameters[n]".
                      "n", se presente, pode ser um dígito de 1 a 9, permitindo que até 
                      10 agentes de arquivo sejam anexados. (Forma abreviada: /fl[n])
     </target>
@@ -598,12 +598,12 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="updated">  /distributedFileLogger                                                       
+        <target state="translated">  /distributedFileLogger
                      Registra a saída do build em vários arquivos de log, um arquivo de log
                      para cada nó do MSBuild. A localização inicial desses arquivos é
                      o diretório atual. Por padrão, os arquivos são nomeados 
                      "MSBuild&lt;nodeid&gt;.log". A localização dos arquivos e
-                     outros parâmetros para fileLogger podem ser especificados 
+                     outros parâmetros para fileLogger pode ser especificada 
                      com o acréscimo da opção "/fileLoggerParameters".
 
                      Se um nome de arquivo de log for definido pela opção fileLoggerParameters,
@@ -650,7 +650,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="updated">  /fileloggerparameters[n]:&lt;parâmetros&gt;                                
+        <target state="translated">  /fileloggerparameters[n]:&lt;parâmetros&gt;
                      Fornece parâmetros extras para agentes de arquivo.
                      A presença dessa opção indica a 
                      opção /filelogger[n] correspondente.
@@ -663,11 +663,11 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                         LogFile – caminho para o arquivo de log no qual o
                             log de build será gravado.
                         Append – determina se o log de build será anexado
-                            ao arquivo de log ou o substituirá. A definição da
-                            opção anexa o log de build ao arquivo de log;
-                            A não definição da opção substitui o 
+                            ao arquivo de log ou o substituirá. A configuração da
+                            opção acrescenta o log de build ao arquivo de log;
+                            A não configuração da opção substitui o 
                             conteúdo de um arquivo de log existente. 
-                            O padrão é não anexar o arquivo de log.
+                            O padrão é não anexar ao arquivo de log.
                         Encoding – especifica a codificação do arquivo, 
                             por exemplo, UTF-8, Unicode ou ASCII
                      O detalhamento padrão é Detailed.
@@ -725,7 +725,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="updated">  /preprocess[:arquivo] 
+        <target state="translated">  /preprocess[:arquivo] 
                      Cria um arquivo de projeto único e agregado
                      embutindo todos os arquivos que poderiam ser importados durante um
                      build, com seus limites marcados. Isso pode ser
@@ -738,7 +738,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      Exemplo:
                        /pp:out.txt
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -747,13 +747,13 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="updated">  /detailedsummary 
+        <target state="translated">  /detailedsummary
                      Mostra informações detalhadas ao final do build
                      sobre as configurações criadas e o modo como elas foram
                      agendadas para nós. 
                      (Forma abreviada: /ds)
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -761,12 +761,12 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <target state="updated">  /debug
-                     Faz com que um prompt de depurador apareça imediatamente para que o 
+        <target state="translated">  /debug
+                     Faz com que um prompt de depurador apareça imediatamente para que o
                      Visual Studio possa ser anexado para que seja possível fazer a depuração do 
-                     MSBuild XML e de qualquer tarefa ou agente usado por ele.
+                     XML MSBuild e de qualquer tarefa ou agente usado por ele.
    </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -1308,38 +1308,38 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializa todos os eventos de build para um arquivo binário compactado.
-                     Por padrão o arquivo está no diretório atual e é chamado de
+                     Por padrão, o arquivo está no diretório atual e é chamado de
                      "msbuild.binlog". O log binário é uma descrição detalhada 
                      do processo de build que pode mais tarde ser usado para reconstruir
-                     log de texto e ser usado por outras ferramentas de análise. Um log binário
-                     normalmente é 10-20x menor que o log de nível
+                     logs de texto e serem usados por outras ferramentas de análise. Um log binário
+                     normalmente é 10-20x menor que a maioria dos logs de nível
                      de diagnóstico de texto mais detalhado, mas contém mais informações.
-                     (Formato curto: /bl)
+                     (Formato abreviado: /bl)
 
                      O agente binário por padrão coleta o texto fonte dos
                      arquivos de projeto, incluindo todos os projetos importados e arquivos
-                     de destino encontrado durante o build. O comutador 
+                     de destino encontrados durante o build. A opção
                      ProjectImports opcional controla esse comportamento:
 
                       ProjectImports=None     – Não coletar as importações 
                                                 do projeto.
                       ProjectImports=Embed    – Inserir as importações do projeto
                                                 no arquivo de log.
-                      ProjectImports=ZipFile  – Salvar os arquivos de projeto para 
+                      ProjectImports=ZipFile  – Salvar os arquivos de projeto no 
                                                 output.projectimports.zip,
                                                 em que a saída tem o mesmo nome que o
                                                 nome do arquivo de log binário.
 
                      A configuração padrão para ProjectImports é Embed.
-                     Nota: o agente não coleta arquivos de fonte não MSBuild,
+                     Nota: o agente não coleta arquivos de origem não MSBuild,
                      como .cs, .cpp etc.
 
-                     Um arquivo .binlog pode ser "reproduzido novamente" parrando-o para
+                     Um arquivo .binlog pode ser "reproduzido novamente" passando-o para
                      msbuild.exe como um argumento, em vez de como um projeto/solução.
                      Outros agentes receberão as informações contidas no arquivo de log
-                     como se o build orignal estivesse acontecendo.
+                     como se o build original estivesse acontecendo.
                      Você pode ler mais sobre o log binário e seus usos em:
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
@@ -1369,14 +1369,14 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      override a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="new">  /restore[:True|False]
-                     Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
-                     (Short form: /r)
+        <target state="translated">  /restore[:True|False]
+                     Executa um destino chamado Restore antes de criar
+                     outros destinos.  Isso é útil quando sua árvore de
+                     projeto precisar que pacotes sejam restaurados antes de
+                     serem criados. Especificar /restore é o mesmo que
+                     especificar /restore:True.  Use o parâmetro para
+                     substituir um valor que vem de um arquivo de resposta.
+                     (Forma abreviada: /r)
     </target>
         <note>
       LOCALIZATION: "/restore" and "/r" should not be localized.
@@ -1385,7 +1385,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
       </trans-unit>
       <trans-unit id="InvalidNodeReuseTrueValue">
         <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
-        <target state="new">MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</target>
+        <target state="translated">MSBUILD: erro MSB1042: o valor de reutilização do nó não é válido. Essa versão do MSBuild não dá suporte à reutilização de nó. Se especificado, o valor da opção de reutilização de nó deve ser falso.</target>
         <note>{StrBegin="MSBUILD : error MSB1042: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
      This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
@@ -1394,7 +1394,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
       </trans-unit>
       <trans-unit id="InvalidRestoreValue">
         <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1052: Restore value is not valid. {0}</target>
+        <target state="translated">MSBUILD: erro MSB1052: o valor de restauração não é válido. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1052: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
