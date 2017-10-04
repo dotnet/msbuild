@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Core.Contracts;
+using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
@@ -21,7 +22,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                 Locale = "en-US"
             };
 
-            EngineEnvironmentSettings = new EngineEnvironmentSettings(host, x => null);
+            EngineEnvironmentSettings = new EngineEnvironmentSettings(host, x => new MockSettingsLoader(x));
             host.VirtualizeDirectory(GetTemplateEngineDirectory());
         }
         
