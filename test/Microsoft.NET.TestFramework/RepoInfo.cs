@@ -55,69 +55,11 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
-        public static string BinPath
+        private static string BinPath
         {
             get
             {
                 return Path.Combine(RepoRoot, "bin");
-            }
-        }
-
-        public static string NuGetFallbackFolder
-        {
-            get
-            {
-                return Path.Combine(BinPath, "NuGetFallbackFolder");
-            }
-        }
-
-        public static string TestsFolder
-        {
-            get
-            {
-                return Path.Combine(BinPath, Configuration, "Tests");
-            }
-        }
-
-        public static string PackagesPath
-        {
-            get { return Path.Combine(BinPath, Configuration, "Packages"); }
-        }
-
-        public static string NuGetCachePath
-        {
-            get { return Path.Combine(RepoRoot, "packages"); }
-        }
-
-
-        public static string SdksPath
-        {
-            get { return Path.Combine(BinPath, Configuration, "Sdks"); }
-        }
-
-        public static string BuildExtensionsSdkPath
-        {
-            get { return Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions"); }
-        }
-
-        public static string BuildExtensionsMSBuildPath
-        {
-            get { return Path.Combine(BuildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions"); }
-        }
-
-        public static string CliSdkPath
-        {
-            get { return Path.Combine(RepoRoot, ".dotnet_cli", "sdk", CliVersion); }
-        }
-
-        public static string CliVersion { get; }
-            = File.ReadAllText(Path.Combine(RepoRoot, "DotnetCLIVersion.txt")).Trim();
-
-        public static string DotNetHostPath
-        {
-            get
-            {
-                return Path.Combine(RepoRoot, ".dotnet_cli", $"dotnet{Constants.ExeSuffix}");
             }
         }
 
@@ -129,20 +71,46 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
+        private static ToolsetInfo _toolsetUnderTest;
+        public static ToolsetInfo ToolsetUnderTest
+        {
+            get
+            {
+                if (_toolsetUnderTest == null)
+                {
+                    _toolsetUnderTest = new ToolsetInfo();
+                    _toolsetUnderTest.CliVersion = File.ReadAllText(Path.Combine(RepoRoot, "DotnetCLIVersion.txt")).Trim();
+                    _toolsetUnderTest.DotNetHostPath = Path.Combine(RepoRoot, ".dotnet_cli", $"dotnet{Constants.ExeSuffix}");
+                    _toolsetUnderTest.SdksPath = Path.Combine(BinPath, Configuration, "Sdks");
+                    _toolsetUnderTest.BuildExtensionsSdkPath = Path.Combine(_toolsetUnderTest.SdksPath, "Microsoft.NET.Build.Extensions");
+                    _toolsetUnderTest.BuildExtensionsMSBuildPath = Path.Combine(_toolsetUnderTest.BuildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
+                }
+                return _toolsetUnderTest;
+            }
+        }
+
+        private static TestContext _testExecutionInfo;
+        public static TestContext TestExecutionInfo
+        {
+            get
+            {
+                if (_testExecutionInfo == null)
+                {
+                    _testExecutionInfo = new TestContext();
+                    _testExecutionInfo.TestExecutionDirectory = AppContext.BaseDirectory;
+                    _testExecutionInfo.TestAssetsDirectory = Path.Combine(RepoRoot, "TestAssets");
+                    _testExecutionInfo.NuGetCachePath = Path.Combine(RepoRoot, "packages");
+                    _testExecutionInfo.NuGetFallbackFolder = Path.Combine(BinPath, "NuGetFallbackFolder");
+                }
+                return _testExecutionInfo;
+            }
+        }
+
         private static string FindConfigurationInBasePath()
         {
             // assumes tests are always executed from the "bin/$Configuration/Tests" directory
             return new DirectoryInfo(GetBaseDirectory()).Parent.Name;
         }
-
-        // For test purposes, override the implicit .NETCoreApp version for self-contained apps that to builds thare 
-        //  (1) different from the fixed framework-dependent defaults (1.0.5, 1.1.2, 2.0.0)
-        //  (2) currently available on nuget.org
-        //
-        // This allows bumping the versions before builds without causing tests to fail.
-        public const string ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0 = "1.0.4";
-        public const string ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1 = "1.1.1";
-        public const string ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0 = "2.0.0-preview2-25407-01";
 
         public static string GetBaseDirectory()
         {
@@ -153,42 +121,6 @@ namespace Microsoft.NET.TestFramework
 #endif
 
             return directory;
-        }
-
-        public static void AddTestEnvironmentVariables(SdkCommandSpec command)
-        {
-            //  Set NUGET_PACKAGES environment variable to match value from build.ps1
-            command.Environment["NUGET_PACKAGES"] = RepoInfo.NuGetCachePath;
-
-            command.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
-            command.Environment["MSBuildSDKsPath"] = RepoInfo.SdksPath;
-            command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR"] = RepoInfo.SdksPath;
-
-            command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(RepoInfo.CliSdkPath, "Microsoft.NETCoreSdk.BundledVersions.props");
-
-            if (UsingFullMSBuildWithoutExtensionsTargets())
-            {
-                command.Environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(RepoInfo.BuildExtensionsSdkPath,
-                    "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
-            }
-            command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets");
-
-            command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0;
-            command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1;
-            command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0;
-        }
-
-        private static bool UsingFullMSBuildWithoutExtensionsTargets()
-        {
-            string fullMSBuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
-            if (string.IsNullOrEmpty(fullMSBuildPath))
-            {
-                return false;
-            }
-
-            string fullMSBuildDirectory = Path.GetDirectoryName(fullMSBuildPath);
-            string extensionsImportAfterPath = Path.Combine(fullMSBuildDirectory, "..", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
-            return !File.Exists(extensionsImportAfterPath);
         }
     }
 }

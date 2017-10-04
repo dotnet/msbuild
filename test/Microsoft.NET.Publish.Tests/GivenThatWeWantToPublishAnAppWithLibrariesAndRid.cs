@@ -78,7 +78,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}",
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "App.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "App.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should().Pass()

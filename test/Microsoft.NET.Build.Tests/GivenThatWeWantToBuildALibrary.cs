@@ -129,7 +129,7 @@ namespace Microsoft.NET.Build.Tests
                 File.Delete(preprocessedFile);
             }, valueType: GetValuesCommand.ValueType.Property);
 
-            string dotnetRoot = Path.GetDirectoryName(RepoInfo.DotNetHostPath);
+            string dotnetRoot = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);
 
             expectedAllProjects = expectedAllProjects.Distinct().ToList();
 

@@ -84,7 +84,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { applicationPath })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
                 .CaptureStdOut()
                 .Execute()
                 .Should().Pass()

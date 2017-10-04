@@ -93,7 +93,7 @@ namespace Microsoft.NET.Build.Tests
                     outputFiles.Add("AllResourcesInSatellite.deps.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.dev.json");
-                    command = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
+                    command = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
                 }
 
                 outputDirectory.Should().OnlyHaveFiles(outputFiles);

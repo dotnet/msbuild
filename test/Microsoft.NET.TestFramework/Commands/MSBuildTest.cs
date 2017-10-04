@@ -10,7 +10,13 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public class MSBuildTest
     {
-        public static readonly MSBuildTest Stage0MSBuild = new MSBuildTest(RepoInfo.DotNetHostPath);
+        public static MSBuildTest Stage0MSBuild
+        {
+            get
+            {
+                return new MSBuildTest(TestContext.Current.ToolsetUnderTest.DotNetHostPath);
+            }
+        }
 
         private string DotNetHostPath { get; }
 
@@ -47,7 +53,7 @@ namespace Microsoft.NET.TestFramework.Commands
                 ret.Arguments = newArgs;
             }
 
-            RepoInfo.AddTestEnvironmentVariables(ret);
+            TestContext.Current.AddTestEnvironmentVariables(ret);
 
             return ret;
         }

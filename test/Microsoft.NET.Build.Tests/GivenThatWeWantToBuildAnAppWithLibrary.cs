@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tests
                 "TestLibrary.pdb",
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should()
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDir = buildCommand.GetOutputDirectory("netcoreapp2.0");
 
-            var commandResult = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDir.FullName, "TestApp.dll") })
+            var commandResult = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDir.FullName, "TestApp.dll") })
                 .CaptureStdOut()
                 .Execute();
 

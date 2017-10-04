@@ -140,15 +140,13 @@ namespace Microsoft.NET.TestFramework
         public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "")
         {
             return new RestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
-                .AddSourcesFromCurrentConfig()
-                .AddSource(RepoInfo.PackagesPath);
+                .AddSourcesFromCurrentConfig();
         }
 
         public NuGetRestoreCommand GetNuGetRestoreCommand(ITestOutputHelper log, string relativePath = "")
         {
             return new NuGetRestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
-                .AddSourcesFromCurrentConfig()
-                .AddSource(RepoInfo.PackagesPath);
+                .AddSourcesFromCurrentConfig();
         }
 
         public TestAsset Restore(ITestOutputHelper log, string relativePath = "", params string[] args)

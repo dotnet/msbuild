@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
                 "AuxLibrary.pdb",
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should()

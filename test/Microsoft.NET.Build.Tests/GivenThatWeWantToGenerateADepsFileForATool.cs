@@ -91,8 +91,8 @@ class Program
         //  This method duplicates a lot of logic from the CLI in order to test generating deps files for tools in the SDK repo
         private CommandResult GenerateDepsAndRunTool(TestProject toolProject, [CallerMemberName] string callingMethod = "")
         {
-            DeleteFolder(Path.Combine(RepoInfo.NuGetCachePath, toolProject.Name.ToLowerInvariant()));
-            DeleteFolder(Path.Combine(RepoInfo.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant()));
+            DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, toolProject.Name.ToLowerInvariant()));
+            DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant()));
 
             var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name)
                 .Restore(Log, toolProject.Name);
@@ -129,12 +129,12 @@ class Program
             restoreCommand.AddSource(nupkgPath);
             restoreCommand.Execute().Should().Pass();
 
-            string toolAssetsFilePath = Path.Combine(RepoInfo.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "1.0.0", toolProject.TargetFrameworks, "project.assets.json");
+            string toolAssetsFilePath = Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "1.0.0", toolProject.TargetFrameworks, "project.assets.json");
             var toolAssetsFile = new LockFileFormat().Read(toolAssetsFilePath);
 
             var args = new List<string>();
 
-            string generateDepsProjectPath = Path.Combine(RepoInfo.SdksPath, "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
+            string generateDepsProjectPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
 
             args.Add($"/p:ProjectAssetsFile=\"{toolAssetsFilePath}\"");
 
@@ -210,10 +210,10 @@ class Program
 
             var toolCommandSpec = new SdkCommandSpec()
             {
-                FileName = RepoInfo.DotNetHostPath,
+                FileName = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
                 Arguments = dotnetArgs
             };
-            RepoInfo.AddTestEnvironmentVariables(toolCommandSpec);
+            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec);
 
             ICommand toolCommand = toolCommandSpec.ToCommand().CaptureStdOut();
 

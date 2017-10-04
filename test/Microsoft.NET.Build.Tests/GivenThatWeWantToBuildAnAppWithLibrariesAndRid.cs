@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tests
                 "LibraryWithRids.pdb",
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "App.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "App.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should().Pass()

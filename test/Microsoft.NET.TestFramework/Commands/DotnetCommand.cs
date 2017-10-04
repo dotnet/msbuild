@@ -22,7 +22,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             return new SdkCommandSpec()
             {
-                FileName = RepoInfo.DotNetHostPath,
+                FileName = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
                 Arguments = args.ToList(),
                 WorkingDirectory = WorkingDirectory
             };
