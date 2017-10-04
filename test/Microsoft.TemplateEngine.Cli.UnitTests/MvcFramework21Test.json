@@ -1,0 +1,11 @@
+﻿[
+  {
+    "kind": "file_contains",
+    "path": "temp.csproj",
+    "text": "<TargetFramework>netcoreapp2.1</TargetFramework>"
+  },
+  {
+    "kind": "file_exists",
+    "path": "wwwroot/css/site.css"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "file_exists",
+    "path": "Rename.cs"
+  },
+  {
+    "kind": "file_does_not_exist",
+    "path": "Application1.cs"
+  }
+]
