@@ -40,5 +40,10 @@ namespace Microsoft.TemplateEngine.Cli
 
             return defaultValue;
         }
+
+        public static string GetHash(string toHash)
+        {
+            return toHash.GetHashCode().ToString();
+        }
     }
 }
