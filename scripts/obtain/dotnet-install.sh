@@ -522,7 +522,7 @@ get_absolute_path() {
     eval $invocation
     
     local relative_or_absolute_path=$1
-    echo "$(cd "$(dirname "$1")" && pwd -P)"/"$(basename "$1")"
+    echo "$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
     return 0
 }
 
@@ -537,14 +537,14 @@ copy_files_or_dirs_from_list() {
     local root_path="$(remove_trailing_slash "$1")"
     local out_path="$(remove_trailing_slash "$2")"
     local override="$3"
-    local override_switch="$(if [ "$override" = false ]; then printf -- "-n"; fi)"
+    local override_switch=$(if [ "$override" = false ]; then printf -- "-n"; fi)
     
     cat | uniq | while read -r file_path; do
         local path="$(remove_beginning_slash "${file_path#$root_path}")"
-        local target="$out_path"/"$path"
+        local target="$out_path/$path"
         if [ "$override" = true ] || (! ([ -d "$target" ] || [ -e "$target" ])); then
-            mkdir -p "$out_path"/"$(dirname "$path")"
-            cp -R $override_switch "$root_path"/"$path" "$target"
+            mkdir -p "$out_path/$(dirname "$path")"
+            cp -R $override_switch "$root_path/$path" "$target"
         fi
     done
 }
