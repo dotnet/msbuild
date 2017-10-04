@@ -7,10 +7,10 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    ///     Defines methods to support the comparison of <see cref="IKeyed"/> objects for
+    ///     Defines methods to support the comparison of objects for
     ///     equality over constrained inputs.
     /// </summary>
-    internal interface IConstrainedEqualityComparer<in T> : IEqualityComparer<T> where T : IKeyed 
+    internal interface IConstrainedEqualityComparer<in T> : IEqualityComparer<T>
     {
         /// <summary>
         /// Determines whether the specified objects are equal, factoring in the specified bounds when comparing <paramref name="y"/>.
