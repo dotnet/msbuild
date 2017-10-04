@@ -494,7 +494,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectTaskInstance ReadTaskElement(ProjectTaskElement taskElement)
         {
-            List<ProjectTaskInstanceChild> taskOutputs = new List<ProjectTaskInstanceChild>();
+            List<ProjectTaskInstanceChild> taskOutputs = new List<ProjectTaskInstanceChild>(taskElement.Count);
 
             foreach (ProjectOutputElement output in taskElement.Outputs)
             {
@@ -540,7 +540,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectPropertyGroupTaskInstance ReadPropertyGroupUnderTargetElement(ProjectPropertyGroupElement propertyGroupElement)
         {
-            List<ProjectPropertyGroupTaskPropertyInstance> properties = new List<ProjectPropertyGroupTaskPropertyInstance>();
+            List<ProjectPropertyGroupTaskPropertyInstance> properties = new List<ProjectPropertyGroupTaskPropertyInstance>(propertyGroupElement.Count);
 
             foreach (ProjectPropertyElement propertyElement in propertyGroupElement.Properties)
             {
@@ -570,7 +570,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectItemGroupTaskInstance ReadItemGroupUnderTargetElement(ProjectItemGroupElement itemGroupElement)
         {
-            List<ProjectItemGroupTaskItemInstance> items = new List<ProjectItemGroupTaskItemInstance>();
+            List<ProjectItemGroupTaskItemInstance> items = new List<ProjectItemGroupTaskItemInstance>(itemGroupElement.Count);
 
             foreach (ProjectItemElement itemElement in itemGroupElement.Items)
             {
@@ -630,7 +630,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectTargetInstance ReadNewTargetElement(ProjectTargetElement targetElement, bool parentProjectSupportsReturnsAttribute)
         {
-            List<ProjectTargetInstanceChild> targetChildren = new List<ProjectTargetInstanceChild>();
+            List<ProjectTargetInstanceChild> targetChildren = new List<ProjectTargetInstanceChild>(targetElement.Count);
             List<ProjectOnErrorInstance> targetOnErrorChildren = new List<ProjectOnErrorInstance>();
 
             foreach (ProjectElement targetChildElement in targetElement.Children)
