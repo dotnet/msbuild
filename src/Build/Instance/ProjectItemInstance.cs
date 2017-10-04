@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.Execution
                         return (_directMetadata == null) ? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>() : _directMetadata.DeepClone(); // copy on write!
                     }
 
-                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> allMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> allMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(_itemDefinitions.Count + (_directMetadata?.Count ?? 0));
 
                     // Next, any inherited item definitions. Front of the list is highest priority,
                     // so walk backwards.
