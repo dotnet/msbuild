@@ -1,6 +1,11 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -43,7 +48,17 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static string GetHash(string toHash)
         {
-            return toHash.GetHashCode().ToString();
+            if (toHash == null)
+            {
+                return null;
+            }
+
+            byte[] bytesToHash = Encoding.UTF8.GetBytes(toHash);
+            using (HMACSHA256 hmac = new HMACSHA256(new byte[64]))
+            {
+                byte[] hashedBytes = hmac.ComputeHash(bytesToHash);
+                return BitConverter.ToString(hashedBytes).Replace("-", "");
+            }
         }
     }
 }

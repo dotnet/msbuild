@@ -865,10 +865,10 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 templateName = highestPrecedenceTemplate.Info.Identity;
                 _commandInput.AllTemplateParams.TryGetValue("Framework", out string inputFrameworkValue);
-                framework = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "Framework", inputFrameworkValue);
+                framework = TelemetryHelper.GetHash(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "Framework", inputFrameworkValue));
 
                 _commandInput.AllTemplateParams.TryGetValue("auth", out string inputAuthValue);
-                auth = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "auth", inputAuthValue);
+                auth = TelemetryHelper.GetHash(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "auth", inputAuthValue));
             }
             else
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -26,7 +26,8 @@ namespace dotnet_new3
         public static int Main(string[] args)
         {
             bool emitTimings = args.Any(x => string.Equals(x, "--debug:emit-timings", StringComparison.OrdinalIgnoreCase));
-            return New3Command.Run(CommandName, CreateHost(emitTimings), new TelemetryLogger(null), FirstRun, args);
+            bool debugTelemetry = args.Any(x => string.Equals(x, "--debug:emit-telemetry", StringComparison.OrdinalIgnoreCase));
+            return New3Command.Run(CommandName, CreateHost(emitTimings), new TelemetryLogger(null, debugTelemetry), FirstRun, args);
         }
 
         private static ITemplateEngineHost CreateHost(bool emitTimings)
