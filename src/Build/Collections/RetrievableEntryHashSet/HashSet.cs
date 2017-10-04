@@ -1113,7 +1113,7 @@ namespace Microsoft.Build.Collections
                                                                                                                                                         }
                                                                                                                                                         return numRemoved;
                                                                                                                                                     }
-#endif
+
         /// <summary>
         /// Gets the IEqualityComparer that is used to determine equality of keys for 
         /// the HashSet.
@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.Collections
                 return _comparer;
             }
         }
-
+#endif
         /// <summary>
         /// Sets the capacity of this list to the size of the list (rounded up to nearest prime),
         /// unless count is 0, in which case we release references.
