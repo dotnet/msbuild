@@ -544,8 +544,7 @@ copy_files_or_dirs_from_list() {
         local target="$out_path"/"$path"
         if [ "$override" = true ] || (! ([ -d "$target" ] || [ -e "$target" ])); then
             mkdir -p "$out_path"/"$(dirname "$path")"
-            say "cp -R $override_switch $root_path/$path $target"
-            cp -R "$override_switch" "$root_path"/"$path" "$target"
+            cp -R $override_switch "$root_path"/"$path" "$target"
         fi
     done
 }
