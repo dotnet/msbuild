@@ -46,7 +46,23 @@
       <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*" />
 
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
-      <NuGetCommonExtensions Include="$(VsInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*.*" />
+      <!--<NuGetCommonExtensions Include="$(VsInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*.*" />-->
+      <!-- TODO: Need NuGet.Build.Tasks.dll, would be not to not list out all of its dependencies! -->
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\runtimes\any\native\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.commands\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.common\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.configuration\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.dependencyresolver.core\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.frameworks\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.librarymodel\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.packaging\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.packaging.core\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.projectmodel\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.protocol\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.versioning\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuspec.referencegenerator\$(NuGetVersion)\lib\net45\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\Newtonsoft.Json\9.0.1\lib\net45\**\*.*" />
 
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.dll" />
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe" />

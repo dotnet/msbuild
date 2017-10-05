@@ -43,6 +43,7 @@
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.6.35</GitVersioningVersion>
     <NuSpecReferenceGeneratorVersion>1.4.2</NuSpecReferenceGeneratorVersion>
+    <NuGetVersion>4.5.0-preview1-4518</NuGetVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
@@ -56,8 +57,10 @@
     <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning\$(GitVersioningVersion)\build\</GitVersioningDir>
 
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
-    <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
-    <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
+    <BuildToolsTaskDir Condition="'$(OsEnvironment)'=='Windows_NT'">$(ToolsDir)net45\</BuildToolsTaskDir>
+    <BuildToolsTaskDir Condition="'$(OsEnvironment)'!='Windows_NT'">$(ToolsDir)</BuildToolsTaskDir>
+    <PackagingTaskDir Condition="'$(OsEnvironment)'=='Windows_NT'">$(ToolsDir)net45\</PackagingTaskDir>
+    <PackagingTaskDir Condition="'$(OsEnvironment)'!='Windows_NT'">$(ToolsDir)</PackagingTaskDir>
 
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
