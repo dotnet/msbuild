@@ -19,7 +19,7 @@ namespace Microsoft.NET.Restore.Tests
         }
 
         [Fact]
-        public void It_uses_NetstandardLibrary200_as_the_implicit_version_for_NetStandard20()
+        public void It_uses_NetstandardLibrary20x_as_the_implicit_version_for_NetStandard20()
         {
             const string testProjectName = "NetStandard2Library";
             var project = new TestProject
@@ -51,11 +51,11 @@ namespace Microsoft.NET.Restore.Tests
                 lockFile.GetTarget(NuGetFramework.Parse(".NETStandard,Version=v2.0"), null);
             var netStandardLibrary =
                 target.Libraries.Single(l => l.Name == "NETStandard.Library");
-            netStandardLibrary.Version.ToString().Should().Be("2.0.0");
+            netStandardLibrary.Version.ToString().Should().Be("2.0.1");
         }
 
         [Fact]
-        public void It_uses_MicrosoftNETCoreApp200_as_the_implicit_version_for_NetCoreApp20()
+        public void It_uses_MicrosoftNETCoreApp20x_as_the_implicit_version_for_NetCoreApp20()
         {
             const string testProjectName = "NetCoreApp2";
             var project = new TestProject
