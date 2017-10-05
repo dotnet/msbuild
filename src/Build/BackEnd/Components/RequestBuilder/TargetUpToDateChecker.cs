@@ -425,8 +425,8 @@ namespace Microsoft.Build.BackEnd
         {
             // break down the input/output specifications along the standard separator, after expanding all embedded properties
             // and item metadata
-            IList<string> targetInputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetInputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.InputsLocation);
-            IList<string> targetOutputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetOutputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.OutputsLocation);
+            var targetInputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetInputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.InputsLocation);
+            var targetOutputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetOutputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.OutputsLocation);
 
             itemVectorTransformsInTargetInputs = new ItemVectorPartitionCollection(MSBuildNameIgnoreCaseComparer.Default);
 
@@ -820,7 +820,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="elementLocation"></param>
         private void SeparateItemVectorsFromDiscreteItems
         (
-            IList<string> items,
+            SemiColonTokenizer items,
             ItemBucket bucket,
             out ItemVectorPartitionCollection itemVectors,
             ItemVectorPartitionCollection itemVectorTransforms,

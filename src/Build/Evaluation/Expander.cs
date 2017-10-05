@@ -292,11 +292,11 @@ namespace Microsoft.Build.Evaluation
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
-        internal IList<string> ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
-            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation)).ToList();
+            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation));
         }
 
         /// <summary>

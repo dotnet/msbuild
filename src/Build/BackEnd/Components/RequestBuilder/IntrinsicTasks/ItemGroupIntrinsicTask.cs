@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd
                             HashSet<string> removeMetadata = null;
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
-                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation);
+                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
                                 if (keepMetadataEvaluated.Count > 0)
                                 {
                                     keepMetadata = new HashSet<string>(keepMetadataEvaluated);
@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.RemoveMetadata))
                             {
-                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation);
+                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation).ToList();
                                 if (removeMetadataEvaluated.Count > 0)
                                 {
                                     removeMetadata = new HashSet<string>(removeMetadataEvaluated);
@@ -469,7 +469,7 @@ namespace Microsoft.Build.BackEnd
             HashSet<string> specificationsToFind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             // Split by semicolons
-            IList<string> specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation);
+            var specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation);
 
             foreach (string piece in specificationPieces)
             {

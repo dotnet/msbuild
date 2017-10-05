@@ -968,17 +968,13 @@ namespace Microsoft.Build.Evaluation
         private void PerformDepthFirstPass(ProjectRootElement currentProjectOrImport)
         {
             // We accumulate InitialTargets from the project and each import
-            IList<string> initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
+            var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
             _initialTargetsList.AddRange(initialTargets);
 
             if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
             {
-                IList<string> globalPropertiesToTreatAsLocals = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation);
-                // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-                var globalPropertiesToTreatAsLocalsCount = globalPropertiesToTreatAsLocals.Count;
-                for (var i = 0; i < globalPropertiesToTreatAsLocalsCount; i++)
-                {
-                    var propertyName = globalPropertiesToTreatAsLocals[i];
+                foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation))
+                { 
                     XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
                     _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
                 }
@@ -1376,8 +1372,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void AddBeforeAndAfterTargetMappings(ProjectTargetElement targetElement, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets, Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget, Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget)
         {
-            IList<string> beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
-            IList<string> afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
+            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
+            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
 
             foreach (string beforeTarget in beforeTargets)
             {
