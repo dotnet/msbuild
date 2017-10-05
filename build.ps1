@@ -70,14 +70,21 @@ if (Test-Path $NETBuildExtensionsTargets)
 if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.0.5"))
 {
     & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version 1.0.5 -SharedRuntime
-    if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
+    if($LASTEXITCODE -ne 0) { throw "Failed to install the 1.0.5 runtime" }
 }
 
 # Install 1.1.1 shared framework
 if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.1.2"))
 {
     & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version 1.1.2 -SharedRuntime
-    if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
+    if($LASTEXITCODE -ne 0) { throw "Failed to install 1.1.2 runtime" }
+}
+
+# Install 2.0.0 shared framework
+if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\2.0.0"))
+{
+    & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version 2.0.0 -SharedRuntime
+    if($LASTEXITCODE -ne 0) { throw "Failed to install 2.0.0 runtime" }
 }
 
 # Download nuget.exe

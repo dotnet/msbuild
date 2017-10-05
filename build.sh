@@ -83,8 +83,11 @@ curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --version $DOTNET_CLI_
 # Install 1.0.4 shared framework
 [ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.0.5" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version "1.0.5" --shared-runtime
 
-# Install 1.1.1 shared framework
+# Install 1.1.2 shared framework
 [ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.1.2" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version "1.1.2" --shared-runtime
+
+# Install 2.0.0 shared framework
+[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/2.0.0" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version "2.0.0" --shared-runtime
 
 # Put stage 0 on the PATH
 export PATH="$DOTNET_INSTALL_DIR:$PATH"
