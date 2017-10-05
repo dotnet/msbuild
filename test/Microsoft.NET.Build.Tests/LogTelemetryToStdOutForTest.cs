@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using NuGet.Protocol;
+using Newtonsoft.Json;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
 
         private void OnTelemetryLogged(object sender, TelemetryEventArgs args)
         {
-            Console.WriteLine(args.ToJson());
+            Console.WriteLine(JsonConvert.SerializeObject(args));
         }
     }
 }
