@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (args.Length == 0)
             {
-                telemetryLogger.TrackEvent(commandName + "-CalledWithNoArgs");
+                telemetryLogger.TrackEvent(commandName + TelemetryConstants.CalledWithNoArgsEventSuffix);
             }
 
             INewCommandInput commandInput = new NewCommandInputCli(commandName);
@@ -483,7 +483,6 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_commandInput.IsHelpFlagSpecified)
             {
-                _telemetryLogger.TrackEvent(CommandName + "-Help");
                 ShowUsageHelp();
                 DisplayTemplateList(templateResolutionResult);
                 return CreationResultStatus.Success;
@@ -506,7 +505,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private CreationResultStatus EnterInstallFlow()
         {
-            _telemetryLogger.TrackEvent(CommandName + "-Install", new Dictionary<string, string> { { "CountOfThingsToInstall", _commandInput.ToInstallList.Count.ToString() } });
+            _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, _commandInput.ToInstallList.Count.ToString() } });
 
             Installer.InstallPackages(_commandInput.ToInstallList);
 
@@ -522,7 +521,6 @@ namespace Microsoft.TemplateEngine.Cli
                 DisplayInvalidParameters(invalidParams);
                 if (_commandInput.IsHelpFlagSpecified)
                 {
-                    _telemetryLogger.TrackEvent(CommandName + "-Help");
                     ShowUsageHelp();
                 }
                 else
@@ -670,7 +668,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else if (_commandInput.IsHelpFlagSpecified)
             {
-                _telemetryLogger.TrackEvent(CommandName + "-Help");
                 return DisplayTemplateHelpForSingularGroup(templateResolutionResult);
             }
 
@@ -701,25 +698,35 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             highestPrecedenceTemplate.Info.Tags.TryGetValue("language", out ICacheTag language);
-            _commandInput.AllTemplateParams.TryGetValue("framework", out string framework);
-            _commandInput.AllTemplateParams.TryGetValue("auth", out string auth);
             bool isMicrosoftAuthored = string.Equals(highestPrecedenceTemplate.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
-            string templateName = isMicrosoftAuthored ? highestPrecedenceTemplate.Info.Identity : "(3rd Party)";
+            string framework = null;
+            string auth = null;
+            string templateName = null;
 
-            if (!isMicrosoftAuthored)
+            if (isMicrosoftAuthored)
             {
-                auth = null;
+                templateName = highestPrecedenceTemplate.Info.Identity;
+                _commandInput.AllTemplateParams.TryGetValue("Framework", out string inputFrameworkValue);
+                framework = TelemetryHelper.GetHash(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "Framework", inputFrameworkValue));
+
+                _commandInput.AllTemplateParams.TryGetValue("auth", out string inputAuthValue);
+                auth = TelemetryHelper.GetHash(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "auth", inputAuthValue));
+            }
+            else
+            {
+                templateName = TelemetryHelper.GetHash(highestPrecedenceTemplate.Info.Identity);
             }
 
             if (argsError)
             {
-                _telemetryLogger.TrackEvent(CommandName + "CreateTemplate", new Dictionary<string, string>
+                _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
                 {
-                    { "language", language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
-                    { "argument-error", "true" },
-                    { "framework", framework },
-                    { "template-name", templateName },
-                    { "auth", auth }
+                    { TelemetryConstants.Language, language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                    { TelemetryConstants.ArgError, "True" },
+                    { TelemetryConstants.Framework, framework },
+                    { TelemetryConstants.TemplateName, templateName },
+                    { TelemetryConstants.IsTemplateThirdParty, (!isMicrosoftAuthored).ToString() },
+                    { TelemetryConstants.Auth, auth }
                 });
 
                 if (commandParseFailureMessage != null)
@@ -756,14 +763,15 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 finally
                 {
-                    _telemetryLogger.TrackEvent(CommandName + "CreateTemplate", new Dictionary<string, string>
+                    _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
                     {
-                        { "language", language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
-                        { "argument-error", "false" },
-                        { "framework", framework },
-                        { "template-name", templateName },
-                        { "create-success", success.ToString() },
-                        { "auth", auth }
+                        { TelemetryConstants.Language, language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                        { TelemetryConstants.ArgError, "False" },
+                        { TelemetryConstants.Framework, framework },
+                        { TelemetryConstants.TemplateName, templateName },
+                        { TelemetryConstants.IsTemplateThirdParty, (!isMicrosoftAuthored).ToString() },
+                        { TelemetryConstants.CreationResult, success.ToString() },
+                        { TelemetryConstants.Auth, auth }
                     });
                 }
 
@@ -808,6 +816,11 @@ namespace Microsoft.TemplateEngine.Cli
             if (_commandInput.HasParseError)
             {
                 return HandleParseError();
+            }
+
+            if (_commandInput.IsHelpFlagSpecified)
+            {
+                _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.HelpEventSuffix);
             }
 
             if (_commandInput.ShowAliasesSpecified)
@@ -881,7 +894,6 @@ namespace Microsoft.TemplateEngine.Cli
             // TODO: get a meaningful error message from the parser
             if (_commandInput.IsHelpFlagSpecified)
             {
-                _telemetryLogger.TrackEvent(CommandName + "-Help");
                 ShowUsageHelp();
             }
             else
