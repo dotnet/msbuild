@@ -3291,7 +3291,7 @@ namespace Microsoft.Build.Evaluation
                 _itemsByEvaluatedInclude = new MultiDictionary<string, ProjectItem>(StringComparer.OrdinalIgnoreCase);
                 this.Expander = new Expander<ProjectProperty, ProjectItem>(this.Properties, _items);
                 this.ItemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinition>(MSBuildNameIgnoreCaseComparer.Default);
-                this.Targets = new RetrievableEntryHashSet<ProjectTargetInstance>(OrdinalIgnoreCaseKeyedComparer.Instance);
+                this.Targets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
                 this.ImportClosure = new List<Triple<ProjectImportElement, ProjectRootElement, int>>();
                 this.ImportClosureWithDuplicates = new List<Triple<ProjectImportElement, ProjectRootElement, int>>();
                 this.AllEvaluatedProperties = new List<ProjectProperty>();

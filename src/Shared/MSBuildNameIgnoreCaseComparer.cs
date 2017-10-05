@@ -24,7 +24,7 @@ namespace Microsoft.Build.Collections
 #if FEATURE_BINARY_SERIALIZATION
     [Serializable]
 #endif
-    internal class MSBuildNameIgnoreCaseComparer : IConstrainedEqualityComparer<IKeyed>, IEqualityComparer<string>
+    internal class MSBuildNameIgnoreCaseComparer : IConstrainedEqualityComparer<string>, IEqualityComparer<string>
     {
         /// <summary>
         /// The processor architecture on which we are running, but default it will be x86
@@ -45,29 +45,9 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal static MSBuildNameIgnoreCaseComparer Default { get; } = new MSBuildNameIgnoreCaseComparer();
 
-        public bool Equals(IKeyed x, IKeyed y)
-        {
-            return Equals(x?.Key, y?.Key);
-        }
-
-        public bool Equals(IKeyed x, IKeyed y, int indexY, int length)
-        {
-            return Equals(x.Key, y.Key, indexY, length);
-        }
-
         public bool Equals(string x, string y)
         {
             return Equals(x, y, 0, y?.Length ?? 0);
-        }
-
-        public int GetHashCode(IKeyed obj)
-        {
-            return GetHashCode(obj?.Key);
-        }
-
-        public int GetHashCode(IKeyed obj, int index, int length)
-        {
-            return GetHashCode(obj?.Key, index, length);
         }
 
         public int GetHashCode(string obj)
