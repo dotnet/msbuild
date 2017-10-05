@@ -107,19 +107,37 @@
   <Target Name="BootstrapNetCore">
     <ItemGroup>
       <DeployedItems Include="$(DeploymentDir)\**\*.*"/>
+      <!-- TODO: Need NuGet.Build.Tasks.dll, would be not to not list out all of its dependencies! -->
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\runtimes\any\native\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.commands\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.common\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.configuration\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.dependencyresolver.core\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.frameworks\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.librarymodel\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.packaging\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.packaging.core\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.projectmodel\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.protocol\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.versioning\$(NuGetVersion)\lib\netstandard1.0\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\nuspec.referencegenerator\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\Newtonsoft.Json\9.0.1\lib\netstandard1.0\**\*.*" />
     </ItemGroup>
 
     <RemoveDir
             Directories="$(BootstrapDestination)"
-            ContinueOnError="true"/>
+            ContinueOnError="true" />
 
     <RemoveDir
             Directories="$(BootstrapDestination)"
-            ContinueOnError="true"/>
+            ContinueOnError="true" />
 
     <Copy SourceFiles="@(DeployedItems)"
-          DestinationFolder="$(BootstrapDestination)\%(RecursiveDir)"
-          />
+          DestinationFolder="$(BootstrapDestination)\%(RecursiveDir)" />
+
+    <Copy SourceFiles="@(NuGetCommonExtensions)"
+          DestinationFiles="@(NuGetCommonExtensions -> '$(BootstrapDestination)%(RecursiveDir)%(FileName)%(Extension)')" />
 
     <!-- Microsoft.Portable.CSharp.targets imports this file with a capital T -->
     <Copy SourceFiles="$(DeploymentDir)\Microsoft.CSharp.targets"
