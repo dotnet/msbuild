@@ -18,11 +18,11 @@ namespace Microsoft.Build.Evaluation
     ///  (3) Combination: @(foo->'xxx;xxx', 'xxx;xxx')
     ///  We must not split on semicolons in macro or separator expressions like these.
     /// </remarks>
-    internal struct SemicolonTokenizer : IEnumerable<string>
+    internal struct SemiColonTokenizer : IEnumerable<string>
     {
         private readonly string _expression;
 
-        public SemicolonTokenizer(string expression)
+        public SemiColonTokenizer(string expression)
         {
             _expression = expression;
         }
