@@ -12,14 +12,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
     public static class TemplateParameterHelpBase
     {
         // Note: This method explicitly filters out "type" and "language", in addition to other filtering.
-        public static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false, bool hasPostActionScriptRunner = false)
+        public static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false, bool hasPostActionScriptRunner = false, HashSet<string> parametersToAlwaysShow = null)
         {
             IList<ITemplateParameter> filteredParams = parameterDefinitions
                 .Where(x => x.Priority != TemplateParameterPriority.Implicit
                         && !hiddenParams.Contains(x.Name)
                         && !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase)
                         && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
-                        && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1)).ToList();    // for filtering "tags"
+                        && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1 || (parametersToAlwaysShow?.Contains(x.Name) ?? false))).ToList();    // for filtering "tags"
 
             if (hasPostActionScriptRunner)
             {

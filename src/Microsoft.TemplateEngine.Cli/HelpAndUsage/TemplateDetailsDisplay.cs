@@ -81,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(parameterDetails.AllParams.ParameterDefinitions, parameterDetails.ExplicitlyHiddenParams,
-                                                                                    showImplicitlyHiddenParams, parameterDetails.HasPostActionScriptRunner);
+                                                                                    showImplicitlyHiddenParams, parameterDetails.HasPostActionScriptRunner, parameterDetails.ParametersToAlwaysShow);
 
             if (filteredParams.Any())
             {
@@ -226,6 +226,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             HashSet<string> groupUserParamsWithDefaultValues = new HashSet<string>(StringComparer.Ordinal);
             Dictionary<string, bool> parameterHidingDisposition = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> parametersToAlwaysShow = new HashSet<string>(StringComparer.Ordinal);
 
             foreach (ITemplateInfo templateInfo in templateGroup.OrderByDescending(x => x.Precedence))
             {
@@ -294,6 +295,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
                 // If any template says the user input value is the default, include it here.
                 groupUserParamsWithDefaultValues.UnionWith(usageInformation.UserParametersWithDefaultValues);
+                parametersToAlwaysShow.UnionWith(hostSpecificTemplateData.ParametersToAlwaysShow);
             }
 
             // aggregate the parameter variants
@@ -318,7 +320,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 ExplicitlyHiddenParams = parametersToHide,
                 GroupVariantsForCanonicals = groupVariantsForCanonicals,
                 GroupUserParamsWithDefaultValues = groupUserParamsWithDefaultValues,
-                HasPostActionScriptRunner = groupHasPostActionScriptRunner
+                HasPostActionScriptRunner = groupHasPostActionScriptRunner,
+                ParametersToAlwaysShow = parametersToAlwaysShow,
             };
         }
 
@@ -331,6 +334,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             public IReadOnlyDictionary<string, IReadOnlyList<string>> GroupVariantsForCanonicals;
             public HashSet<string> GroupUserParamsWithDefaultValues;
             public bool HasPostActionScriptRunner;
+            public HashSet<string> ParametersToAlwaysShow;
         }
     }
 }

@@ -83,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortName}");
             IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
-            IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames);
+            IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames, parametersToAlwaysShow: hostTemplateData.ParametersToAlwaysShow);
 
             foreach (ITemplateParameter parameter in filteredParams)
             {
