@@ -9,8 +9,8 @@ Looking for V1 of the .NET Core tooling?
 
 If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild and the new csproj), see https://dot.net/core.
 
-> **Note:** the release/2.0.0 branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, use 
-> v1 of the tools.
+> **Note:** the release/2.0.0 branch of the CLI repo is based on an upcoming update of the SDK and is considered pre-release. For production-level usage, please use the
+> released version of the tools available at https://dot.net/core
 
 Found an issue?
 ---------------
@@ -88,11 +88,10 @@ Reference notes:
 > **1**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
 > <br><br>**2**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
 
-
-[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.version
-[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.coherent.version
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
+[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.version
 [version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
+[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.coherent.version
 [coherent-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x86_Release_coherent_badge.svg
 
 [win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe
