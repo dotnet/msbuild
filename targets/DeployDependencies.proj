@@ -21,30 +21,6 @@
           SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- Copy content of BuildTools package to deployment folders -->
-  <!--<Target Name="CopyBuildTools">
-    <PropertyGroup>
-      <BuildToolsVersionFile>$(RepoRoot)BuildToolsVersion.txt</BuildToolsVersionFile>
-    </PropertyGroup>
-    <ReadLinesFromFile File="$(BuildToolsVersionFile)">
-      <Output TaskParameter="Lines" ItemName="BuildToolsVersion" />
-    </ReadLinesFromFile>
-    <PropertyGroup>
-      <BuildToolsVersion>@(BuildToolsVersion)</BuildToolsVersion>
-    </PropertyGroup>
-    <ItemGroup>
-      <BuildToolsFiles Include="$(ToolPackagesDir)Microsoft.DotNet.BuildTools\$(BuildToolsVersion)\lib\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(BuildToolsFiles)"
-          DestinationFolder="$(DeploymentDir)"
-          SkipUnchangedFiles="true"
-          />
-    <Copy SourceFiles="@(BuildToolsFiles)"
-          DestinationFolder="$(TestDeploymentDir)"
-          SkipUnchangedFiles="true"
-          />
-  </Target>-->
-
   <Target Name="CopyPackageContent">
     <ItemGroup>
       <!-- We want the list of files *after* restore, which happens
@@ -208,8 +184,7 @@
         SourceFiles="$(TestDeploymentDir)\dotnet"
         DestinationFiles="$(TestDeploymentDir)\dotnet.exe"
         Condition="'$(MonoBuild)' != 'true'"
-        />        
-        
+        />
   </Target>
 
   <Target Name="DeployDependencies"
