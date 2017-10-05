@@ -210,8 +210,11 @@ namespace Microsoft.TemplateEngine.Cli
                 if (wildcardIndex > -1)
                 {
                     int lastSlashBeforeWildcard = pkg.LastIndexOfAny(new[] { '\\', '/' });
-                    pattern = pkg.Substring(lastSlashBeforeWildcard + 1);
-                    pkg = pkg.Substring(0, lastSlashBeforeWildcard);
+                    if (lastSlashBeforeWildcard >= 0)
+                    {
+                        pattern = pkg.Substring(lastSlashBeforeWildcard + 1);
+                        pkg = pkg.Substring(0, lastSlashBeforeWildcard);
+                    }
                 }
 
                 try
