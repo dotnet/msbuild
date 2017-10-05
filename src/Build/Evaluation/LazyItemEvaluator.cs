@@ -499,8 +499,13 @@ namespace Microsoft.Build.Evaluation
         {
             builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation);
 
-            var itemCaptures = builder.ItemSpec.Fragments.OfType<ItemExpressionFragment<P, I>>().Select(i => i.Capture);
-            AddReferencedItemLists(builder, itemCaptures);
+            foreach (ItemFragment fragment in builder.ItemSpec.Fragments)
+            {
+                if (fragment is ItemExpressionFragment<P, I> itemExpression)
+                {
+                    AddReferencedItemLists(builder, itemExpression.Capture);
+                }
+            }
         }
 
         private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
@@ -557,14 +562,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 AddReferencedItemLists(operationBuilder, match);
-            }
-        }
-
-        private void AddReferencedItemLists(OperationBuilder operationBuilder, IEnumerable<ExpressionShredder.ItemExpressionCapture> captures)
-        {
-            foreach (var capture in captures)
-            {
-                AddReferencedItemLists(operationBuilder, capture);
             }
         }
 
