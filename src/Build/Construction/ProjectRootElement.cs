@@ -2093,7 +2093,11 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
-            var document = new XmlDocumentWithLocation {PreserveWhitespace = preserveFormatting};
+            var document = new XmlDocumentWithLocation
+            {
+                FullPath = fullPath,
+                PreserveWhitespace = preserveFormatting
+            };
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectLoadFromFileBegin, CodeMarkerEvent.perfMSBuildProjectLoadFromFileEnd))
 #endif
@@ -2110,7 +2114,6 @@ namespace Microsoft.Build.Construction
                         document.Load(xtr.Reader);
                     }
 
-                    document.FullPath = fullPath;
                     _projectFileLocation = ElementLocation.Create(fullPath);
                     _directory = Path.GetDirectoryName(fullPath);
 
