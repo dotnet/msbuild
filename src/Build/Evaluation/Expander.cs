@@ -292,7 +292,7 @@ namespace Microsoft.Build.Evaluation
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
-        internal IList<string> ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
@@ -341,13 +341,9 @@ namespace Microsoft.Build.Evaluation
                 return result;
             }
 
-            IList<string> splits = ExpressionShredder.SplitSemiColonSeparatedList(expression);
-
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var splitsCount = splits.Count;
-            for (var i = 0; i < splitsCount; i++)
+            var splits = ExpressionShredder.SplitSemiColonSeparatedList(expression);
+            foreach (string split in splits)
             {
-                var split = splits[i];
                 bool isTransformExpression;
                 IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems<I, T>(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
 
@@ -2239,7 +2235,7 @@ namespace Microsoft.Build.Evaluation
                                 // that case.
                                 if (s_invariantCompareInfo.IndexOf(metadataValue, ';') >= 0)
                                 {
-                                    IList<string> splits = ExpressionShredder.SplitSemiColonSeparatedList(metadataValue);
+                                    var splits = ExpressionShredder.SplitSemiColonSeparatedList(metadataValue);
 
                                     foreach (string itemSpec in splits)
                                     {

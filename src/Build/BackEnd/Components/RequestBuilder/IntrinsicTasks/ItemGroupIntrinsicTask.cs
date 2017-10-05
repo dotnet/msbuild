@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd
                             HashSet<string> removeMetadata = null;
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
-                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation);
+                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
                                 if (keepMetadataEvaluated.Count > 0)
                                 {
                                     keepMetadata = new HashSet<string>(keepMetadataEvaluated);
@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.RemoveMetadata))
                             {
-                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation);
+                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation).ToList();
                                 if (removeMetadataEvaluated.Count > 0)
                                 {
                                     removeMetadata = new HashSet<string>(removeMetadataEvaluated);
@@ -350,7 +350,7 @@ namespace Microsoft.Build.BackEnd
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedInclude.Length > 0)
             {
-                IList<string> includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
+                var includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
                 ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(this.Project, originalItem.ItemType);
 
                 foreach (string includeSplit in includeSplits)
@@ -387,7 +387,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (evaluatedExclude.Length > 0)
                     {
-                        IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
+                        var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
                         HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                         foreach (string excludeSplit in excludeSplits)
@@ -469,7 +469,7 @@ namespace Microsoft.Build.BackEnd
             HashSet<string> specificationsToFind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             // Split by semicolons
-            IList<string> specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation);
+            var specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation);
 
             foreach (string piece in specificationPieces)
             {
