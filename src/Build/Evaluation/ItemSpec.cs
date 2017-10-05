@@ -43,17 +43,18 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpec">The string containing item syntax</param>
         /// <param name="expander">Expects the expander to have a default item factory set</param>
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
+        /// <param name="projectDirectory">The directory that the project is in.</param>
         /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
-        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation, bool expandProperties = true)
+        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties = true)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, expandProperties);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
         }
 
-        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, bool expandProperties)
+        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
             var builder = ImmutableList.CreateBuilder<ItemFragment>();
 
@@ -80,7 +81,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     bool isItemListExpression;
-                    var itemReferenceFragment = ProcessItemExpression(splitEscaped, itemSpecLocation, out isItemListExpression);
+                    var itemReferenceFragment = ProcessItemExpression(splitEscaped, itemSpecLocation, projectDirectory, out isItemListExpression);
 
                     if (isItemListExpression)
                     {
@@ -124,7 +125,7 @@ namespace Microsoft.Build.Evaluation
             return builder.ToImmutable();
         }
 
-        private ItemExpressionFragment<P, I> ProcessItemExpression(string expression, IElementLocation elementLocation, out bool isItemListExpression)
+        private ItemExpressionFragment<P, I> ProcessItemExpression(string expression, IElementLocation elementLocation, string projectDirectory, out bool isItemListExpression)
         {
             isItemListExpression = false;
 
@@ -143,7 +144,7 @@ namespace Microsoft.Build.Evaluation
 
             isItemListExpression = true;
 
-            return new ItemExpressionFragment<P, I>(capture, expression, this);
+            return new ItemExpressionFragment<P, I>(capture, expression, this, projectDirectory);
         }
 
         /// <summary>
@@ -249,7 +250,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Path of the project the itemspec is coming from
         /// </summary>
-        protected string ProjectPath { get; }
+        protected string ProjectDirectory { get; }
 
         /// <summary>
         /// Function that checks if a given string matches the <see cref="ItemSpecFragment"/>
@@ -259,29 +260,25 @@ namespace Microsoft.Build.Evaluation
         private readonly Lazy<IMSBuildGlob> _msbuildGlob;
         protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob.Value;
 
-        protected ItemFragment(string itemSpecFragment, string projectPath)
+        protected ItemFragment(string itemSpecFragment, string projectDirectory)
             : this(
                 itemSpecFragment,
-                projectPath,
-                CreateFileMatcher(itemSpecFragment, projectPath))
+                projectDirectory,
+                CreateFileMatcher(itemSpecFragment, projectDirectory))
         {
         }
 
-        private static Lazy<Func<string, bool>> CreateFileMatcher(string itemSpecFragment, string projectPath)
+        private static Lazy<Func<string, bool>> CreateFileMatcher(string itemSpecFragment, string projectDirectory)
         {
-            var projectDirectory = string.IsNullOrEmpty(projectPath)
-                ? string.Empty
-                : Path.GetDirectoryName(projectPath);
-
             return
                 new Lazy<Func<string, bool>>(
-                    () => EngineFileUtilities.GetFileSpecMatchTester(itemSpecFragment, projectDirectory));
+                    () => EngineFileUtilities.GetFileSpecMatchTester(itemSpecFragment, projectDirectory ?? string.Empty));
         }
 
-        protected ItemFragment(string itemSpecFragment, string projectPath, Lazy<Func<string, bool>> fileMatcher)
+        protected ItemFragment(string itemSpecFragment, string projectDirectory, Lazy<Func<string, bool>> fileMatcher)
         {
             ItemSpecFragment = itemSpecFragment;
-            ProjectPath = projectPath;
+            ProjectDirectory = projectDirectory;
             FileMatcher = fileMatcher;
 
             _msbuildGlob = new Lazy<IMSBuildGlob>(CreateMsBuildGlob);
@@ -300,22 +297,22 @@ namespace Microsoft.Build.Evaluation
 
         protected virtual IMSBuildGlob CreateMsBuildGlob()
         {
-            return Globbing.MSBuildGlob.Parse(ProjectPath, ItemSpecFragment.Unescape());
+            return Globbing.MSBuildGlob.Parse(ProjectDirectory, ItemSpecFragment.Unescape());
         }
     }
 
     internal class ValueFragment : ItemFragment
     {
-        public ValueFragment(string itemSpecFragment, string projectPath)
-            : base(itemSpecFragment, projectPath)
+        public ValueFragment(string itemSpecFragment, string projectDirectory)
+            : base(itemSpecFragment, projectDirectory)
         {
         }
     }
 
     internal class GlobFragment : ItemFragment
     {
-        public GlobFragment(string itemSpecFragment, string projectPath)
-            : base(itemSpecFragment, projectPath)
+        public GlobFragment(string itemSpecFragment, string projectDirectory)
+            : base(itemSpecFragment, projectDirectory)
         {
         }
     }
@@ -353,8 +350,8 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec)
-            : base(itemSpecFragment, containingItemSpec.ItemSpecLocation.File)
+        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec, string projectDirectory)
+            : base(itemSpecFragment, projectDirectory)
         {
             Capture = capture;
 
@@ -395,7 +392,7 @@ namespace Microsoft.Build.Evaluation
                     false /* do not include null expansion results */,
                     out throwaway,
                     out itemsFromCapture);
-                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
+                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectDirectory)).ToList();
 
                 return true;
             }

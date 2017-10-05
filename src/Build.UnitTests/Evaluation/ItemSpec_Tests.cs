@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
         private ProjectInstanceItemSpec CreateItemSpecFrom(string itemSpec, ProjectInstanceExpander expander)
         {
-            return new ProjectInstanceItemSpec(itemSpec, expander, MockElementLocation.Instance);
+            return new ProjectInstanceItemSpec(itemSpec, expander, MockElementLocation.Instance, "ProjectDirectory");
         }
 
         private ProjectInstanceExpander CreateExpander(Dictionary<string, string[]> items)
