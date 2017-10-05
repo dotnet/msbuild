@@ -61,18 +61,9 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         /// <param name="expression">List expression to split</param>
         /// <returns>Array of non-empty strings from split list.</returns>
-        internal static IList<string> SplitSemiColonSeparatedList(string expression)
+        internal static SemiColonTokenizer SplitSemiColonSeparatedList(string expression)
         {
-            List<string> splitList = null;
-            foreach (string segment in new SemiColonTokenizer(expression))
-            {
-                if (splitList == null)
-                    splitList = new List<string>(1);
-
-                splitList.Add(segment);
-            }
-
-            return (IList<string>)splitList ?? Array.Empty<string>();
+            return new SemiColonTokenizer(expression);
         }
 
         /// <summary>

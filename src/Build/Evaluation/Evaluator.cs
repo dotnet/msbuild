@@ -415,7 +415,7 @@ namespace Microsoft.Build.Evaluation
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedIncludeEscaped.Length > 0)
             {
-                IList<string> includeSplitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
+                var includeSplitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
 
                 foreach (string includeSplitEscaped in includeSplitsEscaped)
                 {
@@ -1800,7 +1800,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (evaluatedExclude.Length > 0)
                 {
-                    IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
+                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
 
                     HashSet<string> excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 

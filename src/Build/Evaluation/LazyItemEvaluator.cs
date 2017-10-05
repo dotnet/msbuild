@@ -469,12 +469,11 @@ namespace Microsoft.Build.Evaluation
 
                 if (evaluatedExclude.Length > 0)
                 {
-                    IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
-
-                    operationBuilder.Excludes.AddRange(excludeSplits);
+                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
 
                     foreach (var excludeSplit in excludeSplits)
                     {
+                        operationBuilder.Excludes.Add(excludeSplit);
                         AddItemReferences(excludeSplit, operationBuilder, itemElement.ExcludeLocation);
                     }
                 }
