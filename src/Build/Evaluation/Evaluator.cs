@@ -837,7 +837,7 @@ namespace Microsoft.Build.Evaluation
             if (lazyEvaluator != null)
             {
                 // Tell the lazy evaluator to compute the items and add them to _data
-                foreach (var itemData in lazyEvaluator.GetAllItems())
+                foreach (var itemData in lazyEvaluator.GetAllItemsDeferred())
                 {
                     if (itemData.ConditionResult)
                     {

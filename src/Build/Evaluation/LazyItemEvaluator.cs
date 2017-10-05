@@ -401,7 +401,7 @@ namespace Microsoft.Build.Evaluation
             return ret;
         }
 
-        public IEnumerable<ItemData> GetAllItems()
+        public IEnumerable<ItemData> GetAllItemsDeferred()
         {
             return _itemLists.Values.SelectMany(itemList => itemList.GetItems(ImmutableHashSet<string>.Empty))
                                     .OrderBy(itemData => itemData.ElementOrder);
