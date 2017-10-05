@@ -46,6 +46,7 @@
       <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*" />
 
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
+      <NuGetCommonExtensions Include="$(VsInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*.*" />
 
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.dll" />
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe" />
@@ -71,6 +72,8 @@
 
     <Copy SourceFiles="@(InstalledNuGetFiles)"
           DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(NuGetCommonExtensions)"
+          DestinationFiles="@(NuGetCommonExtensions -> '$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\%(RecursiveDir)%(FileName)%(Extension)')" />
 
     <!-- Delete shim projects, because they point where we can't follow. -->
     <!-- It would be better to just not copy these. -->
@@ -88,9 +91,6 @@
   <Target Name="BootstrapNetCore">
     <ItemGroup>
       <DeployedItems Include="$(DeploymentDir)\**\*.*"/>
-      <!-- Work around https://github.com/Microsoft/msbuild/issues/658
-           by making sure NuGet DLLs are next to MSBuild.exe -->
-      <DeployedItems Include="$(ToolsDir)\NuGet*.dll" />
     </ItemGroup>
 
     <RemoveDir

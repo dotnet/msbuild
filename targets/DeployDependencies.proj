@@ -22,7 +22,7 @@
   </Target>
 
   <!-- Copy content of BuildTools package to deployment folders -->
-  <Target Name="CopyBuildTools">
+  <!--<Target Name="CopyBuildTools">
     <PropertyGroup>
       <BuildToolsVersionFile>$(RepoRoot)BuildToolsVersion.txt</BuildToolsVersionFile>
     </PropertyGroup>
@@ -43,7 +43,7 @@
           DestinationFolder="$(TestDeploymentDir)"
           SkipUnchangedFiles="true"
           />
-  </Target>
+  </Target>-->
 
   <Target Name="CopyPackageContent">
     <ItemGroup>
@@ -185,7 +185,7 @@
   </Target>
   
   <Target Name="FixupFilenames"
-          DependsOnTargets="CopyBuildTools;DeployRuntime"
+          DependsOnTargets="DeployRuntime"
           Condition="'$(OsEnvironment)'!='Windows_NT'">
           
     <!-- Portable targets package has mismatched casing for Microsoft.CSharp.Targets -->
@@ -213,6 +213,6 @@
   </Target>
 
   <Target Name="DeployDependencies"
-          DependsOnTargets="CopyBuildTools;CopyPackageContent;CopyCompilerTools;DeployRuntime;FixupFilenames" />
+          DependsOnTargets="CopyPackageContent;CopyCompilerTools;DeployRuntime;FixupFilenames" />
 
 </Project>
