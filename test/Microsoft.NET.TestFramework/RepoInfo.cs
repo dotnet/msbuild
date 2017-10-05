@@ -84,6 +84,13 @@ namespace Microsoft.NET.TestFramework
                     _toolsetUnderTest.SdksPath = Path.Combine(BinPath, Configuration, "Sdks");
                     _toolsetUnderTest.BuildExtensionsSdkPath = Path.Combine(_toolsetUnderTest.SdksPath, "Microsoft.NET.Build.Extensions");
                     _toolsetUnderTest.BuildExtensionsMSBuildPath = Path.Combine(_toolsetUnderTest.BuildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
+
+                    //  Run tests on full framework MSBuild if environment variable is set pointing to it
+                    string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
+                    if (!string.IsNullOrEmpty(msbuildPath))
+                    {
+                        _toolsetUnderTest.FullFrameworkMSBuildPath = msbuildPath;
+                    }
                 }
                 return _toolsetUnderTest;
             }

@@ -10,7 +10,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System;

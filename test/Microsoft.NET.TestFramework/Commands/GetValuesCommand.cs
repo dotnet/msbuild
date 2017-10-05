@@ -30,8 +30,8 @@ namespace Microsoft.NET.TestFramework.Commands
         public string Configuration { get; set; }
 
         public GetValuesCommand(ITestOutputHelper log, string projectPath, string targetFramework,
-            string valueName, ValueType valueType = ValueType.Property, MSBuildTest msbuild = null)
-            : base(log, "WriteValuesToFile", projectPath, relativePathToProject: null, msbuild: msbuild)
+            string valueName, ValueType valueType = ValueType.Property)
+            : base(log, "WriteValuesToFile", projectPath, relativePathToProject: null)
         {
             _targetFramework = targetFramework;
 
@@ -77,7 +77,7 @@ namespace Microsoft.NET.TestFramework.Commands
             var outputDirectory = GetOutputDirectory(_targetFramework);
             outputDirectory.Create();
 
-            return MSBuild.CreateCommandForTarget("WriteValuesToFile", newArgs.ToArray());
+            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget("WriteValuesToFile", newArgs.ToArray());
         }
 
         public List<string> GetValues()

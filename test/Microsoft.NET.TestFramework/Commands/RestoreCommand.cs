@@ -14,8 +14,8 @@ namespace Microsoft.NET.TestFramework.Commands
     {
         private List<string> _sources = new List<string>();
 
-        public RestoreCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null, MSBuildTest msbuild = null)
-            : base(log, "Restore", projectPath, relativePathToProject, msbuild)
+        public RestoreCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null)
+            : base(log, "Restore", projectPath, relativePathToProject)
         {
         }
 
@@ -51,7 +51,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
             newArgs.AddRange(args);
 
-            return MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
+            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget("restore", newArgs.ToArray());
         }
     }
 }

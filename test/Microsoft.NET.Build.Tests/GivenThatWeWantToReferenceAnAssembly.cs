@@ -11,7 +11,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit;
 using Xunit.Abstractions;
 

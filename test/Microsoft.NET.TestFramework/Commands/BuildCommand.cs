@@ -12,8 +12,8 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public sealed class BuildCommand : MSBuildCommand
     {
-        public BuildCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null, MSBuildTest msbuild = null)
-            : base(log, "Build", projectRootPath, relativePathToProject, msbuild)
+        public BuildCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null)
+            : base(log, "Build", projectRootPath, relativePathToProject)
         {
         }
     }

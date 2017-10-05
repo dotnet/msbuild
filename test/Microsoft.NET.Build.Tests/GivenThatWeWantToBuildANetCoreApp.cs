@@ -17,7 +17,6 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
