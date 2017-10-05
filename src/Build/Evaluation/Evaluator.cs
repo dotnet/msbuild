@@ -837,12 +837,8 @@ namespace Microsoft.Build.Evaluation
             if (lazyEvaluator != null)
             {
                 // Tell the lazy evaluator to compute the items and add them to _data
-                IList<LazyItemEvaluator<P, I, M, D>.ItemData> items = lazyEvaluator.GetAllItems();
-                // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-                var itemsCount = items.Count;
-                for (var i = 0; i < itemsCount; i++)
+                foreach (var itemData in lazyEvaluator.GetAllItemsDeferred())
                 {
-                    var itemData = items[i];
                     if (itemData.ConditionResult)
                     {
                         _data.AddItem(itemData.Item);

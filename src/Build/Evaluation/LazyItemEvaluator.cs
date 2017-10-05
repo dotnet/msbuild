@@ -401,13 +401,10 @@ namespace Microsoft.Build.Evaluation
             return ret;
         }
 
-        public IList<ItemData> GetAllItems()
+        public IEnumerable<ItemData> GetAllItemsDeferred()
         {
-            var ret = _itemLists.Values.SelectMany(itemList => itemList.GetItems(ImmutableHashSet<string>.Empty))
-                .OrderBy(itemData => itemData.ElementOrder)
-                .ToList();
-
-            return ret;
+            return _itemLists.Values.SelectMany(itemList => itemList.GetItems(ImmutableHashSet<string>.Empty))
+                                    .OrderBy(itemData => itemData.ElementOrder);
         }
 
         public void ProcessItemElement(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
