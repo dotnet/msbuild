@@ -49,6 +49,11 @@ namespace Microsoft.Build.BackEnd
         private const int CancelWarningWaitInterval = 15000;
 
         /// <summary>
+        /// True if intrinsic MSBuild tasks, MSBuild and CallTarget, are supported.
+        /// </summary>
+        private static readonly bool s_supportsIntrinsicMSBuildTasks = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDISABLEINTRINSICMSBUILDTASK"));
+
+        /// <summary>
         /// Whether to log task input parameters.  Can either be set through an environment variable 
         /// or by the BuildParameters.
         /// </summary>
@@ -980,7 +985,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDISABLEINTRINSICMSBUILDTASK")))
+                if (s_supportsIntrinsicMSBuildTasks)
                 {
                     // Map to an intrinsic task, if necessary.
                     if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
