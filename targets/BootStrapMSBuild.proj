@@ -46,8 +46,8 @@
       <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*" />
 
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
-      <!--<NuGetCommonExtensions Include="$(VsInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*.*" />-->
-      <!-- TODO: Need NuGet.Build.Tasks.dll, would be not to not list out all of its dependencies! -->
+
+      <!-- TODO: Automate getting NuGet.Build.Tasks.dll + all dependencies. -->
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\lib\net45\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\runtimes\any\native\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.commands\$(NuGetVersion)\lib\net45\**\*.*" />
@@ -107,7 +107,8 @@
   <Target Name="BootstrapNetCore">
     <ItemGroup>
       <DeployedItems Include="$(DeploymentDir)\**\*.*"/>
-      <!-- TODO: Need NuGet.Build.Tasks.dll, would be not to not list out all of its dependencies! -->
+
+      <!-- TODO: Automate getting NuGet.Build.Tasks.dll + all dependencies. -->
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\runtimes\any\native\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.commands\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
