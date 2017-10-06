@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
                         items.Add(item.Item);
                 }
 
-                return items.ToImmutableHashSet();
+                return items.ToImmutableList();
             }
 
             protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
