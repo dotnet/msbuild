@@ -270,6 +270,26 @@ namespace Microsoft.Build.UnitTests
             CheckContentVB(content, "<Assembly: System.AssemblyTrademarkAttribute()>");
         }
 
+        [Fact]
+        public void OneAttributeNoParamsFSharp()
+        {
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            TaskItem attribute = new TaskItem("System.AssemblyTrademarkAttribute");
+            task.AssemblyAttributes = new TaskItem[] { attribute };
+            task.Language = "F#";
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+
+            string content = File.ReadAllText(task.OutputFile.ItemSpec);
+            Console.WriteLine(content);
+
+            CheckContentFSharp(content, "[<assembly: System.AssemblyTrademarkAttribute()>]");
+        }
+
         /// <summary>
         /// More than one attribute
         /// </summary>
@@ -661,6 +681,19 @@ namespace Microsoft.Build.UnitTests
                 "Option Explicit On",
                 "Imports System",
                 "Imports System.Reflection");
+        }
+
+        private static void CheckContentFSharp(string actualContent, params string[] expectedAttributes)
+        {
+            // Generated F# code contains a necessary `do()` trailer which we have to account for
+            var attributeCollection = expectedAttributes.Concat(new[] { "do()" });
+            CheckContent(
+                actualContent,
+                attributeCollection.ToArray(),
+                "//",
+                "namespace FSharp",
+                "open System",
+                "open System.Reflection");
         }
 
         private static void CheckContent(string actualContent, string[] expectedAttributes, string commentStart, params string[] expectedHeader)
