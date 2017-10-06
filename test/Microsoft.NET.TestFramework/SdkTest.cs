@@ -18,8 +18,6 @@ namespace Microsoft.NET.TestFramework
 
         protected SdkTest(ITestOutputHelper log)
         {
-            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "1");
-
             Log = log;
         }
         public void Dispose()

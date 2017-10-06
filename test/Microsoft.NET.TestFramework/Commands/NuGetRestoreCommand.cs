@@ -63,9 +63,14 @@ namespace Microsoft.NET.TestFramework.Commands
 
             newArgs.AddRange(args);
 
+            if (string.IsNullOrEmpty(TestContext.Current.NuGetExePath))
+            {
+                throw new InvalidOperationException("Path to nuget.exe not set");
+            }
+
             SdkCommandSpec ret = new SdkCommandSpec()
             {
-                FileName = RepoInfo.NuGetExePath,
+                FileName = TestContext.Current.NuGetExePath,
                 Arguments = newArgs
             };
 
