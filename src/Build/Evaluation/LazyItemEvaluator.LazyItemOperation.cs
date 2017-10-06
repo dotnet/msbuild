@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var items = SelectItems(listBuilder, globsToIgnore).ToList();
+                ImmutableList<I> items = SelectItems(listBuilder, globsToIgnore);
                 MutateItems(items);
                 SaveItems(items, listBuilder);
             }
@@ -54,15 +54,16 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Produce the items to operate on. For example, create new ones or select existing ones
             /// </summary>
-            protected virtual ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                return listBuilder.Select(itemData => itemData.Item).ToList();
+                return listBuilder.Select(itemData => itemData.Item)
+                                  .ToImmutableList();
             }
 
             // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
-            protected virtual void MutateItems(ICollection<I> items) { }
+            protected virtual void MutateItems(ImmutableList<I> items) { }
 
-            protected virtual void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
+            protected virtual void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
 
             private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
             {
@@ -80,9 +81,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<ProjectMetadataElement> metadata)
+            protected void DecorateItemsWithMetadata(ImmutableList<I> items, ImmutableList<ProjectMetadataElement> metadata)
             {
-                if (metadata.Any())
+                if (metadata.Count > 0)
                 {
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
@@ -227,14 +228,6 @@ namespace Microsoft.Build.Evaluation
                         _expander.Metadata = null;
                     }
                 }
-            }
-
-            /// <summary>
-            /// Collects all the items of this item element's type that match the items (represented as operations)
-            /// </summary>
-            protected IEnumerable<I> SelectItemsMatchingItemSpec(ImmutableList<ItemData>.Builder listBuilder, IElementLocation elementLocation)
-            {
-                return _itemSpec.FilterItems(listBuilder.Select(itemData => itemData.Item));
             }
         }
     }

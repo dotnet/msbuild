@@ -42,7 +42,7 @@ namespace Microsoft.Build.Evaluation
                     matchItemspec = (itemSpec, item) => itemSpec.MatchesItem(item);
                 }
 
-                ICollection<I> matchedItems = ImmutableList.CreateBuilder<I>();
+                var matchedItems = ImmutableList.CreateBuilder<I>();
 
                 for (int i = 0; i < listBuilder.Count; i++)
                 {
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                DecorateItemsWithMetadata(matchedItems, _metadata);
+                DecorateItemsWithMetadata(matchedItems.ToImmutableList(), _metadata);
             }
 
             private static bool ItemSpecOnlyReferencesOneItemType(ItemSpec<P, I> itemSpec, string itemType)

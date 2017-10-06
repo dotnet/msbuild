@@ -148,14 +148,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Return the items in <param name="items"/> that match this itemspec
-        /// </summary>
-        public IEnumerable<I> FilterItems(IEnumerable<I> items)
-        {
-            return items.Where(MatchesItem);
-        }
-
-        /// <summary>
         /// Return true if the given <paramref name="item"/> matches this itemspec
         /// </summary>
         /// <param name="item">The item to attempt to find a match for.</param>
