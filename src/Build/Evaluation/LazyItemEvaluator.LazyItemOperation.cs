@@ -228,14 +228,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-
-            /// <summary>
-            /// Collects all the items of this item element's type that match the items (represented as operations)
-            /// </summary>
-            protected IEnumerable<I> SelectItemsMatchingItemSpec(ImmutableList<ItemData>.Builder listBuilder, IElementLocation elementLocation)
-            {
-                return _itemSpec.FilterItems(listBuilder.Select(itemData => itemData.Item));
-            }
         }
     }
 }
