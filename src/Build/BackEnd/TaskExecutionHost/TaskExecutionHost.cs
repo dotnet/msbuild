@@ -23,7 +23,6 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Logging;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.Build.Utilities;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
