@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var items = SelectItems(listBuilder, globsToIgnore).ToList();
+                ImmutableList<I> items = SelectItems(listBuilder, globsToIgnore);
                 MutateItems(items);
                 SaveItems(items, listBuilder);
             }
@@ -54,9 +54,10 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Produce the items to operate on. For example, create new ones or select existing ones
             /// </summary>
-            protected virtual ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                return listBuilder.Select(itemData => itemData.Item).ToList();
+                return listBuilder.Select(itemData => itemData.Item)
+                                  .ToImmutableList();
             }
 
             // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328

@@ -33,9 +33,9 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                List<I> itemsToAdd = new List<I>();
+                var itemsToAdd = ImmutableList.CreateBuilder<I>();
 
                 Lazy<Func<string, bool>> excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
@@ -102,9 +102,6 @@ namespace Microsoft.Build.Evaluation
                             excludePatternsForGlobs
                             );
 
-                        // itemsToAdd might grow 0 or more times during the following iteration. Proactively increase its capacity to ensure only one growth happens
-                        IncreaseListCapacityIfNecessary(itemsToAdd, includeSplitFilesEscaped.Length);
-
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
                             itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
@@ -116,7 +113,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                return itemsToAdd;
+                return itemsToAdd.ToImmutable();
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
@@ -130,16 +127,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
-            }
-
-            private void IncreaseListCapacityIfNecessary(List<I> list, int itemsToAdd)
-            {
-                var newLength = list.Count + itemsToAdd;
-
-                if (list.Capacity < newLength)
-                {
-                    list.Capacity = newLength;
-                }
             }
 
             protected override void MutateItems(ICollection<I> items)
