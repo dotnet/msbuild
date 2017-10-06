@@ -252,42 +252,22 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         protected string ProjectDirectory { get; }
 
-        /// <summary>
-        /// Function that checks if a given string matches the <see cref="ItemSpecFragment"/>
-        /// </summary>
-        protected Lazy<Func<string, bool>> FileMatcher { get; }
-
+        private readonly Lazy<FileSpecMatcherTester> _fileMatcher;
         private readonly Lazy<IMSBuildGlob> _msbuildGlob;
         protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob.Value;
 
         protected ItemFragment(string itemSpecFragment, string projectDirectory)
-            : this(
-                itemSpecFragment,
-                projectDirectory,
-                CreateFileMatcher(itemSpecFragment, projectDirectory))
-        {
-        }
-
-        private static Lazy<Func<string, bool>> CreateFileMatcher(string itemSpecFragment, string projectDirectory)
-        {
-            return
-                new Lazy<Func<string, bool>>(
-                    () => EngineFileUtilities.GetFileSpecMatchTester(itemSpecFragment, projectDirectory ?? string.Empty));
-        }
-
-        protected ItemFragment(string itemSpecFragment, string projectDirectory, Lazy<Func<string, bool>> fileMatcher)
         {
             ItemSpecFragment = itemSpecFragment;
             ProjectDirectory = projectDirectory;
-            FileMatcher = fileMatcher;
-
+            _fileMatcher = new Lazy<FileSpecMatcherTester>(CreateFileSpecMatcher);
             _msbuildGlob = new Lazy<IMSBuildGlob>(CreateMsBuildGlob);
         }
 
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
         public virtual int MatchCount(string itemToMatch)
         {
-            return FileMatcher.Value(itemToMatch) ? 1 : 0;
+            return _fileMatcher.Value.IsMatch(itemToMatch) ? 1 : 0;
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()
@@ -298,6 +278,11 @@ namespace Microsoft.Build.Evaluation
         protected virtual IMSBuildGlob CreateMsBuildGlob()
         {
             return Globbing.MSBuildGlob.Parse(ProjectDirectory, ItemSpecFragment.Unescape());
+        }
+
+        private FileSpecMatcherTester CreateFileSpecMatcher()
+        {
+            return FileSpecMatcherTester.Parse(ProjectDirectory, ItemSpecFragment);
         }
     }
 

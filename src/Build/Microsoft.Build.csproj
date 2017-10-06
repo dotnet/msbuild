@@ -620,6 +620,7 @@
     <Compile Include="Utilities\EngineFileUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Utilities\FileSpecMatchTester.cs" />
     <Compile Include="Utilities\RegistryKeyWrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
