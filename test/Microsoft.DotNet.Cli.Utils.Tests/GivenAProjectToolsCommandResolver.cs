@@ -266,14 +266,8 @@ namespace Microsoft.DotNet.Tests
 
             var lockFile = new LockFileFormat().Read(lockFilePath);
 
-            var depsJsonFile = Path.Combine(
-                Path.GetDirectoryName(lockFilePath),
-                "dotnet-portable.deps.json");
-
-            if (File.Exists(depsJsonFile))
-            {
-                File.Delete(depsJsonFile);
-            }
+            // NOTE: We must not use the real deps.json path here as it will interfere with tests running in parallel.
+            var depsJsonFile = Path.GetTempFileName();
             File.WriteAllText(depsJsonFile, "temp");
 
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
