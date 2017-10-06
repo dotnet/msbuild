@@ -30,7 +30,7 @@ namespace Microsoft.Build.Evaluation
                 return items.ToImmutableList();
             }
 
-            protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
             {
                 if (!_conditionResult)
                 {

@@ -63,7 +63,7 @@ namespace Microsoft.Build.Evaluation
             // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
             protected virtual void MutateItems(ImmutableList<I> items) { }
 
-            protected virtual void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
+            protected virtual void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
 
             private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
             {

@@ -134,7 +134,7 @@ namespace Microsoft.Build.Evaluation
                 DecorateItemsWithMetadata(items, _metadata);
             }
 
-            protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
             {
                 foreach (var item in items)
                 {
