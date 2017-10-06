@@ -20,7 +20,14 @@ namespace Microsoft.Build.Evaluation
             // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
             protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                return _itemSpec.FilterItems(listBuilder.Select(itemData => itemData.Item)).ToImmutableHashSet();
+                var items = ImmutableHashSet.CreateBuilder<I>();
+                foreach (ItemData item in listBuilder)
+                {
+                    if (_itemSpec.MatchesItem(item.Item))
+                        items.Add(item.Item);
+                }
+
+                return items.ToImmutableHashSet();
             }
 
             protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
