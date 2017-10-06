@@ -4,22 +4,9 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM microsoft/dotnet-buildtools-prereqs:centos-6-783abde-20171304101322
+FROM microsoft/dotnet-buildtools-prereqs:centos-6-d485f41-20173404063424
 
-# Install prerequisites for the git build below
-RUN yum -q -y install sudo expat-devel perl-devel autoconf gcc gcc-c++ gettext-devel
-
-# Compile and install a version of the git that supports the features that cli build needs
-RUN \
-    wget https://www.kernel.org/pub/software/scm/git/git-2.9.5.tar.gz && \
-    tar -xf git-2.9.5.tar.gz && \
-    cd  git-2.9.5 && \
-    make configure && \
-    ./configure --prefix=/usr/local --without-tcltk && \
-    make -j $(nproc --all) all && \
-    make install && \
-    cd .. && \
-    rm -r git-2.9.5
+RUN yum -q -y install sudo
 
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
