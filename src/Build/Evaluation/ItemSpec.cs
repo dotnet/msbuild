@@ -101,14 +101,14 @@ namespace Microsoft.Build.Evaluation
                         {
 
                             // Just return the original string.
-                            builder.Add(new ValueFragment(splitEscaped, itemSpecLocation.File));
+                            builder.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
                             // Unescape before handing it to the filesystem.
                             var filespecUnescaped = EscapingUtilities.UnescapeAll(splitEscaped);
 
-                            builder.Add(new GlobFragment(filespecUnescaped, itemSpecLocation.File));
+                            builder.Add(new GlobFragment(filespecUnescaped, projectDirectory));
                         }
                         else
                         {
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Evaluation
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
 
-                            builder.Add(new ValueFragment(splitEscaped, itemSpecLocation.File));
+                            builder.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
                     }
                 }

@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -11,6 +12,7 @@ using ProjectInstanceItemSpec =
     Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance>;
 using ProjectInstanceExpander =
     Microsoft.Build.Evaluation.Expander<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance>;
+
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
@@ -52,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
         private ProjectInstanceItemSpec CreateItemSpecFrom(string itemSpec, ProjectInstanceExpander expander)
         {
-            return new ProjectInstanceItemSpec(itemSpec, expander, MockElementLocation.Instance, "ProjectDirectory");
+            return new ProjectInstanceItemSpec(itemSpec, expander, MockElementLocation.Instance, Path.GetDirectoryName(MockElementLocation.Instance.File));
         }
 
         private ProjectInstanceExpander CreateExpander(Dictionary<string, string[]> items)
