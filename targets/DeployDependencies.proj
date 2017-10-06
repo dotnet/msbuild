@@ -21,30 +21,6 @@
           SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- Copy content of BuildTools package to deployment folders -->
-  <Target Name="CopyBuildTools">
-    <PropertyGroup>
-      <BuildToolsVersionFile>$(RepoRoot)BuildToolsVersion.txt</BuildToolsVersionFile>
-    </PropertyGroup>
-    <ReadLinesFromFile File="$(BuildToolsVersionFile)">
-      <Output TaskParameter="Lines" ItemName="BuildToolsVersion" />
-    </ReadLinesFromFile>
-    <PropertyGroup>
-      <BuildToolsVersion>@(BuildToolsVersion)</BuildToolsVersion>
-    </PropertyGroup>
-    <ItemGroup>
-      <BuildToolsFiles Include="$(ToolPackagesDir)Microsoft.DotNet.BuildTools\$(BuildToolsVersion)\lib\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(BuildToolsFiles)"
-          DestinationFolder="$(DeploymentDir)"
-          SkipUnchangedFiles="true"
-          />
-    <Copy SourceFiles="@(BuildToolsFiles)"
-          DestinationFolder="$(TestDeploymentDir)"
-          SkipUnchangedFiles="true"
-          />
-  </Target>
-
   <Target Name="CopyPackageContent">
     <ItemGroup>
       <!-- We want the list of files *after* restore, which happens
@@ -75,7 +51,7 @@
           />
   </Target>
 
-  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.Tasks.dll"/>
+  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
   <PropertyGroup>
     <!--At build time, we target netstandard to be runnable on many runtimes.
@@ -185,7 +161,7 @@
   </Target>
   
   <Target Name="FixupFilenames"
-          DependsOnTargets="CopyBuildTools;DeployRuntime"
+          DependsOnTargets="DeployRuntime"
           Condition="'$(OsEnvironment)'!='Windows_NT'">
           
     <!-- Portable targets package has mismatched casing for Microsoft.CSharp.Targets -->
@@ -208,11 +184,10 @@
         SourceFiles="$(TestDeploymentDir)\dotnet"
         DestinationFiles="$(TestDeploymentDir)\dotnet.exe"
         Condition="'$(MonoBuild)' != 'true'"
-        />        
-        
+        />
   </Target>
 
   <Target Name="DeployDependencies"
-          DependsOnTargets="CopyBuildTools;CopyPackageContent;CopyCompilerTools;DeployRuntime;FixupFilenames" />
+          DependsOnTargets="CopyPackageContent;CopyCompilerTools;DeployRuntime;FixupFilenames" />
 
 </Project>
