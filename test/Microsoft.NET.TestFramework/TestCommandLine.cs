@@ -21,6 +21,8 @@ namespace Microsoft.NET.TestFramework
 
         public bool NoRepoInference { get; private set; }
 
+        public bool ShouldShowHelp { get; private set; }
+
         public static TestCommandLine Parse(string[] args)
         {
             TestCommandLine ret = new TestCommandLine();
@@ -54,6 +56,10 @@ namespace Microsoft.NET.TestFramework
                 {
                     ret.NoRepoInference = true;
                 }
+                else if (arg.Equals("-help", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("/?"))
+                {
+                    ret.ShouldShowHelp = true;
+                }
                 else
                 {
                     ret.RemainingArgs.Add(arg);
@@ -78,13 +84,35 @@ namespace Microsoft.NET.TestFramework
             return ret;
         }
 
-        public static List<string> HandleCommandLine(string [] args)
+        public static List<string> HandleCommandLine(string [] args, out bool showHelp)
         {
             TestCommandLine commandLine = Parse(args);
 
-            TestContext.Initialize(commandLine);
+            if (!commandLine.ShouldShowHelp)
+            {
+                TestContext.Initialize(commandLine);
+            }
+
+            showHelp = commandLine.ShouldShowHelp;
 
             return commandLine.RemainingArgs;
+        }
+
+        public static void ShowHelp()
+        {
+            Console.WriteLine(
+@"
+
+.NET Core SDK test runner
+
+Options to control toolset to test:
+  -useFullMSBuild         : Use full framework (instead of .NET Core) version of MSBuild found in PATH
+  -fullMSBuildPath <path> : Use full framework version of MSBuild in specified path
+  -dotnetPath <path>      : Use specified path for dotnet host
+  -sdkRepo <path>         : Use specified SDK repo for Microsoft.NET.SDK tasks / targets
+  -sdkConfig <config>     : Use specified configuration for SDK repo
+  -noRepoInference        : Don't automatically find SDK repo to use based on path to test binaries
+  -help                   : Show help");
         }
     }
 }
