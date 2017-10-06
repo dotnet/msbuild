@@ -23,6 +23,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Logging;
 using System.Globalization;
 using System.Reflection;
+using Microsoft.Build.Utilities;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
@@ -47,11 +48,6 @@ namespace Microsoft.Build.BackEnd
         /// Time interval in miliseconds between subsequent warnings that a non-cancelable task has not finished
         /// </summary>
         private const int CancelWarningWaitInterval = 15000;
-
-        /// <summary>
-        /// True if intrinsic MSBuild tasks, MSBuild and CallTarget, are supported.
-        /// </summary>
-        private static readonly bool s_supportsIntrinsicMSBuildTasks = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDISABLEINTRINSICMSBUILDTASK"));
 
         /// <summary>
         /// Whether to log task input parameters.  Can either be set through an environment variable 
@@ -985,7 +981,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                if (s_supportsIntrinsicMSBuildTasks)
+                if (!Traits.Instance.EscapeHatches.DisableIntrinsicMSBuildTasks)
                 {
                     // Map to an intrinsic task, if necessary.
                     if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))

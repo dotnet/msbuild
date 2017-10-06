@@ -94,6 +94,11 @@ namespace Microsoft.Build.Utilities
         // it's unneeded (at least by the 16.0 timeframe).
         public readonly bool UseCaseSensitiveItemNames = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1";
 
+        /// <summary>
+        /// True (MSBUILDDISABLEINTRINSICMSBUILDTASK=1), ff intrinsic MSBuild tasks, MSBuild and CallTarget, are disabled.
+        /// </summary>
+        public readonly bool DisableIntrinsicMSBuildTasks = Environment.GetEnvironmentVariable("MSBUILDDISABLEINTRINSICMSBUILDTASK") == "1";
+
         private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
         {
             var mode = Environment.GetEnvironmentVariable("MSBUILD_PROJECTINSTANCE_TRANSLATION_MODE");
