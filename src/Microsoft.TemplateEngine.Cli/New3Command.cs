@@ -707,14 +707,14 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 templateName = highestPrecedenceTemplate.Info.Identity;
                 _commandInput.AllTemplateParams.TryGetValue("Framework", out string inputFrameworkValue);
-                framework = TelemetryHelper.GetHash(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "Framework", inputFrameworkValue));
+                framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "Framework", inputFrameworkValue));
 
                 _commandInput.AllTemplateParams.TryGetValue("auth", out string inputAuthValue);
-                auth = TelemetryHelper.GetHash(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "auth", inputAuthValue));
+                auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(highestPrecedenceTemplate.Info, "auth", inputAuthValue));
             }
             else
             {
-                templateName = TelemetryHelper.GetHash(highestPrecedenceTemplate.Info.Identity);
+                templateName = TelemetryHelper.HashWithNormalizedCasing(highestPrecedenceTemplate.Info.Identity);
             }
 
             if (argsError)

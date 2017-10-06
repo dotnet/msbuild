@@ -46,19 +46,40 @@ namespace Microsoft.TemplateEngine.Cli
             return defaultValue;
         }
 
-        public static string GetHash(string toHash)
+        /// <summary>
+        /// // The hashed mac address needs to be the same hashed value as produced by the other distinct sources given the same input. (e.g. VsCode)
+        /// </summary>
+        public static string Hash(string text)
         {
-            if (toHash == null)
+            var sha256 = SHA256.Create();
+            return HashInFormat(sha256, text);
+        }
+
+        public static string HashWithNormalizedCasing(string text)
+        {
+            if (text == null)
             {
                 return null;
             }
 
-            byte[] bytesToHash = Encoding.UTF8.GetBytes(toHash);
-            using (HMACSHA256 hmac = new HMACSHA256(new byte[64]))
+            return Hash(text.ToUpper());
+        }
+
+        private static string HashInFormat(SHA256 sha256, string text)
+        {
+            if (text == null)
             {
-                byte[] hashedBytes = hmac.ComputeHash(bytesToHash);
-                return BitConverter.ToString(hashedBytes).Replace("-", "");
+                return null;
             }
+
+            byte[] bytes = Encoding.UTF8.GetBytes(text);
+            byte[] hash = sha256.ComputeHash(bytes);
+            StringBuilder hashString = new StringBuilder();
+            foreach (byte x in hash)
+            {
+                hashString.AppendFormat("{0:x2}", x);
+            }
+            return hashString.ToString();
         }
     }
 }
