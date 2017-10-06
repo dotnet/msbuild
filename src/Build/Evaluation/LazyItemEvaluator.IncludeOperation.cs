@@ -129,7 +129,7 @@ namespace Microsoft.Build.Evaluation
                 return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
             }
 
-            protected override void MutateItems(ICollection<I> items)
+            protected override void MutateItems(ImmutableList<I> items)
             {
                 DecorateItemsWithMetadata(items, _metadata);
             }

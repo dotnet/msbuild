@@ -61,7 +61,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
-            protected virtual void MutateItems(ICollection<I> items) { }
+            protected virtual void MutateItems(ImmutableList<I> items) { }
 
             protected virtual void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<ProjectMetadataElement> metadata)
+            protected void DecorateItemsWithMetadata(ImmutableList<I> items, ImmutableList<ProjectMetadataElement> metadata)
             {
                 if (metadata.Any())
                 {
