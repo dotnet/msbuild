@@ -83,7 +83,7 @@ namespace Microsoft.Build.Evaluation
 
             protected void DecorateItemsWithMetadata(ImmutableList<I> items, ImmutableList<ProjectMetadataElement> metadata)
             {
-                if (metadata.Any())
+                if (metadata.Count > 0)
                 {
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
