@@ -1216,7 +1216,7 @@ namespace Microsoft.Build.Evaluation
 
         private GlobResult BuildGlobResultFromIncludeItem(ProjectItemElement itemElement, IReadOnlyDictionary<string, CumulativeRemoveElementData> removeElementCache)
         {
-            var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
+            var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
             var includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
 
@@ -1233,7 +1233,7 @@ namespace Microsoft.Build.Evaluation
 
             if (!string.IsNullOrEmpty(itemElement.Exclude))
             {
-                var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
+                var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation, itemElement.ContainingProject.DirectoryPath);
 
                 excludeFragmentStrings = excludeItemspec.FlattenFragmentsAsStrings().ToImmutableHashSet();
                 excludeGlob = excludeItemspec.ToMSBuildGlob();
@@ -1288,7 +1288,7 @@ namespace Microsoft.Build.Evaluation
                 removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
             }
 
-            var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation);
+            var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation, itemElement.ContainingProject.DirectoryPath);
 
             cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(removeSpec);
         }
@@ -1440,7 +1440,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 Provenance provenance;
-                var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, _data.Expander, out provenance);
+                var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, itemElement.ContainingProject.DirectoryPath, _data.Expander, out provenance);
                 var result = matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
 
                 return result?.Item2 > 0
@@ -1482,7 +1482,7 @@ namespace Microsoft.Build.Evaluation
         /// 
         /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
         /// </summary>
-        private int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
+        private int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, string projectDirectory, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
         {
             if (string.IsNullOrEmpty(itemSpec))
             {
@@ -1491,7 +1491,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // expand the properties
-            var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, expandProperties: true);
+            var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, projectDirectory, expandProperties: true);
             var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
 
             // Result is inconclusive if properties are present

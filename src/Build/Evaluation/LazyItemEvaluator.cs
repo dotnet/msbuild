@@ -438,7 +438,7 @@ namespace Microsoft.Build.Evaluation
             OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata(itemElement, conditionResult);
 
             // Proces Update attribute
-            ProcessItemSpec(itemElement.Update, itemElement.UpdateLocation, operationBuilder);
+            ProcessItemSpec(rootDirectory, itemElement.Update, itemElement.UpdateLocation, operationBuilder);
 
             ProcessMetadataElements(itemElement, operationBuilder);
 
@@ -453,7 +453,7 @@ namespace Microsoft.Build.Evaluation
             operationBuilder.ConditionResult = conditionResult;
 
             // Process include
-            ProcessItemSpec(itemElement.Include, itemElement.IncludeLocation, operationBuilder);
+            ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
 
             //  Code corresponds to Evaluator.EvaluateItemElement
 
@@ -486,14 +486,14 @@ namespace Microsoft.Build.Evaluation
         {
             OperationBuilder operationBuilder = new OperationBuilder(itemElement, conditionResult);
 
-            ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, operationBuilder);
+            ProcessItemSpec(rootDirectory, itemElement.Remove, itemElement.RemoveLocation, operationBuilder);
 
             return new RemoveOperation(operationBuilder, this);
         }
 
-        private void ProcessItemSpec(string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
+        private void ProcessItemSpec(string rootDirectory, string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
         {
-            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation);
+            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
 
             foreach (ItemFragment fragment in builder.ItemSpec.Fragments)
             {
