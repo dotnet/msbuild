@@ -1421,12 +1421,23 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public IEnumerable<ProjectItemInstance> GetItemsByItemTypeAndEvaluatedInclude(string itemType, string evaluatedInclude)
         {
+            // Avoid using LINQ - this is called a lot in VS
             if (_itemsByEvaluatedInclude == null)
             {
-                return this.GetItems(itemType).Where(item => String.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase));
+                foreach (var item in GetItems(itemType))
+                {
+                    if (string.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase))
+                        yield return item;
+                }
             }
-
-            return this.GetItemsByEvaluatedInclude(evaluatedInclude).Where(item => String.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase));
+            else
+            {
+                foreach (var item in GetItemsByEvaluatedInclude(evaluatedInclude))
+                {
+                    if (string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase))
+                        yield return item;
+                }
+            }
         }
 
         /// <summary>
@@ -2453,10 +2464,10 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Get items by evaluatedInclude value
         /// </summary>
-        private ICollection<ProjectItemInstance> GetItemsByEvaluatedInclude(string evaluatedInclude)
+        private IEnumerable<ProjectItemInstance> GetItemsByEvaluatedInclude(string evaluatedInclude)
         {
             // Even if there are no items in itemsByEvaluatedInclude[], it will return an IEnumerable, which is non-null
-            return new ReadOnlyCollection<ProjectItemInstance>(_itemsByEvaluatedInclude[evaluatedInclude]);
+            return _itemsByEvaluatedInclude[evaluatedInclude];
         }
 
         /// <summary>
