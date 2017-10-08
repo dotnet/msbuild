@@ -190,9 +190,7 @@
     <Compile Include="..\MSBuild\OutOfProcTaskAppDomainWrapperBase.cs">
       <Link>OutOfProcTaskAppDomainWrapperBase.cs</Link>
     </Compile>
-    <Compile Include="OutOfProcTaskAppDomainWrapper.cs">
-      <Link>OutOfProcTaskAppDomainWrapperStub.cs</Link>
-    </Compile>
+    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
