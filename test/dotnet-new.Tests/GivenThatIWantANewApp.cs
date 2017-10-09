@@ -75,14 +75,14 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Theory]
-        [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
-        [InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
-        public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
+        [InlineData("console", "microsoft.netcore.app")]
+        [InlineData("classlib", "netstandard.library")]
+        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Project";
-            var expectedVersion = GetFrameworkPackageVersion();
+            var expectedVersion = "2.0.0";
             var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
             new NewCommand()
@@ -98,32 +98,6 @@ namespace Microsoft.DotNet.New.Tests
             new DirectoryInfo(Path.Combine(packagesDirectory, packageName))
                 .Should().Exist()
                 .And.HaveDirectory(expectedVersion);
-
-            string GetFrameworkPackageVersion()
-            {
-                var dotnetDir = new FileInfo(DotnetUnderTest.FullName).Directory;
-                var sharedFxDir = dotnetDir
-                    .GetDirectory("shared", "Microsoft.NETCore.App")
-                    .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.0.0"));
-
-                if (packageName == "microsoft.netcore.app")
-                {
-                    return sharedFxDir.Name;
-                }
-
-                var depsFile = Path.Combine(sharedFxDir.FullName, "Microsoft.NETCore.App.deps.json");
-                using (var stream = File.OpenRead(depsFile))
-                using (var reader = new DependencyContextJsonReader())
-                {
-                    var context = reader.Read(stream);
-                    var dependency = context
-                        .RuntimeLibraries
-                        .Single(library => string.Equals(library.Name, packageName, StringComparison.OrdinalIgnoreCase));
-
-                    return dependency.Version;
-                }
-            }
         }
     }
 }
