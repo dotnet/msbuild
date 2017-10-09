@@ -785,7 +785,7 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 // Loop through all the TaskItems in our arraylist, and convert them.
-                ArrayList finalTaskInputs = new ArrayList();
+                ArrayList finalTaskInputs = new ArrayList(taskItems.Count);
 
                 if (parameterType != typeof(ITaskItem[]))
                 {
