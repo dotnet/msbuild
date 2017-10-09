@@ -2283,7 +2283,7 @@ namespace Microsoft.Build.Evaluation
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
-                                        String.Join(Path.PathSeparator.ToString(), pathsToSearch));
+                                        String.Join(";", pathsToSearch));
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
