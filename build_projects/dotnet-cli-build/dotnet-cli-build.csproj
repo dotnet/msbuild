@@ -29,6 +29,5 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
  </ItemGroup>
 </Project>
