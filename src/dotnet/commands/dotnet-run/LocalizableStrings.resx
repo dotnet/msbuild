@@ -177,7 +177,7 @@ The current {1} is '{2}'.</value>
     <value>Using launch settings from {0}...</value>
   </data>
   <data name="LaunchProfileIsNotAJsonObject" xml:space="preserve">
-    <value>A profile with the specified name could not be found or is not a valid JSON object.</value>
+    <value>Launch profile is not a JSON object.</value>
   </data>
   <data name="LaunchProfileHandlerCannotBeLocated" xml:space="preserve">
     <value>The launch profile type '{0}' is not supported.</value>

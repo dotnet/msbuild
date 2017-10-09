@@ -23,8 +23,9 @@ namespace Microsoft.DotNet.Cli.Utils
             new Dictionary<string, string>
             {
                 { "MSBuildExtensionsPath", AppContext.BaseDirectory },
-                { "MSBuildSDKsPath", GetMSBuildSDKsPath() },
-                { "DOTNET_HOST_PATH", GetDotnetPath() },
+                { "CscToolExe", GetRunCscPath() },
+                { "VbcToolExe", GetRunVbcPath() },
+                { "MSBuildSDKsPath", GetMSBuildSDKsPath() }
             };
 
         private readonly IEnumerable<string> _msbuildRequiredParameters =
@@ -77,9 +78,20 @@ namespace Microsoft.DotNet.Cli.Utils
                 SdksDirectoryName);
         }
 
-        private static string GetDotnetPath()
+        private static string GetRunVbcPath()
         {
-            return new Muxer().MuxerPath;
+            return GetRunToolPath("Vbc");
+        }        
+
+        private static string GetRunCscPath()
+        {
+            return GetRunToolPath("Csc");
+        }
+
+        private static string GetRunToolPath(string compilerName)
+        {
+            var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : ".sh";
+            return Path.Combine(AppContext.BaseDirectory, "Roslyn", $"Run{compilerName}{scriptExtension}");
         }
     }
 }
