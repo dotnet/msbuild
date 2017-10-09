@@ -213,7 +213,7 @@
 
   <Target Name="TestSdkRpm"
           DependsOnTargets="RestoreTests;DownloadAspNetCoreRuntimeRpmInstaller"
-          Condition=" '$(IsRPMBasedDistro)' == 'True' and '$(FPMPresent)' == 'True' "
+          Condition=" '$(IsRPMBasedDistro)' == 'True' and '$(FPMPresent)' == 'True' and '$(IsSharedFrameworkPreReleaseVersion)' != 'True' "
           Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);
