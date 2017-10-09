@@ -74,7 +74,7 @@ namespace Microsoft.Build.Logging
             {
                 if (string.IsNullOrEmpty(parameterValue))
                 {
-                    string message = ResourceUtilities.FormatResourceString("InvalidFileLoggerFile", string.Empty, ResourceUtilities.FormatResourceString("logfilePathNullOrEmpty"));
+                    string message = ResourceUtilities.FormatResourceString("InvalidFileLoggerFile", string.Empty, ResourceUtilities.GetResourceString("logfilePathNullOrEmpty"));
                     throw new LoggerException(message);
                 }
 

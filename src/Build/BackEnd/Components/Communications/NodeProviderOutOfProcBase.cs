@@ -255,7 +255,7 @@ namespace Microsoft.Build.BackEnd
                                 commandLineArgs
                             );
 
-                        string nodeFailedToLaunchError = ResourceUtilities.FormatResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
+                        string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
                         throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
                     }
                 }

@@ -262,7 +262,7 @@ namespace Microsoft.Build.BackEnd
 
             // Parse the global properties into a hashtable.
             Hashtable propertiesTable;
-            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.FormatResourceString("General.GlobalProperties"), "Properties", this.Properties, out propertiesTable))
+            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", this.Properties, out propertiesTable))
             {
                 return false;
             }

@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks
             if (pAttrs == IntPtr.Zero)
             {
                 throw new COMException(
-                    ResourceUtilities.FormatResourceString("ResolveComReference.CannotGetTypeLibAttrForTypeLib"));
+                    ResourceUtilities.GetResourceString("ResolveComReference.CannotGetTypeLibAttrForTypeLib"));
             }
 
             try
@@ -223,7 +223,7 @@ namespace Microsoft.Build.Tasks
             if (pAttrs == IntPtr.Zero)
             {
                 throw new COMException(
-                    ResourceUtilities.FormatResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
+                    ResourceUtilities.GetResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
             }
 
             try
@@ -257,7 +257,7 @@ namespace Microsoft.Build.Tasks
             if (pVarDesc == IntPtr.Zero)
             {
                 throw new COMException(
-                    ResourceUtilities.FormatResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
+                    ResourceUtilities.GetResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
             }
 
             varDesc = (VARDESC)Marshal.PtrToStructure(pVarDesc, typeof(VARDESC));
@@ -284,7 +284,7 @@ namespace Microsoft.Build.Tasks
             if (pFuncDesc == IntPtr.Zero)
             {
                 throw new COMException(
-                    ResourceUtilities.FormatResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
+                    ResourceUtilities.GetResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
             }
 
             funcDesc = (FUNCDESC)Marshal.PtrToStructure(pFuncDesc, typeof(FUNCDESC));

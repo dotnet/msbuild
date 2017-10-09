@@ -343,7 +343,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 }
                 else
                 {
-                    throw new XamlParseException(ResourceUtilities.FormatResourceString("Xaml.InvalidRootObject"));
+                    throw new XamlParseException(ResourceUtilities.GetResourceString("Xaml.InvalidRootObject"));
                 }
             }
 
