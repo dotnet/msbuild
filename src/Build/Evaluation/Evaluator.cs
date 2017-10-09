@@ -108,13 +108,13 @@ namespace Microsoft.Build.Evaluation
         /// List of ProjectItemElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
-        private readonly IList<ProjectItemGroupElement> _itemGroupElements;
+        private readonly List<ProjectItemGroupElement> _itemGroupElements;
 
         /// <summary>
         /// List of ProjectItemDefinitionElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
-        private readonly IList<ProjectItemDefinitionGroupElement> _itemDefinitionGroupElements;
+        private readonly List<ProjectItemDefinitionGroupElement> _itemDefinitionGroupElements;
 
         /// <summary>
         /// List of ProjectUsingTaskElement's traversing into imports.
@@ -122,13 +122,13 @@ namespace Microsoft.Build.Evaluation
         /// Key is the directory of the file importing the usingTask, which is needed
         /// to handle any relative paths in the usingTask.
         /// </summary>
-        private readonly IList<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
+        private readonly List<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
 
         /// <summary>
         /// List of ProjectTargetElement's traversing into imports. 
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
-        private readonly IList<ProjectTargetElement> _targetElements;
+        private readonly List<ProjectTargetElement> _targetElements;
 
         /// <summary>
         /// Paths to imports already seen and where they were imported from; used to flag duplicate imports
@@ -791,12 +791,10 @@ namespace Microsoft.Build.Evaluation
             // Pass1: evaluate properties, load imports, and gather everything else
             PerformDepthFirstPass(_projectRootElement);
 
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var initialTargetsListCount = _initialTargetsList.Count;
-            List<string> initialTargets = new List<string>(initialTargetsListCount);
-            for (var i = 0; i < initialTargetsListCount; i++)
+            List<string> initialTargets = new List<string>(_initialTargetsList.Count);
+            foreach (var initialTarget in _initialTargetsList)
             {
-                initialTargets.Add(EscapingUtilities.UnescapeAll(_initialTargetsList[i].Trim()));
+                initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget.Trim()));
             }
 
             _data.InitialTargets = initialTargets;
@@ -808,11 +806,9 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8817, endPass1);
 #endif
             // Pass2: evaluate item definitions
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var itemsDefinitionGroupElementsCount = _itemDefinitionGroupElements.Count;
-            for (var i = 0; i < itemsDefinitionGroupElementsCount; i++)
+            foreach (var itemDefinitionGroupElement in _itemDefinitionGroupElements)
             {
-                EvaluateItemDefinitionGroupElement(_itemDefinitionGroupElements[i]);
+                EvaluateItemDefinitionGroupElement(itemDefinitionGroupElement);
             }
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass2End);
@@ -827,11 +823,9 @@ namespace Microsoft.Build.Evaluation
             lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext);
 
             // Pass3: evaluate project items
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var itemsGroupCount = _itemGroupElements.Count;
-            for (var i = 0; i < itemsGroupCount; i++)
-            {
-                EvaluateItemGroupElement(_itemGroupElements[i], lazyEvaluator);
+            foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
+            { 
+                EvaluateItemGroupElement(itemGroup, lazyEvaluator);
             }
 
             if (lazyEvaluator != null)
@@ -867,11 +861,8 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8819, endPass3);
 #endif
             // Pass4: evaluate using-tasks
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var entryCount = _usingTaskElements.Count;
-            for (var i = 0; i < entryCount; i++)
-            {
-                var entry = _usingTaskElements[i];
+            foreach (var entry in _usingTaskElements)
+            {   
                 EvaluateUsingTaskElement(entry.Key, entry.Value);
             }
 
@@ -1009,14 +1000,11 @@ namespace Microsoft.Build.Evaluation
 #endif
 
             // Get all the implicit imports (e.g. <Project Sdk="" />, but not <Import Sdk="" />)
-            var implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
+            List<ProjectImportElement> implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
 
             // Evaluate the "top" implicit imports as if they were the first entry in the file.
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var implicitImportsCount = implicitImports.Count;
-            for (var i = 0; i < implicitImportsCount; i++)
+            foreach (var import in implicitImports)
             {
-                var import = implicitImports[i];
                 if (import.ImplicitImportLocation == ImplicitImportLocation.Top)
                 {
                     EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
@@ -1184,11 +1172,8 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            implicitImportsCount = implicitImports.Count;
-            for (var i = 0; i < implicitImportsCount; i++)
+            foreach (var import in implicitImports)
             {
-                var import = implicitImports[i];
                 if (import.ImplicitImportLocation == ImplicitImportLocation.Bottom)
                 {
                     EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
