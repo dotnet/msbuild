@@ -1675,8 +1675,8 @@ namespace Microsoft.Build.Execution
         {
             ProjectRootElement rootElement = ProjectRootElement.Create();
 
-            rootElement.InitialTargets = String.Join(";", InitialTargets.ToArray());
-            rootElement.DefaultTargets = String.Join(";", DefaultTargets.ToArray());
+            rootElement.InitialTargets = String.Join(";", InitialTargets);
+            rootElement.DefaultTargets = String.Join(";", DefaultTargets);
             rootElement.ToolsVersion = ToolsVersion;
 
             // Add all of the item definitions.            

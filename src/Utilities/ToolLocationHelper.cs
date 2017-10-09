@@ -2472,10 +2472,10 @@ namespace Microsoft.Build.Utilities
             string registryRoot = NativeMethodsShared.IsWindows ? GetTargetPlatformMonikerRegistryRoots(registrySearchLocation) : string.Empty;
 
             string cachedTargetPlatformsKey = String.Join("|",
-                String.Join(";", sdkDiskRoots.ToArray()),
+                String.Join(";", sdkDiskRoots),
                 registryRoot);
 
-            string cachedExtensionSdksKey = extensionDiskRoots == null ? String.Empty : String.Join(";", extensionDiskRoots.ToArray());
+            string cachedExtensionSdksKey = extensionDiskRoots == null ? String.Empty : String.Join(";", extensionDiskRoots);
 
             lock (s_locker)
             {

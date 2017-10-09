@@ -129,7 +129,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 configurationId,
                 parentBuildEventContext,
                 projectFullPath,
-                String.Join(";", targets.ToArray()),
+                String.Join(";", targets),
                 properties,
                 items
                 );
