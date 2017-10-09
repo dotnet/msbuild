@@ -704,38 +704,38 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Captures within this capture
             /// </summary>
-            private List<ItemExpressionCapture> _captures;
+            private readonly List<ItemExpressionCapture> _captures;
 
             /// <summary>
             /// The position in the original string where the first character of the captured
             /// substring was found.
             /// </summary>
-            private int _index;
+            private readonly int _index;
 
             /// <summary>
             /// The length of the captured substring.
             /// </summary>
-            private int _length;
+            private readonly int _length;
 
             /// <summary>
             /// The captured substring from the input string.
             /// </summary>
-            private string _value;
+            private readonly string _value;
 
             /// <summary>
             /// The type of the item within this expression
             /// </summary>
-            private string _itemType;
+            private readonly string _itemType;
 
             /// <summary>
             /// The separator, if any, within this expression
             /// </summary>
-            private string _separator;
+            private readonly string _separator;
 
             /// <summary>
             /// The starting character of the separator within the expression
             /// </summary>
-            private int _separatorStart;
+            private readonly int _separatorStart;
 
             /// <summary>
             /// The function name, if any, within this expression
