@@ -2275,17 +2275,15 @@ namespace Microsoft.Build.Evaluation
             // Adding the value of $(MSBuildExtensionsPath*) property to the list of search paths
             var prop = _data.GetProperty(fallbackSearchPathMatch.PropertyName);
 
-            var pathsToSearch =
-                // The actual value of the property, with no fallbacks
-                new[] { prop?.EvaluatedValue }
-                // The list of fallbacks, in order
-                .Concat(fallbackSearchPathMatch.SearchPaths).ToList();
-
+            var pathsToSearch = new string[fallbackSearchPathMatch.SearchPaths.Count + 1];
+            pathsToSearch[0] = prop?.EvaluatedValue;                       // The actual value of the property, with no fallbacks
+            fallbackSearchPathMatch.SearchPaths.CopyTo(pathsToSearch, 1);  // The list of fallbacks, in order
+            
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
-                                        String.Join(Path.PathSeparator.ToString(), pathsToSearch));
+                                        String.Join(";", pathsToSearch));
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
