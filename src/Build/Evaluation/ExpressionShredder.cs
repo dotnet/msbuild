@@ -776,7 +776,6 @@ namespace Microsoft.Build.Evaluation
             public List<ItemExpressionCapture> Captures
             {
                 get { return _captures; }
-                set { _captures = value; }
             }
 
             /// <summary>
@@ -810,7 +809,6 @@ namespace Microsoft.Build.Evaluation
             public string ItemType
             {
                 get { return _itemType; }
-                set { _itemType = value; }
             }
 
             /// <summary>
@@ -819,7 +817,6 @@ namespace Microsoft.Build.Evaluation
             public string Separator
             {
                 get { return _separator; }
-                set { _separator = value; }
             }
 
             /// <summary>
