@@ -24,9 +24,6 @@
     <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(CLI_Roslyn_Version)">
       <ExcludeAssets>All</ExcludeAssets>
     </PackageReference>
-    <PackageReference Include="CliDeps.Satellites.Roslyn" Version="$(CLI_Roslyn_Satellites_Version)">
-      <ExcludeAssets>All</ExcludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -77,23 +74,31 @@
           
     <ItemGroup>
       <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(CLI_Roslyn_Version)/tools/**/*" />
-      <RoslynSatelliteBits Include="$(NuGetPackagesDir)/clideps.satellites.roslyn/$(CLI_Roslyn_Satellites_Version)/lib/netstandard1.0/**/*" />
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(RoslynSatelliteBits)" DestinationFiles="@(RoslynSatelliteBits->'$(RoslynDirectory)/bincore/%(RecursiveDir)%(Filename)%(Extension)')" />
     <ItemGroup>
-      <RetargetRuntimeConfigPaths Include="$(RoslynDirectory)/bincore/csc.runtimeconfig.json" />
-      <RetargetRuntimeConfigPaths Include="$(RoslynDirectory)/bincore/vbc.runtimeconfig.json" />
+      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/csc.runtimeconfig.json" />
+      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/vbc.runtimeconfig.json" />
+      <RoslynDeps Include="$(RoslynDirectory)/bincore/csc.deps.json" />
+      <RoslynDeps Include="$(RoslynDirectory)/bincore/vbc.deps.json" />
+      <RoslynSatelliteDeps Include="$(RoslynDirectory)/bincore/tool_roslyn_satellites.deps.json" />
     </ItemGroup>
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
       <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
-      InputFile="%(RetargetRuntimeConfigPaths.Identity)"
-      DestinationFile="%(RetargetRuntimeConfigPaths.Identity)"
+      InputFile="%(RoslynRuntimeConfigs.Identity)"
+      DestinationFile="%(RoslynRuntimeConfigs.Identity)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
+    <DotNetPublish
+      ToolPath="$(Stage0Directory)"
+      Configuration="$(Configuration)"
+      ProjectPath="$(SrcDirectory)/tool_roslyn_satellites/tool_roslyn_satellites.csproj" />
+    <AddToDeps TargetDeps="@(RoslynDeps)" AdditionalDeps="@(RoslynSatelliteDeps)" />
+    <Delete Files="@(RoslynSatelliteDeps)" />
   </Target>
 
   <Target Name="PublishFSharp"
