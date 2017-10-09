@@ -202,7 +202,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal static Resolver[] CompileDirectories
         (
-            IEnumerable<string> directories,
+            List<string> directories,
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
