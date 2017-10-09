@@ -264,7 +264,7 @@ namespace Microsoft.Build.Evaluation
                     // Create an expression capture that encompases the entire expression between the @( and the )
                     // with the item name and any separator contained within it
                     // and each transform expression contained within it (i.e. each ->XYZ)
-                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, expression.Substring(startPoint, endPoint - startPoint), itemName, separator, separatorStart, separatorLength, transformExpressions);
+                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, expression.Substring(startPoint, endPoint - startPoint), itemName, separator, separatorStart, transformExpressions);
                     subExpressions.Add(expressionCapture);
 
                     continue;
@@ -738,11 +738,6 @@ namespace Microsoft.Build.Evaluation
             private int _separatorStart;
 
             /// <summary>
-            /// The length of the separator
-            /// </summary>
-            private int _separatorLength;
-
-            /// <summary>
             /// The function name, if any, within this expression
             /// </summary>
             private string _functionName;
@@ -756,7 +751,7 @@ namespace Microsoft.Build.Evaluation
             /// Create an Expression Capture instance
             /// Represents a sub expression, shredded from a larger expression
             /// </summary>
-            public ItemExpressionCapture(int index, int length, string subExpression) : this(index, length, subExpression, null, null, -1, -1, null)
+            public ItemExpressionCapture(int index, int length, string subExpression) : this(index, length, subExpression, null, null, -1, null)
             {
             }
 
@@ -764,7 +759,7 @@ namespace Microsoft.Build.Evaluation
             /// Create an Expression Capture instance
             /// Represents a sub expression, shredded from a larger expression
             /// </summary>
-            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, int separatorLength, List<ItemExpressionCapture> captures)
+            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, List<ItemExpressionCapture> captures)
             {
                 _index = index;
                 _length = length;
@@ -772,7 +767,6 @@ namespace Microsoft.Build.Evaluation
                 _itemType = itemType;
                 _separator = separator;
                 _separatorStart = separatorStart;
-                _separatorLength = separatorLength;
                 _captures = captures;
             }
 
@@ -834,14 +828,6 @@ namespace Microsoft.Build.Evaluation
             public int SeparatorStart
             {
                 get { return _separatorStart; }
-            }
-
-            /// <summary>
-            /// The length of the separator.
-            /// </summary>
-            public int SeparatorLength
-            {
-                get { return _separatorLength; }
             }
 
             /// <summary>
