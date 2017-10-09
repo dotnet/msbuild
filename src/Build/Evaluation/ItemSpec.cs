@@ -360,7 +360,7 @@ namespace Microsoft.Build.Evaluation
             {
                 _expander = _containingItemSpec.Expander;
 
-                List<Tuple<string, I>> itemsFromCapture;
+                List<Pair<string, I>> itemsFromCapture;
                 bool throwaway;
                 _expander.ExpandExpressionCapture(
                     Capture,
@@ -369,7 +369,7 @@ namespace Microsoft.Build.Evaluation
                     false /* do not include null expansion results */,
                     out throwaway,
                     out itemsFromCapture);
-                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectDirectory)).ToList();
+                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Key, ProjectDirectory)).ToList();
 
                 return true;
             }
