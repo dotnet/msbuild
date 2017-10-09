@@ -688,7 +688,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
 
             // Verify the existence of the first line of the header.
-            StringReader reader = new StringReader(ResourceUtilities.FormatResourceString("BuildHierarchyHeader"));
+            StringReader reader = new StringReader(ResourceUtilities.GetResourceString("BuildHierarchyHeader"));
             _logger.AssertLogContains(reader.ReadLine());
         }
 

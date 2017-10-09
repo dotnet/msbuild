@@ -588,7 +588,7 @@ namespace Microsoft.Build.CommandLine
                     // is a better way.
                     if (cpuCount == 1 && FileUtilities.IsSolutionFilename(projectFile) && verbosity > LoggerVerbosity.Minimal)
                     {
-                        Console.WriteLine(ResourceUtilities.FormatResourceString("PossiblyOmittedMaxCPUSwitch"));
+                        Console.WriteLine(ResourceUtilities.GetResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
                     if (preprocessWriter != null || debugger)
                     {
@@ -817,7 +817,7 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            Console.WriteLine(ResourceUtilities.FormatResourceString("AbortingBuild"));
+            Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task

@@ -1350,7 +1350,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && parameterValue.Count > 0)
             {
-                string parameterText = ResourceUtilities.FormatResourceString("TaskParameterPrefix");
+                string parameterText = ResourceUtilities.GetResourceString("TaskParameterPrefix");
                 parameterText = ItemGroupLoggingHelper.GetParameterText(parameterText, parameter.Name, parameterValue);
                 _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
             }
@@ -1377,7 +1377,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _taskLoggingContext.LogCommentFromText(
                         MessageImportance.Low,
-                        ResourceUtilities.FormatResourceString("TaskParameterPrefix") + parameter.Name + "=" + ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
+                        ResourceUtilities.GetResourceString("TaskParameterPrefix") + parameter.Name + "=" + ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
                 }
             }
 
@@ -1493,7 +1493,7 @@ namespace Microsoft.Build.BackEnd
                     if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
                         string parameterText = ItemGroupLoggingHelper.GetParameterText(
-                            ResourceUtilities.FormatResourceString("OutputItemParameterMessagePrefix"),
+                            ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"),
                             outputTargetName,
                             outputs);
 
@@ -1573,7 +1573,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
-                        string parameterText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.FormatResourceString("OutputItemParameterMessagePrefix"), outputTargetName, outputs);
+                        string parameterText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"), outputTargetName, outputs);
                         _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
                     }
                 }

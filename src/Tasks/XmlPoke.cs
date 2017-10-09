@@ -256,7 +256,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (XmlException xe)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPoke.NamespacesParameterNotWellFormed"), xe);
+                throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPoke.NamespacesParameterNotWellFormed"), xe);
             }
 
             XmlNodeList xnl = doc.SelectNodes("/Namespaces/*[local-name() = 'Namespace']");

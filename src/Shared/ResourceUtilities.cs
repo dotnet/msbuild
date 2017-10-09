@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Text;
+using System.ComponentModel;
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
@@ -169,6 +170,13 @@ namespace Microsoft.Build.Shared
 
             // NOTE: the AssemblyResources.GetString() method is thread-safe
             return ExtractMessageCode(true /* msbuildCodeOnly */, FormatString(GetResourceString(resourceName), args), out code);
+        }
+
+        [Obsolete("Use GetResourceString instead.", true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal static string FormatResourceString()
+        {   // Avoids an accidental dependency on FormatResourceString(string, params object[])
+            return null;
         }
 
         /// <summary>

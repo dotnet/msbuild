@@ -384,7 +384,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     if (targetOutputs != null)
                     {
-                        WriteLinePretty(ResourceUtilities.FormatResourceString("TargetOutputItemsHeader"));
+                        WriteLinePretty(ResourceUtilities.GetResourceString("TargetOutputItemsHeader"));
                         foreach (ITaskItem item in targetOutputs)
                         {
                             WriteLinePretty(ResourceUtilities.FormatResourceString("TargetOutputItem", item.ItemSpec));

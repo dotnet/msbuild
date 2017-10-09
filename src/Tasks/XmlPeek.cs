@@ -279,7 +279,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (XmlException xe)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNotWellFormed"), xe);
+                throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPeek.NamespacesParameterNotWellFormed"), xe);
             }
 
             XmlNodeList xnl = doc.SelectNodes("/Namespaces/*[local-name() = 'Namespace']");
@@ -331,11 +331,11 @@ namespace Microsoft.Build.Tasks
             {
                 if (xmlInputPath != null && xmlContent != null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.XmlInput.TooMany"));
+                    throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPeek.XmlInput.TooMany"));
                 }
                 else if (xmlInputPath == null && xmlContent == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.XmlInput.TooFew"));
+                    throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPeek.XmlInput.TooFew"));
                 }
 
                 if (xmlInputPath != null)
