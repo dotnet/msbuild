@@ -150,6 +150,8 @@ Copyright (c) .NET Foundation. All rights reserved.
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.CheckForTargetInAssetsFile"
            AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.JoinItems"
+           AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!-- The condition on this target causes it to be skipped during design-time builds if
         the restore operation hasn't run yet.  This is to avoid displaying an error in
@@ -276,9 +278,11 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeActiveTFMFileDependencies">
     <ItemGroup>
       <_ContentFileDeps Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
-      <__ContentFileDefs Include="@(FileDefinitions)" Exclude="@(_ContentFileDeps)" />
-      <_ContentFileDefs Include="@(FileDefinitions)" Exclude="@(__ContentFileDefs)" />
     </ItemGroup>
+    
+    <JoinItems Left="@(_ContentFileDeps)" Right="@(FileDefinitions)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_ContentFileDefs" />
+    </JoinItems>
 
     <ProduceContentAssets
       ContentFileDefinitions="@(_ContentFileDefs)"
@@ -380,11 +384,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
       <_CompileFileItems Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
-
-      <!-- Get corresponding file definitions -->
-      <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
-      <_CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(__CompileFileDefinitions)" />
-
+    </ItemGroup>
+    <!-- Get corresponding file definitions -->
+    <JoinItems Left="@(_CompileFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_CompileFileDefinitions" />
+    </JoinItems>
+    <ItemGroup>
       <ResolvedCompileFileDefinitions Include="@(_CompileFileDefinitions->'%(ResolvedPath)')">
         <Private>false</Private>
         <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
@@ -417,16 +422,31 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolveLockFileReferences"
           DependsOnTargets="_ComputeLockFileReferences;_ComputeLockFileFrameworks">
-    <ItemGroup>
-      <!-- Add the references we computed -->
-      <Reference Include="@(ResolvedCompileFileDefinitions)" />
-      <Reference Include="@(ResolvedFrameworkAssemblies)" />
 
-      <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
-           consider a project with an Reference Include="System", and some NuGet package is providing System.dll.
-           Simple references can also come from NuGet framework assemblies, hence this statement should occur after
-           including all computed references. -->
-      <Reference Remove="%(ResolvedCompileFileDefinitions.FileName)" />
+    <ItemGroup>
+      <ResolvedCompileFileDefinitions Update="@(ResolvedCompileFileDefinitions)">
+        <HintPath>%(FullPath)</HintPath>
+      </ResolvedCompileFileDefinitions>
+    </ItemGroup>
+    
+    <JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="FileName" LeftMetadata="*"
+               Right="@(Reference)" RightKey="" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_JoinedResolvedCompileFileDefinitions" />
+    </JoinItems>
+
+    <ItemGroup>
+      <Reference Remove="@(_JoinedResolvedCompileFileDefinitions)" />
+      <Reference Include="@(_JoinedResolvedCompileFileDefinitions)" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ResolvedCompileFileDefinitionsToAdd Include="@(ResolvedCompileFileDefinitions)" />
+      <ResolvedCompileFileDefinitionsToAdd Remove="%(_JoinedResolvedCompileFileDefinitions.HintPath)" />
+      
+      <!-- Add the references we computed -->
+      <Reference Include="@(ResolvedCompileFileDefinitionsToAdd)" />
+      <Reference Include="@(ResolvedFrameworkAssemblies)" />
+      
     </ItemGroup>
   </Target>
 
@@ -444,11 +464,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="_TransitiveProjectReferences">
     <ItemGroup>
       <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
-
-      <!-- Get corresponding package definitions -->
-      <__TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(_TransitiveProjectDependencies)" />
-      <_TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(__TransitiveProjectDefinitions)" />
-      
+    </ItemGroup>
+    <!-- Get corresponding package definitions -->
+    <JoinItems Left="@(_TransitiveProjectDependencies)" Right="@(PackageDefinitions)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_TransitiveProjectDefinitions" />
+    </JoinItems>
+    <ItemGroup>
       <_TransitiveProjectReferences Include="%(_TransitiveProjectDefinitions.Path)">
         <ResolvedPath>%(_TransitiveProjectDefinitions.ResolvedPath)</ResolvedPath>
       </_TransitiveProjectReferences>
@@ -502,29 +523,34 @@ Copyright (c) .NET Foundation. All rights reserved.
         DependsOnTargets="_ComputeActiveTFMFileDependencies;RunProduceContentAssets"
         Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
     <ItemGroup>
-      <!--NativeLibrary-->
       <_NativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
-      <__NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_NativeFileItems)" />
-      <_NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__NativeCopyLocalItems)" />
-      <NativeCopyLocalItems Include="%(_NativeCopyLocalItems.ResolvedPath)" />
-
-      <!--RuntimeAssembly-->
       <_RuntimeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeAssembly'))" />
-      <__RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_RuntimeFileItems)" />
-      <_RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__RuntimeCopyLocalItems)" />
-      <RuntimeCopyLocalItems Include="%(_RuntimeCopyLocalItems.ResolvedPath)" />
-
-      <!--ResourceAssembly-->
       <_ResourceFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ResourceAssembly'))" />
-      <__ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_ResourceFileItems)" />
+    </ItemGroup>
+    
+    <!--NativeLibrary-->
+    <JoinItems Left="@(_NativeFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_NativeCopyLocalItems" />
+    </JoinItems>
+
+    <!--RuntimeAssembly-->
+    <JoinItems Left="@(_RuntimeFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_RuntimeCopyLocalItems" />
+    </JoinItems>
+
+    <!--ResourceAssembly-->
+    <JoinItems Left="@(_ResourceFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_ResourceCopyLocalItems" />
+    </JoinItems>
+    
+    <ItemGroup>
+     
+      <NativeCopyLocalItems Include="%(_NativeCopyLocalItems.ResolvedPath)" />
+      <RuntimeCopyLocalItems Include="%(_RuntimeCopyLocalItems.ResolvedPath)" />
       
       <!-- These resource items are in folders with names which correspond to the locale.  Here, set the DestinationSubDirectory to the
            folder name so that it will be copied to the right target path and so conflict resolution won't think there are conflicts
-           between satellite assemblies in different languages. 
-           
-           This is done in two steps because if it was done all at once, MSBuild would try te evaluate the metadata even if there weren't
-           any items, which would result in an error trying to call Directory.GetParent() without any arguments. -->
-      <_ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__ResourceCopyLocalItems)" />
+           between satellite assemblies in different languages. -->
       <_ResourceCopyLocalItems Update="@(_ResourceCopyLocalItems)" Condition="'@(_ResourceCopyLocalItems)' != ''">
         <DestinationSubDirectory>$([System.IO.Directory]::GetParent(%(ResolvedPath)).get_Name())\</DestinationSubDirectory>
       </_ResourceCopyLocalItems>
