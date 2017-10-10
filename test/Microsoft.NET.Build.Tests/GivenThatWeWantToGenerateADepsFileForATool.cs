@@ -208,10 +208,14 @@ class Program
 
             dotnetArgs.Add(Path.GetFullPath(toolAssemblyPath));
 
-            ICommand toolCommand = Command.Create(RepoInfo.DotNetHostPath, dotnetArgs)
-                .CaptureStdOut();
-            toolCommand = RepoInfo.AddTestEnvironmentVariables(toolCommand);
+            var toolCommandSpec = new SdkCommandSpec()
+            {
+                FileName = RepoInfo.DotNetHostPath,
+                Arguments = dotnetArgs
+            };
+            RepoInfo.AddTestEnvironmentVariables(toolCommandSpec);
 
+            ICommand toolCommand = toolCommandSpec.ToCommand().CaptureStdOut();
 
             var toolResult = toolCommand.Execute();
 
