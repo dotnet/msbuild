@@ -33,6 +33,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
+        public Dictionary<string, string> EmbeddedResources { get; } = new Dictionary<string, string>();
+
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
         private static string GetShortTargetFrameworkIdentifier(string targetFramework)
@@ -268,6 +270,11 @@ namespace {this.Name}
                 {
                     File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
                 }
+            }
+
+            foreach (var kvp in EmbeddedResources)
+            {
+                File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
             }
         }
 
