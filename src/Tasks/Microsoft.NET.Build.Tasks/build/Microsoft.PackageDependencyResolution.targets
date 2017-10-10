@@ -279,10 +279,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_ContentFileDeps Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
     </ItemGroup>
-    <JoinItems Left="@(_ContentFileDeps)"
-               Right="@(FileDefinitions)"
-               RightMetadata="*"
-                 >
+    
+    <JoinItems Left="@(_ContentFileDeps)" Right="@(FileDefinitions)" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_ContentFileDefs" />
     </JoinItems>
 
@@ -388,10 +386,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_CompileFileItems Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
     </ItemGroup>
     <!-- Get corresponding file definitions -->
-    <JoinItems Left="@(_CompileFileItems)"
-               Right="@(FileDefinitions)"
-               RightMetadata="*"
-                 >
+    <JoinItems Left="@(_CompileFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_CompileFileDefinitions" />
     </JoinItems>
     <ItemGroup>
@@ -434,16 +429,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       </ResolvedCompileFileDefinitions>
     </ItemGroup>
     
-    <JoinItems Left="@(ResolvedCompileFileDefinitions)"
-               LeftKey="FileName"
-               Right="@(Reference)"
-               RightKey=""
-               LeftMetadata="*"
-               RightMetadata="*"
-               >
-
+    <JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="FileName" LeftMetadata="*"
+               Right="@(Reference)" RightKey="" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_JoinedResolvedCompileFileDefinitions" />
-      
     </JoinItems>
 
     <ItemGroup>
@@ -478,10 +466,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
     </ItemGroup>
     <!-- Get corresponding package definitions -->
-    <JoinItems Left="@(_TransitiveProjectDependencies)"
-               Right="@(PackageDefinitions)"
-               RightMetadata="*"
-                 >
+    <JoinItems Left="@(_TransitiveProjectDependencies)" Right="@(PackageDefinitions)" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_TransitiveProjectDefinitions" />
     </JoinItems>
     <ItemGroup>
@@ -544,26 +529,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
     
     <!--NativeLibrary-->
-    <JoinItems Left="@(_NativeFileItems)"
-                 Right="@(FileDefinitions)"
-                 RightMetadata="*"
-                 >
+    <JoinItems Left="@(_NativeFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_NativeCopyLocalItems" />
     </JoinItems>
 
     <!--RuntimeAssembly-->
-    <JoinItems Left="@(_RuntimeFileItems)"
-               Right="@(FileDefinitions)"
-               RightMetadata="*"
-                 >
+    <JoinItems Left="@(_RuntimeFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_RuntimeCopyLocalItems" />
     </JoinItems>
 
     <!--ResourceAssembly-->
-    <JoinItems Left="@(_ResourceFileItems)"
-               Right="@(FileDefinitions)"
-               RightMetadata="*"
-                 >
+    <JoinItems Left="@(_ResourceFileItems)" Right="@(FileDefinitions)" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_ResourceCopyLocalItems" />
     </JoinItems>
     

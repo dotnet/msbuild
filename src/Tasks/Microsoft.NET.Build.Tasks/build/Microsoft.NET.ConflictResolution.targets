@@ -37,10 +37,8 @@ Copyright (c) .NET Foundation. All rights reserved.
            for conflicts). -->
       <_RuntimeTargetItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeTarget'))" />
     </ItemGroup>
-    <JoinItems Left="@(_RuntimeTargetItems)"
-                 Right="@(FileDefinitions)"
-                 RightMetadata="*"
-                 >
+    
+    <JoinItems Left="@(_RuntimeTargetItems)" Right="@(FileDefinitions)" RightMetadata="*">
       <Output TaskParameter="JoinResult" ItemName="_RuntimeTargetPublishItems" />
     </JoinItems>
     
