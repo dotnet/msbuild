@@ -10,6 +10,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Linq;
 using Microsoft.Build.Framework;
+using System.Reflection;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
@@ -34,7 +35,12 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 throw new BuildErrorException(Strings.FrameworkListPathNotRooted, frameworkListPath);
             }
 
-            string objectKey = $"{nameof(FrameworkListReader)}:{frameworkListPath}";
+
+            //  Need to include assembly name in the key here, since both Microsoft.NET.Build.Tasks and Microsoft.NET.Build.Extensions.Tasks share this code,
+            //  but can't share the types of the ConflictItem objects.
+            string assemblyName = typeof(FrameworkListReader).GetTypeInfo().Assembly.FullName;
+
+            string objectKey = $"{assemblyName}:{nameof(FrameworkListReader)}:{frameworkListPath}";
 
             IEnumerable<ConflictItem> result;
 
