@@ -46,6 +46,9 @@ namespace Microsoft.NET.TestFramework
             command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1;
             command.Environment[nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)] = ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0;
 
+            command.Environment["GenerateResourceMSBuildArchitecture"] = "CurrentArchitecture";
+            command.Environment["GenerateResourceMSBuildRuntime"] = "CurrentRuntime";
+
             ToolsetUnderTest.AddTestEnvironmentVariables(command);
         }
 
