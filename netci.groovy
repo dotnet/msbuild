@@ -48,7 +48,7 @@ set DOTNET_CLI_UI_LANGUAGE=es
     }
     else if (os == 'RHEL6') {
         osUsedForMachineAffinity = 'Ubuntu16.04';
-        buildCommand = "./build.sh --skip-prereqs --configuration ${configuration} --docker rhel.6 --targets Default"
+        buildCommand = "./build.sh --skip-prereqs --configuration ${configuration} --runtime-id rhel.6-x64 --docker rhel.6 --targets Default"
     }
     else {
         // Jenkins non-Ubuntu CI machines don't have docker
