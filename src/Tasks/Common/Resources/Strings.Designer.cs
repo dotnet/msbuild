@@ -450,5 +450,13 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("UnsupportedSDKVersionForNetStandard20", resourceCulture);
             }
         }
+
+        internal static string FrameworkListPathNotRooted
+        {
+            get
+            {
+                return ResourceManager.GetString("FrameworkListPathNotRooted", resourceCulture);
+            }
+        }
     }
 }

@@ -8,26 +8,63 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
+using System.Linq;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
-    static class FrameworkListReader
+    class FrameworkListReader
     {
-        public static IEnumerable<ConflictItem> LoadConflictItems(string frameworkListPath, ILog log)
+        private IBuildEngine4 _buildEngine;
+
+        public FrameworkListReader(IBuildEngine4 buildEngine)
+        {
+            _buildEngine = buildEngine;
+        }
+
+        public IEnumerable<ConflictItem> GetConflictItems(string frameworkListPath, ILog log)
         {
             if (frameworkListPath == null)
             {
                 throw new ArgumentNullException(nameof(frameworkListPath));
             }
 
+            if (!Path.IsPathRooted(frameworkListPath))
+            {
+                throw new BuildErrorException(Strings.FrameworkListPathNotRooted, frameworkListPath);
+            }
+
+            string objectKey = $"{nameof(FrameworkListReader)}:{frameworkListPath}";
+
+            IEnumerable<ConflictItem> result;
+
+            object existingConflictItems = _buildEngine.GetRegisteredTaskObject(objectKey, RegisteredTaskObjectLifetime.AppDomain);
+
+            if (existingConflictItems == null)
+            {
+                result = LoadConflictItems(frameworkListPath, log);
+
+                _buildEngine.RegisterTaskObject(objectKey, result, RegisteredTaskObjectLifetime.AppDomain, true);
+            }
+            else
+            {
+                result = (IEnumerable<ConflictItem>)existingConflictItems;
+            }
+
+            return result;
+        }
+
+        private static IEnumerable<ConflictItem> LoadConflictItems(string frameworkListPath, ILog log)
+        {
             if (!File.Exists(frameworkListPath))
             {
                 //  This is not an error, as we get both the root target framework directory as well as the Facades folder passed in as TargetFrameworkDirectories.
                 //  Only the root will have a RedistList\FrameworkList.xml in it
-                yield break;
+                return Enumerable.Empty<ConflictItem>();
             }
 
             var frameworkList = XDocument.Load(frameworkListPath);
+            var ret = new List<ConflictItem>();
             foreach (var file in frameworkList.Root.Elements("File"))
             {
                 var assemblyName = file.Attribute("AssemblyName")?.Value;
@@ -40,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                         "AssemblyName",
                         assemblyName);
                     log.LogError(errorMessage);
-                    yield break;
+                    return Enumerable.Empty<ConflictItem>();
                 }
 
                 Version assemblyVersion;
@@ -51,14 +88,16 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                         "Version",
                         assemblyVersionString);
                     log.LogError(errorMessage);
-                    yield break;
+                    return Enumerable.Empty<ConflictItem>();
                 }
 
-                yield return new ConflictItem(assemblyName + ".dll",
+                ret.Add(new ConflictItem(assemblyName + ".dll",
                                                 packageId: null,
                                                 assemblyVersion: assemblyVersion,
-                                                fileVersion: null);
+                                                fileVersion: null));
             }
+
+            return ret;
         }
     }
 }

@@ -82,9 +82,11 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             //  Also treat assemblies from FrameworkList.xml as platform assemblies
             if (TargetFrameworkDirectories != null && TargetFrameworkDirectories.Any())
             {
+                var frameworkListReader = new FrameworkListReader(BuildEngine4);
+
                 platformItems = platformItems.Concat(TargetFrameworkDirectories.SelectMany(tfd =>
                 {
-                    return FrameworkListReader.LoadConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
+                    return frameworkListReader.GetConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
                 }));
             }
 

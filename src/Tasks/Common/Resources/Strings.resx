@@ -318,4 +318,7 @@
   <data name="ErrorParsingFrameworkListInvalidValue" xml:space="preserve">
     <value>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</value>
   </data>
+  <data name="FrameworkListPathNotRooted" xml:space="preserve">
+    <value>Framework list file path '{0}' is not rooted. Only full paths are supported.</value>
+  </data>
 </root>
