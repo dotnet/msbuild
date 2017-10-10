@@ -704,6 +704,11 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
+                if (!_data.ShouldEvaluateForDesignTime)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ConditionedProperties));
+                }
+
                 if (_data.ConditionedProperties == null)
                 {
                     return ReadOnlyEmptyDictionary<string, List<string>>.Instance;
@@ -747,7 +752,14 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return new ReadOnlyCollection<ProjectItem>(_data.ItemsIgnoringCondition); }
+            {
+                if (!_data.ShouldEvaluateForDesignTime)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ItemsIgnoringCondition));
+                }
+
+                return new ReadOnlyCollection<ProjectItem>(_data.ItemsIgnoringCondition);
+            }
         }
 
         /// <summary>
@@ -853,6 +865,11 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
+                if (!_data.ShouldEvaluateForDesignTime)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(AllEvaluatedItemDefinitionMetadata));
+                }
+
                 ICollection<ProjectMetadata> allEvaluatedItemDefinitionMetadata = _data.AllEvaluatedItemDefinitionMetadata;
 
                 if (allEvaluatedItemDefinitionMetadata == null)
@@ -877,6 +894,11 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
+                if (!_data.ShouldEvaluateForDesignTime)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(AllEvaluatedItems));
+                }
+
                 ICollection<ProjectItem> allEvaluatedItems = _data.AllEvaluatedItems;
 
                 if (allEvaluatedItems == null)
