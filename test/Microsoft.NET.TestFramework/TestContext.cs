@@ -58,7 +58,6 @@ namespace Microsoft.NET.TestFramework
             TestContext testContext = new TestContext();
             testContext.TestExecutionDirectory = AppContext.BaseDirectory;
             testContext.TestAssetsDirectory = FindFolderInTree("TestAssets", AppContext.BaseDirectory);
-            testContext.NuGetCachePath = FindOrCreateFolderInTree("packages", AppContext.BaseDirectory);
 
             string repoRoot = null;
             string repoConfiguration = null;
@@ -81,10 +80,12 @@ namespace Microsoft.NET.TestFramework
             {
                 testContext.NuGetFallbackFolder = Path.Combine(repoRoot, "bin", "NuGetFallbackFolder");
                 testContext.NuGetExePath = Path.Combine(repoRoot, ".nuget", $"nuget{Constants.ExeSuffix}");
+                testContext.NuGetCachePath = Path.Combine(repoRoot, "packages");
             }
             else
             {
                 testContext.NuGetFallbackFolder = FindOrCreateFolderInTree("NuGetFallbackFolder", AppContext.BaseDirectory);
+                testContext.NuGetCachePath = FindOrCreateFolderInTree("packages", AppContext.BaseDirectory);
                 var nuGetFolder = FindFolderInTree(".nuget", AppContext.BaseDirectory, false);
                 if (nuGetFolder != null)
                 {
