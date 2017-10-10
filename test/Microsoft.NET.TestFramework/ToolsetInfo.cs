@@ -17,27 +17,28 @@ namespace Microsoft.NET.TestFramework
 
         public string SdksPath { get; set; }
 
-        public string BuildExtensionsSdkPath
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(SdksPath))
-                {
-                    return null;
-                }
-                return Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions");
-            }
-        }
-
         public string BuildExtensionsMSBuildPath
         {
             get
             {
-                if (string.IsNullOrEmpty(BuildExtensionsSdkPath))
+                if (!string.IsNullOrEmpty(SdksPath))
                 {
-                    return null;
+                    var buildExtensionsSdkPath = Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions");
+                    return Path.Combine(buildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
                 }
-                return Path.Combine(BuildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
+                else
+                {
+                    var msbuildBinPath = Path.GetDirectoryName(FullFrameworkMSBuildPath);
+                    if (ShouldUseFullFrameworkMSBuild)
+                    {
+                        var msbuildRoot = Directory.GetParent(msbuildBinPath).Parent.FullName;
+                        return Path.Combine(msbuildRoot, @"Microsoft\Microsoft.NET.Build.Extensions");
+                    }
+                    else
+                    {
+                        return Path.Combine(msbuildBinPath, @"Microsoft\Microsoft.NET.Build.Extensions");
+                    }
+                }
             }
         }
 
@@ -51,6 +52,14 @@ namespace Microsoft.NET.TestFramework
             {
                 command.Environment["MSBuildSDKsPath"] = SdksPath;
                 command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR"] = SdksPath;
+
+                command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets");
+
+                if (UsingFullMSBuildWithoutExtensionsTargets())
+                {
+                    command.Environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions",
+                        "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
+                }
             }
 
             if (!string.IsNullOrEmpty(CliVersionForBundledVersions))
@@ -58,13 +67,6 @@ namespace Microsoft.NET.TestFramework
                 string dotnetRoot = Path.GetDirectoryName(DotNetHostPath);
                 string stage0SdkPath = Path.Combine(dotnetRoot, "sdk", CliVersionForBundledVersions); ;
                 command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(stage0SdkPath, "Microsoft.NETCoreSdk.BundledVersions.props");
-            }
-            command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets");
-
-            if (UsingFullMSBuildWithoutExtensionsTargets())
-            {
-                command.Environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(BuildExtensionsSdkPath,
-                    "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
             }
         }
 
