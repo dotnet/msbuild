@@ -1512,7 +1512,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-  <Target Name="_ComputeProjectReferenceTargetFrameworkMatches" BeforeTargets="_GetProjectReferenceTargetFrameworkProperties">
+  <Target Name="_GetProjectReferenceTargetFrameworkProperties">
+    <!--
+      Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
+      TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 
+      has floating NTM=UAP,Version=vX.Y.Z. However, in other cases (classic PCLs), NTM contains multiple values and that will cause the MSBuild
+      invocation below to fail by passing invalid properties. Therefore we do not use the NTM if it contains a semicolon.
+    -->
+    <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
+      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != '' and !$(NuGetTargetMoniker.Contains(';'))">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
+      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
+    </PropertyGroup>
+
     <!--
       Honor SkipGetTargetFrameworkProperties=true metadata on project references
       to mean that the project reference is known not to target multiple frameworks
@@ -1558,12 +1569,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
 
     <!-- For each reference, get closest match -->
-    <AssignReferencePropertiesTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
-                                   CurrentProjectTargetFramework="$(TargetFrameworkMoniker)"
-                                   Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0'">
+    <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
+                                            CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
+                                            CurrentProjectName="MSBuildProjectName"
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
-    </AssignReferencePropertiesTask>
+    </GetReferenceNearestTargetFrameworkTask>
 
+    <ItemGroup>
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
+        <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
+      </AnnotatedProjects>
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true'">
+        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
+      </AnnotatedProjects>
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' == 'true'">
+        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier</UndefineProperties>
+      </AnnotatedProjects>
+    </ItemGroup>
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" />
       <_MSBuildProjectReferenceExistent Include="@(AnnotatedProjects)" />
@@ -1580,7 +1603,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
         <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
-        <IsRidAgnostic>true</IsRidAgnostic>
+        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
+      <IsRidAgnostic>false</IsRidAgnostic>
+      <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
   </Target>
@@ -1598,68 +1623,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     ======================================================================================
   -->
-  <Target Name="_GetProjectReferenceTargetFrameworkProperties">
-    <!--
-      Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
-      TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 
-      has floating NTM=UAP,Version=vX.Y.Z. However, in other cases (classic PCLs), NTM contains multiple values and that will cause the MSBuild
-      invocation below to fail by passing invalid properties. Therefore we do not use the NTM if it contains a semicolon.
-    -->
-    <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != '' and !$(NuGetTargetMoniker.Contains(';'))">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
-    </PropertyGroup>
-
-    <MSBuild
-        Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="GetTargetFrameworkProperties"
-        BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
-        ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
-
-      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkProperties" />
-    </MSBuild>
-
-    <ItemGroup>
-      <!-- Backward compat: extract metadata for properties to set from a semicolon-delimited return value -->
-      <_ProjectReferenceTargetFrameworkProperties
-        Condition="'@(_ProjectReferenceTargetFrameworkProperties->Count())' > '1' and '%(_ProjectReferenceTargetFrameworkProperties.OriginalItemSpec)' != ''">
-        <DelimitedStringReturn>@(_ProjectReferenceTargetFrameworkProperties)</DelimitedStringReturn>
-      </_ProjectReferenceTargetFrameworkProperties>
-      <_ProjectReferenceTargetFrameworkProperties
-        Include="%(_ProjectReferenceTargetFrameworkProperties.OriginalItemSpec)"
-        Condition="'%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)' != ''">
-        <OriginalItemSpec>%(_ProjectReferenceTargetFrameworkProperties.OriginalItemSpec)</OriginalItemSpec>
-        <DesiredTargetFrameworkProperties>$([System.String]::Copy('%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)').Replace('ProjectHasSingleTargetFramework=true','').Replace('ProjectHasSingleTargetFramework=false','').Replace('ProjectIsRidAgnostic=true','').TrimEnd(';'))</DesiredTargetFrameworkProperties>
-        <HasSingleTargetFramework>$([System.String]::Copy('%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)').Contains('ProjectHasSingleTargetFramework=true'))</HasSingleTargetFramework>
-        <IsRidAgnostic>$([System.String]::Copy('%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)').Contains('ProjectIsRidAgnostic=true'))</IsRidAgnostic>
-      </_ProjectReferenceTargetFrameworkProperties>
-      <_ProjectReferenceTargetFrameworkProperties
-        Remove="@(_ProjectReferenceTargetFrameworkProperties)"
-        Condition="'%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)' != ''" />
-
-      <!-- Build an item that has Identity matching _MSBuildProjectReferenceExistent and metadata for properties to set. -->
-      <_ProjectReferencesWithTargetFrameworkProperties
-        Include="@(_ProjectReferenceTargetFrameworkProperties->'%(OriginalItemSpec)')" />
-
-      <!-- Set the project's returned TargetFramework -->
-      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' != 'true'">
-        <SetTargetFramework>@(_ProjectReferencesWithTargetFrameworkProperties->'%(DesiredTargetFrameworkProperties)')</SetTargetFramework>
-      </_MSBuildProjectReferenceExistent>
-
-      <!-- If the project has only one TF, don't specify it. It will go directly to the inner build anyway and we don't want to redundantly specify a global property, which can cause a race. -->
-      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' == 'true'">
-        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');TargetFramework</UndefineProperties>
-      </_MSBuildProjectReferenceExistent>
-
-      <!-- If the project has only one RID, assume it's compatible with the current project and don't pass this one along. -->
-      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(IsRidAgnostic)')' == 'true'">
-        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');RuntimeIdentifier</UndefineProperties>
-      </_MSBuildProjectReferenceExistent>
-    </ItemGroup>
-  </Target>
+  
 
   <!--
     ============================================================
