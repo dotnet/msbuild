@@ -36,8 +36,13 @@ Copyright (c) .NET Foundation. All rights reserved.
            that path (for example "runtimes/win/lib/netstandard1.3/System.Diagnostics.TraceSource.dll" when looking
            for conflicts). -->
       <_RuntimeTargetItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeTarget'))" />
-      <__RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(_RuntimeTargetItems)" />
-      <_RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(__RuntimeTargetPublishItems)" />
+    </ItemGroup>
+    
+    <JoinItems Left="@(_RuntimeTargetItems)" Right="@(FileDefinitions)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_RuntimeTargetPublishItems" />
+    </JoinItems>
+    
+    <ItemGroup>
       <_RuntimeTargetPublishItems Update="@(_RuntimeTargetPublishItems)"
                                   DestinationSubPath="%(Path)" />
 
