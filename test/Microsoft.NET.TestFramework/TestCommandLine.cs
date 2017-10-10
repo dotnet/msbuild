@@ -9,6 +9,8 @@ namespace Microsoft.NET.TestFramework
     {
         public List<string> RemainingArgs { get; private set; }
 
+        public bool UseFullFrameworkMSBuild { get; private set; }
+
         public string FullFrameworkMSBuildPath { get; private set; }
 
         public string DotnetHostPath { get; private set; }
@@ -28,7 +30,11 @@ namespace Microsoft.NET.TestFramework
             while (argStack.Any())
             {
                 string arg = argStack.Pop();
-                if (arg.Equals("-fullMSBuild", StringComparison.InvariantCultureIgnoreCase) && argStack.Any())
+                if (arg.Equals("-useFullMSBuild", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    ret.UseFullFrameworkMSBuild = true;
+                }
+                else if (arg.Equals("-fullMSBuildPath", StringComparison.InvariantCultureIgnoreCase) && argStack.Any())
                 {
                     ret.FullFrameworkMSBuildPath = argStack.Pop();
                 }
