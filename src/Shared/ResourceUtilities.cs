@@ -174,7 +174,7 @@ namespace Microsoft.Build.Shared
 
         [Obsolete("Use GetResourceString instead.", true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        internal static string FormatResourceString()
+        internal static string FormatResourceString(string resourceName)
         {   // Avoids an accidental dependency on FormatResourceString(string, params object[])
             return null;
         }
