@@ -85,6 +85,11 @@ namespace Microsoft.NET.TestFramework
             else
             {
                 testContext.NuGetFallbackFolder = FindOrCreateFolderInTree("NuGetFallbackFolder", AppContext.BaseDirectory);
+                var nuGetFolder = FindFolderInTree(".nuget", AppContext.BaseDirectory, false);
+                if (nuGetFolder != null)
+                {
+                    testContext.NuGetExePath = Path.Combine(nuGetFolder, $"nuget{Constants.ExeSuffix}");
+                }
             }
 
             testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, repoConfiguration, commandLine);
