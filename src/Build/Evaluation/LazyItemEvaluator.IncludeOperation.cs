@@ -99,7 +99,8 @@ namespace Microsoft.Build.Evaluation
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                             _rootDirectory,
                             glob,
-                            excludePatternsForGlobs
+                            excludePatternsForGlobs,
+                            entriesCache: EntriesCache
                             );
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)

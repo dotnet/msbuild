@@ -6,9 +6,14 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Security;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -19,13 +24,398 @@ namespace Microsoft.Build.UnitTests
 {
     public class FileMatcherTest
     {
+        [Fact]
+        public void GetFilesPatternMatching()
+        {
+            var workingPath = Path.Combine(Path.GetTempPath(), "Test");
+            var files = new string[]
+            {
+                "Foo.cs",
+                "Foo2.cs",
+                "file.txt",
+                "file1.txt",
+                "file1.txtother",
+                "fie1.txt",
+                "fire1.txt"
+            };
+
+            try
+            {
+                Directory.CreateDirectory(workingPath);
+                foreach (var file in files)
+                {
+                    File.WriteAllBytes(Path.Combine(workingPath, file), new byte[5000]);
+                }
+
+                var patterns = new Dictionary<string, int>
+                {
+                    {"*.txt", 4},
+                    { "???.cs", 1},
+                    { "????.cs", 1},
+                    {"file?.txt", 1},
+                    {"fi?e?.txt", 2},
+                    { "???.*", 1},
+                    { "????.*", 3},
+                    { "*.???", 4},
+                    { "f??e1.txt", 2}
+                };
+                foreach (var pattern in patterns)
+                {
+                    try
+                    {
+                        Assert.Equal(pattern.Value, FileMatcher.GetFiles(workingPath, pattern.Key).Length);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine($"Pattern {pattern} failed");
+                        throw;
+                    }
+                }
+            }
+            finally
+            {
+                FileUtilities.DeleteWithoutTrailingBackslash(workingPath, true);
+            }
+        }
+
+        [Theory]
+        [InlineData(
+            @"src\**\inner\**\*.cs", // Include
+            new string[] { }, // Excludes
+            new[] // Expected matchings
+            {
+                @"src\foo\inner\foo.cs",
+                @"src\foo\inner\foo\foo.cs",
+                @"src\foo\inner\bar\bar.cs",
+                @"src\bar\inner\baz.cs",
+                @"src\bar\inner\baz\baz.cs",
+                @"src\bar\inner\foo\foo.cs"
+            }
+        )]
+        [InlineData(
+            @"src\**\inner\**\*.cs", // Include
+            new[] // Excludes
+            {
+                @"**\foo\**"
+            },
+            new[] // Expected matchings
+            {
+                @"src\bar\inner\baz.cs",
+                @"src\bar\inner\baz\baz.cs"
+            }
+        )]
+        [InlineData(
+            @"src\**\inner\**\*.cs", // Include
+            new[] // Excludes
+            {
+                @"src\bar\inner\baz\**"
+            },
+            new[] // Expected matchings
+            {
+                @"src\foo\inner\foo.cs",
+                @"src\foo\inner\foo\foo.cs",
+                @"src\foo\inner\bar\bar.cs",
+                @"src\bar\inner\baz.cs",
+                @"src\bar\inner\foo\foo.cs"
+            }
+        )]
+        [InlineData(
+            @"src\foo\**\*.cs", // Include
+            new[] // Excludes
+            {
+                @"src\foo\**\foo\**"
+            },
+            new[] // Expected matchings
+            {
+                @"src\foo\foo.cs",
+                @"src\foo\inner\foo.cs",
+                @"src\foo\inner\bar\bar.cs"
+            }
+        )]
+        [InlineData(
+            @"src\foo\inner\**\*.cs", // Include
+            new[] // Excludes
+            {
+                @"src\foo\**\???\**"
+            },
+            new[] // Expected matchings
+            {
+                @"src\foo\inner\foo.cs"
+            }
+        )]
+        [InlineData(
+            @"**\???\**\*.cs", // Include
+            new string[] { }, // Excludes
+            new[] // Expected matchings
+            {
+                @"src\foo.cs",
+                @"src\bar.cs",
+                @"src\baz.cs",
+                @"src\foo\foo.cs",
+                @"src\bar\bar.cs",
+                @"src\baz\baz.cs",
+                @"src\foo\inner\foo.cs",
+                @"src\foo\inner\foo\foo.cs",
+                @"src\foo\inner\bar\bar.cs",
+                @"src\bar\inner\baz.cs",
+                @"src\bar\inner\baz\baz.cs",
+                @"src\bar\inner\foo\foo.cs",
+                @"build\baz\foo.cs"
+            }
+        )]
+        [InlineData(
+            @"**\*.*", // Include
+            new[] // Excludes
+            {
+                @"**\???\**\*.cs"
+            },
+            new[] // Expected matchings
+            {
+                @"readme.txt",
+                @"licence.md"
+            }
+        )]
+        [InlineData(
+            @"**\?a?\**\?a?\*.c?", // Include
+            new string[] { }, // Excludes
+            new[] // Expected matchings
+            {
+                @"src\bar\inner\baz\baz.cs"
+            }
+        )]
+        [InlineData(
+            @"**\?a?\**\?a?.c?", // Include
+            new[] // Excludes
+            {
+                @"**\?a?\**\?a?\*.c?"
+            },
+            new[] // Expected matchings
+            {
+                @"src\bar\bar.cs",
+                @"src\baz\baz.cs",
+                @"src\foo\inner\bar\bar.cs",
+                @"src\bar\inner\baz.cs"
+            }
+        )]
+        public void GetFilesComplexGlobbingMatching(string includePattern, string[] excludePatterns, string[] expectedMatchings)
+        {
+            var workingPath = Path.Combine(Path.GetTempPath(), "Globbing");
+            var files = new []
+            {
+                @"src\foo.cs",
+                @"src\bar.cs",
+                @"src\baz.cs",
+                @"src\foo\foo.cs",
+                @"src\bar\bar.cs",
+                @"src\baz\baz.cs",
+                @"src\foo\inner\foo.cs",
+                @"src\foo\inner\foo\foo.cs",
+                @"src\foo\inner\bar\bar.cs",
+                @"src\bar\inner\baz.cs",
+                @"src\bar\inner\baz\baz.cs",
+                @"src\bar\inner\foo\foo.cs",
+                @"build\baz\foo.cs",
+                @"readme.txt",
+                @"licence.md"
+            };
+            Action<string, string[], bool> match = (include, excludes, hasNoMatches) =>
+            {
+                string[] matchedFiles = null;
+                try
+                {
+                    matchedFiles = FileMatcher.GetFiles(workingPath, include, excludes);
+                    if (hasNoMatches)
+                    {
+                        Assert.Equal(0, matchedFiles.Length);
+                        return;
+                    }
+                    // We have to lower file paths as the result could be in uppercase e.g. "SRC\foo.cs"
+                    var normMatchedFiles = matchedFiles
+                        .Select(o => o.Replace(Path.DirectorySeparatorChar, '\\').ToLowerInvariant()).ToArray();
+                    foreach (var matchedFile in normMatchedFiles)
+                    {
+                        Assert.Contains(matchedFile, expectedMatchings);
+                    }
+                    Assert.Equal(expectedMatchings.Length, matchedFiles.Length);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Globbing failed for include {include} with excludes {string.Join(",", excludes)}, " +
+                                      $"should have no matches: {hasNoMatches}, " +
+                                      $"returned files: {(matchedFiles != null ? string.Join(",", matchedFiles) : null)}");
+                    throw;
+                }
+            };
+
+            try
+            {
+                // Create directories and files
+                foreach (var file in files)
+                {
+                    var normFile = file.Replace('\\', Path.DirectorySeparatorChar);
+                    var dirPath = Path.Combine(workingPath, Path.GetDirectoryName(normFile));
+
+                    Directory.CreateDirectory(dirPath);
+                    File.WriteAllBytes(Path.Combine(dirPath, Path.GetFileName(normFile)), new byte[5000]);
+                }
+
+                // Normal matching
+                match(includePattern, excludePatterns, false);
+                // Include forward slash
+                match(includePattern.Replace('\\', '/'), excludePatterns, false);
+                // Excludes forward slash
+                match(includePattern, excludePatterns.Select(o => o.Replace('\\', '/')).ToArray(), false);
+
+                // Backward compatibilities:
+                // 1. When an include or exclude starts with a fixed directory part e.g. "src/foo/**",
+                //    then matching should be case-sensitive on Linux, as the directory was checked for its existance
+                //    by using Directory.Exists, which is case-sensitive on Linux (on OSX is not).
+                // 2. On Unix, when an include uses a simple ** wildcard e.g. "**\*.cs", the file pattern e.g. "*.cs",
+                //    should be matched case-sensitive, as files were retrieved by using the searchPattern parameter
+                //    of Directory.GetFiles, which is case-sensitive on Unix.
+                var shouldHaveNoMatches = false;
+
+                // Do not test uppercase excludes on Linux, as it is not simple to figure out which files shall
+                // be excluded
+                if (!NativeMethodsShared.IsLinux)
+                {
+                    // Excludes uppercase
+                    match(includePattern, excludePatterns.Select(o => o.ToUpperInvariant()).ToArray(), false);
+                }
+                else
+                {
+                    // On Linux, we will have no matches for an uppercase include, when it starts with a fixed directory part
+                    // e.g. "SRC/FOO"
+                    shouldHaveNoMatches = !includePattern.StartsWith("**");
+                }
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    // On Unix, we will have no matches for an uppercase include, that has a simple ** wildcard and a file pattern
+                    // e.g. "**\*.CS"
+                    string fixedDirectoryPart;
+                    string wildcardDirectoryPart;
+                    string filenamePart;
+                    string matchFileExpression;
+                    bool needsRecursion;
+                    bool isLegalFileSpec;
+                    FileMatcher.GetFileSpecInfo(includePattern,
+                        out fixedDirectoryPart,
+                        out wildcardDirectoryPart,
+                        out filenamePart,
+                        out matchFileExpression,
+                        out needsRecursion,
+                        out isLegalFileSpec,
+                        FileMatcher.s_defaultGetFileSystemEntries);
+                    bool matchWithRegex =
+                        // if we have a directory specification that uses wildcards, and
+                        (wildcardDirectoryPart.Length > 0) &&
+                        // the specification is not a simple "**"
+                        (wildcardDirectoryPart != ("**" + new string(Path.DirectorySeparatorChar, 1)));
+                    shouldHaveNoMatches |= !matchWithRegex && filenamePart.Any(char.IsLetter);
+                }
+
+                // Include uppercase
+                match(includePattern.ToUpperInvariant(), excludePatterns, shouldHaveNoMatches);
+            }
+            finally
+            {
+                FileUtilities.DeleteWithoutTrailingBackslash(workingPath, true);
+            }
+        }
+
+        [Fact]
+        public void WildcardMatching()
+        {
+            var inputs = new List<Tuple<string, string, bool>>
+            {
+                // No wildcards
+                new Tuple<string, string, bool>("a", "a", true),
+                new Tuple<string, string, bool>("a", "", false),
+                new Tuple<string, string, bool>("", "a", false),
+
+                // Non ASCII characters
+                new Tuple<string, string, bool>("šđčćž", "šđčćž", true),
+
+                // * wildcard
+                new Tuple<string, string, bool>("abc", "*bc", true),
+                new Tuple<string, string, bool>("abc", "a*c", true),
+                new Tuple<string, string, bool>("abc", "ab*", true),
+                new Tuple<string, string, bool>("ab", "*ab", true),
+                new Tuple<string, string, bool>("ab", "a*b", true),
+                new Tuple<string, string, bool>("ab", "ab*", true),
+                new Tuple<string, string, bool>("", "*", true),
+
+                // ? wildcard
+                new Tuple<string, string, bool>("abc", "?bc", true),
+                new Tuple<string, string, bool>("abc", "a?c", true),
+                new Tuple<string, string, bool>("abc", "ab?", true),
+                new Tuple<string, string, bool>("ab", "?ab", false),
+                new Tuple<string, string, bool>("ab", "a?b", false),
+                new Tuple<string, string, bool>("ab", "ab?", false),
+                new Tuple<string, string, bool>("", "?", false),
+
+                // Mixed wildcards
+                new Tuple<string, string, bool>("a", "*?", true),
+                new Tuple<string, string, bool>("a", "?*", true),
+                new Tuple<string, string, bool>("ab", "*?", true),
+                new Tuple<string, string, bool>("ab", "?*", true),
+                new Tuple<string, string, bool>("abc", "*?", true),
+                new Tuple<string, string, bool>("abc", "?*", true),
+
+                // Multiple mixed wildcards
+                new Tuple<string, string, bool>("a", "??", false),
+                new Tuple<string, string, bool>("ab", "?*?", true),
+                new Tuple<string, string, bool>("ab", "*?*?*", true),
+                new Tuple<string, string, bool>("abc", "?**?*?", true),
+                new Tuple<string, string, bool>("abc", "?**?*c?", false),
+                new Tuple<string, string, bool>("abcd", "?b*??", true),
+                new Tuple<string, string, bool>("abcd", "?a*??", false),
+                new Tuple<string, string, bool>("abcd", "?**?c?", true),
+                new Tuple<string, string, bool>("abcd", "?**?d?", false),
+                new Tuple<string, string, bool>("abcde", "?*b*?*d*?", true),
+
+                // ? wildcard in the input string
+                new Tuple<string, string, bool>("?", "?", true),
+                new Tuple<string, string, bool>("?a", "?a", true),
+                new Tuple<string, string, bool>("a?", "a?", true),
+                new Tuple<string, string, bool>("a?b", "a?", false),
+                new Tuple<string, string, bool>("a?ab", "a?aab", false),
+                new Tuple<string, string, bool>("aa?bbbc?d", "aa?bbc?dd", false),
+
+                // * wildcard in the input string
+                new Tuple<string, string, bool>("*", "*", true),
+                new Tuple<string, string, bool>("*a", "*a", true),
+                new Tuple<string, string, bool>("a*", "a*", true),
+                new Tuple<string, string, bool>("a*b", "a*", true),
+                new Tuple<string, string, bool>("a*ab", "a*aab", false),
+                new Tuple<string, string, bool>("a*abab", "a*b", true),
+                new Tuple<string, string, bool>("aa*bbbc*d", "aa*bbc*dd", false),
+                new Tuple<string, string, bool>("aa*bbbc*d", "a*bbc*d", true)
+            };
+            foreach (var input in inputs)
+            {
+                try
+                {
+                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2, false));
+                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2, true));
+                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1.ToUpperInvariant(), input.Item2, true));
+                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2.ToUpperInvariant(), true));
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Input {input.Item1} with pattern {input.Item2} failed");
+                    throw;
+                }
+            }
+        }
+
         /*
          * Method:  GetFileSystemEntries
          *
          * Simulate Directories.GetFileSystemEntries where file names are short.
          *
          */
-        private static string[] GetFileSystemEntries(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        private static ImmutableArray<string> GetFileSystemEntries(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
             if
             (
@@ -33,7 +423,7 @@ namespace Microsoft.Build.UnitTests
                 && (@"D:\" == path || @"\\server\share\" == path || path.Length == 0)
             )
             {
-                return new string[] { Path.Combine(path, "LongDirectoryName") };
+                return ImmutableArray.Create(Path.Combine(path, "LongDirectoryName"));
             }
             else if
             (
@@ -41,7 +431,7 @@ namespace Microsoft.Build.UnitTests
                 && (@"D:\LongDirectoryName" == path || @"\\server\share\LongDirectoryName" == path || @"LongDirectoryName" == path)
             )
             {
-                return new string[] { Path.Combine(path, "LongSubDirectory") };
+                return ImmutableArray.Create(Path.Combine(path, "LongSubDirectory"));
             }
             else if
             (
@@ -49,7 +439,7 @@ namespace Microsoft.Build.UnitTests
                 && (@"D:\LongDirectoryName\LongSubDirectory" == path || @"\\server\share\LongDirectoryName\LongSubDirectory" == path || @"LongDirectoryName\LongSubDirectory" == path)
             )
             {
-                return new string[] { Path.Combine(path, "LongFileName.txt") };
+                return ImmutableArray.Create(Path.Combine(path, "LongFileName.txt"));
             }
             else if
             (
@@ -57,7 +447,7 @@ namespace Microsoft.Build.UnitTests
                 && @"c:\apple\banana\tomato" == path
             )
             {
-                return new string[] { Path.Combine(path, "pomegranate") };
+                return ImmutableArray.Create(Path.Combine(path, "pomegranate"));
             }
             else if
             (
@@ -65,14 +455,14 @@ namespace Microsoft.Build.UnitTests
             )
             {
                 // No files exist here. This is an empty directory.
-                return new string[0];
+                return ImmutableArray<string>.Empty;
             }
             else
             {
                 Console.WriteLine("GetFileSystemEntries('{0}', '{1}')", path, pattern);
                 Assert.True(false, "Unexpected input into GetFileSystemEntries");
             }
-            return new string[] { "<undefined>" };
+            return ImmutableArray.Create("<undefined>");
         }
 
         private static readonly char S = Path.DirectorySeparatorChar;
@@ -845,45 +1235,45 @@ namespace Microsoft.Build.UnitTests
         public void RemoveProjectDirectory()
         {
             string[] strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };
-            FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/");
+            strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
             Assert.Equal(strings[0], "1.file");
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file"};
-            FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/");
+            strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\" : "/").ToArray();
             Assert.Equal(strings[0], NativeMethodsShared.IsWindows ? "directory\\1.file" : "directory/1.file");
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directory\\1.file" : "/directory/1.file" };
-            FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory");
+            strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory").ToArray();
             Assert.Equal(strings[0], "1.file");
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };
-            FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory" );
+            strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory" ).ToArray();
             Assert.Equal(strings[0], NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file");
 
             strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\directorymorechars\\1.file" : "/directorymorechars/1.file" };
-            FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory");
+            strings = FileMatcher.RemoveProjectDirectory(strings, NativeMethodsShared.IsWindows ? "c:\\directory" : "/directory").ToArray();
             Assert.Equal(strings[0], NativeMethodsShared.IsWindows ? "c:\\directorymorechars\\1.file" : "/directorymorechars/1.file" );
 
             if (NativeMethodsShared.IsWindows)
             {
                 strings = new string[1] { "\\Machine\\1.file" };
-                FileMatcher.RemoveProjectDirectory(strings, "\\Machine");
+                strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine").ToArray();
                 Assert.Equal(strings[0], "1.file");
 
                 strings = new string[1] { "\\Machine\\directory\\1.file" };
-                FileMatcher.RemoveProjectDirectory(strings, "\\Machine");
+                strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine").ToArray();
                 Assert.Equal(strings[0], "directory\\1.file");
 
                 strings = new string[1] { "\\Machine\\directory\\1.file" };
-                FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory");
+                strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
                 Assert.Equal(strings[0], "1.file");
 
                 strings = new string[1] { "\\Machine\\1.file" };
-                FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory");
+                strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
                 Assert.Equal(strings[0], "\\Machine\\1.file");
 
                 strings = new string[1] { "\\Machine\\directorymorechars\\1.file" };
-                FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory");
+                strings = FileMatcher.RemoveProjectDirectory(strings, "\\Machine\\directory").ToArray();
                 Assert.Equal(strings[0], "\\Machine\\directorymorechars\\1.file");
             }
         }
@@ -913,9 +1303,9 @@ namespace Microsoft.Build.UnitTests
                 @"src/test/dir\a\b\c\a.cs",
             }
             )]
-        public void IncludePatternShouldPreserveUserSlashesInFixedDirPart(string include, string[] matching)
+        public void IncludePatternShouldNotPreserveUserSlashesInFixedDirPart(string include, string[] matching)
         {
-            MatchDriver(include, null, matching, null, null, normalizePaths: false);
+            MatchDriver(include, null, matching, null, null, normalizeAllPaths: false, normalizeExpectedMatchingFiles: true);
         }
 
         [Theory]
@@ -1057,6 +1447,36 @@ namespace Microsoft.Build.UnitTests
                 @"src\Common\Properties\AssemblyInfo.cs",
             }
             )]
+        [InlineData(
+            @"**\*.cs", // Include Pattern
+            new[] // Exclude patterns
+            {
+                @"**\bin\**\*.cs",
+                @"src\Co??on\**",
+            },
+            new[] // Matching files
+            {
+                @"foo.cs",
+                @"src\Framework\Properties\AssemblyInfo.cs",
+                @"src\Framework\Foo\Bar\Baz\Buzz.cs"
+            },
+            new[] // Non matching files
+            {
+                @"foo.txt",
+                @"src\Framework\Readme.md",
+                @"src\Common\foo.cs",
+
+                // Ideally these would be untouchable
+                @"src\Framework\bin\foo.cs",
+                @"src\Framework\bin\Debug",
+                @"src\Framework\bin\Debug\foo.cs",
+                @"src\Common\Properties\AssemblyInfo.cs"
+            },
+            new[] // Non matching files that shouldn't be touched
+            {
+                @"src\Common\Properties\"
+            }
+        )]
         [InlineData(
             @"src\**\proj\**\*.cs", // Include Pattern
             new[] // Exclude patterns
@@ -1212,7 +1632,7 @@ namespace Microsoft.Build.UnitTests
                             )
                             {
                                 ++hits;
-                                files.Add(candidate);
+                                files.Add(FileMatcher.Normalize(candidate));
                             }
                             else if (pattern.Substring(0, 2) == "*.") // Match patterns like *.cs
                             {
@@ -1221,7 +1641,7 @@ namespace Microsoft.Build.UnitTests
                                 if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
                                 {
                                     ++hits;
-                                    files.Add(candidate);
+                                    files.Add(FileMatcher.Normalize(candidate));
                                 }
                             }
                             else if (pattern.Substring(pattern.Length - 4, 2) == ".?") // Match patterns like foo.?xt
@@ -1235,7 +1655,7 @@ namespace Microsoft.Build.UnitTests
                                     if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
                                     {
                                         ++hits;
-                                        files.Add(candidate);
+                                        files.Add(FileMatcher.Normalize(candidate));
                                     }
                                 }
                             }
@@ -1293,7 +1713,7 @@ namespace Microsoft.Build.UnitTests
                                     || pattern == null
                                 )
                                 {
-                                    directories.Add(match);
+                                    directories.Add(FileMatcher.Normalize(match));
                                 }
                                 else if    // Match patterns like ?emp
                                     (
@@ -1305,7 +1725,7 @@ namespace Microsoft.Build.UnitTests
                                     string baseMatchTail = baseMatch.Substring(1);
                                     if (String.Compare(tail, baseMatchTail, StringComparison.OrdinalIgnoreCase) == 0)
                                     {
-                                        directories.Add(match);
+                                        directories.Add(FileMatcher.Normalize(match));
                                     }
                                 }
                                 else
@@ -1326,7 +1746,7 @@ namespace Microsoft.Build.UnitTests
             /// <param name="path">The path to search.</param>
             /// <param name="pattern">The pattern to search (may be null)</param>
             /// <returns>The matched files or folders.</returns>
-            internal string[] GetAccessibleFileSystemEntries(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+            internal ImmutableArray<string> GetAccessibleFileSystemEntries(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
             {
                 string normalizedPath = Normalize(path);
 
@@ -1345,7 +1765,7 @@ namespace Microsoft.Build.UnitTests
                     GetMatchingDirectories(_fileSet3, normalizedPath, pattern, files);
                 }
 
-                return files.ToArray();
+                return files.ToImmutableArray();
             }
 
             /// <summary>
@@ -1534,7 +1954,7 @@ namespace Microsoft.Build.UnitTests
             MatchDriver(forwardSlashFileSpec, forwardSlashExcludeSpecs, matchingFiles, nonmatchingFiles, untouchableFiles);
         }
 
-        private static void MatchDriver(string filespec, string[] excludeFilespecs, string[] matchingFiles, string[] nonmatchingFiles, string[] untouchableFiles, bool normalizePaths = true)
+        private static void MatchDriver(string filespec, string[] excludeFilespecs, string[] matchingFiles, string[] nonmatchingFiles, string[] untouchableFiles, bool normalizeAllPaths = true, bool normalizeExpectedMatchingFiles = false)
         {
             MockFileSystem mockFileSystem = new MockFileSystem(matchingFiles, nonmatchingFiles, untouchableFiles);
             string[] files = FileMatcher.GetFiles
@@ -1546,14 +1966,15 @@ namespace Microsoft.Build.UnitTests
                 new DirectoryExists(mockFileSystem.DirectoryExists)
             );
 
-            Func<string[], string[]> normalize = (paths => normalizePaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
+            Func<string[], string[]> normalizeAllFunc = (paths => normalizeAllPaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
+            Func<string[], string[]> normalizeMatching = (paths => normalizeExpectedMatchingFiles ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
 
-            string[] normalizedFiles = normalize(files);
+            string[] normalizedFiles = normalizeAllFunc(files);
 
             // Validate the matching files.
             if (matchingFiles != null)
             {
-                string[] normalizedMatchingFiles = normalize(matchingFiles);
+                string[] normalizedMatchingFiles = normalizeAllFunc(normalizeMatching(matchingFiles));
 
                 foreach (string matchingFile in normalizedMatchingFiles)
                 {
@@ -1572,7 +1993,7 @@ namespace Microsoft.Build.UnitTests
             // Validate the non-matching files
             if (nonmatchingFiles != null)
             {
-                string[] normalizedNonMatchingFiles = normalize(nonmatchingFiles);
+                string[] normalizedNonMatchingFiles = normalizeAllFunc(nonmatchingFiles);
 
                 foreach (string nonmatchingFile in normalizedNonMatchingFiles)
                 {
@@ -1600,9 +2021,9 @@ namespace Microsoft.Build.UnitTests
         /// <param name="path"></param>
         /// <param name="pattern"></param>
         /// <returns>Array of matching file system entries (can be empty).</returns>
-        private static string[] GetFileSystemEntriesLoopBack(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        private static ImmutableArray<string> GetFileSystemEntriesLoopBack(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
-            return new string[] { Path.Combine(path, pattern) };
+            return ImmutableArray.Create(Path.Combine(path, pattern));
         }
 
         /*************************************************************************************
