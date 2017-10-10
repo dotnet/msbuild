@@ -3272,8 +3272,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected1Foo, projectContents, @".\1.foo");
 
             using (var env = TestEnvironment.Create())
-            using (var projectCollection = new ProjectCollection())
             {
+                var projectCollection = env.CreateProjectCollection().Collection;
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], "u/x");
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
@@ -3284,6 +3284,39 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 AssertProvenanceResult(expected2Foo, project.GetItemProvenance(@"../x/d13/../../x/d12/d23/../2.foo"));
                 AssertProvenanceResult(new ProvenanceResultTupleList(), project.GetItemProvenance(@"../x/d13/../x/d12/d23/../2.foo"));
+            }
+        }
+
+        [Fact]
+        public void GetItemProvenanceMatchesAbsoluteAndRelativePaths()
+        {
+            var projectContents =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1.foo`/>
+                    <B Include=`$(MSBuildProjectDirectory)\1.foo`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            using (var env = TestEnvironment.Create())
+            {
+                var projectCollection = env.CreateProjectCollection().Collection;
+
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+
+                var expectedProvenance = new ProvenanceResultTupleList
+                {
+                    Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                    Tuple.Create("B", Operation.Include, Provenance.StringLiteral | Provenance.Inconclusive, 1)
+                };
+
+                AssertProvenanceResult(expectedProvenance, project.GetItemProvenance(@"1.foo"));
+
+                var absoluteFile = Path.Combine(Path.GetDirectoryName(testFiles.ProjectFile), "1.foo");
+                AssertProvenanceResult(expectedProvenance, project.GetItemProvenance(absoluteFile));
             }
         }
 
@@ -3735,6 +3768,36 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             foreach (var nonMatchingString in stringsThatShouldNotMatch)
             {
                 Assert.False(uberGlob.IsMatch(nonMatchingString));
+            }
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldProduceGlobsThatMatchAbsolutePaths()
+        {
+            var projectContents =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.cs`/>
+                    <B Include=`$(MSBuildProjectDirectory)\*.cs`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            using (var env = TestEnvironment.Create())
+            {
+                var projectCollection = env.CreateProjectCollection().Collection;
+
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+
+                var absoluteFile = Path.Combine(Path.GetDirectoryName(testFiles.ProjectFile), "a.cs");
+
+                foreach (var globResult in project.GetAllGlobs())
+                {
+                    globResult.MsBuildGlob.IsMatch("a.cs").ShouldBeTrue();
+                    globResult.MsBuildGlob.IsMatch(absoluteFile).ShouldBeTrue();
+                }
             }
         }
 
