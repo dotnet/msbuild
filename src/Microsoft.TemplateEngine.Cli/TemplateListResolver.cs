@@ -257,7 +257,11 @@ namespace Microsoft.TemplateEngine.Cli
                         if (template.Info.Tags.TryGetValue(paramName, out ICacheTag paramDetails))
                         {
                             // key is the value user should provide, value is description
-                            if (paramDetails.ChoicesAndDescriptions.ContainsKey(paramValue))
+                            if (string.IsNullOrEmpty(paramValue))
+                            {
+                                template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                            }
+                            else if (paramDetails.ChoicesAndDescriptions.ContainsKey(paramValue))
                             {
                                 template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
                             }

@@ -98,9 +98,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase))
                 {
                     option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation,
-                                            Accept.ExactlyOneArgument()
+                                            Accept.ExactlyOneArgument());
                                                 //.WithSuggestionsFrom(parameter.Choices.Keys.ToArray())
-                                                .With(defaultValue: () => parameter.DefaultValue));
+                                                // Don't give this a default value, otherwise the switch without a value is valid (gets set to the default)
+                                                // User should have to give a value, or not specify the switch - which causes the default to be applied.
                 }
                 else if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
                 {
