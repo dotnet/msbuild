@@ -45,6 +45,18 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var log = new MSBuildLog(Log);
             var packageRanks = new PackageRank(PreferredPackages);
 
+            //  Treat assemblies from FrameworkList.xml as platform assemblies that also get considered at compile time
+            IEnumerable<ConflictItem> compilePlatformItems = null;
+            if (TargetFrameworkDirectories != null && TargetFrameworkDirectories.Any())
+            {
+                var frameworkListReader = new FrameworkListReader(BuildEngine4);
+
+                compilePlatformItems = TargetFrameworkDirectories.SelectMany(tfd =>
+                {
+                    return frameworkListReader.GetConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
+                });
+            }
+
             // resolve conflicts at compile time
             var referenceItems = GetConflictTaskItems(References, ConflictItemType.Reference).ToArray();
 
@@ -53,6 +65,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             compileConflictScope.ResolveConflicts(referenceItems,
                 ci => ItemUtilities.GetReferenceFileName(ci.OriginalItem),
                 HandleCompileConflict);
+
+            if (compilePlatformItems != null)
+            {
+                compileConflictScope.ResolveConflicts(compilePlatformItems,
+                    ci => ci.FileName,
+                    HandleCompileConflict);
+            }
 
             // resolve conflicts that class in output
             var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
@@ -79,15 +98,9 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var platformConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
             var platformItems = PlatformManifests?.SelectMany(pm => PlatformManifestReader.LoadConflictItems(pm.ItemSpec, log)) ?? Enumerable.Empty<ConflictItem>();
 
-            //  Also treat assemblies from FrameworkList.xml as platform assemblies
-            if (TargetFrameworkDirectories != null && TargetFrameworkDirectories.Any())
+            if (compilePlatformItems != null)
             {
-                var frameworkListReader = new FrameworkListReader(BuildEngine4);
-
-                platformItems = platformItems.Concat(TargetFrameworkDirectories.SelectMany(tfd =>
-                {
-                    return frameworkListReader.GetConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
-                }));
+                platformItems = platformItems.Concat(compilePlatformItems);
             }
 
             platformConflictScope.ResolveConflicts(platformItems, pi => pi.FileName, pi => { });
