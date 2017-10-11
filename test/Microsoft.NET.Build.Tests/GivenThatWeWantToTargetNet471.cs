@@ -118,6 +118,13 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{testProject.Name}.exe",
                 $"{testProject.Name}.pdb",
+
+                //  Remove these two once https://github.com/dotnet/sdk/issues/1647 is fixed
+                "System.Net.Http.dll",
+                "System.IO.Compression.dll",
+
+                //  This is an implementation dependency of the System.Net.Http package, which won't get conflict resolved out
+                "System.Diagnostics.DiagnosticSource.dll",
             });
         }
     }
