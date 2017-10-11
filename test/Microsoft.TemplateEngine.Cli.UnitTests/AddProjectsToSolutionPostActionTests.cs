@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
@@ -72,10 +72,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(EngineEnvironmentSettings, postAction, creationResult, string.Empty, out IReadOnlyList<string> foundProjectFiles));
             Assert.Equal(2, foundProjectFiles.Count);
-            Assert.True(foundProjectFiles.ToList().Contains(creationResult.PrimaryOutputs[0].Path));
-            Assert.True(foundProjectFiles.ToList().Contains(creationResult.PrimaryOutputs[2].Path));
+            Assert.Contains(creationResult.PrimaryOutputs[0].Path, foundProjectFiles.ToList());
+            Assert.Contains(creationResult.PrimaryOutputs[2].Path, foundProjectFiles.ToList());
 
-            Assert.False(foundProjectFiles.ToList().Contains(creationResult.PrimaryOutputs[1].Path));
+            Assert.DoesNotContain(creationResult.PrimaryOutputs[1].Path, foundProjectFiles.ToList());
         }
 
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionDoesntFindProjectOutOfRange))]

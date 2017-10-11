@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
@@ -37,11 +36,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
 
             Assert.Equal(1, invalidForAllTemplates.Count);
-            Assert.True(invalidForAllTemplates.Contains("foo"));
+            Assert.Contains("foo", invalidForAllTemplates);
 
             Assert.Equal(2, invalidForSomeTemplates.Count);
-            Assert.True(invalidForSomeTemplates.Contains("bar"));
-            Assert.True(invalidForSomeTemplates.Contains("baz"));
+            Assert.Contains("bar", invalidForSomeTemplates);
+            Assert.Contains("baz", invalidForSomeTemplates);
         }
 
         [Fact(DisplayName = nameof(GetParametersInvalidForTemplatesInList_NoneForAllTest))]
@@ -66,8 +65,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(0, invalidForAllTemplates.Count);
 
             Assert.Equal(2, invalidForSomeTemplates.Count);
-            Assert.True(invalidForSomeTemplates.Contains("foo"));
-            Assert.True(invalidForSomeTemplates.Contains("bar"));
+            Assert.Contains("foo", invalidForSomeTemplates);
+            Assert.Contains("bar", invalidForSomeTemplates);
         }
 
         [Fact(DisplayName = nameof(GetParametersInvalidForTemplatesInList_NoneForSomeTest))]
@@ -90,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
 
             Assert.Equal(1, invalidForAllTemplates.Count);
-            Assert.True(invalidForAllTemplates.Contains("foo"));
+            Assert.Contains("foo", invalidForAllTemplates);
 
             Assert.Equal(0, invalidForSomeTemplates.Count);
         }

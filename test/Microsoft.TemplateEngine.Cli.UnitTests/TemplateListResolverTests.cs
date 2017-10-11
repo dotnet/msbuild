@@ -314,8 +314,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(2, unambiguousGroup.Count);
-            Assert.True(unambiguousGroup.Any(x => string.Equals(x.Info.Identity, "foo.test.old")));
-            Assert.True(unambiguousGroup.Any(x => string.Equals(x.Info.Identity, "foo.test.new")));
+            Assert.Contains(unambiguousGroup, x => string.Equals(x.Info.Identity, "foo.test.old"));
+            Assert.Contains(unambiguousGroup, x => string.Equals(x.Info.Identity, "foo.test.new"));
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_ParameterNameDisambiguates))]
@@ -496,8 +496,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(2, unambiguousGroup.Count);
             Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
 
-            Assert.True(unambiguousGroup[0].MatchDisposition.Any(x => x.Kind == MatchKind.InvalidParameterValue));
-            Assert.True(unambiguousGroup[1].MatchDisposition.Any(x => x.Kind == MatchKind.InvalidParameterValue));
+            Assert.Contains(unambiguousGroup[0].MatchDisposition, x => x.Kind == MatchKind.InvalidParameterValue);
+            Assert.Contains(unambiguousGroup[1].MatchDisposition, x => x.Kind == MatchKind.InvalidParameterValue);
         }
 
         private static ICacheTag CreateTestCacheTag(string choice, string description = null, string defaultValue = null)
