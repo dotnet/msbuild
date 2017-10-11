@@ -535,6 +535,8 @@ namespace Microsoft.Build.Evaluation
             UseProjectCollectionSetting
         }
 
+        internal Data TestOnlyGetPrivateData => _data;
+
         /// <summary>
         /// Gets or sets the project collection which contains this project.
         /// Can never be null.
