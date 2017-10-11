@@ -363,13 +363,16 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilder
         {
+            // WORKAROUND: Unnecessary boxed allocation: https://github.com/dotnet/corefx/issues/24563
+            private static readonly ImmutableDictionary<string, LazyItemList> s_emptyIgnoreCase = ImmutableDictionary.Create<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
             public ItemSpec<P,I> ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
-                ImmutableDictionary.CreateBuilder<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+                s_emptyIgnoreCase.ToBuilder();
 
             public bool ConditionResult { get; set; }
 
