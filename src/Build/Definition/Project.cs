@@ -31,6 +31,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using System.Globalization;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 
@@ -2712,7 +2713,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // For back compat Project based evaluations should, by default, evaluate elements with false conditions
-            var shouldEvaluateElementsWithFalseCondition = !loadSettings.HasFlag(ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+            var shouldEvaluateElementsWithFalseCondition = Traits.Instance.EscapeHatches.EvaluateElementsWithFalseConditionInProjectEvaluation ?? !loadSettings.HasFlag(ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
 
             _data = new Data(this, globalPropertiesCollection, toolsVersion, subToolsetVersion, shouldEvaluateElementsWithFalseCondition);
 
