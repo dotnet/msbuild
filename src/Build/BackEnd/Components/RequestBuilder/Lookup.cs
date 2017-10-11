@@ -548,7 +548,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (modifies.Count != 0)
                         {
-                            allModifies = allModifies ?? new Dictionary<ProjectItemInstance, MetadataModifications>();
+                            allModifies = allModifies ?? new Dictionary<ProjectItemInstance, MetadataModifications>(modifies.Count);
 
                             // We already have some modifies for this type
                             foreach (KeyValuePair<ProjectItemInstance, MetadataModifications> modify in modifies)
