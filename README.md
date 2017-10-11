@@ -26,43 +26,83 @@ The following Publish methods are currently supported by the Publish package:
 Publish CommandLine Usage:
 
 Folder publish:
+--------------
+
+using MSBuild (without a profile)
 ```
 msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
-or
-msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfileName>
-or
+```
+
+using dotnet (without a profile)
+```
 dotnet publish WebApplication.csproj /p:PublishDir="C:\deployedApp\newapp"
 ```
 
+Profile can be added to the following location in the project /Properties/PublishProfiles/<FolderProfile.pubxml>. Folder Publish profile samples are available below:
+
+Using MSBuild (with a profile)
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfile>
+```
+
+Using dotnet (with a profile)
+```
+dotnet publish WebApplication.csproj /p:PublishProfile=<FolderProfile>
+```
+
+
 MSDeploy Publish:
+----------------
+
+Using MsBuild (with the default profile)
 ```
-msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName> /p:Password=<DeploymentPassword>
-or
-dotnet publish WebApplication.csproj /p:PublishProfile=<MsDeployProfileName> /p:Password=<DeploymentPassword>
+msbuild  WebApplication.csproj /p:DeployOnBuild=true /p:WebPublishMethod=MSDeploy /p:MSDeployServiceURL=<msdeployUrl> /p:DeployIisAppPath=<IISSiteName> /p:UserName=<username> /p:Password=<DeploymentPassword> /p:PublishProfile=Default
 ```
 
-MsDeploy Package Publish:
+Using dotnet (with the default profile)
 ```
-msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployPackageProfileName>
-or
-dotnet publish WebApplication.csproj /p:PublishProfile=<MsDeployPackageProfileName>
+dotnet publish WebApplication.csproj /p:WebPublishMethod=MSDeploy /p:MSDeployServiceURL=<msdeployUrl> /p:DeployIisAppPath=<IISSiteName> /p:UserName=<username> /p:Password=<DeploymentPassword> /p:PublishProfile=Default
 ```
 
-Sample EF Migrations section:
-```xml
-<ItemGroup>
-    <DestinationConnectionStrings Include="ShoppingCartConnection">
-      <Value>Data Source=tcp:dbserver.database.windows.net,1433;Initial Catalog=shoppingcartdbdb_db;User Id=appUser@dbserver;Password=password</Value>
-    </DestinationConnectionStrings>
-</ItemGroup>
-<ItemGroup>
-    <EFMigrations Include="ShoppingCartContext">
-      <Value>Data Source=tcp:dbserver.database.windows.net,1433;Initial Catalog=shoppingcartdbdb_db;User Id=efMigrationUser@dbserver;Password=password</Value>
-    </EFMigrations>
-</ItemGroup>
+Profile can be added to the following location in the project /Properties/PublishProfiles/<MsDeployProfile.pubxml>. MsDeploy Publish profile samples are available below:
+
+Using MsBuild (with a profile)
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfile> /p:Password=<DeploymentPassword>
+```
+
+Using dotnet (with a profile)
+```
+dotnet publish WebApplication.csproj /p:PublishProfile=<MsDeployProfile> /p:Password=<DeploymentPassword>
+```
+
+MsDeploy Package:
+----------------
+
+Using MsBuild (with the default profile)
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PublishProfile=Default
+```
+
+Using dotnet (with the default profile)
+```
+dotnet publish WebApplication.csproj /p:WebPublishMethod=Package /p:PublishProfile=Default
+```
+
+Profile can be added to the following location in the project /Properties/PublishProfiles/<MsDeployPackage.pubxml>. MsDeployPackage Publish profile samples are available below:
+
+Using MsBuild (with a profile)
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployPackage>
+```
+
+Using dotnet (with a profile)
+```
+dotnet publish WebApplication.csproj /p:PublishProfile=<MsDeployPackage>
 ```
  
 Sample Folder Profile:
+---------------------
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -78,6 +118,7 @@ Sample Folder Profile:
 ```
 
 Sample MsDeploy Publish Profile:
+-------------------------------
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -99,6 +140,7 @@ Sample MsDeploy Publish Profile:
 </Project>
 ```
 Sample MsDeploy Package Publish Profile
+---------------------------------------
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -113,6 +155,7 @@ Sample MsDeploy Package Publish Profile
 ```
 
 Sample MsDeploy Profile With Destination Connection String & EF Migrations
+--------------------------------------------------------------------------
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -179,7 +222,7 @@ Sample to skip specific folders and files during Web Deploy Publish:
 </ItemGroup>
 ```
 
-Pre-Publish and Post-Publish extensibility:
+Sample to Add Pre-Publish and Post-Publish extensibility:
 
 ```xml  
   <Target Name="CustomActionsBeforePublish" BeforeTargets="BeforePublish">
