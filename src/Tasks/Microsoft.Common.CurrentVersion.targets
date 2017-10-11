@@ -1399,6 +1399,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
+                                        IntellisenseBuildResultsCollector
+
+    Collects items or properties that Intellisese initialization design time builds might need from build instance.
+    Used for OOP Design time builds.
+    ============================================================
+    -->
+  <Target Name="IntellisenseBuildResultsCollector"
+          Returns="@(ReferencedNuGetPackages)"/>
+
+  <!--
+    ============================================================
                                         AssignProjectConfiguration
 
     Assigns the appropriate configuration to each project in the list of project references passed in.
