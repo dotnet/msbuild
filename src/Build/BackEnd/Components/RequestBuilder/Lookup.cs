@@ -85,11 +85,6 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<ProjectItemInstance, ProjectItemInstance> _cloneTable;
 
         /// <summary>
-        /// Read-only wrapper around this lookup.
-        /// </summary>
-        private ReadOnlyLookup _readOnlyLookup;
-
-        /// <summary>
         /// A dictionary of named values for debugger display only. If 
         /// not debugging, this should be null.
         /// </summary>
@@ -136,21 +131,6 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Returns a read-only wrapper around this lookup
-        /// </summary>
-        internal ReadOnlyLookup ReadOnlyLookup
-        {
-            get
-            {
-                if (_readOnlyLookup == null)
-                {
-                    _readOnlyLookup = new ReadOnlyLookup(this);
-                }
-                return _readOnlyLookup;
-            }
-        }
 
         // Convenience private properties
         // "Primary" is the "top" or "innermost" scope
@@ -1484,39 +1464,5 @@ namespace Microsoft.Build.BackEnd
                 _owningLookup.LeaveScope(this);
             }
         }
-    }
-
-    #region Related Types
-
-    /// <summary>
-    /// Read-only wrapper around a lookup.
-    /// Passed to Expander and ItemExpander, which only need to
-    /// use a lookup in a read-only fashion, thus increasing 
-    /// encapsulation of the data in the Lookup.
-    /// </summary>
-    internal class ReadOnlyLookup : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>
-    {
-        private Lookup _lookup;
-
-        internal ReadOnlyLookup(Lookup lookup)
-        {
-            _lookup = lookup;
-        }
-
-        public ICollection<ProjectItemInstance> GetItems(string itemType)
-        {
-            return _lookup.GetItems(itemType);
-        }
-
-        public ProjectPropertyInstance GetProperty(string name)
-        {
-            return _lookup.GetProperty(name);
-        }
-
-        public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
-        {
-            return _lookup.GetProperty(name, startIndex, endIndex);
-        }
-        #endregion
     }
 }
