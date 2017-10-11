@@ -72,6 +72,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool SkipUpdateCheck { get; set; }
 
+        public bool CheckForUpdates { get; set; }
+
+        public bool CheckForUpdatesNoPrompt { get; set; }
+
         public string AllowScriptsToRun { get; set; }
 
         public IReadOnlyDictionary<string, string> InputTemplateParams { get; set; }

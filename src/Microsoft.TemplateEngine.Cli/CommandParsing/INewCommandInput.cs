@@ -50,6 +50,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool SkipUpdateCheck { get; }
 
+        bool CheckForUpdates { get; }
+
+        bool CheckForUpdatesNoPrompt { get; }
+
         string AllowScriptsToRun { get; }
 
         bool HasDebuggingFlag(string flag);

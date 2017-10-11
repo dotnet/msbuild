@@ -553,4 +553,25 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="PartialTemplateMatchSwitchesNotValidForAllMatches" xml:space="preserve">
     <value>Some partially matched templates may not support these input switches:</value>
   </data>
+  <data name="AllUpdatesApplyPrompt" xml:space="preserve">
+    <value>Apply updates ([A]ll|[N]one|[P]rompt)?</value>
+  </data>
+  <data name="ApplyUpdatesInvalidChoiceResponse" xml:space="preserve">
+    <value>Invalid choice...</value>
+  </data>
+  <data name="NoUpdatesFound" xml:space="preserve">
+    <value>No updates found.</value>
+  </data>
+  <data name="SingleUpdateApplyPrompt" xml:space="preserve">
+    <value>{0} : update ([Y]es|[N]o)?</value>
+  </data>
+  <data name="UpdatesAvailableListHeader" xml:space="preserve">
+    <value>Updates are available for the following:</value>
+  </data>
+  <data name="UpdateCheckError" xml:space="preserve">
+    <value>An error occured checking for {0} template updates.</value>
+  </data>
+  <data name="TemplateUpdateError" xml:space="preserve">
+    <value>An error occured updating templates for: {0}</value>
+  </data>
 </root>

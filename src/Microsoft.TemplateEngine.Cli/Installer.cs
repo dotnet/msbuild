@@ -24,6 +24,11 @@ namespace Microsoft.TemplateEngine.Cli
             _paths = new Paths(environmentSettings);
         }
 
+        public void AddInstallDescriptorForLocation(Guid mountPointId)
+        {
+            ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
+        }
+
         public void InstallPackages(IEnumerable<string> installationRequests)
         {
             List<string> localSources = new List<string>();
@@ -227,7 +232,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                         foreach (Guid mountPointId in contentMountPointIds)
                         {
-                            ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
+                            AddInstallDescriptorForLocation(mountPointId);
                         }
                     }
                     else if (_environmentSettings.Host.FileSystem.DirectoryExists(pkg) || _environmentSettings.Host.FileSystem.FileExists(pkg))
@@ -237,7 +242,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                         foreach (Guid mountPointId in contentMountPointIds)
                         {
-                            ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
+                            AddInstallDescriptorForLocation(mountPointId);
                         }
                     }
                     else

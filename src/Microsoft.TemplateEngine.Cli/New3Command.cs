@@ -36,6 +36,7 @@ namespace Microsoft.TemplateEngine.Cli
                     $"
             , RegexOptions.IgnorePatternWhitespace);
         private readonly Action<IEngineEnvironmentSettings, IInstaller> _onFirstRun;
+        private readonly Func<string> _inputGetter = () => Console.ReadLine();
 
         public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, INewCommandInput commandInput)
             : this(commandName, host, telemetryLogger, onFirstRun, commandInput, null)
@@ -264,7 +265,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult, scriptRunSettings);
-            postActionDispatcher.Process(() => Console.ReadLine());
+            postActionDispatcher.Process(_inputGetter);
         }
 
         private CreationResultStatus EnterInstallFlow()
@@ -525,6 +526,18 @@ namespace Microsoft.TemplateEngine.Cli
                 if (!string.IsNullOrEmpty(_commandInput.Alias) && !_commandInput.IsHelpFlagSpecified)
                 {
                     return AliasSupport.ManipulateAliasIfValid(_aliasRegistry, _commandInput.Alias, _commandInput.Tokens.ToList(), AllTemplateShortNames);
+                }
+
+                if (_commandInput.CheckForUpdates)
+                {
+                    // Don't return after updating. This way, if someone runs something like:
+                    //      > dotnet new mvc --update-check
+                    // we'll first check for updates, then try to invoke the template.
+                    new TemplateUpdating(EnvironmentSettings, Installer, _inputGetter).Update(_settingsLoader.InstallUnitDescriptorCache.Descriptors.Values.ToList());
+                }
+                else if (_commandInput.CheckForUpdatesNoPrompt)
+                {
+                    new TemplateUpdating(EnvironmentSettings, Installer, _inputGetter).UpdateWithoutPrompting(_settingsLoader.InstallUnitDescriptorCache.Descriptors.Values.ToList());
                 }
 
                 if (string.IsNullOrWhiteSpace(TemplateName))
