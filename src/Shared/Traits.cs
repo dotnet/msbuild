@@ -108,7 +108,8 @@ namespace Microsoft.Build.Utilities
                 return null;
             }
 
-            if (bool.TryParse(value, out var result))
+            bool result;
+            if (bool.TryParse(value, out result))
             {
                 return result;
             }
