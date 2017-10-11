@@ -588,11 +588,19 @@ namespace Microsoft.Build.BackEnd
                 return groupFound;
             }
 
+            // Set the initial sizes to avoid resizing during import
+            int itemsTypesCount = 1;    // We're only ever importing a single item type
+            int itemsCount = groupFound?.Count ?? 0;    // Start with initial set
+            itemsCount += allAdds?.Count ?? 0;          // Add all the additions
+            itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
+            if (itemsCount < 0)
+                itemsCount = 0;
+
             // We have adds and/or removes and/or modifies to incorporate.
             // We can't modify the group, because that might
             // be visible to other batches; we have to create
             // a new one.
-            ItemDictionary<ProjectItemInstance> result = new ItemDictionary<ProjectItemInstance>();
+            ItemDictionary<ProjectItemInstance> result = new ItemDictionary<ProjectItemInstance>(itemsTypesCount, itemsCount);
 
             if (groupFound != null)
             {

@@ -65,11 +65,11 @@ namespace Microsoft.Build.Collections
         /// Constructor for an empty collection taking an initial capacity
         /// for the number of distinct item types
         /// </summary>
-        internal ItemDictionary(int initialItemTypesCapacity)
+        internal ItemDictionary(int initialItemTypesCapacity, int initialItemsCapacity = 0)
         {
             // Tracing.Record("new item dictionary");
             _itemLists = new Dictionary<string, LinkedList<T>>(initialItemTypesCapacity, MSBuildNameIgnoreCaseComparer.Default);
-            _nodes = new Dictionary<T, LinkedListNode<T>>();
+            _nodes = new Dictionary<T, LinkedListNode<T>>(initialItemsCapacity);
         }
 
         /// <summary>
