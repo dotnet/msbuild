@@ -574,4 +574,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="TemplateUpdateError" xml:space="preserve">
     <value>An error occured updating templates for: {0}</value>
   </data>
+  <data name="UpdateCheckerNotAvailable" xml:space="preserve">
+    <value>No update checker(s) for the following:</value>
+  </data>
 </root>

@@ -25,6 +25,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             EnsureFactoryToUpdaterMapping();
             Dictionary<Guid, List<IInstallUnitDescriptor>> installUnitsToCheckForUpdates = new Dictionary<Guid, List<IInstallUnitDescriptor>>();
+            List<IInstallUnitDescriptor> descriptorsWithoutUpdaters = new List<IInstallUnitDescriptor>();
             List<IUpdateUnitDescriptor> updateDescriptors = new List<IUpdateUnitDescriptor>();
 
             // collect the descriptors by their factoryId, ignoring descriptors that don't have corresponding factories or updaters.
@@ -39,6 +40,19 @@ namespace Microsoft.TemplateEngine.Cli
                     }
 
                     updateList.Add(descriptor);
+                }
+                else
+                {
+                    descriptorsWithoutUpdaters.Add(descriptor);
+                }
+            }
+
+            if (descriptorsWithoutUpdaters.Count > 0)
+            {
+                Reporter.Output.WriteLine(LocalizableStrings.UpdateCheckerNotAvailable.Bold().Red());
+                foreach (IInstallUnitDescriptor descriptor in descriptorsWithoutUpdaters)
+                {
+                    Reporter.Output.WriteLine($"\t{descriptor.UserReadableIdentifier}".Bold().Red());
                 }
             }
 

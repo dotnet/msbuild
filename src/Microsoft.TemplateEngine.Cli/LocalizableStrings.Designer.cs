@@ -1353,6 +1353,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No update checker(s) for the following:.
+        /// </summary>
+        public static string UpdateCheckerNotAvailable {
+            get {
+                return ResourceManager.GetString("UpdateCheckerNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An error occured checking for {0} template updates..
         /// </summary>
         public static string UpdateCheckError {
