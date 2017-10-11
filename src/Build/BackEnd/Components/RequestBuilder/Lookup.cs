@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd
     /// 
     /// For sensible semantics, only the current primary scope can be modified at any point.
     /// </summary>
-    internal class Lookup
+    internal class Lookup : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>
     {
         #region Fields
 
@@ -455,7 +455,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns null.
         /// Caller must not modify the property returned.
         /// </summary>
-        internal ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
+        public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
         {
             // Walk down the tables and stop when the first 
             // property with this name is found
@@ -493,7 +493,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns null.
         /// Caller must not modify the property returned.
         /// </summary>
-        internal ProjectPropertyInstance GetProperty(string name)
+        public ProjectPropertyInstance GetProperty(string name)
         {
             ErrorUtilities.VerifyThrowInternalLength(name, "name");
 
@@ -505,7 +505,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns an empty list.
         /// Caller must not modify the group returned.
         /// </summary>
-        internal ICollection<ProjectItemInstance> GetItems(string itemType)
+        public ICollection<ProjectItemInstance> GetItems(string itemType)
         {
             // The visible items consist of the adds (accumulated as we go down)
             // plus the first set of regular items we encounter
