@@ -124,6 +124,7 @@
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.versioning\$(NuGetVersion)\lib\netstandard1.0\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuspec.referencegenerator\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\Newtonsoft.Json\9.0.1\lib\netstandard1.0\**\*.*" />
+      <BootstrapDependencies Include="$(ProjectDir)targets\bootstrapDependencies\Core\**\*.*" />
     </ItemGroup>
 
     <RemoveDir
@@ -139,6 +140,9 @@
 
     <Copy SourceFiles="@(NuGetCommonExtensions)"
           DestinationFiles="@(NuGetCommonExtensions -> '$(BootstrapDestination)%(RecursiveDir)%(FileName)%(Extension)')" />
+
+    <Copy SourceFiles="@(BootstrapDependencies)"
+          DestinationFiles="@(BootstrapDependencies -> '$(BootstrapDestination)%(RecursiveDir)%(FileName)%(Extension)')" />
 
     <!-- Microsoft.Portable.CSharp.targets imports this file with a capital T -->
     <Copy SourceFiles="$(DeploymentDir)\Microsoft.CSharp.targets"
