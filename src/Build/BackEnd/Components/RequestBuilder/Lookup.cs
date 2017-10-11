@@ -510,8 +510,9 @@ namespace Microsoft.Build.BackEnd
             // The visible items consist of the adds (accumulated as we go down)
             // plus the first set of regular items we encounter
             // minus any removes
-            ItemDictionary<ProjectItemInstance> allAdds = null;
-            ItemDictionary<ProjectItemInstance> allRemoves = null;
+
+            List<ProjectItemInstance> allAdds = null;
+            List<ProjectItemInstance> allRemoves = null;
             Dictionary<ProjectItemInstance, MetadataModifications> allModifies = null;
             ICollection<ProjectItemInstance> groupFound = null;
 
@@ -523,8 +524,8 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> adds = scope.Adds[itemType];
                     if (adds.Count != 0)
                     {
-                        allAdds = allAdds ?? new ItemDictionary<ProjectItemInstance>();
-                        allAdds.ImportItemsOfType(itemType, adds);
+                        allAdds = allAdds ?? new List<ProjectItemInstance>(adds.Count);
+                        allAdds.AddRange(adds);
                     }
                 }
 
@@ -534,8 +535,8 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> removes = scope.Removes[itemType];
                     if (removes.Count != 0)
                     {
-                        allRemoves = allRemoves ?? new ItemDictionary<ProjectItemInstance>();
-                        allRemoves.ImportItems(removes);
+                        allRemoves = allRemoves ?? new List<ProjectItemInstance>(removes.Count);
+                        allRemoves.AddRange(removes);
                     }
                 }
 
