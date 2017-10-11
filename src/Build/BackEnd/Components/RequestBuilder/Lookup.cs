@@ -510,8 +510,9 @@ namespace Microsoft.Build.BackEnd
             // The visible items consist of the adds (accumulated as we go down)
             // plus the first set of regular items we encounter
             // minus any removes
-            ItemDictionary<ProjectItemInstance> allAdds = null;
-            ItemDictionary<ProjectItemInstance> allRemoves = null;
+
+            List<ProjectItemInstance> allAdds = null;
+            List<ProjectItemInstance> allRemoves = null;
             Dictionary<ProjectItemInstance, MetadataModifications> allModifies = null;
             ICollection<ProjectItemInstance> groupFound = null;
 
@@ -523,8 +524,8 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> adds = scope.Adds[itemType];
                     if (adds.Count != 0)
                     {
-                        allAdds = allAdds ?? new ItemDictionary<ProjectItemInstance>();
-                        allAdds.ImportItemsOfType(itemType, adds);
+                        allAdds = allAdds ?? new List<ProjectItemInstance>(adds.Count);
+                        allAdds.AddRange(adds);
                     }
                 }
 
@@ -534,8 +535,8 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> removes = scope.Removes[itemType];
                     if (removes.Count != 0)
                     {
-                        allRemoves = allRemoves ?? new ItemDictionary<ProjectItemInstance>();
-                        allRemoves.ImportItems(removes);
+                        allRemoves = allRemoves ?? new List<ProjectItemInstance>(removes.Count);
+                        allRemoves.AddRange(removes);
                     }
                 }
 
@@ -547,7 +548,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (modifies.Count != 0)
                         {
-                            allModifies = allModifies ?? new Dictionary<ProjectItemInstance, MetadataModifications>();
+                            allModifies = allModifies ?? new Dictionary<ProjectItemInstance, MetadataModifications>(modifies.Count);
 
                             // We already have some modifies for this type
                             foreach (KeyValuePair<ProjectItemInstance, MetadataModifications> modify in modifies)
@@ -587,11 +588,19 @@ namespace Microsoft.Build.BackEnd
                 return groupFound;
             }
 
+            // Set the initial sizes to avoid resizing during import
+            int itemsTypesCount = 1;    // We're only ever importing a single item type
+            int itemsCount = groupFound?.Count ?? 0;    // Start with initial set
+            itemsCount += allAdds?.Count ?? 0;          // Add all the additions
+            itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
+            if (itemsCount < 0)
+                itemsCount = 0;
+
             // We have adds and/or removes and/or modifies to incorporate.
             // We can't modify the group, because that might
             // be visible to other batches; we have to create
             // a new one.
-            ItemDictionary<ProjectItemInstance> result = new ItemDictionary<ProjectItemInstance>();
+            ItemDictionary<ProjectItemInstance> result = new ItemDictionary<ProjectItemInstance>(itemsTypesCount, itemsCount);
 
             if (groupFound != null)
             {
