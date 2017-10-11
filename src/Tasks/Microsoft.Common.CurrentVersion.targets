@@ -1517,10 +1517,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         _GetProjectReferenceTargetFrameworkProperties
 
     Builds the GetTargetFrameworks target of all existent project references to get a list
-    of all supported TargetFrameworks of the referenced projects. For each project, call
-    GetReferenceNearestTargetFrameworkTask to determine the closest match. This allows a
-    cross-targeting project to select how it should be configured to build against the
-    most appropriate target for the referring target framework.
+    of all supported TargetFrameworks of the referenced projects. Calls the
+    GetReferenceNearestTargetFrameworkTask to determine the closest match for each project.
+    This allows a cross-targeting project to select how it should be configured to build
+    against the most appropriate target for the referring target framework.
 
     ======================================================================================
   -->
@@ -1567,7 +1567,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
-    <!-- Get reference target framework lists -->
+    <!--
+       Get reference target framework lists.
+       Note: A future optimization could cache the closest match and set the target framework on
+       this MSBuild task invocation. This would (optimistically) save an evaluation of the referenced
+       project when the answer is the same.
+    -->
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="GetTargetFrameworks"
@@ -1589,6 +1594,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </GetReferenceNearestTargetFrameworkTask>
 
     <ItemGroup>
+      <!--
+         If the task was skipped or the current TargetFramework is empty, AnnotatedProjects will be empty.
+         In this case, copy _ProjectReferenceTargetFrameworkPossibilities as is. See:
+            https://github.com/dotnet/sdk/issues/416
+      -->
       <AnnotatedProjects Include="@(_ProjectReferenceTargetFrameworkPossibilities)"
                          Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''" />
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
@@ -1596,8 +1606,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
       </AnnotatedProjects>
 
-      <!-- If the NearestTargetFramework property was not set or the project has a single TargetFramework, we need to Undefine
-           TargetFramework to avoid another project evaluation. -->
+      <!--
+         If the NearestTargetFramework property was not set or the project has a single TargetFramework, we need to Undefine
+         TargetFramework to avoid another project evaluation.
+      -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
