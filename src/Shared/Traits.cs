@@ -52,7 +52,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Force whether Project based evaluations should evaluate elements with false conditions.
         /// </summary>
-        public readonly bool? EvaluateElementsWithFalseConditionInProjectEvaluation = ParseNullableBoolFromEnvironmentVariable(nameof(EvaluateElementsWithFalseConditionInProjectEvaluation));
+        public readonly bool? EvaluateElementsWithFalseConditionInProjectEvaluation = ParseNullableBoolFromEnvironmentVariable("MSBUILDEVALUATEELEMENTSWITHFALSECONDITIONINPROJECTEVALUATION");
 
         /// <summary>
         /// Always use the accurate-but-slow CreateFile approach to timestamp extraction.
