@@ -4,11 +4,11 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM microsoft/dotnet-buildtools-prereqs:centos-6-d485f41-20173404063424
+FROM microsoft/dotnet-buildtools-prereqs:centos-6-376e1a3-20174311014331
 
 # yum doesn't work with the special curl version we have in the base docker image,
 # so we remove /usr/local/lib from the library path for this command
-RUN LD_LIBRARY_PATH= yum -q -y install sudo
+RUN yum -q -y install sudo
 
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
