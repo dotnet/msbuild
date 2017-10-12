@@ -245,6 +245,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </ItemGroup>
             </Target>
             </Project>");
+
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
@@ -253,6 +254,123 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Equal("a1", i1Group.First().EvaluatedInclude);
             Assert.Equal("b1", i2Group.First().EvaluatedInclude);
+        }
+
+        internal const string TargetitemwithIncludeAndExclude = @"
+                    <Project>
+                       <Target Name=`t`>
+                          <ItemGroup>
+                              <i Include='{0}' Exclude='{1}'/>
+                          </ItemGroup>
+                       </Target>
+                    </Project>
+                ";
+
+        [Theory]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            "a.*",
+            "*.1",
+            new[] { "a.1", "a.2", "a.1" },
+            new[] { "a.2" },
+            false)]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            @"**\*.cs",
+            @"a\**",
+            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
+            new[] { "1.cs" },
+            false)]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            @"**\*",
+            @"**\b\**",
+            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
+            new[] { "1.cs", @"a\2.cs", "build.proj" },
+            false)]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            @"**\*",
+            @"**\b\**\*.cs",
+            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs", @"a\b\c\5.txt" },
+            new[] { "1.cs", @"a\2.cs", @"a\b\c\5.txt", "build.proj" },
+            false)]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            @"src\**\proj\**\*.cs",
+            @"src\**\proj\**\none\**\*",
+            new[]
+            {
+                "1.cs",
+                @"src\2.cs",
+                @"src\a\3.cs",
+                @"src\proj\4.cs",
+                @"src\proj\a\5.cs",
+                @"src\a\proj\6.cs",
+                @"src\a\proj\a\7.cs",
+                @"src\proj\none\8.cs",
+                @"src\proj\a\none\9.cs",
+                @"src\proj\a\none\a\10.cs",
+                @"src\a\proj\a\none\11.cs",
+                @"src\a\proj\a\none\a\12.cs"
+            },
+            new[]
+            {
+                @"src\a\proj\6.cs",
+                @"src\a\proj\a\7.cs",
+                @"src\proj\4.cs",
+                @"src\proj\a\5.cs"
+            },
+            false)]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            @"**\*",
+            "foo",
+            new[]
+            {
+                "foo",
+                @"a\foo",
+                @"a\a\foo",
+                @"a\b\foo",
+            },
+            new[]
+            {
+                @"a\a\foo",
+                @"a\b\foo",
+                @"a\foo",
+                "build.proj"
+            },
+            false)]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            @"**\*",
+            @"a\af*\*",
+            new[]
+            {
+                @"a\foo",
+                @"a\a\foo",
+                @"a\b\foo",
+            },
+            new[]
+            {
+                @"a\a\foo",
+                @"a\b\foo",
+                @"a\foo",
+                "build.proj"
+            },
+            false)]
+        [InlineData(TargetitemwithIncludeAndExclude,
+            @"$(MSBuildThisFileDirectory)\**\*",
+            @"$(MSBuildThisFileDirectory)\a\foo.txt",
+            new[]
+            {
+                @"a\foo",
+                @"a\foo.txt",
+            },
+            new[]
+            {
+                @"a\foo",
+                "build.proj"
+            },
+            true)]
+        public void ItemsWithWildcards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute)
+        {
+            projectContents = string.Format(projectContents, includeString, excludeString).Cleanup();
+
+            AssertItemEvaluationFromTarget(projectContents, "t", "i", inputFiles, expectedInclude, makeExpectedIncludeAbsolute);
         }
 
         [Fact]
@@ -3554,6 +3672,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             task.ExecuteTask(lookup);
+        }
+
+        internal static void AssertItemEvaluationFromTarget(string projectContents, string targetName, string itemType, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        {
+            ObjectModelHelpers.AssertItemEvaluationFromGenericItemEvaluator((p, c) =>
+                {
+                    var project = new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c);
+                    var projectInstance = project.CreateProjectInstance();
+                    var targetChild = projectInstance.Targets["t"].Children.First();
+
+                    var nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
+                    var entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { targetName }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0"));
+                    entry.RequestConfiguration.Project = projectInstance;
+                    var task = IntrinsicTask.InstantiateTask(
+                        targetChild,
+                        nodeContext.LogProjectStarted(entry).LogTargetBatchStarted(projectInstance.FullPath, projectInstance.Targets["t"], null),
+                        projectInstance,
+                        false);
+
+                    var lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), null);
+                    task.ExecuteTask(lookup);
+
+                    return lookup.GetItems(itemType).Select(i => (ObjectModelHelpers.TestItem)new ObjectModelHelpers.ProjectItemInstanceTestItemAdapter(i)).ToList();
+                },
+                projectContents,
+                inputFiles,
+                expectedInclude,
+                makeExpectedIncludeAbsolute,
+                expectedMetadataPerItem,
+                normalizeSlashes);
         }
         #endregion
     }

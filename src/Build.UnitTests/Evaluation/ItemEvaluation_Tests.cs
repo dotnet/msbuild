@@ -615,7 +615,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", "1");
                     }
 
-                    ObjectModelHelpers.AssertItemEvaluation(
+                    ObjectModelHelpers.AssertItemEvaluationFromProject(
                         projectContents,
                         inputFiles: new[] {"a.cs", "b.cs", "c.cs"},
                         expectedInclude: new[] {"a.cs", "b.cs", "c.cs", "b.cs", "c.cs", "b.cs"});
