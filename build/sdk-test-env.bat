@@ -17,6 +17,5 @@ set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set MSBuildSDKsPath=%SDK_REPO_ROOT%bin\Debug\Sdks
 set DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR=%SDK_REPO_ROOT%bin\Debug\Sdks
 set NETCoreSdkBundledVersionsProps=%SDK_REPO_ROOT%.dotnet_cli\sdk\%SDK_CLI_VERSION%\Microsoft.NETCoreSdk.BundledVersions.props
-set CustomAfterMicrosoftCommonTargets=%SDK_REPO_ROOT%bin\Debug\Sdks\Microsoft.NET.Build.Extensions\msbuildExtensions-ver\Microsoft.Common.Targets\ImportAfter\Microsoft.NET.Build.Extensions.targets
 set MicrosoftNETBuildExtensionsTargets=%SDK_REPO_ROOT%bin\Debug\Sdks\Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets
 rem You also need to add https://dotnet.myget.org/F/dotnet-core/api/v3/index.json to your NuGet feeds if building projects outside the SDK cone
