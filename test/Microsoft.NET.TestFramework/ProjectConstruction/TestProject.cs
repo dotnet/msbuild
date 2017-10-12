@@ -234,6 +234,7 @@ class Program
                     foreach (var dependency in this.ReferencedProjects)
                     {
                         source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.Name);" + Environment.NewLine;
+                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.List);" + Environment.NewLine;
                     }
 
                     source +=
@@ -244,16 +245,19 @@ class Program
                 {
                     source =
     $@"using System;
+using System.Collections.Generic;
 
 namespace {this.Name}
 {{
     public class {this.Name}Class
     {{
         public static string Name {{ get {{ return ""{this.Name}""; }} }}
+        public static List<string> List {{ get {{ return null; }} }}
 ";
                     foreach (var dependency in this.ReferencedProjects)
                     {
                         source += $"        public string {dependency.Name}Name {{ get {{ return {dependency.Name}.{dependency.Name}Class.Name; }} }}" + Environment.NewLine;
+                        source += $"        public List<string> {dependency.Name}List {{ get {{ return {dependency.Name}.{dependency.Name}Class.List; }} }}" + Environment.NewLine;
                     }
 
                     source +=

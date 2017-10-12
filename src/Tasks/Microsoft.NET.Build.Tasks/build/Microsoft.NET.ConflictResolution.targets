@@ -18,7 +18,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
-  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="_ComputeLockFileCopyLocal">
+  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="_ComputeLockFileCopyLocal;GetReferenceAssemblyPaths">
     
     <ItemGroup>
       <!-- We need to find all the files that will be loaded from deps for conflict resolution.
@@ -59,6 +59,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                 OtherRuntimeItems="@(_LockFileAssemblies)"
                                 PlatformManifests="@(PackageConflictPlatformManifests)"
+                                TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
@@ -77,9 +78,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="_HandlePublishFileConflicts" AfterTargets="RunResolvePublishAssemblies">
+  <Target Name="_HandlePublishFileConflicts" AfterTargets="RunResolvePublishAssemblies"
+          DependsOnTargets="GetReferenceAssemblyPaths">
     <ResolvePackageFileConflicts ReferenceCopyLocalPaths="@(ResolvedAssembliesToPublish)"
                                 PlatformManifests="@(PackageConflictPlatformManifests)"
+                                TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ResolvedAssembliesToPublishWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_PublishConflictPackageFiles" />

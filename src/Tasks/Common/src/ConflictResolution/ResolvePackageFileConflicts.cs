@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
@@ -22,6 +23,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         public ITaskItem[] OtherRuntimeItems { get; set; }
 
         public ITaskItem[] PlatformManifests { get; set; }
+
+        public ITaskItem[] TargetFrameworkDirectories { get; set; }
 
         /// <summary>
         /// NuGet3 and later only.  In the case of a conflict with identical file version information a file from the most preferred package will be chosen.
@@ -42,6 +45,18 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var log = new MSBuildLog(Log);
             var packageRanks = new PackageRank(PreferredPackages);
 
+            //  Treat assemblies from FrameworkList.xml as platform assemblies that also get considered at compile time
+            IEnumerable<ConflictItem> compilePlatformItems = null;
+            if (TargetFrameworkDirectories != null && TargetFrameworkDirectories.Any())
+            {
+                var frameworkListReader = new FrameworkListReader(BuildEngine4);
+
+                compilePlatformItems = TargetFrameworkDirectories.SelectMany(tfd =>
+                {
+                    return frameworkListReader.GetConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
+                });
+            }
+
             // resolve conflicts at compile time
             var referenceItems = GetConflictTaskItems(References, ConflictItemType.Reference).ToArray();
 
@@ -50,6 +65,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             compileConflictScope.ResolveConflicts(referenceItems,
                 ci => ItemUtilities.GetReferenceFileName(ci.OriginalItem),
                 HandleCompileConflict);
+
+            if (compilePlatformItems != null)
+            {
+                compileConflictScope.ResolveConflicts(compilePlatformItems,
+                    ci => ci.FileName,
+                    HandleCompileConflict);
+            }
 
             // resolve conflicts that class in output
             var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
@@ -75,6 +97,11 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             // we only commit the platform items since its not a conflict if other items share the same filename.
             var platformConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
             var platformItems = PlatformManifests?.SelectMany(pm => PlatformManifestReader.LoadConflictItems(pm.ItemSpec, log)) ?? Enumerable.Empty<ConflictItem>();
+
+            if (compilePlatformItems != null)
+            {
+                platformItems = platformItems.Concat(compilePlatformItems);
+            }
 
             platformConflictScope.ResolveConflicts(platformItems, pi => pi.FileName, pi => { });
             platformConflictScope.ResolveConflicts(referenceItems.Where(ri => !referenceConflicts.Contains(ri.OriginalItem)),

@@ -12,11 +12,14 @@ namespace Microsoft.NET.Build.Tasks
     {
         public static Version GetFileVersion(string sourcePath)
         {
-            var fvi = FileVersionInfo.GetVersionInfo(sourcePath);
-
-            if (fvi != null)
+            if (sourcePath != null)
             {
-                return new Version(fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart);
+                var fvi = FileVersionInfo.GetVersionInfo(sourcePath);
+
+                if (fvi != null)
+                {
+                    return new Version(fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart);
+                }
             }
 
             return null;

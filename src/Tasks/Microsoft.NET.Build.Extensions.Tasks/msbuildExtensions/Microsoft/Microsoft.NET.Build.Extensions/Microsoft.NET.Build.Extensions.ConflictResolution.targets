@@ -26,10 +26,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <Target Name="_HandlePackageFileConflicts" 
           BeforeTargets="$(_HandlePackageFileConflictsBefore)"
-          AfterTargets="$(_HandlePackageFileConflictsAfter)">
+          AfterTargets="$(_HandlePackageFileConflictsAfter)"
+          DependsOnTargets="GetReferenceAssemblyPaths">
     <ResolvePackageFileConflicts References="@(Reference)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
+                                 TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
                                  PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />

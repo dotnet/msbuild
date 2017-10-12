@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (!File.Exists(manifestPath))
             {
-                string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.CouldNotLoadPlatformManifest,
+                string errorMessage = string.Format(CultureInfo.CurrentCulture, Strings.CouldNotLoadPlatformManifest,
                     manifestPath);
                 log.LogError(errorMessage);
                 yield break;
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (lineParts.Length != 4)
                     {
-                        string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingPlatformManifest,
+                        string errorMessage = string.Format(CultureInfo.CurrentCulture, Strings.ErrorParsingPlatformManifest,
                             manifestPath,
                             lineNumber,
                             "fileName|packageId|assemblyVersion|fileVersion");
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (assemblyVersionString.Length != 0 && !Version.TryParse(assemblyVersionString, out assemblyVersion))
                     {
-                        string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingPlatformManifestInvalidValue,
+                        string errorMessage = string.Format(CultureInfo.CurrentCulture, Strings.ErrorParsingPlatformManifestInvalidValue,
                             manifestPath,
                             lineNumber,
                             "AssemblyVersion",
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (fileVersionString.Length != 0 && !Version.TryParse(fileVersionString, out fileVersion))
                     {
-                        string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingPlatformManifestInvalidValue,
+                        string errorMessage = string.Format(CultureInfo.CurrentCulture, Strings.ErrorParsingPlatformManifestInvalidValue,
                             manifestPath,
                             lineNumber,
                             "FileVersion",

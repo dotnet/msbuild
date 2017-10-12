@@ -388,13 +388,21 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("EncounteredConflict", resourceCulture);
             }
         }
-        
+
         internal static string CouldNotLoadPlatformManifest {
             get {
                 return ResourceManager.GetString("CouldNotLoadPlatformManifest", resourceCulture);
             }
         }
-        
+
+        internal static string ErrorParsingFrameworkListInvalidValue
+        {
+            get
+            {
+                return ResourceManager.GetString("ErrorParsingFrameworkListInvalidValue", resourceCulture);
+            }
+        }
+
         internal static string ErrorParsingPlatformManifest {
             get {
                 return ResourceManager.GetString("ErrorParsingPlatformManifest", resourceCulture);
@@ -440,6 +448,14 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string UnsupportedSDKVersionForNetStandard20 {
             get {
                 return ResourceManager.GetString("UnsupportedSDKVersionForNetStandard20", resourceCulture);
+            }
+        }
+
+        internal static string FrameworkListPathNotRooted
+        {
+            get
+            {
+                return ResourceManager.GetString("FrameworkListPathNotRooted", resourceCulture);
             }
         }
     }
