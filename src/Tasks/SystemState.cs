@@ -130,8 +130,9 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Default construct.
             /// </summary>
-            internal FileState()
+            internal FileState(DateTime lastModified)
             {
+                this.lastModified = lastModified;
             }
 
             /// <summary>
@@ -166,13 +167,12 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Get or set the assemblyName.
+            /// Gets the last modified date.
             /// </summary>
             /// <value></value>
             internal DateTime LastModified
             {
                 get { return lastModified; }
-                set { lastModified = value; }
             }
 
             /// <summary>
@@ -364,8 +364,7 @@ namespace Microsoft.Build.Tasks
             // Still no--need to create.            
             if (cacheFileState == null) // Or check time stamp
             {
-                cacheFileState = new FileState();
-                cacheFileState.LastModified = getLastWriteTime(path);
+                cacheFileState = new FileState(getLastWriteTime(path));
                 instanceLocalFileStateCache[path] = cacheFileState;
                 SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
                 isDirty = true;
@@ -376,8 +375,7 @@ namespace Microsoft.Build.Tasks
                 DateTime lastModified = getLastWriteTime(path);
                 if (lastModified != cacheFileState.LastModified)
                 {
-                    cacheFileState = new FileState();
-                    cacheFileState.LastModified = getLastWriteTime(path);
+                    cacheFileState = new FileState(getLastWriteTime(path));
                     instanceLocalFileStateCache[path] = cacheFileState;
                     SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
                     isDirty = true;
