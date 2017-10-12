@@ -166,9 +166,12 @@ namespace Microsoft.NET.TestFramework
 
             command = command.EnvironmentVariable("NETCoreSdkBundledVersionsProps", Path.Combine(RepoInfo.CliSdkPath, "Microsoft.NETCoreSdk.BundledVersions.props"));
 
-            // The following line can be removed once this file is integrated into MSBuild
-            command = command.EnvironmentVariable("CustomAfterMicrosoftCommonTargets", Path.Combine(RepoInfo.BuildExtensionsSdkPath, 
-                "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets"));
+            if (UsingFullMSBuildWithoutExtensionsTargets())
+            {
+                command = command.EnvironmentVariable("CustomAfterMicrosoftCommonTargets", Path.Combine(RepoInfo.BuildExtensionsSdkPath,
+                    "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets"));
+            }
+
             command = command.EnvironmentVariable("MicrosoftNETBuildExtensionsTargets", Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets"));
 
             command = command
@@ -177,6 +180,19 @@ namespace Microsoft.NET.TestFramework
                 .EnvironmentVariable(nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0), ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0);
 
             return command;
+        }
+
+        private static bool UsingFullMSBuildWithoutExtensionsTargets()
+        {
+            string fullMSBuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
+            if (string.IsNullOrEmpty(fullMSBuildPath))
+            {
+                return false;
+            }
+
+            string fullMSBuildDirectory = Path.GetDirectoryName(fullMSBuildPath);
+            string extensionsImportAfterPath = Path.Combine(fullMSBuildDirectory, "..", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
+            return !File.Exists(extensionsImportAfterPath);
         }
     }
 }
