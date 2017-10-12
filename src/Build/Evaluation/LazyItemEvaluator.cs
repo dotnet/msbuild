@@ -55,20 +55,21 @@ namespace Microsoft.Build.Evaluation
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
-            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType).Select(itemData => itemData.Item).ToList());
+            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
         }
 
-        private ICollection<ItemData> GetItems(string itemType)
+        private ImmutableList<I> GetItems(string itemType)
         {
             LazyItemList itemList = GetItemList(itemType);
             if (itemList == null)
             {
-                return ImmutableList<ItemData>.Empty;
+                return ImmutableList<I>.Empty;
             }
-            return itemList.GetItemData(ImmutableHashSet<string>.Empty).Where(itemData => itemData.ConditionResult).ToList();
+
+            return itemList.GetMatchedItems(ImmutableHashSet<string>.Empty);
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
@@ -243,6 +244,18 @@ namespace Microsoft.Build.Evaluation
             {
                 _previous = previous;
                 _memoizedOperation = new MemoizedOperation(operation);
+            }
+
+            public ImmutableList<I> GetMatchedItems(ImmutableHashSet<string> globsToIgnore)
+            {
+                ImmutableList<I>.Builder items = ImmutableList.CreateBuilder<I>();
+                foreach (ItemData data in GetItemData(globsToIgnore))
+                {
+                    if (data.ConditionResult)
+                        items.Add(data.Item);
+                }
+
+                return items.ToImmutable();
             }
 
             public ImmutableList<ItemData>.Builder GetItemData(ImmutableHashSet<string> globsToIgnore)
