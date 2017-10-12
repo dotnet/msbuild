@@ -199,7 +199,8 @@
           AfterTargets="PublishMSBuildExtensions">
     <ItemGroup>
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
-      <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
+      <SdkFiles Include="$(PublishDir)/**/*"
+                Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*;$(PublishDir)/**/Microsoft.TestPlatform.Extensions.EventLogCollector.dll" />
 
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
       <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
