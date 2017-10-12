@@ -22,7 +22,25 @@ namespace Microsoft.NET.TestFramework
 
         public ToolsetInfo ToolsetUnderTest { get; set; }
 
-        public static TestContext Current { get; private set; }
+        private static TestContext _current;
+
+        public static TestContext Current
+        {
+            get
+            {
+                if (_current == null)
+                {
+                    //  Initialize test context in cases where it hasn't been initialized via the entry point
+                    //  (ie when using test explorer or another runner)
+                    Initialize(TestCommandLine.Parse(Array.Empty<string>()));
+                }
+                return _current;
+            }
+            set
+            {
+                _current = value;
+            }
+        }
 
         // For test purposes, override the implicit .NETCoreApp version for self-contained apps that to builds thare 
         //  (1) different from the fixed framework-dependent defaults (1.0.5, 1.1.2, 2.0.0)
