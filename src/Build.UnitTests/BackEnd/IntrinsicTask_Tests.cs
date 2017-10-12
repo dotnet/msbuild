@@ -267,31 +267,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ";
 
         [Theory]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             "a.*",
             "*.1",
             new[] { "a.1", "a.2", "a.1" },
             new[] { "a.2" },
             false)]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             @"**\*.cs",
             @"a\**",
             new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
             new[] { "1.cs" },
             false)]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             @"**\*",
             @"**\b\**",
             new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
             new[] { "1.cs", @"a\2.cs", "build.proj" },
             false)]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             @"**\*",
             @"**\b\**\*.cs",
             new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs", @"a\b\c\5.txt" },
             new[] { "1.cs", @"a\2.cs", @"a\b\c\5.txt", "build.proj" },
             false)]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             @"src\**\proj\**\*.cs",
             @"src\**\proj\**\none\**\*",
             new[]
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"src\proj\a\5.cs"
             },
             false)]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             @"**\*",
             "foo",
             new[]
@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "build.proj"
             },
             false)]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             @"**\*",
             @"a\af*\*",
             new[]
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "build.proj"
             },
             false)]
-        [InlineData(TargetitemwithIncludeAndExclude,
+        [InlineData(
             @"$(MSBuildThisFileDirectory)\**\*",
             @"$(MSBuildThisFileDirectory)\a\foo.txt",
             new[]
@@ -366,9 +366,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "build.proj"
             },
             true)]
+        [InlineData(
+            @"$(MSBuildThisFileDirectory)\**\*",
+            @"$(MSBuildThisFileDirectory)\a\**\*",
+            new[]
+            {
+                @"a\a",
+                @"a\b\ab",
+                @"b\b",
+                @"c\c",
+                @"c\d\cd",
+            },
+            new[]
+            {
+                "build.proj",
+                @"b\b",
+                @"c\c",
+                @"c\d\cd",
+            },
+            true)]
         public void ItemsWithWildcards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute)
         {
-            projectContents = string.Format(projectContents, includeString, excludeString).Cleanup();
+            projectContents = string.Format(TargetitemwithIncludeAndExclude, includeString, excludeString).Cleanup();
 
             AssertItemEvaluationFromTarget(projectContents, "t", "i", inputFiles, expectedInclude, makeExpectedIncludeAbsolute);
         }

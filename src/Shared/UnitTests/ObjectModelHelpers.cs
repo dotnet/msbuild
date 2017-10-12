@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             return items[0];
         }
 
-        internal static void AssertItemEvaluationFromProject(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        internal static void AssertItemEvaluationFromProject(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false, bool makeExpectedIncludeAbsolute = false)
         {
             AssertItemEvaluationFromGenericItemEvaluator((p, c) =>
                 {
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests
             projectContents,
             inputFiles,
             expectedInclude,
-            false,
+            makeExpectedIncludeAbsolute,
             expectedMetadataPerItem,
             normalizeSlashes);
         }
@@ -144,19 +144,16 @@ namespace Microsoft.Build.UnitTests
 
                 if (makeExpectedIncludeAbsolute)
                 {
-                    for (int i = 0; i < expectedInclude.Length; i++)
-                    {
-                        expectedInclude[i] = Path.Combine(testProject.TestRoot, expectedInclude[i]);
-                    }
+                    expectedInclude = expectedInclude.Select(i => Path.Combine(testProject.TestRoot, i)).ToArray();
                 }
 
                 if (expectedMetadataPerItem == null)
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, evaluatedItems, expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
+                    AssertItems(expectedInclude, evaluatedItems, expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
                 }
                 else
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, evaluatedItems, expectedMetadataPerItem, normalizeSlashes);
+                    AssertItems(expectedInclude, evaluatedItems, expectedMetadataPerItem, normalizeSlashes);
                 }
             }
         }
