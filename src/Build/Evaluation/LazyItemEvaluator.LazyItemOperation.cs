@@ -76,7 +76,7 @@ namespace Microsoft.Build.Evaluation
                 LazyItemList itemList;
                 if (_referencedItemLists.TryGetValue(itemType, out itemList))
                 {
-                    return itemList.GetItems(globsToIgnore)
+                    return itemList.GetItemData(globsToIgnore)
                         .Where(ItemData => ItemData.ConditionResult)
                         .Select(itemData => itemData.Item)
                         .ToList();
