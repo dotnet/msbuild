@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.Equal(NormalizeSlashes(expectedItems[i]), NormalizeSlashes(items[i].EvaluatedInclude));
+                    Assert.Equal(NormalizeSlashes(expectedItems[i]), items[i].EvaluatedInclude);
                 }
 
                 AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);

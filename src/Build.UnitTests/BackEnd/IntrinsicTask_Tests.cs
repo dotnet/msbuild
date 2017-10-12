@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             var projectContents = string.Format(TargetitemwithIncludeAndExclude, includeString, excludeString).Cleanup();
 
-            AssertItemEvaluationFromTarget(projectContents, "t", "i", inputFiles, expectedInclude, makeExpectedIncludeAbsolute);
+            AssertItemEvaluationFromTarget(projectContents, "t", "i", inputFiles, expectedInclude, makeExpectedIncludeAbsolute, normalizeSlashes: true);
         }
 
         [Fact]
