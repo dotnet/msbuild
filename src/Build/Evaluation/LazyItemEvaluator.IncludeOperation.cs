@@ -66,7 +66,6 @@ namespace Microsoft.Build.Evaluation
             {
                 var itemsToAdd = ImmutableList.CreateBuilder<I>();
 
-
                 Lazy<Func<string, bool>> excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (excludes != null)
