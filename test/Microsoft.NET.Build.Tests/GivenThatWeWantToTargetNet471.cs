@@ -38,9 +38,11 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .Execute()
+                .Execute("/v:normal")
                 .Should()
-                .Pass();
+                .Pass()
+                .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
@@ -76,9 +78,11 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .Execute()
+                .Execute("/v:normal")
                 .Should()
-                .Pass();
+                .Pass()
+                .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
@@ -109,9 +113,11 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .Execute()
+                .Execute("/v:normal")
                 .Should()
-                .Pass();
+                .Pass()
+                .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
