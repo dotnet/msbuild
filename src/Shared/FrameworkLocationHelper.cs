@@ -65,6 +65,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion461 = new Version(4, 6, 1);
         internal static readonly Version dotNetFrameworkVersion462 = new Version(4, 6, 2);
         internal static readonly Version dotNetFrameworkVersion47 = new Version(4, 7);
+        internal static readonly Version dotNetFrameworkVersion471 = new Version(4, 7, 1);
 
         // visual studio versions.
         internal static readonly Version visualStudioVersion100 = new Version(10, 0);
@@ -209,6 +210,9 @@ namespace Microsoft.Build.Shared
 
             // v4.7
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion47, visualStudioVersion150),
+
+            // v4.7.1
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion471, visualStudioVersion150),
         };
 
         /// <summary>
@@ -277,7 +281,8 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion46,
                 dotNetFrameworkVersion461,
                 dotNetFrameworkVersion462,
-                dotNetFrameworkVersion47
+                dotNetFrameworkVersion47,
+                dotNetFrameworkVersion471
             }),
         };
 
@@ -309,6 +314,7 @@ namespace Microsoft.Build.Shared
             { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion47, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion471, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion47, visualStudioVersion150) },
        };
 
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
@@ -1165,6 +1171,10 @@ namespace Microsoft.Build.Shared
             {
                 string sdkVersionFolder = "4.6"; // Default for back-compat
 
+                if (dotNetSdkVersion == dotNetFrameworkVersion471)
+                {
+                    sdkVersionFolder = "4.7.1";
+                }
                 if (dotNetSdkVersion == dotNetFrameworkVersion47)
                 {
                     sdkVersionFolder = "4.7";
