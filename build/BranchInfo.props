@@ -1,6 +1,6 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Channel>release/2.0.0</Channel>
-    <BranchName>release/2.0.0</BranchName>
+    <Channel>dev/release/2.0</Channel>
+    <BranchName>dev/release/2.0</BranchName>
   </PropertyGroup>
 </Project>
