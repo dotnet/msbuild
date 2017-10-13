@@ -90,7 +90,7 @@ Copyright (c) .NET Foundation. All rights reserved.
            and VS won't show a warning icon on the reference.  See https://github.com/dotnet/sdk/issues/1499
            -->
       
-      <Reference Include="@(_NETStandardLibraryNETFrameworkLib.FileName)">
+      <Reference Include="%(_NETStandardLibraryNETFrameworkLib.FileName)">
         <HintPath>%(_NETStandardLibraryNETFrameworkLib.Identity)</HintPath>
         <Private>false</Private>
       </Reference>
