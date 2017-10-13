@@ -287,7 +287,7 @@ namespace Microsoft.NET.Build.Tests
                         // Add a target that replaces the facade folder with the set of netstandard support assemblies
                         // this can be replaced by targeting the version of .NETFramework that includes netstandard inbox,
                         // once available
-                        var facadesDir = Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "net461", "lib\\");
+                        var facadesDir = Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "net461", "ref\\");
                         var ns = project.Root.Name.Namespace;
                         var target = new XElement(ns + "Target",
                             new XAttribute("Name", "ReplaceDesignTimeFacadeDirectories"),
