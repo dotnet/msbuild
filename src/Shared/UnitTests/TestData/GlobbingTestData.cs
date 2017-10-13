@@ -139,7 +139,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                 yield return new object[]
                 {
                     @"$(MSBuildThisFileDirectory)\**\*",
-                    @"$(MSBuildThisFileDirectory)\a\**\*",
+                    @"$(MSBuildThisFileDirectory)\a\**\*;build.proj",
                     new[]
                     {
                         @"a\a",
@@ -150,7 +150,6 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                     },
                     new[]
                     {
-                        "build.proj",
                         @"b\b",
                         @"c\c",
                         @"c\d\cd"
