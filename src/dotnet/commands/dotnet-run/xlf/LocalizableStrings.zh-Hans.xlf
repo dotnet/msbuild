@@ -103,8 +103,8 @@ The current {1} is '{2}'.</source>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
-        <target state="needs-review-translation">启动配置文件不是 JSON 对象。</target>
+        <source>Launch profile is not a JSON object.</source>
+        <target state="translated">启动配置文件不是 JSON 对象。</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
