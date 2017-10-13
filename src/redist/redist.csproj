@@ -251,11 +251,11 @@
       <RoslynTargets Include="%(RoslynFilesWithPEMarker.FullPath)" Condition=" '%(RoslynFilesWithPEMarker.IsPE)' == 'True' " />
       <FSharpTargets Include="%(FSharpFilesWithPEMarker.FullPath)" Condition=" '%(FSharpFilesWithPEMarker.IsPE)' == 'True' " />
       <RemainingTargets Include="%(RemainingFilesWithPEMarker.FullPath)" Condition=" '%(RemainingFilesWithPEMarker.IsPE)' == 'True' " />
-
+ 
       <RoslynFolders Include="@(RoslynTargets-&gt;DirectoryName()-&gt;Distinct())" />
       <FSharpFolders Include="@(FSharpTargets-&gt;DirectoryName()-&gt;Distinct())" />
       <RemainingFolders Include="@(RemainingTargets-&gt;DirectoryName()-&gt;Distinct())" />
-
+ 
       <!-- FSharp.Build.dll causes the FSharp folder to be included. Remove it, as we don't want other FSharp dlls being included in the crossgen. -->
       <RemainingFolders Remove="$(PublishDir)FSharp\**\*" />
     </ItemGroup>
@@ -272,7 +272,7 @@
         CrossgenPath="$(CrossgenPath)"
         ReadyToRun="True"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(RoslynFolders);$(SharedFrameworkNameVersionPath)" />
-
+ 
     <Crossgen
         SourceAssembly="%(FSharpTargets.FullPath)"
         DestinationPath="%(FSharpTargets.FullPath)"
@@ -280,7 +280,7 @@
         CrossgenPath="$(CrossgenPath)"
         ReadyToRun="True"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(FSharpFolders);$(SharedFrameworkNameVersionPath)" />
-
+ 
     <Crossgen
         SourceAssembly="%(RemainingTargets.FullPath)"
         DestinationPath="%(RemainingTargets.FullPath)"
