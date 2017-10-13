@@ -240,24 +240,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 data.AllEvaluatedItemDefinitionMetadata.ShouldBeEmpty();
                 data.AllEvaluatedItems.ShouldBeEmpty();
 
-                Should.Throw<InvalidOperationException>(() =>
-                {
-                    var c = project.ConditionedProperties;
-                });
+                project.ConditionedProperties.ShouldBeEmpty();
+                project.AllEvaluatedItemDefinitionMetadata.ShouldBeEmpty();
+                project.AllEvaluatedItems.ShouldBeEmpty();
 
                 Should.Throw<InvalidOperationException>(() =>
                 {
                     var c = project.ItemsIgnoringCondition;
-                });
-
-                Should.Throw<InvalidOperationException>(() =>
-                {
-                    var c = project.AllEvaluatedItemDefinitionMetadata;
-                });
-
-                Should.Throw<InvalidOperationException>(() =>
-                {
-                    var c = project.AllEvaluatedItems;
                 });
             }
         }

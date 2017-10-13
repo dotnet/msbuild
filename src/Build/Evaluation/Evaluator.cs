@@ -1281,7 +1281,7 @@ namespace Microsoft.Build.Evaluation
                 itemGroupConditionResult = EvaluateCondition(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
             }
 
-            if (itemGroupConditionResult || _data.ShouldEvaluateForDesignTime)
+            if (itemGroupConditionResult || (_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
                 foreach (ProjectItemElement itemElement in itemGroupElement.Items)
                 {
@@ -1694,7 +1694,7 @@ namespace Microsoft.Build.Evaluation
                 itemConditionResult = EvaluateCondition(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
             }
 
-            if (!itemConditionResult && !_data.ShouldEvaluateForDesignTime)
+            if (!itemConditionResult && !(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
 #if FEATURE_MSBUILD_DEBUGGER
                 if (DebuggerManager.DebuggingEnabled)
