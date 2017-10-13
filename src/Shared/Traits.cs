@@ -13,7 +13,20 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     internal class Traits
     {
-        public static Traits Instance = new Traits();
+        private static Traits _instance = new Traits();
+        public static Traits Instance
+        {
+            get
+            {
+#if DEBUG
+                if (Environment.GetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS") == "1")
+                {
+                    return new Traits();
+                }
+#endif
+                return _instance;
+            }
+        }
 
         public EscapeHatches EscapeHatches { get; }
 

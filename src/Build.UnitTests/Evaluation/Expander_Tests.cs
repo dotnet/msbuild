@@ -1158,7 +1158,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <param name="itemMetadata"></param>
         private void CreateComplexPropertiesItemsMetadata
             (
-            out ReadOnlyLookup readOnlyLookup,
+            out Lookup readOnlyLookup,
             out StringMetadataTable itemMetadata
             )
         {
@@ -1212,7 +1212,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             lookup.PopulateWithItems("IntermediateAssembly", intermediateAssemblyItemGroup);
             lookup.PopulateWithItems("Content", contentItemGroup);
 
-            readOnlyLookup = new ReadOnlyLookup(lookup);
+            readOnlyLookup = lookup;
         }
 
         /// <summary>
@@ -1221,7 +1221,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoTaskItemsComplex()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 
@@ -1253,7 +1253,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringComplexPiecemeal()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 
@@ -1306,7 +1306,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringEmpty()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 
@@ -1332,7 +1332,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringComplex()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 
@@ -1354,7 +1354,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringLeaveEscapedComplex()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 
@@ -1376,7 +1376,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringExpectIdenticalReference()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 
@@ -1407,7 +1407,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringExpanderOptions()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 
@@ -1430,7 +1430,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringListLeaveEscapedComplex()
         {
-            ReadOnlyLookup lookup;
+            Lookup lookup;
             StringMetadataTable itemMetadata;
             CreateComplexPropertiesItemsMetadata(out lookup, out itemMetadata);
 

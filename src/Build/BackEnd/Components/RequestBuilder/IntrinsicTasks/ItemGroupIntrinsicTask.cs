@@ -6,7 +6,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
 using System.Linq;
 using Microsoft.Build.Collections;
@@ -20,6 +22,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
+using LazyItemEvaluatorInstance = Microsoft.Build.Evaluation.LazyItemEvaluator<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance, Microsoft.Build.Execution.ProjectMetadataInstance, Microsoft.Build.Execution.ProjectItemDefinitionInstance>;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -28,6 +31,8 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class ItemGroupIntrinsicTask : IntrinsicTask
     {
+        private static readonly ConcurrentDictionary<string, ImmutableArray<string>> _emptyConcurrentDictionary = new ConcurrentDictionary<string, ImmutableArray<string>>();
+
         /// <summary>
         /// The task instance data
         /// </summary>
@@ -52,6 +57,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The lookup used for evaluation and as a destination for these items.</param>
         internal override void ExecuteTask(Lookup lookup)
         {
+            // todo This logic is largely duplicated with the evaluation of items under <Project>. Reuse the Evaluator item evaluation phase here too.
             foreach (ProjectItemGroupTaskItemInstance child in _taskInstance.Items)
             {
                 List<ItemBucket> buckets = null;
@@ -153,7 +159,7 @@ namespace Microsoft.Build.BackEnd
             bucket.Expander.Metadata = metadataTable;
 
             // Second, expand the item include and exclude, and filter existing metadata as appropriate.
-            IList<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata);
+            IList<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, bucket.Lookup, keepMetadata, removeMetadata);
 
             // Third, expand the metadata.           
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
@@ -324,6 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="originalItem">The original item data</param>
         /// <param name="expander">The expander to use.</param>
+        /// <param name="itemProvider"></param>
         /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
         /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
         /// <remarks>
@@ -332,88 +339,46 @@ namespace Microsoft.Build.BackEnd
         /// been refactored.
         /// </remarks>
         /// <returns>A list of items.</returns>
-        private IList<ProjectItemInstance> ExpandItemIntoItems
-        (
-            ProjectItemGroupTaskItemInstance originalItem,
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
-            ISet<string> keepMetadata,
-            ISet<string> removeMetadata
-        )
+        private IList<ProjectItemInstance> ExpandItemIntoItems(ProjectItemGroupTaskItemInstance originalItem, Expander<ProjectPropertyInstance, ProjectItemInstance> expander, IItemProvider<ProjectItemInstance> itemProvider, ISet<string> keepMetadata, ISet<string> removeMetadata)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
-            IList<ProjectItemInstance> items = new List<ProjectItemInstance>();
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(this.Project, originalItem.ItemType);
 
-            // UNDONE: (Refactor)  This code also exists in largely the same form in Evaluator.CreateItemsFromInclude.
-            // STEP 1: Expand properties and metadata in Include
-            string evaluatedInclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Include, ExpanderOptions.ExpandPropertiesAndMetadata, originalItem.IncludeLocation);
+            // exlude construction copied from Microsoft.Build.Evaluation.LazyItemEvaluator.BuildIncludeOperation
+            var excludes = ImmutableList<string>.Empty.ToBuilder();
 
-            // STEP 2: Split Include on any semicolons, and take each split in turn
-            if (evaluatedInclude.Length > 0)
+            if (originalItem.Exclude.Length > 0)
             {
-                var includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
-                ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(this.Project, originalItem.ItemType);
+                //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                //  if so we need to add the right item reference
+                string evaluatedExclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Exclude, ExpanderOptions.ExpandAll, originalItem.ExcludeLocation);
 
-                foreach (string includeSplit in includeSplits)
+                if (evaluatedExclude.Length > 0)
                 {
-                    // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                    bool throwaway;
+                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
 
-                    IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplit, itemFactory, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, originalItem.IncludeLocation);
-
-                    if (itemsFromSplit != null)
+                    foreach (string excludeSplit in excludeSplits)
                     {
-                        // Expression is in form "@(X)", so add these items directly.
-                        foreach (ProjectItemInstance item in itemsFromSplit)
-                        {
-                            items.Add(item);
-                        }
-                    }
-                    else
-                    {
-                        // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(Project.Directory, includeSplit);
-
-                        foreach (string includeSplitFile in includeSplitFiles)
-                        {
-                            items.Add(new ProjectItemInstance(Project, originalItem.ItemType, includeSplitFile, includeSplit /* before wildcard expansion */, null, null, originalItem.Location.File));
-                        }
-                    }
-                }
-
-                // STEP 4: Evaluate, split, expand and subtract any Exclude
-                if (originalItem.Exclude.Length > 0)
-                {
-                    string evaluatedExclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Exclude, ExpanderOptions.ExpandAll, originalItem.ExcludeLocation);
-
-                    if (evaluatedExclude.Length > 0)
-                    {
-                        var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
-                        HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                        foreach (string excludeSplit in excludeSplits)
-                        {
-                            string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
-
-                            foreach (string excludeSplitFile in excludeSplitFiles)
-                            {
-                                excludesUnescapedForComparison.Add(excludeSplitFile);
-                            }
-                        }
-
-                        List<ProjectItemInstance> remainingItems = new List<ProjectItemInstance>();
-
-                        for (int i = 0; i < items.Count; i++)
-                        {
-                            if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude))
-                            {
-                                remainingItems.Add(items[i]);
-                            }
-                        }
-
-                        items = remainingItems;
+                        excludes.Add(excludeSplit);
                     }
                 }
             }
+
+            var itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(originalItem.Include, expander, originalItem.IncludeLocation, Project.Directory, ExpanderOptions.ExpandPropertiesAndMetadata);
+
+            var items = LazyItemEvaluatorInstance.IncludeOperation.ComputeItemsFromElement(
+                itemSpec,
+                excludes.ToImmutable(),
+                originalItem.IncludeLocation,
+                originalItem.ExcludeLocation,
+                ImmutableHashSet<string>.Empty,
+                Project.Directory,
+                originalItem.Location.File,
+                expander,
+                itemProvider,
+                itemFactory,
+                _emptyConcurrentDictionary
+                );
 
             // Filter the metadata as appropriate
             if (keepMetadata != null)

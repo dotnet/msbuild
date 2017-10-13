@@ -44,17 +44,17 @@ namespace Microsoft.Build.Evaluation
         /// <param name="expander">Expects the expander to have a default item factory set</param>
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
         /// <param name="projectDirectory">The directory that the project is in.</param>
-        /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
-        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties = true)
+        /// <param name="expandOptions">Expander options for expanding the itemspec before breaking down fragments. Defaults to <see cref="ExpanderOptions.ExpandProperties"/>. Use null to express no expansion.</param>
+        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation, string projectDirectory, ExpanderOptions? expandOptions = ExpanderOptions.ExpandProperties)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandOptions);
         }
 
-        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
+        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, ExpanderOptions? expandOptions)
         {
             var builder = ImmutableList.CreateBuilder<ItemFragment>();
 
@@ -67,9 +67,9 @@ namespace Microsoft.Build.Evaluation
             }
 
             // STEP 1: Expand properties in Include
-            if (expandProperties)
+            if (expandOptions != null)
             {
-                evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(ItemSpecString, ExpanderOptions.ExpandProperties, itemSpecLocation);
+                evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(ItemSpecString, expandOptions.Value, itemSpecLocation);
             }
 
             // STEP 2: Split Include on any semicolons, and take each split in turn

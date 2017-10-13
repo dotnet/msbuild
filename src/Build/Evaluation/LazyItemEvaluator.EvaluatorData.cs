@@ -12,7 +12,7 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class EvaluatorData : IEvaluatorData<P, I, M, D>
+        internal class EvaluatorData : IEvaluatorData<P, I, M, D>
         {
             IEvaluatorData<P, I, M, D> _wrappedData;
             Func<string, ICollection<I>> _itemGetter;

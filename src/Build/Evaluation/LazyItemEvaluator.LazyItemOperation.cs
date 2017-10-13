@@ -12,7 +12,7 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        private abstract class LazyItemOperation : IItemOperation
+        internal abstract class LazyItemOperation : IItemOperation
         {
             private readonly string _itemType;
             private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;

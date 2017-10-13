@@ -234,7 +234,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private class LazyItemList
+        internal class LazyItemList
         {
             private readonly LazyItemList _previous;
             private readonly MemoizedOperation _memoizedOperation;
@@ -361,7 +361,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private class OperationBuilder
+        internal class OperationBuilder
         {
             // WORKAROUND: Unnecessary boxed allocation: https://github.com/dotnet/corefx/issues/24563
             private static readonly ImmutableDictionary<string, LazyItemList> s_emptyIgnoreCase = ImmutableDictionary.Create<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
@@ -384,7 +384,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private class OperationBuilderWithMetadata : OperationBuilder
+        internal class OperationBuilderWithMetadata : OperationBuilder
         {
             public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
 

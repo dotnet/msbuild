@@ -1516,7 +1516,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // expand the properties
-            var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, projectDirectory, expandProperties: true);
+            var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, projectDirectory, ExpanderOptions.ExpandProperties);
             var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
 
             // Result is inconclusive if properties are present

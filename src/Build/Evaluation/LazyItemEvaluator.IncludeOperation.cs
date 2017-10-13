@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -13,7 +15,7 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class IncludeOperation : LazyItemOperation
+        internal class IncludeOperation : LazyItemOperation
         {
             readonly int _elementOrder;
             
@@ -35,37 +37,67 @@ namespace Microsoft.Build.Evaluation
 
             protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
+                return ComputeItemsFromElement(
+                    _itemSpec,
+                    _excludes,
+                    _itemElement.IncludeLocation,
+                    _itemElement.ExcludeLocation,
+                    globsToIgnore,
+                    _rootDirectory,
+                    _itemElement.ContainingProject.FullPath,
+                    _expander,
+                    _evaluatorData,
+                    _itemFactory,
+                    EntriesCache);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ImmutableList<I> ComputeItemsFromElement(
+                ItemSpec<P, I> itemSpec,
+                ImmutableList<string> excludes,
+                IElementLocation includeLocation,
+                IElementLocation excludeLocation,
+                ImmutableHashSet<string> globsToIgnore,
+                string rootDirectory, string projectPath,
+                Expander<P, I> expander,
+                IItemProvider<I> itemProvider,
+                IItemFactory<I, I> itemFactory,
+                ConcurrentDictionary<string, ImmutableArray<string>> entriesCache)
+            {
                 var itemsToAdd = ImmutableList.CreateBuilder<I>();
 
                 Lazy<Func<string, bool>> excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
-                if (_excludes != null)
+                if (excludes != null)
                 {
                     // STEP 4: Evaluate, split, expand and subtract any Exclude
-                    foreach (string exclude in _excludes)
+                    foreach (string exclude in excludes)
                     {
-                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
+                        string excludeExpanded = expander.ExpandIntoStringLeaveEscaped(exclude,
+                            ExpanderOptions.ExpandPropertiesAndItems, excludeLocation);
                         var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
                         excludePatterns.AddRange(excludeSplits);
                     }
 
                     if (excludePatterns.Count > 0)
                     {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
+                        excludeTester = new Lazy<Func<string, bool>>(() =>
+                            EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, rootDirectory));
                     }
                 }
 
                 ISet<string> excludePatternsForGlobs = null;
 
-                foreach (var fragment in _itemSpec.Fragments)
+                foreach (var fragment in itemSpec.Fragments)
                 {
                     if (fragment is ItemExpressionFragment<P, I>)
                     {
                         // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                         bool throwaway;
-                        var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            ((ItemExpressionFragment<P, I>)fragment).Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
-                            false /* do not include null expansion results */, out throwaway, _itemElement.IncludeLocation);
+                        var itemsFromExpression = expander.ExpandExpressionCaptureIntoItems(
+                            ((ItemExpressionFragment<P, I>) fragment).Capture, itemProvider, itemFactory,
+                            ExpanderOptions.ExpandItems,
+                            false /* do not include null expansion results */, out throwaway, includeLocation);
 
                         if (excludeTester != null)
                         {
@@ -78,18 +110,18 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is ValueFragment)
                     {
-                        string value = ((ValueFragment)fragment).ItemSpecFragment;
+                        string value = ((ValueFragment) fragment).ItemSpecFragment;
 
                         if (excludeTester == null ||
                             !excludeTester.Value(EscapingUtilities.UnescapeAll(value)))
                         {
-                            var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
+                            var item = itemFactory.CreateItem(value, value, projectPath);
                             itemsToAdd.Add(item);
                         }
                     }
                     else if (fragment is GlobFragment)
                     {
-                        string glob = ((GlobFragment)fragment).ItemSpecFragment;
+                        string glob = ((GlobFragment) fragment).ItemSpecFragment;
 
                         if (excludePatternsForGlobs == null)
                         {
@@ -97,15 +129,16 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
-                            _rootDirectory,
+                            rootDirectory,
                             glob,
                             excludePatternsForGlobs,
-                            entriesCache: EntriesCache
-                            );
+                            entriesCache: entriesCache
+                        );
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
-                            itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                            itemsToAdd.Add(itemFactory.CreateItem(includeSplitFileEscaped, glob,
+                                projectPath));
                         }
                     }
                     else
@@ -117,6 +150,7 @@ namespace Microsoft.Build.Evaluation
                 return itemsToAdd.ToImmutable();
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
             {
                 var anyExcludes = excludePatterns.Count > 0;
@@ -144,7 +178,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        class IncludeOperationBuilder : OperationBuilderWithMetadata
+        internal class IncludeOperationBuilder : OperationBuilderWithMetadata
         {
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }
