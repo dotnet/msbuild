@@ -27,6 +27,8 @@ namespace Microsoft.Build.Tasks
     [Serializable]
     internal sealed class SystemState : StateFileBase, ISerializable
     {
+        private Hashtable upToDateLocalFileStateCache = new Hashtable();
+
         /// <summary>
         /// State information for cached files kept at the SystemState instance level.
         /// </summary>
@@ -130,8 +132,9 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Default construct.
             /// </summary>
-            internal FileState()
+            internal FileState(DateTime lastModified)
             {
+                this.lastModified = lastModified;
             }
 
             /// <summary>
@@ -166,13 +169,12 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Get or set the assemblyName.
+            /// Gets the last modified date.
             /// </summary>
             /// <value></value>
             internal DateTime LastModified
             {
                 get { return lastModified; }
-                set { lastModified = value; }
             }
 
             /// <summary>
@@ -323,68 +325,59 @@ namespace Microsoft.Build.Tasks
             return new GetAssemblyRuntimeVersion(this.GetRuntimeVersion);
         }
 
-        /// <summary>
-        /// Retrieve the file state object for this path. Create if necessary.
-        /// </summary>
-        /// <param name="path">The name of the file.</param>
-        /// <returns>The file state object.</returns>
         private FileState GetFileState(string path)
         {
-            // Is it in the process-wide cache?
-            FileState cacheFileState = null;
-            FileState processFileState = null;
-            SystemState.s_processWideFileStateCache.TryGetValue(path, out processFileState);
-            FileState instanceLocalFileState = instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
+            // Looking up an assembly to get its metadata can be expensive for projects that reference large amounts
+            // of assemblies. To avoid that expense, we remember and serialize this information betweeen runs in
+            // XXXResolveAssemblyReferencesInput.cache files in the intermediate directory and also store it in an
+            // process-wide cache to share between successive builds.
+            //
+            // To determine if this information is up-to-date, we use the last modified date of the assembly, however,
+            // as calls to GetLastWriteTime can add up over hundreds and hundreds of files, we only check for
+            // invalidation once per assembly per ResolveAssemblyReference session.
 
-            // Sync the caches.
-            if (processFileState == null && instanceLocalFileState != null)
-            {
-                cacheFileState = instanceLocalFileState;
-                SystemState.s_processWideFileStateCache.TryAdd(path, instanceLocalFileState);
-            }
-            else if (processFileState != null && instanceLocalFileState == null)
-            {
-                cacheFileState = processFileState;
-                instanceLocalFileStateCache[path] = processFileState;
-            }
-            else if (processFileState != null && instanceLocalFileState != null)
-            {
-                if (processFileState.LastModified > instanceLocalFileState.LastModified)
-                {
-                    cacheFileState = processFileState;
-                    instanceLocalFileStateCache[path] = processFileState;
-                }
-                else
-                {
-                    cacheFileState = instanceLocalFileState;
-                    SystemState.s_processWideFileStateCache.TryAdd(path, instanceLocalFileState);
-                }
-            }
+            FileState state = (FileState)upToDateLocalFileStateCache[path];
+            if (state == null)
+            {   // We haven't seen this file this ResolveAssemblyReference session
 
-            // Still no--need to create.            
-            if (cacheFileState == null) // Or check time stamp
-            {
-                cacheFileState = new FileState();
-                cacheFileState.LastModified = getLastWriteTime(path);
-                instanceLocalFileStateCache[path] = cacheFileState;
-                SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
-                isDirty = true;
-            }
-            else
-            {
-                // If time stamps have changed, then purge.
-                DateTime lastModified = getLastWriteTime(path);
-                if (lastModified != cacheFileState.LastModified)
-                {
-                    cacheFileState = new FileState();
-                    cacheFileState.LastModified = getLastWriteTime(path);
-                    instanceLocalFileStateCache[path] = cacheFileState;
-                    SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
+                FileState serialized = (FileState)instanceLocalFileStateCache[path];
+                state = GetFileStateFromProcessWideCache(path, serialized);
+                upToDateLocalFileStateCache[path] = state;
+
+                if (serialized != state)
+                {   // We pulled a value from the process-wide cache, or created a new one
+                    instanceLocalFileStateCache[path] = state;
                     isDirty = true;
                 }
             }
 
-            return cacheFileState;
+            return state;
+        }
+
+        private FileState GetFileStateFromProcessWideCache(string path, FileState template)
+        {
+            // When reading from the process-wide cache, we always check to see if our data
+            // is up-to-date to avoid getting stale data from a previous build.
+            DateTime lastModified = getLastWriteTime(path);
+
+            // Has another build seen this file before?
+            FileState state;
+            if (!s_processWideFileStateCache.TryGetValue(path, out state) || state.LastModified != lastModified)
+            {   // We've never seen it before, or we're out of date
+
+                state = CreateFileState(lastModified, template);
+                s_processWideFileStateCache[path] = state;
+            }
+
+            return state;
+        }
+
+        private FileState CreateFileState(DateTime lastModified, FileState template)
+        {
+            if (template != null && template.LastModified == lastModified)
+                return template;    // Our serialized data is up-to-date
+
+            return new FileState(lastModified);
         }
 
         /// <summary>
