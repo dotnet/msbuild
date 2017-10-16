@@ -92,7 +92,7 @@
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
     <DotNetPublish
-      ToolPath="$(Stage0Directory)"
+      ToolPath="$(PreviousStageDirectory)"
       Configuration="$(Configuration)"
       ProjectPath="$(SrcDirectory)/tool_roslyn_satellites/tool_roslyn_satellites.csproj" />
     <AddToDeps TargetDeps="@(RoslynDeps)" AdditionalDeps="@(RoslynSatelliteDeps)" />
@@ -227,6 +227,7 @@
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
       <RemainingFiles Remove="$(PublishDir)TestHost*\**\*" />
       <RemainingFiles Remove="$(PublishDir)Sdks\**\*" />
+      <RemainingFiles Remove="$(PublishDir)\**\Microsoft.TestPlatform.Extensions.EventLogCollector.dll" />
 
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
       <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
