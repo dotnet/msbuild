@@ -8,7 +8,14 @@
     <ArtifactCloudDropAccountName Condition="'$(ArtifactCloudDropAccountName)' == ''">dotnetcli</ArtifactCloudDropAccountName>
     <DotnetBlobRootUrl>https://$(ArtifactCloudDropAccountName).blob.core.windows.net/$(ArtifactContainerName)</DotnetBlobRootUrl>
     <ChecksumContainerName>$(CHECKSUM_STORAGE_CONTAINER)</ChecksumContainerName>
+    <ChecksumContainerName Condition="'$(ChecksumContainerName)' == ''">dotnet</ChecksumContainerName>
     <ChecksumCloudDropAccessToken>$(CHECKSUM_STORAGE_KEY)</ChecksumCloudDropAccessToken>
     <ChecksumCloudDropAccountName>$(CHECKSUM_STORAGE_ACCOUNT)</ChecksumCloudDropAccountName>
+    <ChecksumCloudDropAccountName Condition="'$(ChecksumCloudDropAccountName)' == ''">dotnetclichecksums</ChecksumCloudDropAccountName>
+    <TransportFeedContainerName>$(TRANSPORTFEED_STORAGE_CONTAINER)</TransportFeedContainerName>
+    <TransportFeedContainerName Condition="'$(TransportFeedContainerName)' == ''">dotnet-core</TransportFeedContainerName>
+    <TransportFeedCloudDropAccessToken>$(TRANSPORTFEED_STORAGE_KEY)</TransportFeedCloudDropAccessToken>
+    <TransportFeedCloudDropAccountName>$(TRANSPORTFEED_STORAGE_ACCOUNT)</TransportFeedCloudDropAccountName>
+    <TransportFeedCloudDropAccountName Condition="'$(TransportFeedCloudDropAccountName)' == ''">dotnetfeed</TransportFeedCloudDropAccountName>
   </PropertyGroup>
 </Project>
