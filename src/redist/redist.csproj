@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
-  <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
   <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
   <PropertyGroup>
@@ -39,28 +38,6 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
-
-  <Target Name="PublishAspNetRuntimePackageStore"
-          AfterTargets="CrossgenPublishDir">
-    <ItemGroup>
-      <AspNetRuntimePackageStore Remove="*" />
-      <AspNetRuntimePackageStore Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(AspNetRuntimePackageStore)"
-          DestinationFiles="@(AspNetRuntimePackageStore->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
-  <Target Name="PublishSharedFramework"
-          BeforeTargets="Publish">
-    <ItemGroup>
-      <SharedFramework Remove="*" />
-      <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(SharedFramework)"
-          DestinationFiles="@(SharedFramework->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
 
   <Target Name="PublishVersionFile"
           BeforeTargets="Publish">
@@ -170,74 +147,8 @@
     </MSBuild>
   </Target>
 
-  <Target Name="PublishTemplates"
-          AfterTargets="Publish">
-    <ItemGroup>
-      <TemplatesToBundle Include="$(RepoRoot)/build/BundledTemplates.proj">
-        <Properties>
-          TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
-          TemplatePackageName=%(BundledTemplate.Identity);
-          TemplatePackageVersion=%(BundledTemplate.Version);
-          PreviousStageDirectory=$(PreviousStageDirectory)
-        </Properties>
-      </TemplatesToBundle>
-    </ItemGroup>
-
-    <MSBuild
-      BuildInParallel="False"
-      Projects="@(TemplatesToBundle)">
-    </MSBuild>
-  </Target>
-
-  <Target Name="PublishLzmaArchive"
-          Condition="'$(CLIBUILD_SKIP_LZMA)' != 'true'"
-          DependsOnTargets="GetNuGetPackagesArchive"
-          AfterTargets="Publish">
-  </Target>
-
-  <Target Name="CrossgenPublishDir"
-          Condition=" '$(DISABLE_CROSSGEN)' == '' "
-          AfterTargets="PublishMSBuildExtensions">
-    <ItemGroup>
-      <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
-      <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
-
-      <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
-      <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
-
-      <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
-      <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
-    </ItemGroup>
-
-    <AddMetadataIsPE Items="@(SdkFiles)">
-      <Output TaskParameter="ResultItems" ItemName="SdkFilesWithPEMarker" />
-    </AddMetadataIsPE>
-
-    <ItemGroup>
-      <CrossgenTargets Include="%(SdkFilesWithPEMarker.FullPath)" Condition=" '%(SdkFilesWithPEMarker.IsPE)' == 'True' " />
-    </ItemGroup>
-
-    <RemoveDuplicates Inputs="@(SdkFiles->'%(RootDir)%(Directory)')">
-      <Output TaskParameter="Filtered" ItemName="PublishDirSubDirectories" />
-    </RemoveDuplicates>
-
-    <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
-    <Chmod Condition=" '$(OSName)' != 'win' "
-           Glob="$(CrossgenPath)"
-           Mode="u+x" />
-
-    <Crossgen SourceAssembly="%(CrossgenTargets.FullPath)"
-              DestinationPath="%(CrossgenTargets.FullPath)"
-              JITPath="$(LibCLRJitPath)"
-              CrossgenPath="$(CrossgenPath)"
-              ReadyToRun="True"
-              PlatformAssemblyPaths="@(PlatformAssemblies);
-                                     @(PublishDirSubDirectories);
-                                     $(SharedFrameworkNameVersionPath)" />
-  </Target>
-
   <Target Name="ChmodPublishDir"
-          AfterTargets="CrossgenPublishDir"
+          AfterTargets="PublishMSBuildExtensions"
           Condition=" '$(OSName)' != 'win' ">
     
     <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
@@ -248,7 +159,7 @@
   </Target>
 
   <Target Name="CreateSymbolsDirectory"
-          AfterTargets="CrossgenPublishDir">
+          AfterTargets="PublishMSBuildExtensions">
     <ItemGroup>
       <_AllSdkFiles Include="$(PublishDir)/**/*" />
     </ItemGroup>
@@ -264,23 +175,6 @@
     </ItemGroup>
 
     <Delete Files="@(PdbsToClean)" />
-  </Target>
-
-  <Target Name="PublishStage2WithBackwardsCompatibleRuntimes"
-          AfterTargets="PublishLzmaArchive;">
-    <ItemGroup>
-      <BackwardsCompatibleSharedFrameworks Remove="*" />
-      <BackwardsCompatibleSharedFrameworks Include="$(BackwardsCompatibleSharedFrameworksPublishDirectory)/**/*" />
-
-      <Stage2Cli Remove="*" />
-      <Stage2Cli Include="$(OutputDirectory)/**/*" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(BackwardsCompatibleSharedFrameworks)"
-          DestinationFiles="@(BackwardsCompatibleSharedFrameworks->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <Copy SourceFiles="@(Stage2Cli)"
-          DestinationFiles="@(Stage2Cli->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="RetargetVSTestConsole"
