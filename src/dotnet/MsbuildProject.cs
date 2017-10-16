@@ -256,7 +256,7 @@ namespace Microsoft.DotNet.Tools
 
             string fullPath = Path.GetFullPath(reference);
             ret.Add(fullPath);
-            ret.Add(PathUtility.GetRelativePath(ProjectDirectory, fullPath));
+            ret.Add(Path.GetRelativePath(ProjectDirectory, fullPath));
 
             return ret;
         }
