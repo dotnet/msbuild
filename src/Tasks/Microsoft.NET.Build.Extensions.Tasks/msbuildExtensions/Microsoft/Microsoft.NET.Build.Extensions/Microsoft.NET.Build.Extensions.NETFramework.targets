@@ -60,13 +60,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- if any reference depends on netstandard and it is not inbox, add references and implementation assemblies for netstandard2.0  -->
     <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true'">
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
-                                          Include="$(MSBuildThisFileDirectory)\net47\lib\*.dll" />
+                                          Include="$(MSBuildThisFileDirectory)net47\lib\*.dll" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
-                                          Include="$(MSBuildThisFileDirectory)\net462\lib\*.dll"
-                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net462\lib\%(FileName).dll')" />
+                                          Include="$(MSBuildThisFileDirectory)net462\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)net462\lib\%(FileName).dll')" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
-                                          Include="$(MSBuildThisFileDirectory)\net461\lib\*.dll"
-                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll')" />
+                                          Include="$(MSBuildThisFileDirectory)net461\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)net461\lib\%(FileName).dll')" />
 
       <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
            consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in 
