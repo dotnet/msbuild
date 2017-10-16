@@ -13,6 +13,7 @@ namespace Microsoft.TemplateEngine.Cli
         private StringBuilder _stderr;
         private StringBuilder _stdout;
         private DataReceivedEventHandler _outputDataReceived;
+        private bool _anyNonEmptyStderrWritten;
 
         public static Dotnet Restore(params string[] args)
         {
@@ -109,6 +110,16 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void ForwardStreamStdErr(object sender, DataReceivedEventArgs e)
         {
+            if (!_anyNonEmptyStderrWritten)
+            {
+                if (string.IsNullOrWhiteSpace(e.Data))
+                {
+                    return;
+                }
+
+                _anyNonEmptyStderrWritten = true;
+            }
+
             Console.Error.WriteLine(e.Data);
         }
 
