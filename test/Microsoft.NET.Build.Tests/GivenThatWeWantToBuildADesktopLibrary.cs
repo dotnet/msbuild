@@ -283,8 +283,10 @@ public static class {project.Name}
                 .NotHaveStdOutContaining("MSB3243");
         }
 
-        [Fact]
-        public void It_uses_hintpath_when_replacing_simple_name_references()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_uses_hintpath_when_replacing_simple_name_references(bool useFacades)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -298,21 +300,39 @@ public static class {project.Name}
                 IsSdkProject = true
             };
 
-
-            var testAsset = _testAssetsManager.CreateTestProject(project)
-                .WithProjectChanges(p =>
+            if (useFacades)
+            {
+                var netStandard2Project = new TestProject()
                 {
-                    var ns = p.Root.Name.Namespace;
+                    Name = "NETStandard20Project",
+                    TargetFrameworks = "netstandard2.0",
+                    IsSdkProject = true
+                };
 
-                    var itemGroup = new XElement(ns + "ItemGroup");
-                    p.Root.Add(itemGroup);
+                project.ReferencedProjects.Add(netStandard2Project);
+            }
 
-                    itemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", "System.Net.Http"),
-                        new XAttribute("Version", "4.3.2")));
 
-                    itemGroup.Add(new XElement(ns + "Reference",
-                        new XAttribute("Include", "System.Net.Http")));
+            var testAsset = _testAssetsManager.CreateTestProject(project, "SimpleNamesWithHintPaths", identifier: useFacades ? "_useFacades" : "")
+                .WithProjectChanges((path, p) =>
+                {
+                    if (Path.GetFileNameWithoutExtension(path) == project.Name)
+                    {
+                        var ns = p.Root.Name.Namespace;
+
+                        var itemGroup = new XElement(ns + "ItemGroup");
+                        p.Root.Add(itemGroup);
+
+                        if (!useFacades)
+                        {
+                            itemGroup.Add(new XElement(ns + "PackageReference",
+                                new XAttribute("Include", "System.Net.Http"),
+                                new XAttribute("Version", "4.3.2")));
+                        }
+
+                        itemGroup.Add(new XElement(ns + "Reference",
+                            new XAttribute("Include", "System.Net.Http")));
+                    }
                 })
                 .Restore(Log, project.Name);
 
@@ -326,12 +346,20 @@ public static class {project.Name}
                 .Should()
                 .Pass();
 
-            string nugetReferencePath = Path.Combine(RepoInfo.NuGetCachePath, "system.net.http", "4.3.2", "ref", "net46", "System.Net.Http.dll");
+            string correctHttpReference;
+            if (useFacades)
+            {
+                correctHttpReference = Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, @"net461\lib\System.Net.Http.dll");
+            }
+            else
+            {
+                correctHttpReference = Path.Combine(RepoInfo.NuGetCachePath, "system.net.http", "4.3.2", "ref", "net46", "System.Net.Http.dll");
+            }
 
             var valuesWithMetadata = getValuesCommand.GetValuesWithMetadata();
 
             //  There shouldn't be a Reference item where the ItemSpec is the path to the System.Net.Http.dll from a NuGet package
-            valuesWithMetadata.Should().NotContain(v => v.value == nugetReferencePath);
+            valuesWithMetadata.Should().NotContain(v => v.value == correctHttpReference);
 
             //  There should be a Reference item where the ItemSpec is the simple name System.Net.Http
             valuesWithMetadata.Should().ContainSingle(v => v.value == "System.Net.Http");
@@ -339,7 +367,7 @@ public static class {project.Name}
             //  The Reference item with the simple name should have a HintPath to the DLL in the NuGet package
             valuesWithMetadata.Single(v => v.value == "System.Net.Http")
                 .metadata["HintPath"]
-                .Should().Be(nugetReferencePath);            
+                .Should().Be(correctHttpReference);            
         }
     }
 }
