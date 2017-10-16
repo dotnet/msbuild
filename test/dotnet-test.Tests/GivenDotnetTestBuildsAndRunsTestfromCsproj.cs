@@ -28,8 +28,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -52,8 +52,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -227,8 +227,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);

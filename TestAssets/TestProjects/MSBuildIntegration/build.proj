@@ -29,9 +29,6 @@
     <Error Condition=" '$(MSBuildExtensionsPath)' == '' " 
            Text="Expected MSBuildExtensionsPath to be set, but it is not." />
     
-    <Error Condition=" '$(CscToolExe)' == '' " 
-           Text="Expected CscToolExe to be set, but it is not." />
-
     <Error Condition=" '$(MSBuildSDKsPath)' == '' " 
            Text="Expected MSBuildSDKsPath to be set, but it is not." />
 

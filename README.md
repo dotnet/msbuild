@@ -67,7 +67,6 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
 
-
 | Latest Coherent Build<sup>2</sup><br>*master* |
 |:------:|
 | [![][coherent-version-badge]][coherent-version] |

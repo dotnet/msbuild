@@ -5,6 +5,11 @@
     <BundledTemplate Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" Version="$(TemplateEngineTemplate2_0Version)" />
     <BundledTemplate Include="Microsoft.DotNet.Test.ProjectTemplates.2.1" Version="$(TemplateEngineTemplateVersion)" />
     <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.1" Version="$(TemplateEngineTemplateVersion)" />
+
     <BundledTemplate Include="Microsoft.DotNet.Web.Spa.ProjectTemplates" Version="$(SpaTemplateVersion)" />
+
+    <BundledTemplate Include="Microsoft.DotNet.Web.Client.ItemTemplates" Version="$(AspnetTemplateVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ItemTemplates" Version="$(AspnetTemplateVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.0" Version="$(AspnetTemplateVersion)" />
   </ItemGroup>
 </Project>
