@@ -18,6 +18,7 @@
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.1-beta-24410-02" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
+    <PackageReference Include="NuGet.Protocol" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
