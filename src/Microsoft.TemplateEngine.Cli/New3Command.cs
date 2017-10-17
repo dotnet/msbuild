@@ -368,20 +368,15 @@ namespace Microsoft.TemplateEngine.Cli
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
             string framework = null;
             string auth = null;
-            string templateName = null;
+            string templateName = TelemetryHelper.HashWithNormalizedCasing(templateToInvoke.Info.Identity);
 
             if (isMicrosoftAuthored)
             {
-                templateName = templateToInvoke.Info.Identity;
                 _commandInput.InputTemplateParams.TryGetValue("Framework", out string inputFrameworkValue);
                 framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "Framework", inputFrameworkValue));
 
                 _commandInput.InputTemplateParams.TryGetValue("auth", out string inputAuthValue);
                 auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "auth", inputAuthValue));
-            }
-            else
-            {
-                templateName = TelemetryHelper.HashWithNormalizedCasing(templateToInvoke.Info.Identity);
             }
 
             bool argsError = CheckForArgsError(templateToInvoke, out string commandParseFailureMessage);
