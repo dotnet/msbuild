@@ -54,6 +54,7 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 
 > **Note:** Be aware that the following installers are the **latest bits**. If you
 > want to install the latest released versions, check out the [preceding section](#looking-for-v1-of-the-net-core-tooling).
+> In order to be able to restore these pre-release packages, you may need to add a NuGet feed pointing to https://dotnet.myget.org/F/dotnet-core/api/v3/index.json. Other feeds may also be necessary depending on what kind of project you are working with.
 
 | Platform | Latest Daily Build<br>*master*<br>[![][version-badge]][version] |
 | -------- | :-------------------------------------: |
