@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" Version="$(CLI_MSBuild_Version)" />
-    <PackageReference Include="System.Reflection.Metadata" Version="1.4.1-beta-24410-02" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.4.1" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
     <PackageReference Include="NuGet.Protocol" Version="$(CLI_NuGet_Version)" />
