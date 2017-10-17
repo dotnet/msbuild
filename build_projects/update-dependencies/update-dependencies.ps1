@@ -35,7 +35,17 @@ if (!$env:DOTNET_INSTALL_DIR)
 }
 
 # Install a stage 0
-cp -r $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
+ Write-Output "Installing .NET Core CLI Stage 0"
+
+if (!$env:DOTNET_TOOL_DIR)
+{
+    & "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Channel "master" -Architecture $Architecture
+    if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
+}
+else
+{
+    cp -r $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
+}
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"

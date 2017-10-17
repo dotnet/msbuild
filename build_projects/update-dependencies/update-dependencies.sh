@@ -33,8 +33,19 @@ fi
 if [ ! -d "$DOTNET_INSTALL_DIR" ]; then
     mkdir -p $DOTNET_INSTALL_DIR
 fi
+# Install a stage 0
+echo "Installing .NET Core CLI Stage 0"
 
-cp -r $DOTNET_TOOL_DIR/* $DOTNET_INSTALL_DIR/
+if [ -z "$DOTNET_TOOL_DIR" ]; then
+    $REPO_ROOT/scripts/obtain/dotnet-install.sh -Channel master -Architecture x64
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to install stage 0"
+        exit 1
+    fi
+else
+    cp -r $DOTNET_TOOL_DIR/* $DOTNET_INSTALL_DIR/
+fi
 
 # Put the stage 0 on the path
 export PATH=$DOTNET_INSTALL_DIR:$PATH
