@@ -42,8 +42,8 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             {
                 result.StdOut
                     .Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
-                    .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest")
-                    .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                    .And.Contain("Passed   VSTestPassTest")
+                    .And.Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
