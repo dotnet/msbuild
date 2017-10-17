@@ -80,7 +80,7 @@ if (!$env:DOTNET_TOOL_DIR)
 }
 else
 {
-    cp -r $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
+    Copy-Item -Recurse -Force $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
 }
 
 # Put the stage0 on the path
