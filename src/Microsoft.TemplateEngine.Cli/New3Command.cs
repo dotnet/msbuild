@@ -87,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (args.Length == 0)
             {
-                telemetryLogger.TrackEvent(commandName + "-CalledWithNoArgs");
+                telemetryLogger.TrackEvent(commandName + TelemetryConstants.CalledWithNoArgsEventSuffix);
             }
 
             INewCommandInput commandInput = new NewCommandInputCli(commandName);
@@ -269,7 +269,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private CreationResultStatus EnterInstallFlow()
         {
-            _telemetryLogger.TrackEvent(CommandName + "-Install", new Dictionary<string, string> { { "CountOfThingsToInstall", _commandInput.ToInstallList.Count.ToString() } });
+            _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, _commandInput.ToInstallList.Count.ToString() } });
 
             Installer.InstallPackages(_commandInput.ToInstallList);
 
@@ -365,26 +365,31 @@ namespace Microsoft.TemplateEngine.Cli
         private async Task<CreationResultStatus> EnterTemplateInvocationFlowAsync(ITemplateMatchInfo templateToInvoke)
         {
             templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag language);
-            _commandInput.InputTemplateParams.TryGetValue("framework", out string framework);
-            _commandInput.InputTemplateParams.TryGetValue("auth", out string auth);
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
-            string templateName = isMicrosoftAuthored ? templateToInvoke.Info.Identity : "(3rd Party)";
+            string framework = null;
+            string auth = null;
+            string templateName = TelemetryHelper.HashWithNormalizedCasing(templateToInvoke.Info.Identity);
 
-            if (!isMicrosoftAuthored)
+            if (isMicrosoftAuthored)
             {
-                auth = null;
+                _commandInput.InputTemplateParams.TryGetValue("Framework", out string inputFrameworkValue);
+                framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "Framework", inputFrameworkValue));
+
+                _commandInput.InputTemplateParams.TryGetValue("auth", out string inputAuthValue);
+                auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "auth", inputAuthValue));
             }
 
             bool argsError = CheckForArgsError(templateToInvoke, out string commandParseFailureMessage);
             if (argsError)
             {
-                _telemetryLogger.TrackEvent(CommandName + "CreateTemplate", new Dictionary<string, string>
+                _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
                 {
-                    { "language", language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
-                    { "argument-error", "true" },
-                    { "framework", framework },
-                    { "template-name", templateName },
-                    { "auth", auth }
+                    { TelemetryConstants.Language, language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                    { TelemetryConstants.ArgError, "True" },
+                    { TelemetryConstants.Framework, framework },
+                    { TelemetryConstants.TemplateName, templateName },
+                    { TelemetryConstants.IsTemplateThirdParty, (!isMicrosoftAuthored).ToString() },
+                    { TelemetryConstants.Auth, auth }
                 });
 
                 if (commandParseFailureMessage != null)
@@ -407,7 +412,7 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     success = false;
                     Reporter.Error.WriteLine(cx.Message.Bold().Red());
-                    if(cx.InnerException != null)
+                    if (cx.InnerException != null)
                     {
                         Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
                     }
@@ -421,14 +426,15 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 finally
                 {
-                    _telemetryLogger.TrackEvent(CommandName + "CreateTemplate", new Dictionary<string, string>
+                    _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
                     {
-                        { "language", language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
-                        { "argument-error", "false" },
-                        { "framework", framework },
-                        { "template-name", templateName },
-                        { "create-success", success.ToString() },
-                        { "auth", auth }
+                        { TelemetryConstants.Language, language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                        { TelemetryConstants.ArgError, "False" },
+                        { TelemetryConstants.Framework, framework },
+                        { TelemetryConstants.TemplateName, templateName },
+                        { TelemetryConstants.IsTemplateThirdParty, (!isMicrosoftAuthored).ToString() },
+                        { TelemetryConstants.CreationResult, success.ToString() },
+                        { TelemetryConstants.Auth, auth }
                     });
                 }
 
@@ -475,6 +481,11 @@ namespace Microsoft.TemplateEngine.Cli
             if (_commandInput.HasParseError)
             {
                 return HelpForTemplateResolution.HandleParseError(_commandInput, _telemetryLogger);
+            }
+
+            if (_commandInput.IsHelpFlagSpecified)
+            {
+                _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.HelpEventSuffix);
             }
 
             if (_commandInput.ShowAliasesSpecified)
