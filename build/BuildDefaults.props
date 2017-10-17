@@ -18,5 +18,7 @@
     <NoWarn>NU1701</NoWarn>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <DefineConstants Condition="'$(DotNetBuildFromSource)' == 'true'">$(DefineConstants);SOURCE_BUILD</DefineConstants>
   </PropertyGroup>
 </Project>
