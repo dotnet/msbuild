@@ -424,6 +424,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeLockFileReferences;_ComputeLockFileFrameworks">
 
     <ItemGroup>
+      <!-- Add framework references from NuGet packages here, so that if there is also a matching reference from a NuGet package,
+           it will be treated the same as a reference from the project file. -->
+      <Reference Include="@(ResolvedFrameworkAssemblies)" />
+      
       <ResolvedCompileFileDefinitions Update="@(ResolvedCompileFileDefinitions)">
         <HintPath>%(FullPath)</HintPath>
       </ResolvedCompileFileDefinitions>
@@ -445,8 +449,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       
       <!-- Add the references we computed -->
       <Reference Include="@(ResolvedCompileFileDefinitionsToAdd)" />
-      <Reference Include="@(ResolvedFrameworkAssemblies)" />
-      
     </ItemGroup>
   </Target>
 
