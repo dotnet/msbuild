@@ -15,7 +15,7 @@
 
     <!-- Build MSBuildSdkResolver for all target frameworks (so we can build and test it x-plat) -->
     <MSBuild Projects="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver/Microsoft.DotNet.MSBuildSdkResolver.csproj"
-             Condition="'$(IncludeMSBuildSdkResolver)' != 'false'" />
+             Condition="'$(IncludeMSBuildSdkResolver)' == 'true'" />
 
     <!-- Publish MSBuildSdkResolver for net46 (to prepare it for the VS insertion nupkg packaging) -->
     <MSBuild Projects="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver/Microsoft.DotNet.MSBuildSdkResolver.csproj"
