@@ -41,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli
                 //If the request string doesn't have any wild cards or probable path indicators,
                 //  and doesn't have a "::" delimiter either, try to convert it to "latest package"
                 //  form
-                if (req.IndexOfAny(new[] { '*', '?', '/', '\\' }) < 0 && req.IndexOf("::", StringComparison.Ordinal) < 0)
+                if (OriginalRequestIsImplicitPackageVersionSyntax(request))
                 {
                     req += "::*";
                 }
@@ -67,6 +67,27 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             _environmentSettings.SettingsLoader.Save();
+        }
+
+        private bool OriginalRequestIsImplicitPackageVersionSyntax(string req)
+        {
+            if (req.IndexOfAny(new[] { '*', '?', '/', '\\' }) < 0 && req.IndexOf("::", StringComparison.Ordinal) < 0)
+            {
+                bool localFileSystemEntryExists = false;
+
+                try
+                {
+                    localFileSystemEntryExists = _environmentSettings.Host.FileSystem.FileExists(req)
+                                                 || _environmentSettings.Host.FileSystem.DirectoryExists(req);
+                }
+                catch
+                {
+                }
+
+                return !localFileSystemEntryExists;
+            }
+
+            return false;
         }
 
         public IEnumerable<string> Uninstall(IEnumerable<string> uninstallRequests)

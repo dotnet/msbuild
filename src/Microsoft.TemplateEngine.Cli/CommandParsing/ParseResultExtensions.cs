@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 
@@ -74,7 +74,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 return option.Arguments;
             }
 
-            return new List<string>();
+            return null;
         }
 
         private static bool TryTraversePath(this ParseResult parseResult, out AppliedOption option, params string[] optionPath)
