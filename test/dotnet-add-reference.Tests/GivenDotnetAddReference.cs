@@ -661,7 +661,7 @@ Commands:
         [InlineData("nonexistingframeworkname")]
         public void WhenFrameworkSwitchIsNotMatchingAnyOfTargetedFrameworksItPrintsError(string framework)
         {
-            var setup = Setup();
+            var setup = Setup(framework);
             var lib = new ProjDir(setup.LibDir);
             var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
 

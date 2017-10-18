@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -17,8 +15,8 @@
 
   <ItemGroup>
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
-    <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
-    <PackageReference Include="xunit.runner.console" Version="2.1.0" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.console" Version="2.2.0" />
     <PackageReference Include="Microsoft.Deployment.WindowsInstaller" Version="1.0.0" />
   </ItemGroup>
 

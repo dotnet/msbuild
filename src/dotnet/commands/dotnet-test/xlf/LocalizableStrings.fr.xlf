@@ -73,9 +73,11 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results.
-                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
+                                        Examples:
+                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="translated">Spécifiez un enregistreur d'événements pour les résultats des tests.
+        <target state="needs-review-translation">Spécifiez un enregistreur d'événements pour les résultats des tests.
                                         Exemple : --logger "trx[;LogFileName=&lt;Nom de fichier unique par défaut&gt;]"
                                         En savoir plus sur la prise en charge des arguments de l'enregistreur d'événements : https://aka.ms/vstest-report</target>
         <note />
@@ -171,6 +173,11 @@ Arguments de RunSettings :
                                         More info here : https://aka.ms/vstest-collect</source>
         <target state="translated">Active le collecteur de données pour la série de tests.
                                         Plus d'informations ici : https://aka.ms/vstest-collect</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
+        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
         <note />
       </trans-unit>
     </body>
