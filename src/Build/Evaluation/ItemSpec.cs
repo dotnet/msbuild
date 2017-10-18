@@ -247,22 +247,52 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         protected string ProjectDirectory { get; }
 
-        private readonly Lazy<FileSpecMatcherTester> _fileMatcher;
-        private readonly Lazy<IMSBuildGlob> _msbuildGlob;
-        protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob.Value;
+        private bool _fileMatcherInitialized;
+        private FileSpecMatcherTester _fileMatcher;
+
+        // not a Lazy to reduce memory
+        private FileSpecMatcherTester FileMatcher
+        {
+            get
+            {
+                if (_fileMatcherInitialized)
+                {
+                    return _fileMatcher;
+                }
+
+                _fileMatcher = CreateFileSpecMatcher();
+                _fileMatcherInitialized = true;
+
+                return _fileMatcher;
+            }
+        }
+
+        private IMSBuildGlob _msbuildGlob;
+
+        // not a Lazy to reduce memory
+        protected virtual IMSBuildGlob MsBuildGlob
+        {
+            get
+            {
+                if (_msbuildGlob == null)
+                {
+                    _msbuildGlob = CreateMsBuildGlob();
+                }
+
+                return _msbuildGlob;
+            }
+        }
 
         protected ItemFragment(string itemSpecFragment, string projectDirectory)
         {
             ItemSpecFragment = itemSpecFragment;
             ProjectDirectory = projectDirectory;
-            _fileMatcher = new Lazy<FileSpecMatcherTester>(CreateFileSpecMatcher);
-            _msbuildGlob = new Lazy<IMSBuildGlob>(CreateMsBuildGlob);
         }
 
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
         public virtual int MatchCount(string itemToMatch)
         {
-            return _fileMatcher.Value.IsMatch(itemToMatch) ? 1 : 0;
+            return FileMatcher.IsMatch(itemToMatch) ? 1 : 0;
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()
