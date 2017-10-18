@@ -237,6 +237,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_myApp_V20Path = Path.Combine(s_myAppRootPath, "v2.0");
         protected static readonly string s_myApp_V30Path = Path.Combine(s_myAppRootPath, "v3.0");
 
+        protected static readonly string s_netstandardLibraryDllPath = Path.Combine(s_rootPathPrefix, "NetStandard", "netstandardlibrary.dll");
+        protected static readonly string s_netstandardDllPath = Path.Combine(s_rootPathPrefix, "NetStandard", "netstandard.dll");
+
+        protected static readonly string s_portableDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "Portable.dll");
+        protected static readonly string s_systemRuntimeDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "System.Runtime.dll");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -562,10 +568,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\DirectoryContainsdllAndWinmd\c.winmd",
             @"C:\DirectoryContainstwoWinmd\a.winmd",
             @"C:\DirectoryContainstwoWinmd\c.winmd",
-            @"C:\SystemRuntime\System.Runtime.dll",
-            @"C:\SystemRuntime\Portable.dll",
-            @"C:\NetStandard\netstandardlibrary.dll",
-            @"C:\NetStandard\netstandard.dll",
+            s_systemRuntimeDllPath,
+            s_portableDllPath,
+            s_netstandardLibraryDllPath,
+            s_netstandardDllPath,
             @"C:\SystemRuntime\Regular.dll",
         };
 
@@ -2416,21 +2422,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension[0];
             }
 
-            if (String.Compare(path, @"C:\SystemRuntime\Portable.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a portable assembly with a reference to System.Runtime
                 return new AssemblyNameExtension[]
                 {
-                    GetAssemblyName(@"C:\SystemRuntime\System.Runtime.dll")
+                    GetAssemblyName(s_systemRuntimeDllPath)
                 };
             }
 
-            if (String.Compare(path, @"C:\NetStandard\netstandardlibrary.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_netstandardLibraryDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a .NET Standard assembly
                 return new AssemblyNameExtension[]
                 {
-                    GetAssemblyName(@"C:\NetStandard\netstandard.dll")
+                    GetAssemblyName(s_netstandardDllPath)
                 };
             }
 
