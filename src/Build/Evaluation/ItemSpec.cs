@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The fragments that compose an item spec string (values, globs, item references)
         /// </summary>
-        public ImmutableList<ItemFragment> Fragments { get; }
+        public List<ItemFragment> Fragments { get; }
 
         /// <summary>
         /// The expander needs to have a default item factory set.
@@ -54,16 +54,14 @@ namespace Microsoft.Build.Evaluation
             Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
         }
 
-        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
+        private List<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
-            var builder = ImmutableList.CreateBuilder<ItemFragment>();
-
             //  Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
 
             if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
             {
-                return builder.ToImmutable();
+                return new List<ItemFragment>();
             }
 
             // STEP 1: Expand properties in Include
@@ -71,6 +69,18 @@ namespace Microsoft.Build.Evaluation
             {
                 evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(ItemSpecString, ExpanderOptions.ExpandProperties, itemSpecLocation);
             }
+
+            var semicolonCount = 0;
+            foreach (var c in evaluatedItemspecEscaped)
+            {
+                if (c == ';')
+                {
+                    semicolonCount++;
+                }
+            }
+
+            // estimate the number of fragments with the number of semicolons. This is will overestimate in case of transforms with semicolons, but won't underestimate.
+            var fragments = new List<ItemFragment>(semicolonCount + 1);
 
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedItemspecEscaped.Length > 0)
@@ -85,7 +95,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (isItemListExpression)
                     {
-                        builder.Add(itemReferenceFragment);
+                        fragments.Add(itemReferenceFragment);
                     }
                     else
                     {
@@ -101,14 +111,14 @@ namespace Microsoft.Build.Evaluation
                         {
 
                             // Just return the original string.
-                            builder.Add(new ValueFragment(splitEscaped, projectDirectory));
+                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
                             // Unescape before handing it to the filesystem.
                             var filespecUnescaped = EscapingUtilities.UnescapeAll(splitEscaped);
 
-                            builder.Add(new GlobFragment(filespecUnescaped, projectDirectory));
+                            fragments.Add(new GlobFragment(filespecUnescaped, projectDirectory));
                         }
                         else
                         {
@@ -116,13 +126,13 @@ namespace Microsoft.Build.Evaluation
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
 
-                            builder.Add(new ValueFragment(splitEscaped, projectDirectory));
+                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
                     }
                 }
             }
 
-            return builder.ToImmutable();
+            return fragments;
         }
 
         private ItemExpressionFragment<P, I> ProcessItemExpression(string expression, IElementLocation elementLocation, string projectDirectory, out bool isItemListExpression)
