@@ -26,7 +26,7 @@
     <TemplateEngineVersion>1.0.0-beta2-20171004-309</TemplateEngineVersion>
     <TemplateEngineTemplateVersion>1.0.0-beta2-20171004-309</TemplateEngineTemplateVersion>
     <TemplateEngineTemplate2_0Version>1.0.0-beta2-20171004-309</TemplateEngineTemplate2_0Version>
-    <AspnetTemplateVersion>1.0.0-beta2-20171004-309</AspnetTemplateVersion>
+    <AspnetTemplateVersion>1.0.0-beta2-20170810-304</AspnetTemplateVersion>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
