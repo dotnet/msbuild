@@ -207,22 +207,25 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<string> FlattenFragmentsAsStrings()
         {
-            foreach (var valueString in Fragments.OfType<ValueFragment>().Select(v => v.ItemSpecFragment))
+            foreach (var fragment in Fragments)
             {
-                yield return valueString;
-            }
+                if (fragment is ValueFragment || fragment is GlobFragment)
+                {
+                    yield return fragment.ItemSpecFragment;
+                }
+                else if (fragment is ItemExpressionFragment<P, I>)
+                {
+                    var itemExpression = (ItemExpressionFragment<P, I>) fragment;
 
-            foreach (var globString in Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment))
-            {
-                yield return globString;
-            }
-
-            foreach (
-                var referencedItemString in
-                Fragments.OfType<ItemExpressionFragment<P, I>>().SelectMany(f => f.ReferencedItems).Select(v => v.ItemSpecFragment)
-            )
-            {
-                yield return referencedItemString;
+                    foreach (var referencedItem in itemExpression.ReferencedItems)
+                    {
+                        yield return referencedItem.ItemSpecFragment;
+                    }
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                }
             }
         }
 		
