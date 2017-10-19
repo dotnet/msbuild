@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
     <TargetFrameworks>netstandard1.5;net46</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.5</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' or '$(DotNetBuildFromSource)' == 'true' ">netstandard1.5</TargetFrameworks>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

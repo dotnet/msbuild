@@ -13,6 +13,8 @@
     <PackageReference Include="Microsoft.NetCore.App" Version="$(CLI_SharedFrameworkVersion)" />
     <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(CLI_FSharp_Version)" />
     <PackageReference Include="CliDeps.Satellites.FSharp" Version="$(CLI_FSharp_Satellites_Version)" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
   </ItemGroup>
 
   <ItemGroup>
