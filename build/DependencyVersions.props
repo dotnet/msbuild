@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.0.1</CLI_SharedFrameworkVersion>
-    <CLI_MSBuild_Version>15.4.7</CLI_MSBuild_Version>
+    <CLI_SharedFrameworkVersion>2.0.0</CLI_SharedFrameworkVersion>
+    <CLI_MSBuild_Version>15.4.8</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.2-beta1-61921-05</CLI_Roslyn_Version>
     <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170727-1</CLI_Roslyn_Satellites_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
