@@ -1,13 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if !SOURCE_BUILD
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.VersionTools.Automation;
 using System.IO;
 
-#if !SOURCE_BUILD
-using Microsoft.DotNet.VersionTools.Automation;
-#endif
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -24,7 +23,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         public override bool Execute()
         {
-#if !SOURCE_BUILD
             string versionsRepoPath = $"build-info/dotnet/cli/{BranchName}";
 
             GitHubAuth auth = new GitHubAuth(GitHubPassword);
@@ -32,9 +30,9 @@ namespace Microsoft.DotNet.Cli.Build
             repoUpdater.UpdateBuildInfoAsync(
                 Directory.GetFiles(PackagesDirectory, "*.nupkg"),
                 versionsRepoPath).Wait();
-#endif
 
             return true;
         }
     }
 }
+#endif
