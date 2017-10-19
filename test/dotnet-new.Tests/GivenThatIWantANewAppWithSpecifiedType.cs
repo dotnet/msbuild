@@ -20,14 +20,15 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("C#", "classlib", false, false)]
         [InlineData("C#", "mstest", false, false)]
         [InlineData("C#", "xunit", false, false)]
-        [InlineData("C#", "web", false, false)]
-        [InlineData("C#", "mvc", false, false)]
-        [InlineData("C#", "webapi", false, false)]
+        [InlineData("C#", "web", true, false)]
+        [InlineData("C#", "mvc", true, false)]
+        [InlineData("C#", "webapi", true, false)]
         [InlineData("C#", "angular", false, true)]
         [InlineData("C#", "react", false, true)]
         [InlineData("C#", "reactredux", false, true)]
         [InlineData("F#", "console", false, false)]
-        [InlineData("F#", "classlib", false, false)]
+        // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
+        //[InlineData("F#", "classlib", false, false)]
         [InlineData("F#", "mstest", false, false)]
         [InlineData("F#", "xunit", false, false)]
         [InlineData("F#", "mvc", true, false)]
@@ -50,8 +51,7 @@ namespace Microsoft.DotNet.New.Tests
 
             if (useNuGetConfigForAspNet)
             {
-                var configFile = new FileInfo(Path.Combine(rootPath, "..", "..", "..", "..", "..", "NuGet.tempaspnetpatch.config"));
-                File.Copy(configFile.FullName, Path.Combine(rootPath, "NuGet.Config"));
+                AspNetNuGetConfiguration.WriteNuGetConfigWithAspNetPrivateFeeds(Path.Combine(rootPath, "NuGet.Config"));
             }
 
             if (skipSpaWebpackSteps)
@@ -61,10 +61,9 @@ namespace Microsoft.DotNet.New.Tests
                 Directory.CreateDirectory(Path.Combine(rootPath, "wwwroot", "dist"));
             }
 
-            // https://github.com/dotnet/templating/issues/946 - remove DisableImplicitAssetTargetFallback once this is fixed.
             new TestCommand("dotnet")
                 .WithWorkingDirectory(rootPath)
-                .Execute($"restore /p:DisableImplicitAssetTargetFallback=true")
+                .Execute($"restore")
                 .Should().Pass();
 
             var buildResult = new TestCommand("dotnet")

@@ -180,6 +180,9 @@
   <data name="MigrateDefinition" xml:space="preserve">
     <value>Migrates a project.json based project to a msbuild based project.</value>
   </data>
+  <data name="StoreDefinition" xml:space="preserve">
+    <value>Stores the specified assemblies in the runtime store.</value>
+  </data>
   <data name="ProjectModificationCommands" xml:space="preserve">
     <value>Project modification commands</value>
   </data>
@@ -256,6 +259,6 @@
     <value>Roll forward on no candidate shared framework is enabled.</value>
   </data>
   <data name="AdditionalDeps" xml:space="preserve">
-    <value>Path to additonal deps.json file.</value>
+    <value>Path to additional deps.json file.</value>
   </data>
 </root>

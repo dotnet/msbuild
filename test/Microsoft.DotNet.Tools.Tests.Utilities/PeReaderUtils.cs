@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             // TODO: Nick Guerrera (Nick.Guerrera@microsoft.com) hacked this method for temporary use.
             // There is a blob decoder feature in progress but it won't ship in time for our milestone.
-            // Replace this method with the blob decoder feature when later it is availale.
+            // Replace this method with the blob decoder feature when later it is available.
 
             var signature = reader.GetMemberReference((MemberReferenceHandle)attribute.Constructor).Signature;
             var signatureReader = reader.GetBlobReader(signature);

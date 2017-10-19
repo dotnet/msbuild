@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void VersionCommandDisplaysCorrectVersion()
         {
-            var versionFilePath = Path.Combine(AppContext.BaseDirectory, ".version");
+            var versionFilePath = Path.Combine(AppContext.BaseDirectory, "ExpectedSdkVersion.txt");
             var version = GetVersionFromFile(versionFilePath);
 
             CommandResult result = new DotnetCommand()
@@ -31,14 +31,8 @@ namespace Microsoft.DotNet.Tests
         {
             using (var reader = new StreamReader(File.OpenRead(versionFilePath)))
             {
-                SkipCommit(reader);
                 return reader.ReadLine();
             }
-        }
-
-        private void SkipCommit(StreamReader reader)
-        {
-            reader.ReadLine();
         }
     }
 }
