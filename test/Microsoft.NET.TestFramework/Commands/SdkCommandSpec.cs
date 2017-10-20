@@ -26,11 +26,19 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public ICommand ToCommand()
         {
-            var commandSpec = new CommandSpec(FileName, EscapeArgs(), CommandResolutionStrategy.Path, Environment);
+            var commandSpec = new CommandSpec(FileName, EscapeArgs(), CommandResolutionStrategy.Path);
             ICommand ret = Command.Create(commandSpec);
             if (WorkingDirectory != null)
             {
                 ret = ret.WorkingDirectory(WorkingDirectory);
+            }
+
+            //  It's necessary to set the environment variables here instead of passing them to the CommandSpec constructor,
+            //  because if they are passed to the CommandSpec constructor, they won't override existing environment variables,
+            //  which can cause the wrong MSBuildSDKsPath to be used
+            foreach (var kvp in Environment)
+            {
+                ret.EnvironmentVariable(kvp.Key, kvp.Value);
             }
 
             return ret;
