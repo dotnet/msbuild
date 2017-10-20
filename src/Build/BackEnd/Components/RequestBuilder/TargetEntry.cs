@@ -18,6 +18,7 @@ using Microsoft.Build.Debugging;
 #endif
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -363,7 +364,17 @@ namespace Microsoft.Build.BackEnd
                     // target.  In the Task builder (and original Task Engine), a Task Skipped message would be logged in
                     // the context of the target, not the task.  This should be the same, especially given that we
                     // wish to allow batching on the condition of a target.
-                    projectLoggingContext.LogComment(MessageImportance.Low, "TargetSkippedFalseCondition", _target.Name, _target.Condition, expanded);
+                    var skippedTargetEventArgs = new TargetSkippedEventArgs(
+                        "TargetSkippedFalseCondition",
+                        _target.Name,
+                        _target.Condition,
+                        expanded)
+                    {
+                        BuildEventContext = projectLoggingContext.BuildEventContext,
+                        TargetName = _target.Name,
+                        ParentTarget = ParentEntry?.Target?.Name
+                    };
+                    projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
                 }
 
                 return new List<TargetSpecification>();

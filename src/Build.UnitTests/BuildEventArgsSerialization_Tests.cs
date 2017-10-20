@@ -359,6 +359,27 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripTargetSkippedEventArgs()
+        {
+            var args = new TargetSkippedEventArgs(
+                "Message")
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+                ProjectFile = "foo.csproj",
+                ParentTarget = "bar"
+            };
+
+            Roundtrip(args,
+                e => e.ParentTarget,
+                e => e.Importance.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile);
+        }
+
+        [Fact]
         public void ReadingCorruptedStreamThrows()
         {
             var memoryStream = new MemoryStream();

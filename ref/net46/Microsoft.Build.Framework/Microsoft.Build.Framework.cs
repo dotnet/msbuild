@@ -464,6 +464,13 @@ namespace Microsoft.Build.Framework
         public System.Collections.IEnumerable TargetOutputs { get { throw null; } set { } }
     }
     public delegate void TargetFinishedEventHandler(object sender, Microsoft.Build.Framework.TargetFinishedEventArgs e);
+    public partial class TargetSkippedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public TargetSkippedEventArgs() { }
+        public TargetSkippedEventArgs(string message, params object[] messageArgs) { }
+        public string ParentTarget { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string TargetName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
     public partial class TargetStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected TargetStartedEventArgs() { }

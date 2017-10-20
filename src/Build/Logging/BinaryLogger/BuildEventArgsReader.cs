@@ -105,6 +105,9 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.ProjectImported:
                     result = ReadProjectImportedEventArgs();
                     break;
+                case BinaryLogRecordKind.TargetSkipped:
+                    result = ReadTargetSkippedEventArgs();
+                    break;
                 default:
                     break;
             }
@@ -146,6 +149,24 @@ namespace Microsoft.Build.Logging
 
             e.ImportedProjectFile = importedProjectFile;
             e.UnexpandedProject = unexpandedProject;
+            return e;
+        }
+
+        private BuildEventArgs ReadTargetSkippedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            // Read unused Importance, it defaults to Low
+            ReadInt32();
+            var parentTarget = ReadOptionalString();
+
+            var e = new TargetSkippedEventArgs(
+                fields.Message);
+
+            SetCommonFields(e, fields);
+
+            e.ProjectFile = fields.ProjectFile;
+
+            e.ParentTarget = parentTarget;
             return e;
         }
 

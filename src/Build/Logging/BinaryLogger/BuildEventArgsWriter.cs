@@ -251,6 +251,11 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
+            if (e is TargetSkippedEventArgs)
+            {
+                Write((TargetSkippedEventArgs)e);
+            }
+
             Write(BinaryLogRecordKind.Message);
             WriteMessageFields(e);
         }
@@ -261,6 +266,13 @@ namespace Microsoft.Build.Logging
             WriteMessageFields(e);
             WriteOptionalString(e.ImportedProjectFile);
             WriteOptionalString(e.UnexpandedProject);
+        }
+
+        private void Write(TargetSkippedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.TargetSkipped);
+            WriteMessageFields(e);
+            WriteOptionalString(e.ParentTarget);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)

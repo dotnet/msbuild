@@ -141,6 +141,7 @@
     <Compile Include="TargetFinishedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="TargetSkippedEventArgs.cs" />
     <Compile Include="TargetStartedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

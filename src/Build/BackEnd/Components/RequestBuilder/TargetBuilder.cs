@@ -20,6 +20,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using System.Threading.Tasks;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -554,12 +555,15 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
-                    _projectLoggingContext.LogComment
-                        (
-                        Microsoft.Build.Framework.MessageImportance.Low,
+                    var skippedTargetEventArgs = new TargetSkippedEventArgs(
                         targetResult.ResultCode == TargetResultCode.Success ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
-                        currentTargetEntry.Name
-                        );
+                        currentTargetEntry.Name)
+                    {
+                        BuildEventContext = _projectLoggingContext.BuildEventContext,
+                        TargetName = currentTargetEntry.Name,
+                        ParentTarget = currentTargetEntry.ParentEntry?.Target.Name
+                    };
+                    _projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
 
                     if (currentTargetEntry.StopProcessingOnCompletion)
                     {
