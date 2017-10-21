@@ -17,7 +17,6 @@ namespace Microsoft.Build.Shared
         private static bool s_initialized;
 
         // Cached method info
-        private static MethodInfo s_assemblyNameCloneMethod;
         private static PropertyInfo s_assemblylocationProperty;
         private static MethodInfo s_cultureInfoGetCultureMethod;
 
@@ -55,22 +54,25 @@ namespace Microsoft.Build.Shared
 
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
-#if FEATURE_ASSEMBLYNAME_CLONE
-            return (AssemblyName) assemblyNameToClone.Clone();
-#else
+            // NOTE: In large projects, this is called a lot. Avoid calling AssemblyName.Clone
+            // because it clones the Version property (which is immutable) and the PublicKey property
+            // and the PublicKeyToken property.
+            //
+            // While the array themselves are mutable - throughout MSBuild they are only ever
+            // read from.
+            AssemblyName name = new AssemblyName();
+            name.Name = assemblyNameToClone.Name;
+            name.SetPublicKey(assemblyNameToClone.GetPublicKey());
+            name.SetPublicKeyToken(assemblyNameToClone.GetPublicKeyToken());
+            name.Version = assemblyNameToClone.Version;
+            name.CultureInfo = assemblyNameToClone.CultureInfo;
+            name.HashAlgorithm = assemblyNameToClone.HashAlgorithm;
+            name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
+            name.CodeBase = assemblyNameToClone.CodeBase;
+            name.Flags = assemblyNameToClone.Flags;
+            name.KeyPair = assemblyNameToClone.KeyPair;
 
-            Initialize();
-
-            if (s_assemblyNameCloneMethod == null)
-            {
-                return new AssemblyName(assemblyNameToClone.FullName);
-            }
-
-            // Try to Invoke the Clone method via reflection. If the method exists (it will on .NET
-            // Core 2.0 or later) use that result, otherwise use new AssemblyName(FullName).
-            return (AssemblyName) s_assemblyNameCloneMethod.Invoke(assemblyNameToClone, null) ??
-                   new AssemblyName(assemblyNameToClone.FullName);
-#endif
+            return name;
         }
 
         public static bool CultureInfoHasGetCultures()
@@ -101,7 +103,6 @@ namespace Microsoft.Build.Shared
         {
             if (s_initialized) return;
 
-            s_assemblyNameCloneMethod = typeof(AssemblyName).GetMethod("Clone");
             s_assemblylocationProperty = typeof(Assembly).GetProperty("Location", typeof(string));
             s_cultureInfoGetCultureMethod = typeof(CultureInfo).GetMethod("GetCultures");
 
