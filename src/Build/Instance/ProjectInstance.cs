@@ -579,6 +579,8 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        bool IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.CanEvaluateElementsWithFalseConditions => false;
+
         /// <summary>
         /// Enumerator over properties in this project
         /// </summary>

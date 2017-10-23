@@ -151,7 +151,14 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-           
+
+            public bool CanEvaluateElementsWithFalseConditions
+            {
+                get
+                {
+                    return _wrappedData.CanEvaluateElementsWithFalseConditions;
+                }
+            }
 
             public PropertyDictionary<P> Properties
             {
