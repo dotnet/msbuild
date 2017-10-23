@@ -35,9 +35,7 @@
                      Condition=" '$(IslinuxPortable)' != 'true' "/>
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
                      Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
-      <ForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.Cli.Utils.*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
-      <ForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.MSBuildSdkResolver.*.nupkg"
+      <ForPublishing Include="@(NupkgsForPublishing)"
                      Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).*.nupkg"
                      Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' "/>
