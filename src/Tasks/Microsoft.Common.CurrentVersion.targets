@@ -1585,6 +1585,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
     </MSBuild>
 
+    <ItemGroup>
+      <!--
+        Preserve the ItemSpec value on the _ProjectReferenceTargetFrameworkPossibilities. Because relative paths in another project
+        context would be incorrect, the MSBuild task invocation needs expands the project reference paths in the MSBuild task above.
+        This is generally OK, but if the list is copied the OriginalItemSpec can become the expanded value and cause issues correlating
+        a project reference back to an Item instance.
+      -->
+      <_ProjectReferenceTargetFrameworkPossibilitiesOriginalItemSpec Include="@(_ProjectReferenceTargetFrameworkPossibilities->'%(OriginalItemSpec)')"/>
+      <_ProjectReferenceTargetFrameworkPossibilities Remove="@(_ProjectReferenceTargetFrameworkPossibilities)"  />
+      <_ProjectReferenceTargetFrameworkPossibilities Include="@(_ProjectReferenceTargetFrameworkPossibilitiesOriginalItemSpec)"/>
+    </ItemGroup>
+
     <!-- For each reference, get closest match -->
     <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
                                             CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
