@@ -1368,6 +1368,11 @@ namespace Microsoft.Build.Execution
                         {
                             // Utilities.TaskItem's don't know about item definition metadata. So merge that into the values.
                             destinationItem.SetMetadata(metadatum.Name, GetMetadataEscaped(metadatum.Name));
+                            if (metadatum.Name == "OriginalItemSpec")
+                            {
+                                // We copied OriginalItemSpec, don't re-apply it later.
+                                addOriginalItemSpec = false;
+                            }
                         }
                     }
                 }
