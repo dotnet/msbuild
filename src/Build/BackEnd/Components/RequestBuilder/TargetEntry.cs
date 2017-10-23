@@ -178,7 +178,7 @@ namespace Microsoft.Build.BackEnd
             _targetBuilderCallback = targetBuilderCallback;
             _targetSpecification = targetSpecification;
             _parentTarget = parentTarget;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup.ReadOnlyLookup, baseLookup.ReadOnlyLookup);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup);
             _state = TargetEntryState.Dependencies;
             _baseLookup = baseLookup;
             _host = host;

@@ -100,7 +100,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             _metadata = metadata;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup.ReadOnlyLookup, _lookup.ReadOnlyLookup, new StringMetadataTable(metadata));
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(metadata));
 
             _bucketSequenceNumber = bucketSequenceNumber;
         }

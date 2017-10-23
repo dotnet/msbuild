@@ -707,11 +707,6 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                if (!_data.ShouldEvaluateForDesignTime)
-                {
-                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ConditionedProperties));
-                }
-
                 if (_data.ConditionedProperties == null)
                 {
                     return ReadOnlyEmptyDictionary<string, List<string>>.Instance;
@@ -756,7 +751,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                if (!_data.ShouldEvaluateForDesignTime)
+                if (!(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
                 {
                     ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ItemsIgnoringCondition));
                 }
@@ -868,11 +863,6 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                if (!_data.ShouldEvaluateForDesignTime)
-                {
-                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(AllEvaluatedItemDefinitionMetadata));
-                }
-
                 ICollection<ProjectMetadata> allEvaluatedItemDefinitionMetadata = _data.AllEvaluatedItemDefinitionMetadata;
 
                 if (allEvaluatedItemDefinitionMetadata == null)
@@ -897,11 +887,6 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                if (!_data.ShouldEvaluateForDesignTime)
-                {
-                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(AllEvaluatedItems));
-                }
-
                 ICollection<ProjectItem> allEvaluatedItems = _data.AllEvaluatedItems;
 
                 if (allEvaluatedItems == null)
@@ -2713,9 +2698,9 @@ namespace Microsoft.Build.Evaluation
             }
 
             // For back compat Project based evaluations should, by default, evaluate elements with false conditions
-            var shouldEvaluateElementsWithFalseCondition = Traits.Instance.EscapeHatches.EvaluateElementsWithFalseConditionInProjectEvaluation ?? !loadSettings.HasFlag(ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+            var canEvaluateElementsWithFalseConditions = Traits.Instance.EscapeHatches.EvaluateElementsWithFalseConditionInProjectEvaluation ?? !loadSettings.HasFlag(ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
 
-            _data = new Data(this, globalPropertiesCollection, toolsVersion, subToolsetVersion, shouldEvaluateElementsWithFalseCondition);
+            _data = new Data(this, globalPropertiesCollection, toolsVersion, subToolsetVersion, canEvaluateElementsWithFalseConditions);
 
             _loadSettings = loadSettings;
 
@@ -2945,13 +2930,13 @@ namespace Microsoft.Build.Evaluation
             /// Constructor taking the immutable global properties and tools version.
             /// Tools version may be null.
             /// </summary>
-            internal Data(Project project, PropertyDictionary<ProjectPropertyInstance> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, bool shouldEvaluateForDesignTime)
+            internal Data(Project project, PropertyDictionary<ProjectPropertyInstance> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, bool CanEvaluateElementsWithFalseConditions)
             {
                 _project = project;
                 _globalProperties = globalProperties;
-                ShouldEvaluateForDesignTime = shouldEvaluateForDesignTime;
                 this.ExplicitToolsVersion = explicitToolsVersion;
                 this.ExplicitSubToolsetVersion = explicitSubToolsetVersion;
+                this.CanEvaluateElementsWithFalseConditions = CanEvaluateElementsWithFalseConditions;
             }
 
             /// <summary>
@@ -2959,7 +2944,9 @@ namespace Microsoft.Build.Evaluation
             /// as well as items respecting condition; and collect
             /// conditioned properties, as well as regular properties
             /// </summary>
-            public bool ShouldEvaluateForDesignTime { get; }
+            public bool ShouldEvaluateForDesignTime => true;
+
+            public bool CanEvaluateElementsWithFalseConditions { get; }
 
             /// <summary>
             /// Collection of all evaluated item definitions, one per item-type

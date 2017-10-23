@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd
     /// 
     /// For sensible semantics, only the current primary scope can be modified at any point.
     /// </summary>
-    internal class Lookup
+    internal class Lookup : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>
     {
         #region Fields
 
@@ -83,11 +83,6 @@ namespace Microsoft.Build.BackEnd
         /// a remove or modify of the real item, not the clone we handed over. So we keep a lookup of (clone, original) to consult.
         /// </summary>
         private Dictionary<ProjectItemInstance, ProjectItemInstance> _cloneTable;
-
-        /// <summary>
-        /// Read-only wrapper around this lookup.
-        /// </summary>
-        private ReadOnlyLookup _readOnlyLookup;
 
         /// <summary>
         /// A dictionary of named values for debugger display only. If 
@@ -136,21 +131,6 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Returns a read-only wrapper around this lookup
-        /// </summary>
-        internal ReadOnlyLookup ReadOnlyLookup
-        {
-            get
-            {
-                if (_readOnlyLookup == null)
-                {
-                    _readOnlyLookup = new ReadOnlyLookup(this);
-                }
-                return _readOnlyLookup;
-            }
-        }
 
         // Convenience private properties
         // "Primary" is the "top" or "innermost" scope
@@ -455,7 +435,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns null.
         /// Caller must not modify the property returned.
         /// </summary>
-        internal ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
+        public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
         {
             // Walk down the tables and stop when the first 
             // property with this name is found
@@ -493,7 +473,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns null.
         /// Caller must not modify the property returned.
         /// </summary>
-        internal ProjectPropertyInstance GetProperty(string name)
+        public ProjectPropertyInstance GetProperty(string name)
         {
             ErrorUtilities.VerifyThrowInternalLength(name, "name");
 
@@ -505,7 +485,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns an empty list.
         /// Caller must not modify the group returned.
         /// </summary>
-        internal ICollection<ProjectItemInstance> GetItems(string itemType)
+        public ICollection<ProjectItemInstance> GetItems(string itemType)
         {
             // The visible items consist of the adds (accumulated as we go down)
             // plus the first set of regular items we encounter
@@ -1484,39 +1464,5 @@ namespace Microsoft.Build.BackEnd
                 _owningLookup.LeaveScope(this);
             }
         }
-    }
-
-    #region Related Types
-
-    /// <summary>
-    /// Read-only wrapper around a lookup.
-    /// Passed to Expander and ItemExpander, which only need to
-    /// use a lookup in a read-only fashion, thus increasing 
-    /// encapsulation of the data in the Lookup.
-    /// </summary>
-    internal class ReadOnlyLookup : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>
-    {
-        private Lookup _lookup;
-
-        internal ReadOnlyLookup(Lookup lookup)
-        {
-            _lookup = lookup;
-        }
-
-        public ICollection<ProjectItemInstance> GetItems(string itemType)
-        {
-            return _lookup.GetItems(itemType);
-        }
-
-        public ProjectPropertyInstance GetProperty(string name)
-        {
-            return _lookup.GetProperty(name);
-        }
-
-        public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
-        {
-            return _lookup.GetProperty(name, startIndex, endIndex);
-        }
-        #endregion
     }
 }

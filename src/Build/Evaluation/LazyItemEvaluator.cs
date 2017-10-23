@@ -55,20 +55,21 @@ namespace Microsoft.Build.Evaluation
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
-            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType).Select(itemData => itemData.Item).ToList());
+            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
         }
 
-        private ICollection<ItemData> GetItems(string itemType)
+        private ImmutableList<I> GetItems(string itemType)
         {
             LazyItemList itemList = GetItemList(itemType);
             if (itemList == null)
             {
-                return ImmutableList<ItemData>.Empty;
+                return ImmutableList<I>.Empty;
             }
-            return itemList.GetItems(ImmutableHashSet<string>.Empty).Where(itemData => itemData.ConditionResult).ToList();
+
+            return itemList.GetMatchedItems(ImmutableHashSet<string>.Empty);
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
@@ -245,7 +246,19 @@ namespace Microsoft.Build.Evaluation
                 _memoizedOperation = new MemoizedOperation(operation);
             }
 
-            public ImmutableList<ItemData>.Builder GetItems(ImmutableHashSet<string> globsToIgnore)
+            public ImmutableList<I> GetMatchedItems(ImmutableHashSet<string> globsToIgnore)
+            {
+                ImmutableList<I>.Builder items = ImmutableList.CreateBuilder<I>();
+                foreach (ItemData data in GetItemData(globsToIgnore))
+                {
+                    if (data.ConditionResult)
+                        items.Add(data.Item);
+                }
+
+                return items.ToImmutable();
+            }
+
+            public ImmutableList<ItemData>.Builder GetItemData(ImmutableHashSet<string> globsToIgnore)
             {
                 // Cache results only on the LazyItemOperations whose results are required by an external caller (via GetItems). This means:
                 //   - Callers of GetItems who have announced ahead of time that they would reference an operation (via MarkAsReferenced())
@@ -412,7 +425,7 @@ namespace Microsoft.Build.Evaluation
 
         public IEnumerable<ItemData> GetAllItemsDeferred()
         {
-            return _itemLists.Values.SelectMany(itemList => itemList.GetItems(ImmutableHashSet<string>.Empty))
+            return _itemLists.Values.SelectMany(itemList => itemList.GetItemData(ImmutableHashSet<string>.Empty))
                                     .OrderBy(itemData => itemData.ElementOrder);
         }
 
