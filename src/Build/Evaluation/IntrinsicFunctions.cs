@@ -449,6 +449,11 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
         }
 
+        public static bool IsRunningFromVisualStudio()
+        {
+            return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+        }
+
         #region Debug only intrinsics
 
         /// <summary>
