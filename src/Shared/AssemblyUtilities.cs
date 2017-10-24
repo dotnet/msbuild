@@ -54,6 +54,10 @@ namespace Microsoft.Build.Shared
 
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
+#if CLR2COMPATIBILITY
+            return (AssemblyName) assemblyNameToClone.Clone();
+#else
+
             // NOTE: In large projects, this is called a lot. Avoid calling AssemblyName.Clone
             // because it clones the Version property (which is immutable) and the PublicKey property
             // and the PublicKeyToken property.
@@ -66,9 +70,13 @@ namespace Microsoft.Build.Shared
             name.SetPublicKeyToken(assemblyNameToClone.GetPublicKeyToken());
             name.Version = assemblyNameToClone.Version;
             name.Flags = assemblyNameToClone.Flags;
-            name.CultureName = assemblyNameToClone.CultureName;
             name.ContentType = assemblyNameToClone.ContentType;
             name.ProcessorArchitecture = assemblyNameToClone.ProcessorArchitecture;
+
+            // mono does not support CultureName
+#if !MONO
+            name.CultureName = assemblyNameToClone.CultureName;
+#endif
 
 #if FEATURE_ASSEMBLYNAME_CULTUREINFO
             name.CultureInfo = assemblyNameToClone.CultureInfo;
@@ -80,6 +88,8 @@ namespace Microsoft.Build.Shared
 #endif
 
             return name;
+#endif
+
         }
 
         public static bool CultureInfoHasGetCultures()
