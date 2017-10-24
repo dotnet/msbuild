@@ -69,13 +69,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                                                 Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net461\ref\%(FileName).dll')" />
 
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
-                                          Include="$(MSBuildThisFileDirectory)\net47\lib\*.dll" />
+                                          Include="$(MSBuildThisFileDirectory)net47\lib\*.dll" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
-                                          Include="$(MSBuildThisFileDirectory)\net462\lib\*.dll"
-                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net462\lib\%(FileName).dll')" />
+                                          Include="$(MSBuildThisFileDirectory)net462\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)net462\lib\%(FileName).dll')" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
-                                          Include="$(MSBuildThisFileDirectory)\net461\lib\*.dll"
-                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll')" />
+                                          Include="$(MSBuildThisFileDirectory)net461\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)net461\lib\%(FileName).dll')" />
 
       <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
            consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in 
@@ -85,11 +85,26 @@ Copyright (c) .NET Foundation. All rights reserved.
            targets. -->
       <Reference Remove="%(_NETStandardLibraryNETFrameworkReference.FileName)" />
 
-      <Reference Include="@(_NETStandardLibraryNETFrameworkReference)">
+      <!-- Put each facade assembly in two separate items: Reference with Private set to false, which means it won't be
+           copied locally, and ReferenceCopyLocalPaths, which will be copied locally.  The reason for this split is to
+           workaround https://github.com/dotnet/core-setup/issues/2981 by ensuring that the facades are written
+           to the deps.json with a type of "referenceassembly" instead of "reference".
+           
+           The exception is netfx.force.conflicts.dll, which shouldn't be copied local.  So it isn't included in
+           ReferenceCopyLocalPaths.
+           
+           When we add the Reference items, we use the simple name as the ItemSpec, and refer to the full path
+           to the DLL via the HintPath metadata.  This is so that if we're replacing a simple Reference,
+           the OriginalItemSpec of the resolved reference will match to the Reference that was replaced,
+           and VS won't show a warning icon on the reference.  See https://github.com/dotnet/sdk/issues/1499
+           -->
+      
+      <Reference Include="%(_NETStandardLibraryNETFrameworkLib.FileName)">
+        <HintPath>%(_NETStandardLibraryNETFrameworkLib.Identity)</HintPath>
         <Private>false</Private>
       </Reference>
-
-      <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)">
+      
+      <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)" Condition="'%(FileName)' != 'netfx.force.conflicts'">
         <Private>false</Private>
       </ReferenceCopyLocalPaths>
     </ItemGroup>
