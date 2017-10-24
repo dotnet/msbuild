@@ -59,15 +59,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <!-- if any reference depends on netstandard and it is not inbox, add references and implementation assemblies for netstandard2.0  -->
     <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true'">
-      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
-                                                Include="$(MSBuildThisFileDirectory)\net47\ref\*.dll" />
-      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
-                                                Include="$(MSBuildThisFileDirectory)\net462\ref\*.dll"
-                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net462\ref\%(FileName).dll')" />
-      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
-                                                Include="$(MSBuildThisFileDirectory)\net461\ref\*.dll"
-                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net461\ref\%(FileName).dll')" />
-
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
                                           Include="$(MSBuildThisFileDirectory)net47\lib\*.dll" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
@@ -83,7 +74,7 @@ Copyright (c) .NET Foundation. All rights reserved.
            Simple references can also come from NuGet framework assemblies, hence this statement should occur after
            including all computed references, thus this target is scheduled after references have been raised by NuGet
            targets. -->
-      <Reference Remove="%(_NETStandardLibraryNETFrameworkReference.FileName)" />
+      <Reference Remove="%(_NETStandardLibraryNETFrameworkLib.FileName)" />
 
       <!-- Put each facade assembly in two separate items: Reference with Private set to false, which means it won't be
            copied locally, and ReferenceCopyLocalPaths, which will be copied locally.  The reason for this split is to
