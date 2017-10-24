@@ -30,5 +30,6 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="1.0.0-prerelease-01929-02" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
  </ItemGroup>
 </Project>
