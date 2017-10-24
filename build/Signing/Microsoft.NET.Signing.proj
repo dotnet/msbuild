@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
 
   <PropertyGroup>
-    <SignTool>$(NuGet_Packages)\roslyntools.microsoft.signtool\0.2.0-beta\tools\SignTool.exe</SignTool>
+    <SignTool>$(NuGet_Packages)\roslyntools.microsoft.signtool\0.3.3-beta\tools\SignTool.exe</SignTool>
   </PropertyGroup>
 
   <ItemGroup>

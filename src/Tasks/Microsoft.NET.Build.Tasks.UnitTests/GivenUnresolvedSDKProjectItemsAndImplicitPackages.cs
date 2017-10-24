@@ -58,7 +58,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 metadata: new Dictionary<string, string>
                 {
                     { MetadataKeys.SDKPackageItemSpec, "" },
-                    { MetadataKeys.Name, "DefaultImplicitPackage1" }
+                    { MetadataKeys.Name, "DefaultImplicitPackage1" },
+                    { MetadataKeys.Version, "1.2.3" }
                 });
 
             var task = new CollectSDKReferencesDesignTime();

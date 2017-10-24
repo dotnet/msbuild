@@ -51,19 +51,122 @@
       <Link>Resources\xlf\%(FileName)%(Extension)</Link>
     </None>
     <EmbeddedResource Include="..\Common\Resources\Strings.resx">
-      <Link>Resources\%(FileName)%(Extension)</Link>
+      <Link>Resources\Strings.resx</Link>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
     </EmbeddedResource>
     <Compile Include="..\Common\Resources\Strings.Designer.cs">
-      <Link>Resources\%(FileName)%(Extension)</Link>
+      <Link>Resources\Strings.Designer.cs</Link>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="..\Common\src\BuildErrorException.cs">
+      <Link>Common\.\\BuildErrorException.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\DiagnosticMessageSeverity.cs">
+      <Link>Common\.\\DiagnosticMessageSeverity.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\DiagnosticsHelper.cs">
+      <Link>Common\.\\DiagnosticsHelper.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\FileUtilities.cs">
+      <Link>Common\.\\FileUtilities.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\FileUtilities.net45.cs">
+      <Link>Common\.\\FileUtilities.net45.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\FileUtilities.netstandard.cs">
+      <Link>Common\.\\FileUtilities.netstandard.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ILog.cs">
+      <Link>Common\.\\ILog.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ItemUtilities.cs">
+      <Link>Common\.\\ItemUtilities.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\MSBuildLog.cs">
+      <Link>Common\.\\MSBuildLog.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\MetadataKeys.cs">
+      <Link>Common\.\\MetadataKeys.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\NETSdkError.cs">
+      <Link>Common\.\\NETSdkError.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\NuGetUtils.cs">
+      <Link>Common\.\\NuGetUtils.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\TaskBase.cs">
+      <Link>Common\.\\TaskBase.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ConflictResolution\ConflictItem.cs">
+      <Link>Common\ConflictResolution\\ConflictItem.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ConflictResolution\ConflictResolver.cs">
+      <Link>Common\ConflictResolution\\ConflictResolver.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ConflictResolution\MSBuildUtilities.cs">
+      <Link>Common\ConflictResolution\\MSBuildUtilities.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ConflictResolution\MetadataNames.cs">
+      <Link>Common\ConflictResolution\\MetadataNames.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ConflictResolution\PackageRank.cs">
+      <Link>Common\ConflictResolution\\PackageRank.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ConflictResolution\PlatformManifestReader.cs">
+      <Link>Common\ConflictResolution\\PlatformManifestReader.cs</Link>
+    </Compile>
+    <Compile Update="..\Common\src\ConflictResolution\ResolvePackageFileConflicts.cs">
+      <Link>Common\ConflictResolution\\ResolvePackageFileConflicts.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="..\Common\Resources\xlf\Strings.cs.xlf">
+      <Link>Resources\xlf\Strings.cs.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.de.xlf">
+      <Link>Resources\xlf\Strings.de.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.es.xlf">
+      <Link>Resources\xlf\Strings.es.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.fr.xlf">
+      <Link>Resources\xlf\Strings.fr.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.it.xlf">
+      <Link>Resources\xlf\Strings.it.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.ja.xlf">
+      <Link>Resources\xlf\Strings.ja.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.ko.xlf">
+      <Link>Resources\xlf\Strings.ko.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.pl.xlf">
+      <Link>Resources\xlf\Strings.pl.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.pt-BR.xlf">
+      <Link>Resources\xlf\Strings.pt-BR.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.ru.xlf">
+      <Link>Resources\xlf\Strings.ru.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.tr.xlf">
+      <Link>Resources\xlf\Strings.tr.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.zh-Hans.xlf">
+      <Link>Resources\xlf\Strings.zh-Hans.xlf</Link>
+    </None>
+    <None Update="..\Common\Resources\xlf\Strings.zh-Hant.xlf">
+      <Link>Resources\xlf\Strings.zh-Hant.xlf</Link>
+    </None>
+  </ItemGroup>
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
       <_netstandardLibraryNetFrameworkPath>$(NUGET_PACKAGES)\NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_netstandardLibraryNetFrameworkPath>
@@ -79,8 +182,8 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="CopyAdditionalFilesToLayout" Condition="'$(TargetFramework)' == ''" DependsOnTargets="PrepareAdditionalFilesToLayout" AfterTargets="Build" Inputs="@(LayoutFile)" Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
-    <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+  <Target Name="CopyAdditionalFilesToLayout" Condition="'$(TargetFramework)' == ''" DependsOnTargets="PrepareAdditionalFilesToLayout" AfterTargets="Build" Inputs="@(LayoutFile)" Outputs="@(LayoutFile-&gt;'$(PackageLayoutOutputPath)%(TargetPath)')">
+    <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile-&gt;'$(PackageLayoutOutputPath)%(TargetPath)')">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
     </Copy>
   </Target>
