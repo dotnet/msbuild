@@ -31,11 +31,14 @@ namespace Microsoft.DotNet.Tools.Restore
 
             var parsedRestore = result["dotnet"]["restore"];
 
-            var msbuildArgs = new List<string>
+            var msbuildArgs = new List<string>();
+
+            if (noLogo)
             {
-                "/NoLogo",
-                "/t:Restore"
-            };
+                msbuildArgs.Add("/nologo");
+            }
+
+            msbuildArgs.Add("/t:Restore");
 
             msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
 

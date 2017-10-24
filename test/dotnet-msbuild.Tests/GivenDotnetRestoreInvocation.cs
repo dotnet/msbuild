@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     public class GivenDotnetRestoreInvocation
     {
         private const string ExpectedPrefix =
-            "exec <msbuildpath> /m /v:m /NoLogo /t:Restore";
+            "exec <msbuildpath> /m /v:m /nologo /t:Restore";
 
         [Theory]
         [InlineData(new string[] { }, "")]

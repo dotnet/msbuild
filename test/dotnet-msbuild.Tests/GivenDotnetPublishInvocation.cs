@@ -20,12 +20,10 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             this.output = output;
         }
 
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /t:Publish";
+        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m";
 
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-f", "<tfm>" }, "/p:TargetFramework=<tfm>")]
-        [InlineData(new string[] { "--framework", "<tfm>" }, "/p:TargetFramework=<tfm>")]
         [InlineData(new string[] { "-r", "<rid>" }, "/p:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "/p:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "-o", "<publishdir>" }, "/p:PublishDir=<publishdir>")]
@@ -43,10 +41,35 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
 
             var msbuildPath = "<msbuildpath>";
-            PublishCommand.FromArgs(args, msbuildPath)
-                          .GetProcessStartInfo()
-                          .Arguments.Should()
-                          .Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+            var command = PublishCommand.FromArgs(args, msbuildPath);
+
+            command.SeparateRestoreCommand
+                   .Should()
+                   .BeNull();
+
+            command.GetProcessStartInfo()
+                   .Arguments.Should()
+                   .Be($"{ExpectedPrefix} /restore /t:Publish{expectedAdditionalArgs}");
+        }
+
+        [Theory]
+        [InlineData(new string[] { "-f", "<tfm>" }, "/p:TargetFramework=<tfm>")]
+        [InlineData(new string[] { "--framework", "<tfm>" }, "/p:TargetFramework=<tfm>")]
+        public void MsbuildInvocationIsCorrectForSeparateRestore(string[] args, string expectedAdditionalArgs)
+        {
+            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+
+            var msbuildPath = "<msbuildpath>";
+            var command = PublishCommand.FromArgs(args, msbuildPath);
+
+            command.SeparateRestoreCommand
+                   .GetProcessStartInfo()
+                   .Arguments.Should()
+                   .Be($"{ExpectedPrefix} /t:Restore");
+
+            command.GetProcessStartInfo()
+                   .Arguments.Should()
+                   .Be($"{ExpectedPrefix} /nologo /t:Publish{expectedAdditionalArgs}");
         }
 
         [Theory]
