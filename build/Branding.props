@@ -17,10 +17,11 @@
 
     <ArtifactNameSdk>dotnet-toolset-internal</ArtifactNameSdk>
     <ArtifactNameSdkDebug>dotnet-toolset-internal-debug</ArtifactNameSdkDebug>
-    <ArtifactNameSdkLanguagePack>dotnet-toolset-langpack</ArtifactNameSdkLanguagePack>
+    <ArtifactNameSdkLanguagePack>dotnet-sdk-langpack</ArtifactNameSdkLanguagePack>
 
     <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)</ArtifactNameWithVersionSdk>
-    <ArtifactNameWithVersionMSBuildExtensions>dotnet-standard-support-vs2015-$(SdkVersion)</ArtifactNameWithVersionMSBuildExtensions>
+    <ArtifactNameMSBuildExtensions>dotnet-standard-support-vs2015</ArtifactNameMSBuildExtensions>
+    <ArtifactNameWithVersionMSBuildExtensions>$(ArtifactNameMSBuildExtensions)-$(SdkVersion)</ArtifactNameWithVersionMSBuildExtensions>
 
     <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)</ArtifactNameWithVersionSdkDebug>
     <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)</ArtifactNameWithVersionSdkLanguagePack>

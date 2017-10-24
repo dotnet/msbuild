@@ -8,7 +8,7 @@
     <SharedFrameworkRid>$(CoreSetupRid)</SharedFrameworkRid>
     <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
 
-    <DotNetCoreSdkLKGCompressedFileName>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(DotNetCoreSdkLKGVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</DotNetCoreSdkLKGCompressedFileName>
+    <DotNetCoreSdkLKGCompressedFileName>dotnet-sdk-$(DotNetCoreSdkLKGVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</DotNetCoreSdkLKGCompressedFileName>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -75,10 +75,12 @@
       </LayoutDefinition>
     </ItemGroup>
 
-    <ItemGroup Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x86' ">
+    <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
       <LayoutDefinition Include="MSBuildExtensions">
         <InputFiles>@(CombinedMSBuildExtensionsInput)</InputFiles>
         <OutputFiles>@(CombinedMSBuildExtensionsRelativeOutputFiles -> '$(MSBuildExtensionsOutputDirectory)/%(Identity)')</OutputFiles>
+        <NameWithVersion>$(ArtifactNameWithVersionMSBuildExtensions)</NameWithVersion>
+        <Name>$(ArtifactNameMSBuildExtensions)</Name>
       </LayoutDefinition>
     </ItemGroup>
   </Target>
