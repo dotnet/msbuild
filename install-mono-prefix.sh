@@ -59,8 +59,7 @@ mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Microsoft.VisualStudioVersion.v* ${DESTD
 
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*UnitTests*
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*xunit*
-rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/NuGet*
-rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/System.Runtime.InteropServices.RuntimeInformation.dll
+rm -f ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/System.Runtime.InteropServices.RuntimeInformation.dll
 #rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Roslyn/csc.exe*
 
 FILES="\
