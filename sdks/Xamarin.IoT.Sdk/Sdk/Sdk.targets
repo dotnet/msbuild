@@ -10,6 +10,6 @@ Copyright (C) Microsoft Corp. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildSdksPath)\Microsoft.NET.Sdk\Sdk\Sdk.targets" Condition="Exists('$(MSBuildSdksPath)\Microsoft.NET.Sdk\Sdk\Sdk.targets')" />
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
   <Import Project="$(MSBuildThisFileDirectory)..\build\Xamarin.IoT.targets" Condition="Exists('$(MSBuildThisFileDirectory)..\build\Xamarin.IoT.targets')" />
 </Project>
