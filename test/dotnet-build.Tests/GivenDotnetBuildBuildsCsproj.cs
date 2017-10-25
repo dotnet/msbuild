@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.0")
+            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.1")
                 .GetFile($"{testAppName}.dll");
 
             var outputRunCommand = new DotnetCommand();
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework netcoreapp2.0")
+                .Execute("--framework netcoreapp2.1")
                 .Should().Pass();
         }
 
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -f netcoreapp2.0 -o \"{rootPath}\" --debug:ephemeral-hive --no-restore";
+            string newArgs = $"console -f netcoreapp2.1 -o \"{rootPath}\" --debug:ephemeral-hive --no-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputDll = Directory.EnumerateFiles(
-                Path.Combine(rootPath, "bin", configuration, "netcoreapp2.0"), "*.dll", 
+                Path.Combine(rootPath, "bin", configuration, "netcoreapp2.1"), "*.dll", 
                 SearchOption.TopDirectoryOnly)
                 .Single();
 
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName)
+                .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
 

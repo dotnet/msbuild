@@ -162,7 +162,9 @@
   </data>
   <data name="CmdLoggerDescription" xml:space="preserve">
     <value>Specify a logger for test results.
-                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
+                                        Examples:
+                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</value>
   </data>
   <data name="CmdConfiguration" xml:space="preserve">
@@ -215,5 +217,8 @@ RunSettings arguments:
   <data name="cmdCollectDescription" xml:space="preserve">
     <value>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</value>
+  </data>
+  <data name="CmdBlameDescription" xml:space="preserve">
+    <value>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</value>
   </data>
 </root>
