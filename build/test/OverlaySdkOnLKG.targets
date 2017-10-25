@@ -3,7 +3,7 @@
     <ItemGroup>
       <OverlaySDK Include="$(DotNetCoreSdkLKGPublishDirectory)/**/*" />
       <TemplatesToOverlay Include="$(IntermediateDirectory)/Templates/*.nupkg" />
-      <LzmaArchiveToOverlay Include="$(IntermediateDirectory)/nugetPackagesArchive.lzma" />
+      <LzmaArchiveToOverlay Include="$(IntermediateDirectory)/nuGetPackagesArchive.lzma" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
@@ -16,13 +16,13 @@
 
   <Target Name="PrepareLKGForOverlay">
     <ItemGroup>
-      <LzmaArchiveFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/nugetPackagesArchive.lzma" />
+      <LzmaArchiveFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/nuGetPackagesArchive.lzma" />
       <TemplatesFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/Templates/*.nupkg" />
     </ItemGroup>
 
     <!-- Backup the lzma archive -->
     <Copy SourceFiles="@(LzmaArchiveFromLKG)"
-          DestinationFiles="$(IntermediateDirectory)/nugetPackagesArchive.lzma" />
+          DestinationFiles="$(IntermediateDirectory)/nuGetPackagesArchive.lzma" />
 
     <!-- Backup the templates -->
     <Copy SourceFiles="@(TemplatesFromLKG)"
@@ -51,6 +51,6 @@
   <Target Name="CleanUpOverlay" AfterTargets="Test">
     <RemoveDir Directories="$(SdkOutputDirectory)/Templates" />
 
-    <Delete Files="$(SdkOutputDirectory)/nugetPackagesArchive.lzma" />
+    <Delete Files="$(SdkOutputDirectory)/nuGetPackagesArchive.lzma" />
   </Target>
 </Project>
