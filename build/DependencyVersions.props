@@ -7,9 +7,9 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <MsBuildPackagesVersion>15.2.0-preview-000093-02</MsBuildPackagesVersion>
-    <DependencyModelVersion>2.0.0-preview1-001960</DependencyModelVersion>
-    <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
+    <MsBuildPackagesVersion>15.4.8</MsBuildPackagesVersion>
+    <DependencyModelVersion>2.0.0</DependencyModelVersion>
+    <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
     <NuGetVersion>4.5.0-preview2-4529</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
