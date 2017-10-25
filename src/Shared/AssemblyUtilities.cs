@@ -70,10 +70,9 @@ namespace Microsoft.Build.Shared
             name.SetPublicKeyToken(assemblyNameToClone.GetPublicKeyToken());
             name.Version = assemblyNameToClone.Version;
             name.Flags = assemblyNameToClone.Flags;
-            name.ContentType = assemblyNameToClone.ContentType;
             name.ProcessorArchitecture = assemblyNameToClone.ProcessorArchitecture;
 
-#if FEATURE_ASSEMBLYNAME_CULTUREINFO
+#if !RUNTIME_TYPE_NETCORE
             name.CultureInfo = assemblyNameToClone.CultureInfo;
             name.HashAlgorithm = assemblyNameToClone.HashAlgorithm;
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
