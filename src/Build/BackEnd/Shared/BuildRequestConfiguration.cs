@@ -156,9 +156,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="data">The data containing the configuration information.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
-        /// <param name="getToolset">Callback used to get a Toolset based on a ToolsVersion</param>
-        internal BuildRequestConfiguration(BuildRequestData data, string defaultToolsVersion, Internal.Utilities.GetToolset getToolset = null)
-            : this(0, data, defaultToolsVersion, getToolset)
+        internal BuildRequestConfiguration(BuildRequestData data, string defaultToolsVersion)
+            : this(0, data, defaultToolsVersion)
         {
         }
 
@@ -170,8 +169,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configId">The configuration ID to assign to this new configuration.</param>
         /// <param name="data">The data containing the configuration information.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
-        /// <param name="getToolset">Callback used to get a Toolset based on a ToolsVersion</param>
-        internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion, Internal.Utilities.GetToolset getToolset = null)
+        internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion)
         {
             ErrorUtilities.VerifyThrowArgumentNull(data, "data");
             ErrorUtilities.VerifyThrowInternalLength(data.ProjectFullPath, "data.ProjectFullPath");
@@ -179,7 +177,7 @@ namespace Microsoft.Build.BackEnd
             _configId = configId;
             _projectFullPath = data.ProjectFullPath;
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
-            _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion, getToolset);
+            _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion);
             _globalProperties = data.GlobalPropertiesDictionary;
             TargetNames = new List<string>(data.TargetNames);
 
@@ -988,7 +986,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Determines what the real tools version is.
         /// </summary>
-        private string ResolveToolsVersion(BuildRequestData data, string defaultToolsVersion, Internal.Utilities.GetToolset getToolset)
+        private string ResolveToolsVersion(BuildRequestData data, string defaultToolsVersion)
         {
             if (data.ExplicitToolsVersionSpecified)
             {
@@ -1000,38 +998,14 @@ namespace Microsoft.Build.BackEnd
             {
                 return data.ProjectInstance.Toolset.ToolsVersion;
             }
-            else if (FileUtilities.IsVCProjFilename(data.ProjectFullPath))
+            if (FileUtilities.IsVCProjFilename(data.ProjectFullPath))
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(data.ProjectFullPath), "ProjectUpgradeNeededToVcxProj", data.ProjectFullPath);
             }
-            else if (!FileUtilities.IsSolutionFilename(data.ProjectFullPath))
-            {
-                // If the file does not exist, it's a failure of the host, possibly msbuild.exe; so it's an ArgumentException here
-                ErrorUtilities.VerifyThrowArgument(File.Exists(data.ProjectFullPath), "ProjectFileNotFound", data.ProjectFullPath);
 
-                string toolsVersionFromFile = null;
-
-                // We use an XmlTextReader to sniff, rather than simply loading a ProjectRootElement into the cache, because
-                // quite likely this won't be the node on which the request will be built, so we'd be loading the ProjectRootElement
-                // on this node unnecessarily.
-                toolsVersionFromFile = XmlUtilities.SniffAttributeValueFromXmlFile(ProjectFullPath, XMakeAttributes.project, XMakeAttributes.toolsVersion);
-
-                // Instead of just using the ToolsVersion from the file, though, ask our "source of truth" what the ToolsVersion 
-                // we should use is.  This takes into account the various environment variables that can affect ToolsVersion, etc., 
-                // to make it more likely that the ToolsVersion we come up with is going to be the one actually being used by the 
-                // project at build time.  
-                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                    (
-                        data.ExplicitlySpecifiedToolsVersion,
-                        toolsVersionFromFile,
-                        getToolset,
-                        defaultToolsVersion
-                    );
-
-                return toolsVersionToUse;
-            }
-
-            // Couldn't find out the right ToolsVersion any other way, so just return the default. 
+            // We used to "sniff" the tools version from the project XML by opening it and reading the attribute.
+            // This was causing unnecessary overhead since the ToolsVersion is never really used.  Instead we just
+            // return the default tools version
             return defaultToolsVersion;
         }
 
