@@ -73,11 +73,6 @@ namespace Microsoft.Build.Shared
             name.ContentType = assemblyNameToClone.ContentType;
             name.ProcessorArchitecture = assemblyNameToClone.ProcessorArchitecture;
 
-            // mono does not support CultureName
-#if !MONO
-            name.CultureName = assemblyNameToClone.CultureName;
-#endif
-
 #if FEATURE_ASSEMBLYNAME_CULTUREINFO
             name.CultureInfo = assemblyNameToClone.CultureInfo;
             name.HashAlgorithm = assemblyNameToClone.HashAlgorithm;
@@ -85,6 +80,10 @@ namespace Microsoft.Build.Shared
             name.CodeBase = assemblyNameToClone.CodeBase;
             name.KeyPair = assemblyNameToClone.KeyPair;
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
+#elif !MONO
+            // Setting the culture name creates a new CultureInfo, leading to many allocations. Only set CultureName when the CultureInfo member is not available.
+            // CultureName not available on Mono
+            name.CultureName = assemblyNameToClone.CultureName;
 #endif
 
             return name;
