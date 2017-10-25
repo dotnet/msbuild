@@ -78,7 +78,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private AssemblyNameExtension()
         {
-            InitializeRemappedFrom();
         }
 
         /// <summary>
