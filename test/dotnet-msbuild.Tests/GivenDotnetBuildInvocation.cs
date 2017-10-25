@@ -9,8 +9,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetBuildInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m";
-        const string ExpectedSuffix = "/clp:Summary";
+        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /clp:Summary";
 
         [Theory]
         [InlineData(new string[] { }, "/t:Build")]
@@ -36,7 +35,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             var msbuildPath = "<msbuildpath>";
             BuildCommand.FromArgs(args, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs} {ExpectedSuffix}");
+                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
         }
     }
 }
