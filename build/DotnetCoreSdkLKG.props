@@ -1,0 +1,29 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <CoreSetupRid>$(HostRid)</CoreSetupRid>
+    <CoreSetupRid Condition=" '$(HostOSName)' == 'win' or '$(HostOSName)' == 'osx' ">$(HostMonikerRid)</CoreSetupRid>
+
+    <!-- Use the portable linux-x64 Rid when downloading the shared framework compressed file.
+         NOTE: There isn't a 'linux-x64' version of the installers or the additional shared framweork. -->
+    <SharedFrameworkRid>$(CoreSetupRid)</SharedFrameworkRid>
+    <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
+
+    <DotNetCoreSdkLKGCompressedFileName>dotnet-sdk-$(DotNetCoreSdkLKGVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</DotNetCoreSdkLKGCompressedFileName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DotNetCoreSdkLKGRootUrl>$(DotnetBlobRootUrl)/Sdk/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGRootUrl>
+    <DotNetCoreSdkLKGDownloadUrl>$(DotNetCoreSdkLKGRootUrl)$(DotNetCoreSdkLKGCompressedFileName)$(CoreSetupBlobAccessTokenParam)</DotNetCoreSdkLKGDownloadUrl>
+    <DotNetCoreSdkLKGDownloadDirectory>$(IntermediateDirectory)/toolsetDownload/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGDownloadDirectory>
+    <DotNetCoreSdkLKGArchive>$(DotNetCoreSdkLKGDownloadDirectory)$(DotNetCoreSdkLKGCompressedFileName)</DotNetCoreSdkLKGArchive>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_DownloadAndExtractItem Include="DotNetCoreSdkLKGArchive"
+                           Condition="!Exists('$(DotNetCoreSdkLKGArchive)')">
+      <Url>$(DotNetCoreSdkLKGDownloadUrl)</Url>
+      <DownloadFileName>$(DotNetCoreSdkLKGArchive)</DownloadFileName>
+      <ExtractDestination>$(DotNetCoreSdkLKGPublishDirectory)</ExtractDestination>
+    </_DownloadAndExtractItem>
+  </ItemGroup>
+</Project>

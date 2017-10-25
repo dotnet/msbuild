@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <DotNetCoreSdkLKGVersion>2.0.3-servicing-007050</DotNetCoreSdkLKGVersion>
     <CLI_SharedFrameworkVersion>2.0.0</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.4.8</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.2-beta1-61921-05</CLI_Roslyn_Version>

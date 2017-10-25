@@ -9,6 +9,6 @@
     <LayoutDirectory Condition=" '$(OSName)' == 'ubuntu' OR '$(OSName)' == 'debian' ">$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</LayoutDirectory>
     <LayoutDirectory Condition=" '$(OSName)' != 'ubuntu' AND '$(OSName)' != 'debian' ">$(IntermediateDirectory)/layouts</LayoutDirectory>
     <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
-    <MSBuildExtensionsOutputDirectory>$(LayoutDirectory)/MSBuildExtensions</MSBuildExtensionsOutputDirectory>
+    <MSBuildExtensionsOutputDirectory>$(LayoutDirectory)/$(ArtifactNameMSBuildExtensions)</MSBuildExtensionsOutputDirectory>
   </PropertyGroup>
 </Project>

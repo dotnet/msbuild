@@ -52,15 +52,13 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
          which is what the signing build uses -->
     <Import Project="build/BundledTools.props" />
     <Import Project="build/BundledSdks.props" />
-    <Import Project="build/BundledTemplates.props" />
-
-    <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/VersionBadge.props" />
-    <Import Project="build/BundledRuntimes.props" />
-    <Import Project="build/CrossGen.props" />
-    <Import Project="build/BackwardsCompatibilityRuntimes.props" />
 
     <Import Project="build/AzureInfo.props" />
+    <Import Project="build/BuildDefaults.props" />
+    <Import Project="build/VersionBadge.props" />
+    <Import Project="build/DotnetCoreSdkLKG.props" />
+    <Import Project="build/BackwardsCompatibilityRuntimes.props" />
+
     <Import Project="build/InstallerInfo.props" />
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>

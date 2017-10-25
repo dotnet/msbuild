@@ -2,10 +2,8 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SdkDebugLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkDebug)</SdkDebugLayoutOutputDirectory>
-    <CombinedHostHostFxrFrameworkSdkOutputDirectory>$(LayoutDirectory)/$(ArtifactNameCombinedHostHostFxrFrameworkSdk)</CombinedHostHostFxrFrameworkSdkOutputDirectory>
     <SdkLanguagePackOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkLanguagePack)</SdkLanguagePackOutputDirectory>
     <SatelliteAssemblies>*.resources.dll</SatelliteAssemblies>
-    <WindowsSatelliteAssembliesRegEx>.*.resources.dll</WindowsSatelliteAssembliesRegEx>
   </PropertyGroup>
 
   <Target DependsOnTargets="Init" Name="SetupLayoutInputsOutputs" >
@@ -13,10 +11,7 @@
     <ItemGroup>
       <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
       <SdkDebugLayoutInput Include="$(SymbolsDirectory)/sdk/**/*" />
-      <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**/*" />
       <SdkLanguagePackInput Include="$(OutputDirectory)/sdk/**/$(SatelliteAssemblies)" />
-
-      <AspNetRuntimeFilesInput Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
 
       <MSBuildExtensionsInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions/**/*" />
       <MSBuildExtensionsVerInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions-ver/**/*" />
@@ -33,11 +28,6 @@
       Path1="$(SymbolsDirectory)"
       Path2="%(SdkDebugLayoutInput.Identity)" >
       <Output TaskParameter="RelativePath" ItemName="SdkDebugRelativeOutputFiles" />
-    </MakeRelative>
-    <MakeRelative
-      Path1="$(OutputDirectory)/"
-      Path2="%(CombinedHostHostFxrFrameworkSdkInput.Identity)" >
-      <Output TaskParameter="RelativePath" ItemName="CombinedHostHostFxrFrameworkSdkRelativeOutputFiles" />
     </MakeRelative>
     <MakeRelative
       Path1="$(OutputDirectory)/"
@@ -77,15 +67,6 @@
         <Name>$(ArtifactNameSdkDebug)</Name>
       </LayoutDefinition>
 
-      <LayoutDefinition Include="CombinedHostHostFxrFrameworkSdk">
-        <InputFiles>@(CombinedHostHostFxrFrameworkSdkInput)</InputFiles>
-        <OutputFiles>@(CombinedHostHostFxrFrameworkSdkRelativeOutputFiles -> '$(CombinedHostHostFxrFrameworkSdkOutputDirectory)/%(Identity)')</OutputFiles>
-        <NameWithVersion>$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)</NameWithVersion>
-        <Name>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)</Name>
-        <ExcludePatterns Condition=" '$(OSName)' == 'win' ">$(WindowsSatelliteAssembliesRegEx)</ExcludePatterns>
-        <ExcludePatterns Condition=" '$(OSName)' != 'win' ">$(SatelliteAssemblies)</ExcludePatterns>
-      </LayoutDefinition>
-
       <LayoutDefinition Include="SdkLanguagePack">
         <InputFiles>@(SdkLanguagePackInput)</InputFiles>
         <OutputFiles>@(SdkLanguagePackRelativeOutputFiles -> '$(SdkLanguagePackOutputDirectory)/%(Identity)')</OutputFiles>
@@ -94,10 +75,12 @@
       </LayoutDefinition>
     </ItemGroup>
 
-    <ItemGroup Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x86' ">
+    <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
       <LayoutDefinition Include="MSBuildExtensions">
         <InputFiles>@(CombinedMSBuildExtensionsInput)</InputFiles>
         <OutputFiles>@(CombinedMSBuildExtensionsRelativeOutputFiles -> '$(MSBuildExtensionsOutputDirectory)/%(Identity)')</OutputFiles>
+        <NameWithVersion>$(ArtifactNameWithVersionMSBuildExtensions)</NameWithVersion>
+        <Name>$(ArtifactNameMSBuildExtensions)</Name>
       </LayoutDefinition>
     </ItemGroup>
   </Target>
