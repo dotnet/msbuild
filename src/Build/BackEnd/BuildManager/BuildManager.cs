@@ -833,7 +833,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Create/Retrieve a configuration for each request
-                BuildRequestConfiguration buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion, _buildParameters.GetToolset);
+                BuildRequestConfiguration buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
                 BuildRequestConfiguration matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
                 BuildRequestConfiguration newConfiguration = ResolveConfiguration(buildRequestConfiguration, matchingConfiguration, submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
 
@@ -948,7 +948,7 @@ namespace Microsoft.Build.Execution
 
             if (existingConfiguration == null)
             {
-                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, Array.Empty<string>()), null /* use the instance's tools version */, null /* shouldn't need to get toolsets because ProjectInstance's ToolsVersion overrides */);
+                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, Array.Empty<string>()), null /* use the instance's tools version */);
             }
             else
             {

@@ -350,7 +350,7 @@ namespace Microsoft.Build.BackEnd
                 // Otherwise let the BuildRequestConfiguration figure out what tools version will be used
                 BuildRequestData data = new BuildRequestData(projectFiles[i], properties[i].ToDictionary(), explicitToolsVersion, targets, null);
 
-                BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion, _componentHost.BuildParameters.GetToolset);
+                BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion);
 
                 requests[i] = new FullyQualifiedBuildRequest(config, targets, waitForResults,
                     flags: skipNonexistentTargets ? BuildRequestDataFlags.SkipNonexistentTargets : BuildRequestDataFlags.None);
