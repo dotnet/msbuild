@@ -332,6 +332,16 @@
         <target state="translated">La piattaforma di RuntimeIdentifier e quella di PlatformTarget devono corrispondere.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorParsingFrameworkListInvalidValue">
+        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="new">Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkListPathNotRooted">
+        <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="new">Framework list file path '{0}' is not rooted. Only full paths are supported.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
