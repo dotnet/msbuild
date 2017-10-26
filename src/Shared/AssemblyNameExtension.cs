@@ -713,7 +713,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            if (!CompareCulture(that))
+            if (!CompareCultures(AssemblyName, that.AssemblyName))
             {
                 return false;
             }
@@ -734,29 +734,13 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Allows the comparison of the culture.
         /// </summary>
-        internal bool CompareCulture(AssemblyNameExtension that)
+        internal static bool CompareCultures(AssemblyName a, AssemblyName b)
         {
             // Do the Cultures match?
 #if FEATURE_ASSEMBLYNAME_CULTUREINFO
-            CultureInfo aCulture = CultureInfo;
-            CultureInfo bCulture = that.CultureInfo;
-            if (aCulture == null)
-            {
-                aCulture = CultureInfo.InvariantCulture;
-            }
-            if (bCulture == null)
-            {
-                bCulture = CultureInfo.InvariantCulture;
-            }
-
-            if (aCulture.LCID != bCulture.LCID)
-            {
-                return false;
-            }
-
-            return true;
+            return a?.CultureInfo?.LCID == b?.CultureInfo?.LCID;
 #else
-            return CultureInfo?.Name == that.CultureInfo?.Name;
+            return a?.CultureInfo?.Name == b?.CultureInfo?.Name;
 #endif
         }
 
@@ -774,7 +758,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Compare two public key tokens.
         /// </summary>
-        private static bool ComparePublicKeyTokens(byte[] aPKT, byte[] bPKT)
+        internal static bool ComparePublicKeyTokens(byte[] aPKT, byte[] bPKT)
         {
             // Some assemblies (real case was interop assembly) may have null PKTs.
             if (aPKT == null)
@@ -926,7 +910,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            if ((comparisonFlags & PartialComparisonFlags.Culture) != 0 && CultureInfo != null && (that.CultureInfo == null || !CompareCulture(that)))
+            if ((comparisonFlags & PartialComparisonFlags.Culture) != 0 && CultureInfo != null && (that.CultureInfo == null || !CompareCultures(AssemblyName, that.AssemblyName)))
             {
                 return false;
             }

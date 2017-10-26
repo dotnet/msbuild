@@ -2371,26 +2371,20 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (DependentAssembly remappedAssembly in _remappedAssemblies)
                 {
-                    // First, exclude anything without the simple name match
-                    AssemblyNameExtension comparisonAssembly = new AssemblyNameExtension(remappedAssembly.PartialAssemblyName);
-                    if (assemblyName.CompareBaseNameTo(comparisonAssembly) == 0)
-                    {
-                        // Comparison assembly is a partial name. Give it our version.
-                        comparisonAssembly.ReplaceVersion(assemblyName.Version);
+                    AssemblyName comparisonAssembly = remappedAssembly.AssemblyNameReadOnly;
 
-                        if (assemblyName.Equals(comparisonAssembly))
+                    if (CompareAssembliesIgnoringVersion(assemblyName.AssemblyName, comparisonAssembly))
+                    {
+                        foreach (BindingRedirect bindingRedirect in remappedAssembly.BindingRedirects)
                         {
-                            foreach (BindingRedirect bindingRedirect in remappedAssembly.BindingRedirects)
+                            if (assemblyName.Version >= bindingRedirect.OldVersionLow && assemblyName.Version <= bindingRedirect.OldVersionHigh)
                             {
-                                if (assemblyName.Version >= bindingRedirect.OldVersionLow && assemblyName.Version <= bindingRedirect.OldVersionHigh)
+                                // If the new version is different than the old version, then there is a unification.
+                                if (assemblyName.Version != bindingRedirect.NewVersion)
                                 {
-                                    // If the new version is different than the old version, then there is a unification.
-                                    if (assemblyName.Version != bindingRedirect.NewVersion)
-                                    {
-                                        unifiedVersion = bindingRedirect.NewVersion;
-                                        unificationReason = UnificationReason.BecauseOfBindingRedirect;
-                                        return true;
-                                    }
+                                    unifiedVersion = bindingRedirect.NewVersion;
+                                    unificationReason = UnificationReason.BecauseOfBindingRedirect;
+                                    return true;
                                 }
                             }
                         }
@@ -2420,6 +2414,37 @@ namespace Microsoft.Build.Tasks
 
 
             return false;
+        }
+
+        /// <summary>
+        /// Used to avoid extra allocations from cloning AssemblyNameExtension and AssemblyName
+        /// </summary>
+        private bool CompareAssembliesIgnoringVersion(AssemblyName a, AssemblyName b)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(a, nameof(a));
+            ErrorUtilities.VerifyThrowInternalNull(b, nameof(b));
+
+            if (a == b)
+            {
+                return true;
+            }
+
+            if (0 != String.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (!AssemblyNameExtension.CompareCultures(a, b))
+            {
+                return false;
+            }
+
+            if (!AssemblyNameExtension.ComparePublicKeyTokens(a.GetPublicKeyToken(), b.GetPublicKeyToken()))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
