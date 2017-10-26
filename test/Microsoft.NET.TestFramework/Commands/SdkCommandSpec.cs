@@ -17,7 +17,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string WorkingDirectory { get; set; }
 
-        string EscapeArgs()
+        private string EscapeArgs()
         {
             //  Note: this doesn't handle invoking .cmd files via "cmd /c" on Windows, which probably won't be necessary here
             //  If it is, refer to the code in WindowsExePreferredCommandSpecFactory in Microsoft.DotNet.Cli.Utils
@@ -46,7 +46,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public ProcessStartInfo ToProcessStartInfo()
         {
-            ProcessStartInfo ret = new ProcessStartInfo();
+            var ret = new ProcessStartInfo();
             ret.FileName = FileName;
             ret.Arguments = EscapeArgs();
             foreach (var kvp in Environment)

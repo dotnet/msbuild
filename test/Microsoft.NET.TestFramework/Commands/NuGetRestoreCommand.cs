@@ -68,7 +68,7 @@ namespace Microsoft.NET.TestFramework.Commands
                 throw new InvalidOperationException("Path to nuget.exe not set");
             }
 
-            SdkCommandSpec ret = new SdkCommandSpec()
+            var ret = new SdkCommandSpec()
             {
                 FileName = TestContext.Current.NuGetExePath,
                 Arguments = newArgs
