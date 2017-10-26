@@ -111,7 +111,7 @@
       <NextStagePropsContent>
 &lt;Project&gt;
     &lt;PropertyGroup&gt;
-        &lt;PreviousStageDirectory&gt;$(OutputDirectory)&lt;/PreviousStageDirectory&gt;
+        &lt;PreviousStageDirectory&gt;$(SdkOutputDirectory)&lt;/PreviousStageDirectory&gt;
         &lt;PreviousStageDotnet&gt;$(DotnetInOutputDirectory)&lt;/PreviousStageDotnet&gt;
         &lt;CliOuterBuildStage&gt;$(CliBuildStage)&lt;/CliOuterBuildStage&gt;
     &lt;/PropertyGroup&gt;

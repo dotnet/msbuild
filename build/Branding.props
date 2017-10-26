@@ -15,8 +15,8 @@
         '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
     <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
 
-    <ArtifactNameSdk>dotnet-toolset-internal</ArtifactNameSdk>
-    <ArtifactNameSdkDebug>dotnet-toolset-internal-debug</ArtifactNameSdkDebug>
+    <ArtifactNameSdk>dotnet-cli-internal</ArtifactNameSdk>
+    <ArtifactNameSdkDebug>dotnet-cli-internal-debug</ArtifactNameSdkDebug>
     <ArtifactNameSdkLanguagePack>dotnet-sdk-langpack</ArtifactNameSdkLanguagePack>
 
     <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)</ArtifactNameWithVersionSdk>

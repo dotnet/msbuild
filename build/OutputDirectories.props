@@ -10,12 +10,11 @@
       <BaseOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/bin/$(MSBuildProjectName)'))</BaseOutputPath>
 
       <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/obj/$(MSBuildProjectName)'))</BaseIntermediateOutputPath>
-      <OutputDirectory>$(BaseOutputDirectory)/dotnet</OutputDirectory>
+      <OutputDirectory>$(BaseOutputDirectory)/Cli</OutputDirectory>
       <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/dotnetWithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
-      <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
+      <CliOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</CliOutputDirectory>
+      <SdkOutputDirectory>$(BaseOutputDirectory)/dotnet</SdkOutputDirectory>
       <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
-      <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
-      <FSharpDirectory>$(SdkOutputDirectory)/FSharp</FSharpDirectory>
       <CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
@@ -24,7 +23,7 @@
       <AspNetRuntimePackageStorePublishDirectory>$(BaseOutputDirectory)/AspRT</AspNetRuntimePackageStorePublishDirectory>
       <BackwardsCompatibleSharedFrameworksPublishDirectory>$(IntermediateDirectory)/backwardsCompatibleSharedFrameworksPublish</BackwardsCompatibleSharedFrameworksPublishDirectory>
       <TestOutputDir>$(BaseOutputDirectory)/testpackages/</TestOutputDir>
-      <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
+      <DotnetInOutputDirectory>$(BaseOutputDirectory)/dotnet/dotnet$(ExeExtension)</DotnetInOutputDirectory>
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
       <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
       <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
