@@ -501,7 +501,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     _filterEventSource.WarningsAsErrorsByProject = new ConcurrentDictionary<int, ISet<string>>();
                 }
 
-                _filterEventSource.WarningsAsErrorsByProject.Add(projectInstanceId, new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase));
+                if (_filterEventSource.WarningsAsErrorsByProject.ContainsKey(projectInstanceId))
+                {
+                    return;
+                }
+
+                _filterEventSource.WarningsAsErrorsByProject[projectInstanceId] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
             }
         }
 
@@ -514,7 +519,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     _filterEventSource.WarningsAsMessagesByProject = new ConcurrentDictionary<int, ISet<string>>();
                 }
 
-                _filterEventSource.WarningsAsMessagesByProject.Add(projectInstanceId, new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase));
+                if (_filterEventSource.WarningsAsMessagesByProject.ContainsKey(projectInstanceId))
+                {
+                    return;
+                }
+
+                _filterEventSource.WarningsAsMessagesByProject[projectInstanceId] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
             }
         }
 

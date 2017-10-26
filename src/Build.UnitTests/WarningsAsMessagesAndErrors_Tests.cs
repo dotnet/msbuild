@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -82,6 +80,45 @@ namespace Microsoft.Build.Engine.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(GetTestProject(warningsAsMessages: ExpectedEventCode));
 
             VerifyBuildMessageEvent(logger);
+        }
+
+        /// <summary>
+        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsMessagesWhenBuildingSameProjectMultipleTimes()
+        {
+            try
+            {
+                ObjectModelHelpers.CreateFileInTempProjectDirectory("project1.proj", $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""project2.proj"" Targets=""Build"" />
+                    </Target>
+                </Project>");
+
+                ObjectModelHelpers.CreateFileInTempProjectDirectory("project2.proj", $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <MSBuildWarningsAsMessages>{ExpectedEventCode}</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""$(MSBuildThisFileFullPath)"" Targets=""AnotherTarget"" />
+                    </Target>
+                    <Target Name=""AnotherTarget"">
+                        <Message Text=""WarningsAsMessages: '$(MSBuildWarningsAsMessages)'"" />
+                        <Warning Text=""{ExpectedEventMessage}"" Code=""{ExpectedEventCode}"" />
+                    </Target>
+                </Project>");
+
+                MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("project1.proj");
+
+                VerifyBuildMessageEvent(logger);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
         }
 
         [Fact]
