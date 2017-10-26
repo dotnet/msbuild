@@ -22,6 +22,40 @@ namespace Microsoft.Build.Engine.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(GetTestProject(treatAllWarningsAsErrors: false));
         }
 
+        /// <summary>
+        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorsWhenBuildingSameProjectMultipleTimes()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles project2 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""$(MSBuildThisFileFullPath)"" Targets=""AnotherTarget"" />
+                    </Target>
+                    <Target Name=""AnotherTarget"">
+                        <Warning Text=""{ExpectedEventMessage}"" Code=""{ExpectedEventCode}"" />
+                    </Target>
+                </Project>");
+
+                TransientTestProjectWithFiles project1 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""{project2.ProjectFile}"" Targets=""Build"" />
+                    </Target>
+                </Project>");
+
+                MockLogger logger = project1.BuildProjectExpectFailure();
+
+                VerifyBuildErrorEvent(logger);
+            }
+        }
+
         [Fact]
         public void TreatWarningsAsErrorsWhenSpecified()
         {
@@ -88,17 +122,10 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void TreatWarningsAsMessagesWhenBuildingSameProjectMultipleTimes()
         {
-            try
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
-                ObjectModelHelpers.CreateFileInTempProjectDirectory("project1.proj", $@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                    <Target Name=""Build"">
-                        <MSBuild Projects=""project2.proj"" Targets=""Build"" />
-                    </Target>
-                </Project>");
-
-                ObjectModelHelpers.CreateFileInTempProjectDirectory("project2.proj", $@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                TransientTestProjectWithFiles project2 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
                     <PropertyGroup>
                         <MSBuildWarningsAsMessages>{ExpectedEventCode}</MSBuildWarningsAsMessages>
                     </PropertyGroup>
@@ -106,18 +133,20 @@ namespace Microsoft.Build.Engine.UnitTests
                         <MSBuild Projects=""$(MSBuildThisFileFullPath)"" Targets=""AnotherTarget"" />
                     </Target>
                     <Target Name=""AnotherTarget"">
-                        <Message Text=""WarningsAsMessages: '$(MSBuildWarningsAsMessages)'"" />
                         <Warning Text=""{ExpectedEventMessage}"" Code=""{ExpectedEventCode}"" />
                     </Target>
                 </Project>");
 
-                MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("project1.proj");
+                TransientTestProjectWithFiles project1 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""{project2.ProjectFile}"" Targets=""Build"" />
+                    </Target>
+                </Project>");
+
+                MockLogger logger = project1.BuildProjectExpectSuccess();
 
                 VerifyBuildMessageEvent(logger);
-            }
-            finally
-            {
-                ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
 
