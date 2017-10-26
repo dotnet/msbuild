@@ -503,6 +503,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 if (_filterEventSource.WarningsAsErrorsByProject.ContainsKey(projectInstanceId))
                 {
+                    // The same project instance can be built multiple times with different targets.  In this case the codes have already been added
                     return;
                 }
 
@@ -521,6 +522,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 if (_filterEventSource.WarningsAsMessagesByProject.ContainsKey(projectInstanceId))
                 {
+                    // The same project instance can be built multiple times with different targets.  In this case the codes have already been added
                     return;
                 }
 
