@@ -22,6 +22,7 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
     <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
+    <BuildTasksFeedDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
