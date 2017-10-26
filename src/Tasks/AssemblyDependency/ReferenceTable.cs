@@ -2372,7 +2372,7 @@ namespace Microsoft.Build.Tasks
                 foreach (DependentAssembly remappedAssembly in _remappedAssemblies)
                 {
                     // First, exclude anything without the simple name match
-                    AssemblyNameExtension comparisonAssembly = new AssemblyNameExtension(remappedAssembly.PartialAssemblyName.CloneIfPossible());
+                    AssemblyNameExtension comparisonAssembly = new AssemblyNameExtension(remappedAssembly.PartialAssemblyName);
                     if (assemblyName.CompareBaseNameTo(comparisonAssembly) == 0)
                     {
                         // Comparison assembly is a partial name. Give it our version.
