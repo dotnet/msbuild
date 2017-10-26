@@ -408,14 +408,18 @@ namespace Microsoft.Build.Engine.UnitTests
 
         internal MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
         {
-            BuildProject(globalProperties, toolsVersion, out MockLogger logger).ShouldBeFalse();
+            MockLogger logger;
+
+            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeFalse();
 
             return logger;
         }
 
         internal MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
         {
-            BuildProject(globalProperties, toolsVersion, out MockLogger logger).ShouldBeTrue();
+            MockLogger logger;
+
+            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeTrue();
 
             return logger;
         }
