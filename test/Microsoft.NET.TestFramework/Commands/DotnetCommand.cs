@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Xunit.Abstractions;
@@ -17,15 +18,14 @@ namespace Microsoft.NET.TestFramework.Commands
         {
         }
 
-        protected override ICommand CreateCommand(string[] args)
+        protected override SdkCommandSpec CreateCommand(string[] args)
         {
-            ICommand ret = Command.Create(RepoInfo.DotNetHostPath, args);
-            if (!string.IsNullOrEmpty(WorkingDirectory))
+            return new SdkCommandSpec()
             {
-                ret = ret.WorkingDirectory(WorkingDirectory);
-            }
-
-            return ret;
+                FileName = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
+                Arguments = args.ToList(),
+                WorkingDirectory = WorkingDirectory
+            };
         }
     }
 }

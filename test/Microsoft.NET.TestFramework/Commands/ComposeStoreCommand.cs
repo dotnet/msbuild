@@ -13,8 +13,8 @@ namespace Microsoft.NET.TestFramework.Commands
     {
         private const string PublishSubfolderName = "packages";
 
-        public ComposeStoreCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null, MSBuildTest msbuild = null)
-            : base(log, "ComposeStore", projectPath, relativePathToProject, msbuild)
+        public ComposeStoreCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null)
+            : base(log, "ComposeStore", projectPath, relativePathToProject)
         {
         }
 

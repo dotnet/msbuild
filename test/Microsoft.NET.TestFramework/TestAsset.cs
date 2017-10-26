@@ -7,7 +7,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Collections.Generic;
 using Xunit.Abstractions;
 
@@ -140,15 +139,13 @@ namespace Microsoft.NET.TestFramework
         public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "")
         {
             return new RestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
-                .AddSourcesFromCurrentConfig()
-                .AddSource(RepoInfo.PackagesPath);
+                .AddSourcesFromCurrentConfig();
         }
 
         public NuGetRestoreCommand GetNuGetRestoreCommand(ITestOutputHelper log, string relativePath = "")
         {
             return new NuGetRestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
-                .AddSourcesFromCurrentConfig()
-                .AddSource(RepoInfo.PackagesPath);
+                .AddSourcesFromCurrentConfig();
         }
 
         public TestAsset Restore(ITestOutputHelper log, string relativePath = "", params string[] args)

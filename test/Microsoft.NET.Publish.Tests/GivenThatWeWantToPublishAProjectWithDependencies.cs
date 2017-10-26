@@ -53,7 +53,7 @@ namespace Microsoft.NET.Publish.Tests
             string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies");
 
             Command runAppCommand = Command.Create(
-                RepoInfo.DotNetHostPath,
+                TestContext.Current.ToolsetUnderTest.DotNetHostPath,
                 new[] { appPath, "one", "two" });
 
             string expectedOutput =

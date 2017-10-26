@@ -12,17 +12,12 @@ namespace Microsoft.NET.TestFramework
     {
         protected TestAssetsManager _testAssetsManager = new TestAssetsManager();
 
-        protected bool UsingFullFrameworkMSBuild { get; }
+        protected bool UsingFullFrameworkMSBuild => TestContext.Current.ToolsetUnderTest.ShouldUseFullFrameworkMSBuild;
 
         protected ITestOutputHelper Log { get; }
 
         protected SdkTest(ITestOutputHelper log)
         {
-            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "1");
-
-            string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
-            UsingFullFrameworkMSBuild = !string.IsNullOrEmpty(msbuildPath);
-
             Log = log;
         }
         public void Dispose()

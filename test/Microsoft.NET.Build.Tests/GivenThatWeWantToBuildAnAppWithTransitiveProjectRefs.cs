@@ -10,7 +10,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using FluentAssertions;
 using System.Xml.Linq;
 using System.Linq;
@@ -67,7 +66,7 @@ namespace Microsoft.NET.Build.Tests
                 "AuxLibrary.pdb",
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should()

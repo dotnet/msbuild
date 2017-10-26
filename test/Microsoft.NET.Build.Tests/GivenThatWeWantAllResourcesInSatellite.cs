@@ -9,7 +9,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Microsoft.DotNet.Cli.Utils;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
@@ -93,7 +92,7 @@ namespace Microsoft.NET.Build.Tests
                     outputFiles.Add("AllResourcesInSatellite.deps.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.dev.json");
-                    command = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
+                    command = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
                 }
 
                 outputDirectory.Should().OnlyHaveFiles(outputFiles);

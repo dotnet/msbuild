@@ -9,9 +9,7 @@ namespace Microsoft.NET.TestFramework
     {
         public FullMSBuildOnlyFactAttribute()
         {
-            string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
-            bool usingFullFrameworkMSBuild = !string.IsNullOrEmpty(msbuildPath);
-            if (!usingFullFrameworkMSBuild)
+            if (!TestContext.Current.ToolsetUnderTest.ShouldUseFullFrameworkMSBuild)
             {
                 this.Skip = "This test requires Full MSBuild to run";
             }

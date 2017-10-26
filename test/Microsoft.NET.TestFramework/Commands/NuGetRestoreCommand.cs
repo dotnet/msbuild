@@ -47,7 +47,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
-        protected override ICommand CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(params string[] args)
         {
             var newArgs = new List<string>();
 
@@ -63,7 +63,18 @@ namespace Microsoft.NET.TestFramework.Commands
 
             newArgs.AddRange(args);
 
-            return Command.Create(RepoInfo.NuGetExePath, newArgs);
+            if (string.IsNullOrEmpty(TestContext.Current.NuGetExePath))
+            {
+                throw new InvalidOperationException("Path to nuget.exe not set");
+            }
+
+            var ret = new SdkCommandSpec()
+            {
+                FileName = TestContext.Current.NuGetExePath,
+                Arguments = newArgs
+            };
+
+            return ret;
         }
     }
 }

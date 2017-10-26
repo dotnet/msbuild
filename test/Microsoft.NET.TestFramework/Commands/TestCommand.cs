@@ -4,6 +4,7 @@
 using Microsoft.DotNet.Cli.Utils;
 using System.Collections.Generic;
 using Xunit.Abstractions;
+using System.Diagnostics;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -18,7 +19,7 @@ namespace Microsoft.NET.TestFramework.Commands
             Log = log;
         }
 
-        protected abstract ICommand CreateCommand(string[] args);
+        protected abstract SdkCommandSpec CreateCommand(string[] args);
 
         public TestCommand WithEnvironmentVariable(string name, string value)
         {
@@ -26,9 +27,22 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
+        public ProcessStartInfo GetProcessStartInfo(params string[] args)
+        {
+            var commandSpec = CreateCommand(args);
+
+            foreach (var kvp in _environment)
+            {
+                commandSpec.Environment[kvp.Key] = kvp.Value;
+            }
+
+            return commandSpec.ToProcessStartInfo();
+        }
+
         public CommandResult Execute(params string[] args)
         {
             var command = CreateCommand(args)
+                .ToCommand()
                 .CaptureStdOut()
                 .CaptureStdErr();
 

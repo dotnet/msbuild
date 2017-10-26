@@ -47,6 +47,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="TestLockFiles.cs" />
     <Compile Include="GivenARemoveDuplicatePackageReferences.cs" />
+    <Compile Include="..\Common\CommandLine\TestCommandLine.Default.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="all.asset.types.portable.deps.json">
