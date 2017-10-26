@@ -11,7 +11,7 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
-      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver" >
+      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver" Condition="'$(IncludeMSBuildSdkResolver)' == 'true'" >
         <ProjectName>Microsoft.DotNet.MSBuildSdkResolver</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>

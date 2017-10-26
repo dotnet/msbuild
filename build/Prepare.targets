@@ -68,7 +68,8 @@
 
   <Target Name="SetupRestoreSrcPackagesInputsOutputs">
     <ItemGroup>
-      <RestoreSrcPackagesInput Include="$(RepoRoot)/src/**/*.csproj" Exclude="$(RepoRoot)/src/**/%24projectName%24.csproj"/>
+      <RestoreSrcPackagesInput Include="$(RepoRoot)/src/**/*.csproj" />
+      <RestoreSrcPackagesInput Remove="%(RestoreSrcPackagesInput.Identity)" Condition="'%(RestoreSrcPackagesInput.Filename)' == 'Microsoft.DotNet.MSBuildSdkResolver' and '$(IncludeMSBuildSdkResolver)' != 'true'" />
     </ItemGroup>
   </Target>
 
