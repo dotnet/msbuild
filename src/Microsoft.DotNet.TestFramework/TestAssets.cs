@@ -17,13 +17,11 @@ namespace Microsoft.DotNet.TestFramework
 
         private FileInfo _dotnetCsprojExe;
 
-        private FileInfo _dotnetProjectJsonExe;
+        private string _testWorkingFolder;
 
-        private const string ProjectJsonSearchPattern = "project.json";
+        public FileInfo DotnetCsprojExe => _dotnetCsprojExe;
 
-        private const string CsprojSearchPattern = "*.csproj";
-
-        public TestAssets(DirectoryInfo assetsRoot, FileInfo dotnetCsprojExe, FileInfo dotnetProjectJsonExe)
+        public TestAssets(DirectoryInfo assetsRoot, FileInfo dotnetCsprojExe, string testWorkingFolder)
         {
             if (assetsRoot == null)
             {
@@ -35,11 +33,6 @@ namespace Microsoft.DotNet.TestFramework
                 throw new ArgumentNullException(nameof(dotnetCsprojExe));
             }
 
-            if (dotnetProjectJsonExe == null)
-            {
-                throw new ArgumentNullException(nameof(dotnetProjectJsonExe));
-            }
-            
             if (!assetsRoot.Exists)
             {
                 throw new DirectoryNotFoundException($"Directory not found at '{assetsRoot}'");
@@ -50,16 +43,10 @@ namespace Microsoft.DotNet.TestFramework
                 throw new FileNotFoundException("Csproj dotnet executable must exist", dotnetCsprojExe.FullName);
             }
 
-            if (!dotnetProjectJsonExe.Exists)
-            {
-                throw new FileNotFoundException("project.json dotnet executable must exist", dotnetProjectJsonExe.FullName);
-            }
-
             _root = assetsRoot;
 
             _dotnetCsprojExe = dotnetCsprojExe;
-
-            _dotnetProjectJsonExe = dotnetProjectJsonExe;
+            _testWorkingFolder = testWorkingFolder;
         }
 
         public TestAssetInfo Get(string name)
@@ -74,24 +61,7 @@ namespace Microsoft.DotNet.TestFramework
             return new TestAssetInfo(
                 assetDirectory, 
                 name, 
-                _dotnetCsprojExe,
-                CsprojSearchPattern);
-        }
-
-        public TestAssetInfo GetProjectJson(string name)
-        {
-            return GetProjectJson(TestAssetKinds.TestProjects, name);
-        }
-
-        public TestAssetInfo GetProjectJson(string kind, string name)
-        {
-            var assetDirectory = new DirectoryInfo(Path.Combine(_root.FullName, kind, name));
-
-            return new TestAssetInfo(
-                assetDirectory, 
-                name, 
-                _dotnetProjectJsonExe,
-                ProjectJsonSearchPattern);
+                this);
         }
 
         public DirectoryInfo CreateTestDirectory(string testProjectName = "temp", [CallerMemberName] string callingMethod = "", string identifier = "")
@@ -112,7 +82,10 @@ namespace Microsoft.DotNet.TestFramework
 #else
             string baseDirectory = AppContext.BaseDirectory;
 #endif
-            return Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
+            //  Find the name of the assembly the test comes from based on the the base directory and how the output path has been constructed
+            string testAssemblyName = new DirectoryInfo(baseDirectory).Parent.Parent.Name;
+
+            return Path.Combine(_testWorkingFolder, testAssemblyName, callingMethod + identifier, testProjectName);
         }
     }
 }
