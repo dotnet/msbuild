@@ -1532,14 +1532,21 @@ typedef enum _tagAssemblyComparisonResult
                 }
                 else
                 {
-                    if (!string.IsNullOrWhiteSpace(assemblyName))
+                    if (Directory.Exists(s_gacPath))
                     {
-                        _assemblyNameVersion = new AssemblyName(assemblyName);
-                        _gacDirectories = Directory.EnumerateDirectories(s_gacPath, _assemblyNameVersion.Name);
+                        if (!string.IsNullOrWhiteSpace(assemblyName))
+                        {
+                            _assemblyNameVersion = new AssemblyName(assemblyName);
+                            _gacDirectories = Directory.EnumerateDirectories(s_gacPath, _assemblyNameVersion.Name);
+                        }
+                        else
+                        {
+                            _gacDirectories = Directory.EnumerateDirectories(s_gacPath);
+                        }
                     }
                     else
                     {
-                        _gacDirectories = Directory.EnumerateDirectories(s_gacPath);
+                        _gacDirectories = Array.Empty<string>();
                     }
                 }
             }
