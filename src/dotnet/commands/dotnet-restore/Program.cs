@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Restore
         {
         }
 
-        public static RestoreCommand FromArgs(string[] args, string msbuildPath = null)
+        public static RestoreCommand FromArgs(string[] args, string msbuildPath = null, bool noLogo = true)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -31,16 +31,14 @@ namespace Microsoft.DotNet.Tools.Restore
 
             var parsedRestore = result["dotnet"]["restore"];
 
-            var msbuildArgs = new List<string>
-            {
-                "/NoLogo",
-                "/t:Restore"
-            };
+            var msbuildArgs = new List<string>();
 
-            if (!HasVerbosityOption(parsedRestore))
+            if (noLogo)
             {
-                msbuildArgs.Add("/ConsoleLoggerParameters:Verbosity=Minimal");
+                msbuildArgs.Add("/nologo");
             }
+
+            msbuildArgs.Add("/t:Restore");
 
             msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
 
@@ -64,13 +62,6 @@ namespace Microsoft.DotNet.Tools.Restore
             }
             
             return cmd.Execute();
-        }
-
-        private static bool HasVerbosityOption(AppliedOption parsedRestore)
-        {
-            return parsedRestore.HasOption("verbosity") ||
-                   parsedRestore.Arguments.Any(a => a.Contains("/v:")) ||
-                   parsedRestore.Arguments.Any(a => a.Contains("/verbosity:"));
         }
     }
 }
