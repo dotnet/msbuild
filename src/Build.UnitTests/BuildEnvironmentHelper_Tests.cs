@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +20,13 @@ namespace Microsoft.Build.Engine.UnitTests
 #else
         private const string MSBuildExeName = "MSBuild.exe";
 #endif
+
+        [Fact]
+        public void ShouldBeRunningInTests()
+        {
+            BuildEnvironmentHelper.Instance.RunningTests.ShouldBeTrue();
+        }
+
         [Fact]
         public void GetExecutablePath()
         {
