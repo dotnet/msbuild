@@ -738,9 +738,41 @@ namespace Microsoft.Build.Shared
         {
             // Do the Cultures match?
 #if FEATURE_ASSEMBLYNAME_CULTUREINFO
-            return a?.CultureInfo?.LCID == b?.CultureInfo?.LCID;
+            CultureInfo aCulture = a.CultureInfo;
+            CultureInfo bCulture = b.CultureInfo;
+            if (aCulture == null)
+            {
+                aCulture = CultureInfo.InvariantCulture;
+            }
+            if (bCulture == null)
+            {
+                bCulture = CultureInfo.InvariantCulture;
+            }
+
+            if (aCulture.LCID != bCulture.LCID)
+            {
+                return false;
+            }
+
+            return true;
 #else
-            return a?.CultureName == b?.CultureName;
+            string aCulture = a.CultureName;
+            string bCulture = b.CultureName;
+            if (aCulture == null)
+            {
+                aCulture = CultureInfo.InvariantCulture.Name;
+            }
+            if (bCulture == null)
+            {
+                bCulture = CultureInfo.InvariantCulture.Name;
+            }
+
+            if (aCulture != bCulture)
+            {
+                return false;
+            }
+
+            return true;
 #endif
         }
 
