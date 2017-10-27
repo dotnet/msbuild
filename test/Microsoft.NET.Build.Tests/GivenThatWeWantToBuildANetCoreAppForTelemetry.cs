@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tests
             buildCommand
                 .Execute(TelemetryTestLogger)
                 .StdOut.Should()
-                .Contain("{\"EventName\":\"TargetFramework\",\"Properties\":{\"version\":\".NETCoreApp,Version=v1.0\"}");
+                .Contain("{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v1.0\"}");
         }
 
         [CoreMSBuildOnlyFact]
@@ -67,9 +67,9 @@ namespace Microsoft.NET.Build.Tests
             buildCommand
                 .Execute(TelemetryTestLogger)
                 .StdOut.Should()
-                .Contain("{\"EventName\":\"TargetFramework\",\"Properties\":{\"version\":\".NETFramework,Version=v4.6\"}")
+                .Contain("{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETFramework,Version=v4.6\"}")
                 .And
-                .Contain("{\"EventName\":\"TargetFramework\",\"Properties\":{\"version\":\".NETCoreApp,Version=v1.1\"}");
+                .Contain("{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v1.1\"}");
         }
     }
 }

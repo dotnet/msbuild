@@ -103,7 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_CollectTargetFrameworkForTelemetry" AfterTargets="_CheckForUnsupportedTargetFramework">
-    <Telemetry EventName="TargetFramework" EventData="version=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
+    <Telemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
   </Target>
 
   <!-- 
