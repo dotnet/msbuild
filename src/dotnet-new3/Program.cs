@@ -27,10 +27,25 @@ namespace dotnet_new3
         {
             bool emitTimings = args.Any(x => string.Equals(x, "--debug:emit-timings", StringComparison.OrdinalIgnoreCase));
             bool debugTelemetry = args.Any(x => string.Equals(x, "--debug:emit-telemetry", StringComparison.OrdinalIgnoreCase));
-            return New3Command.Run(CommandName, CreateHost(emitTimings), new TelemetryLogger(null, debugTelemetry), FirstRun, args);
+    
+            DefaultTemplateEngineHost host = CreateHost(emitTimings);
+
+            bool debugAuthoring = args.Any(x => string.Equals(x, "--trace:authoring", StringComparison.OrdinalIgnoreCase));
+            bool debugInstall = args.Any(x => string.Equals(x, "--trace:install", StringComparison.OrdinalIgnoreCase));
+            if (debugAuthoring)
+            {
+                AddAuthoringLogger(host);
+                AddInstallLogger(host);
+            }
+            else if (debugInstall)
+            {
+                AddInstallLogger(host);
+            }
+
+            return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), FirstRun, args);
         }
 
-        private static ITemplateEngineHost CreateHost(bool emitTimings)
+        private static DefaultTemplateEngineHost CreateHost(bool emitTimings)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -66,7 +81,26 @@ namespace dotnet_new3
                 };
             }
 
+
             return host;
+        }
+
+        private static void AddAuthoringLogger(DefaultTemplateEngineHost host)
+        {
+            Action<string, string[]> authoringLogger = (message, additionalInfo) =>
+            {
+                Console.WriteLine(string.Format("Authoring: {0}", message));
+            };
+            host.RegisterDiagnosticLogger("Authoring", authoringLogger);
+        }
+
+        private static void AddInstallLogger(DefaultTemplateEngineHost host)
+        {
+            Action<string, string[]> installLogger = (message, additionalInfo) =>
+            {
+                Console.WriteLine(string.Format("Install: {0}", message));
+            };
+            host.RegisterDiagnosticLogger("Install", installLogger);
         }
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
