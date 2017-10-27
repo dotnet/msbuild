@@ -740,7 +740,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_ASSEMBLYNAME_CULTUREINFO
             return a?.CultureInfo?.LCID == b?.CultureInfo?.LCID;
 #else
-            return a?.CultureInfo?.Name == b?.CultureInfo?.Name;
+            return a?.CultureName == b?.CultureName;
 #endif
         }
 
