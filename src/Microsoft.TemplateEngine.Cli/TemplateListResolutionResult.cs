@@ -92,6 +92,7 @@ namespace Microsoft.TemplateEngine.Cli
             return false;
         }
 
+        // Note: This method does not consider default language matches / mismatches
         public bool TryGetAllInvokableTemplates(out IReadOnlyList<ITemplateMatchInfo> invokableTemplates)
         {
             IEnumerable<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch());
@@ -108,7 +109,13 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template)
         {
-            IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch()).ToList();
+            IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch() 
+                                                && (_hasUserInputLanguage 
+                                                    || !x.DispositionOfDefaults.Any()
+                                                    || x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact))
+                                                    )
+                                                    .ToList();
+            
             if (invokableMatches.Count() == 1)
             {
                 template = invokableMatches[0];

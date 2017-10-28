@@ -218,24 +218,29 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (ITemplateMatchInfo template in listToFilter)
             {
-                MatchKind matchKind;
+                if (template.Info.Tags != null)
+                {
+                    if (template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
+                    {
+                        MatchKind matchKind;
 
-                if (template.Info.Tags == null ||
-                    template.Info.Tags.TryGetValue("language", out ICacheTag languageTag) &&
-                    languageTag.ChoicesAndDescriptions.ContainsKey(language))
-                {
-                    matchKind = MatchKind.Exact;
-                }
-                else
-                {
-                    matchKind = MatchKind.Mismatch;
-                }
+                        if (languageTag.ChoicesAndDescriptions.ContainsKey(language))
+                        {
+                            matchKind = MatchKind.Exact;
+                        }
+                        else
+                        {
+                            matchKind = MatchKind.Mismatch;
+                        }
 
-                template.AddDisposition(new MatchInfo
-                {
-                    Location = MatchLocation.DefaultLanguage,
-                    Kind = matchKind
-                });
+                        // only add default language disposition when there is a language specified for the template.
+                        template.AddDisposition(new MatchInfo
+                        {
+                            Location = MatchLocation.DefaultLanguage,
+                            Kind = matchKind
+                        });
+                    }
+                }
             }
         }
 
