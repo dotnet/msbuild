@@ -2052,6 +2052,11 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <target state="translated">Görev fabrikası, "TaskType" özelliği için bir değer döndürmelidir.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="new">The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
