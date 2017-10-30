@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tasks
                     catch (Exception e) when (IsReferenceException(e))
                     {
                         // ResolveAssemblyReference treats all of these exceptions as warnings so we'll do the same
-                        Log.LogWarning(Strings.GetDependsOnNETStandardFailedWithException, e.Message);
+                        Log.LogWarning(Strings.GetDependsOnNETStandardFailedWithException, e.Message, referenceSourcePath);
                     }
                 }
             }
