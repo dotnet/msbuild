@@ -2052,6 +2052,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">작업 팩터리에서 "TaskType" 속성의 값을 반환해야 합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="new">The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

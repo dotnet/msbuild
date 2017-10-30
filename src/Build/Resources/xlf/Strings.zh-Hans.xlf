@@ -2052,6 +2052,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">任务工厂必须对 "TaskType" 属性返回一个值。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="new">The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
