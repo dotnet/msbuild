@@ -31,9 +31,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
                     if (firstArgument != null)
                     {
                         result.Add(new ApplicationInsightsEntryFormat(
-                            "dotnet-" + topLevelCommandNameFromParse,
+                            "sublevelparser/command",
                             new Dictionary<string, string>
                             {
+                                {"verb", topLevelCommandNameFromParse},
                                 {"argument", firstArgument}
                             }));
                     }

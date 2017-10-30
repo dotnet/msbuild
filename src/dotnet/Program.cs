@@ -82,6 +82,7 @@ namespace Microsoft.DotNet.Cli
             var command = string.Empty;
             var lastArg = 0;
             var cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
+            TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
             using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel(cliFallbackFolderPathCalculator))
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
@@ -120,7 +121,13 @@ namespace Microsoft.DotNet.Cli
                         // It's the command, and we're done!
                         command = args[lastArg];
 
-                        if (IsDotnetBeingInvokedFromNativeInstaller(command))
+                        if (string.IsNullOrEmpty(command))
+                        {
+                            command = "help";
+                        }
+
+                        topLevelCommandParserResult = new TopLevelCommandParserResult(args[lastArg]);
+                        if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
                         {
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                         }
@@ -144,7 +151,7 @@ namespace Microsoft.DotNet.Cli
                     telemetryClient = new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
                 }
                 TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
-                TelemetryEventEntry.TelemetryFilter = new TelemetryFilter();
+                TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             }
 
             IEnumerable<string> appArgs =
@@ -158,23 +165,18 @@ namespace Microsoft.DotNet.Cli
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
-            if (string.IsNullOrEmpty(command))
-            {
-                command = "help";
-            }
-
-            TelemetryEventEntry.TrackEvent(command, null, null);
+            TelemetryEventEntry.SendFiltered(topLevelCommandParserResult);
 
             int exitCode;
-            if (BuiltInCommandsCatalog.Commands.TryGetValue(command, out var builtIn))
+            if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
-                TelemetryEventEntry.SendFiltered(Parser.Instance.ParseFrom($"dotnet {command}", appArgs.ToArray()));
+                TelemetryEventEntry.SendFiltered(Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray()));
                 exitCode = builtIn.Command(appArgs.ToArray());
             }
             else
             {
                 CommandResult result = Command.Create(
-                        "dotnet-" + command,
+                        "dotnet-" + topLevelCommandParserResult.Command,
                         appArgs,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15)
                     .Execute();
@@ -183,9 +185,9 @@ namespace Microsoft.DotNet.Cli
             return exitCode;
         }
 
-        private static bool IsDotnetBeingInvokedFromNativeInstaller(string command)
+        private static bool IsDotnetBeingInvokedFromNativeInstaller(TopLevelCommandParserResult parseResult)
         {
-            return command == "internal-reportinstallsuccess";
+            return parseResult.Command == "internal-reportinstallsuccess";
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
@@ -268,7 +270,7 @@ namespace Microsoft.DotNet.Cli
 
             string currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
 
-            // if the current RID isn't supported by the shared framework, display the RID the CLI was 
+            // if the current RID isn't supported by the shared framework, display the RID the CLI was
             // built with instead, so the user knows which RID they should put in their "runtimes" section.
             return fxDepsFile.IsRuntimeSupported(currentRid) ?
                 currentRid :

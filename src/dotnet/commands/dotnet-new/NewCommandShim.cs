@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.New
                 {
                     if (telemetry.Enabled)
                     {
-                        telemetry.TrackEvent(name, props, measures);
+                        telemetry.TrackEvent($"template/{name}", props, measures);
                     }
                 });
             }

@@ -17,6 +17,11 @@ namespace Microsoft.DotNet.Cli.Telemetry
             return HashInFormat(sha256, text);
         }
 
+        public static string HashWithNormalizedCasing(string text)
+        {
+            return Hash(text.ToUpperInvariant());
+        }
+
         private static string HashInFormat(SHA256 sha256, string text)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(text);

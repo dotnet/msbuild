@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Tools.MSBuild;
@@ -10,26 +11,7 @@ namespace Microsoft.DotNet.Tools
 {
     public class RestoringCommand : MSBuildForwardingApp
     {
-        private bool NoRestore { get; }
-
-        private IEnumerable<string> ParsedArguments { get; }
-
-        private IEnumerable<string> TrailingArguments { get; }
-
-        private IEnumerable<string> ArgsToForwardToRestore()
-        {
-            var restoreArguments = ParsedArguments.Where(a =>
-                !a.StartsWith("/p:TargetFramework"));
-
-            if (!restoreArguments.Any(a => a.StartsWith("/verbosity:")))
-            {
-                restoreArguments = restoreArguments.Concat(new string[] { "/verbosity:q" });
-            }
-
-            return restoreArguments.Concat(TrailingArguments);
-        }
-
-        private bool ShouldRunImplicitRestore => !NoRestore;
+        public RestoreCommand SeparateRestoreCommand { get; }
 
         public RestoringCommand(
             IEnumerable<string> msbuildArgs,
@@ -37,18 +19,64 @@ namespace Microsoft.DotNet.Tools
             IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(msbuildArgs, msbuildPath)
+            : base(GetCommandArguments(msbuildArgs, parsedArguments, noRestore), msbuildPath)
         {
-            NoRestore = noRestore;
-            ParsedArguments = parsedArguments;
-            TrailingArguments = trailingArguments;
+            SeparateRestoreCommand = GetSeparateRestoreCommand(parsedArguments, trailingArguments, noRestore, msbuildPath);
         }
+
+        private static IEnumerable<string> GetCommandArguments(
+            IEnumerable<string> msbuildArgs,
+            IEnumerable<string> parsedArguments,
+            bool noRestore)
+        {
+            if (noRestore) 
+            {
+                return msbuildArgs;
+            }
+
+            if (HasArgumentToExcludeFromRestore(parsedArguments))
+            {
+                return Prepend("/nologo", msbuildArgs);
+            }
+
+            return Prepend("/restore", msbuildArgs);
+        }
+
+        private static RestoreCommand GetSeparateRestoreCommand(
+            IEnumerable<string> parsedArguments,
+            IEnumerable<string> trailingArguments, 
+            bool noRestore,
+            string msbuildPath)
+        {
+            if (noRestore || !HasArgumentToExcludeFromRestore(parsedArguments))
+            {
+                return null;
+            }
+
+            var restoreArguments = parsedArguments
+                .Where(a => !IsExcludedFromRestore(a))
+                .Concat(trailingArguments);
+
+            return RestoreCommand.FromArgs(
+                restoreArguments.ToArray(), 
+                msbuildPath, 
+                noLogo: false);
+        }
+
+        private static IEnumerable<string> Prepend(string argument, IEnumerable<string> arguments)
+            => new[] { argument }.Concat(arguments);
+
+        private static bool HasArgumentToExcludeFromRestore(IEnumerable<string> arguments)
+            => arguments.Any(a => IsExcludedFromRestore(a));
+
+        private static bool IsExcludedFromRestore(string argument) 
+            => argument.StartsWith("/p:TargetFramework=", StringComparison.Ordinal);
 
         public override int Execute()
         {
-            if (ShouldRunImplicitRestore)
+            if (SeparateRestoreCommand != null)
             {
-                int exitCode = RestoreCommand.Run(ArgsToForwardToRestore().ToArray());
+                int exitCode = SeparateRestoreCommand.Execute();
                 if (exitCode != 0)
                 {
                     return exitCode;
