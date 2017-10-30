@@ -29,6 +29,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string Configuration { get; set; }
 
+        public List<string> MetadataNames { get; set; } = new List<string>();
+
         public GetValuesCommand(ITestOutputHelper log, string projectPath, string targetFramework,
             string valueName, ValueType valueType = ValueType.Property)
             : base(log, "WriteValuesToFile", projectPath, relativePathToProject: null)
@@ -52,19 +54,32 @@ namespace Microsoft.NET.TestFramework.Commands
                 GetBaseIntermediateDirectory().FullName,
                 Path.GetFileName(ProjectFile) + ".WriteValuesToFile.g.targets");
 
-            string linesAttribute = _valueType == ValueType.Property ?
-                $"Lines=`$({_valueName})`" :
-                $"Lines=`@({_valueName})`";
+            string linesAttribute;
+            if (_valueType == ValueType.Property)
+            {
+                linesAttribute = $"$({_valueName})";
+            }
+            else
+            {
+                linesAttribute = $"%({_valueName}.Identity)";
+                foreach (var metadataName in MetadataNames)
+                {
+                    linesAttribute += $"%09%({_valueName}.{metadataName})";
+                }
+            }
 
             string injectTargetContents =
-@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+$@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <Target Name=`WriteValuesToFile` " + (ShouldCompile ? $"DependsOnTargets=`{DependsOnTargets}`" : "") + $@">
+    <ItemGroup>
+      <LinesToWrite Include=`{linesAttribute}`/>
+    </ItemGroup>
     <WriteLinesToFile
       File=`bin\$(Configuration)\$(TargetFramework)\{_valueName}Values.txt`
-      {linesAttribute}
+      Lines=`@(LinesToWrite)`
       Overwrite=`true`
       Encoding=`Unicode`
       />
@@ -82,13 +97,38 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public List<string> GetValues()
         {
+            return GetValuesWithMetadata().Select(t => t.value).ToList();
+        }
+
+        public List<(string value, Dictionary<string, string> metadata)> GetValuesWithMetadata()
+        {
+            var ret = new List<(string value, Dictionary<string, string> metadata)>();
+
             string outputFilename = $"{_valueName}Values.txt";
             var outputDirectory = GetOutputDirectory(_targetFramework, Configuration ?? "Debug");
 
             return File.ReadAllLines(Path.Combine(outputDirectory.FullName, outputFilename))
-                .Select(line => line.Trim())
-                .Where(line => !string.IsNullOrEmpty(line))
-                .ToList();
+               .Where(line => !string.IsNullOrWhiteSpace(line))
+               .Select(line =>
+               {
+                   if (!MetadataNames.Any())
+                   {
+                       return (value: line, metadata: new Dictionary<string, string>());
+                   }
+                   else
+                   {
+                       var fields = line.Split('\t');
+
+                       var dict = new Dictionary<string, string>();
+                       for (int i=0; i<MetadataNames.Count;i++)
+                       {
+                           dict[MetadataNames[i]] = fields[i + 1];
+                       }
+
+                       return (value: fields[0], metadata: dict);
+                   }
+               })
+               .ToList();
         }
     }
 }

@@ -239,7 +239,7 @@ public static class Program
     }
 }
 ";
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: runtimeIdentifier);
 
             testProjectInstance.Restore(Log, testProject.Name);
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));

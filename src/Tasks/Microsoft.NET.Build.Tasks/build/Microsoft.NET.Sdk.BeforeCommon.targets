@@ -62,6 +62,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- dependencies coming from the package manager lock file should not be copied locally for .NET Core and .NETStandard projects -->
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">false</CopyLocalLockFileAssemblies>
+
+    <!-- Disable the use of FrameworkPathOverride in Microsoft.Common.CurrentVersion.targets which can slow down evaluation.  FrameworkPathOverride
+    is not needed for NETStandard or NETCore since references come from NuGet packages-->
+    <EnableFrameworkPathOverride Condition="'$(EnableFrameworkPathOverride)' == ''">false</EnableFrameworkPathOverride>
   </PropertyGroup>
   
   <!-- Regardless of platform, enable dependency file generation if PreserveCompilatioContext is set. -->
