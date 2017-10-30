@@ -78,7 +78,22 @@
              Targets="Pack"
              Properties="$(CommonMSBuildGlobalProperties);NoBuild=true"
              />
+  </Target>
 
+  <Target Name="BuildForCli">
+    <MSBuild Projects="@(NuGetProjectFile)"
+             Targets="Restore"
+             Properties="$(CommonMSBuildGlobalProperties)" />
+
+    <MSBuild Projects="@(NuGetProjectFile)"
+             Targets="Build"
+             Properties="$(CommonMSBuildGlobalProperties)" />
+
+    <MSBuild BuildInParallel="true"
+             Projects="@(NuGetProjectFile)"
+             Targets="Pack"
+             Properties="$(CommonMSBuildGlobalProperties);NoBuild=true"
+             />
   </Target>
   
   <Target Name="CleanNuGetPackages">
