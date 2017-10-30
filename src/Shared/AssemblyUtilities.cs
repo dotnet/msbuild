@@ -19,13 +19,17 @@ namespace Microsoft.Build.Shared
         // Cached method info
         private static PropertyInfo s_assemblylocationProperty;
         private static MethodInfo s_cultureInfoGetCultureMethod;
-        private static Lazy<Assembly> s_entryAssembly = new Lazy<Assembly>(() => GetEntryAssembly());
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
         private static Lazy<CultureInfo[]> s_validCultures = new Lazy<CultureInfo[]>(() => GetValidCultures(), true);
 #endif
 
+#if !CLR2COMPATIBILITY
+        private static Lazy<Assembly> s_entryAssembly = new Lazy<Assembly>(() => GetEntryAssembly());
         public static Assembly EntryAssembly => s_entryAssembly.Value;
+#else
+        public static Assembly EntryAssembly = GetEntryAssembly();
+#endif
 
         public static string GetAssemblyLocation(Assembly assembly)
         {
