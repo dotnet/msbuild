@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <NupkgsForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.Cli.Utils.*.nupkg" />
+    <NupkgsForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.MSBuildSdkResolver.*.nupkg" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <RelativePath>packages</RelativePath>
+  </PropertyGroup>
+
+  <Target Name="PublishNupkgToTransportFeed" Condition=" '$(PUBLISH_NUPKG_TO_TRANSPORT_FEED)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
+    <Error Condition="'$(TransportFeedContainerName)' == ''" Text="Missing property TransportFeedContainerName." />
+    <Error Condition="'$(TransportFeedCloudDropAccountName)' == ''" Text="Missing property TransportFeedCloudDropAccountName." />
+    <Error Condition="'$(TransportFeedCloudDropAccessToken)' == ''" Text="Missing property TransportFeedCloudDropAccessToken." />
+
+    <Message Text="Publish to $(TransportFeedContainerName) started" />
+    <PushToBlobFeed AccountKey="$(TransportFeedCloudDropAccessToken)"
+                AccountName="$(TransportFeedCloudDropAccountName)"
+                ContainerName="$(TransportFeedContainerName)"
+                IndexDirectory="$(IndexDirectory)"
+                ItemsToPush="@(NupkgsForPublishing)"
+                Overwrite="false"
+                PublishFlatContainer="false"
+                RelativePath="$(RelativePath)" />
+
+  </Target>
+</Project>
