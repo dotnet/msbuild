@@ -13,7 +13,6 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit.Abstractions;
 

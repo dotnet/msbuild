@@ -11,7 +11,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -84,7 +83,7 @@ public static class Program
             var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { applicationPath })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
                 .CaptureStdOut()
                 .Execute()
                 .Should().Pass()

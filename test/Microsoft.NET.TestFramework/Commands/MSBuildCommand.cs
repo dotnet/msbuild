@@ -11,7 +11,6 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public class MSBuildCommand : TestCommand
     { 
-        public MSBuildTest MSBuild { get; }
         public string Target { get;  }
 
         private readonly string _projectRootPath;
@@ -21,10 +20,9 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
-        public MSBuildCommand(ITestOutputHelper log, string target, string projectRootPath, string relativePathToProject = null, MSBuildTest msbuild = null)
+        public MSBuildCommand(ITestOutputHelper log, string target, string projectRootPath, string relativePathToProject = null)
             : base(log)
         {
-            MSBuild = msbuild ?? MSBuildTest.Stage0MSBuild;
             Target = target;
 
             _projectRootPath = projectRootPath;
@@ -88,11 +86,11 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
-        protected override ICommand CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(params string[] args)
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, FullPathProjectFile);
-            return MSBuild.CreateCommandForTarget(Target, newArgs.ToArray());
+            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(Target, newArgs.ToArray());
         }
     }
 }

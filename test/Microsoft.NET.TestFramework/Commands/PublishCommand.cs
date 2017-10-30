@@ -15,8 +15,8 @@ namespace Microsoft.NET.TestFramework.Commands
     {
         private const string PublishSubfolderName = "publish";
 
-        public PublishCommand(ITestOutputHelper log, string projectPath, MSBuildTest msbuild = null)
-            : base(log, "Publish", projectPath, relativePathToProject: null, msbuild: msbuild)
+        public PublishCommand(ITestOutputHelper log, string projectPath)
+            : base(log, "Publish", projectPath, relativePathToProject: null)
         {
         }
 

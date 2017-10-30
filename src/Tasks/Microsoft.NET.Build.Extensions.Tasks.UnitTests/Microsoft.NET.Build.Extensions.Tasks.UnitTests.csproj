@@ -27,6 +27,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\CommandLine\TestCommandLine.Default.cs" />
     <Compile Include="GivenAGetDependsOnNETStandardTask.cs" />
     <Compile Include="..\Microsoft.NET.Build.Tasks.UnitTests\Mocks\MockBuildEngine.cs" />
     <Compile Include="..\Microsoft.NET.Build.Tasks.UnitTests\Mocks\MockTaskItem.cs" />
