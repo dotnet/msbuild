@@ -110,13 +110,13 @@ namespace Microsoft.TemplateEngine.Cli
         public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template)
         {
             IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch() 
-                                                && (_hasUserInputLanguage 
-                                                    || !x.DispositionOfDefaults.Any()
+                                                && (_hasUserInputLanguage
+                                                    || x.DispositionOfDefaults.Count == 0
                                                     || x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact))
                                                     )
                                                     .ToList();
             
-            if (invokableMatches.Count() == 1)
+            if (invokableMatches.Count == 1)
             {
                 template = invokableMatches[0];
                 return true;
