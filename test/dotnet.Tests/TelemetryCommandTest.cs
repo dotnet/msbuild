@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.Tests
         {
             const string argumentToSend = "push";
 
-            string[] args = { "nuget", argumentToSend, "aRoot" };
+            string[] args = { "nuget", argumentToSend };
 
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
