@@ -115,24 +115,20 @@ echo "Running command: $BUILD_COMMAND"
 echo "Using code from: $DOCKER_HOST_SHARE_DIR"
 [ -z "$INTERACTIVE" ] || echo "Running Interactive"
 
+# Note: passwords/keys should not be passed in the environment
 docker run $INTERACTIVE -t --rm --sig-proxy=true \
     --name $DOTNET_BUILD_CONTAINER_NAME \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
     -e CHANNEL \
-    -e CONNECTION_STRING \
     -e REPO_ID \
     -e REPO_USER \
-    -e REPO_PASS \
     -e REPO_SERVER \
     -e DOTNET_BUILD_SKIP_CROSSGEN \
     -e PUBLISH_TO_AZURE_BLOB \
     -e NUGET_FEED_URL \
     -e NUGET_API_KEY \
-    -e GITHUB_PASSWORD \
-    -e ARTIFACT_STORAGE_KEY \
     -e ARTIFACT_STORAGE_ACCOUNT \
     -e ARTIFACT_STORAGE_CONTAINER \
-    -e CHECKSUM_STORAGE_KEY \
     -e CHECKSUM_STORAGE_ACCOUNT \
     -e CHECKSUM_STORAGE_CONTAINER \
     -e CLIBUILD_SKIP_TESTS \
@@ -141,10 +137,7 @@ docker run $INTERACTIVE -t --rm --sig-proxy=true \
     -e RELEASESUFFIX \
     -e COREFXAZURECONTAINER \
     -e AZUREACCOUNTNAME \
-    -e AZUREACCESSTOKEN \
-    -e VSOPASSWORD \
     -e RELEASETOOLSGITURL \
     -e CORESETUPBLOBROOTURL \
-    -e CORESETUPBLOBACCESSTOKEN \
     $DOTNET_BUILD_CONTAINER_TAG \
     $BUILD_COMMAND "$@"
