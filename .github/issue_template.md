@@ -2,6 +2,8 @@
 
 Example repro steps:
 
+- zip file with project file, directory contents, and script that invokes msbuild.
+
 Project file
 ```xml
 <Project>
