@@ -15,6 +15,15 @@ Project file
 </Project>
 ```
 
+Directory contents:
+```
+/
+- a.cs
+- b.cs
+- dir/
+     - c.cs
+```
+
 Command line
 ```
 msbuild /bl
