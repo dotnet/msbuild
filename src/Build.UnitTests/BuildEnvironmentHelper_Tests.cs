@@ -22,12 +22,6 @@ namespace Microsoft.Build.Engine.UnitTests
 #endif
 
         [Fact]
-        public void ShouldBeRunningInTests()
-        {
-            BuildEnvironmentHelper.Instance.RunningTests.ShouldBeTrue();
-        }
-
-        [Fact]
         public void GetExecutablePath()
         {
             var msbuildPath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
@@ -272,11 +266,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/669")]
-#else
         [Fact]
-#endif
         public void BuildEnvironmentDetectsRunningTests()
         {
             BuildEnvironmentHelper.Instance.RunningTests.ShouldBeTrue();
