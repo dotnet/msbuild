@@ -15,7 +15,5 @@
     <TransportFeedContainerName>$(TRANSPORTFEED_STORAGE_CONTAINER)</TransportFeedContainerName>
     <TransportFeedContainerName Condition="'$(TransportFeedContainerName)' == ''">dotnet-core</TransportFeedContainerName>
     <TransportFeedCloudDropAccessToken>$(TRANSPORTFEED_STORAGE_KEY)</TransportFeedCloudDropAccessToken>
-    <TransportFeedCloudDropAccountName>$(TRANSPORTFEED_STORAGE_ACCOUNT)</TransportFeedCloudDropAccountName>
-    <TransportFeedCloudDropAccountName Condition="'$(TransportFeedCloudDropAccountName)' == ''">dotnetfeed</TransportFeedCloudDropAccountName>
   </PropertyGroup>
 </Project>
