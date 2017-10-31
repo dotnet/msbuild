@@ -50,24 +50,23 @@ namespace Microsoft.TemplateEngine.Cli
                 allUpdatesChoice = GetUserChoiceForAllUpdates(inputGetter);
             }
 
-            if (allUpdatesChoice == ApplyUpdatesChoice.None)
+            switch (allUpdatesChoice)
             {
-                return;
-            }
-            else if (allUpdatesChoice == ApplyUpdatesChoice.All)
-            {
-                ApplyUpdates(updateDescriptorList);
-            }
-            else if (allUpdatesChoice == ApplyUpdatesChoice.Prompt)
-            {
-                foreach (IUpdateUnitDescriptor descriptor in updateDescriptorList)
-                {
-                    bool shouldUpdate = GetUserChoiceForIndividualUpdate(descriptor, inputGetter);
-                    if (shouldUpdate)
+                case ApplyUpdatesChoice.None:
+                    return;
+                case ApplyUpdatesChoice.All:
+                    ApplyUpdates(updateDescriptorList);
+                    break;
+                case ApplyUpdatesChoice.Prompt:
+                    foreach (IUpdateUnitDescriptor descriptor in updateDescriptorList)
                     {
-                        ApplyUpdates(new List<IUpdateUnitDescriptor>() { descriptor });
+                        bool shouldUpdate = GetUserChoiceForIndividualUpdate(descriptor, inputGetter);
+                        if (shouldUpdate)
+                        {
+                            ApplyUpdates(new List<IUpdateUnitDescriptor>() { descriptor });
+                        }
                     }
-                }
+                    break;
             }
         }
 

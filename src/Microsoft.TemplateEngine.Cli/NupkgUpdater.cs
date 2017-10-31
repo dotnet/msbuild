@@ -27,13 +27,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public void ApplyUpdates(IInstaller installer, IReadOnlyList<IUpdateUnitDescriptor> updatesToApply)
         {
-            // TODO: revisit whether this should happen, or something else.
-            if (updatesToApply.Any(x => x.InstallUnitDescriptor.FactoryId != DescriptorFactoryId))
-            {
-                throw new Exception("Incorrect descriptor type");
-            }
-
-            installer.InstallPackages(updatesToApply.Select(x => x.InstallString));
+            IReadOnlyList<IUpdateUnitDescriptor> filteredUpdateToApply = updatesToApply.Where(x => x.InstallUnitDescriptor.FactoryId == DescriptorFactoryId).ToList();
+            installer.InstallPackages(filteredUpdateToApply.Select(x => x.InstallString));
         }
     }
 }
