@@ -169,7 +169,11 @@ namespace Microsoft.DotNet.Cli
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
-                TelemetryEventEntry.SendFiltered(Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray()));
+                var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
+                if (!parseResult.Errors.Any())
+                {
+                    TelemetryEventEntry.SendFiltered(parseResult);
+                }
 
                 exitCode = builtIn.Command(appArgs.ToArray());
             }
