@@ -19,6 +19,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
+    <RunWorkingDirectory Condition=" '$(RunWorkingDirectory)' == '' and '$(EnableDefaultRunWorkingDirectory)' != 'false' ">$(MSBuildProjectDirectory)</RunWorkingDirectory>
   </PropertyGroup>
 
   <PropertyGroup>
