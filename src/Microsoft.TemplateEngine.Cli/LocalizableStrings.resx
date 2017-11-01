@@ -553,6 +553,15 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="PartialTemplateMatchSwitchesNotValidForAllMatches" xml:space="preserve">
     <value>Some partially matched templates may not support these input switches:</value>
   </data>
+  <data name="CommitHash" xml:space="preserve">
+    <value> Commit Hash: {0}</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value> Version:             {0}</value>
+  </data>
+  <data name="InstalledItems" xml:space="preserve">
+    <value>Currently installed items:</value>
+  </data>
   <data name="AllUpdatesApplyPrompt" xml:space="preserve">
     <value>Apply updates ([A]ll|[N]one|[P]rompt)?</value>
   </data>
