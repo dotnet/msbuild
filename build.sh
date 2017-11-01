@@ -77,14 +77,17 @@ if [ -z "$HOME" ]; then
 fi
 
 # Install a stage 0
-DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
+DOTNET_INSTALL_SCRIPT_URL="https://dot.net/v1/dotnet-install.sh"
 curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --version $DOTNET_CLI_VERSION --verbose
 
 # Install 1.0.4 shared framework
-[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.0.5" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --channel "Preview" --version "1.0.5" --shared-runtime
+[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.0.5" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version "1.0.5" --shared-runtime
 
-# Install 1.1.1 shared framework
-[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.1.2" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --channel "Release/1.1.0" --version "1.1.2" --shared-runtime
+# Install 1.1.2 shared framework
+[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.1.2" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version "1.1.2" --shared-runtime
+
+# Install 2.0.0 shared framework
+[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/2.0.0" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version "2.0.0" --shared-runtime
 
 # Put stage 0 on the PATH
 export PATH="$DOTNET_INSTALL_DIR:$PATH"
@@ -95,4 +98,13 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 # Don't resolve runtime, shared framework, or SDK from global locations
 export DOTNET_MULTILEVEL_LOOKUP=0
 
-dotnet msbuild $REPOROOT/build/build.proj /m:1 /nologo /p:Configuration=$CONFIGURATION /p:Platform="$PLATFORM" "${args[@]}" /warnaserror
+logPath="$REPOROOT/bin/log"
+[ -d "$logPath" ] || mkdir -p $logPath
+
+# NET Core Build
+msbuildSummaryLog="$logPath/sdk.log"
+msbuildWarningLog="$logPath/sdk.wrn"
+msbuildFailureLog="$logPath/sdk.err"
+msbuildBinLog="$logPath/sdk.binlog"
+
+dotnet msbuild $REPOROOT/build/build.proj /m:1 /nologo /p:Configuration=$CONFIGURATION /p:Platform="$PLATFORM" /warnaserror /flp1:Summary\;Verbosity=diagnostic\;Encoding=UTF-8\;LogFile=$msbuildSummaryLog /flp2:WarningsOnly\;Verbosity=diagnostic\;Encoding=UTF-8\;LogFile=$msbuildWarningLog /flp3:ErrorsOnly\;Verbosity=diagnostic\;Encoding=UTF-8\;LogFile=$msbuildFailureLog /bl:$msbuildBinLog "${args[@]}"

@@ -60,7 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0'">1.6.1</NETStandardImplicitPackageVersion>
     
     <!-- Default to use the latest stable release.  Currently this is the same as the previous clause, but when we have a stable 2.0 package this should change. -->
-    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">1.6.1</NETStandardImplicitPackageVersion>
+    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">2.0.1</NETStandardImplicitPackageVersion>
   </PropertyGroup>
   
   <!--  

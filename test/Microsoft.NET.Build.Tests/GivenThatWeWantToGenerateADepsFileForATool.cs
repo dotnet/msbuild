@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "TestTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = "netcoreapp2.1",
                 IsExe = true
             };
 
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DependencyContextTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = "netcoreapp2.1",
                 IsExe = true
             };
 

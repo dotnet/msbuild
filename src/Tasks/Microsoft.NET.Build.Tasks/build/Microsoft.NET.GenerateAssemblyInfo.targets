@@ -95,7 +95,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <GeneratedAssemblyInfoInputsCacheFile>$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfoInputs.cache</GeneratedAssemblyInfoInputsCacheFile>
     </PropertyGroup>
 
-    <Hash ItemsToHash="@(AssemblyAttribute->'%(Identity)%(_Parameter1)')">
+    <!-- We only use up to _Parameter1 for most attributes, but other targets may add additional assembly attributes with multiple parameters. -->
+    <Hash ItemsToHash="@(AssemblyAttribute->'%(Identity)%(_Parameter1)%(_Parameter2)%(_Parameter3)%(_Parameter4)%(_Parameter5)%(_Parameter6)%(_Parameter7)%(_Parameter8)')">
       <Output TaskParameter="HashResult" PropertyName="_AssemblyAttributesHash" />
     </Hash>
 

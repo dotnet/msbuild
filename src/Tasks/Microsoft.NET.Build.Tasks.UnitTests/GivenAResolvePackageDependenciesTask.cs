@@ -16,6 +16,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     public class GivenAResolvePackageDependenciesTask
     {
         private static readonly string _packageRoot = "\\root\\packages".Replace('\\', Path.DirectorySeparatorChar);
+        private static readonly string _projectPath = "\\root\\anypath\\solutiondirectory\\myprojectdir\\myproject.csproj".Replace('\\', Path.DirectorySeparatorChar);
 
         [Theory]
         [MemberData(nameof(ItemCounts))]
@@ -254,8 +255,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     package.GetMetadata(MetadataKeys.Type).Should().Be("project");
                     package.GetMetadata(MetadataKeys.Path).Should().Be($"../ClassLibP/project.json");
 
-                    var resolvedPath = Path.GetDirectoryName(Path.GetFullPath(lockFile.Path));
-                    resolvedPath = Path.GetFullPath(Path.Combine(resolvedPath, "../ClassLibP/ClassLibP.csproj"));
+                    var projectDirectoryPath = Path.GetDirectoryName(Path.GetFullPath(_projectPath));
+                    var resolvedPath = Path.GetFullPath(Path.Combine(projectDirectoryPath, "../ClassLibP/ClassLibP.csproj"));
                     package.GetMetadata(MetadataKeys.ResolvedPath).Should().Be(resolvedPath);
                 }
                 else
@@ -796,7 +797,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new ResolvePackageDependencies(lockFile, resolver)
             {
                 ProjectAssetsFile = lockFile.Path,
-                ProjectPath = null,
+                ProjectPath = _projectPath,
                 ProjectLanguage = null
             };
 

@@ -366,7 +366,7 @@ namespace Microsoft.NET.Build.Tasks
             /// A list of name/version strings to specify dependency identities.
             /// Note: identity here is just a "name/version" and does not have TFM part in front.
             /// </summary>
-            public IList<string> Dependencies { get; }
+            public List<string> Dependencies { get; }
 
             /// <summary>
             /// Returns name/value pairs for metadata specific to given item type's implementation.
