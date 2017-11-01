@@ -6,7 +6,7 @@
   <PropertyGroup>
     <PathListSeparator>:</PathListSeparator>
     <PathListSeparator Condition=" '$(OSName)' == 'win' ">%3b</PathListSeparator>
-    <ExecPath>$(OutputDirectory)$(PathListSeparator)$(PATH)</ExecPath>
+    <ExecPath>$(SdkOutputDirectory)$(PathListSeparator)$(PATH)</ExecPath>
     <ExecPath Condition=" '$(OSName)' == 'win' ">$(OutputDirectory)</ExecPath>
     <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
@@ -30,7 +30,7 @@
           PreviousStageProps=$(NextStagePropsPath);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(OutputDirectory);
+          ToolPath=$(SdkOutputDirectory);
           WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity)))
         </Properties>
       </ProjectsToTest>
@@ -56,14 +56,14 @@
   <Target Name="RestoreTests"
           DependsOnTargets="PrepareTests;
                             CreateTestAssetPackageNuPkgs;">
-    <DotNetRestore ToolPath="$(OutputDirectory)"
+    <DotNetRestore ToolPath="$(SdkOutputDirectory)"
                    ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
                    AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)" />
   </Target>
 
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
-    <DotNetBuild ToolPath="$(OutputDirectory)"
+    <DotNetBuild ToolPath="$(SdkOutputDirectory)"
                  ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
                  AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
                  MaxCpuCount="1" />
@@ -73,7 +73,7 @@
           DependsOnTargets="SetupTestPackageProjectData;"
           Outputs="%(TestPackageProject.Identity)">
 
-    <DotNetRestore ToolPath="$(OutputDirectory)"
+    <DotNetRestore ToolPath="$(SdkOutputDirectory)"
                    WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
                    ProjectPath="%(TestPackageProject.ProjectPath)"
                    AdditionalParameters="/p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)"
@@ -82,14 +82,14 @@
     <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
-                ToolPath="$(OutputDirectory)"
+                ToolPath="$(SdkOutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
 
   </Target>
 
   <Target Name="EnsureStageSeparation">
-    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:OutputDirectory=&quot;$(OutputDirectory)&quot;"
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:OutputDirectory=&quot;$(SdkOutputDirectory)&quot;"
                    ToolPath="$(PreviousStageDirectory)" />
   </Target>
 </Project>

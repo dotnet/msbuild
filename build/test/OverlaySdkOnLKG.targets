@@ -1,34 +1,24 @@
 <Project ToolsVersion="14.0" DefaultTargets="Test">
-  <Target Name="OverlaySdkOnLKG" DependsOnTargets="PrepareLKGForOverlay">
+  <Target Name="OverlaySdkOnLKG">
     <ItemGroup>
       <OverlaySDK Include="$(DotNetCoreSdkLKGPublishDirectory)/**/*" />
-      <TemplatesToOverlay Include="$(IntermediateDirectory)/Templates/*.nupkg" />
-      <LzmaArchiveToOverlay Include="$(IntermediateDirectory)/nuGetPackagesArchive.lzma" />
+      <OverlayCLI Include="$(OutputDirectory)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
-          DestinationFiles="@(OverlaySDK->'$(OutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(OverlaySDK->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <Copy SourceFiles="@(TemplatesToOverlay)" DestinationFiles="@(TemplatesToOverlay->'$(SdkOutputDirectory)/Templates/%(Filename)%(Extension)')" />
-
-    <Copy SourceFiles="@(LzmaArchiveToOverlay)" DestinationFiles="@(LzmaArchiveToOverlay->'$(SdkOutputDirectory)/%(Filename)%(Extension)')" />
-  </Target>
-
-  <Target Name="PrepareLKGForOverlay">
     <ItemGroup>
-      <LzmaArchiveFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/nuGetPackagesArchive.lzma" />
-      <TemplatesFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/Templates/*.nupkg" />
+      <OldSdk Include="$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/**/*" />
     </ItemGroup>
 
-    <!-- Backup the lzma archive -->
-    <Copy SourceFiles="@(LzmaArchiveFromLKG)"
-          DestinationFiles="$(IntermediateDirectory)/nuGetPackagesArchive.lzma" />
+    <Move SourceFiles="@(OldSdk)"
+          DestinationFiles="@(OldSdk->'$(SdkOutputDirectory)\sdk\$(SdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <!-- Backup the templates -->
-    <Copy SourceFiles="@(TemplatesFromLKG)"
-          DestinationFiles="@(TemplatesFromLKG->'$(IntermediateDirectory)/Templates/%(Filename)%(Extension)')" />
+    <RemoveDir Directories="$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)" />
 
-    <RemoveDir Directories="$(DotNetCoreSdkLKGPublishDirectory)/sdk" />
+    <Copy SourceFiles="@(OverlayCLI)"
+          DestinationFiles="@(OverlayCLI->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishStage2WithBackwardsCompatibleRuntimes"
@@ -38,7 +28,7 @@
       <BackwardsCompatibleSharedFrameworks Include="$(BackwardsCompatibleSharedFrameworksPublishDirectory)/**/*" />
 
       <Stage2Cli Remove="*" />
-      <Stage2Cli Include="$(OutputDirectory)/**/*" />
+      <Stage2Cli Include="$(SdkOutputDirectory)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(BackwardsCompatibleSharedFrameworks)"
@@ -46,11 +36,5 @@
 
     <Copy SourceFiles="@(Stage2Cli)"
           DestinationFiles="@(Stage2Cli->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
-  <Target Name="CleanUpOverlay" AfterTargets="Test">
-    <RemoveDir Directories="$(SdkOutputDirectory)/Templates" />
-
-    <Delete Files="$(SdkOutputDirectory)/nuGetPackagesArchive.lzma" />
   </Target>
 </Project>

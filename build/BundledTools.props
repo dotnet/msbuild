@@ -1,11 +1,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <BundledTools Include="MSBuild;
-                           NuGet.CommandLine.XPlat;
-                           dotnet" />
+    <BundledTools Include="dotnet" />
     
-    <BundledToolProjects Include="tool_msbuild;
-                                  tool_nuget;
-                                  redist;" />
+    <BundledToolProjects Include="redist;" />
   </ItemGroup>
 </Project>
