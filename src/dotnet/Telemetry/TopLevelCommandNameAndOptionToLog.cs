@@ -36,9 +36,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
                         parseResult[DotnetName][topLevelCommandName]
                             .AppliedOptions[option];
                     result.Add(new ApplicationInsightsEntryFormat(
-                        "dotnet-" + topLevelCommandName,
+                        "sublevelparser/command",
                         new Dictionary<string, string>
                         {
+                            { "verb", topLevelCommandName},
                             {option, appliedOptions.Arguments.ElementAt(0)}
                         }));
                 }
