@@ -9,7 +9,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using System.IO;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
@@ -77,7 +76,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}",
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "App.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "App.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should().Pass()

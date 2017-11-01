@@ -11,7 +11,6 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Publish.Tests
 {

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <BuildTasksFeedDllVersion>1.0.0-prerelease-01929-02</BuildTasksFeedDllVersion>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\PublishNupkgToTransportFeed.targets" />
+
+  <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+    <OutputType>Library</OutputType>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NonShipping>true</NonShipping>
+    <NoStdLib>true</NoStdLib>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(BuildTasksFeedDllVersion)" />
+  </ItemGroup>
+</Project>

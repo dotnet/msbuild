@@ -11,8 +11,8 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public sealed class PackCommand : MSBuildCommand
     {
-        public PackCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null, MSBuildTest msbuild = null)
-            : base(log, "Pack", projectPath, relativePathToProject, msbuild)
+        public PackCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null)
+            : base(log, "Pack", projectPath, relativePathToProject)
         {
         }
 

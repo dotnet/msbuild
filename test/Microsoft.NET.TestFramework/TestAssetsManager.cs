@@ -20,7 +20,7 @@ namespace Microsoft.NET.TestFramework
 
         public TestAssetsManager()
         {
-            var testAssetsDirectory = Path.Combine(RepoInfo.RepoRoot, "TestAssets");
+            var testAssetsDirectory = TestContext.Current.TestAssetsDirectory;
             var testProjectsDirectory = Path.Combine(testAssetsDirectory, "TestProjects");
             
             if (!Directory.Exists(testAssetsDirectory))

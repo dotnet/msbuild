@@ -15,9 +15,15 @@ namespace Microsoft.NET.Build.Tests
         public static string NuGetSharedDirectoryNamePostfix = "_NuGetDependencies";
         public static string NetstandardToken = "netstandard";
         public static string DependencyDirectoryNamePrefix = "D_";
-        public static string NuGetPackageBaseDirectory = Path.Combine(
-            RepoInfo.GetBaseDirectory(),
-            TestDirectoriesNamePrefix + NuGetSharedDirectoryNamePostfix);
+        public static string NuGetPackageBaseDirectory
+        {
+            get
+            {
+                return Path.Combine(TestContext.Current.TestExecutionDirectory,
+                                    TestDirectoriesNamePrefix + NuGetSharedDirectoryNamePostfix);
+            }
+        }
+            
 
         public static string ConstructNuGetPackageReferencePath(TestProject dependencyProject)
         {
@@ -47,7 +53,7 @@ namespace Microsoft.NET.Build.Tests
                     Directory.Delete(ConstantStringValues.NuGetPackageBaseDirectory, true);
                 }
                 //  Delete the generated NuGet packages in the cache.
-                foreach (string dir in Directory.EnumerateDirectories(RepoInfo.NuGetCachePath, ConstantStringValues.DependencyDirectoryNamePrefix + "*"))
+                foreach (string dir in Directory.EnumerateDirectories(TestContext.Current.NuGetCachePath, ConstantStringValues.DependencyDirectoryNamePrefix + "*"))
                 {
                     Directory.Delete(dir, true);
                 }

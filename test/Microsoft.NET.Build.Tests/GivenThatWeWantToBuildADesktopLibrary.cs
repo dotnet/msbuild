@@ -352,11 +352,11 @@ public static class {project.Name}
             string correctHttpReference;
             if (useFacades)
             {
-                correctHttpReference = Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, @"net461\lib\System.Net.Http.dll");
+                correctHttpReference = Path.Combine(TestContext.Current.ToolsetUnderTest.BuildExtensionsMSBuildPath, @"net461\lib\System.Net.Http.dll");
             }
             else
             {
-                correctHttpReference = Path.Combine(RepoInfo.NuGetCachePath, "system.net.http", "4.3.2", "ref", "net46", "System.Net.Http.dll");
+                correctHttpReference = Path.Combine(TestContext.Current.NuGetCachePath, "system.net.http", "4.3.2", "ref", "net46", "System.Net.Http.dll");
             }
 
             var valuesWithMetadata = getValuesCommand.GetValuesWithMetadata();

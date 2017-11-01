@@ -11,9 +11,7 @@ namespace Microsoft.NET.TestFramework
     {
         public CoreMSBuildAndWindowsOnlyTheoryAttribute()
         {
-            string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
-            bool usingFullFrameworkMSBuild = !string.IsNullOrEmpty(msbuildPath);
-            if (usingFullFrameworkMSBuild || RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+            if (TestContext.Current.ToolsetUnderTest.ShouldUseFullFrameworkMSBuild || RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
             {
                 this.Skip = "This test requires Core MSBuild and Windows to run";
             }

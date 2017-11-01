@@ -12,7 +12,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using FluentAssertions;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Pack.Tests

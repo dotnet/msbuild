@@ -20,7 +20,6 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
@@ -52,17 +51,17 @@ namespace Microsoft.NET.Build.Tests
         //  Test behavior when implicit version differs for framework-dependent and self-contained apps
         [Theory]
         [InlineData("netcoreapp1.0", false, true, "1.0.5")]
-        [InlineData("netcoreapp1.0", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)]
+        [InlineData("netcoreapp1.0", true, true, TestContext.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)]
         [InlineData("netcoreapp1.0", false, false, "1.0.5")]
         [InlineData("netcoreapp1.1", false, true, "1.1.2")]
-        [InlineData("netcoreapp1.1", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)]
+        [InlineData("netcoreapp1.1", true, true, TestContext.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)]
         [InlineData("netcoreapp1.1", false, false, "1.1.2")]
         [InlineData("netcoreapp2.0", false, true, "2.0.0")]
-        [InlineData("netcoreapp2.0", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)]
+        [InlineData("netcoreapp2.0", true, true, TestContext.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)]
         [InlineData("netcoreapp2.0", false, false, "2.0.0")]
         public void It_targets_the_right_framework_depending_on_output_type(string targetFramework, bool selfContained, bool isExe, string expectedFrameworkVersion)
         {
-            string testIdentifier = "Framework_targeting_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
+            string testIdentifier = "Framework_targeting_" + targetFramework + "_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
 
             It_targets_the_right_framework(testIdentifier, targetFramework, null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion);
         }
@@ -245,7 +244,7 @@ public static class Program
 
             string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier ?? "").FullName;
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputFolder, project.Name + ".dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputFolder, project.Name + ".dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should()

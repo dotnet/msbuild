@@ -7,7 +7,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
 using System.Linq;
 using FluentAssertions;

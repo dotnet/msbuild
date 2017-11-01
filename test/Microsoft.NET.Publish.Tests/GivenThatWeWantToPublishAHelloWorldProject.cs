@@ -10,7 +10,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System;
@@ -47,7 +46,7 @@ namespace Microsoft.NET.Publish.Tests
                 "HelloWorld.runtimeconfig.json"
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "HelloWorld.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "HelloWorld.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should()
@@ -414,7 +413,7 @@ public static class Program
                 dependencyContext.Should()
                     .OnlyHaveRuntimeAssemblies(rid ?? "", testProject.Name);
 
-                runCommand = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll") });
+                runCommand = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll") });
             }
 
             runCommand

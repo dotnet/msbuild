@@ -9,7 +9,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using System.IO;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
@@ -97,7 +96,7 @@ namespace Microsoft.NET.Build.Tests
                 "LibraryWithRids.pdb",
             });
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "App.dll") })
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "App.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should().Pass()
