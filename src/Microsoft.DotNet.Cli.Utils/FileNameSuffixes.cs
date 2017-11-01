@@ -24,6 +24,8 @@ namespace Microsoft.DotNet.Cli.Utils
                         return OSX;
                     case Platform.Linux:
                         return Linux;
+                    case Platform.FreeBSD:
+                        return FreeBSD;
                     default:
                         throw new InvalidOperationException("Unknown Platform");
                 }
@@ -55,6 +57,14 @@ namespace Microsoft.DotNet.Cli.Utils
         };
 
         public static PlatformFileNameSuffixes Linux { get; } = new PlatformFileNameSuffixes
+        {
+            DynamicLib = ".so",
+            Exe = "",
+            ProgramDatabase = ".pdb",
+            StaticLib = ".a"
+        };
+
+        public static PlatformFileNameSuffixes FreeBSD { get; } = new PlatformFileNameSuffixes
         {
             DynamicLib = ".so",
             Exe = "",
