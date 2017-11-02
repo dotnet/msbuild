@@ -21,26 +21,14 @@ namespace Microsoft.NET.TestFramework
         public TestAssetsManager()
         {
             var testAssetsDirectory = TestContext.Current.TestAssetsDirectory;
-            var testProjectsDirectory = Path.Combine(testAssetsDirectory, "TestProjects");
-            
+
             if (!Directory.Exists(testAssetsDirectory))
             {
                 throw new DirectoryNotFoundException($"Directory not found: '{testAssetsDirectory}'");
             }
 
-            if (!Directory.Exists(testProjectsDirectory))
-            {
-                throw new DirectoryNotFoundException($"Directory not found: '{testProjectsDirectory}'");
-            }
-
-            var buildVersion = Path.Combine(testAssetsDirectory, "buildVersion.txt");
-            if (!File.Exists(buildVersion))
-            {
-                throw new FileNotFoundException($"File not found: {buildVersion}");
-            }
-
-            ProjectsRoot = testProjectsDirectory;
-            BuildVersion = File.ReadAllText(buildVersion).Trim();
+            ProjectsRoot = testAssetsDirectory;
+            BuildVersion = TestContext.Current.BuildVersion;
         }
 
         public TestAsset CopyTestAsset(

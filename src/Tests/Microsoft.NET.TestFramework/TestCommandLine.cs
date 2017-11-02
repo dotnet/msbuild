@@ -23,6 +23,8 @@ namespace Microsoft.NET.TestFramework
 
         public bool ShouldShowHelp { get; private set; }
 
+        public string BuildVersion { get; private set; }
+
         public static TestCommandLine Parse(string[] args)
         {
             TestCommandLine ret = new TestCommandLine();
@@ -55,6 +57,10 @@ namespace Microsoft.NET.TestFramework
                 else if (arg.Equals("-noRepoInference", StringComparison.CurrentCultureIgnoreCase))
                 {
                     ret.NoRepoInference = true;
+                }
+                else if (arg.Equals("-buildVersion", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    ret.BuildVersion = argStack.Pop();
                 }
                 else if (arg.Equals("-help", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("/?"))
                 {
@@ -112,6 +118,7 @@ Options to control toolset to test:
   -sdkRepo <path>         : Use specified SDK repo for Microsoft.NET.SDK tasks / targets
   -sdkConfig <config>     : Use specified configuration for SDK repo
   -noRepoInference        : Don't automatically find SDK repo to use based on path to test binaries
+  -buildVersion           : Use specified build version
   -help                   : Show help");
         }
     }

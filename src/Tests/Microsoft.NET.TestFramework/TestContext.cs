@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
+using System.Reflection;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -19,6 +20,8 @@ namespace Microsoft.NET.TestFramework
         public string NuGetFallbackFolder { get; set; }
 
         public string NuGetExePath { get; set; }
+
+        public string BuildVersion { get; set; }
 
         public ToolsetInfo ToolsetUnderTest { get; set; }
 
@@ -75,7 +78,7 @@ namespace Microsoft.NET.TestFramework
         {
             TestContext testContext = new TestContext();
             testContext.TestExecutionDirectory = AppContext.BaseDirectory;
-            testContext.TestAssetsDirectory = FindFolderInTree("TestAssets", AppContext.BaseDirectory);
+            testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
 
             string repoRoot = null;
             string repoConfiguration = null;
@@ -90,25 +93,33 @@ namespace Microsoft.NET.TestFramework
 
                 if (repoRoot != null)
                 {
-                    // assumes tests are always executed from the "bin/$Configuration/Tests" directory
-                    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Name;
+                    // assumes tests are always executed from the "artifacts/$Configuration/bin/Tests/$MSBuildProjectFile" directory
+                    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Parent.Parent.Name;
                 }
             }
             if (repoRoot != null)
             {
-                testContext.NuGetFallbackFolder = Path.Combine(repoRoot, "bin", "NuGetFallbackFolder");
-                testContext.NuGetExePath = Path.Combine(repoRoot, ".nuget", $"nuget{Constants.ExeSuffix}");
-                testContext.NuGetCachePath = Path.Combine(repoRoot, "packages");
+                testContext.NuGetFallbackFolder = Path.Combine(repoRoot, "artifacts", ".nuget", "NuGetFallbackFolder");
+                testContext.NuGetExePath = Path.Combine(repoRoot, "artifacts", ".nuget", $"nuget{Constants.ExeSuffix}");
+                testContext.NuGetCachePath = Path.Combine(repoRoot, "artifacts", ".nuget", "packages");
             }
             else
             {
-                testContext.NuGetFallbackFolder = FindOrCreateFolderInTree("NuGetFallbackFolder", AppContext.BaseDirectory);
-                testContext.NuGetCachePath = FindOrCreateFolderInTree("packages", AppContext.BaseDirectory);
-                var nuGetFolder = FindFolderInTree(".nuget", AppContext.BaseDirectory, false);
-                if (nuGetFolder != null)
-                {
-                    testContext.NuGetExePath = Path.Combine(nuGetFolder, $"nuget{Constants.ExeSuffix}");
-                }
+                var nugetFolder = FindOrCreateFolderInTree(".nuget", AppContext.BaseDirectory);
+
+                testContext.NuGetFallbackFolder = Path.Combine(nugetFolder, "NuGetFallbackFolder");
+                testContext.NuGetExePath = Path.Combine(nugetFolder, $"nuget{Constants.ExeSuffix}");
+                testContext.NuGetCachePath = Path.Combine(nugetFolder, "packages");
+            }
+
+            if (commandLine.BuildVersion != null)
+            {
+                testContext.BuildVersion = commandLine.BuildVersion;
+            }
+            else
+            {
+                var assemblyInformationalVersion = (AssemblyInformationalVersionAttribute)(Attribute.GetCustomAttribute(typeof(TestContext).Assembly, typeof(AssemblyInformationalVersionAttribute)));
+                testContext.BuildVersion = assemblyInformationalVersion.InformationalVersion;
             }
 
             testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, repoConfiguration, commandLine);

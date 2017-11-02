@@ -20,7 +20,7 @@ class Program
             newArgs.Insert(0, typeof(Program).Assembly.Location);
         }
 
-        int returnCode = new Xunit.ConsoleClient.Program().EntryPoint(newArgs.ToArray());
+        int returnCode = Xunit.ConsoleClient.Program.Main(newArgs.ToArray());
 
         if (showHelp)
         {

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
+using System.Xml.Linq;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -112,9 +113,11 @@ namespace Microsoft.NET.TestFramework
 
             if (repoRoot != null)
             {
-                ret.CliVersionForBundledVersions = File.ReadAllText(Path.Combine(repoRoot, "DotnetCLIVersion.txt")).Trim();
-                ret.DotNetHostPath = Path.Combine(repoRoot, ".dotnet_cli", $"dotnet{Constants.ExeSuffix}");
-                ret.SdksPath = Path.Combine(repoRoot, "bin", configuration, "Sdks");
+                var dotnetCliVersion = GetDotNetCliVersion(repoRoot);
+
+                ret.CliVersionForBundledVersions = dotnetCliVersion;
+                ret.DotNetHostPath = Path.Combine(repoRoot, "artifacts", ".dotnet", dotnetCliVersion, $"dotnet{Constants.ExeSuffix}");
+                ret.SdksPath = Path.Combine(repoRoot, "artifacts", configuration, "bin", "Sdks");
             }
             else
             {
@@ -131,6 +134,23 @@ namespace Microsoft.NET.TestFramework
             }
 
             return ret;
+        }
+
+        private static string GetDotNetCliVersion(string repoRoot)
+        {
+            var xml = XDocument.Load(Path.Combine(repoRoot, "build", "Versions.props"));
+
+            foreach (var propertyGroup in xml.Descendants(XName.Get("PropertyGroup", "http://schemas.microsoft.com/developer/msbuild/2003")))
+            {
+                var dotnetCliVersion = propertyGroup.Descendants(XName.Get("DotNetCliVersion", "http://schemas.microsoft.com/developer/msbuild/2003"));
+
+                if (dotnetCliVersion.Any())
+                {
+                    return dotnetCliVersion.Single().Value;
+                }
+            }
+
+            throw new Exception("Failed to locate the .NET CLI Version");
         }
 
         private static string ResolveCommand(string command)
