@@ -27,10 +27,14 @@ namespace Microsoft.Build.Tasks
     [Serializable]
     internal sealed class SystemState : StateFileBase, ISerializable
     {
+        /// <summary>
+        /// Cache at the SystemState instance level. Has the same contents as <see cref="instanceLocalFileStateCache"/>.
+        /// It acts as a flag to enforce that an entry has been checked for staleness only once.
+        /// </summary>
         private Hashtable upToDateLocalFileStateCache = new Hashtable();
 
         /// <summary>
-        /// State information for cached files kept at the SystemState instance level.
+        /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
         private Hashtable instanceLocalFileStateCache = new Hashtable();
 
