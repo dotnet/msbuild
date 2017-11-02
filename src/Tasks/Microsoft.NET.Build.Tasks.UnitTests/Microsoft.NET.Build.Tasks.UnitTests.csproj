@@ -1,95 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
 
-  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.props" />
-  
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <NonShipping>true</NonShipping>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel">
-      <Version>$(NuGetVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel">
-      <Version>$(DependencyModelVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Framework">
-      <Version>$(MsBuildPackagesVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core">
-      <Version>$(MsBuildPackagesVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="FluentAssertions.Json">
-      <Version>$(FluentAssertionsJsonVersion)</Version>
-    </PackageReference>
+    <PackageReference Include="FluentAssertions.Json" Version="$(FluentAssertionsJsonVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="GivenAConflictResolver.cs" />
-    <Compile Include="GivenAProjectContext.cs" />
-    <Compile Include="GivenACompilationOptionsConverter.cs" />
-    <Compile Include="GivenAProduceContentsAssetsTask.cs" />
-    <Compile Include="GivenAResolvePackageDependenciesTask.cs" />
-    <Compile Include="GivenThatWeReportAssetsLogMessages.cs" />
-    <Compile Include="GivenUnresolvedSDKProjectItemsAndImplicitPackages.cs" />
-    <Compile Include="LockFileSnippets.cs" />
-    <Compile Include="Mocks\MockBuildEngine.cs" />
-    <Compile Include="Mocks\MockLog.cs" />
-    <Compile Include="Mocks\MockContentAssetPreprocessor.cs" />
-    <Compile Include="Mocks\MockPackageResolver.cs" />
-    <Compile Include="Mocks\MockTaskItem.cs" />
-    <Compile Include="GivenThatWeWantToGetDependenciesViaDesignTimeBuild.cs" />
-    <Compile Include="GivenAPublishAssembliesResolver.cs" />
-    <Compile Include="GivenADependencyContextBuilder.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="TestLockFiles.cs" />
-    <Compile Include="GivenARemoveDuplicatePackageReferences.cs" />
-    <Compile Include="..\Common\CommandLine\TestCommandLine.Default.cs" />
+    <ProjectReference Include="..\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="all.asset.types.portable.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="all.asset.types.osx.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="dotnet.new.resources.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="dotnet.new.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="LockFiles\all.asset.types.project.lock.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="LockFiles\dependencies.withgraphs.project.lock.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="LockFiles\dotnet.new.project.lock.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="simple.dependencies.directReference.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="simple.dependencies.compilerOptions.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="simple.dependencies.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="LockFiles\simple.dependencies.project.lock.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Compile Include="**\*.cs" />
+    <Compile Include="..\..\Tests\Common\CommandLine\TestCommandLine.Default.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj">
-      <Project>{df7d2697-b3b4-45c2-8297-27245f528a99}</Project>
-      <Name>Microsoft.NET.Build.Tasks</Name>
-    </ProjectReference>
+    <None Include="*.deps.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="LockFiles\*.project.lock.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-  <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
-  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.targets" />
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
 </Project>
