@@ -208,6 +208,9 @@
 
       <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
       <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
+
+      <!-- Don't crossgen satellite assemblies -->
+      <SdkFiles Remove="$(PublishDir)/**/*.resources.dll" />
     </ItemGroup>
 
     <AddMetadataIsPE Items="@(SdkFiles)">
