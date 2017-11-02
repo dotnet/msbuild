@@ -359,7 +359,7 @@ namespace Microsoft.Build.Tasks
             if (processFileState == null && instanceLocalFileState != null)
             {
                 cacheFileState = instanceLocalFileState;
-                SystemState.s_processWideFileStateCache.TryAdd(path, instanceLocalFileState);
+                SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
             }
             else if (processFileState != null && instanceLocalFileState == null)
             {
@@ -376,7 +376,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     cacheFileState = instanceLocalFileState;
-                    SystemState.s_processWideFileStateCache.TryAdd(path, instanceLocalFileState);
+                    SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
                 }
             }
 
@@ -385,7 +385,7 @@ namespace Microsoft.Build.Tasks
             {
                 cacheFileState = new FileState(getLastWriteTime(path));
                 instanceLocalFileStateCache[path] = cacheFileState;
-                SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
+                SystemState.s_processWideFileStateCache[path] = cacheFileState;
                 isDirty = true;
             }
             else
@@ -396,7 +396,7 @@ namespace Microsoft.Build.Tasks
                 {
                     cacheFileState = new FileState(getLastWriteTime(path));
                     instanceLocalFileStateCache[path] = cacheFileState;
-                    SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
+                    SystemState.s_processWideFileStateCache[path] = cacheFileState;
                     isDirty = true;
                 }
             }
