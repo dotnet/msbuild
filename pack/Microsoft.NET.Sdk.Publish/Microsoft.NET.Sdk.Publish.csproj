@@ -1,0 +1,110 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    
+    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\</WebSdkRoot>
+    <WebSdkSource Condition="'$(WebSdkSource)' == '' ">$(WebSdkRoot)\src\</WebSdkSource>
+    <WebSdkTools Condition="'$(WebSdkTools)' == '' ">$(WebSdkRoot)\tools\</WebSdkTools>
+
+    <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
+	  <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
+    <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
+    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">2.0.0-dev$(CurrentDate)-1</WebSdkVersion>
+    
+    <!-- NuGet properties-->
+    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
+    <IncludeBuildOutput>False</IncludeBuildOutput>
+
+    <!-- Package Properties-->
+    <PackageName>Microsoft.NET.Sdk.Publish</PackageName>
+    <Version>$(WebSdkVersion)</Version>
+    <Title>Microsoft.NET.Sdk.Publish</Title>
+    <Authors>Microsoft Corporation</Authors>
+    <Owners>Microsoft</Owners>
+    <LicenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</LicenseUrl>
+    <ProjectUrl>https://github.com/aspnet/websdk</ProjectUrl>
+    <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
+    <Description>This package contains MSBuild targets and tasks for publishing ASP.NET projects. This package is required for publishing ASP.NET Core projects.</Description>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.NET.Sdk.Publish.Tasks.dll">
+      <Pack>true</Pack>
+      <PackagePath>tools\net46</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
+      <Pack>true</Pack>
+      <PackagePath>tools\net46</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkTools)\WebDeploy\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>tools\net46\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll">
+      <Pack>true</Pack>
+      <PackagePath>tools\netcoreapp1.0</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
+      <Pack>true</Pack>
+      <PackagePath>tools\netcoreapp1.0</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\ComputeTargets\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\ComputeTargets</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishTargets\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\PublishTargets</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\CopyTargets\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\CopyTargets</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\TransformTargets\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\TransformTargets</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishProfiles\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\PublishProfiles</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\DotNetCLIToolTargets\*.*">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0\DotNetCLIToolTargets</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.props">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.targets">
+      <Pack>true</Pack>
+      <PackagePath>build\netstandard1.0</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.props">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </Content>
+
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.targets">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </Content>
+  </ItemGroup>
+
+</Project>

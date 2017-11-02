@@ -23,9 +23,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj" />
-    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj" />
-    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Web.Package\Microsoft.NET.Sdk.Web.Package.csproj" />
+    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Publish\Microsoft.NET.Sdk.Publish.csproj" />
+    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Web.ProjectSystem\Microsoft.NET.Sdk.Web.ProjectSystem.csproj" />
+    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Web\Microsoft.NET.Sdk.Web.csproj" />
   </ItemGroup>
 
   <UsingTask TaskName="GetCoreSdkBuildVersion" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
@@ -99,12 +99,8 @@
       <CopyRetryProperties>Retries=20;RetryDelayMilliseconds=150</CopyRetryProperties>
     </PropertyGroup>
 
-    <MSBuild Projects="@(ProjectFiles)" BuildInParallel="true" Targets="Build"
+    <MSBuild Projects="@(ProjectFiles)" Targets="Restore;Build;Pack"
              Properties="$(CopyRetryProperties);CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)" />
-  </Target>
-
-  <Target Name="Clean">
-    <MSBuild Projects="@(ProjectFiles)" BuildInParallel="true" Targets="Clean" />
   </Target>
 
   <Target Name="_Publish">
