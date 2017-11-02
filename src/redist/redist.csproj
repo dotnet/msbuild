@@ -101,7 +101,8 @@
 
     <Delete Files="$(PublishDir)/$(TargetName).deps.json;
                    $(PublishDir)/$(TargetName).runtimeconfig.json;
-                   $(PublishDir)/%(BundledToolProjects.Identity).dll" />
+                   $(PublishDir)/%(BundledToolProjects.Identity).dll;
+                   $(PublishDir)/%(BundledToolProjects.Identity).pdb" />
 
     <ChangeEntryPointLibraryName
           DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
@@ -198,7 +199,7 @@
 
   <Target Name="CrossgenPublishDir"
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
-          AfterTargets="PublishMSBuildExtensions">
+          AfterTargets="GenerateCliRuntimeConfigurationFiles">
     <ItemGroup>
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
       <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
@@ -255,24 +256,16 @@
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
   </Target>
 
-  <Target Name="CreateSymbolsDirectory"
-          AfterTargets="CrossgenPublishDir">
+  <Target Name="SeparateSymbolsFromPublishDir"
+          AfterTargets="CrossgenPublishDir"
+          Condition="'$(SeparateSymbolsArchive)' != 'false'">
     <ItemGroup>
-      <_AllSdkFiles Include="$(PublishDir)/**/*" />
+      <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
+      <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(_AllSdkFiles)"
-        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)/sdk/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
-  <Target Name="RemovePdbsFromPublishDir"
-          AfterTargets="CreateSymbolsDirectory">
-    <ItemGroup>
-      <PdbsToClean Include="$(PublishDir)/**/*.pdb" />
-      <PdbsToClean Include="$(PublishDir)/**/*.ni.*.map" />
-    </ItemGroup>
-
-    <Delete Files="@(PdbsToClean)" />
+    <Move SourceFiles="@(PdbsToMove)" 
+          DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishStage2WithBackwardsCompatibleRuntimes"

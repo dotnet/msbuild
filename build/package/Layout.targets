@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkDebugLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkDebug)</SdkDebugLayoutOutputDirectory>
+    <SdkSymbolsLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkSymbols)</SdkSymbolsLayoutOutputDirectory>
     <CombinedHostHostFxrFrameworkSdkOutputDirectory>$(LayoutDirectory)/$(ArtifactNameCombinedHostHostFxrFrameworkSdk)</CombinedHostHostFxrFrameworkSdkOutputDirectory>
     <SdkLanguagePackOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkLanguagePack)</SdkLanguagePackOutputDirectory>
     <SatelliteAssemblies>*.resources.dll</SatelliteAssemblies>
@@ -12,7 +12,7 @@
     <!-- Set up Items with Layout Input Files -->
     <ItemGroup>
       <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
-      <SdkDebugLayoutInput Include="$(SymbolsDirectory)/sdk/**/*" />
+      <SdkSymbolsLayoutInput Include="$(SymbolsDirectory)/sdk/**/*" />
       <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**/*" />
       <SdkLanguagePackInput Include="$(OutputDirectory)/sdk/**/$(SatelliteAssemblies)" />
 
@@ -30,9 +30,9 @@
       <Output TaskParameter="RelativePath" ItemName="SdkRelativeOutputFiles" />
     </MakeRelative>
     <MakeRelative
-      Path1="$(SymbolsDirectory)"
-      Path2="%(SdkDebugLayoutInput.Identity)" >
-      <Output TaskParameter="RelativePath" ItemName="SdkDebugRelativeOutputFiles" />
+      Path1="$(SymbolsDirectory)/"
+      Path2="%(SdkSymbolsLayoutInput.Identity)" >
+      <Output TaskParameter="RelativePath" ItemName="SdkSymbolsRelativeOutputFiles" />
     </MakeRelative>
     <MakeRelative
       Path1="$(OutputDirectory)/"
@@ -70,11 +70,11 @@
         <Name>$(ArtifactNameSdk)</Name>
       </LayoutDefinition>
 
-      <LayoutDefinition Include="Debug">
-        <InputFiles>@(SdkDebugLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>
-        <NameWithVersion>$(ArtifactNameWithVersionSdkDebug)</NameWithVersion>
-        <Name>$(ArtifactNameSdkDebug)</Name>
+      <LayoutDefinition Include="SdkSymbols" Condition="'$(SeparateSymbolsArchive)' != 'false'">
+        <InputFiles>@(SdkSymbolsLayoutInput)</InputFiles>
+        <OutputFiles>@(SdkSymbolsRelativeOutputFiles -> '$(SdkSymbolsLayoutOutputDirectory)/%(Identity)')</OutputFiles>
+        <NameWithVersion>$(ArtifactNameWithVersionSdkSymbols)</NameWithVersion>
+        <Name>$(ArtifactNameSdkSymbols)</Name>
       </LayoutDefinition>
 
       <LayoutDefinition Include="CombinedHostHostFxrFrameworkSdk">
