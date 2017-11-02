@@ -233,12 +233,18 @@
            Glob="$(CrossgenPath)"
            Mode="u+x" />
 
+    <!-- Crossgen does not support generating symbols on Mac  -->
+    <PropertyGroup Condition="'$(CreateCrossgenSymbols)' == ''">
+      <CreateCrossgenSymbols>true</CreateCrossgenSymbols>
+      <CreateCrossgenSymbols Condition="'$(OSName)' == 'osx'">false</CreateCrossgenSymbols>
+   </PropertyGroup>
+
     <Crossgen SourceAssembly="%(CrossgenTargets.FullPath)"
               DestinationPath="%(CrossgenTargets.FullPath)"
               JITPath="$(LibCLRJitPath)"
               CrossgenPath="$(CrossgenPath)"
               ReadyToRun="True"
-              CreateSymbols="True"
+              CreateSymbols="$(CreateCrossgenSymbols)"
               DiasymReaderPath="@(DiasymReaderPath)"
               PlatformAssemblyPaths="@(PlatformAssemblies);
                                      @(PublishDirSubDirectories);
