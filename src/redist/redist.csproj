@@ -211,6 +211,8 @@
 
       <!-- Don't crossgen satellite assemblies -->
       <SdkFiles Remove="$(PublishDir)/**/*.resources.dll" />
+
+      <DiasymReaderPath Include="$(SharedFrameworkNameVersionPath)/Microsoft.DiaSymReader.Native.*.dll" />
     </ItemGroup>
 
     <AddMetadataIsPE Items="@(SdkFiles)">
@@ -235,6 +237,8 @@
               JITPath="$(LibCLRJitPath)"
               CrossgenPath="$(CrossgenPath)"
               ReadyToRun="True"
+              CreateSymbols="True"
+              DiasymReaderPath="@(DiasymReaderPath)"
               PlatformAssemblyPaths="@(PlatformAssemblies);
                                      @(PublishDirSubDirectories);
                                      $(SharedFrameworkNameVersionPath)" />
@@ -265,6 +269,7 @@
           AfterTargets="CreateSymbolsDirectory">
     <ItemGroup>
       <PdbsToClean Include="$(PublishDir)/**/*.pdb" />
+      <PdbsToClean Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
     <Delete Files="@(PdbsToClean)" />
