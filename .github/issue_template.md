@@ -1,14 +1,16 @@
 ### Steps to reproduce
 
-Example repro steps:
-
-- zip file with project file, directory contents, and script that invokes msbuild.
+Either include a project sample, attach a zipped project, or provide IDE / CLI steps to create the project and repro the behaviour. Example of a project sample:
 
 Project file
 ```xml
 <Project>
+  <PropertyGroup>
+    <Extension>cs</Extension>
+  </PropertyGroup>
+  
   <ItemGroup>
-    <I Include="**/*.cs"/>
+    <I Include="**/*.$(Extension)"/>
   </ItemGroup>
   
   <Target Name="Build">
@@ -38,4 +40,5 @@ msbuild /bl
 
 ### Environment data
 `msbuild /version` output:
-If applicable, version of tool that invokes MSBuild (Visual Studio, dotnet CLI, etc):
+OS info:
+If applicable, version of the tool that invokes MSBuild (Visual Studio, dotnet CLI, etc):
