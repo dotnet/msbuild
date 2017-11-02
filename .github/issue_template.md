@@ -40,5 +40,7 @@ msbuild /bl
 
 ### Environment data
 `msbuild /version` output:
+
 OS info:
+
 If applicable, version of the tool that invokes MSBuild (Visual Studio, dotnet CLI, etc):
