@@ -293,6 +293,7 @@
   </Target>
 
   <Target Name="RetargetVSTestConsole"
+          BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
           AfterTargets="Publish">
     <PropertyGroup>
       <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
