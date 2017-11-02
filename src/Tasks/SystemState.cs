@@ -340,18 +340,68 @@ namespace Microsoft.Build.Tasks
             if (state == null)
             {   // We haven't seen this file this ResolveAssemblyReference session
 
-                FileState serialized = (FileState)instanceLocalFileStateCache[path];
-                state = GetFileStateFromProcessWideCache(path, serialized);
+                state = ComputeFileStateFromCachesAndDisk(path);
                 upToDateLocalFileStateCache[path] = state;
+            }
 
-                if (serialized != state)
-                {   // We pulled a value from the process-wide cache, or created a new one
-                    instanceLocalFileStateCache[path] = state;
+            return state;
+        }
+
+        private FileState ComputeFileStateFromCachesAndDisk(string path)
+        {
+            // Is it in the process-wide cache?
+            FileState cacheFileState = null;
+            FileState processFileState = null;
+            SystemState.s_processWideFileStateCache.TryGetValue(path, out processFileState);
+            FileState instanceLocalFileState = instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
+
+            // Sync the caches.
+            if (processFileState == null && instanceLocalFileState != null)
+            {
+                cacheFileState = instanceLocalFileState;
+                SystemState.s_processWideFileStateCache.TryAdd(path, instanceLocalFileState);
+            }
+            else if (processFileState != null && instanceLocalFileState == null)
+            {
+                cacheFileState = processFileState;
+                instanceLocalFileStateCache[path] = processFileState;
+            }
+            else if (processFileState != null && instanceLocalFileState != null)
+            {
+                if (processFileState.LastModified > instanceLocalFileState.LastModified)
+                {
+                    cacheFileState = processFileState;
+                    instanceLocalFileStateCache[path] = processFileState;
+                }
+                else
+                {
+                    cacheFileState = instanceLocalFileState;
+                    SystemState.s_processWideFileStateCache.TryAdd(path, instanceLocalFileState);
+                }
+            }
+
+            // Still no--need to create.            
+            if (cacheFileState == null) // Or check time stamp
+            {
+                cacheFileState = new FileState(getLastWriteTime(path));
+                instanceLocalFileStateCache[path] = cacheFileState;
+                SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
+                isDirty = true;
+            }
+            else
+            {
+                // If time stamps have changed, then purge.
+                DateTime lastModified = getLastWriteTime(path);
+                if (lastModified != cacheFileState.LastModified)
+                {
+                    cacheFileState = new FileState(getLastWriteTime(path));
+                    instanceLocalFileStateCache[path] = cacheFileState;
+                    SystemState.s_processWideFileStateCache.TryAdd(path, cacheFileState);
                     isDirty = true;
                 }
             }
 
-            return state;
+            return cacheFileState;
         }
 
         private FileState GetFileStateFromProcessWideCache(string path, FileState template)
