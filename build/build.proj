@@ -1,117 +1,36 @@
-<Project
-  xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
-  DefaultTargets="Build"
-  ToolsVersion="14.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project DefaultTargets="Build" TreatAsLocalProperty="SolutionPath">
+
+  <!--
+    Optional parameters:
+      SolutionPath     Path to the solution to build
+      Configuration    Build configuration: "Debug", "Release", etc.
+      CIBuild          "true" if building on CI server
+      Restore          "true" to restore toolset and solution
+      Build            "true" to build solution
+      Rebuild          "true" to rebuild solution
+      Deploy           "true" to deploy assets (e.g. VSIXes) built in this repo
+      Test             "true" to run tests
+      Sign             "true" to sign built binaries
+      Pack             "true" to build NuGet packages
+      Properties        List of properties to pass to each build phase ("Name=Value;Name=Value;...")
+  -->
 
   <PropertyGroup>
-    <TestsDirectory>$(RepositoryRootDirectory)bin\$(Configuration)\Tests\</TestsDirectory>
-
-    <CommonMSBuildGlobalProperties>
-      Configuration=$(Configuration);
-    </CommonMSBuildGlobalProperties>
+    <SolutionPath Condition="'$(SolutionPath)' == ''">$(MSBuildThisFileDirectory)..\sdk.sln</SolutionPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" />
-    <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
-    <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
-    <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj" />
+  <Import Project="..\Directory.Build.props" />
 
-    <!-- Explicitly specify task unit test projects -->
-    <TestProject Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
-    <TestProject Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Extensions.Tasks.UnitTests\Microsoft.NET.Build.Extensions.Tasks.UnitTests.csproj" />
-    <!-- Discover test projects under the test folder by convention -->
-    <TestProject Include="$(RepositoryRootDirectory)test\**\*.Tests.csproj" />
-  </ItemGroup>
-  <Target Name="RestorePackages">
-
-    <Message Text="Restoring nuget packages" Importance="high" />
-
-    <PropertyGroup>
-        <__NewLine><![CDATA[
-]]></__NewLine>
-        <__SetNuget_Packages Condition="'$(OS)' == 'Windows_NT'">set NUGET_PACKAGES=$(NuGet_Packages)</__SetNuget_Packages>
-        <__SetNuget_Packages Condition="'$(OS)' != 'Windows_NT'">export NUGET_PACKAGES=$(NuGet_Packages)$(__NewLine)export NUGET_HTTP_CACHE_PATH="$(NUGET_HTTP_CACHE_PATH)"
-</__SetNuget_Packages>
-    </PropertyGroup>
-
-    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore $(SolutionFile) /v:minimal"
-          WorkingDirectory="$(RepositoryRootDirectory)"
-          />
-  </Target>
-
-  <Target Name="BuildSolution">
-
-    <Message Text="Building %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(SolutionFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-
-  <Target Name="RebuildSolution">
-
-    <Message Text="Rebuilding %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(SolutionFile)"
-             Targets="Rebuild"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-
-  <Target Name="SignPackages">
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(SigningProjectFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-  </Target>
-
-  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages">
-    <MSBuild BuildInParallel="true"
-             Projects="@(NuGetProjectFile)"
-             Targets="Pack"
-             Properties="$(CommonMSBuildGlobalProperties);NoBuild=true"
-             />
-  </Target>
-
-  <Target Name="BuildForCli">
-    <MSBuild Projects="@(NuGetProjectFile)"
+  <Target Name="Build">
+    <MSBuild Projects="Toolset.proj" 
              Targets="Restore"
-             Properties="$(CommonMSBuildGlobalProperties)" />
+             Properties="BaseIntermediateOutputPath=$(MSBuildThisFileDirectory)..\artifacts\toolset\;ExcludeRestorePackageImports=true"
+             Condition="'$(Restore)' == 'true'"/>
 
-    <MSBuild Projects="@(NuGetProjectFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)" />
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(NuGetProjectFile)"
-             Targets="Pack"
-             Properties="$(CommonMSBuildGlobalProperties);NoBuild=true"
-             />
-  </Target>
-  
-  <Target Name="CleanNuGetPackages">
-    <Delete Files="$(OutputPath)Packages\*.nupkg" />
-  </Target>
- 
-  <Target Name="RebuildNuGetPackages" DependsOnTargets="CleanNuGetPackages;BuildNuGetPackages" />
-
-  <Target Name="Test">
-    <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot; -verbose"
-          LogStandardErrorAsError="true"
-          WorkingDirectory="$(TestsDirectory)"
-          />
+    <MSBuild Projects="$(RepoToolsetDir)Build.proj" 
+             Properties="SolutionPath=$(SolutionPath);Configuration=$(Configuration);CIBuild=$(CIBuild);Restore=$(Restore);Build=$(Build);Rebuild=$(Rebuild);Deploy=$(Deploy);Test=$(Test);Sign=$(Sign);Pack=$(Pack);Properties=$(Properties)" />
   </Target>
 
-  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages" />
-  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages" />
-
-  <Target Name="Build" DependsOnTargets="BuildWithoutTesting;Test" />
-  <Target Name="Rebuild" DependsOnTargets="RebuildWithoutTesting;Test" />
 </Project>

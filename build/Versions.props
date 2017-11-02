@@ -1,30 +1,82 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="OutDir;Configuration">
-  <!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
-  <!-- This file is imported by all projects at the beginning of the project files -->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Properties are commented out where they match the current default specified in Repo Toolset -->
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
-  
+
+  <!-- Repo Version Information -->
   <PropertyGroup>
-    <MsBuildPackagesVersion>15.4.8</MsBuildPackagesVersion>
-    <DependencyModelVersion>2.0.0</DependencyModelVersion>
-    <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
-    <NuGetVersion>4.4.0-preview3-4475</NuGetVersion>
-    <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
-    <NETStandardLibraryNETFrameworkVersion>2.0.0-preview3-25514-04</NETStandardLibraryNETFrameworkVersion>
-    <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
+    <VersionBase>2.0.3</VersionBase>
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
   </PropertyGroup>
 
-  <!-- Dependencies from test projects -->
+  <!-- Repo Toolset Features -->
   <PropertyGroup>
-    <xunitVersion>2.3.0-beta2-build3683</xunitVersion>
-    <xunitVisualStudioVersion>2.3.0-beta2-build1317</xunitVisualStudioVersion>
-    <xunitConsoleRunnerVersion>2.3.0-beta1-build3642</xunitConsoleRunnerVersion>
+    <!-- <UsingToolIbcOptimization>false</UsingToolIbcOptimization> -->
+    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
+    <!-- <UsingToolPdbConverter>false</UsingToolPdbConverter> -->
+    <UsingToolSourceLink>false</UsingToolSourceLink>
+    <UsingToolVSSDK>true</UsingToolVSSDK>
+    <!-- <UsingToolXliff>true</UsingToolXliff> -->
+    <!-- <UsingToolXUnit>true</UsingToolXUnit> -->
+  </PropertyGroup>
+
+  <!-- Toolset Dependencies -->
+  <PropertyGroup>
+    <DotNetCliVersion>2.0.2-vspre-006963</DotNetCliVersion>
+    <!-- <MicroBuildCoreVersion>0.2.0</MicroBuildCoreVersion> -->
+    <!-- <MicroBuildPluginsSwixBuildVersion>1.0.147</MicroBuildPluginsSwixBuildVersion> -->
+    <!-- <MicrosoftDotNetIBCMergeVersion>4.7.1-alpha-00001</MicrosoftDotNetIBCMergeVersion> -->
+    <!-- <MicrosoftNetCompilersVersion>2.3.0</MicrosoftNetCompilersVersion> -->
+    <!-- <Pdb2PdbVersion>1.1.0-beta1-62209-01</Pdb2PdbVersion> -->
+    <!-- <RoslynToolsMicrosoftModifyVsixManifestVersion>0.3.3-beta</RoslynToolsMicrosoftModifyVsixManifestVersion> -->
+    <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha49</RoslynToolsMicrosoftRepoToolsetVersion>
+    <RoslynToolsMicrosoftSignToolVersion>0.3.7-beta</RoslynToolsMicrosoftSignToolVersion>
+    <SourceLinkCreateCommandLineVersion>2.5.0</SourceLinkCreateCommandLineVersion>
+    <VSWhereVersion>2.2.7</VSWhereVersion>
+    <!-- <XliffTasksVersion>0.2.0-beta-000053</XliffTasksVersion> -->
+  </PropertyGroup>
+
+  <!-- VSSDK Dependencies -->
+  <PropertyGroup>
+    <!-- <MicrosoftVSSDKBuildToolsVersion>15.1.192</MicrosoftVSSDKBuildToolsVersion> -->
+    <MicrosoftVisualStudioPlatformVSEditorVersion>15.0.26606-alpha</MicrosoftVisualStudioPlatformVSEditorVersion>
+    <MicrosoftVisualStudioPlatformVSEditorInteropVersion>15.0.26606-alpha</MicrosoftVisualStudioPlatformVSEditorInteropVersion>
+    <MicrosoftVisualStudioTextInternalVersion>15.0.26606-alpha</MicrosoftVisualStudioTextInternalVersion>
+    <MicrosoftVisualStudioTelemetryVersion>15.0.26606-alpha</MicrosoftVisualStudioTelemetryVersion>
+    <MicrosoftVisualStudioThreadingVersion>15.3.83</MicrosoftVisualStudioThreadingVersion>
+  </PropertyGroup>
+
+  <!-- Production Dependencies -->
+  <PropertyGroup>
+    <MicrosoftBuildFrameworkVersion>15.2.0-preview-000093-02</MicrosoftBuildFrameworkVersion>
+    <MicrosoftBuildUtilitiesCoreVersion>15.2.0-preview-000093-02</MicrosoftBuildUtilitiesCoreVersion>
+    <MicrosoftExtensionsDependencyModelVersion>2.0.0-preview1-001960</MicrosoftExtensionsDependencyModelVersion>
+    <NETStandardLibraryNETFrameworkVersion>2.0.0-preview2-25405-01</NETStandardLibraryNETFrameworkVersion>
+    <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
+    <NuGetBuildTasksPackVersion>4.4.0-preview3-4475</NuGetBuildTasksPackVersion>
+    <NuGetPackagingVersion>4.4.0-preview3-4475</NuGetPackagingVersion>
+    <NuGetProjectModelVersion>4.4.0-preview3-4475</NuGetProjectModelVersion>
+    <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
+    <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
+    <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
+  </PropertyGroup>
+
+  <!-- Test Dependencies -->
+  <PropertyGroup>
+    <DotNetXUnitVersion>2.3.0</DotNetXUnitVersion>
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
-    <DotNetCliUtilsVersion>2.0.0-preview3-006805</DotNetCliUtilsVersion>
+    <MicrosoftDotNetCliUtilsVersion>2.0.0-preview3-006805</MicrosoftDotNetCliUtilsVersion>
+    <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
+    <XUnitVersion>2.3.0</XUnitVersion>
+    <XUnitConsoleVersion>2.3.0</XUnitConsoleVersion>
+    <XUnitConsoleRunnerVersion>2.3.0</XUnitConsoleRunnerVersion>
+    <XUnitRunnerVisualStudioVersion>2.3.0</XUnitRunnerVisualStudioVersion>
   </PropertyGroup>
-  
+
 </Project>

@@ -28,15 +28,15 @@ osList.each { os ->
 
         // Calculate the build command
         if (os == 'Windows_NT') {
-            buildCommand = ".\\build.cmd -Configuration $config"
+            buildCommand = ".\\build\\cibuild.cmd -configuration $config"
             machineAffinity = 'latest-dev15-3-preview1'
         } else if (os == 'Windows_NT_FullFramework') {
-            buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
+            buildCommand = ".\\build\\cibuild.cmd -configuration $config -fullMSBuild"
             osBase = 'Windows_NT'
             machineAffinity = 'latest-dev15-3-preview1'
         } else {
             // Jenkins non-Ubuntu CI machines don't have docker
-            buildCommand = "./build.sh --configuration $config"
+            buildCommand = "./build/cibuild.sh --configuration $config"
         }
 
         def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
@@ -44,8 +44,7 @@ osList.each { os ->
             steps {
                 if (osBase == 'Windows_NT') {
                     // Batch
-                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\Preview\\Enterprise\\Common7\\Tools\\
-${buildCommand}""")
+                    batchFile(buildCommand)
                 }
                 else {
                     // Shell

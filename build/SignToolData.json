@@ -1,5 +1,5 @@
 {
-    sign: [
+    "sign": [
         {
             "certificate": "Microsoft402",
             "strongName": "MsSharedLib72",
