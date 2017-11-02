@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">  
+  <PropertyGroup>
+    <OverwriteOnPublish Condition="'$(OverwriteOnPublish)' == ''">false</OverwriteOnPublish>
+  </PropertyGroup>
   
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
@@ -15,12 +14,8 @@
 
   <!-- UploadToAzure target comes from Build Tools -->
   <Target Name="PublishArtifacts"
-           DependsOnTargets="GenerateVersionBadge;
-                             GatherItemsForPattern;
-                             GenerateChecksums;
-                             UploadArtifactsToAzure;
-                             UploadChecksumsToAzure;
-                             PublishCliVersionBadge" />
+           DependsOnTargets="GatherItemsForPattern;
+                             UploadArtifactsToAzure;" />
 
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
@@ -37,30 +32,29 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PublishCliVersionBadge">
-    <ItemGroup>
-      <CliVersionBadgeToUpload Include="$(VersionBadge)" />
-      <CliVersionBadgeToUpload Include="$(CoherentBadge)"
-              Condition=" '$(Coherent)' == 'true' " />
-    </ItemGroup>
-
-    <ItemGroup>
-      <CliVersionBadgeToUpload>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
-      </CliVersionBadgeToUpload>
-    </ItemGroup>
-
+  <!-- publishes artifacts to blob storage in Azure -->
+  <Target Name="UploadArtifactsToAzure" DependsOnTargets="GatherItemsForPattern">
+    <Error Condition="'$(ArtifactContainerName)' == ''" Text="Missing property ArtifactContainerName." />
+    <Error Condition="'$(ArtifactCloudDropAccountName)' == ''" Text="Missing property ArtifactCloudDropAccountName." />
+    <Error Condition="'$(ArtifactCloudDropAccessToken)' == ''" Text="Missing property ArtifactCloudDropAccessToken." />
+    <!-- create the container if it doesn't exist -->
+    <CreateAzureContainer
+      AccountKey="$(ArtifactCloudDropAccessToken)"
+      AccountName="$(ArtifactCloudDropAccountName)"
+      ContainerName="$(ArtifactContainerName)" />
+    <!-- now upload the items -->
     <UploadToAzure
       AccountKey="$(ArtifactCloudDropAccessToken)"
       AccountName="$(ArtifactCloudDropAccountName)"
       ContainerName="$(ArtifactContainerName)"
-      Items="@(CliVersionBadgeToUpload)"
+      Items="@(ForPublishing)"
       Overwrite="$(OverwriteOnPublish)" />
+  </Target>
 
-    <SetBlobPropertiesBasedOnFileType
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(CliVersionBadgeToUpload)" />
+  <Target Name="FinishBuild">
+    <UpdateVersionsRepo BranchName="$(BranchName)"
+                        PackagesDirectory="$(PackagesDirectory)"
+                        GitHubPassword="$(GITHUB_PASSWORD)"
+                        Condition=" '$(GITHUB_PASSWORD)' != '' " />
   </Target>
 </Project>
