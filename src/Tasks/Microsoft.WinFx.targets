@@ -11,4 +11,33 @@
 
    <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.WinFx.targets" Condition="Exists('$(MSBuildFrameworkToolsPath)\Microsoft.WinFx.targets')" />
 
+   <!-- This target is to fix a problem with WPF TemporaryAssembly creation during markup compilation. Shipping fix with MsBuild, until 
+        we can get the right fix into .NET Framework and Windows.
+   -->
+
+   <Target Name="GenerateTemporaryTargetAssembly"
+               Condition="'$(_RequireMCPass2ForMainAssembly)' == 'true'" >
+
+      <Message Text="MSBuildProjectFile is $(MSBuildProjectFile)" Condition="'$(MSBuildTargetsVerbose)' == 'true'" />
+
+       <GenerateTemporaryTargetAssembly2
+                CurrentProject="$(MSBuildProjectFullPath)"
+                MSBuildBinPath="$(MSBuildBinPath)"
+                ReferencePathTypeName="ReferencePath"
+                CompileTypeName="Compile"
+                GeneratedCodeFiles="@(_GeneratedCodeFiles)"
+                ReferencePath="@(ReferencePath)"
+                IntermediateOutputPath="$(IntermediateOutputPath)"
+                AssemblyName="$(AssemblyName)"
+                CompileTargetName="$(_CompileTargetNameForLocalType)"
+                 >
+
+       </GenerateTemporaryTargetAssembly2>
+
+       <CreateItem Include="$(IntermediateOutputPath)$(TargetFileName)" >
+               <Output TaskParameter="Include" ItemName="AssemblyForLocalTypeReference" />
+       </CreateItem>
+
+  </Target>
+
 </Project>

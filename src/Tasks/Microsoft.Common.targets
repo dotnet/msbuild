@@ -124,7 +124,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImportProjectExtensionTargets Condition="'$(ImportProjectExtensionTargets)' == ''">true</ImportProjectExtensionTargets>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.targets" Condition="'$(ImportProjectExtensionTargets)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
+  <!-- WPF sometimes creates a temporary project. In order to properly import NuGet generated targets, we need to use _OriginalProjectName when set. -->
+  <Import Project="$(MSBuildProjectExtensionsPath)$(_OriginalProjectName).*.targets" Condition="'$(_OriginalProjectName)' != '' and '$(ImportProjectExtensionTargets)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
+  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.targets" Condition="'$(_OriginalProjectName)' == '' and '$(ImportProjectExtensionTargets)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
 
   <PropertyGroup>
     <ImportDirectoryBuildTargets Condition="'$(ImportDirectoryBuildTargets)' == ''">true</ImportDirectoryBuildTargets>

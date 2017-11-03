@@ -60,7 +60,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImportProjectExtensionProps Condition="'$(ImportProjectExtensionProps)' == ''">true</ImportProjectExtensionProps>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.props" Condition="'$(ImportProjectExtensionProps)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
+  <!-- WPF sometimes creates a temporary project. In order to properly import NuGet generated targets, we need to use _OriginalProjectName when set. -->
+  <Import Project="$(MSBuildProjectExtensionsPath)$(_OriginalProjectName).*.props" Condition="'$(_OriginalProjectName)' != '' and '$(ImportProjectExtensionProps)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
+  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.props" Condition="'$(_OriginalProjectName)' == '' and'$(ImportProjectExtensionProps)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
 
   <!-- 
         Import wildcard "ImportBefore" props files if we're actually in a 12.0+ project (rather than a project being
