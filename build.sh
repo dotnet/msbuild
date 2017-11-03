@@ -14,11 +14,11 @@ export CONFIGURATION="Release"
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 export DOTNET_VERSION=1.0.4
 export WebSdkRoot=$REPOROOT
-export WebSdkBin=$WebSdkRoot\bin\ 
-export WebSdkIntermediate=$WebSdkRoot\obj\ 
-export WebSdkReferences=$WebSdkRoot\references\ 
-export WebSdkSource=$WebSdkRoot\src\ 
-export WebSdkTools=$WebSdkRoot\tools\ 
+export WebSdkBin=$WebSdkRoot/bin/ 
+export WebSdkIntermediate=$WebSdkRoot/obj/ 
+export WebSdkReferences=$WebSdkRoot/references/ 
+export WebSdkSource=$WebSdkRoot/src/ 
+export WebSdkTools=$WebSdkRoot/tools/ 
 
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
@@ -29,10 +29,16 @@ export WebSdkTools=$WebSdkRoot\tools\
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
-curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 1.0.4
+curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 1.1.0
+curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.0.2
+
+curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
+[ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461
+tar -zxvf $DOTNET_INSTALL_DIR/buildtools.tar.gz -C $DOTNET_INSTALL_DIR/buildtools/net461
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
+export ReferenceAssemblyRoot=$DOTNET_INSTALL_DIR/buildtools/net461
 
 # Increases the file descriptors limit for this bash. It prevents an issue we were hitting during restore
 FILE_DESCRIPTOR_LIMIT=$( ulimit -n )
@@ -43,4 +49,4 @@ then
 fi
 
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build.proj" /p:Configuration=$CONFIGURATION;SkipInvalidConfigurations=true /t:Build
+$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build.proj" /t:Build /p:Configuration=$CONFIGURATION /p:SkipInvalidConfigurations=true /p:NETFrameworkSupported=false

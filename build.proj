@@ -105,7 +105,11 @@
   </Target>
 
   <Target Name="_RunTests">
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet test $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj /p:SkipInvalidConfigurations=true;configuration=Release" />
+    
+    <Exec  Command="$(DOTNET_INSTALL_DIR)/dotnet test $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj -f=netcoreapp2.0 --no-build /p:SkipInvalidConfigurations=true;configuration=Release" />
+
+    <Exec Condition="'$(NETFrameworkSupported)' != 'false'"
+     Command="$(DOTNET_INSTALL_DIR)/dotnet test $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj -f=net46 --no-build /p:SkipInvalidConfigurations=true;configuration=Release" />
   </Target>
 
   <Target Name="_GeneratePackages">
