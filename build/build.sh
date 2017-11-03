@@ -114,7 +114,7 @@ function InstallDotNetCli {
 
   if [ -z "$DOTNET_INSTALL_DIR" ]
   then
-    export DOTNET_INSTALL_DIR="$RepoRoot/artifacts/.dotnet/$dotnetcliVersion"
+    export DOTNET_INSTALL_DIR="$RepoRoot/artifacts/.dotnet/$dotnetCliVersion"
   fi
 
   dotnetInstallScript="$DOTNET_INSTALL_DIR/dotnet-install.sh"
