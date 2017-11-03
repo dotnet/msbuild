@@ -42,6 +42,13 @@ namespace Microsoft.Build.Tasks
         private Hashtable instanceLocalFileExists = new Hashtable();
 
         /// <summary>
+        /// DirectoryExists information is purely instance-local. It doesn't make sense to
+        /// cache this for long periods of time since there's no way (without actually 
+        /// calling Directory.Exists) to tell whether the cache is out-of-date.
+        /// </summary>
+        private Hashtable instanceLocalDirectoryExists = new Hashtable();
+
+        /// <summary>
         /// GetDirectories information is also purely instance-local. This information
         /// is only considered good for the lifetime of the task (or whatever) that owns 
         /// this instance.
@@ -82,6 +89,11 @@ namespace Microsoft.Build.Tasks
         /// Cached delegate.
         /// </summary>
         private FileExists fileExists = null;
+
+        /// <summary>
+        /// Cached delegate.
+        /// </summary>
+        private DirectoryExists directoryExists = null;
 
         /// <summary>
         /// Cached delegate.
@@ -301,6 +313,12 @@ namespace Microsoft.Build.Tasks
         {
             fileExists = fileExistsValue;
             return new FileExists(this.FileExists);
+        }
+
+        public DirectoryExists CacheDelegate(DirectoryExists directoryExistsValue)
+        {
+            directoryExists = directoryExistsValue;
+            return new DirectoryExists(this.DirectoryExists);
         }
 
         /// <summary>
@@ -542,6 +560,24 @@ namespace Microsoft.Build.Tasks
             /////////////////////////////////////////////////////////////////////////////////////////////
             bool exists = fileExists(path);
             instanceLocalFileExists[path] = exists;
+            return exists;
+        }
+
+        /// <summary>
+        /// Cached implementation of DirectoryExists.
+        /// </summary>
+        /// <param name="path">Path to file.</param>
+        /// <returns>True if the directory exists.</returns>
+        private bool DirectoryExists(string path)
+        {
+            object flag = instanceLocalDirectoryExists[path];
+            if (flag != null)
+            {
+                return (bool)flag;
+            }
+
+            bool exists = directoryExists(path);
+            instanceLocalDirectoryExists[path] = exists;
             return exists;
         }
     }
