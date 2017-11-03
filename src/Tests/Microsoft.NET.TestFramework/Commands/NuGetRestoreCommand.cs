@@ -61,6 +61,9 @@ namespace Microsoft.NET.TestFramework.Commands
 
             newArgs.Add(FullPathProjectFile);
 
+            newArgs.Add("-PackagesDirectory");
+            newArgs.Add(TestContext.Current.NuGetCachePath);
+
             newArgs.AddRange(args);
 
             if (string.IsNullOrEmpty(TestContext.Current.NuGetExePath))

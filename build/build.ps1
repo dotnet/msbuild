@@ -145,6 +145,16 @@ function InstallDotNetCli {
   $env:DOTNET_MULTILEVEL_LOOKUP=0
 }
 
+function InstallNuGet {
+  $nugetInstallDir = Join-Path $RepoRoot "artifacts\.nuget"
+  $nugetExe = Join-Path $nugetInstallDir "nuget.exe"
+
+  if (!(Test-Path -path $nugetExe)) {
+    Create-Directory $nugetInstallDir
+    Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -UseBasicParsing -OutFile $nugetExe
+  }
+}
+
 function LocateVisualStudio {
   $vswhereVersion = GetVSWhereVersion
   $vsWhereDir = Join-Path $ToolsRoot "vswhere\$vswhereVersion"
@@ -166,6 +176,7 @@ function LocateVisualStudio {
 
 function Build {
   InstallDotNetCli
+  InstallNuget
 
   # Preparation of a CI machine
   if ($prepareMachine) {
