@@ -236,14 +236,44 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(String.Empty, FileUtilities.GetDirectory("foo"));
         }
 
-        /// <summary>
-        /// Exercises FileUtilities.HasExtension
-        /// </summary>
-        [Fact]
-        public void HasExtension()
+        [Theory]
+        [InlineData("foo.txt",      new[] { ".txt" })]
+        [InlineData("foo.txt",      new[] { ".TXT" })]
+        [InlineData("foo.txt",      new[] { ".TXT"})]
+        [InlineData("foo.txt",      new[] { ".EXE", ".TXT" })]
+        [InlineData("foo",          new[] { "" })]
+        public void HasExtension_WhenFileNameHasExtension_ReturnsTrue(string fileName, string[] allowedExtensions)
         {
-            Assert.True(FileUtilities.HasExtension("foo.txt", new string[] { ".EXE", ".TXT" })); // "test 1"
-            Assert.False(FileUtilities.HasExtension("foo.txt", new string[] { ".EXE", ".DLL" })); // "test 2"
+            var result = FileUtilities.HasExtension(fileName, allowedExtensions);
+
+            Assert.True(result);
+        }
+
+        [Theory]
+        [InlineData("foo.txt",      new string [0])]
+        [InlineData("foo.txt",      new[] { ".DLL" })]
+        [InlineData("foo.txt",      new[] { ".EXE", ".DLL" })]
+        [InlineData("foo.exec",     new[] { ".exe", })]
+        [InlineData("foo.exe",      new[] { ".exec", })]
+        [InlineData("foo",          new[] { ".exe", })]
+        [InlineData("foo",          new[] { "foo", })]
+        [InlineData("",             new[] { ".exe" })]
+        [InlineData(null,           new[] { ".exe" })]
+        public void HasExtension_WhenFileNameDoesNotHaveExtension_ReturnsFalse(string fileName, string[] allowedExtensions)
+        {
+            var result = FileUtilities.HasExtension(fileName, allowedExtensions);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void HasExtension_WhenInvalidFileName_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                FileUtilities.HasExtension("|", new[] { ".exe" });
+
+            });
         }
 
         [Fact]
