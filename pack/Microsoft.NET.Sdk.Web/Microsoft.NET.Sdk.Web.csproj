@@ -30,7 +30,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk" Version="$(CoreSdkVersion)" />
     <PackageReference Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(WebSdkVersion)" />
     <PackageReference Include="Microsoft.NET.Sdk.Publish" Version="$(WebSdkVersion)" />
     
