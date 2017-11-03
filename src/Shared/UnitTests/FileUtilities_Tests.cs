@@ -241,7 +241,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("foo.txt",      new[] { ".TXT" })]
         [InlineData("foo.txt",      new[] { ".TXT"})]
         [InlineData("foo.txt",      new[] { ".EXE", ".TXT" })]
-        [InlineData("foo",          new[] { "" })]
         public void HasExtension_WhenFileNameHasExtension_ReturnsTrue(string fileName, string[] allowedExtensions)
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
@@ -250,13 +249,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("foo.txt",      new string [0])]
         [InlineData("foo.txt",      new[] { ".DLL" })]
         [InlineData("foo.txt",      new[] { ".EXE", ".DLL" })]
         [InlineData("foo.exec",     new[] { ".exe", })]
         [InlineData("foo.exe",      new[] { ".exec", })]
         [InlineData("foo",          new[] { ".exe", })]
-        [InlineData("foo",          new[] { "foo", })]
         [InlineData("",             new[] { ".exe" })]
         [InlineData(null,           new[] { ".exe" })]
         public void HasExtension_WhenFileNameDoesNotHaveExtension_ReturnsFalse(string fileName, string[] allowedExtensions)

@@ -532,14 +532,23 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool HasExtension(string fileName, string[] allowedExtensions)
         {
-            string fileExtension = Path.GetExtension(fileName);
-            foreach (string extension in allowedExtensions)
+            Debug.Assert(allowedExtensions != null && allowedExtensions.Length > 0);
+
+            // Easiest way to invoke invalid path chars
+            // check, which callers are relying on.
+            if (Path.HasExtension(fileName))
             {
-                if (String.Compare(fileExtension, extension, PathComparison) == 0)
+                foreach (string extension in allowedExtensions)
                 {
-                    return true;
+                    Debug.Assert(!String.IsNullOrEmpty(extension) && extension[0] == '.');
+
+                    if (fileName.EndsWith(extension, PathComparison))
+                    {
+                        return true;
+                    }
                 }
             }
+
             return false;
         }
 
