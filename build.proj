@@ -1,4 +1,4 @@
-  <!-- Build file -->
+<!-- Build file -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.SubmitCodeSignJob" />
   <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.WaitForCodeSignJobs" />
@@ -163,6 +163,6 @@
 
   <Target Name="Sign" />
 
-  <Import Project="$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets" Condition="Exists('$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets')"/>
+  <Import Project="$(WebSdkTools)\Microsoft.NET.Sdk.Web.Sign.targets" Condition="Exists('$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets')"/>
 </Project>
 
