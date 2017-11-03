@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
       ""GeneratorId"": ""0c434df7-e2cb-4dee-b216-d7c58c8eb4b3"",
       ""GroupIdentity"": ""ItemNugetConfig"",
       ""Precedence"": 100,
-      ""Name"": ""Nuget Config"",
+      ""Name"": ""NuGet Config"",
       ""ShortName"": ""nugetconfig"",
       ""Tags"": {
                 ""type"": {
@@ -177,7 +177,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
       ""Identity"": ""Microsoft.Standard.QuickStarts.Nuget.Config"",
       ""GeneratorId"": ""0c434df7-e2cb-4dee-b216-d7c58c8eb4b3"",
       ""GroupIdentity"": ""ItemNugetConfig"",
-      ""Name"": ""Nuget Config"",
+      ""Name"": ""NuGet Config"",
       ""ShortName"": ""nugetconfig"",
       ""Tags"": {
                 ""type"": ""item""

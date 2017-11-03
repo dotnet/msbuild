@@ -241,6 +241,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool SkipUpdateCheck => _parseResult.HasAppliedOption(new[] { _commandName, "skip-update-check" });
 
+        public bool CheckForUpdates => _parseResult.HasAppliedOption(new[] { _commandName, "update" });
+
+        public bool CheckForUpdatesNoPrompt => _parseResult.HasAppliedOption(new[] { _commandName, "update-no-prompt" });
+
         public string AllowScriptsToRun
         {
             get
