@@ -38,6 +38,35 @@
       </ProjectsToTest>
     </ItemGroup>
 
+    <!-- Begin Workaround lack of a stable package version for depedencies; copy into simulated stable version folders -->
+ 
+    <PropertyGroup>
+        <StableSharedFrameworkDirectory>$(OutputDirectory)/shared/Microsoft.NETCore.App/$(SharedFrameworkStableVersion)</StableSharedFrameworkDirectory>
+        <StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes>$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/shared/Microsoft.NETCore.App/$(SharedFrameworkStableVersion)</StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes>
+    </PropertyGroup>
+
+    <ItemGroup>  
+        <Stabilize_SourceFiles_2_0 Include="$(OutputDirectory)/shared/Microsoft.NETCore.App/$(CLI_SharedFrameworkVersion)/*.*"/>
+        <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
+                                          Include="$(StableSharedFrameworkDirectory)" />
+        <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
+                                          Include="$(StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes)" />
+    </ItemGroup>
+
+    <Copy
+        Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
+        SourceFiles="@(Stabilize_SourceFiles_2_0)"
+        DestinationFiles="@(Stabilize_SourceFiles_2_0->'$(StableSharedFrameworkDirectory)/%(RecursiveDir)%(Filename)%(Extension)')"
+    />
+
+    <Copy
+        Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
+        SourceFiles="@(Stabilize_SourceFiles_2_0)"
+        DestinationFiles="@(Stabilize_SourceFiles_2_0->'$(StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes)/%(RecursiveDir)%(Filename)%(Extension)')"
+    />
+ 
+    <!-- End Workaround lack of a stable package version for depedencies; copy into simulated stable versions -->
+
     <Message Text="Starting test execution" Importance="High" />
   
     <MSBuild
@@ -46,6 +75,12 @@
     </MSBuild>
 
     <Message Text="Finished test execution" Importance="High" />
+
+    <!-- Begin Workaround lack of a stable package version for depedencies; remove simulated stable version folder. -->
+
+    <RemoveDir Directories="@(SimulatedStableSharedFrameworkDirectories)" />
+ 
+    <!-- End Workaround lack of a stable package version for depedencies; remove simulated stable version folder. -->
   </Target>
 
   <Target Name="PrepareTests"
