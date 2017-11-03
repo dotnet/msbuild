@@ -3,6 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishDebian.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToTransportFeed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/RuntimeCoherence.targets" />
@@ -24,6 +25,7 @@
                              GenerateChecksums;
                              UploadArtifactsToAzure;
                              UploadChecksumsToAzure;
+                             PublishNupkgToTransportFeed;
                              PublishDebFilesToDebianRepo;
                              PublishCliVersionBadge" />
 
@@ -33,11 +35,11 @@
                      Condition=" '$(IslinuxPortable)' != 'true' "/>
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
                      Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
-      <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg"
+      <ForPublishing Include="@(NupkgsForPublishing)"
                      Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
-      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture)*.nupkg"
+      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).*.nupkg"
                      Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' "/>
-      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions*.nupkg"
+      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.*.nupkg"
                      Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
     </ItemGroup>
 
