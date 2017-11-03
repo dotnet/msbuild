@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.SubmitCodeSignJob" />
   <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.WaitForCodeSignJobs" />
-  
+
   <!-- 
     Variables that can be overriden by CI machine (official build):
     
@@ -11,7 +11,7 @@
       - WebSdkVersion -  web sdk full version
       - WebSdkPackagesDropDir [Required] - official drop folder path for web packages
   -->
-  
+
   <PropertyGroup>
     <CoreSdkDropDir Condition="'$(CoreSdkDropDir)' == ''">\\cpvsbuild\Drops\Roslyn\Roslyn-Project-System\DotNet-Core-Sdk</CoreSdkDropDir>
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.0.0</VersionPrefix>
@@ -57,7 +57,7 @@
   </UsingTask>
 
   <Target Name="Build" DependsOnTargets="Init;_Build"/>
-  
+
   <Target Name="Init" DependsOnTargets="_InitCoreSdk;_InitWebSdk">
   </Target>
 
@@ -88,20 +88,103 @@
       <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(BuildBranchName)$(CurrentDate)-$(BUILD_NUMBER)</WebSdkVersion>
     </PropertyGroup>
   </Target>
-  
-  <Target Name="_Build">
+
+  <Target Name="_RestoreSolution">
+    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet restore $(WebSdkRoot)\Microsoft.Net.Sdk.Web.Sln /p:SkipInvalidConfigurations=true;configuration=Release" />
+  </Target>
+
+  <Target Name="_BuildProduct">
+    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet build $(WebSdkRoot)\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj /p:SkipInvalidConfigurations=true;configuration=Release" />
+  </Target>
+
+  <Target Name="_CopyArtifacts">
+    <!--Copy publish sdks-->
+    <Copy SourceFiles="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.props"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Publish\Sdk\Sdk.props"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.targets"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Publish\Sdk\Sdk.targets"
+        OverwriteReadOnlyFiles="true" />
+
+    <!--Copy project system sdks-->
+    <Copy SourceFiles="$(WebSdkSource)\ProjectSystem\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\Sdk.props"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem\Sdk\Sdk.props"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkSource)\ProjectSystem\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\Sdk.targets"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem\Sdk\Sdk.targets"
+        OverwriteReadOnlyFiles="true" />
+
+    <!--Copy web sdks-->
+    <Copy SourceFiles="$(WebSdkSource)\Web\Microsoft.NET.Sdk.Web.Targets\Sdk.props"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.props"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkSource)\Web\Microsoft.NET.Sdk.Web.Targets\Sdk.targets"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.targets"
+        OverwriteReadOnlyFiles="true" />
+
+    <!-- Copy Publish targets and project system targets-->
     <PropertyGroup>
-      <!-- When C# projects have external dependencies that are shared,
-                 the Copy task can fail during parallel builds because multiple
-                 builds attempt to copy the same DLL at the same time.
-                 These properties tell the Copy task to retry after such a failure,
-                 so the build can ultimately succeed. -->
+      <_PublishTargetDestination>$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Publish\build\netstandard1.0\</_PublishTargetDestination>
+      <_ProjectSystemTargetDestination>$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem\build\netstandard1.0\</_ProjectSystemTargetDestination>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_PublishTargets Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\**\*.*" />
+      <_ProjectSystemTargets Include="$(WebSdkSource)\ProjectSystem\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\netstandard1.0\**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_PublishTargets)"
+        DestinationFiles="@(_PublishTargets -> '$(_PublishTargetDestination)%(RecursiveDir)%(FileName)%(Extension)')"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="@(_ProjectSystemTargets)"
+        DestinationFiles="@(_ProjectSystemTargets -> '$(_ProjectSystemTargetDestination)%(RecursiveDir)%(FileName)%(Extension)')"
+        OverwriteReadOnlyFiles="true" />
+
+    <!-- Copy Publish tasks-->
+    <Copy SourceFiles="$(WebSdkbin)\Release\net46\win7-x86\Microsoft.NET.Sdk.Publish.Tasks.dll"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Publish\tools\net46\Microsoft.NET.Sdk.Publish.Tasks.dll"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkbin)\Release\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll"
+        DestinationFiles="$(DOTNET_INSTALL_DIR)\Sdk\$(DOTNET_VERSION)\Sdks\Microsoft.NET.Sdk.Publish\tools\netcoreapp1.0\Microsoft.NET.Sdk.Publish.Tasks.dll"
+        OverwriteReadOnlyFiles="true" />
+
+  </Target>
+
+  <Target Name="_BuildTests">
+    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet build $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj /p:SkipInvalidConfigurations=true;configuration=Release" />
+  </Target>
+
+  <Target Name="_RunTests">
+    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet test $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj /p:SkipInvalidConfigurations=true;configuration=Release" />
+  </Target>
+
+  <Target Name="_GeneratePackages">
+    <PropertyGroup>
       <CopyRetryProperties>Retries=20;RetryDelayMilliseconds=150</CopyRetryProperties>
     </PropertyGroup>
 
     <MSBuild Projects="@(ProjectFiles)" Targets="Restore;Build;Pack"
-             Properties="$(CopyRetryProperties);CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)" />
+         Properties="$(CopyRetryProperties);CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)" />
   </Target>
+
+  <PropertyGroup>
+    <_BuildDependsOn>
+      $(_BuildDependsOn);
+      _RestoreSolution;
+      _BuildProduct;
+      _CopyArtifacts;
+      _BuildTests;
+      _RunTests;
+      _GeneratePackages;
+    </_BuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_Build" DependsOnTargets="$(_BuildDependsOn)" />
 
   <Target Name="_Publish">
     <!-- Generate semaphore files for core and web sdk -->
@@ -122,7 +205,7 @@
       <SignedPackages Include="$(CodeSignOutputPath)\Packages\*.nupkg" />
     </ItemGroup>
 
-    <Exec Command="$(NugetExe) push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package" Condition="'$(MyGetSecurityToken)' != ''" />   
+    <Exec Command="$(NugetExe) push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package" Condition="'$(MyGetSecurityToken)' != ''" />
   </Target>
 
   <UsingTask TaskName="GenerateSemaphore" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
