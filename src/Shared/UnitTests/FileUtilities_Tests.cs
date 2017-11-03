@@ -10,6 +10,8 @@ using System.IO;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Xunit;
+using System.Threading;
+using System.Globalization;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -242,6 +244,24 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.True(FileUtilities.HasExtension("foo.txt", new string[] { ".EXE", ".TXT" })); // "test 1"
             Assert.False(FileUtilities.HasExtension("foo.txt", new string[] { ".EXE", ".DLL" })); // "test 2"
+        }
+
+        [Fact]
+        public void HasExtension_UsesOrdinalIgnoreCase()
+        {
+            var currentCulture = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("tr-TR"); // Turkish
+
+                var result = FileUtilities.HasExtension("foo.ini", new string[] { ".INI" });
+
+                Assert.True(result);
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
         }
 
         /// <summary>

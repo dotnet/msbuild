@@ -535,7 +535,7 @@ namespace Microsoft.Build.Shared
             string fileExtension = Path.GetExtension(fileName);
             foreach (string extension in allowedExtensions)
             {
-                if (String.Compare(fileExtension, extension, StringComparison.CurrentCultureIgnoreCase) == 0)
+                if (String.Compare(fileExtension, extension, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return true;
                 }
