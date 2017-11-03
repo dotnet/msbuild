@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
+    <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -44,7 +43,6 @@
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.InternalAbstractions/Microsoft.DotNet.InternalAbstractions.csproj" />
-    <ProjectReference Include="../Microsoft.DotNet.Archive/Microsoft.DotNet.Archive.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Sln.Internal/Microsoft.DotNet.Cli.Sln.Internal.csproj" />
   </ItemGroup>
@@ -68,6 +66,7 @@
     <PackageReference Include="Microsoft.TemplateEngine.Cli.Localization" Version="$(TemplateEngineVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(TemplateEngineVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(TemplateEngineVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(DotNetCliArchiverVersion)" />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-<Project>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Product>Sdk</Product>
     <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
@@ -15,7 +15,5 @@
     <TransportFeedContainerName>$(TRANSPORTFEED_STORAGE_CONTAINER)</TransportFeedContainerName>
     <TransportFeedContainerName Condition="'$(TransportFeedContainerName)' == ''">dotnet-core</TransportFeedContainerName>
     <TransportFeedCloudDropAccessToken>$(TRANSPORTFEED_STORAGE_KEY)</TransportFeedCloudDropAccessToken>
-    <TransportFeedCloudDropAccountName>$(TRANSPORTFEED_STORAGE_ACCOUNT)</TransportFeedCloudDropAccountName>
-    <TransportFeedCloudDropAccountName Condition="'$(TransportFeedCloudDropAccountName)' == ''">dotnetfeed</TransportFeedCloudDropAccountName>
   </PropertyGroup>
 </Project>
