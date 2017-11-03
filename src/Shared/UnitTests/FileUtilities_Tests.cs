@@ -272,6 +272,8 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
+#if FEATURE_THREAD_CULTURE
+
         [Fact]
         public void HasExtension_UsesOrdinalIgnoreCase()
         {
@@ -289,6 +291,8 @@ namespace Microsoft.Build.UnitTests
                 Thread.CurrentThread.CurrentCulture = currentCulture;
             }
         }
+
+#endif
 
         /// <summary>
         /// Exercises FileUtilities.EnsureTrailingSlash
