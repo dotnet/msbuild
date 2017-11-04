@@ -6,21 +6,13 @@
           DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;IsolateArtifactsFromDirectoryBuildFiles;CreatePropsForNextStage" />
 
   <Target Name="Init"
-          DependsOnTargets="PrintBuildInfo;
-                            SetTelemetryProfile;
+          DependsOnTargets="SetTelemetryProfile;
                             BuildDotnetCliBuildFramework;">
-  </Target>
-
-  <Target Name="PrintBuildInfo">
-    <Message Text="Host info - Rid: $(HostRid), OSName: $(HostOSName)" Importance="High" />
-    <Message Text="Build info - Rid: $(Rid), Architecture: $(Architecture), OSName: $(OSName)" Importance="High" />
-    <Message Text="If you intended to use a different Rid, Architecture, or OSName run the following command to generate your build state:" Importance="High" />
-    <Message Text="dotnet msbuild build.proj /p:Architecture=Architecture /p:Rid=Rid /p:OSName=OSName /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles" Importance="High" />
   </Target>
 
   <Target Name="SetTelemetryProfile"
           DependsOnTargets="BuildDotnetCliBuildFramework" >
-    <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="$(DOTNET_CLI_TELEMETRY_PROFILE);https://github.com/dotnet/cli;$(CommitHash)" />
+    <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="$(DOTNET_CLI_TELEMETRY_PROFILE);https://github.com/dotnet/cli;$(BuildNumber)" />
   </Target>
 
   <Target Name="DownloadHostAndSharedFxArtifacts">
@@ -29,6 +21,10 @@
       <OverwriteExtractionDestination>%(_DownloadAndExtractItem.OverwriteDestination)</OverwriteExtractionDestination>
       <OverwriteExtractionDestination Condition="'$(OverwriteExtractionDestination)' == ''">True</OverwriteExtractionDestination>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PreviousStageFiles Include="$(PreviousStageDirectory)/**/*" />
+    </ItemGroup>
     
     <DownloadFile Condition=" '@(_DownloadAndExtractItem)' != '' "
                   Uri="%(_DownloadAndExtractItem.Url)"
@@ -43,6 +39,9 @@
                                SourceArchive="%(_DownloadAndExtractItem.DownloadFileName)"
                                DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestination)"
                                OverwriteDestination="$(OverwriteExtractionDestination)" />
+
+    <Copy SourceFiles="@(PreviousStageFiles)"
+          DestinationFiles="@(PreviousStageFiles->'$(DotNetCoreSdkLKGPublishDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
   </Target>
 
   <Target Name="RestoreSrcPackages"

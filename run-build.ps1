@@ -77,6 +77,8 @@ if (!$env:DOTNET_TOOL_DIR)
         Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
         exit $LastExitCode
     }
+
+    Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -SharedRuntime -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 }
 else
 {

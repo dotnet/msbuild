@@ -158,6 +158,8 @@ if [ -z "$DOTNET_TOOL_DIR" ]; then
         echo "run-build: Error: installing stage0 with exit code $EXIT_CODE." >&2
         exit $EXIT_CODE
     fi
+
+     (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --shared-runtime --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 else
     cp -r $DOTNET_TOOL_DIR/* $DOTNET_INSTALL_DIR/
 fi

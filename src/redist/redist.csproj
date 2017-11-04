@@ -10,7 +10,7 @@
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <PublishDir>$(CliOutputDirectory)</PublishDir>
-    <VersionSuffix>$(CommitCount)</VersionSuffix>
+    <VersionSuffix>$(BuildNumber)</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,14 +30,6 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
-
-  <Target Name="PublishVersionFile"
-          BeforeTargets="Publish">
-
-    <WriteLinesToFile File="$(PublishDir)/.version"
-                      Lines="$(CommitHash);$(SdkVersion);$(Rid)"
-                      Overwrite="true" />
-  </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
           AfterTargets="Publish">
@@ -78,7 +70,7 @@
        we can MIT license the published dotnet -->
   <Target Name="RemoveMSDiaTypeLib"
           AfterTargets="Publish"
-          Condition="'$(OSName)' != 'win'">
+          Condition=" '$(OS)' != 'Windows_NT' ">
     <Delete Files="$(PublishDir)/TestHost/msdia140typelib_clr0200.dll" />
   </Target>
 
@@ -105,7 +97,7 @@
 
   <Target Name="ChmodPublishDir"
           AfterTargets="PublishMSBuildExtensions"
-          Condition=" '$(OSName)' != 'win' ">
+          Condition=" '$(OS)' != 'Windows_NT' ">
     
     <Exec Command="find $(PublishDir) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(PublishDir) -type f -exec chmod 644 {} \;" />

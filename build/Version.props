@@ -5,13 +5,17 @@
     <VersionPatch>3</VersionPatch>
     <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">refac</ReleaseSuffix>
 
+    <!-- When running on VSO (for official builds) use a real number. -->
+    <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">00000001-01</BuildNumber>
+
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
-    <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 
+    <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(BuildNumber)</SimpleVersion> 
     <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</SimpleVersion> 
 
-    <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix> 
+    <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(BuildNumber)</VersionSuffix> 
 
-    <FullNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion> 
+    <FullNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-$(BuildNumber)</FullNugetVersion> 
 
     <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(FullNugetVersion)</NugetVersion> 
     <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</NugetVersion> 

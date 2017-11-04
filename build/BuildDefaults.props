@@ -1,5 +1,11 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">windows</OSPlatform>
+    <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">linux</OSPlatform>
+    <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">osx</OSPlatform>
+
+    <Architecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</Architecture>
+
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
@@ -7,7 +13,7 @@
     <IncludeAspNetCoreRuntime Condition="'$(IncludeAspNetCoreRuntime)' == ''">true</IncludeAspNetCoreRuntime>
     <IncludeMSBuildSdkResolver Condition="'$(IncludeMSBuildSdkResolver)' == ''">true</IncludeMSBuildSdkResolver>
     <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' ">true</UsePortableLinuxSharedFramework>
-    <IncludeSharedFrameworksForBackwardsCompatibilityTests Condition=" $(IncludeSharedFrameworksForBackwardsCompatibilityTests) == '' AND '$(Rid)' != 'linux-x64' ">true</IncludeSharedFrameworksForBackwardsCompatibilityTests>
+
     <HighEntropyVA>true</HighEntropyVA>
 
     <!-- Only use asset target fallback that we set (not implicit one to net461). -->

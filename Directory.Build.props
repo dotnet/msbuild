@@ -29,22 +29,15 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
   </PropertyGroup>
 
-  <Import Project="build/InitRepo.props" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(HostInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(BuildInfoProps)" />
-
   <Import Project="build/BranchInfo.props" />
 
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
 
-  <Import Project="build/DerivedHostMachineInfo.props" />
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
   <Import Project="build/MSBuildExtensions.props" />
-  <Import Project="build/SetupPreviousStage.props" />
   <Import Project="build/OutputDirectories.props" />
 
   <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">
@@ -55,10 +48,8 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <Import Project="build/AzureInfo.props" />
     <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/DotnetCoreSdkLKG.props" />
-    <Import Project="build/BackwardsCompatibilityRuntimes.props" />
+    <Import Project="build/SetupPreviousStage.props" />
 
-    <Import Project="build/InstallerInfo.props" />
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>
   
