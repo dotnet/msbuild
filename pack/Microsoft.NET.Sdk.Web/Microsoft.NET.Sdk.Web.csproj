@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <OutputType>library</OutputType>
+    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\</WebSdkRoot>
+    <WebSdkSource Condition="'$(WebSdkSource)' ==''">$(WebSdkRoot)src\</WebSdkSource>
+    <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
+    <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
+    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">2.0.0-dev$(CurrentDate)-1</WebSdkVersion>
+
+    <!--NuGet Properties-->
+    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
+    <IncludeBuildOutput>False</IncludeBuildOutput>
+    
+    <!-- Package Properties-->
+    <PackageName>Microsoft.NET.Sdk.Web</PackageName>
+    <Description>
+      This package contains MSBuild targets and tasks for building and publishing ASP.NET Core projects. This package is required for building and publishing ASP.NET Core projects.
+    </Description>
+    <Language>en-US</Language>
+    <Version>$(WebSdkVersion)</Version>
+    <Authors>Microsoft Corporation</Authors>
+    <Owners>Microsoft</Owners>
+    <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
+    <LicenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</LicenseUrl>
+    <ProjectUrl>https://github.com/aspnet/websdk</ProjectUrl>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(WebSdkVersion)" />
+    <PackageReference Include="Microsoft.NET.Sdk.Publish" Version="$(WebSdkVersion)" />
+    
+    <Content Include="$(WebSdkSource)\Web\Microsoft.NET.Sdk.Web.Targets\Sdk.props">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </Content>
+    <Content Include="$(WebSdkSource)\Web\Microsoft.NET.Sdk.Web.Targets\Sdk.targets">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </Content>
+  </ItemGroup>
+
+</Project>
