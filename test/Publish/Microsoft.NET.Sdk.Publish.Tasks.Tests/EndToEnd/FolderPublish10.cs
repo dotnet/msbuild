@@ -9,6 +9,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
     public class FolderPublish10
     {
+        public FolderPublish10()
+        {
+            Initialize();
+        }
+
         public string BaseTestDirectory
         {
             get

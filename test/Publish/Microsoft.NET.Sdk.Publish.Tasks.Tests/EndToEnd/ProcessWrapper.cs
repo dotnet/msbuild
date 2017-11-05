@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+#if NET46
 using System.Management;
+#endif
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,13 +61,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
         private static void KillProcessTreeInternal(int pid)
         {
+#if NET46
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("Select * From Win32_Process Where ParentProcessID=" + pid);
             ManagementObjectCollection moc = searcher.Get();
             foreach (ManagementObject mo in moc)
             {
                 KillProcessTreeInternal(Convert.ToInt32(mo["ProcessID"]));
             }
-
+#endif
             try
             {
                 Process proc = Process.GetProcessById(pid);
