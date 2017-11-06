@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
         private string[] _candidateAssemblyFiles = Array.Empty<string>();
         private string[] _targetFrameworkDirectories = Array.Empty<string>();
         private string[] _searchPaths = Array.Empty<string>();
-        private string[] _allowedAssemblyExtensions = new string[] { ".dll", ".exe", ".winmd" };
+        private string[] _allowedAssemblyExtensions = new string[] { ".winmd", ".dll", ".exe" };
         private string[] _relatedFileExtensions = new string[] { ".pdb", ".xml", ".pri" };
         private string _appConfigFile = null;
         private bool _supportsBindingRedirectGeneration;
