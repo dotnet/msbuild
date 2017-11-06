@@ -2054,8 +2054,8 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
         <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
-        <target state="new">The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</target>
-        <note></note>
+        <target state="translated">Bu proje yüklenirken ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition ayarlandığından, belirtilen "{0}" API ‘si kullanılamıyor.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
