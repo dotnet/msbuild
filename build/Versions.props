@@ -2,8 +2,6 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Properties are commented out where they match the current default specified in Repo Toolset -->
-
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
@@ -16,39 +14,18 @@
 
   <!-- Repo Toolset Features -->
   <PropertyGroup>
-    <!-- <UsingToolIbcOptimization>false</UsingToolIbcOptimization> -->
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-    <!-- <UsingToolPdbConverter>false</UsingToolPdbConverter> -->
     <UsingToolSourceLink>false</UsingToolSourceLink>
     <UsingToolVSSDK>true</UsingToolVSSDK>
-    <!-- <UsingToolXliff>true</UsingToolXliff> -->
-    <!-- <UsingToolXUnit>true</UsingToolXUnit> -->
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>2.0.2-vspre-006963</DotNetCliVersion>
-    <!-- <MicroBuildCoreVersion>0.2.0</MicroBuildCoreVersion> -->
-    <!-- <MicroBuildPluginsSwixBuildVersion>1.0.147</MicroBuildPluginsSwixBuildVersion> -->
-    <!-- <MicrosoftDotNetIBCMergeVersion>4.7.1-alpha-00001</MicrosoftDotNetIBCMergeVersion> -->
-    <!-- <MicrosoftNetCompilersVersion>2.3.0</MicrosoftNetCompilersVersion> -->
-    <!-- <Pdb2PdbVersion>1.1.0-beta1-62209-01</Pdb2PdbVersion> -->
-    <!-- <RoslynToolsMicrosoftModifyVsixManifestVersion>0.3.3-beta</RoslynToolsMicrosoftModifyVsixManifestVersion> -->
-    <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha49</RoslynToolsMicrosoftRepoToolsetVersion>
+    <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha51</RoslynToolsMicrosoftRepoToolsetVersion>
     <RoslynToolsMicrosoftSignToolVersion>0.3.7-beta</RoslynToolsMicrosoftSignToolVersion>
     <SourceLinkCreateCommandLineVersion>2.5.0</SourceLinkCreateCommandLineVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
-    <!-- <XliffTasksVersion>0.2.0-beta-000053</XliffTasksVersion> -->
-  </PropertyGroup>
-
-  <!-- VSSDK Dependencies -->
-  <PropertyGroup>
-    <!-- <MicrosoftVSSDKBuildToolsVersion>15.1.192</MicrosoftVSSDKBuildToolsVersion> -->
-    <MicrosoftVisualStudioPlatformVSEditorVersion>15.0.26606-alpha</MicrosoftVisualStudioPlatformVSEditorVersion>
-    <MicrosoftVisualStudioPlatformVSEditorInteropVersion>15.0.26606-alpha</MicrosoftVisualStudioPlatformVSEditorInteropVersion>
-    <MicrosoftVisualStudioTextInternalVersion>15.0.26606-alpha</MicrosoftVisualStudioTextInternalVersion>
-    <MicrosoftVisualStudioTelemetryVersion>15.0.26606-alpha</MicrosoftVisualStudioTelemetryVersion>
-    <MicrosoftVisualStudioThreadingVersion>15.3.83</MicrosoftVisualStudioThreadingVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->

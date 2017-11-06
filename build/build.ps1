@@ -69,8 +69,7 @@ function GetVSWhereVersion {
   [xml]$xml = Get-Content $DependenciesProps
 
   foreach ($propertyGroup in $xml.Project.PropertyGroup) {
-    if (Get-Member -inputObject $propertyGroup -name VSWhereVersion)
-    {
+    if (Get-Member -inputObject $propertyGroup -name VSWhereVersion) {
         return $propertyGroup.VSWhereVersion
     }
   }
