@@ -579,9 +579,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Put the most likely extensions first for reference resolution speed.
         -->
     <AllowedReferenceAssemblyFileExtensions Condition=" '$(AllowedReferenceAssemblyFileExtensions)' == '' ">
-      .winmd;
       .dll;
-      .exe
+      .exe;
+      .winmd
     </AllowedReferenceAssemblyFileExtensions>
 
     <!--
@@ -2400,8 +2400,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ExpandSDKReferencesDependsOn>
 
     <ExpandSDKAllowedReferenceExtensions Condition="'$(ExpandSDKAllowedReferenceExtensions)' == ''">
-      .winmd;
-      .dll
+      .dll;
+      .winmd
     </ExpandSDKAllowedReferenceExtensions>
   </PropertyGroup>
 
