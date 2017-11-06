@@ -263,11 +263,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void HasExtension_WhenInvalidFileName_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                FileUtilities.HasExtension("/", new[] { ".exe" });
+                FileUtilities.HasExtension("|/", new[] { ".exe" });
 
             });
         }
