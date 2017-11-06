@@ -1191,6 +1191,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit&apos; flag.
+        /// </summary>
+        public static string SettingsReadError {
+            get {
+                return ResourceManager.GetString("SettingsReadError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Short Name.
         /// </summary>
         public static string ShortName {

@@ -536,7 +536,16 @@ namespace Microsoft.TemplateEngine.Cli
 
             Initialize();
             bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
-            _settingsLoader.RebuildCacheFromSettingsIfNotCurrent(forceCacheRebuild);
+            try
+            {
+                _settingsLoader.RebuildCacheFromSettingsIfNotCurrent(forceCacheRebuild);
+            }
+            catch (EngineInitializationException eiex)
+            {
+                Reporter.Error.WriteLine(eiex.Message.Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.SettingsReadError);
+                return CreationResultStatus.CreateFailed;
+            }
 
             try
             {
