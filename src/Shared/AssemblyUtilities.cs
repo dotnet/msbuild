@@ -24,6 +24,13 @@ namespace Microsoft.Build.Shared
         private static Lazy<CultureInfo[]> s_validCultures = new Lazy<CultureInfo[]>(() => GetValidCultures(), true);
 #endif
 
+#if !CLR2COMPATIBILITY
+        private static Lazy<Assembly> s_entryAssembly = new Lazy<Assembly>(() => GetEntryAssembly());
+        public static Assembly EntryAssembly => s_entryAssembly.Value;
+#else
+        public static Assembly EntryAssembly = GetEntryAssembly();
+#endif
+
         public static string GetAssemblyLocation(Assembly assembly)
         {
 #if FEATURE_ASSEMBLY_LOCATION
@@ -122,6 +129,19 @@ namespace Microsoft.Build.Shared
             s_cultureInfoGetCultureMethod = typeof(CultureInfo).GetMethod("GetCultures");
 
             s_initialized = true;
+        }
+
+        private static Assembly GetEntryAssembly()
+        {
+#if FEATURE_ASSEMBLY_GETENTRYASSEMBLY
+            return System.Reflection.Assembly.GetEntryAssembly();
+#else
+            var getEntryAssembly = typeof(Assembly).GetMethod("GetEntryAssembly");
+
+            ErrorUtilities.VerifyThrowInternalNull(getEntryAssembly, "Assembly does not have the method GetEntryAssembly");
+
+            return (Assembly) getEntryAssembly.Invoke(null, Array.Empty<object>());
+#endif
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
