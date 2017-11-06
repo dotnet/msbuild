@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -22,6 +20,40 @@ namespace Microsoft.Build.Engine.UnitTests
             VerifyBuildErrorEvent(logger);
 
             ObjectModelHelpers.BuildProjectExpectSuccess(GetTestProject(treatAllWarningsAsErrors: false));
+        }
+
+        /// <summary>
+        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorsWhenBuildingSameProjectMultipleTimes()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles project2 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""$(MSBuildThisFileFullPath)"" Targets=""AnotherTarget"" />
+                    </Target>
+                    <Target Name=""AnotherTarget"">
+                        <Warning Text=""{ExpectedEventMessage}"" Code=""{ExpectedEventCode}"" />
+                    </Target>
+                </Project>");
+
+                TransientTestProjectWithFiles project1 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""{project2.ProjectFile}"" Targets=""Build"" />
+                    </Target>
+                </Project>");
+
+                MockLogger logger = project1.BuildProjectExpectFailure();
+
+                VerifyBuildErrorEvent(logger);
+            }
         }
 
         [Fact]
@@ -82,6 +114,40 @@ namespace Microsoft.Build.Engine.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(GetTestProject(warningsAsMessages: ExpectedEventCode));
 
             VerifyBuildMessageEvent(logger);
+        }
+
+        /// <summary>
+        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsMessagesWhenBuildingSameProjectMultipleTimes()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles project2 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <MSBuildWarningsAsMessages>{ExpectedEventCode}</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""$(MSBuildThisFileFullPath)"" Targets=""AnotherTarget"" />
+                    </Target>
+                    <Target Name=""AnotherTarget"">
+                        <Warning Text=""{ExpectedEventMessage}"" Code=""{ExpectedEventCode}"" />
+                    </Target>
+                </Project>");
+
+                TransientTestProjectWithFiles project1 = testEnvironment.CreateTestProjectWithFiles($@"
+                <Project xmlns=""msbuildnamespace"">
+                    <Target Name=""Build"">
+                        <MSBuild Projects=""{project2.ProjectFile}"" Targets=""Build"" />
+                    </Target>
+                </Project>");
+
+                MockLogger logger = project1.BuildProjectExpectSuccess();
+
+                VerifyBuildMessageEvent(logger);
+            }
         }
 
         [Fact]
