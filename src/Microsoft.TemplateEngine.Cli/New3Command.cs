@@ -91,14 +91,14 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (customHiveFlagIndex + 1 >= args.Length)
                 {
-                    Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute path to the custom hive".Bold().Red());
+                    Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute or relative path to the custom hive".Bold().Red());
                     return 1;
                 }
 
                 hivePath = args[customHiveFlagIndex + 1];
                 if (hivePath.StartsWith("-"))
                 {
-                    Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute path to the custom hive".Bold().Red());
+                    Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute or relative path to the custom hive".Bold().Red());
                     return 1;
                 }
             }
