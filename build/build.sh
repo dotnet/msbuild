@@ -104,8 +104,7 @@ function CreateDirectory {
 }
 
 function GetDotNetCliVersion {
-  xml="$( cat "$RepoRoot/build/Versions.props" )"
-  echo "$( grep -oPm1 "(?<=<DotNetCliVersion>)[^<]+" <<< "$xml" )"
+  echo "$( awk -F'[<>]' "/<DotNetCliVersion>/{print \$3}" "$RepoRoot/build/Versions.props" )"
 }
 
 function InstallDotNetCli {
