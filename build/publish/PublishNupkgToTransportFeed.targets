@@ -6,7 +6,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <ExpectedFeedUrl>https://dotnetfeed.blob.core.windows.net/$(TransportFeedContainerName)/packages/index.json</ExpectedFeedUrl>
+    <ExpectedFeedUrl>https://dotnetfeed.blob.core.windows.net/$(TransportFeedContainerName)/index.json</ExpectedFeedUrl>
   </PropertyGroup>
 
   <Target Name="PublishNupkgToTransportFeed" Condition=" '$(PUBLISH_NUPKG_TO_TRANSPORT_FEED)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
