@@ -25,16 +25,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
-        public static string WithBackwardsCompatibleRuntimes
-        {
-            get
-            {
-                return Path.Combine(
-                    new RepoDirectoriesProvider().Stage2WithBackwardsCompatibleRuntimesDirectory,
-                    "dotnet");
-            }
-        }
-
         public static bool IsLocalized()
         {
             for (var culture = CultureInfo.CurrentUICulture; !culture.Equals(CultureInfo.InvariantCulture); culture = culture.Parent)

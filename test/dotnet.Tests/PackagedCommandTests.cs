@@ -92,41 +92,6 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void IfPreviousVersionOfSharedFrameworkIsNotInstalled_ToolsTargetingItFail(bool toolPrefersCLIRuntime)
-        {
-            var testInstance = TestAssets.Get("AppWithToolDependency")
-                .CreateInstance(identifier: toolPrefersCLIRuntime ? "preferCLIRuntime" : "")
-                .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
-
-            testInstance = testInstance.WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
-
-                var toolReference = project.Descendants(ns + "DotNetCliToolReference")
-                    .Where(tr => tr.Attribute("Include").Value == "dotnet-portable")
-                    .Single();
-
-                toolReference.Attribute("Include").Value =
-                    toolPrefersCLIRuntime ? "dotnet-portable-v1-prefercli" : "dotnet-portable-v1";
-            });
-
-            testInstance = testInstance.WithRestoreFiles();
-
-            new BuildCommand()
-                .WithProjectDirectory(testInstance.Root)
-                .Execute()
-                .Should().Pass();
-
-            new GenericCommand(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1")
-                .WithWorkingDirectory(testInstance.Root)
-                .Execute()
-                .Should().Fail();
-        }
-
         [RequiresSpecificFrameworkTheory("netcoreapp1.1")]
         [InlineData(true)]
         [InlineData(false)]
@@ -156,8 +121,7 @@ namespace Microsoft.DotNet.Tests
                 .Execute()
                 .Should().Pass();
 
-            var result =
-                new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            var result = new DotnetCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1");
 
@@ -209,8 +173,7 @@ namespace Microsoft.DotNet.Tests
 
             testInstance = testInstance.WithRestoreFiles();
 
-            var result =
-                    new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            var result = new DotnetCommand()
                     .WithWorkingDirectory(testInstance.Root)
                     .Execute("portable-v1");
 
@@ -255,7 +218,7 @@ namespace Microsoft.DotNet.Tests
                 .Execute()
                 .Should().Pass();
 
-            new DependencyToolInvokerCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            new DependencyToolInvokerCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithEnvironmentVariable(CommandContext.Variables.Verbose, "true")
                 .ExecuteWithCapturedOutput($"tool-with-output-name", framework, "")
@@ -377,7 +340,7 @@ namespace Microsoft.DotNet.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            new DependencyContextTestCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            new DependencyContextTestCommand(DotnetUnderTest.FullName)
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute("")
                 .Should().Pass();

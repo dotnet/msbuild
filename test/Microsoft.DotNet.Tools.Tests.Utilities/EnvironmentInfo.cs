@@ -1,13 +1,15 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.PlatformAbstractions;
+
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public static class EnvironmentInfo
     {
         public static bool HasSharedFramework(string framework)
         {
-            string rid = RepoDirectoriesProvider.BuildRid;
+            string rid = RuntimeEnvironment.GetRuntimeIdentifier();
 
             if (framework == "netcoreapp1.0")
             {

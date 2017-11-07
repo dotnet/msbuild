@@ -5,9 +5,9 @@
 
   <PropertyGroup>
     <PathListSeparator>:</PathListSeparator>
-    <PathListSeparator Condition=" '$(OSName)' == 'win' ">%3b</PathListSeparator>
+    <PathListSeparator Condition=" '$(OS)' == 'Windows_NT' ">%3b</PathListSeparator>
     <ExecPath>$(SdkOutputDirectory)$(PathListSeparator)$(PATH)</ExecPath>
-    <ExecPath Condition=" '$(OSName)' == 'win' ">$(OutputDirectory)</ExecPath>
+    <ExecPath Condition=" '$(OS)' == 'Windows_NT' ">$(OutputDirectory)</ExecPath>
     <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>

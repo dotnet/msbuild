@@ -77,6 +77,8 @@ if (!$env:DOTNET_TOOL_DIR)
         Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
         exit $LastExitCode
     }
+
+    Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -SharedRuntime -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 }
 else
 {
@@ -93,7 +95,6 @@ if ($NoBuild)
 }
 else
 {
-    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }

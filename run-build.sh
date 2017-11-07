@@ -158,6 +158,8 @@ if [ -z "$DOTNET_TOOL_DIR" ]; then
         echo "run-build: Error: installing stage0 with exit code $EXIT_CODE." >&2
         exit $EXIT_CODE
     fi
+
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --shared-runtime --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE")
 else
     cp -r $DOTNET_TOOL_DIR/* $DOTNET_INSTALL_DIR/
 fi
@@ -180,7 +182,6 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 echo "${args[@]}"
 
 if [ $BUILD -eq 1 ]; then
-    dotnet msbuild build.proj /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS "${args[@]}"
 else
     echo "Not building due to --nobuild"
