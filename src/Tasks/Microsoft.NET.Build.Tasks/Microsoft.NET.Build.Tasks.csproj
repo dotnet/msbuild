@@ -78,7 +78,7 @@
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
-      <_NugetBuildTasksPackPath>$(NuGetPackageRoot)NuGet.Build.Tasks.Pack\$(NuGetBuildTasksPackVersion)</_NugetBuildTasksPackPath>
+      <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackVersion)</_NugetBuildTasksPackPath>
     </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">

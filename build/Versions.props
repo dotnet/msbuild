@@ -23,7 +23,7 @@
   <PropertyGroup>
     <DotNetCliVersion>2.0.2-vspre-006963</DotNetCliVersion>
     <MicrosoftDotNetBuildTasksFeedVersion>1.0.0-prerelease-01929-02</MicrosoftDotNetBuildTasksFeedVersion>
-    <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha51</RoslynToolsMicrosoftRepoToolsetVersion>
+    <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha52</RoslynToolsMicrosoftRepoToolsetVersion>
     <RoslynToolsMicrosoftSignToolVersion>0.3.7-beta</RoslynToolsMicrosoftSignToolVersion>
     <SourceLinkCreateCommandLineVersion>2.5.0</SourceLinkCreateCommandLineVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
