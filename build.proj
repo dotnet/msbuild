@@ -16,6 +16,7 @@
 
   <PropertyGroup>
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.0.0</VersionPrefix>
+    <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)\dotnet&quot;</DOTNET_EXE_PATH>
   </PropertyGroup>
 
   <Target Name="Build" DependsOnTargets="Init;_Build"/>
@@ -32,11 +33,11 @@
   </Target>
 
   <Target Name="_RestoreSolution">
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet restore $(WebSdkRoot)\Microsoft.Net.Sdk.Web.Sln /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)\Microsoft.Net.Sdk.Web.Sln&quot; /p:configuration=Release /p:SkipInvalidConfigurations=true" />
   </Target>
 
   <Target Name="_BuildProduct">
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet build $(WebSdkRoot)\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj&quot; /p:configuration=Release /p:SkipInvalidConfigurations=true" />
   </Target>
 
   <Target Name="_CopyArtifacts">
@@ -98,27 +99,27 @@
   </Target>
 
   <Target Name="_BuildTests" Condition="'$(PB_SkipTests)' != 'true'">
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet build $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; /p:configuration=Release /p:SkipInvalidConfigurations=true" />
   </Target>
 
   <Target Name="_RunTests" Condition="'$(PB_SkipTests)' != 'true'"> 
-    <Exec  Command="$(DOTNET_INSTALL_DIR)/dotnet test $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj -f=netcoreapp2.0 --no-build /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec  Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp2.0 --no-build /p:configuration=Release /p:SkipInvalidConfigurations=true" />
 
     <Exec Condition="'$(NETFrameworkSupported)' != 'false'"
-     Command="$(DOTNET_INSTALL_DIR)/dotnet test $(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj -f=net46 --no-build /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+     Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=net46 --no-build /p:configuration=Release /p:SkipInvalidConfigurations=true" />
   </Target>
 
   <Target Name="_GeneratePackages">
     
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet restore $(WebSdkRoot)\Microsoft.Net.Sdk.Web.Sln /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)\Microsoft.Net.Sdk.Web.Sln&quot; /p:configuration=Release /p:SkipInvalidConfigurations=true" />
     
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet build $(WebSdkRoot)\Microsoft.Net.Sdk.Web.Sln /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)\Microsoft.Net.Sdk.Web.Sln&quot; /p:configuration=Release /p:SkipInvalidConfigurations=true" />
    
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet pack $(WebSdkRoot)\pack\Microsoft.NET.Sdk.Publish\Microsoft.NET.Sdk.Publish.csproj /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)\pack\Microsoft.NET.Sdk.Publish\Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
     
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet pack $(WebSdkRoot)\pack\Microsoft.NET.Sdk.Web.ProjectSystem\Microsoft.NET.Sdk.Web.ProjectSystem.csproj /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)\pack\Microsoft.NET.Sdk.Web.ProjectSystem\Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
 
-    <Exec Command="$(DOTNET_INSTALL_DIR)/dotnet pack $(WebSdkRoot)\pack\Microsoft.NET.Sdk.Web\Microsoft.NET.Sdk.Web.csproj /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)\pack\Microsoft.NET.Sdk.Web\Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
 
   </Target>
 
