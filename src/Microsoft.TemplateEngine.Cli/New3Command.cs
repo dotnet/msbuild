@@ -89,8 +89,6 @@ namespace Microsoft.TemplateEngine.Cli
             int customHiveFlagIndex = args.ToList().IndexOf("--debug:custom-hive");
             if (customHiveFlagIndex >= 0)
             {
-                Reporter.Output.WriteLine($"CustomHive index = {customHiveFlagIndex}... args.Length() = {args.Length}");
-
                 if (customHiveFlagIndex + 1 >= args.Length)
                 {
                     Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute path to the custom hive".Bold().Red());
