@@ -9,4 +9,3 @@ done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 . "$ScriptRoot/build.sh" --restore --build --test --ci $@
-return $?
