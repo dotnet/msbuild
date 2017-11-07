@@ -104,7 +104,7 @@ Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verw
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
-        <target state="needs-review-translation">Das Startprofil ist kein JSON-Objekt.</target>
+        <target state="translated">Ein Profil mit dem angegebenen Namen wurde nicht gefunden oder ist kein gültiges JSON-Objekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
