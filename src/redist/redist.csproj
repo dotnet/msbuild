@@ -123,7 +123,8 @@
 
     <Delete Files="$(PublishDir)/$(TargetName).deps.json;
                    $(PublishDir)/$(TargetName).runtimeconfig.json;
-                   $(PublishDir)/%(BundledToolProjects.Identity).dll" />
+                   $(PublishDir)/%(BundledToolProjects.Identity).dll;
+                   $(PublishDir)/%(BundledToolProjects.Identity).pdb" />
 
     <ChangeEntryPointLibraryName
           DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
@@ -220,7 +221,7 @@
 
   <Target Name="CrossgenPublishDir"
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
-          AfterTargets="PublishMSBuildExtensions">
+          AfterTargets="GenerateCliRuntimeConfigurationFiles">
     <ItemGroup>
       <RoslynFiles Include="$(PublishDir)Roslyn\bincore\**\*" />
       <FSharpFiles Include="$(PublishDir)FSharp\**\*" Exclude="$(PublishDir)FSharp\FSharp.Build.dll" />
@@ -235,6 +236,13 @@
 
       <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
       <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
+
+      <!-- Don't crossgen satellite assemblies -->
+      <RoslynFiles Remove="$(PublishDir)Roslyn\bincore\**\*.resources.dll" />
+      <FSharpFiles Remove="$(PublishDir)FSharp\**\*.resources.dll" />
+      <RemainingFiles Remove="$(PublishDir)**\*.resources.dll" />
+
+      <DiasymReaderPath Include="$(SharedFrameworkNameVersionPath)/Microsoft.DiaSymReader.Native.*.dll" />
     </ItemGroup>
 
     <AddMetadataIsPE Items="@(RoslynFiles)">
@@ -265,12 +273,20 @@
            Glob="$(CrossgenPath)"
            Mode="u+x" />
 
+    <!-- Crossgen does not support generating symbols on Mac  -->
+    <PropertyGroup Condition="'$(CreateCrossgenSymbols)' == ''">
+      <CreateCrossgenSymbols>true</CreateCrossgenSymbols>
+      <CreateCrossgenSymbols Condition="'$(OSName)' == 'osx'">false</CreateCrossgenSymbols>
+   </PropertyGroup>
+
     <Crossgen
         SourceAssembly="%(RoslynTargets.FullPath)"
         DestinationPath="%(RoslynTargets.FullPath)"
         JITPath="$(LibCLRJitPath)"
         CrossgenPath="$(CrossgenPath)"
         ReadyToRun="True"
+        CreateSymbols="$(CreateCrossgenSymbols)"
+        DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(RoslynFolders);$(SharedFrameworkNameVersionPath)" />
  
     <Crossgen
@@ -279,6 +295,8 @@
         JITPath="$(LibCLRJitPath)"
         CrossgenPath="$(CrossgenPath)"
         ReadyToRun="True"
+        CreateSymbols="$(CreateCrossgenSymbols)"
+        DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(FSharpFolders);$(SharedFrameworkNameVersionPath)" />
  
     <Crossgen
@@ -287,6 +305,8 @@
         JITPath="$(LibCLRJitPath)"
         CrossgenPath="$(CrossgenPath)"
         ReadyToRun="True"
+        CreateSymbols="$(CreateCrossgenSymbols)"
+        DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(RemainingFolders);$(SharedFrameworkNameVersionPath)" />
   </Target>
 
@@ -299,23 +319,16 @@
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
   </Target>
 
-  <Target Name="CreateSymbolsDirectory"
-          AfterTargets="CrossgenPublishDir">
+  <Target Name="SeparateSymbolsFromPublishDir"
+          AfterTargets="CrossgenPublishDir"
+          Condition="'$(SeparateSymbolsArchive)' != 'false'">
     <ItemGroup>
-      <_AllSdkFiles Include="$(PublishDir)/**/*" />
+      <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
+      <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(_AllSdkFiles)"
-        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)/sdk/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
-  <Target Name="RemovePdbsFromPublishDir"
-          AfterTargets="CreateSymbolsDirectory">
-    <ItemGroup>
-      <PdbsToClean Include="$(PublishDir)/**/*.pdb" />
-    </ItemGroup>
-
-    <Delete Files="@(PdbsToClean)" />
+    <Move SourceFiles="@(PdbsToMove)" 
+          DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishStage2WithBackwardsCompatibleRuntimes"
@@ -336,6 +349,7 @@
   </Target>
 
   <Target Name="RetargetVSTestConsole"
+          BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
           AfterTargets="Publish">
     <PropertyGroup>
       <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
