@@ -86,6 +86,25 @@ namespace Microsoft.TemplateEngine.Cli
                 Console.ReadLine();
             }
 
+            int customHiveFlagIndex = args.ToList().IndexOf("--debug:custom-hive");
+            if (customHiveFlagIndex >= 0)
+            {
+                Reporter.Output.WriteLine($"CustomHive index = {customHiveFlagIndex}... args.Length() = {args.Length}");
+
+                if (customHiveFlagIndex + 1 >= args.Length)
+                {
+                    Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute path to the custom hive".Bold().Red());
+                    return 1;
+                }
+
+                hivePath = args[customHiveFlagIndex + 1];
+                if (hivePath.StartsWith("-"))
+                {
+                    Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute path to the custom hive".Bold().Red());
+                    return 1;
+                }
+            }
+
             if (args.Length == 0)
             {
                 telemetryLogger.TrackEvent(commandName + TelemetryConstants.CalledWithNoArgsEventSuffix);
