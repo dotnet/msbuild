@@ -35,8 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsBinDir)Tests\Directory.Build.props" />
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsBinDir)Tests\Directory.Build.targets" />
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.props" />
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
   </ItemGroup>
 
   <Target Name="_CopyDirectoryBuildTestDependencies"

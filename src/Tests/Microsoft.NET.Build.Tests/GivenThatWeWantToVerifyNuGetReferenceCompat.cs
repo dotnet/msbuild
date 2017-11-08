@@ -85,17 +85,20 @@ namespace Microsoft.NET.Build.Tests
 
                 //  Skip creating the NuGet package if not running on Windows; or if the NuGet package already exists
                 //        https://github.com/dotnet/sdk/issues/335
-                if ((RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || dependencyProject.BuildsOnNonWindows) && !dependencyPackageReference.NuGetPackageExists())
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || dependencyProject.BuildsOnNonWindows)
                 {
+                    if (!dependencyPackageReference.NuGetPackageExists())
+                    {
+                        //  Create the NuGet packages
+                        var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, ConstantStringValues.TestDirectoriesNamePrefix, ConstantStringValues.NuGetSharedDirectoryNamePostfix);
+                        var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(Log, relativePath: dependencyProject.Name).Execute().Should().Pass();
+                        var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
+
+                        var dependencyPackCommand = new PackCommand(Log, dependencyProjectDirectory);
+                        var dependencyPackResult = dependencyPackCommand.Execute().Should().Pass();
+                    }
+
                     referencerProject.PackageReferences.Add(dependencyPackageReference);
-
-                    //  Create the NuGet packages
-                    var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, ConstantStringValues.TestDirectoriesNamePrefix, ConstantStringValues.NuGetSharedDirectoryNamePostfix);
-                    var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(Log, relativePath: dependencyProject.Name).Execute().Should().Pass();
-                    var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
-
-                    var dependencyPackCommand = new PackCommand(Log, dependencyProjectDirectory);
-                    var dependencyPackResult = dependencyPackCommand.Execute().Should().Pass();
                 }
             }
 
@@ -119,7 +122,8 @@ namespace Microsoft.NET.Build.Tests
             //  Modify the restore command to refer to the created NuGet packages
             foreach (TestPackageReference packageReference in referencerProject.PackageReferences)
             {
-                referencerRestoreCommand.AddSource(Path.GetDirectoryName(packageReference.NupkgPath));
+                var source = Path.Combine(packageReference.NupkgPath, packageReference.ID, "bin", "Debug");
+                referencerRestoreCommand.AddSource(source);
             }
 
             if (restoreSucceeds)
@@ -155,7 +159,10 @@ namespace Microsoft.NET.Build.Tests
             var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
-            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+
+            var source = Path.Combine(_net461PackageReference.NupkgPath, _net461PackageReference.ID, "bin", "Debug");
+            restoreCommand.AddSource(source);
+
             restoreCommand.Execute().Should().Pass();
 
             var buildCommand = new BuildCommand(

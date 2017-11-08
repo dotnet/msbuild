@@ -602,7 +602,7 @@ namespace Microsoft.NET.Build.Tests
                     .Should()
                     .Pass();
 
-                var relativePathToSln = testProject.Name + identifier + ".sln";
+                var relativePathToSln = Path.GetFileName(testAsset.Path) + ".sln";
 
                 restoreCommand = testAsset.GetRestoreCommand(Log, relativePathToSln);
                 buildCommand = new BuildCommand(Log, testAsset.TestRoot, relativePathToSln);

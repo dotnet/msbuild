@@ -6,13 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Microsoft.NET.TestFramework
 {
     public class TestAssetsManager
     {
         public string ProjectsRoot { get; private set; }
-
 
         private string BuildVersion { get; set; }
 
@@ -37,8 +38,10 @@ namespace Microsoft.NET.TestFramework
             string identifier = "")
         {
             var testProjectDirectory = GetAndValidateTestProjectDirectory(testProjectName);
+
             var testDestinationDirectory =
                 GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
+            TestDestinationDirectories.Add(testDestinationDirectory);
 
             var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, BuildVersion);
             return testAsset;
@@ -51,6 +54,7 @@ namespace Microsoft.NET.TestFramework
         {
             var testDestinationDirectory =
                 GetTestDestinationDirectoryPath(testProject.Name, callingMethod, identifier);
+            TestDestinationDirectories.Add(testDestinationDirectory);
 
             var testAsset = new TestAsset(testDestinationDirectory, BuildVersion);
 
@@ -89,62 +93,37 @@ namespace Microsoft.NET.TestFramework
             return testProjectDirectory;
         }
 
-        private string GetTestDestinationDirectoryPath(
+        public static string GetTestDestinationDirectoryPath(
             string testProjectName,
             string callingMethod,
             string identifier)
         {
-#if NET451
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-#else
-            string baseDirectory = AppContext.BaseDirectory;
-#endif
-            string ret;
-            if (testProjectName == callingMethod)
+            string baseDirectory = TestContext.Current.TestExecutionDirectory;
+            var directoryName = new StringBuilder(callingMethod).Append(identifier);
+
+            if (testProjectName != callingMethod)
             {
-                //  If testProjectName and callingMethod are the same, don't duplicate it in the test path
-                ret = Path.Combine(baseDirectory, callingMethod + identifier);
-            }
-            else
-            {
-                ret = Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
+                directoryName = directoryName.Append(testProjectName);
             }
 
-            TestDestinationDirectories.Add(ret);
-
-            return ret;
-        }
-
-        const int MAX_PATH = 260;
-
-        //  Drop root for signed build is 73 characters, then add 6 for "\Tests"
-        const int MAX_TESTROOT_LENGTH = 79;
-
-        //  1 space subtracted for path separator between base path and relative file path
-        const int AVAILABLE_TEST_PATH_LENGTH = MAX_PATH - MAX_TESTROOT_LENGTH - 1;
-
-        void ValidateDestinationDirectory(string path)
-        {
-            var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-            foreach (var file in files)
+            // We need to ensure the directory name isn't over 24 characters in length
+            if (directoryName.Length > 24)
             {
-                string relativeFilePath = file.Replace(AppContext.BaseDirectory, "")
-                    //  Remove path separator
-                    .Substring(1);
-
-                if (relativeFilePath.Length > AVAILABLE_TEST_PATH_LENGTH)
+                using (var sha256 = SHA256.Create())
                 {
-                    throw new PathTooLongException("Test path may be too long: " + relativeFilePath);
+                    var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(directoryName.ToString()));
+
+                    directoryName = directoryName.Remove(13, directoryName.Length - 13)
+                                                 .Append("---");
+
+                    directoryName = directoryName.AppendFormat("{0:X2}", hash[0])
+                                                 .AppendFormat("{0:X2}", hash[1])
+                                                 .AppendFormat("{0:X2}", hash[2])
+                                                 .AppendFormat("{0:X2}", hash[3]);
                 }
             }
-        }
 
-        public void ValidateDestinationDirectories()
-        {
-            foreach (var path in TestDestinationDirectories)
-            {
-                ValidateDestinationDirectory(path);
-            }
+            return Path.Combine(baseDirectory, directoryName.ToString());
         }
     }
 }

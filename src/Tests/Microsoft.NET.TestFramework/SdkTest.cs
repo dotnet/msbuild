@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework
 {
-    public abstract class SdkTest : IDisposable
+    public abstract class SdkTest
     {
         protected TestAssetsManager _testAssetsManager = new TestAssetsManager();
 
@@ -19,16 +19,6 @@ namespace Microsoft.NET.TestFramework
         protected SdkTest(ITestOutputHelper log)
         {
             Log = log;
-        }
-        public void Dispose()
-        {
-            //  Skip path length validation if running on full framework MSBuild.  We do the path length validation
-            //  to avoid getting path to long errors when copying the test drop in our build infrastructure.  However,
-            //  those builds are only built with .NET Core MSBuild running on Windows
-            if (!UsingFullFrameworkMSBuild && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                _testAssetsManager.ValidateDestinationDirectories();
-            }
         }
     }
 }
