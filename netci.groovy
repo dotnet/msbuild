@@ -54,15 +54,14 @@ osList.each { os ->
         }
 
         def archiveSettings = new ArchivalSettings()
-        archiveSettings.addFiles("bin/**/*")
-        archiveSettings.addFiles("bin/log/**/*")
-        archiveSettings.excludeFiles("bin/obj/*")
+        archiveSettings.addFiles("artifacts/$config/log/*")
+		archiveSettings.addFiles("artifacts/$config/TestResults/*")
         archiveSettings.setFailIfNothingArchived()
         archiveSettings.setArchiveOnFailure()
-        Utilities.addArchival(newJob, archiveSettings)
         Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
         Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-        Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/*TestResults.xml", false)
-        Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
+		Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
+        Utilities.addXUnitDotNETResults(newJob, "artifacts/$config/TestResults/*.xml", false)
+		Utilities.addArchival(newJob, archiveSettings)
     }
 }
