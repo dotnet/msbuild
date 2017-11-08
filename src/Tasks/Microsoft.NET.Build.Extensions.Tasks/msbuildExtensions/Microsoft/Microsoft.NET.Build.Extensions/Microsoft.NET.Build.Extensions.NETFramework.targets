@@ -76,7 +76,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
     
     <!-- if any reference depends on netstandard and it is not inbox, add references and implementation assemblies for netstandard2.0  -->
-    <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true' AND '$(_TargetFrameworkVersionWithoutV)' != '4.7.1'">
+    <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true' AND '$(_TargetFrameworkVersionWithoutV)' &lt; '4.7.1'">
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
                                           Include="$(MSBuildThisFileDirectory)net47\lib\*.dll" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
