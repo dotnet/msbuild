@@ -67,9 +67,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!--
       .NET 4.7.1 has support for .NET Standard 2.0 built-in, so most of the facades aren't necessary.  However, the assembly versions of a few set of assemblies
-      do not yet match the ones shipped by the support package.  This means that the versions from the contract NuGet packages would be preferred to the in-box 
-      version (which is newer).  So if there is a dependency on netstandard.dll, we use the 4.2.0.0 version of the DLLs from the .NET Standard 2.0 "facades".
-      (Though these DLLs are not actually facades, they contain the implementation.)
+      do not yet match the ones shipped in the support package for .NET Standard 2.0 on .NET 4.7 and below. This means that .NET 4.7 or lower libraries might have
+      references to higher versions of these assemblies than are available in-box in .NET 4.7, leading to assembly loading errors.
       -->
     <ItemGroup Condition="'$(_TargetFrameworkVersionWithoutV)' == '4.7.1'">
       <_NETStandardLibraryNETFrameworkLib Include="$(MSBuildThisFileDirectory)\net471\lib\*.dll" Condition="'$(DependsOnNETStandard)' == 'true'"/>

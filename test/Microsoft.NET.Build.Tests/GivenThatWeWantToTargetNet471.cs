@@ -160,6 +160,7 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.exe",
                 $"{testProject.Name}.pdb",
                 
+                // These two will be includded because Netstandard1.x has a higher version of these two contracts than net4.7.1 which is why they will be added.
                 "System.Net.Http.dll",
                 "System.IO.Compression.dll",
 
@@ -212,12 +213,12 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{netStandardProject.Name}.dll",
                 $"{netStandardProject.Name}.pdb",
-                "System.Diagnostics.DiagnosticSource.dll" // This library will get pulled in as part of the closure of the ns16 project and will be copyied because it's not inbox.
+                "System.Diagnostics.DiagnosticSource.dll" //  This is an implementation dependency of the System.Net.Http package, which won't get conflict resolved out
             }.Concat(net471Shims));
         }
 
         [Fact]
-        public void It_does_not_include_shims_when_app_references_471_library()
+        public void It_does_not_include_shims_when_app_references_471_library_and_461_library()
         {
             //  https://github.com/dotnet/sdk/issues/1625
             if (!Net471ReferenceAssembliesAreInstalled())
@@ -239,9 +240,17 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true
             };
 
-            testProject.ReferencedProjects.Add(net471library);
+            var net461library = new TestProject()
+            {
+                Name = "Net461_Library",
+                TargetFrameworks = "net461",
+                IsSdkProject = true
+            };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_net471")
+            testProject.ReferencedProjects.Add(net471library);
+            testProject.ReferencedProjects.Add(net461library);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_net471_net461")
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -260,11 +269,15 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{net471library.Name}.dll",
                 $"{net471library.Name}.pdb",
+                $"{net461library.Name}.dll",
+                $"{net461library.Name}.pdb",
             });
         }
 
         static bool Net471ReferenceAssembliesAreInstalled()
         {
+            // The version of the MSBuild libraries we are referencing doesn't have an enum value for .NET 4.7.1. So we use the MSBuild API to find 
+            // the path to the 4.6.1 reference assemblies, and locate the 4.7.1 reference assemblies relative to that.
             var net461referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version461);
             if (net461referenceAssemblies == null)
             {
