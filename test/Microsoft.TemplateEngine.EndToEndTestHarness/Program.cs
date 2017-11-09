@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -6,6 +6,10 @@ using System.Reflection;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Edge.TemplateUpdates;
+using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
+using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
 using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json.Linq;
 
@@ -197,7 +201,14 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             catch
             { }
 
-            return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, new[] { "dotnetcli" });
+            var builtIns = new AssemblyComponentCatalog(new[]
+            {
+                typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,
+                typeof(ConditionalConfig).GetTypeInfo().Assembly,
+                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly
+            });
+
+            return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, new[] { "dotnetcli" });
         }
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
