@@ -14,8 +14,8 @@
     <ChecksumCloudDropAccountName Condition="'$(ChecksumCloudDropAccountName)' == ''">dotnetclichecksums</ChecksumCloudDropAccountName>
     <TransportFeedContainerName>$(TRANSPORTFEED_STORAGE_CONTAINER)</TransportFeedContainerName>
     <TransportFeedContainerName Condition="'$(TransportFeedContainerName)' == ''">dotnet-core</TransportFeedContainerName>
+    <TransportFeedExpectedURL>$(TRANSPORTFEED_EXPECTED_URL)</TransportFeedExpectedURL>
+    <TransportFeedExpectedURL Condition="'$(TransportFeedExpectedURL)' == ''">https://dotnetfeed.blob.core.windows.net/$(TransportFeedContainerName)/index.json</TransportFeedExpectedURL>
     <TransportFeedCloudDropAccessToken>$(TRANSPORTFEED_STORAGE_KEY)</TransportFeedCloudDropAccessToken>
-    <TransportFeedCloudDropAccountName>$(TRANSPORTFEED_STORAGE_ACCOUNT)</TransportFeedCloudDropAccountName>
-    <TransportFeedCloudDropAccountName Condition="'$(TransportFeedCloudDropAccountName)' == ''">dotnetfeed</TransportFeedCloudDropAccountName>
   </PropertyGroup>
 </Project>

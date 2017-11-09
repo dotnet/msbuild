@@ -50,5 +50,6 @@
   <PropertyGroup>
     <VersionToolsVersion>1.0.27-prerelease-01723-01</VersionToolsVersion>
     <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
+    <BuildTasksFeedToolVersion>1.0.0-prerelease-02203-01</BuildTasksFeedToolVersion>
   </PropertyGroup>
 </Project>
