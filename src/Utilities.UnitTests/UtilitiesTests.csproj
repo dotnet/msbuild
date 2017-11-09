@@ -18,6 +18,7 @@
     <PackageReference Include="System.Net.Primitives " Version="4.3.0" />
     <PackageReference Include="System.Threading.Overlapped" Version="4.3.0" />
     <PackageReference Include="System.Security.Principal" Version="4.3.0" />
+    <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
 
     <!-- TODO: get this from a package -->
     <Reference Include="..\..\tools\net45\roslyn\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(NetCoreBuild)' != 'true'" />
@@ -43,6 +44,7 @@
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\StringExtensions.cs"/>
     <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs">
       <Link>NativeMethods.cs</Link>
     </Compile>

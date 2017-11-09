@@ -14,6 +14,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
 
     <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.0-prerelease-00629-09" />
+    <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
 
     <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
     <ProjectReference Include="..\Framework\Framework.csproj" />
@@ -60,7 +61,7 @@
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\RunnerUtilities.cs">
+    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">

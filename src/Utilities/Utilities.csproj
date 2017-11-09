@@ -19,6 +19,9 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.0.1" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
     <PackageReference Include="System.Collections.NonGeneric" Version="4.0.1" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
 
     <Compile Condition="$(TargetFramework.StartsWith('netstandard'))" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
@@ -85,6 +88,9 @@
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>ExceptionHandling.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\EscapingStringExtensions\EscapingStringExtensions.cs">
+      <Link>EscapingStringExtensions\EscapingStringExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -103,6 +109,9 @@
     </Compile>
     <Compile Include="..\Shared\HybridDictionary.cs">
       <Link>Collections\HybridDictionary.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <Link>IConstrainedEqualityComparer.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>
@@ -132,9 +141,6 @@
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
       <Link>Collections\ReadOnlyEmptyDictionary.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyList.cs">
-      <Link>Collections\ReadOnlyEmptyList.cs</Link>
     </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>RegistryDelegates.cs</Link>
@@ -170,7 +176,7 @@
       <Link>VisualStudioLocationHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Traits.cs">
-      <Link>Traits</Link>
+      <Link>SharedTraits.cs</Link>
     </Compile>
   </ItemGroup>
 

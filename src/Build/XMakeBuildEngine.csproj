@@ -37,6 +37,7 @@
       <Version Condition="'$(TargetFramework)' == 'net46'">4.5.24.0</Version>
       <Version Condition="'$(TargetFramework)' != 'net46'">4.6.0</Version>
     </PackageReference>
+    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.0.10" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.0.1" />
     <PackageReference Include="System.Xml.XPath.XmlDocument" Version="4.0.1" />
@@ -47,7 +48,12 @@
 
   </ItemGroup>
 
-    <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
+  <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
+       The code here was generally copied from the .NET Framework reference source and
+       modified to compile for .NET Core.
+       
+       After retargeting to .NET Standard 2.0, many of these can probably be removed -->
+  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
     <Compile Include="..\Shared\Compat\Base64Encoder.cs">
       <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
     </Compile>
@@ -127,6 +133,9 @@
     <Compile Include="..\Shared\HybridDictionary.cs">
       <Link>Collections\HybridDictionary.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <Link>IConstrainedEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\NGen.cs">
       <Link>SharedUtilities\NGen.cs</Link>
     </Compile>
@@ -136,6 +145,9 @@
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\StringExtensions.cs">
+      <Link>SharedUtilities\StringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
@@ -359,11 +371,8 @@
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
     <Compile Include="Collections\IValued.cs" />
-    <Compile Include="Collections\OrdinalKeyedComparer.cs" />
-    <Compile Include="Collections\OrdinalIgnoreCaseKeyedComparer.cs" />
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
-    <Compile Include="Collections\ReadOnlyConvertingCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
     <Compile Include="Collections\Triple.cs" />
     <!-- ######################## -->
@@ -525,6 +534,7 @@
     <Compile Include="Evaluation\ProjectParser.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
     <Compile Include="Evaluation\ProjectStringCache.cs" />
+    <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
     <Compile Include="Evaluation\Evaluator.cs" />
@@ -618,12 +628,14 @@
     <Compile Include="Utilities\EngineFileUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Utilities\FileSpecMatchTester.cs" />
     <Compile Include="Utilities\RegistryKeyWrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Utilities\Utilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -634,9 +646,6 @@
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
       <Link>SharedUtilities\ReadOnlyEmptyDictionary.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyList.cs">
-      <Link>SharedUtilities\ReadOnlyEmptyList.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
       <Link>SharedUtilities\AssemblyNameExtension.cs</Link>
