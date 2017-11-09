@@ -135,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("-n|--name", LocalizableStrings.NameOfOutput, Accept.ExactlyOneArgument()),
                     Create.Option("-o|--output", LocalizableStrings.OutputPath, Accept.ExactlyOneArgument()),
                     Create.Option("-i|--install", LocalizableStrings.InstallHelp, Accept.OneOrMoreArguments()),
-                    Create.Option("-u|--uninstall", LocalizableStrings.UninstallHelp, Accept.OneOrMoreArguments()),
+                    Create.Option("-u|--uninstall", LocalizableStrings.UninstallHelp, Accept.ZeroOrMoreArguments()),
                     Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
                     Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
                     Create.Option("-lang|--language", LocalizableStrings.LanguageParameter,
@@ -195,6 +195,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--debug:emit-timings", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:emit-telemetry", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:custom-hive", string.Empty, Accept.ExactlyOneArgument()),
+                    Create.Option("--debug:version", string.Empty, Accept.NoArguments()),
 
                     Create.Option("--trace:authoring", string.Empty, Accept.NoArguments()),
                     Create.Option("--trace:install", string.Empty, Accept.NoArguments()),

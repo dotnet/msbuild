@@ -13,6 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
     public class MockNupkgUpdater : IUpdater
     {
         // a mapping from install descriptor identifiers to the update that should be emitted.
+        [ThreadStatic]
         private static IReadOnlyDictionary<string, IUpdateUnitDescriptor> _mockUpdates;
 
         // Pass in the update descriptors that should be emitted.

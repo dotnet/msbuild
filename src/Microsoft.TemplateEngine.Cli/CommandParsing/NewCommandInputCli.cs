@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -121,7 +122,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             _parseResult = parser.Parse(argsWithCommand.ToArray());
             _templateParamCanonicalToVariantMap = null;
 
-            IList<string> templateNameList = _parseResult.GetArgumentListAtPath(new[] { _commandName }).ToList();
+            IReadOnlyList<string> templateNameList = _parseResult.GetArgumentListAtPath(new[] { _commandName })?.ToList() ?? Empty<string>.List.Value;
             if ((templateNameList.Count > 0) &&
                 !templateNameList[0].StartsWith("-", StringComparison.Ordinal)
                 && (_parseResult.Tokens.Count >= 2)
@@ -213,11 +214,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string BaselineName => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "baseline" });
 
-        public IList<string> ExtraArgsFileNames => _parseResult.GetArgumentListAtPath(new[] { _commandName, "extra-args" }).ToList();
+        public IList<string> ExtraArgsFileNames => _parseResult.GetArgumentListAtPath(new[] { _commandName, "extra-args" })?.ToList();
 
-        public IList<string> ToInstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "install" }).ToList();
+        public IList<string> ToInstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "install" })?.ToList();
 
-        public IList<string> ToUninstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "uninstall" }).ToList();
+        public IList<string> ToUninstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "uninstall" })?.ToList();
 
         public bool IsForceFlagSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "force" });
 

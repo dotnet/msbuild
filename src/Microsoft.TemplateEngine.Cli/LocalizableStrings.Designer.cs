@@ -537,6 +537,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  Commit Hash: {0}.
+        /// </summary>
+        public static string CommitHash {
+            get {
+                return ResourceManager.GetString("CommitHash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Configured Value: {0}.
         /// </summary>
         public static string ConfiguredValue {
@@ -733,6 +742,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string Id {
             get {
                 return ResourceManager.GetString("Id", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currently installed items:.
+        /// </summary>
+        public static string InstalledItems {
+            get {
+                return ResourceManager.GetString("InstalledItems", resourceCulture);
             }
         }
         
@@ -1191,6 +1209,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit&apos; flag.
+        /// </summary>
+        public static string SettingsReadError {
+            get {
+                return ResourceManager.GetString("SettingsReadError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Short Name.
         /// </summary>
         public static string ShortName {
@@ -1394,6 +1421,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string ValueSpecifiedForValuelessParameter {
             get {
                 return ResourceManager.GetString("ValueSpecifiedForValuelessParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  Version:             {0}.
+        /// </summary>
+        public static string Version {
+            get {
+                return ResourceManager.GetString("Version", resourceCulture);
             }
         }
         

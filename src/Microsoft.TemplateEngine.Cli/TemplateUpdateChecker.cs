@@ -84,6 +84,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool TryGetUpdaterForDescriptorFactoryId(Guid factoryId, out IUpdater updater)
         {
+            EnsureFactoryToUpdaterMapping();
+
             return _factoryIdToUpdaterMap.TryGetValue(factoryId, out updater);
         }
 

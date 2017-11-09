@@ -81,6 +81,12 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
         {
+            if (args.Any(x => string.Equals(x, "--debug:version", StringComparison.Ordinal)))
+            {
+                ShowVersion();
+                return 0;
+            }
+
             if (args.Any(x => string.Equals(x, "--debug:attach", StringComparison.Ordinal)))
             {
                 Console.ReadLine();
@@ -317,16 +323,32 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
             {
-                Installer.Uninstall(_commandInput.ToInstallList.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]));
+                Installer.InstallPackages(_commandInput.ToInstallList.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]));
             }
 
-            if (_commandInput.ToUninstallList != null && _commandInput.ToUninstallList.Count > 0 && _commandInput.ToUninstallList[0] != null)
+            if (_commandInput.ToUninstallList != null)
             {
-                IEnumerable<string> failures = Installer.Uninstall(_commandInput.ToUninstallList);
-
-                foreach (string failure in failures)
+                if (_commandInput.ToUninstallList.Count > 0 && _commandInput.ToUninstallList[0] != null)
                 {
-                    Console.WriteLine(LocalizableStrings.CouldntUninstall, failure);
+                    IEnumerable<string> failures = Installer.Uninstall(_commandInput.ToUninstallList);
+
+                    foreach (string failure in failures)
+                    {
+                        Console.WriteLine(LocalizableStrings.CouldntUninstall, failure);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(LocalizableStrings.CommandDescription);
+                    Console.WriteLine();
+                    Console.WriteLine(LocalizableStrings.InstalledItems);
+
+                    foreach (string value in _settingsLoader.InstallUnitDescriptorCache.InstalledItems.Values)
+                    {
+                        Console.WriteLine($" {value}");
+                    }
+
+                    return CreationResultStatus.Success;
                 }
             }
 
@@ -534,9 +556,22 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.InvalidParamValues;
             }
 
-            Initialize();
+            if (!Initialize())
+            {
+                return CreationResultStatus.Success;
+            }
+
             bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
-            _settingsLoader.RebuildCacheFromSettingsIfNotCurrent(forceCacheRebuild);
+            try
+            {
+                _settingsLoader.RebuildCacheFromSettingsIfNotCurrent(forceCacheRebuild);
+            }
+            catch (EngineInitializationException eiex)
+            {
+                Reporter.Error.WriteLine(eiex.Message.Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.SettingsReadError);
+                return CreationResultStatus.CreateFailed;
+            }
 
             try
             {
@@ -671,6 +706,14 @@ namespace Microsoft.TemplateEngine.Cli
                 {LocalizableStrings.Type, x => x.GetType().FullName},
                 {LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
+        }
+
+        private static void ShowVersion()
+        {
+            Reporter.Output.WriteLine(LocalizableStrings.CommandDescription);
+            Reporter.Output.WriteLine();
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.Version, GitInfo.PackageVersion));
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CommitHash, GitInfo.CommitHash));
         }
 
         private static bool ValidateLocaleFormat(string localeToCheck)
