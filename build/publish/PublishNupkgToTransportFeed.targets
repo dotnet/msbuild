@@ -4,7 +4,7 @@
     <BuildTasksFeedToolTargetsFileName>"$(NuGetPackagesDir)/microsoft.dotnet.build.tasks.feed/$(BuildTasksFeedToolVersion)/build/Microsoft.DotNet.Build.Tasks.Feed.targets"</BuildTasksFeedToolTargetsFileName>
   </PropertyGroup>
 
-  <Import Condition="Exists('$(BuildTasksFeedToolTargetsFileName)')" Project="$(BuildTasksFeedToolTargetsFileName)" />
+  <Import Condition="'$(GeneratePropsFile)' != 'true'" Project="$(BuildTasksFeedToolTargetsFileName)" />
 
   <ItemGroup>
     <NupkgsForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.Cli.Utils.*.nupkg" />
@@ -12,12 +12,13 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <ExpectedFeedUrl>https://dotnetfeed.blob.core.windows.net/$(TransportFeedContainerName)/index.json</ExpectedFeedUrl>
+    <ExpectedFeedUrl>$(TransportFeedExpectedURL)</ExpectedFeedUrl>
   </PropertyGroup>
 
   <Target Name="PublishNupkgToTransportFeed" Condition=" '$(PUBLISH_NUPKG_TO_TRANSPORT_FEED)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
     <Error Condition="'$(TransportFeedCloudDropAccessToken)' == ''" Text="Missing property TransportFeedCloudDropAccessToken." />
-
+    <Error Condition="'$(TransportFeedExpectedURL)' == ''" Text="Missing property TransportFeedExpectedURL." />
+    
     <Message Text="Publish NuPkgs to Transport feed started" />
     <PushToBlobFeed AccountKey="$(TransportFeedCloudDropAccessToken)"
                 ExpectedFeedUrl="$(ExpectedFeedUrl)"
