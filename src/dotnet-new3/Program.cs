@@ -10,8 +10,8 @@ using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
-using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Macros;
 using Microsoft.TemplateEngine.Utils;
+using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 
 [assembly:InternalsVisibleTo("dotnet-new3.UnitTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100f33a29044fa9d740c9b3213a93e57c84b472c84e0b8a0e1ae48e67a9f8f6de9d5f7f3d52ac23e48ac51801f1dc950abe901da34d2a9e3baadb141a17c77ef3c565dd5ee5054b91cf63bb3c6ab83f72ab3aafe93d0fc3c2348b764fafb0b1c0733de51459aeab46580384bf9d74c4e28164b7cde247f891ba07891c9d872ad2bb")]
 
@@ -27,10 +27,25 @@ namespace dotnet_new3
         {
             bool emitTimings = args.Any(x => string.Equals(x, "--debug:emit-timings", StringComparison.OrdinalIgnoreCase));
             bool debugTelemetry = args.Any(x => string.Equals(x, "--debug:emit-telemetry", StringComparison.OrdinalIgnoreCase));
-            return New3Command.Run(CommandName, CreateHost(emitTimings), new TelemetryLogger(null, debugTelemetry), FirstRun, args);
+    
+            DefaultTemplateEngineHost host = CreateHost(emitTimings);
+
+            bool debugAuthoring = args.Any(x => string.Equals(x, "--trace:authoring", StringComparison.OrdinalIgnoreCase));
+            bool debugInstall = args.Any(x => string.Equals(x, "--trace:install", StringComparison.OrdinalIgnoreCase));
+            if (debugAuthoring)
+            {
+                AddAuthoringLogger(host);
+                AddInstallLogger(host);
+            }
+            else if (debugInstall)
+            {
+                AddInstallLogger(host);
+            }
+
+            return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), FirstRun, args);
         }
 
-        private static ITemplateEngineHost CreateHost(bool emitTimings)
+        private static DefaultTemplateEngineHost CreateHost(bool emitTimings)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -51,7 +66,8 @@ namespace dotnet_new3
             var builtIns = new AssemblyComponentCatalog(new[]
             {
                 typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,
-                typeof(ConditionalConfig).GetTypeInfo().Assembly
+                typeof(ConditionalConfig).GetTypeInfo().Assembly,
+                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly
             });
 
             DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, new[] { "dotnetcli" });
@@ -65,7 +81,26 @@ namespace dotnet_new3
                 };
             }
 
+
             return host;
+        }
+
+        private static void AddAuthoringLogger(DefaultTemplateEngineHost host)
+        {
+            Action<string, string[]> authoringLogger = (message, additionalInfo) =>
+            {
+                Console.WriteLine(string.Format("Authoring: {0}", message));
+            };
+            host.RegisterDiagnosticLogger("Authoring", authoringLogger);
+        }
+
+        private static void AddInstallLogger(DefaultTemplateEngineHost host)
+        {
+            Action<string, string[]> installLogger = (message, additionalInfo) =>
+            {
+                Console.WriteLine(string.Format("Install: {0}", message));
+            };
+            host.RegisterDiagnosticLogger("Install", installLogger);
         }
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
@@ -80,35 +115,28 @@ namespace dotnet_new3
                 Environment.SetEnvironmentVariable("DN3", path);
             }
 
-            string[] packageList;
+            List<string> toInstallList = new List<string>();
             Paths paths = new Paths(environmentSettings);
 
             if (paths.FileExists(paths.Global.DefaultInstallPackageList))
             {
-                packageList = paths.ReadAllText(paths.Global.DefaultInstallPackageList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (packageList.Length > 0)
-                {
-                    for (int i = 0; i < packageList.Length; ++i)
-                    {
-                        packageList[i] = packageList[i].Replace('\\', Path.DirectorySeparatorChar);
-                    }
-
-                    installer.InstallPackages(packageList);
-                }
+                toInstallList.AddRange(paths.ReadAllText(paths.Global.DefaultInstallPackageList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
             }
 
             if (paths.FileExists(paths.Global.DefaultInstallTemplateList))
             {
-                packageList = paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (packageList.Length > 0)
-                {
-                    for (int i = 0; i < packageList.Length; ++i)
-                    {
-                        packageList[i] = packageList[i].Replace('\\', Path.DirectorySeparatorChar);
-                    }
+                toInstallList.AddRange(paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            }
 
-                    installer.InstallPackages(packageList);
+            if (toInstallList.Count > 0)
+            {
+                for (int i = 0; i < toInstallList.Count; i++)
+                {
+                    toInstallList[i] = toInstallList[i].Replace("\r", "")
+                                                        .Replace('\\', Path.DirectorySeparatorChar);
                 }
+
+                installer.InstallPackages(toInstallList);
             }
         }
     }

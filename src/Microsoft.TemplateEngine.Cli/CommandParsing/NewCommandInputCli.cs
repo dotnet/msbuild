@@ -201,6 +201,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
+        public string CommandName => _commandName;
+
         public string TemplateName => _templateNameArg;
 
         public string Alias => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "alias" });
@@ -239,6 +241,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool SkipUpdateCheck => _parseResult.HasAppliedOption(new[] { _commandName, "skip-update-check" });
 
+        public bool CheckForUpdates => _parseResult.HasAppliedOption(new[] { _commandName, "update" });
+
+        public bool CheckForUpdatesNoPrompt => _parseResult.HasAppliedOption(new[] { _commandName, "update-no-prompt" });
+
         public string AllowScriptsToRun
         {
             get
@@ -257,7 +263,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return _parseResult.HasAppliedOption(new[] { _commandName, flag });
         }
 
-        public IReadOnlyDictionary<string, string> AllTemplateParams
+        public IReadOnlyDictionary<string, string> InputTemplateParams
         {
             get
             {
@@ -357,12 +363,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool TemplateParamHasValue(string paramName)
         {
-            return AllTemplateParams.ContainsKey(paramName);
+            return InputTemplateParams.ContainsKey(paramName);
         }
 
         public string TemplateParamValue(string paramName)
         {
-            AllTemplateParams.TryGetValue(paramName, out string value);
+            InputTemplateParams.TryGetValue(paramName, out string value);
             return value;
         }
 

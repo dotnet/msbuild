@@ -19,12 +19,18 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         {
             _rawParameterInputs = rawParameterInputs;
 
-            AllTemplateParams = new Dictionary<string, string>();
+            InputTemplateParams = new Dictionary<string, string>();
             RemainingParameters = new Dictionary<string, IList<string>>();
             RemainingArguments = new List<string>();
+            _allParametersForTemplate = new List<string>();
         }
 
+        // a list of all the parameters defined by the template
+        private IReadOnlyList<string> _allParametersForTemplate;
+
         private IReadOnlyDictionary<string, string> _rawParameterInputs;
+
+        public string CommandName => "MockNew";
 
         public string TemplateName { get; set; }
 
@@ -66,9 +72,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool SkipUpdateCheck { get; set; }
 
+        public bool CheckForUpdates { get; set; }
+
+        public bool CheckForUpdatesNoPrompt { get; set; }
+
         public string AllowScriptsToRun { get; set; }
 
-        public IReadOnlyDictionary<string, string> AllTemplateParams { get; set; }
+        public IReadOnlyDictionary<string, string> InputTemplateParams { get; set; }
 
         public List<string> RemainingArguments { get; set; }
 
@@ -119,9 +129,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
                 }
             }
 
-            AllTemplateParams = templateParamValues;
+            InputTemplateParams = templateParamValues;
             RemainingParameters = remainingParams;
             RemainingArguments = remainingParams.Keys.ToList();
+
+            _allParametersForTemplate = templateInfo.Parameters.Select(x => x.Name).ToList();
         }
 
         public void ResetArgs(params string[] args)
@@ -145,11 +157,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         }
 
         // Note: This doesn't really deal with variants.
-        // If the input "variant" is in the inputs, return true with the canonical set to the variant.
+        // If the input "variant" is a parameter for the template, return true with the canonical set to the variant.
         // Otherwise return false with the canonical as null.
         public bool TryGetCanonicalNameForVariant(string variant, out string canonical)
         {
-            if (_rawParameterInputs.ContainsKey(variant))
+            if (_allParametersForTemplate.Contains(variant))
             {
                 canonical = variant;
                 return true;

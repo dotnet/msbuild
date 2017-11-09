@@ -1,11 +1,7 @@
-using Microsoft.DotNet.Cli.CommandLine;
+using System.Collections.Generic;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.Utils;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -35,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["foo"]);
             Assert.Equal("--foo", assignmentCoordinator.LongNameAssignments["bar"]);
             Assert.Equal("-fo", assignmentCoordinator.ShortNameAssignments["bar"]); // the short name is based on the long name override if it exists
-            Assert.Equal(0, assignmentCoordinator.InvalidParams.Count);
+            Assert.Empty(assignmentCoordinator.InvalidParams);
 
         }
 
@@ -61,7 +57,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal("-fo", assignmentCoordinator.ShortNameAssignments["foo"]);
             Assert.Equal("--bar", assignmentCoordinator.LongNameAssignments["bar"]);
             Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["bar"]);
-            Assert.Equal(0, assignmentCoordinator.InvalidParams.Count);
+            Assert.Empty(assignmentCoordinator.InvalidParams);
         }
 
         [Fact(DisplayName = nameof(ShortNameExcludedWithEmptyStringOverride))]
@@ -86,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["foo"]);
             Assert.Equal("--bar", assignmentCoordinator.LongNameAssignments["bar"]);
             Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("bar", out string placeholder));
-            Assert.Equal(0, assignmentCoordinator.InvalidParams.Count);
+            Assert.Empty(assignmentCoordinator.InvalidParams);
         }
 
         [Fact(DisplayName = nameof(ParameterNameCannotContainColon))]
@@ -105,8 +101,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Assert.Equal(0, assignmentCoordinator.LongNameAssignments.Count);
             Assert.Equal(0, assignmentCoordinator.ShortNameAssignments.Count);
-            Assert.Equal(1, assignmentCoordinator.InvalidParams.Count);
-            Assert.True(assignmentCoordinator.InvalidParams.Contains("foo:bar"));
+            Assert.Single(assignmentCoordinator.InvalidParams);
+            Assert.Contains("foo:bar", assignmentCoordinator.InvalidParams);
         }
 
         [Fact(DisplayName = nameof(ShortNameGetPrependedPColonIfNeeded))]
@@ -242,7 +238,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal("--no-tools", assignmentCoordinator.LongNameAssignments["NoTools"]);
             Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("SkipRestore", out placeholder));
             Assert.Equal("--no-restore", assignmentCoordinator.LongNameAssignments["skipRestore"]);
-            Assert.Equal(0, assignmentCoordinator.InvalidParams.Count);
+            Assert.Empty(assignmentCoordinator.InvalidParams);
         }
 
         // fills in enough of the parameter info for alias assignment

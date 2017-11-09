@@ -1,6 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -11,6 +12,7 @@ namespace Microsoft.TemplateEngine.Cli
         private static readonly string IsHiddenKey = "isHidden";
         private static readonly string LongNameKey = "longName";
         private static readonly string ShortNameKey = "shortName";
+        private static readonly string AlwaysShowKey = "alwaysShow";
 
         public static HostSpecificTemplateData Default { get; } = new HostSpecificTemplateData();
 
@@ -44,6 +46,25 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 return hiddenNames;
+            }
+        }
+
+        public HashSet<string> ParametersToAlwaysShow
+        {
+            get
+            {
+                HashSet<string> parametersToAlwaysShow = new HashSet<string>(StringComparer.Ordinal);
+                foreach (KeyValuePair<string, Dictionary<string, string>> paramInfo in SymbolInfo)
+                {
+                    if(paramInfo.Value.TryGetValue(AlwaysShowKey, out string alwaysShowValue)
+                        && bool.TryParse(alwaysShowValue, out bool alwaysShowBoolValue)
+                        && alwaysShowBoolValue)
+                    {
+                        parametersToAlwaysShow.Add(paramInfo.Key);
+                    }
+                }
+
+                return parametersToAlwaysShow;
             }
         }
 

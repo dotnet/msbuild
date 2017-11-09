@@ -17,14 +17,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     // Implementation notes:
     // If a test is going to hit the secondary matching in the resolver, make sure to initialize the Tags & CacheParameters,
     //  otherwise an exception will be thrown in TemplateInfo.Parameters getter
+    //  (just about every situation will get to the secondary matching)
     // MockNewCommandInput doesn't support everything in the interface, just enough for this type of testing.
     public class TemplateListResolverTests
     {
         [Fact(DisplayName = nameof(TestFindHighestPrecedenceTemplateIfAllSameGroupIdentity))]
         public void TestFindHighestPrecedenceTemplateIfAllSameGroupIdentity()
         {
-            List<IFilteredTemplateInfo> templatesToCheck = new List<IFilteredTemplateInfo>();
-            templatesToCheck.Add(new FilteredTemplateInfo(
+            List<ITemplateMatchInfo> templatesToCheck = new List<ITemplateMatchInfo>();
+            templatesToCheck.Add(new TemplateMatchInfo(
                 new TemplateInfo()
                 {
                     Precedence = 10,
@@ -33,7 +34,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                     GroupIdentity = "TestGroup"
                 }
                 , null));
-            templatesToCheck.Add(new FilteredTemplateInfo(
+            templatesToCheck.Add(new TemplateMatchInfo(
                 new TemplateInfo()
                 {
                     Precedence = 20,
@@ -42,17 +43,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                     GroupIdentity = "TestGroup"
                 }
                 , null));
-            templatesToCheck.Add(new FilteredTemplateInfo(
+            templatesToCheck.Add(new TemplateMatchInfo(
                 new TemplateInfo()
                 {
                     Precedence = 0,
                     Name = "Template3",
                     Identity = "Template3",
                     GroupIdentity = "TestGroup"
-                }
-                , null));
+                }));
 
-            IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
+            ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
             Assert.NotNull(highestPrecedenceTemplate);
             Assert.Equal("Template2", highestPrecedenceTemplate.Info.Identity);
             Assert.Equal(20, highestPrecedenceTemplate.Info.Precedence);
@@ -61,8 +61,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(TestFindHighestPrecedenceTemplateIfAllSameGroupIdentity_ReturnsNullIfGroupsAreDifferent))]
         public void TestFindHighestPrecedenceTemplateIfAllSameGroupIdentity_ReturnsNullIfGroupsAreDifferent()
         {
-            List<IFilteredTemplateInfo> templatesToCheck = new List<IFilteredTemplateInfo>();
-            templatesToCheck.Add(new FilteredTemplateInfo(
+            List<ITemplateMatchInfo> templatesToCheck = new List<ITemplateMatchInfo>();
+            templatesToCheck.Add(new TemplateMatchInfo(
                 new TemplateInfo()
                 {
                     Precedence = 10,
@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                     GroupIdentity = "TestGroup"
                 }
                 , null));
-            templatesToCheck.Add(new FilteredTemplateInfo(
+            templatesToCheck.Add(new TemplateMatchInfo(
                 new TemplateInfo()
                 {
                     Precedence = 20,
@@ -80,7 +80,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                     GroupIdentity = "RealGroup"
                 }
                 , null));
-            IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
+            ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
             Assert.Null(highestPrecedenceTemplate);
         }
 
@@ -136,17 +136,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IHostSpecificDataLoader hostDataLoader = new MockHostSpecificDataLoader();
 
-            IReadOnlyCollection<IFilteredTemplateInfo> projectTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "project");
+            IReadOnlyCollection<ITemplateMatchInfo> projectTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "project");
             Assert.Equal(3, projectTemplates.Count);
             Assert.True(projectTemplates.Where(x => string.Equals(x.Info.Identity, "Template1", StringComparison.Ordinal)).Any());
             Assert.True(projectTemplates.Where(x => string.Equals(x.Info.Identity, "Template4", StringComparison.Ordinal)).Any());
             Assert.True(projectTemplates.Where(x => string.Equals(x.Info.Identity, "Template5", StringComparison.Ordinal)).Any());
 
-            IReadOnlyCollection<IFilteredTemplateInfo> itemTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "item");
+            IReadOnlyCollection<ITemplateMatchInfo> itemTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "item");
             Assert.Equal(1, itemTemplates.Count);
             Assert.True(itemTemplates.Where(x => string.Equals(x.Info.Identity, "Template2", StringComparison.Ordinal)).Any());
 
-            IReadOnlyCollection<IFilteredTemplateInfo> otherTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "other");
+            IReadOnlyCollection<ITemplateMatchInfo> otherTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "other");
             Assert.Equal(1, otherTemplates.Count);
             Assert.True(otherTemplates.Where(x => string.Equals(x.Info.Identity, "Template3", StringComparison.Ordinal)).Any());
         }
@@ -160,12 +160,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ShortName = "Template1",
                 Name = "Long name of Template1",
                 Identity = "Template1",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
+                Tags = new Dictionary<string, ICacheTag>()
             });
             templatesToSearch.Add(new TemplateInfo()
             {
                 ShortName = "Template2",
                 Name = "Long name of Template2",
                 Identity = "Template2",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
+                Tags = new Dictionary<string, ICacheTag>()
             });
 
             INewCommandInput userInputs = new MockNewCommandInput()
@@ -173,12 +177,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 TemplateName = "Template2"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.Equal(null, matchResult.MatchedTemplatesWithSecondaryMatchInfo);
-            Assert.Equal(1, matchResult.CoreMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroupToUse.Count);
-            Assert.Equal("Template2", matchResult.CoreMatchedTemplates[0].Info.Identity);
-            Assert.Equal("Template2", matchResult.UnambiguousTemplateGroupToUse[0].Info.Identity);
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+
+            Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
+            Assert.Equal("Template2", matchResult.GetBestTemplateMatchList()[0].Info.Identity);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(1, unambiguousGroup.Count);
+            Assert.Equal("Template2", unambiguousGroup[0].Info.Identity);
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_DefaultLanguageDisambiguates))]
@@ -194,7 +199,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "language", CreateTestCacheTag("Perl") }
-                }
+                },
+                CacheParameters = new Dictionary<string, ICacheParameter>()
             });
             templatesToSearch.Add(new TemplateInfo()
             {
@@ -205,7 +211,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "language", CreateTestCacheTag("LISP") }
-                }
+                },
+                CacheParameters = new Dictionary<string, ICacheParameter>()
             });
 
             INewCommandInput userInputs = new MockNewCommandInput()
@@ -213,11 +220,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
-            Assert.Equal(null, matchResult.MatchedTemplatesWithSecondaryMatchInfo);
-            Assert.Equal(2, matchResult.CoreMatchedTemplates.Count);    // they both match the initial query. Default language is secondary
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroupToUse.Count);
-            Assert.Equal("foo.test.Perl", matchResult.UnambiguousTemplateGroupToUse[0].Info.Identity);
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
+            Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(1, unambiguousGroup.Count);
+            Assert.Equal("foo.test.Perl", unambiguousGroup[0].Info.Identity);
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_InputLanguageIsPreferredOverDefault))]
@@ -233,7 +240,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "language", CreateTestCacheTag("Perl") }
-                }
+                },
+                CacheParameters = new Dictionary<string, ICacheParameter>()
             });
             templatesToSearch.Add(new TemplateInfo()
             {
@@ -244,7 +252,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "language", CreateTestCacheTag("LISP") }
-                }
+                },
+                CacheParameters = new Dictionary<string, ICacheParameter>()
             });
 
             INewCommandInput userInputs = new MockNewCommandInput()
@@ -253,11 +262,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Language = "LISP"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
-            Assert.Equal(null, matchResult.MatchedTemplatesWithSecondaryMatchInfo);
-            Assert.Equal(1, matchResult.CoreMatchedTemplates.Count);    // Input language is part of the initial checks.
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroupToUse.Count);
-            Assert.Equal("foo.test.Lisp", matchResult.UnambiguousTemplateGroupToUse[0].Info.Identity);
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
+
+            Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(1, unambiguousGroup.Count);
+            Assert.Equal("foo.test.Lisp", unambiguousGroup[0].Info.Identity);
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_GroupIsFound))]
@@ -270,7 +280,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Name = "Foo template old",
                 Identity = "foo.test.old",
                 GroupIdentity = "foo.test.template",
-                Precedence = 100
+                Precedence = 100,
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
+                Tags = new Dictionary<string, ICacheTag>()
             });
             templatesToSearch.Add(new TemplateInfo()
             {
@@ -278,7 +290,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Name = "Foo template new",
                 Identity = "foo.test.new",
                 GroupIdentity = "foo.test.template",
-                Precedence = 200
+                Precedence = 200,
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
+                Tags = new Dictionary<string, ICacheTag>()
             });
             templatesToSearch.Add(new TemplateInfo()
             {
@@ -286,7 +300,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Name = "Bar template",
                 Identity = "bar.test",
                 GroupIdentity = "bar.test.template",
-                Precedence = 100
+                Precedence = 100,
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
+                Tags = new Dictionary<string, ICacheTag>()
             });
 
             INewCommandInput userInputs = new MockNewCommandInput()
@@ -294,12 +310,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.Equal(2, matchResult.MatchedTemplatesWithSecondaryMatchInfo.Count);
-            Assert.Equal(2, matchResult.CoreMatchedTemplates.Count);
-            Assert.Equal(2, matchResult.UnambiguousTemplateGroupToUse.Count);
-            Assert.True(matchResult.UnambiguousTemplateGroupToUse.Any(x => string.Equals(x.Info.Identity, "foo.test.old")));
-            Assert.True(matchResult.UnambiguousTemplateGroupToUse.Any(x => string.Equals(x.Info.Identity, "foo.test.new")));
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(2, unambiguousGroup.Count);
+            Assert.Contains(unambiguousGroup, x => string.Equals(x.Info.Identity, "foo.test.old"));
+            Assert.Contains(unambiguousGroup, x => string.Equals(x.Info.Identity, "foo.test.new"));
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_ParameterNameDisambiguates))]
@@ -341,10 +357,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.Equal(2, matchResult.MatchedTemplatesWithSecondaryMatchInfo.Count);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroupToUse.Count);
-            Assert.Equal("foo.test.new", matchResult.UnambiguousTemplateGroupToUse[0].Info.Identity);
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(1, unambiguousGroup.Count);
+            Assert.Equal("foo.test.new", unambiguousGroup[0].Info.Identity);
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_ParameterValueDisambiguates))]
@@ -388,10 +404,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.Equal(2, matchResult.MatchedTemplatesWithSecondaryMatchInfo.Count);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroupToUse.Count);
-            Assert.Equal("foo.test.old", matchResult.UnambiguousTemplateGroupToUse[0].Info.Identity);
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(1, unambiguousGroup.Count);
+            Assert.Equal("foo.test.old", unambiguousGroup[0].Info.Identity);
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_UnknownParameterNameInvalidatesMatch))]
@@ -424,19 +440,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, hostSpecificDataLoader, userInputs, null);
-            Assert.Equal(null, matchResult.MatchedTemplatesWithSecondaryMatchInfo);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroupToUse.Count);
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(1, unambiguousGroup.Count);
 
-            // TODO:
-            // These 2 lines are the analogues of what happens in New3Command.EnterSingularTemplateManipulationFlowAsync()
-            //      as a final verification for the template.
-            // This is really a shortcoming of the resolver, this check should get factored into it.
-            // But we'll need to add a new match category so we know that the unambiguous template "matched", except the extra user parameters.
-            HostSpecificTemplateData hostTemplateData = hostSpecificDataLoader.ReadHostSpecificTemplateData(matchResult.UnambiguousTemplateGroupToUse[0].Info);
-            userInputs.ReparseForTemplate(matchResult.UnambiguousTemplateGroupToUse[0].Info, hostTemplateData);
-
-            Assert.False(TemplateListResolver.ValidateRemainingParameters(userInputs, out IReadOnlyList<string> invalidParams));
+            Assert.False(TemplateListResolver.ValidateRemainingParameters(unambiguousGroup[0], out IReadOnlyList<string> invalidParams));
             Assert.Equal(1, invalidParams.Count);
             Assert.Equal("baz", invalidParams[0]);
         }
@@ -483,14 +491,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             };
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
+            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
+            Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
+            Assert.Equal(2, unambiguousGroup.Count);
+            Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.PerformCoreTemplateQuery(templatesToSearch, hostSpecificDataLoader, userInputs, null);
-            Assert.Equal(2, matchResult.MatchedTemplatesWithSecondaryMatchInfo.Count);
-            Assert.Equal(2, matchResult.UnambiguousTemplateGroupToUse.Count);
-            Assert.Equal(2, matchResult.CoreMatchedTemplates.Count);
-
-            Assert.True(matchResult.UnambiguousTemplateGroupToUse[0].MatchDisposition.Any(x => x.Kind == MatchKind.InvalidParameterValue));
-            Assert.True(matchResult.UnambiguousTemplateGroupToUse[1].MatchDisposition.Any(x => x.Kind == MatchKind.InvalidParameterValue));
+            Assert.Contains(unambiguousGroup[0].MatchDisposition, x => x.Kind == MatchKind.InvalidParameterValue);
+            Assert.Contains(unambiguousGroup[1].MatchDisposition, x => x.Kind == MatchKind.InvalidParameterValue);
         }
 
         private static ICacheTag CreateTestCacheTag(string choice, string description = null, string defaultValue = null)

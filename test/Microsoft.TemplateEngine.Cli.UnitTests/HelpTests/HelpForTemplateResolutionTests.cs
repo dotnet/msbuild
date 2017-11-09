@@ -1,0 +1,97 @@
+using System.Collections.Generic;
+using Microsoft.TemplateEngine.Edge.Settings;
+using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Cli.HelpAndUsage;
+using Xunit;
+
+namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
+{
+    public class HelpForTemplateResolutionTests
+    {
+        [Fact(DisplayName = nameof(GetParametersInvalidForTemplatesInListTest))]
+        public void GetParametersInvalidForTemplatesInListTest()
+        {
+            List<ITemplateMatchInfo> matchInfo = new List<ITemplateMatchInfo>();
+
+            // template one
+            List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "bar" });
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateOneDispositions);
+            matchInfo.Add(templateOneMatchInfo);
+
+            // template two
+            List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
+            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateTwoDispositions);
+            matchInfo.Add(templateTwoMatchInfo);
+
+            // template three
+            List<MatchInfo> templateThreeDispositions = new List<MatchInfo>();
+            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "baz" });
+            ITemplateMatchInfo templateThreeMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateThreeDispositions);
+            matchInfo.Add(templateThreeMatchInfo);
+
+            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
+
+            Assert.Equal(1, invalidForAllTemplates.Count);
+            Assert.Contains("foo", invalidForAllTemplates);
+
+            Assert.Equal(2, invalidForSomeTemplates.Count);
+            Assert.Contains("bar", invalidForSomeTemplates);
+            Assert.Contains("baz", invalidForSomeTemplates);
+        }
+
+        [Fact(DisplayName = nameof(GetParametersInvalidForTemplatesInList_NoneForAllTest))]
+        public void GetParametersInvalidForTemplatesInList_NoneForAllTest()
+        {
+            List<ITemplateMatchInfo> matchInfo = new List<ITemplateMatchInfo>();
+
+            // template one
+            List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "bar" });
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateOneDispositions);
+            matchInfo.Add(templateOneMatchInfo);
+
+            // template two
+            List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateTwoDispositions);
+            matchInfo.Add(templateTwoMatchInfo);
+
+            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
+
+            Assert.Equal(0, invalidForAllTemplates.Count);
+
+            Assert.Equal(2, invalidForSomeTemplates.Count);
+            Assert.Contains("foo", invalidForSomeTemplates);
+            Assert.Contains("bar", invalidForSomeTemplates);
+        }
+
+        [Fact(DisplayName = nameof(GetParametersInvalidForTemplatesInList_NoneForSomeTest))]
+        public void GetParametersInvalidForTemplatesInList_NoneForSomeTest()
+        {
+            List<ITemplateMatchInfo> matchInfo = new List<ITemplateMatchInfo>();
+
+            // template one
+            List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
+            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateOneDispositions);
+            matchInfo.Add(templateOneMatchInfo);
+
+            // template two
+            List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
+            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = "foo" });
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new TemplateInfo(), templateTwoDispositions);
+            matchInfo.Add(templateTwoMatchInfo);
+
+            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
+
+            Assert.Equal(1, invalidForAllTemplates.Count);
+            Assert.Contains("foo", invalidForAllTemplates);
+
+            Assert.Equal(0, invalidForSomeTemplates.Count);
+        }
+    }
+}

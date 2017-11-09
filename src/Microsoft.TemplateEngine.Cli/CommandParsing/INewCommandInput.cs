@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
@@ -8,6 +8,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     public interface INewCommandInput
     {
+        string CommandName { get; }
+
         string TemplateName { get; }
 
         IReadOnlyList<string> Tokens { get; }
@@ -48,11 +50,15 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool SkipUpdateCheck { get; }
 
+        bool CheckForUpdates { get; }
+
+        bool CheckForUpdatesNoPrompt { get; }
+
         string AllowScriptsToRun { get; }
 
         bool HasDebuggingFlag(string flag);
 
-        IReadOnlyDictionary<string, string> AllTemplateParams { get; }
+        IReadOnlyDictionary<string, string> InputTemplateParams { get; }
 
         string TemplateParamInputFormat(string canonical);
 

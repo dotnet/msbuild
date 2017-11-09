@@ -15,6 +15,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [InlineData("TestAssets.TemplateWithSourceNameInTargetPathGetsRenamed --name baz", "TemplateWithSourceNameInTargetPathGetsRenamedTest.json")]
         [InlineData("TestAssets.TemplateWithPlaceholderFiles", "TemplateWithPlaceholderFilesTest.json")]
         [InlineData("TestAssets.TemplateWithDerivedSymbolFileRename --name Last.Part.Is.For.Rename", "DerivedSymbolFileRenameTest.json")]
+        [InlineData("TestAssets.TemplateWithMultipleRenamesOnSameFile --fooRename base --barRename ball", "MultipleRenamesOnSameFileTest.json")]
+        [InlineData("TestAssets.TemplateWithMultipleRenamesOnSameFileHandlesOverlap --fooRename pin --oobRename ball", "MultipleRenamesOnSameFileHandlesOverlapTest.json")]
+        [InlineData("TestAssets.TemplateWithMultipleRenamesOnSameFileHandlesInducedOverlap --fooRename bar --barRename baz", "MultipleRenamesOnSameFileHandlesInducedOverlapTest.json")]
         public void VerifyTemplateContentRenames(string args, params string[] scripts)
         {
             Run(args, scripts);
