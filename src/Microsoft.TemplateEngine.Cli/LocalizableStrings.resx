@@ -589,13 +589,4 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="SettingsReadError" xml:space="preserve">
     <value>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</value>
   </data>
-  <data name="CommitHash" xml:space="preserve">
-    <value> Commit Hash: {0}</value>
-  </data>
-  <data name="Version" xml:space="preserve">
-    <value> Version:             {0}</value>
-  </data>
-  <data name="InstalledItems" xml:space="preserve">
-    <value>Currently installed items:</value>
-  </data>
 </root>
