@@ -4,8 +4,8 @@
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Sdk</PackageId>
     <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
-    <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp2.0</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <PackageOutputPath>$(OutputPath)Packages\</PackageOutputPath>
     <PackageLayoutOutputPath>$(OutputPath)Sdks\$(PackageId)\</PackageLayoutOutputPath>
@@ -29,10 +29,13 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="$(NETStandardLibraryNETFrameworkVersion)" ExcludeAssets="All" />
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
-    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" />
+  </ItemGroup>
+
+  <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <PackageReference Update="NuGet.ProjectModel" ExcludeAssets="Runtime" />
+    <PackageReference Update="Microsoft.Extensions.DependencyModel" ExcludeAssets="Runtime" />
   </ItemGroup>
 
   <ItemGroup>
