@@ -1254,6 +1254,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The following parameter(s) or their value(s) are not valid in combination with other supplied parameters or their values:.
+        /// </summary>
+        public static string SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches {
+            get {
+                return ResourceManager.GetString("SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} : update ([Y]es|[N]o)?.
         /// </summary>
         public static string SingleUpdateApplyPrompt {
@@ -1425,7 +1434,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Version:             {0}.
+        ///   Looks up a localized string similar to  Version:     {0}.
         /// </summary>
         public static string Version {
             get {

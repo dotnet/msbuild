@@ -79,9 +79,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             GetParametersInvalidForTemplatesInList(unambiguousTemplateGroup, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
 
-            if (invalidForAllTemplates.Count > 0)
+            if (invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0)
             {
                 DisplayInvalidParameters(invalidForAllTemplates);
+                DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches);
             }
 
             bool showImplicitlyHiddenParams = unambiguousTemplateGroup.Count > 1;
@@ -122,7 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 hasInvalidParameters = true;
                 DisplayInvalidParameters(invalidForAllTemplates);
-                DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates);
+                DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.PartialTemplateMatchSwitchesNotValidForAllMatches);
             }
 
             if (commandInput.IsHelpFlagSpecified)
@@ -255,11 +256,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static void DisplayParametersInvalidForSomeTemplates(IReadOnlyList<string> invalidParams)
+        private static void DisplayParametersInvalidForSomeTemplates(IReadOnlyList<string> invalidParams, string messageHeader)
         {
             if (invalidParams.Count > 0)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.PartialTemplateMatchSwitchesNotValidForAllMatches.Bold().Red());
+                Reporter.Error.WriteLine(messageHeader.Bold().Red());
                 foreach (string flag in invalidParams)
                 {
                     Reporter.Error.WriteLine($"  {flag}".Bold().Red());

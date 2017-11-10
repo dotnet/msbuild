@@ -122,6 +122,24 @@ namespace Microsoft.TemplateEngine.Cli
                 return true;
             }
 
+            // if multiple templates in the group have single starts with matches on the same parameter, it's ambiguous.
+            // For the case where one template has single starts with, and another has ambiguous - on the same param:
+            //      The one with single starts with is chosen as invokable because if the template with an ambiguous match
+            //      was not installed, the one with the singluar invokable would be chosen.
+            HashSet<string> singleStartsWithParamNames = new HashSet<string>();
+            foreach (ITemplateMatchInfo checkTemplate in invokableMatches)
+            {
+                IList<string> singleStartParamNames = checkTemplate.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith).Select(x => x.ChoiceIfLocationIsOtherChoice).ToList();
+                foreach (string paramName in singleStartParamNames)
+                {
+                    if (!singleStartsWithParamNames.Add(paramName))
+                    {
+                        template = null;
+                        return false;
+                    }
+                }
+            }
+
             ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(invokableMatches);
             if (highestInGroupIfSingleGroup != null)
             {

@@ -12,7 +12,7 @@ using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
-namespace Microsoft.TemplateEngine.Cli.UnitTests
+namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
     // Implementation notes:
     // If a test is going to hit the secondary matching in the resolver, make sure to initialize the Tags & CacheParameters,
@@ -94,7 +94,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Identity = "Template1",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "type", CreateTestCacheTag("project") }
+                    { "type", ResolutionTestHelper.CreateTestCacheTag("project") }
                 }
             });
             templatesToSearch.Add(new TemplateInfo()
@@ -103,7 +103,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Identity = "Template2",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "type", CreateTestCacheTag("item") }
+                    { "type", ResolutionTestHelper.CreateTestCacheTag("item") }
                 }
             });
             templatesToSearch.Add(new TemplateInfo()
@@ -112,7 +112,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Identity = "Template3",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "type", CreateTestCacheTag("myType") }
+                    { "type", ResolutionTestHelper.CreateTestCacheTag("myType") }
                 }
             });
             templatesToSearch.Add(new TemplateInfo()
@@ -121,7 +121,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Identity = "Template4",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "type", CreateTestCacheTag("project") }
+                    { "type",ResolutionTestHelper.CreateTestCacheTag("project") }
                 }
             });
             templatesToSearch.Add(new TemplateInfo()
@@ -130,7 +130,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Identity = "Template5",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "type", CreateTestCacheTag("project") }
+                    { "type", ResolutionTestHelper.CreateTestCacheTag("project") }
                 }
             });
 
@@ -198,7 +198,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 GroupIdentity = "foo.test.template",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "language", CreateTestCacheTag("Perl") }
+                    { "language", ResolutionTestHelper.CreateTestCacheTag("Perl") }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -210,7 +210,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 GroupIdentity = "foo.test.template",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "language", CreateTestCacheTag("LISP") }
+                    { "language", ResolutionTestHelper.CreateTestCacheTag("LISP") }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -239,7 +239,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 GroupIdentity = "foo.test.template",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "language", CreateTestCacheTag("Perl") }
+                    { "language", ResolutionTestHelper.CreateTestCacheTag("Perl") }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -251,7 +251,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 GroupIdentity = "foo.test.template",
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "language", CreateTestCacheTag("LISP") }
+                    { "language", ResolutionTestHelper.CreateTestCacheTag("LISP") }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -376,7 +376,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Precedence = 100,
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "framework", CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
+                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -389,7 +389,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Precedence = 200,
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "framework", CreateTestCacheTag(new List<string>() { "netcoreapp2.0" }) }
+                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp2.0" }) }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -462,7 +462,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Precedence = 100,
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "framework", CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
+                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -475,7 +475,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Precedence = 200,
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "framework", CreateTestCacheTag(new List<string>() { "netcoreapp2.0" }) }
+                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp2.0" }) }
                 },
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
@@ -498,27 +498,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Assert.Contains(unambiguousGroup[0].MatchDisposition, x => x.Kind == MatchKind.InvalidParameterValue);
             Assert.Contains(unambiguousGroup[1].MatchDisposition, x => x.Kind == MatchKind.InvalidParameterValue);
-        }
-
-        private static ICacheTag CreateTestCacheTag(string choice, string description = null, string defaultValue = null)
-        {
-            return new CacheTag(null,
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { choice, description }
-                },
-                defaultValue);
-        }
-
-        private static ICacheTag CreateTestCacheTag(IReadOnlyList<string> choiceList, string description = null, string defaultValue = null)
-        {
-            Dictionary<string, string> choicesDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach(string choice in choiceList)
-            {
-                choicesDict.Add(choice, null);
-            };
-
-            return new CacheTag(null, choicesDict, defaultValue);
         }
     }
 }
