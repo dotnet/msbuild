@@ -75,7 +75,7 @@
           NuGetPackagesDir=$(NuGetPackagesDir);
           DependencyPackageName=%(ExtensionPackageToRestore.Identity);
           DependencyPackageVersion=%(ExtensionPackageToRestore.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </ExtensionRestore>
     </ItemGroup>

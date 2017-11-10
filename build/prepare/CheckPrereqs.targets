@@ -8,8 +8,8 @@
       DependsOnTargets="CheckUbuntuAptGetDependencies;
                         CheckCentOsYumDependencies;">
 
-    <Message Text="Using Stage0 version:" />
-    <Exec Command="$(DotnetStage0) --version" />
+    <Message Text="Using previous stage version:" />
+    <Exec Command="$(PreviousStageDotnet) --version" />
   </Target>
 
   <Target Name="CheckUbuntuAptGetDependencies"

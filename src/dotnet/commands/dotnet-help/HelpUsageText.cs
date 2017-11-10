@@ -27,6 +27,8 @@ path-to-application:
   nuget            {LocalizableStrings.NugetDefinition}
   msbuild          {LocalizableStrings.MsBuildDefinition}
   vstest           {LocalizableStrings.VsTestDefinition}
+  store            {LocalizableStrings.StoreDefinition}
+  help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:
   -v|--verbosity        {CommonLocalizableStrings.VerbosityOptionDescription}

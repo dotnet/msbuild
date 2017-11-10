@@ -16,7 +16,7 @@ Documents Index
 
 ## Troubleshooting and issues reporting
 
-- [CLI Known Issues](https://github.com/dotnet/core/blob/master/cli/known-issues.md)
+- [CLI Known Issues](https://github.com/dotnet/core/blob/master/release-notes/2.0/2.0.0-known-issues.md)
 - [Filing migration issues](migration-issues.md)
 
 ## Specifications

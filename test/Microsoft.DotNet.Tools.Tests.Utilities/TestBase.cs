@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     s_testAssets = new TestAssets(
                         new DirectoryInfo(assetsRoot),
                         new FileInfo(new Muxer().MuxerPath),
-                        new FileInfo(new RepoDirectoriesProvider().PjDotnet)); 
+                        new RepoDirectoriesProvider().TestWorkingFolder); 
                 }
 
                 return s_testAssets;
