@@ -10,7 +10,7 @@
   
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
-          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
+          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
                             Package;
                             EvaluateRuntimeCoherence;
@@ -36,11 +36,11 @@
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
                      Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
       <ForPublishing Include="@(NupkgsForPublishing)"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' "/>
+                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
     </ItemGroup>
 
     <ItemGroup>
