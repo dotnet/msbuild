@@ -141,6 +141,7 @@ namespace Microsoft.DotNet.Cli
                         ConfigureDotNetForFirstTimeUse(
                             nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
+                            new AspNetCertificateSentinel(cliFallbackFolderPathCalculator),
                             cliFallbackFolderPathCalculator,
                             hasSuperUserAccess);
 
@@ -204,6 +205,7 @@ namespace Microsoft.DotNet.Cli
         private static void ConfigureDotNetForFirstTimeUse(
             INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
+            IAspNetCertificateSentinel aspNetCertificateSentinel,
             CliFolderPathCalculator cliFolderPathCalculator,
             bool hasSuperUserAccess)
         {
@@ -219,10 +221,13 @@ namespace Microsoft.DotNet.Cli
                     nugetPackagesArchiver,
                     nugetCacheSentinel,
                     cliFolderPathCalculator);
+                var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                     nugetCachePrimer,
                     nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
+                    aspNetCertificateSentinel,
+                    aspnetCertificateGenerator,
                     environmentProvider,
                     Reporter.Output,
                     cliFolderPathCalculator.CliFallbackFolderPath,
