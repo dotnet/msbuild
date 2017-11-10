@@ -140,6 +140,6 @@
   <!-- Place holder target for signing. Actual signing target is in the below import -->
   <Target Name="Sign" />
   
-  <Import Project="$(WebSdkTools)\Microsoft.NET.Sdk.Web.Sign.targets" Condition="Exists('$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets')"/>
+  <Import Project="$(WebSdkTools)\sign.proj" Condition="Exists('$(WebSdkTools)\sign.proj')"/>
 </Project>
 

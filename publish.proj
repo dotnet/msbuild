@@ -2,63 +2,16 @@
 
   <PropertyGroup>
       <LocalDropRoot>$(WebSdkRoot)\bin\$(Configuration)</LocalDropRoot>
-      <NugetExe>$(WebSdkRoot)\tools\NuGet\NuGet.exe</NugetExe>
   </PropertyGroup>
+
+  <Target Name="Publish" DependsOnTargets="_Publish" />
   
-  <Target Name="_Publish">
-    <!-- Generate semaphore files for web sdk -->
-    <PropertyGroup>
-      <WebSdkSemaphorePath>$(LocalDropRoot)\web-sdk.sem</WebSdkSemaphorePath>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <SemaphoreParameter Include="WebSdkVersion=$(WebSdkVersion)"/>
-      <SemaphoreParameter Include="WebSdkDropPath=$(WebSdkPackagesDropDir)" />
-    </ItemGroup>
-
-    <GenerateSemaphore Parameters="@(SemaphoreParameter)" SemaphoreFilePath="$(WebSdkSemaphorePath)" />
-
+  <Target Name="_Publish" DependsOnTargets="Sign">
     <ItemGroup>
       <SignedPackages Include="$(CodeSignOutputPath)\Packages\*.nupkg" />
     </ItemGroup>
 
-    <Exec Command="$(NugetExe) push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package" Condition="'$(MyGetSecurityToken)' != ''" />
+    <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package"/>
   </Target>
-
-  <UsingTask TaskName="GenerateSemaphore" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
-    <ParameterGroup>
-      <Parameters ParameterType="System.String[]" Required="true" />
-      <SemaphoreFilePath ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Using Namespace="System.Text" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-            var builder = new StringBuilder();
-            builder.AppendLine("[Semaphore]");
-            foreach(var par in Parameters)
-            {
-              builder.AppendLine(par);
-            }
-            
-            var retry = 5;
-            while (retry > 0)
-            {
-              try
-              {
-                File.WriteAllText(SemaphoreFilePath, builder.ToString());
-                break;
-              }
-              catch
-              {
-                System.Threading.Thread.Sleep(500);
-                retry--;
-              }
-            }
-        ]]>
-      </Code>
-    </Task>
-  </UsingTask>
 
   </Project>
