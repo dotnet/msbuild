@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Targets", "Microsoft.NET.Sdk.Web.ProjectSystem.Targets", "{E363A15F-DFC8-4B97-BE8B-C327C5DB5864}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1CAF6E2F
 		dotnet-install_1.0.ps1 = dotnet-install_1.0.ps1
 		dotnet-install_2.0.ps1 = dotnet-install_2.0.ps1
 		tools\EnsureWebSdkEnv.cmd = tools\EnsureWebSdkEnv.cmd
+		publish.proj = publish.proj
 		tools\WebSdkEnv.cmd = tools\WebSdkEnv.cmd
 	EndProjectSection
 EndProject
