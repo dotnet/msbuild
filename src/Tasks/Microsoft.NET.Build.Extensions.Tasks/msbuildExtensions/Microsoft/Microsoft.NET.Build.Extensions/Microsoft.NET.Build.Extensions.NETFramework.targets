@@ -66,6 +66,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                              ResourceName="UnsupportedSDKVersionForNetStandard20"/>
 
     <!--
+      Just like references from packages, RAR should not waste time finding dependencies and related files for libraries added by this
+      extension. See related MarkPackageReferencesAsExternallyResolved in Microsoft.PackageDependencyResolution.targets.
+      -->
+    <PropertyGroup Condition="'$(MarkNETFrameworkExtensionAssembliesAsExternallyResolved)' == ''">
+      <MarkNETFrameworkExtensionAssembliesAsExternallyResolved>true</MarkNETFrameworkExtensionAssembliesAsExternallyResolved>
+    </PropertyGroup>
+
+    <!--
       .NET 4.7.1 has support for .NET Standard 2.0 built-in, so most of the facades aren't necessary.  However, the assembly versions of a few set of assemblies
       do not yet match the ones shipped in the support package for .NET Standard 2.0 on .NET 4.7 and below. This means that .NET 4.7 or lower libraries might have
       references to higher versions of these assemblies than are available in-box in .NET 4.7, leading to assembly loading errors. So if there is a dependency on 
@@ -113,6 +121,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Reference Include="%(_NETStandardLibraryNETFrameworkLib.FileName)">
         <HintPath>%(_NETStandardLibraryNETFrameworkLib.Identity)</HintPath>
         <Private>false</Private>
+        <ExternallyResolved>$(MarkNETFrameworkExtensionAssembliesAsExternallyResolved)</ExternallyResolved>
       </Reference>
       
       <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)" Condition="'%(FileName)' != 'netfx.force.conflicts'">
