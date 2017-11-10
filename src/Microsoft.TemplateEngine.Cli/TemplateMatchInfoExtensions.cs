@@ -16,7 +16,7 @@ namespace Microsoft.TemplateEngine.Cli
         public static bool HasParameterMismatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter
-                                       && (x.Kind != MatchKind.Exact && x.Kind != MatchKind.AmbiguousParameterValue));
+                                       && (x.Kind != MatchKind.Exact && x.Kind != MatchKind.AmbiguousParameterValue && x.Kind != MatchKind.SingleStartsWith));
         }
 
         public static bool HasContextMismatch(this ITemplateMatchInfo templateMatchInfo)
@@ -38,6 +38,10 @@ namespace Microsoft.TemplateEngine.Cli
                                 (   // these locations can have partial or exact matches.
                                     x.Kind == MatchKind.Partial
                                     && (x.Location == MatchLocation.Name || x.Location == MatchLocation.ShortName || x.Location == MatchLocation.Classification)
+                                )
+                                ||
+                                (
+                                    x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith
                                 )
                             );
         }
@@ -61,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
         // This is analogous to INewCommandInput.InputTemplateParams
         public static IReadOnlyDictionary<string, string> GetValidTemplateParameters(this ITemplateMatchInfo templateMatchInfo)
         { 
-            return templateMatchInfo.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.Exact)
+            return templateMatchInfo.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.SingleStartsWith))
                                     .ToDictionary(x => x.ChoiceIfLocationIsOtherChoice, x => x.ParameterValue);
         }
 

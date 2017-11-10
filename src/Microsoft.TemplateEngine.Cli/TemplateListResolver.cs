@@ -275,7 +275,7 @@ namespace Microsoft.TemplateEngine.Cli
                                 int startsWithCount = paramDetails.ChoicesAndDescriptions.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
                                 if (startsWithCount == 1)
                                 {
-                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
+                                    template.AddDisposition(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.SingleStartsWith, ChoiceIfLocationIsOtherChoice = paramName, ParameterValue = paramValue });
                                 }
                                 else if (startsWithCount > 1)
                                 {
