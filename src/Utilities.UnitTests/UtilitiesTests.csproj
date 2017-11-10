@@ -12,7 +12,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.0-prerelease-00629-09" />
+    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.1-servicing-02201-03" />
+    <PackageReference Include="Microsoft.DotNet.BuildTools.TestSuite" Version="1.0.1-servicing-02201-03" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
     <PackageReference Include="System.IO.FileSystem.Primitives " Version="4.3.0" />
     <PackageReference Include="System.Net.Primitives " Version="4.3.0" />
@@ -44,7 +45,7 @@
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StringExtensions.cs"/>
+    <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs">
       <Link>NativeMethods.cs</Link>
     </Compile>

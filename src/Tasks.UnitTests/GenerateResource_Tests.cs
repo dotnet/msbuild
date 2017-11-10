@@ -2125,7 +2125,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
 #endif
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2511,7 +2511,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;

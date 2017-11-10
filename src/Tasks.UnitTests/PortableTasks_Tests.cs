@@ -14,7 +14,7 @@ namespace Microsoft.Build.UnitTests
         private static readonly string ProjectFilePath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "portableTaskTest.proj");
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void TestDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(true);

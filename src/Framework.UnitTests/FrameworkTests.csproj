@@ -10,6 +10,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.1-servicing-02201-03" />
+    <PackageReference Include="Microsoft.DotNet.BuildTools.TestSuite" Version="1.0.1-servicing-02201-03" />
     <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
   </ItemGroup>
 

@@ -1,5 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
     <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
 
     <SignAssembly>True</SignAssembly>
@@ -13,6 +15,13 @@
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+
+    <!-- NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
+        CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
+        you don't get those defaults.
+    -->
+
+    <NoWarn>$(NoWarn);NU1603;1701;1702</NoWarn>
   </PropertyGroup>
 
   <!--

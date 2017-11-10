@@ -1937,7 +1937,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// </summary>
         [Fact]
         [Trait("Category", "mono-windows-failing")]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);

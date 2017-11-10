@@ -19,7 +19,6 @@ using System.Security.Principal;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
-using PlatformID = Xunit.PlatformID;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -905,7 +904,7 @@ namespace Microsoft.Build.UnitTests
         /// (or skipped), not files for which there was an error.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "Under Unix all filenames are valid and this test is not useful"
+        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
         public void OutputsOnlyIncludeSuccessfulCopies()
         {
             string temp = Path.GetTempPath();
@@ -1064,7 +1063,7 @@ namespace Microsoft.Build.UnitTests
         /// or not skipUnchangedFiles is true or false. Variation with different casing/relativeness.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
+        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
         public void CopyFileOnItself2()
         {
             string currdir = Directory.GetCurrentDirectory();
@@ -2019,7 +2018,7 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFolder should work.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // SMB share paths only work on Windows
+        [PlatformSpecific(TestPlatforms.Windows)] // SMB share paths only work on Windows
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2121,7 +2120,7 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFolder should work.
         /// </summary>
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // Only Windows has a (small) link limit, and this tests for an HRESULT
+        [PlatformSpecific(TestPlatforms.Windows)] // Only Windows has a (small) link limit, and this tests for an HRESULT
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting

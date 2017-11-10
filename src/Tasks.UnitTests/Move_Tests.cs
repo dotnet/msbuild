@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests
         /// (or skipped), not files for which there was an error.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "Under Unix all filenames are valid and this test is not useful"
+        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
         public void OutputsOnlyIncludeSuccessfulMoves()
         {
             string temp = Path.GetTempPath();
@@ -557,7 +557,7 @@ namespace Microsoft.Build.UnitTests
         /// Variation with different casing/relativeness.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
+        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
         public void MoveFileOnItself2()
         {
             string currdir = Directory.GetCurrentDirectory();
