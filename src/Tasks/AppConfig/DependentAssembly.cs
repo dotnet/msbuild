@@ -28,6 +28,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// The partial <see cref="AssemblyName"/>, there should be no version.
+        /// Setter and Getter clone the incoming / outgoing assembly
         /// </summary>
         internal AssemblyName PartialAssemblyName
         {
@@ -39,6 +40,17 @@ namespace Microsoft.Build.Tasks
             get
             {
                 return _partialAssemblyName?.CloneIfPossible();
+            }
+        }
+
+        /// <summary>
+        /// The full <see cref="AssemblyName"/>. It is not cloned. Callers should not mutate this object.
+        /// </summary>
+        internal AssemblyName AssemblyNameReadOnly
+        {
+            get
+            {
+                return _partialAssemblyName;
             }
         }
 

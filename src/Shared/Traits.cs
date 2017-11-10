@@ -19,7 +19,7 @@ namespace Microsoft.Build.Utilities
             get
             {
 #if DEBUG
-                if (Environment.GetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS") == "1")
+                if (BuildEnvironmentHelper.Instance.RunningTests && Environment.GetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS") == "1")
                 {
                     return new Traits();
                 }

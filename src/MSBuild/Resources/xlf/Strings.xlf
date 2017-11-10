@@ -502,7 +502,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /pp:out.txt
     </source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
         <source>  /detailedsummary
@@ -511,7 +511,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
@@ -519,7 +519,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>

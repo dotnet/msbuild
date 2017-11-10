@@ -2052,6 +2052,11 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <target state="translated">Die Aufgabenfactory muss einen Wert für die Eigenschaft "TaskType" zurückgeben.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">Die angegebene API "{0}" ist nicht verfügbar, weil beim Laden dieses Projekts "ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition" festgelegt wurde.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
