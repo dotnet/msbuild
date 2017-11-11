@@ -11,7 +11,7 @@
       <SignedPackages Include="$(CodeSignOutputPath)\Packages\*.nupkg" />
     </ItemGroup>
 
-    <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package"/>
+    <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push --api-key %(SignedPackages.Identity) $(MyGetSecurityToken) --source https://dotnet.myget.org/F/dotnet-web/api/v2/package"/>
   </Target>
 
   </Project>
