@@ -33,7 +33,7 @@
   </Target>
 
   <Target Name="_RestoreSolution">
-    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.Sln&quot; /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln&quot; /p:configuration=Release /p:SkipInvalidConfigurations=true" />
   </Target>
 
   <Target Name="_BuildProduct">
