@@ -1,14 +1,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-      <LocalDropRoot>$(WebSdkRoot)\bin\$(Configuration)</LocalDropRoot>
+      <LocalDropRoot>$(WebSdkRoot)/bin/$(Configuration)</LocalDropRoot>
   </PropertyGroup>
 
   <Target Name="Publish" DependsOnTargets="_Publish" />
   
   <Target Name="_Publish" DependsOnTargets="Sign">
     <ItemGroup>
-      <SignedPackages Include="$(CodeSignOutputPath)\Packages\*.nupkg" />
+      <SignedPackages Include="$(CodeSignOutputPath)/Packages/*.nupkg" />
     </ItemGroup>
 
     <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) --api-key $(MyGetSecurityToken) --source https://dotnet.myget.org/F/dotnet-web/api/v2/package"/>
