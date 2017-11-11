@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1CAF6E2F
 	ProjectSection(SolutionItems) = preProject
 		tools\Build.cmd = tools\Build.cmd
 		build.proj = build.proj
+		build.sh = build.sh
 		dotnet-install_1.0.ps1 = dotnet-install_1.0.ps1
 		dotnet-install_2.0.ps1 = dotnet-install_2.0.ps1
 		tools\EnsureWebSdkEnv.cmd = tools\EnsureWebSdkEnv.cmd
