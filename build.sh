@@ -34,19 +34,11 @@ curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.0
 
 curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
 [ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461
-tar -zxvf $DOTNET_INSTALL_DIR/buildtools.tar.gz -C $DOTNET_INSTALL_DIR/buildtools/net461
+tar -zxf $DOTNET_INSTALL_DIR/buildtools.tar.gz -C $DOTNET_INSTALL_DIR/buildtools/net461
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
 export ReferenceAssemblyRoot=$DOTNET_INSTALL_DIR/buildtools/net461
-
-# Increases the file descriptors limit for this bash. It prevents an issue we were hitting during restore
-FILE_DESCRIPTOR_LIMIT=$( ulimit -n )
-if [ $FILE_DESCRIPTOR_LIMIT -lt 1024 ]
-then
-    echo "Increasing file description limit to 1024"
-    ulimit -n 1024
-fi
 
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 $DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build.proj" /t:Build /p:Configuration=$CONFIGURATION /p:SkipInvalidConfigurations=true /p:NETFrameworkSupported=false
