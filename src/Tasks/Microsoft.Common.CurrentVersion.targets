@@ -2038,6 +2038,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </Reference>
     </ItemGroup>
 
+    <!--
+      Normally, as an optimization, finding dependencies of references marked with ExternallyResolved=true metadata is skipped.
+      However, skipping that step breaks binding redirect generation when there are conflicting versions within the externally
+      resolved graph.
+    -->
+    <PropertyGroup Condition="'$(FindDependenciesOfExternallyResolvedReferences)' == ''">
+       <FindDependenciesOfExternallyResolvedReferences>false</FindDependenciesOfExternallyResolvedReferences>
+       <FindDependenciesOfExternallyResolvedReferences Condition="'$(AutoGenerateBindingRedirects)' == 'true'">true</FindDependenciesOfExternallyResolvedReferences>
+    </PropertyGroup>
+
     <ResolveAssemblyReference
         Assemblies="@(Reference)"
         AssemblyFiles="@(_ResolvedProjectReferencePaths);@(_ExplicitReference)"
@@ -2076,6 +2086,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ResolvedSDKReferences="@(ResolvedSDKReference)"
         WarnOrErrorOnTargetArchitectureMismatch="$(ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch)"
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
+        FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >

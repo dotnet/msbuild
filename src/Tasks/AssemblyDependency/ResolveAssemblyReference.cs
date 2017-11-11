@@ -163,6 +163,10 @@ namespace Microsoft.Build.Tasks
         ///     string FusionName -- the simple or strong fusion name for this item. If this 
         ///         attribute is present it can save time since the assembly file won't need
         ///         to be opened to get the fusion name.
+        ///     bool ExternallyResolved [default=false] -- indicates that the reference and its
+        ///        dependencies are resolved by an external system (commonly from nuget assets) and
+        ///        so several steps can be skipped as an optimization: finding dependencies, 
+        ///        satellite assemblies, etc.
         /// </summary>
         public ITaskItem[] AssemblyFiles
         {
@@ -204,6 +208,16 @@ namespace Microsoft.Build.Tasks
                 _ignoreTargetFrameworkAttributeVersionMismatch = value;
             }
         }
+
+        /// <summary>
+        /// Force dependencies to be walked even when a reference is marked with ExternallyResolved=true
+        /// metadata.
+        /// </summary>
+        /// <remarks>
+        /// This is used to ensure that we suggest appropriate binding redirects for assembly version
+        /// conflicts within an externally resolved graph.
+        /// </remarks>
+        public bool FindDependenciesOfExternallyResolvedReferences { get; set; }
 
         /// <summary>
         /// List of target framework subset names which will be searched for in the target framework directories
@@ -2146,6 +2160,8 @@ namespace Microsoft.Build.Tasks
                         assemblyMetadataCache
                         );
 
+                    dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
+
                     // If AutoUnify, then compute the set of assembly remappings.
                     ArrayList generalResolutionExceptions = new ArrayList();
 
@@ -2271,12 +2287,18 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-
-                    if ((!useSystemRuntime || !useNetStandard) && !FindDependencies)
+                    if ((!useSystemRuntime || !useNetStandard) && (!FindDependencies || dependencyTable.SkippedFindingExternallyResolvedDependencies))
                     {
-                        // when we are not producing the dependency graph look for direct dependencies of primary references.
+                        // when we are not producing the (full) dependency graph look for direct dependencies of primary references
                         foreach (var resolvedReference in dependencyTable.References.Values)
                         {
+                            if (FindDependencies && !resolvedReference.ExternallyResolved)
+                            {
+                                // if we're finding dependencies and a given reference was not marked as ExternallyResolved
+                                // then its use of System.Runtime/.netstandard would already have been identified above.
+                                continue; 
+                            }
+
                             var rawDependencies = GetDependencies(resolvedReference, fileExists, getAssemblyMetadata, assemblyMetadataCache);
                             if (rawDependencies != null)
                             {
