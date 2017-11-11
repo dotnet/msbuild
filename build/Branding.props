@@ -22,14 +22,14 @@
     <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
 
     <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
-    <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
+    <ArtifactNameSdkSymbols>dotnet-sdk-symbols</ArtifactNameSdkSymbols>
     <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-sdk</ArtifactNameCombinedHostHostFxrFrameworkSdk>
     <ArtifactNameSdkLanguagePack>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-langpack</ArtifactNameSdkLanguagePack>
 
     <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdk>
     <ArtifactNameWithVersionMSBuildExtensions>dotnet-standard-support-vs2015-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionMSBuildExtensions>
 
-    <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkDebug>
+    <ArtifactNameWithVersionSdkSymbols>$(ArtifactNameSdkSymbols)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkSymbols>
     <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
     <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkLanguagePack>
     <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>
