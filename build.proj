@@ -103,7 +103,7 @@
   </Target>
 
   <Target Name="_RunTests" Condition="'$(PB_SkipTests)' != 'true'"> 
-    <Exec  Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp2.0 --no-build /p:configuration=Release /p:SkipInvalidConfigurations=true" />
+    <Exec  Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp1.1 --no-build /p:configuration=Release /p:SkipInvalidConfigurations=true" />
 
     <Exec Condition="'$(NETFrameworkSupported)' != 'false'"
      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=net46 --no-build /p:configuration=Release /p:SkipInvalidConfigurations=true" />
@@ -136,5 +136,7 @@
   <Target Name="Sign" />
   
   <Import Project="$(WebSdkTools)/sign.proj" Condition="Exists('$(WebSdkTools)/sign.proj')"/>
+
+  <Import Project="$(WebSdkRoot)/publish.proj" Condition="Exists('$(WebSdkRoot)/publish.proj')"/>
 </Project>
 
