@@ -110,11 +110,16 @@
   </Target>
 
   <Target Name="_GeneratePackages">
-   
-    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
     
+    <!-- Retore -->
+    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/pack/WebSdk_Packages.sln&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+   
+    <!-- Build -->
+    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/pack/WebSdk_Packages.sln&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+   
+    <!-- Pack -->
+    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
     <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
-
     <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=Release /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
   </Target>
 
