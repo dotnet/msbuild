@@ -23,7 +23,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
             get { return testData; }
         }
 
-
+#if NET46
         [Theory]
         [MemberData("EFMigrations")]
         public void GenerateEFScripts_ReturnsFalse_forInValidContexts(ITaskItem[] efMigrationsData)
@@ -49,5 +49,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
             // Assert
             Assert.False(isSucces);
         }
+#endif
     }
 }
