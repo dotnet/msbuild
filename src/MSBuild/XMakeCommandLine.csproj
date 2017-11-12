@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp2.0</TargetFrameworks>
 
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -13,15 +13,7 @@
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
-      <Link>Compat\SerializableAttribute.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
-    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>

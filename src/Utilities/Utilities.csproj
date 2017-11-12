@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <RootNamespace>Microsoft.Build.Utilities</RootNamespace>
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
@@ -23,9 +23,6 @@
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
 
-    <Compile Condition="$(TargetFramework.StartsWith('netstandard'))" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
     <!-- Source Files -->
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyFolders\AssemblyFoldersEx.cs</Link>
