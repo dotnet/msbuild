@@ -30,7 +30,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
 </configuration>
 <!--ProjectGuid: 66964EC2-712A-451A-AB4F-33F18D8F54F1-->");
 
-        //[Fact]
+#if NET46
+        [Fact]
         public void WebConfigTransform_Finds_ProjectGuid_IfSolutionPathIsPassed()
         {
             // Arrange
@@ -44,7 +45,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             Assert.Equal<string>("{66964EC2-712A-451A-AB4F-33F18D8F54F1}", projectGuid);
         }
 
-        //[Theory]
+        [Theory]
         [InlineData("*UnDefined*")]
         [InlineData("")]
         [InlineData(@"c:\AFolderThatDoesNotExist")]
@@ -59,7 +60,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             // Assert
             Assert.Equal<string>("{66964EC2-712A-451A-AB4F-33F18D8F54F1}", projectGuid);
         }
-
+#endif
         [Theory]
         [InlineData("{66964EC2-712A-451A-AB4F-33F18D8F54F1}")]
         public void WebConfigTelemetry_SetsProjectGuidIfNotOptedOut(string projectGuid)
@@ -109,7 +110,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         }
 
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
-        //[Fact]
+#if NET46
+        [Fact]
         public void WebConfigTelemetry_FindsProjectGuid_IfCLIOptedOutEnvVariableIsNotSet()
         {
             // Arrange
@@ -127,7 +129,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             // Reset
             Environment.SetEnvironmentVariable(TelemetryOptout, previousValue);
         }
-
+#endif
         [Fact]
         public void WebConfigTelemetry_DoesNotSearchForProjectGuid_IfCLIOptedOutEnvVariableIsSet()
         {
