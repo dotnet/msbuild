@@ -27,8 +27,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dotnet/sdk</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
   </PropertyGroup>
 
 </Project>
