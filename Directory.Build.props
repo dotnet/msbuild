@@ -16,7 +16,7 @@
   <Import Project="$(MSBuildThisFileDirectory)build\Versions.props"/>
 
   <PropertyGroup>
-    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)\'))</RepoRoot>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.microsoft.repotoolset\$(RoslynToolsMicrosoftRepoToolsetVersion)\tools\</RepoToolsetDir>
     <SignToolDataPath>$(RepoRoot)build\SignToolData.json</SignToolDataPath>
     <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
