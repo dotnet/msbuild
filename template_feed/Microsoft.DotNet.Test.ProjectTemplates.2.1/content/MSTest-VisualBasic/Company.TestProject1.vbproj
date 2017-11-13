@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <RootNamespace>Company.TestProject1</RootNamespace>
     <TargetFramework Condition="'$(TargetFrameworkOverride)' == ''">netcoreapp2.1</TargetFramework>
     <TargetFramework Condition="'$(TargetFrameworkOverride)' != ''">TargetFrameworkOverride</TargetFramework>
     <RuntimeFrameworkVersion Condition="'$(Framework)' == 'netcoreapp2.1'">2.1.0-preview2-25624-02</RuntimeFrameworkVersion>
