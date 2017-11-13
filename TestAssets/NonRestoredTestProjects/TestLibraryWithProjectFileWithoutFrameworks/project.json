@@ -1,8 +1,0 @@
-{
-    "dependencies": {
-        "Microsoft.VisualStudio.Web.CodeGeneration.Tools" : {
-            "version": "1.0.0-preview2-final",
-            "type": "build"
-        }
-    }
-}

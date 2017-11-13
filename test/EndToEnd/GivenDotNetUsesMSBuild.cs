@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .Should()
                 .Pass();
 
-            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            new DotnetCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput(
                     $"-d dependency-tool-invoker -c {configuration} -f netcoreapp2.0 portable")

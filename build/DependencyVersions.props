@@ -15,7 +15,7 @@
          explicitly use different versions. -->
     <CLI_NETSDK_Version>2.0.1-servicing-20170926-1</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
-
+    <CLI_ArchiveVersion>2.0.3-refac-007132</CLI_ArchiveVersion>
     <CLI_NuGet_Version>4.4.0-preview3-4475</CLI_NuGet_Version>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.0-preview3-25514-04</CLI_NETStandardLibraryNETFrameworkVersion>
     <CLI_WEBSDK_Version>2.0.0-rel-20170908-653</CLI_WEBSDK_Version>
