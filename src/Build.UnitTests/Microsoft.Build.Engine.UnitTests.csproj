@@ -1,29 +1,43 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Microsoft.Build.Engine.UnitTests</RootNamespace>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp2.0</TargetFrameworks>
+
+    <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
-    <IsTestProject>true</IsTestProject>
-    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170517-02" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.1-servicing-02201-03" />
+    <PackageReference Include="Microsoft.DotNet.BuildTools.TestSuite" Version="1.0.1-servicing-02201-03" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+    <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
+
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+
+    <!-- TODO: get this from a package -->
+    <Reference Include="..\..\tools\net45\roslyn\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(NetCoreBuild)' != 'true'" />
+    <Reference Include="..\..\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(NetCoreBuild)' == 'true'" />
+
+    <Reference Include="System.Configuration" Condition="'$(NetCoreBuild)' != 'true'" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    
+    <Compile Remove="Definition\ToolsetConfigurationReaderTestHelper.cs" />
+    <Compile Include="Definition\ToolsetConfigurationReaderTestHelper.cs" Condition="'$(NetCoreBuild)' != 'true'" />
+
     <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
       <!-- Extension methods -->
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -50,6 +64,9 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
@@ -83,179 +100,17 @@
     <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
       <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
-    <Compile Include="BackEnd\AssemblyTaskFactory_Tests.cs" />
-    <Compile Include="BackEnd\BatchingEngine_Tests.cs" />
-    <Compile Include="BackEnd\BuildEventArgTransportSink_Tests.cs" />
-    <Compile Include="BackEnd\BuildManager_Tests.cs" />
-    <Compile Include="BackEnd\BuildRequestEngine_Tests.cs" />
-    <Compile Include="BackEnd\BuildRequestConfiguration_Tests.cs" />
-    <Compile Include="BackEnd\BuildRequestConfigurationResponse_Tests.cs" />
-    <Compile Include="BackEnd\BuildRequest_Tests.cs" />
-    <Compile Include="BackEnd\BuildResult_Tests.cs" />
-    <Compile Include="BackEnd\BuildRequestEntry_Tests.cs" />
-    <Compile Include="BackEnd\CentralForwardingLogger_Tests.cs " />
-    <Compile Include="BackEnd\ConfigurationMetadata_Tests.cs" />
-    <Compile Include="BackEnd\CustomTaskHelper.cs" />
-    <Compile Include="BackEnd\Scheduler_Tests.cs" />
-    <Compile Include="BackEnd\ITestTaskHost.cs" />
-    <Compile Include="BackEnd\Lookup_Tests.cs" />
-    <Compile Include="BackEnd\MockHost.cs" />
-    <Compile Include="BackEnd\MockLoggingService.cs" />
-    <Compile Include="BackEnd\MockTaskBuilder.cs" />
-    <Compile Include="BackEnd\MSBuild_Tests.cs" />
-    <Compile Include="BackEnd\SdkResolution_Tests.cs" />
-    <Compile Include="BackEnd\SdkResolverLoader_Tests.cs" />
-    <Compile Include="BackEnd\TargetBuilder_Tests.cs" />
-    <Compile Include="BackEnd\EventRedirectorToSink_Tests.cs " />
-    <Compile Include="BackEnd\EventSourceSink_Tests.cs " />
-    <Compile Include="BackEnd\FullyQualifiedBuildRequest_Tests.cs" />
-    <Compile Include="BackEnd\IntrinsicTask_Tests.cs" />
-    <Compile Include="BackEnd\LoggingServiceFactory_Tests.cs " />
-    <Compile Include="BackEnd\LoggingServicesLogMethod_Tests.cs" />
-    <Compile Include="BackEnd\LoggingService_Tests.cs " />
-    <Compile Include="BackEnd\LoggingContext_Tests.cs" />
-    <Compile Include="BackEnd\NodePackets_Tests.cs " />
-    <Compile Include="BackEnd\NodePacketTranslator_Tests.cs" />
-    <Compile Include="BackEnd\NodeEndpointInProc_Tests.cs " />
-    <Compile Include="BackEnd\OnError_Tests.cs" />
-    <Compile Include="BackEnd\ResultsCache_Tests.cs" />
-    <Compile Include="BackEnd\RequestBuilder_Tests.cs" />
-    <Compile Include="BackEnd\TaskBuilderTestTask.cs" />
-    <Compile Include="BackEnd\TaskExecutionHost_Tests.cs" />
-    <Compile Include="BackEnd\TaskHostConfiguration_Tests.cs" />
-    <Compile Include="BackEnd\TaskHostTaskCancelled_Tests.cs" />
-    <Compile Include="BackEnd\TaskHostTaskComplete_Tests.cs" />
-    <Compile Include="BackEnd\TaskHost_Tests.cs" />
-    <Compile Include="Construction\ProjectRootElement_Tests.cs" />
-    <Compile Include="Evaluation\EvaluationLogging_Tests.cs" />
-    <Compile Include="MockLoggingContext.cs" />
-    <Compile Include="TestComparers\TaskRegistryComparers.cs" />
-    <Compile Include="BackEnd\TaskRegistry_Tests.cs" />
-    <Compile Include="BackEnd\TranslationHelpers.cs" />
-    <Compile Include="BackEnd\TargetEntry_Tests.cs" />
-    <Compile Include="BackEnd\TargetResult_Tests.cs" />
-    <Compile Include="BackEnd\TargetUpToDateChecker_Tests.cs" />
-    <Compile Include="BinaryLogger_Tests.cs" />
-    <Compile Include="BuildEnvironmentHelper_Tests.cs" />
-    <Compile Include="BuildEventArgsSerialization_Tests.cs" />
-    <Compile Include="Definition\Project_Internal_Tests.cs" />
-    <Compile Include="BackEnd\TaskBuilder_Tests.cs" />
-    <Compile Include="BackEnd\TaskItemComparer.cs" />
-    <Compile Include="Collections\CopyOnReadEnumerable_Tests.cs" />
-    <Compile Include="Collections\FilteringEnumerable_Tests.cs" />
-    <Compile Include="Collections\MSBuildNameIgnoreCaseComparer_Tests.cs" />
-    <Compile Include="Collections\MultiDictionary_Tests.cs" />
-    <Compile Include="Collections\OMcollections_tests.cs" />
-    <Compile Include="ConfigureableForwardingLogger_Tests.cs" />
-    <Compile Include="ConsoleLogger_Tests.cs" />
-    <Compile Include="Construction\ElementLocation_Tests.cs" />
-    <Compile Include="Construction\SolutionProjectGenerator_Tests.cs" />
-    <Compile Include="Construction\SolutionFile_Tests.cs" />
-    <Compile Include="Construction\XmlReaderWithoutLocation_Tests.cs" />
-    <Compile Include="Definition\ItemDefinitionGroup_Tests.cs" />
-    <Compile Include="Definition\ProjectHelpers.cs" />
-    <Compile Include="Definition\ProjectItem_Tests.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader_Tests.cs" Condition="$(FeatureSystemConfiguration) == 'true'" />
-    <Compile Include="Definition\ToolsetConfigurationReaderTestHelper.cs" Condition="$(FeatureSystemConfiguration) == 'true'" />
-    <Compile Include="Definition\ToolsetReader_Tests.cs" />
-    <Compile Include="Definition\ToolsetRegistryReader_Tests.cs" />
-    <Compile Include="Definition\Toolset_Tests.cs" />
-    <Compile Include="Definition\ToolsVersion_Tests.cs" />
-    <Compile Include="EscapingInProjects_Tests.cs" />
-    <Compile Include="Evaluation\ItemEvaluation_Tests.cs" />
-    <Compile Include="Evaluation\Evaluator_Tests.cs" />
-    <Compile Include="Evaluation\Expander_Tests.cs" />
-    <Compile Include="Evaluation\ExpressionShredder_Tests.cs" />
-    <Compile Include="Evaluation\ImportFromMSBuildExtensionsPath_Tests.cs" />
-    <Compile Include="Evaluation\Preprocessor_Tests.cs" />
-    <Compile Include="Evaluation\ProjectRootElementCache_Tests.cs" />
-    <Compile Include="Evaluation\ItemSpec_Tests.cs" />
-    <Compile Include="Evaluation\ProjectStringCache_Tests.cs" />
-    <Compile Include="EventArgsFormatting_Tests.cs" />
-    <Compile Include="ExpressionTreeExpression_Tests.cs" />
-    <Compile Include="ExpressionTree_Tests.cs" />
-    <Compile Include="FileLogger_Tests.cs" />
-    <Compile Include="Globbing\MSBuildGlobWithGaps_Tests.cs" />
-    <Compile Include="Globbing\CompositeGlob_Tests.cs" />
-    <Compile Include="Globbing\MSBuildGlob_Tests.cs" />
-    <Compile Include="HashTableUtility_Tests.cs" />
-    <Compile Include="Instance\HostServices_Tests.cs" />
-    <Compile Include="TestComparers\ProjectInstanceModelTestComparers.cs" />
-    <Compile Include="TestData\ProjectInstanceTestObjects.cs" />
-    <Compile Include="Instance\ProjectInstance_Internal_Tests.cs" />
-    <Compile Include="Instance\ProjectTaskInstance_Internal_Tests.cs" />
-    <Compile Include="Instance\ProjectTargetInstance_Internal_Tests.cs" />
-    <Compile Include="Instance\ProjectMetadataInstance_Internal_Tests.cs" />
-    <Compile Include="Instance\ProjectItemGroupTaskItemInstance_Internal_Tests.cs" />
-    <Compile Include="Instance\ProjectPropertyInstance_Internal_Tests.cs" />
-    <Compile Include="Instance\ProjectPropertyGroupTaskPropertyInstance_Internal_Tests.cs" />
-    <Compile Include="Instance\TaskItem_Tests.cs" />
-    <Compile Include="FixPathOnUnix_Tests.cs" />
-    <Compile Include="InvalidProjectFileException_Tests.cs" />
-    <Compile Include="LogFormatter_Tests.cs" />
-    <Compile Include="LoggerDescription_Tests.cs" />
-    <Compile Include="LoggerException_Tests.cs" />
-    <Compile Include="MockElementLocation.cs" />
-    <Compile Include="MockTask.cs" />
-    <Compile Include="OpportunisticIntern_Tests.cs" />
-    <Compile Include="Parser_Tests.cs" />
-    <Compile Include="Scanner_Tests.cs" />
-    <Compile Include="TargetsFile_Test.cs" />
-    <Compile Include="TestUtilities.cs" />
-    <Compile Include="Utilities_Tests.cs" />
-    <Compile Include="WarningsAsMessagesAndErrors_Tests.cs" />
+
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\Tasks\Microsoft.Common.overridetasks">
-      <Link>Microsoft.Common.overridetasks</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Tasks\Microsoft.Common.tasks">
-      <Link>Microsoft.Common.tasks</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="project.json" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj">
-      <Project>{E1ADB824-2B34-4920-953F-746DFD6DB3C1}</Project>
-      <Name>Microsoft.Build.UnitTests.Shared</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
-      <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
-      <Name>Microsoft.Build.Utilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj">
-      <Project>{59a73fe0-d3b7-4299-9063-3a587d429af4}</Project>
-      <Name>Microsoft.Build.Tasks</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Build\Microsoft.Build.csproj">
-      <Project>{16cd7635-7cf4-4c62-a77b-cf87d0f09a58}</Project>
-      <Name>Microsoft.Build</Name>
-    </ProjectReference>
-    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(NetCoreBuild)' != 'true'">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
-    </Reference>
-    <ProjectReference Include="..\MSBuild\MSBuild.csproj">
-      <Project>{23c9fd0e-70c5-4f1f-b08a-d2774240fb51}</Project>
-      <Name>MSBuild</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="..\dir.targets" />
 </Project>

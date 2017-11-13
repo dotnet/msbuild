@@ -1,70 +1,36 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BE53C18D-7E4E-4C57-A359-1D662C384511}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Microsoft.Build.Framework.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Framework.UnitTests</AssemblyName>
-    <IsTestProject>true</IsTestProject>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
+
   <ItemGroup>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Attribute_Tests.cs" />
-    <Compile Include="BuildErrorEventArgs_Tests.cs" />
-    <Compile Include="BuildFinishedEventArgs_Tests.cs" />
-    <Compile Include="BuildMessageEventArgs_Tests.cs" />
-    <Compile Include="BuildStartedEventArgs_Tests.cs" />
-    <Compile Include="BuildWarningEventArgs_Tests.cs" />
-    <Compile Include="CriticalBuildMessageEventArgs_Tests.cs" />
-    <Compile Include="CustomEventArgSerialization_Tests.cs" />
-    <Compile Include="EventArgs_Tests.cs" />
-    <Compile Include="ExternalProjectFinishedEventArgs_Tests.cs" />
-    <Compile Include="ExternalProjectStartedEventArgs_Tests.cs" />
-    <Compile Include="LoggerException_Tests.cs" />
-    <Compile Include="ProjectFinishedEventArgs_Tests.cs" />
-    <Compile Include="ProjectStartedEventArgs_Tests.cs" />
-    <Compile Include="SdkReference_Tests.cs" />
-    <Compile Include="TargetFinishedEventArgs_Tests.cs" />
-    <Compile Include="TargetStartedEventArgs_Tests.cs" />
-    <Compile Include="TaskCommandLineEventArgs_Tests.cs" />
-    <Compile Include="TaskFinishedEventArgs_Tests.cs" />
-    <Compile Include="TaskStartedEventArgs_Tests.cs" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.1-servicing-02201-03" />
+    <PackageReference Include="Microsoft.DotNet.BuildTools.TestSuite" Version="1.0.1-servicing-02201-03" />
+    <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571f09db-a81a-4444-945c-6f7b530054cd}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <Reference Include="System" />
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
+
   <ItemGroup>
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="project.json" />
+    <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <!--
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
-  -->
-  <Import Project="..\dir.targets" />
+
 </Project>

@@ -1,26 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <ProjectGuid>{571F09DB-A81A-4444-945C-6F7B530054CD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Build.Framework</RootNamespace>
-    <AssemblyName>Microsoft.Build.Framework</AssemblyName>
-    <EnableDocumentationFile>true</EnableDocumentationFile>
-    <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
-    <DoNotLocalizeProject>true</DoNotLocalizeProject>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</TargetFrameworks>
+
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
+
   <ItemGroup>
     <Compile Include="..\Shared\Constants.cs">
       <Link>Constants.cs</Link>
@@ -184,13 +171,18 @@
     <Compile Include="XamlTypes\StringProperty.cs" />
     <Compile Include="XamlTypes\ValueEditor.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
+
+  <ItemGroup Condition="'$(FeatureXamlTypes)' != 'true'">
+    <Compile Remove="XamlTypes\**" />
+    <EmbeddedResource Remove="XamlTypes\**" />
+    <None Remove="XamlTypes\**" />
   </ItemGroup>
+
+
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Include="System.Threading.Thread" Version="4.0.0" />
+
+    <Reference Include="System.Xaml" Condition="'$(FeatureXamlTypes)' == 'true'" />
   </ItemGroup>
-  <Import Project="..\dir.targets" />
 </Project>

@@ -1,49 +1,48 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
-    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v1.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <Import Project="..\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</TargetFrameworks>
+
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
+
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
-    <EnableDocumentationFile>true</EnableDocumentationFile>
-    <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
+
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'">
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
-  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+    
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
+    
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.0.0" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'" />
+
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.0.1" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow">
+      <Version Condition="'$(TargetFramework)' == 'net46'">4.5.24.0</Version>
+      <Version Condition="'$(TargetFramework)' != 'net46'">4.6.0</Version>
+    </PackageReference>
+
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+
+    <Reference Include="System.Configuration" Condition="'$(TargetFramework)' == 'net46'" />
+
+  </ItemGroup>
+
   <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
        The code here was generally copied from the .NET Framework reference source and
-       modified to compile for .NET Core -->
+       modified to compile for .NET Core.
+       
+       After retargeting to .NET Standard 2.0, many of these can probably be removed -->
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
     <Compile Include="..\Shared\Compat\Base64Encoder.cs">
       <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
@@ -69,12 +68,6 @@
     <Compile Include="..\Shared\Compat\XmlTextEncoder.cs">
       <Link>SharedUtilities\Compat\XmlTextEncoder.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\XmlTextWriter.cs">
-      <Link>SharedUtilities\Compat\XmlTextWriter.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
-      <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Compat\defaultbinder.cs">
       <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
     </Compile>
@@ -83,9 +76,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>SharedUtilities\EncodingUtilities.cs</Link>
     </Compile>
@@ -757,6 +747,8 @@
     <Compile Include="FxCopExclusions\Microsoft.Build.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
+
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
     <!-- Resource Files -->
@@ -770,29 +762,10 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <!-- Assemblies Files we depend on -->
-    <!-- Be conservative when adding references... adding System.Xml.Linq can add .47 sec cold start time to our launch time, or 80 ms to warm start time -->
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Threading.Tasks">
-      <HintPath>$(FrameworkPathOverride)\System.Threading.Tasks.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
+    <Compile Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**;Collections\RetrievableEntryHashSet\Originals\*" />
+    <EmbeddedResource Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**" />
+    <None Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
-    <None Include="project.json" />
-  </ItemGroup>
-  <!--
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
-  -->
-  <Import Project="..\dir.targets" />
 </Project>

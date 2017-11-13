@@ -1,23 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <PlatformSpecificBuild>true</PlatformSpecificBuild>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
-    <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
-    <NoStdLib>true</NoStdLib>
-    <NoWarn>$(NoWarn);1701</NoWarn>
-    <TargetExt>.dll</TargetExt>
-  </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <PropertyGroup>
-    <ProjectGuid>{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>
-    <AssemblyName>MSBuild</AssemblyName>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp2.0</TargetFrameworks>
+
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>MSBuild</AssemblyName>
+    <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>
+    <ApplicationIcon>MSBuild.ico</ApplicationIcon>
+    <LargeAddressAware>true</LargeAddressAware>
+
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
     <AppConfig>app.config</AppConfig>
@@ -25,38 +20,13 @@
          https://github.com/Microsoft/msbuild/issues/834 Long term
          two files should be generated from a single source. -->
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
-    <ApplicationIcon>MSBuild.ico</ApplicationIcon>
-    <LargeAddressAware>true</LargeAddressAware>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
-  </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-  <PropertyGroup>
-    <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|x64'" />
-  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
-      <Link>Compat\SerializableAttribute.cs</Link>
-    </Compile>
-  </ItemGroup>
+
   <ItemGroup>
-    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -248,35 +218,7 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Build\Microsoft.Build.csproj">
-      <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
-      <Name>Microsoft.Build</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="app.amd64.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="MSBuild.exe.manifest" />
-    <None Include="project.json" />
-  </ItemGroup>
-  <Import Project="..\dir.targets" />
-  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
-            properties to any folder that exists to skip the GetReferenceAssemblyPaths task (not target) and
-            to prevent it from outputting a warning (MSB3644).
-        -->
-    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
-    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
-    <!-- MSBuild thinks all EXEs need binding redirects, not so for CoreCLR! -->
-    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
-    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
-  </PropertyGroup>
 </Project>
