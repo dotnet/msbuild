@@ -2668,6 +2668,8 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
+                            // If IgnoreFaultedImports is enabled, log all other non-handled exceptions and continue
+                            //
                             if (((_loadSettings & ProjectLoadSettings.IgnoreFaultedImports) != 0))
                             {
                                 atleastOneImportIgnored = true;
@@ -2681,19 +2683,6 @@ namespace Microsoft.Build.Evaluation
                                     importElement.ContainingProject.FullPath,
                                     importElement.Location.Line,
                                     importElement.Location.Column)
-                                {
-                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                                    UnexpandedProject = importElement.Project,
-                                    ProjectFile = importElement.ContainingProject.FullPath,
-                                };
-
-                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
-
-                                // Log message for the fault that caused the import to be skipped
-                                eventArgs = new ProjectImportedEventArgs(
-                                    ex.LineNumber,
-                                    ex.ColumnNumber,
-                                    ex.Message)
                                 {
                                     BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                                     UnexpandedProject = importElement.Project,

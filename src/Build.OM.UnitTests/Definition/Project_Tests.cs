@@ -4060,33 +4060,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreFaultedImports);
 
-                    IEnumerable<ProjectImportedEventArgs> eventArgs = logger.AllBuildEvents.Where(i => i is ProjectImportedEventArgs).Cast<ProjectImportedEventArgs>();
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    ProjectImportedEventArgs ignoreImportArg = eventArgs.FirstOrDefault();
-                    ProjectImportedEventArgs faultArg = eventArgs.LastOrDefault();
+                    Assert.NotNull(eventArgs);
 
-                    Assert.NotNull(ignoreImportArg);
-                    Assert.NotNull(faultArg);
-                    Assert.NotSame(ignoreImportArg, faultArg);
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
 
-                    Assert.Equal(import.Project, ignoreImportArg.UnexpandedProject);
-                    Assert.Equal(import.Project, faultArg.UnexpandedProject);
+                    Assert.Null(eventArgs.ImportedProjectFile);
 
-                    Assert.Null(ignoreImportArg.ImportedProjectFile);
-                    Assert.Null(faultArg.ImportedProjectFile);
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
 
-                    Assert.Equal(pre.FullPath, ignoreImportArg.ProjectFile);
-                    Assert.Equal(pre.FullPath, faultArg.ProjectFile);
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
 
-                    Assert.Equal(6, ignoreImportArg.LineNumber);
-                    Assert.Equal(3, ignoreImportArg.ColumnNumber);
-
-                    Assert.Equal(2, faultArg.LineNumber);
-                    Assert.Equal(1, faultArg.ColumnNumber);
-
-                    logger.AssertLogContains(
-                        $"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({ignoreImportArg.LineNumber},{ignoreImportArg.ColumnNumber}), due to the file being faulted.",
-                        $"The element <#text> beneath element <Project> is unrecognized.  {import.Project}");
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being faulted.");
                 }
             }
         }
