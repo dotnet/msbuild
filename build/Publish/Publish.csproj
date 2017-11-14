@@ -1,9 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <PropertyGroup>
-    <BuildTasksFeedDllVersion>1.0.0-prerelease-01929-02</BuildTasksFeedDllVersion>
-  </PropertyGroup>
-
-  <Import Project="$(MSBuildThisFileDirectory)\PublishNupkgToTransportFeed.targets" />
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
@@ -16,7 +13,13 @@
     <NoStdLib>true</NoStdLib>
   </PropertyGroup>
 
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(BuildTasksFeedDllVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(MicrosoftDotNetBuildTasksFeedVersion)" />
   </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\PublishNupkgToTransportFeed.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
 </Project>

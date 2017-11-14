@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
 
   <PropertyGroup>
-    <!-- Capture 'OutputPath' before Publish.csproj modifies it -->
-    <OutputPathTransportFeed>$(OutputPath)</OutputPathTransportFeed>
-    <BuildTasksFeedDll>$(NuGet_Packages)\Microsoft.DotNet.Build.Tasks.Feed\$(BuildTasksFeedDllVersion)\lib\desktop\Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
+    <OutputPathTransportFeed>$(ArtifactsConfigurationDir)</OutputPathTransportFeed>
+    <MicrosoftDotNetBuildTasksFeedDll>$(NuGetPackageRoot)Microsoft.DotNet.Build.Tasks.Feed\$(MicrosoftDotNetBuildTasksFeedVersion)\lib\desktop\Microsoft.DotNet.Build.Tasks.Feed.dll</MicrosoftDotNetBuildTasksFeedDll>
   </PropertyGroup>
 
-  <UsingTask TaskName="PushToBlobFeed" AssemblyFile="$(BuildTasksFeedDll)" />
+  <UsingTask TaskName="PushToBlobFeed" AssemblyFile="$(MicrosoftDotNetBuildTasksFeedDll)" />
 
   <ItemGroup>
-    <NupkgsForPublishing Include="$(OutputPathTransportFeed)Packages\Microsoft.NET.Sdk.*.nupkg" />
-    <NupkgsForPublishing Include="$(OutputPathTransportFeed)Packages\Microsoft.NET.Build.Extensions.*.nupkg" />
+    <NupkgsForPublishing Include="$(PackageOutputPath)Microsoft.NET.Sdk.*.nupkg" />
+    <NupkgsForPublishing Include="$(PackageOutputPath)Microsoft.NET.Build.Extensions.*.nupkg" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -35,7 +34,7 @@
         <![CDATA[
 ]]>
       </NewLineTF>
-      <SetNuget_PackagesTF>set NUGET_PACKAGES=$(NuGet_Packages)</SetNuget_PackagesTF>
+      <SetNuget_PackagesTF>set NUGET_PACKAGES=$(NUGET_PACKAGES)</SetNuget_PackagesTF>
       <SetDotnet_Skip_FirstTime>set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true</SetDotnet_Skip_FirstTime>
       <PublishProjectFile>"$(MSBuildThisFileDirectory)Publish.csproj"</PublishProjectFile>
     </PropertyGroup>
