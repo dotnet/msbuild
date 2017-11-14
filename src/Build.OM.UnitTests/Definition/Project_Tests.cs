@@ -4035,6 +4035,63 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void ProjectImportedEventFaultedFile()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project>BROKEN</Project>
+";
+                string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+                var import = pre.AddImport(importPath);
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreFaultedImports);
+
+                    IEnumerable<ProjectImportedEventArgs> eventArgs = logger.AllBuildEvents.Where(i => i is ProjectImportedEventArgs).Cast<ProjectImportedEventArgs>();
+
+                    ProjectImportedEventArgs ignoreImportArg = eventArgs.FirstOrDefault();
+                    ProjectImportedEventArgs faultArg = eventArgs.LastOrDefault();
+
+                    Assert.NotNull(ignoreImportArg);
+                    Assert.NotNull(faultArg);
+                    Assert.NotSame(ignoreImportArg, faultArg);
+
+                    Assert.Equal(import.Project, ignoreImportArg.UnexpandedProject);
+                    Assert.Equal(import.Project, faultArg.UnexpandedProject);
+
+                    Assert.Null(ignoreImportArg.ImportedProjectFile);
+                    Assert.Null(faultArg.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, ignoreImportArg.ProjectFile);
+                    Assert.Equal(pre.FullPath, faultArg.ProjectFile);
+
+                    Assert.Equal(6, ignoreImportArg.LineNumber);
+                    Assert.Equal(3, ignoreImportArg.ColumnNumber);
+
+                    Assert.Equal(2, faultArg.LineNumber);
+                    Assert.Equal(1, faultArg.ColumnNumber);
+
+                    logger.AssertLogContains(
+                        $"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({ignoreImportArg.LineNumber},{ignoreImportArg.ColumnNumber}), due to the file being faulted.",
+                        $"The element <#text> beneath element <Project> is unrecognized.  {import.Project}");
+                }
+            }
+        }
+
+        [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226

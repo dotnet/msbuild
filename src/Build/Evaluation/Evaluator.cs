@@ -2668,6 +2668,43 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
+                            if (((_loadSettings & ProjectLoadSettings.IgnoreFaultedImports) != 0))
+                            {
+                                atleastOneImportIgnored = true;
+
+                                // Log message for import skipped
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ResourceUtilities.GetResourceString("ProjectImportSkippedFaultedFile"),
+                                    importFileUnescaped,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath,
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                                // Log message for the fault that caused the import to be skipped
+                                eventArgs = new ProjectImportedEventArgs(
+                                    ex.LineNumber,
+                                    ex.ColumnNumber,
+                                    ex.Message)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath,
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                                continue;
+                            }
+
                             // If this exception is a wrapped exception (like IOException or XmlException) then wrap it as an invalid import instead
                             if (ex.InnerException != null)
                             {
