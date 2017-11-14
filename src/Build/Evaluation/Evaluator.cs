@@ -2670,7 +2670,7 @@ namespace Microsoft.Build.Evaluation
 
                             // If IgnoreFaultedImports is enabled, log all other non-handled exceptions and continue
                             //
-                            if (((_loadSettings & ProjectLoadSettings.IgnoreFaultedImports) != 0))
+                            if (((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0))
                             {
                                 atleastOneImportIgnored = true;
 
@@ -2678,7 +2678,7 @@ namespace Microsoft.Build.Evaluation
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                                     importElement.Location.Line,
                                     importElement.Location.Column,
-                                    ResourceUtilities.GetResourceString("ProjectImportSkippedFaultedFile"),
+                                    ResourceUtilities.GetResourceString("ProjectImportSkippedInvalidFile"),
                                     importFileUnescaped,
                                     importElement.ContainingProject.FullPath,
                                     importElement.Location.Line,

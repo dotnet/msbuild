@@ -51,8 +51,8 @@ namespace Microsoft.Build.Evaluation
         DoNotEvaluateElementsWithFalseCondition = 32,
 
         /// <summary>
-        /// Ignore faulted target files when evaluating the project
+        /// Ignore invalid target files when evaluating the project
         /// </summary>
-        IgnoreFaultedImports = 64,
+        IgnoreInvalidImports = 64,
     }
 }

@@ -4035,7 +4035,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void ProjectImportedEventFaultedFile()
+        public void ProjectImportedEventInvalidFile()
         {
             using (var env = TestEnvironment.Create(_output))
             {
@@ -4058,7 +4058,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     MockLogger logger = new MockLogger();
                     collection.RegisterLogger(logger);
 
-                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreFaultedImports);
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreInvalidImports);
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
@@ -4073,7 +4073,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Assert.Equal(6, eventArgs.LineNumber);
                     Assert.Equal(3, eventArgs.ColumnNumber);
 
-                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being faulted.");
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being invalid.");
                 }
             }
         }

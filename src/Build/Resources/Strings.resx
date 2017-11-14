@@ -1624,8 +1624,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being empty.</value>
   </data>
 
-  <data name="ProjectImportSkippedFaultedFile">
-    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being faulted.</value>
+  <data name="ProjectImportSkippedInvalidFile">
+    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being invalid.</value>
   </data>
 
   <data name="ProjectImported">
