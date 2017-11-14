@@ -4000,11 +4000,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
 ";
-                string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
+                var importFile = env.CreateFile(".targets");
+                File.WriteAllText(importFile.Path, contents);
                 ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
 
                 pre.AddPropertyGroup().AddProperty("NotUsed", "");
-                var import = pre.AddImport(importPath);
+                var import = pre.AddImport(importFile.Path);
 
                 pre.Save();
                 pre.Reload();
@@ -4044,11 +4045,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project>BROKEN</Project>
 ";
-                string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
+
+                var importFile = env.CreateFile(".targets");
+                File.WriteAllText(importFile.Path, contents);
                 ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
 
                 pre.AddPropertyGroup().AddProperty("NotUsed", "");
-                var import = pre.AddImport(importPath);
+                var import = pre.AddImport(importFile.Path);
 
                 pre.Save();
                 pre.Reload();
