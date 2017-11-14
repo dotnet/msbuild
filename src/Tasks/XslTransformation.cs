@@ -341,7 +341,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (XmlException xe)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XsltParameterNotWellFormed"), xe);
+                throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XsltParameterNotWellFormed"), xe);
             }
 
             XmlNodeList xnl = doc.SelectNodes("/XsltParameters/*[local-name() = 'Parameter']");
@@ -398,11 +398,11 @@ namespace Microsoft.Build.Tasks
             {
                 if (xmlFile != null && xml != null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XmlInput.TooMany"));
+                    throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XmlInput.TooMany"));
                 }
                 else if (xmlFile == null && xml == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XmlInput.TooFew"));
+                    throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XmlInput.TooFew"));
                 }
 
                 if (xmlFile != null)
@@ -512,11 +512,11 @@ namespace Microsoft.Build.Tasks
                     (xsltFile != null && xsltCompiledDll != null) ||
                     (xslt != null && xsltCompiledDll != null))
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XsltInput.TooMany"));
+                    throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XsltInput.TooMany"));
                 }
                 else if (xsltFile == null && xslt == null && xsltCompiledDll == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XslTransform.XsltInput.TooFew"));
+                    throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XsltInput.TooFew"));
                 }
 
                 if (xsltFile != null)

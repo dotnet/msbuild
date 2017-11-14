@@ -86,6 +86,9 @@
       <Link>FileUtilitiesRegex.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <Link>IConstrainedEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\QuotingUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

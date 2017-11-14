@@ -225,11 +225,6 @@
         <target state="translated">MSB4142: il valore di MSBuildToolsPath non corrisponde al valore di MSBuildBinPath per il parametro ToolsVersion "{0}" definito in "{1}". Se entrambi sono presenti, devono avere lo stesso valore.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
-      <trans-unit id="CustomNamespaceNotAllowedOnThisChildElement">
-        <source>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</source>
-        <target state="translated">MSB4097: l'elemento &lt;{0}&gt; al di sotto dell'elemento &lt;{1}&gt; non può avere uno spazio dei nomi XML personalizzato.</target>
-        <note>{StrBegin="MSB4097: "}</note>
-      </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
         <source>MSB4009: The default tasks file could not be successfully loaded. {0}</source>
         <target state="translated">MSB4009: non è stato possibile caricare il file predefinito delle attività. {0}</target>
@@ -2045,6 +2040,21 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
         <target state="translated">Importazione del progetto "{0}" nel progetto "{1}" a ({2},{3}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
+        <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
+        <target state="translated">La destinazione "{0}" è stata ignorata perché non esiste nel progetto e SkipNonexistentTargets è impostato su true.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryTaskTypeIsNotSet">
+        <source>The task factory must return a value for the "TaskType" property.</source>
+        <target state="translated">La factory delle attività deve restituire un valore per la proprietà "TaskType".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">L'API specificata "{0}" non è disponibile perché ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition è stato impostato durante il caricamento di questo progetto.</target>
         <note />
       </trans-unit>
     </body>

@@ -34,6 +34,8 @@
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\StringExtensions.cs"/>
+    <Compile Include="StringExtensions_Tests.cs" />
     <Compile Include="PlatformManifest_Tests.cs" />
     <Compile Include="TrackedDependencies\FileTrackerTests.cs" />
     <Compile Include="TrackedDependencies\TrackedDependenciesTests.cs" />

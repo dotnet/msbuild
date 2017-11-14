@@ -57,87 +57,13 @@ namespace Microsoft.Build.Evaluation
         /// Fragments are trimmed and empty fragments discarded.
         /// </summary>
         /// <remarks>
-        /// These complex cases prevent us from doing a simple split on ';':
-        ///  (1) Macro expression: @(foo->'xxx;xxx')
-        ///  (2) Separator expression: @(foo, 'xxx;xxx')
-        ///  (3) Combination: @(foo->'xxx;xxx', 'xxx;xxx')
-        ///  We must not split on semicolons in macro or separator expressions like these.
+        /// See <see cref="SemiColonTokenizer"/> for rules.
         /// </remarks>
         /// <param name="expression">List expression to split</param>
         /// <returns>Array of non-empty strings from split list.</returns>
-        internal static IList<string> SplitSemiColonSeparatedList(string expression)
+        internal static SemiColonTokenizer SplitSemiColonSeparatedList(string expression)
         {
-            expression = expression.Trim();
-
-            if (expression.Length == 0)
-            {
-                return Array.Empty<string>();
-            }
-
-            List<string> splitList = new List<string>(1);
-            int segmentStart = 0;
-            bool insideItemList = false;
-            bool insideQuotedPart = false;
-            string segment;
-
-            // Walk along the string, keeping track of whether we are in an item list expression.
-            // If we hit a semi-colon or the end of the string and we aren't in an item list, 
-            // add the segment to the list.
-            for (int current = 0; current < expression.Length; current++)
-            {
-                switch (expression[current])
-                {
-                    case ';':
-                        if (!insideItemList)
-                        {
-                            // End of segment, so add it to the list
-                            segment = expression.Substring(segmentStart, current - segmentStart).Trim();
-                            if (segment.Length > 0)
-                            {
-                                splitList.Add(segment);
-                            }
-
-                            // Move past this semicolon
-                            segmentStart = current + 1;
-                        }
-
-                        break;
-                    case '@':
-                        // An '@' immediately followed by a '(' is the start of an item list
-                        if (expression.Length > current + 1 && expression[current + 1] == '(')
-                        {
-                            // Start of item expression
-                            insideItemList = true;
-                        }
-
-                        break;
-                    case ')':
-                        if (insideItemList && !insideQuotedPart)
-                        {
-                            // End of item expression
-                            insideItemList = false;
-                        }
-
-                        break;
-                    case '\'':
-                        if (insideItemList)
-                        {
-                            // Start or end of quoted expression in item expression
-                            insideQuotedPart = !insideQuotedPart;
-                        }
-
-                        break;
-                }
-            }
-
-            // Reached the end of the string: what's left is another segment
-            segment = expression.Substring(segmentStart, expression.Length - segmentStart).Trim();
-            if (segment.Length > 0)
-            {
-                splitList.Add(segment);
-            }
-
-            return splitList;
+            return new SemiColonTokenizer(expression);
         }
 
         /// <summary>
@@ -338,7 +264,7 @@ namespace Microsoft.Build.Evaluation
                     // Create an expression capture that encompases the entire expression between the @( and the )
                     // with the item name and any separator contained within it
                     // and each transform expression contained within it (i.e. each ->XYZ)
-                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, expression.Substring(startPoint, endPoint - startPoint), itemName, separator, separatorStart, separatorLength, transformExpressions);
+                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, expression.Substring(startPoint, endPoint - startPoint), itemName, separator, separatorStart, transformExpressions);
                     subExpressions.Add(expressionCapture);
 
                     continue;
@@ -778,43 +704,38 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Captures within this capture
             /// </summary>
-            private List<ItemExpressionCapture> _captures;
+            private readonly List<ItemExpressionCapture> _captures;
 
             /// <summary>
             /// The position in the original string where the first character of the captured
             /// substring was found.
             /// </summary>
-            private int _index;
+            private readonly int _index;
 
             /// <summary>
             /// The length of the captured substring.
             /// </summary>
-            private int _length;
+            private readonly int _length;
 
             /// <summary>
             /// The captured substring from the input string.
             /// </summary>
-            private string _value;
+            private readonly string _value;
 
             /// <summary>
             /// The type of the item within this expression
             /// </summary>
-            private string _itemType;
+            private readonly string _itemType;
 
             /// <summary>
             /// The separator, if any, within this expression
             /// </summary>
-            private string _separator;
+            private readonly string _separator;
 
             /// <summary>
             /// The starting character of the separator within the expression
             /// </summary>
-            private int _separatorStart;
-
-            /// <summary>
-            /// The length of the separator
-            /// </summary>
-            private int _separatorLength;
+            private readonly int _separatorStart;
 
             /// <summary>
             /// The function name, if any, within this expression
@@ -830,7 +751,7 @@ namespace Microsoft.Build.Evaluation
             /// Create an Expression Capture instance
             /// Represents a sub expression, shredded from a larger expression
             /// </summary>
-            public ItemExpressionCapture(int index, int length, string subExpression) : this(index, length, subExpression, null, null, -1, -1, null)
+            public ItemExpressionCapture(int index, int length, string subExpression) : this(index, length, subExpression, null, null, -1, null)
             {
             }
 
@@ -838,7 +759,7 @@ namespace Microsoft.Build.Evaluation
             /// Create an Expression Capture instance
             /// Represents a sub expression, shredded from a larger expression
             /// </summary>
-            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, int separatorLength, List<ItemExpressionCapture> captures)
+            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, List<ItemExpressionCapture> captures)
             {
                 _index = index;
                 _length = length;
@@ -846,7 +767,6 @@ namespace Microsoft.Build.Evaluation
                 _itemType = itemType;
                 _separator = separator;
                 _separatorStart = separatorStart;
-                _separatorLength = separatorLength;
                 _captures = captures;
             }
 
@@ -856,7 +776,6 @@ namespace Microsoft.Build.Evaluation
             public List<ItemExpressionCapture> Captures
             {
                 get { return _captures; }
-                set { _captures = value; }
             }
 
             /// <summary>
@@ -890,7 +809,6 @@ namespace Microsoft.Build.Evaluation
             public string ItemType
             {
                 get { return _itemType; }
-                set { _itemType = value; }
             }
 
             /// <summary>
@@ -899,7 +817,6 @@ namespace Microsoft.Build.Evaluation
             public string Separator
             {
                 get { return _separator; }
-                set { _separator = value; }
             }
 
             /// <summary>
@@ -908,14 +825,6 @@ namespace Microsoft.Build.Evaluation
             public int SeparatorStart
             {
                 get { return _separatorStart; }
-            }
-
-            /// <summary>
-            /// The length of the separator.
-            /// </summary>
-            public int SeparatorLength
-            {
-                get { return _separatorLength; }
             }
 
             /// <summary>

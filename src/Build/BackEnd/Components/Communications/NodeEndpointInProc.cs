@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
@@ -92,7 +93,7 @@ namespace Microsoft.Build.BackEnd
         /// Operations on this queue must be synchronized since it is accessible by multiple threads.
         /// Use a lock on the packetQueue itself.
         /// </remarks>
-        private Queue<INodePacket> _packetQueue;
+        private ConcurrentQueue<INodePacket> _packetQueue;
         #endregion
 
         #region Constructors and Factories
@@ -332,11 +333,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue is null");
             ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable is null");
 
-            lock (_packetQueue)
-            {
-                _packetQueue.Enqueue(packet);
-                _packetAvailable.Set();
-            }
+            _packetQueue.Enqueue(packet);
+            _packetAvailable.Set();
         }
 
         /// <summary>
@@ -367,7 +365,7 @@ namespace Microsoft.Build.BackEnd
                 _packetPump.Name = "InProc Endpoint Packet Pump";
                 _packetAvailable = new AutoResetEvent(false);
                 _terminatePacketPump = new AutoResetEvent(false);
-                _packetQueue = new Queue<INodePacket>();
+                _packetQueue = new ConcurrentQueue<INodePacket>();
 #if FEATURE_THREAD_CULTURE
                 _packetPump.CurrentCulture = _componentHost.BuildParameters.Culture;
                 _packetPump.CurrentUICulture = _componentHost.BuildParameters.UICulture;
@@ -432,30 +430,10 @@ namespace Microsoft.Build.BackEnd
                             break;
                         case 1:
                             {
-                                // Figure out how many packets are currently in the queue to process.  We
-                                // will only process the number in the queue at this moment so that we don't
-                                // get into a condition where the sending thread continues to pump packets in
-                                // as fast as we can send them, potentially starving us from detecting a
-                                // terminate event.
-                                int packets = 0;
-                                lock (_packetQueue)
+                                INodePacket packet;
+                                while (_packetQueue.TryDequeue(out packet))
                                 {
-                                    packets = _packetQueue.Count;
-                                }
-
-                                while (packets > 0)
-                                {
-                                    // Grab the first packet in the queue.
-                                    INodePacket packet = null;
-
-                                    lock (_packetQueue)
-                                    {
-                                        ErrorUtilities.VerifyThrow(_packetQueue.Count > 0, "Packet Queue count is zero.");
-                                        packet = _packetQueue.Dequeue();
-                                    }
-
                                     _peerEndpoint._packetFactory.RoutePacket(0, packet);
-                                    --packets;
                                 }
                             }
 

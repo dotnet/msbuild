@@ -9,6 +9,156 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
     
     public static class GlobbingTestData
     {
+        public static IEnumerable<object[]> IncludesAndExcludesWithWildcardsTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "a.*", // include string
+                    "*.1", // exclude string
+                    new[] {"a.1", "a.2", "a.1"}, // files
+                    new[] {"a.2"}, // expected include
+                    false // whether to append the project directory to the expected include items
+                };
+
+                yield return new object[]
+                {
+                    @"**\*.cs",
+                    @"a\**",
+                    new[] {"1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs"},
+                    new[] {"1.cs"},
+                    false
+                };
+
+                yield return new object[]
+                {
+                    @"**\*",
+                    @"**\b\**",
+                    new[] {"1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs"},
+                    new[] {"1.cs", @"a\2.cs", "build.proj"},
+                    false
+                };
+
+                yield return new object[]
+                {
+                    @"**\*",
+                    @"**\b\**\*.cs",
+                    new[] {"1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs", @"a\b\c\5.txt"},
+                    new[] {"1.cs", @"a\2.cs", @"a\b\c\5.txt", "build.proj"},
+                    false
+                };
+
+                yield return new object[]
+                {
+                    @"src\**\proj\**\*.cs",
+                    @"src\**\proj\**\none\**\*",
+                    new[]
+                    {
+                        "1.cs",
+                        @"src\2.cs",
+                        @"src\a\3.cs",
+                        @"src\proj\4.cs",
+                        @"src\proj\a\5.cs",
+                        @"src\a\proj\6.cs",
+                        @"src\a\proj\a\7.cs",
+                        @"src\proj\none\8.cs",
+                        @"src\proj\a\none\9.cs",
+                        @"src\proj\a\none\a\10.cs",
+                        @"src\a\proj\a\none\11.cs",
+                        @"src\a\proj\a\none\a\12.cs"
+                    },
+                    new[]
+                    {
+                        @"src\a\proj\6.cs",
+                        @"src\a\proj\a\7.cs",
+                        @"src\proj\4.cs",
+                        @"src\proj\a\5.cs"
+                    },
+                    false
+                };
+
+                yield return new object[]
+                {
+                    @"**\*",
+                    "foo",
+                    new[]
+                    {
+                        "foo",
+                        @"a\foo",
+                        @"a\a\foo",
+                        @"a\b\foo"
+                    },
+                    new[]
+                    {
+                        @"a\a\foo",
+                        @"a\b\foo",
+                        @"a\foo",
+                        "build.proj"
+                    },
+                    false
+                };
+
+                yield return new object[]
+                {
+                    @"**\*",
+                    @"a\af*\*",
+                    new[]
+                    {
+                        @"a\foo",
+                        @"a\a\foo",
+                        @"a\b\foo"
+                    },
+                    new[]
+                    {
+                        @"a\a\foo",
+                        @"a\b\foo",
+                        @"a\foo",
+                        "build.proj"
+                    },
+                    false
+                };
+
+                yield return new object[]
+                {
+                    @"$(MSBuildThisFileDirectory)\**\*",
+                    @"$(MSBuildThisFileDirectory)\a\foo.txt",
+                    new[]
+                    {
+                        @"a\foo",
+                        @"a\foo.txt"
+                    },
+                    new[]
+                    {
+                        @"a\foo",
+                        "build.proj"
+                    },
+                    true
+                };
+
+                yield return new object[]
+                {
+                    @"$(MSBuildThisFileDirectory)\**\*",
+                    @"$(MSBuildThisFileDirectory)\a\**\*;build.proj",
+                    new[]
+                    {
+                        @"a\a",
+                        @"a\b\ab",
+                        @"b\b",
+                        @"c\c",
+                        @"c\d\cd"
+                    },
+                    new[]
+                    {
+                        @"b\b",
+                        @"c\c",
+                        @"c\d\cd"
+                    },
+                    true
+                };
+            }
+        }
+
         public static IEnumerable<object[]> GlobbingConesTestData
         {
             get

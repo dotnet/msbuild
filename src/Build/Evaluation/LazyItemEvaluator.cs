@@ -10,6 +10,7 @@ using Microsoft.Build.Debugging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -45,24 +46,30 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Cache used for caching IO operation results
+        /// </summary>
+        private readonly ConcurrentDictionary<string, ImmutableArray<string>> _entriesCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
+
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext)
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
-            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType).Select(itemData => itemData.Item).ToList());
+            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
         }
 
-        private ICollection<ItemData> GetItems(string itemType)
+        private ImmutableList<I> GetItems(string itemType)
         {
             LazyItemList itemList = GetItemList(itemType);
             if (itemList == null)
             {
-                return ImmutableList<ItemData>.Empty;
+                return ImmutableList<I>.Empty;
             }
-            return itemList.GetItems(ImmutableHashSet<string>.Empty).Where(itemData => itemData.ConditionResult).ToList();
+
+            return itemList.GetMatchedItems(ImmutableHashSet<string>.Empty);
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
@@ -239,7 +246,19 @@ namespace Microsoft.Build.Evaluation
                 _memoizedOperation = new MemoizedOperation(operation);
             }
 
-            public ImmutableList<ItemData>.Builder GetItems(ImmutableHashSet<string> globsToIgnore)
+            public ImmutableList<I> GetMatchedItems(ImmutableHashSet<string> globsToIgnore)
+            {
+                ImmutableList<I>.Builder items = ImmutableList.CreateBuilder<I>();
+                foreach (ItemData data in GetItemData(globsToIgnore))
+                {
+                    if (data.ConditionResult)
+                        items.Add(data.Item);
+                }
+
+                return items.ToImmutable();
+            }
+
+            public ImmutableList<ItemData>.Builder GetItemData(ImmutableHashSet<string> globsToIgnore)
             {
                 // Cache results only on the LazyItemOperations whose results are required by an external caller (via GetItems). This means:
                 //   - Callers of GetItems who have announced ahead of time that they would reference an operation (via MarkAsReferenced())
@@ -357,13 +376,16 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilder
         {
+            // WORKAROUND: Unnecessary boxed allocation: https://github.com/dotnet/corefx/issues/24563
+            private static readonly ImmutableDictionary<string, LazyItemList> s_emptyIgnoreCase = ImmutableDictionary.Create<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
             public ItemSpec<P,I> ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
-                ImmutableDictionary.CreateBuilder<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+                s_emptyIgnoreCase.ToBuilder();
 
             public bool ConditionResult { get; set; }
 
@@ -401,13 +423,10 @@ namespace Microsoft.Build.Evaluation
             return ret;
         }
 
-        public IList<ItemData> GetAllItems()
+        public IEnumerable<ItemData> GetAllItemsDeferred()
         {
-            var ret = _itemLists.Values.SelectMany(itemList => itemList.GetItems(ImmutableHashSet<string>.Empty))
-                .OrderBy(itemData => itemData.ElementOrder)
-                .ToList();
-
-            return ret;
+            return _itemLists.Values.SelectMany(itemList => itemList.GetItemData(ImmutableHashSet<string>.Empty))
+                                    .OrderBy(itemData => itemData.ElementOrder);
         }
 
         public void ProcessItemElement(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
@@ -441,7 +460,7 @@ namespace Microsoft.Build.Evaluation
             OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata(itemElement, conditionResult);
 
             // Proces Update attribute
-            ProcessItemSpec(itemElement.Update, itemElement.UpdateLocation, operationBuilder);
+            ProcessItemSpec(rootDirectory, itemElement.Update, itemElement.UpdateLocation, operationBuilder);
 
             ProcessMetadataElements(itemElement, operationBuilder);
 
@@ -456,7 +475,7 @@ namespace Microsoft.Build.Evaluation
             operationBuilder.ConditionResult = conditionResult;
 
             // Process include
-            ProcessItemSpec(itemElement.Include, itemElement.IncludeLocation, operationBuilder);
+            ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
 
             //  Code corresponds to Evaluator.EvaluateItemElement
 
@@ -469,12 +488,11 @@ namespace Microsoft.Build.Evaluation
 
                 if (evaluatedExclude.Length > 0)
                 {
-                    IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
-
-                    operationBuilder.Excludes.AddRange(excludeSplits);
+                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
 
                     foreach (var excludeSplit in excludeSplits)
                     {
+                        operationBuilder.Excludes.Add(excludeSplit);
                         AddItemReferences(excludeSplit, operationBuilder, itemElement.ExcludeLocation);
                     }
                 }
@@ -490,17 +508,23 @@ namespace Microsoft.Build.Evaluation
         {
             OperationBuilder operationBuilder = new OperationBuilder(itemElement, conditionResult);
 
-            ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, operationBuilder);
+            ProcessItemSpec(rootDirectory, itemElement.Remove, itemElement.RemoveLocation, operationBuilder);
 
             return new RemoveOperation(operationBuilder, this);
         }
 
-        private void ProcessItemSpec(string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
+        private void ProcessItemSpec(string rootDirectory, string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
         {
-            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation);
+            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
 
-            var itemCaptures = builder.ItemSpec.Fragments.OfType<ItemExpressionFragment<P, I>>().Select(i => i.Capture);
-            AddReferencedItemLists(builder, itemCaptures);
+            foreach (ItemFragment fragment in builder.ItemSpec.Fragments)
+            {
+                ItemExpressionFragment<P, I> itemExpression = fragment as ItemExpressionFragment<P, I>;
+                if (itemExpression != null)
+                {
+                    AddReferencedItemLists(builder, itemExpression.Capture);
+                }
+            }
         }
 
         private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
@@ -557,14 +581,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 AddReferencedItemLists(operationBuilder, match);
-            }
-        }
-
-        private void AddReferencedItemLists(OperationBuilder operationBuilder, IEnumerable<ExpressionShredder.ItemExpressionCapture> captures)
-        {
-            foreach (var capture in captures)
-            {
-                AddReferencedItemLists(operationBuilder, capture);
             }
         }
 

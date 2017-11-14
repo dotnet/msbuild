@@ -313,8 +313,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="toolsVersions">The tools version to use for each project.  Must be the same number as there are project files.</param>
         /// <param name="targets">The targets to be built.  Each project will be built with the same targets.</param>
         /// <param name="waitForResults">True to wait for the results </param>
+        /// <param name="skipNonexistentTargets">If set, skip targets that are not defined in the projects to be built.</param>
         /// <returns>True if the requests were satisfied, false if they were aborted.</returns>
-        public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults)
+        public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
             ErrorUtilities.VerifyThrowArgumentNull(projectFiles, "projectFiles");
@@ -349,9 +350,10 @@ namespace Microsoft.Build.BackEnd
                 // Otherwise let the BuildRequestConfiguration figure out what tools version will be used
                 BuildRequestData data = new BuildRequestData(projectFiles[i], properties[i].ToDictionary(), explicitToolsVersion, targets, null);
 
-                BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion, _componentHost.BuildParameters.GetToolset);
+                BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion);
 
-                requests[i] = new FullyQualifiedBuildRequest(config, targets, waitForResults);
+                requests[i] = new FullyQualifiedBuildRequest(config, targets, waitForResults,
+                    flags: skipNonexistentTargets ? BuildRequestDataFlags.SkipNonexistentTargets : BuildRequestDataFlags.None);
             }
 
             // Send the requests off

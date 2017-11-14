@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Text;
-
-using Microsoft.Build.Shared;
-using System.IO;
-using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -101,6 +102,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"foo.cpp", FileUtilities.MakeRelative(@"c:\abc\def", @"..\def\foo.cpp"));
                 Assert.Equal(@"\\host\path\file", FileUtilities.MakeRelative(@"c:\abc\def", @"\\host\path\file"));
                 Assert.Equal(@"\\host\d$\file", FileUtilities.MakeRelative(@"c:\abc\def", @"\\host\d$\file"));
+                Assert.Equal(@"..\fff\ggg.hh", FileUtilities.MakeRelative(@"c:\foo\bar\..\abc\cde", @"c:\foo\bar\..\abc\fff\ggg.hh"));
             }
             else
             {
@@ -111,6 +113,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"/abc/def/foo.cpp", FileUtilities.MakeRelative(@"/abc/def", @"/abc/def/foo.cpp"));
                 Assert.Equal(@"foo.cpp", FileUtilities.MakeRelative(@"/abc/def", @"foo.cpp"));
                 Assert.Equal(@"foo.cpp", FileUtilities.MakeRelative(@"/abc/def", @"../def/foo.cpp"));
+                Assert.Equal(@"../fff/ggg.hh", FileUtilities.MakeRelative(@"/foo/bar/../abc/cde", @"/foo/bar/../abc/fff/ggg.hh"));
             }
         }
 
@@ -232,15 +235,65 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(String.Empty, FileUtilities.GetDirectory("foo"));
         }
 
-        /// <summary>
-        /// Exercises FileUtilities.HasExtension
-        /// </summary>
-        [Fact]
-        public void HasExtension()
+        [Theory]
+        [InlineData("foo.txt",      new[] { ".txt" })]
+        [InlineData("foo.txt",      new[] { ".TXT" })]
+        [InlineData("foo.txt",      new[] { ".TXT"})]
+        [InlineData("foo.txt",      new[] { ".EXE", ".TXT" })]
+        public void HasExtension_WhenFileNameHasExtension_ReturnsTrue(string fileName, string[] allowedExtensions)
         {
-            Assert.True(FileUtilities.HasExtension("foo.txt", new string[] { ".EXE", ".TXT" })); // "test 1"
-            Assert.False(FileUtilities.HasExtension("foo.txt", new string[] { ".EXE", ".DLL" })); // "test 2"
+            var result = FileUtilities.HasExtension(fileName, allowedExtensions);
+
+            Assert.True(result);
         }
+
+        [Theory]
+        [InlineData("foo.txt",      new[] { ".DLL" })]
+        [InlineData("foo.txt",      new[] { ".EXE", ".DLL" })]
+        [InlineData("foo.exec",     new[] { ".exe", })]
+        [InlineData("foo.exe",      new[] { ".exec", })]
+        [InlineData("foo",          new[] { ".exe", })]
+        [InlineData("",             new[] { ".exe" })]
+        [InlineData(null,           new[] { ".exe" })]
+        public void HasExtension_WhenFileNameDoesNotHaveExtension_ReturnsFalse(string fileName, string[] allowedExtensions)
+        {
+            var result = FileUtilities.HasExtension(fileName, allowedExtensions);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        public void HasExtension_WhenInvalidFileName_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                FileUtilities.HasExtension("|/", new[] { ".exe" });
+
+            });
+        }
+
+#if FEATURE_THREAD_CULTURE
+
+        [Fact]
+        public void HasExtension_UsesOrdinalIgnoreCase()
+        {
+            var currentCulture = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("tr-TR"); // Turkish
+
+                var result = FileUtilities.HasExtension("foo.ini", new string[] { ".INI" });
+
+                Assert.True(result);
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
+        }
+
+#endif
 
         /// <summary>
         /// Exercises FileUtilities.EnsureTrailingSlash
@@ -382,7 +435,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                Assert.Equal(null, FileUtilities.NormalizePath(null));
+                Assert.Equal(null, FileUtilities.NormalizePath(null, null));
             }
            );
         }

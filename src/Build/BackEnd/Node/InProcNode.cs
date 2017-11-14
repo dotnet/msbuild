@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -67,7 +68,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The queue of packets we have received but which have not yet been processed.
         /// </summary>
-        private Queue<INodePacket> _receivedPackets;
+        private ConcurrentQueue<INodePacket> _receivedPackets;
 
         /// <summary>
         /// The event which is set when we receive packets.
@@ -126,7 +127,7 @@ namespace Microsoft.Build.BackEnd
         {
             _componentHost = componentHost;
             _nodeEndpoint = inProcNodeEndpoint;
-            _receivedPackets = new Queue<INodePacket>();
+            _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
             _shutdownEvent = new AutoResetEvent(false);
 
@@ -177,22 +178,8 @@ namespace Microsoft.Build.BackEnd
                         case 1:
                             INodePacket packet = null;
 
-                            int packetCount = _receivedPackets.Count;
-
-                            while (packetCount > 0)
+                            while (_receivedPackets.TryDequeue(out packet))
                             {
-                                lock (_receivedPackets)
-                                {
-                                    if (_receivedPackets.Count > 0)
-                                    {
-                                        packet = _receivedPackets.Dequeue();
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-
                                 if (packet != null)
                                 {
                                     HandlePacket(packet);
@@ -263,11 +250,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            lock (_receivedPackets)
-            {
-                _receivedPackets.Enqueue(packet);
-                _packetReceivedEvent.Set();
-            }
+            _receivedPackets.Enqueue(packet);
+            _packetReceivedEvent.Set();
         }
 
         #endregion

@@ -158,6 +158,14 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Tells the evaluator whether it should evaluate elements with false conditions
+        /// </summary>
+        bool CanEvaluateElementsWithFalseConditions
+        {
+            get;
+        }
+
+        /// <summary>
         /// Enumerator over properties in this project.
         /// Exposed for debugging display.
         /// </summary>

@@ -5,6 +5,7 @@ using System;
 using System.Configuration;
 using System.IO;
 using System.Threading;
+using Microsoft.Build.Shared;
 using Xunit;
 
 #pragma warning disable 436
@@ -49,19 +50,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (s_testFolderFullPath != null && Directory.Exists(s_testFolderFullPath))
                 {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        try
-                        {
-                            Directory.Delete(s_testFolderFullPath, true /* recursive */);
-                            break;
-                        }
-                        catch (Exception)
-                        {
-                            Thread.Sleep(1000);
-                            // Eat exceptions from the delete
-                        }
-                    }
+                    FileUtilities.DeleteDirectoryNoThrow(s_testFolderFullPath, true, 5, 1000);
                 }
             }
             finally

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +20,7 @@ namespace Microsoft.Build.Engine.UnitTests
 #else
         private const string MSBuildExeName = "MSBuild.exe";
 #endif
+
         [Fact]
         public void GetExecutablePath()
         {
@@ -265,11 +267,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/669")]
-#else
         [Fact]
-#endif
         public void BuildEnvironmentDetectsRunningTests()
         {
             BuildEnvironmentHelper.Instance.RunningTests.ShouldBeTrue();

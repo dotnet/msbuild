@@ -41,68 +41,21 @@ namespace Microsoft.Build.BackEnd
             Build
         }
 
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public MSBuild()
-        {
-        }
-
         #region Properties
 
-        // projects to build
-        private ITaskItem[] _projects = null;
-        // A list of targets to build.  This is an optional parameter.  If it's omitted,
-        // the default targets are built.
-        private string[] _targets = null;
-        // A list of property name/value pairs to apply as global properties to the child project.
-        // Each string in this array should be of the form:  "propname=propvalue"
-        private string[] _properties = null;
-
-        /// <summary>
-        /// A semicolon-delimited list of global properties to undefine
-        /// </summary>
-        private string _undefineProperties = null;
-
         // outputs of all built targets
-        private ArrayList _targetOutputs = new ArrayList();
-        // indicates if the paths of target output items should be rebased relative to the calling project
-        private bool _rebaseOutputs = false;
-        // Indicates that we should stop building remaining projects as soon as one fails to build.
-        // The default is that we chug ahead despite failures.
-        private bool _stopOnFirstFailure = false;
-        // When this is true, instead of calling the engine once to build all the targets (for each project),
-        // we would call the engine once per target (for each project).  The benefit of this is that
-        // if one target fails, you can still continue with the remaining targets.
-        private bool _runEachTargetSeparately = false;
-        // When this is true we call the engine with all the projects at once instead of
-        // calling the engine once per project
-        private bool _buildInParallel = false;
-        // If true the project will be unloaded once the  operation is completed
-        private bool _unloadProjectsOnCompletion = false;
-        // If true the cache will be checked for the result and the result will be stored if the operation 
-        // is run
-        private bool _useResultsCache = true;
+        private readonly ArrayList _targetOutputs = new ArrayList();
+
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
         private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
-        // Value of ToolsVersion to use when building projects passed to this task.
-        private string _toolsVersion = null;
-        // Should Targets, Properties (+ properties as project metadata) be un-escaped before processing
-        private string[] _targetAndPropertyListSeparators = null;
 
-        /// <summary>
-        /// The task logging helper
-        /// </summary>
-        private TaskLoggingHelper _logHelper = null;
+        private TaskLoggingHelper _logHelper;
 
+        /// <inheritdoc />
         /// <summary>
         /// The build engine, from ITask
         /// </summary>
-        public IBuildEngine BuildEngine
-        {
-            get;
-            set;
-        }
+        public IBuildEngine BuildEngine { get; set; }
 
         public IBuildEngine2 BuildEngine2
         {
@@ -118,23 +71,16 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                if (_logHelper == null)
-                {
-                    _logHelper = new TaskLoggingHelperExtension(this, AssemblyResources.PrimaryResources, AssemblyResources.SharedResources, "MSBuild.");
-                }
-
-                return _logHelper;
+                return _logHelper ?? (_logHelper = new TaskLoggingHelperExtension(this,
+                           AssemblyResources.PrimaryResources, AssemblyResources.SharedResources, "MSBuild."));
             }
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// The host object, from ITask
         /// </summary>
-        public ITaskHost HostObject
-        {
-            get;
-            set;
-        }
+        public ITaskHost HostObject { get; set; }
 
         /// <summary>
         /// A list of property name/value pairs to apply as global properties to 
@@ -151,69 +97,25 @@ namespace Microsoft.Build.BackEnd
         ///     <MSBuild
         ///         Properties="@(OutputPathItem->'TargetPath=%(Identity)')" />
         /// </remarks>
-        public string[] Properties
-        {
-            get
-            {
-                return _properties;
-            }
-
-            set
-            {
-                _properties = value;
-            }
-        }
+        public string[] Properties { get; set; }
 
         /// <summary>
-        /// Gets or sets the set of global properties to remove.
+        /// Gets or sets a semicolon-delimited list of global properties to remove.
         /// </summary>
-        public string RemoveProperties
-        {
-            get
-            {
-                return _undefineProperties;
-            }
-
-            set
-            {
-                _undefineProperties = value;
-            }
-        }
+        public string RemoveProperties { get; set; } = null;
 
         /// <summary>
         /// The targets to build in each project specified by the <see cref="Projects"/> property.
         /// </summary>
         /// <value>Array of target names.</value>
-        public string[] Targets
-        {
-            get
-            {
-                return _targets;
-            }
-
-            set
-            {
-                _targets = value;
-            }
-        }
+        public string[] Targets { get; set; }
 
         /// <summary>
         /// The projects to build.
         /// </summary>
         /// <value>Array of project items.</value>
         [Required]
-        public ITaskItem[] Projects
-        {
-            get
-            {
-                return _projects;
-            }
-
-            set
-            {
-                _projects = value;
-            }
-        }
+        public ITaskItem[] Projects { get; set; } = null;
 
         /// <summary>
         /// Outputs of the targets built in each project.
@@ -232,117 +134,43 @@ namespace Microsoft.Build.BackEnd
         /// Indicates if the paths of target output items should be rebased relative to the calling project.
         /// </summary>
         /// <value>true, if target output item paths should be rebased</value>
-        public bool RebaseOutputs
-        {
-            get
-            {
-                return _rebaseOutputs;
-            }
-
-            set
-            {
-                _rebaseOutputs = value;
-            }
-        }
+        public bool RebaseOutputs { get; set; } = false;
 
         /// <summary>
         /// Forces the task to stop building the remaining projects as soon as any of
         /// them fail.
         /// </summary>
-        public bool StopOnFirstFailure
-        {
-            get
-            {
-                return _stopOnFirstFailure;
-            }
-
-            set
-            {
-                _stopOnFirstFailure = value;
-            }
-        }
+        public bool StopOnFirstFailure { get; set; } = false;
 
         /// <summary>
         /// When this is true, instead of calling the engine once to build all the targets (for each project),
         /// we would call the engine once per target (for each project).  The benefit of this is that
         /// if one target fails, you can still continue with the remaining targets.
         /// </summary>
-        public bool RunEachTargetSeparately
-        {
-            get
-            {
-                return _runEachTargetSeparately;
-            }
-
-            set
-            {
-                _runEachTargetSeparately = value;
-            }
-        }
+        public bool RunEachTargetSeparately { get; set; } = false;
 
         /// <summary>
         /// Value of ToolsVersion to use when building projects passed to this task.
         /// </summary>
-        public string ToolsVersion
-        {
-            get
-            {
-                return _toolsVersion;
-            }
-
-            set
-            {
-                _toolsVersion = value;
-            }
-        }
+        public string ToolsVersion { get; set; } = null;
 
         /// <summary>
         /// When this is true we call the engine with all the projects at once instead of 
         /// calling the engine once per project
         /// </summary>
-        public bool BuildInParallel
-        {
-            get
-            {
-                return _buildInParallel;
-            }
-            set
-            {
-                _buildInParallel = value;
-            }
-        }
+        public bool BuildInParallel { get; set; }
 
         /// <summary>
         /// If true the project will be unloaded once the operation is completed
         /// </summary>
-        public bool UnloadProjectsOnCompletion
-        {
-            get
-            {
-                return _unloadProjectsOnCompletion;
-            }
-            set
-            {
-                _unloadProjectsOnCompletion = value;
-            }
-        }
+        public bool UnloadProjectsOnCompletion { get; set; } = false;
 
         /// <summary>
         /// If true the cached result will be returned if present and a if MSBuild
         /// task is run its result will be cached in a scope (ProjectFileName, GlobalProperties)[TargetNames]
         /// as a list of build items
         /// </summary>
-        public bool UseResultsCache
-        {
-            get
-            {
-                return _useResultsCache;
-            }
-            set
-            {
-                _useResultsCache = value;
-            }
-        }
+        public bool UseResultsCache { get; set; } = true;
 
         /// <summary>
         /// When this is true, project files that do not exist on the disk will be skipped. By default,
@@ -382,35 +210,28 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
                     bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
-                    if (originalSkipValue)
-                    {
-                        _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Skip;
-                    }
-                    else
-                    {
-                        _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
-                    }
+                    _skipNonexistentProjects = originalSkipValue ? SkipNonexistentProjectsBehavior.Skip : SkipNonexistentProjectsBehavior.Error;
                 }
             }
         }
 
         /// <summary>
-        /// Unescape Targets, Properties (including Properties and AdditionalProperties as Project item metadata)
+        /// Un-escape Targets, Properties (including Properties and AdditionalProperties as Project item metadata)
         /// will be un-escaped before processing. e.g. %3B (an escaped ';') in the string for any of them will 
         /// be treated as if it were an un-escaped ';'
         /// </summary>
-        public string[] TargetAndPropertyListSeparators
-        {
-            get
-            {
-                return _targetAndPropertyListSeparators;
-            }
-            set
-            {
-                _targetAndPropertyListSeparators = value;
-            }
-        }
+        public string[] TargetAndPropertyListSeparators { get; set; } = null;
 
+        /// <summary>
+        /// If set, MSBuild will skip the targets specified in this build request if they are not defined in the
+        /// <see cref="Projects"/> to build. This only applies to this build request (if another target calls the
+        /// "missing target" later this will still result in an error).
+        /// <remarks>
+        /// This could be useful when implementing a breaking protocol change between projects or stubbing behavior 
+        /// which may not make sense in all project types (e.g. Restore).
+        /// </remarks>
+        /// </summary>
+        public bool SkipNonexistentTargets { get; set; }
         #endregion
 
         #region ITask Members
@@ -441,17 +262,17 @@ namespace Microsoft.Build.BackEnd
 
             // Parse the global properties into a hashtable.
             Hashtable propertiesTable;
-            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.FormatResourceString("General.GlobalProperties"), "Properties", this.Properties, out propertiesTable))
+            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", this.Properties, out propertiesTable))
             {
                 return false;
             }
 
             // Parse out the properties to undefine, if any.
             string[] undefinePropertiesArray = null;
-            if (!String.IsNullOrEmpty(_undefineProperties))
+            if (!String.IsNullOrEmpty(RemoveProperties))
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
-                undefinePropertiesArray = _undefineProperties.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                undefinePropertiesArray = RemoveProperties.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string property in undefinePropertiesArray)
                 {
                     Log.LogMessageFromText(String.Format(CultureInfo.InvariantCulture, "  {0}", property), MessageImportance.Low);
@@ -462,9 +283,9 @@ namespace Microsoft.Build.BackEnd
             // If we are in single proc mode and stopOnFirstFailure is true, we cannot build in parallel because 
             // building in parallel sends all of the projects to the engine at once preventing us from not sending
             // any more projects after the first failure. Therefore, to preserve compatibility with whidbey if we are in this situation disable buildInParallel.
-            if (!isRunningMultipleNodes && _stopOnFirstFailure && _buildInParallel)
+            if (!isRunningMultipleNodes && StopOnFirstFailure && BuildInParallel)
             {
-                _buildInParallel = false;
+                BuildInParallel = false;
                 Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NotBuildingInParallel");
             }
 
@@ -473,7 +294,7 @@ namespace Microsoft.Build.BackEnd
             // All project files will be submitted to the engine all at once, this mean there is no stopping for failures between projects.
             // When RunEachTargetSeparately is false, all targets will be submitted to the engine at once, this means there is no way to stop between target failures.
             // therefore the first failure seen will be the only failure seen.
-            if (isRunningMultipleNodes && _buildInParallel && _stopOnFirstFailure && !_runEachTargetSeparately)
+            if (isRunningMultipleNodes && BuildInParallel && StopOnFirstFailure && !RunEachTargetSeparately)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NoStopOnFirstFailure");
             }
@@ -490,7 +311,7 @@ namespace Microsoft.Build.BackEnd
             bool[] skipProjects = null;
 
 
-            if (_buildInParallel)
+            if (BuildInParallel)
             {
                 skipProjects = new bool[Projects.Length];
                 for (int i = 0; i < skipProjects.Length; i++)
@@ -513,7 +334,7 @@ namespace Microsoft.Build.BackEnd
 
                 string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
 
-                if (_stopOnFirstFailure && !success)
+                if (StopOnFirstFailure && !success)
                 {
                     // Inform the user that we skipped the remaining projects because StopOnFirstFailure=true.
                     Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingProjects");
@@ -534,7 +355,7 @@ namespace Microsoft.Build.BackEnd
 
                     // If we are building in parallel we want to only make one call to
                     // ExecuteTargets once we verified that all projects exist
-                    if (!_buildInParallel)
+                    if (!BuildInParallel)
                     {
                         singleProject[0] = project;
                         bool executeResult = await ExecuteTargets(
@@ -547,9 +368,10 @@ namespace Microsoft.Build.BackEnd
                                                 BuildEngine3,
                                                 Log,
                                                 _targetOutputs,
-                                                _useResultsCache,
-                                                _unloadProjectsOnCompletion,
-                                                ToolsVersion
+                                                UseResultsCache,
+                                                UnloadProjectsOnCompletion,
+                                                ToolsVersion,
+                                                SkipNonexistentTargets
                                                 );
 
                         if (!executeResult)
@@ -578,7 +400,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // We need to build all the projects that were not skipped
-            if (_buildInParallel)
+            if (BuildInParallel)
             {
                 success = await BuildProjectsInParallel(propertiesTable, undefinePropertiesArray, targetLists, success, skipProjects);
             }
@@ -591,7 +413,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<bool> BuildProjectsInParallel(Hashtable propertiesTable, string[] undefinePropertiesArray, ArrayList targetLists, bool success, bool[] skipProjects)
         {
-            ITaskItem[] projectToBuildInParallel = Projects;
             // There were some projects that were skipped so we need to recreate the
             // project array with those projects removed
             List<ITaskItem> projectsToBuildArrayList = new List<ITaskItem>();
@@ -602,31 +423,31 @@ namespace Microsoft.Build.BackEnd
                     projectsToBuildArrayList.Add(Projects[i]);
                 }
             }
-            projectToBuildInParallel = projectsToBuildArrayList.ToArray();
+            var projectToBuildInParallel = projectsToBuildArrayList.ToArray();
 
             // Make the call to build the projects
-            if (projectToBuildInParallel.Length > 0)
-            {
-                bool executeResult = await ExecuteTargets
-                                (
-                                projectToBuildInParallel,
-                                propertiesTable,
-                                undefinePropertiesArray,
-                                targetLists,
-                                StopOnFirstFailure,
-                                RebaseOutputs,
-                                BuildEngine3,
-                                Log,
-                                _targetOutputs,
-                                _useResultsCache,
-                                _unloadProjectsOnCompletion,
-                                ToolsVersion
-                                );
+            if (projectToBuildInParallel.Length <= 0) return success;
 
-                if (!executeResult)
-                {
-                    success = false;
-                }
+            bool executeResult = await ExecuteTargets
+            (
+                projectToBuildInParallel,
+                propertiesTable,
+                undefinePropertiesArray,
+                targetLists,
+                StopOnFirstFailure,
+                RebaseOutputs,
+                BuildEngine3,
+                Log,
+                _targetOutputs,
+                UseResultsCache,
+                UnloadProjectsOnCompletion,
+                ToolsVersion,
+                SkipNonexistentTargets
+            );
+
+            if (!executeResult)
+            {
+                success = false;
             }
 
             return success;
@@ -640,36 +461,37 @@ namespace Microsoft.Build.BackEnd
             List<string> expandedProperties = new List<string>();
             List<string> expandedTargets = new List<string>();
 
-            if (this.Properties != null)
+            if (Properties != null)
             {
                 // Expand all properties
-                for (int n = 0; n < this.Properties.Length; n++)
+                for (int n = 0; n < Properties.Length; n++)
                 {
                     // Split each property according to the separators
-                    string[] expandedPropertyValues = this.Properties[n].Split(this.TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedPropertyValues = Properties[n].Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
                     // Add the resultant properties to the final list
                     foreach (string property in expandedPropertyValues)
                     {
                         expandedProperties.Add(property);
                     }
                 }
-                this.Properties = expandedProperties.ToArray();
+                Properties = expandedProperties.ToArray();
             }
 
-            if (this.Targets != null)
+            if (Targets != null)
             {
                 // Expand all targets
-                for (int n = 0; n < this.Targets.Length; n++)
+                for (int n = 0; n < Targets.Length; n++)
                 {
                     // Split each target according to the separators
-                    string[] expandedTargetValues = this.Targets[n].Split(this.TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedTargetValues = Targets[n].Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
                     // Add the resultant targets to the final list
                     foreach (string target in expandedTargetValues)
                     {
                         expandedTargets.Add(target);
                     }
                 }
-                this.Targets = expandedTargets.ToArray();
+
+                Targets = expandedTargets.ToArray();
             }
         }
 
@@ -695,7 +517,7 @@ namespace Microsoft.Build.BackEnd
                 // Separate target invocations for each individual target.
                 foreach (string targetName in targets)
                 {
-                    targetLists.Add(new string[1] { targetName });
+                    targetLists.Add(new[] { targetName });
                 }
             }
             else
@@ -712,8 +534,7 @@ namespace Microsoft.Build.BackEnd
         /// 
         /// </summary>
         /// <returns>True if the operation was successful</returns>
-        internal static async Task<bool> ExecuteTargets
-            (
+        internal static async Task<bool> ExecuteTargets(
             ITaskItem[] projects,
             Hashtable propertiesTable,
             string[] undefineProperties,
@@ -725,8 +546,8 @@ namespace Microsoft.Build.BackEnd
             ArrayList targetOutputs,
             bool useResultsCache,
             bool unloadProjectsOnCompletion,
-            string toolsVersion
-            )
+            string toolsVersion,
+            bool skipNonexistentTargets)
         {
             bool success = true;
 
@@ -856,7 +677,7 @@ namespace Microsoft.Build.BackEnd
                 bool currentTargetResult = true;
 
                 TaskHost taskHost = (TaskHost)buildEngine;
-                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */);
+                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
 
                 currentTargetResult = result.Result;
                 targetOutputsPerProject = result.TargetOutputsPerProject;
@@ -867,13 +688,13 @@ namespace Microsoft.Build.BackEnd
                 {
                     for (int i = 0; i < projects.Length; i++)
                     {
-                        IEnumerable nonNullTargetList = (targetList != null) ? targetList : targetOutputsPerProject[i].Keys;
+                        IEnumerable nonNullTargetList = targetList ?? targetOutputsPerProject[i].Keys;
 
                         foreach (string targetName in nonNullTargetList)
                         {
                             if (targetOutputsPerProject[i].ContainsKey(targetName))
                             {
-                                ITaskItem[] outputItemsFromTarget = (ITaskItem[])targetOutputsPerProject[i][targetName];
+                                ITaskItem[] outputItemsFromTarget = targetOutputsPerProject[i][targetName];
 
                                 foreach (ITaskItem outputItemFromTarget in outputItemsFromTarget)
                                 {

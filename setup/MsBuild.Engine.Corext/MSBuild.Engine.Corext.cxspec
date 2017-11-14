@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<package>
+  <aggregate id="MsBuild.Corext" version="15.0"/>
+</package>

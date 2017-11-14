@@ -330,7 +330,7 @@ namespace Microsoft.Build.Execution
             _explicitToolsVersionSpecified = projectToInheritFrom._explicitToolsVersionSpecified;
             _properties = new PropertyDictionary<ProjectPropertyInstance>(projectToInheritFrom._properties); // This brings along the reserved properties, which are important.
             _items = new ItemDictionary<ProjectItemInstance>(); // We don't want any of the items.  That would include things like ProjectReferences, which would just pollute our own.
-            _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(OrdinalIgnoreCaseKeyedComparer.Instance);
+            _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _environmentVariableProperties = projectToInheritFrom._environmentVariableProperties;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(projectToInheritFrom._itemDefinitions, MSBuildNameIgnoreCaseComparer.Default);
@@ -578,6 +578,8 @@ namespace Microsoft.Build.Execution
                 return _items.ItemTypes;
             }
         }
+
+        bool IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.CanEvaluateElementsWithFalseConditions => false;
 
         /// <summary>
         /// Enumerator over properties in this project
@@ -1421,12 +1423,23 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public IEnumerable<ProjectItemInstance> GetItemsByItemTypeAndEvaluatedInclude(string itemType, string evaluatedInclude)
         {
+            // Avoid using LINQ - this is called a lot in VS
             if (_itemsByEvaluatedInclude == null)
             {
-                return this.GetItems(itemType).Where(item => String.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase));
+                foreach (var item in GetItems(itemType))
+                {
+                    if (string.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase))
+                        yield return item;
+                }
             }
-
-            return this.GetItemsByEvaluatedInclude(evaluatedInclude).Where(item => String.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase));
+            else
+            {
+                foreach (var item in GetItemsByEvaluatedInclude(evaluatedInclude))
+                {
+                    if (string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase))
+                        yield return item;
+                }
+            }
         }
 
         /// <summary>
@@ -1664,8 +1677,8 @@ namespace Microsoft.Build.Execution
         {
             ProjectRootElement rootElement = ProjectRootElement.Create();
 
-            rootElement.InitialTargets = String.Join(";", InitialTargets.ToArray());
-            rootElement.DefaultTargets = String.Join(";", DefaultTargets.ToArray());
+            rootElement.InitialTargets = String.Join(";", InitialTargets);
+            rootElement.DefaultTargets = String.Join(";", DefaultTargets);
             rootElement.ToolsVersion = ToolsVersion;
 
             // Add all of the item definitions.            
@@ -2344,7 +2357,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return new RetrievableEntryHashSet<TValue>(dictionary, OrdinalIgnoreCaseKeyedComparer.Instance, readOnly: true);
+                return new RetrievableEntryHashSet<TValue>(dictionary, StringComparer.OrdinalIgnoreCase, readOnly: true);
             }
         }
 
@@ -2364,7 +2377,7 @@ namespace Microsoft.Build.Execution
             _projectFileLocation = (xml.ProjectFileLocation != null) ? xml.ProjectFileLocation : ElementLocation.EmptyLocation;
             _properties = new PropertyDictionary<ProjectPropertyInstance>();
             _items = new ItemDictionary<ProjectItemInstance>();
-            _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(OrdinalIgnoreCaseKeyedComparer.Instance);
+            _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>((globalProperties == null) ? 0 : globalProperties.Count);
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
@@ -2453,10 +2466,10 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Get items by evaluatedInclude value
         /// </summary>
-        private ICollection<ProjectItemInstance> GetItemsByEvaluatedInclude(string evaluatedInclude)
+        private IEnumerable<ProjectItemInstance> GetItemsByEvaluatedInclude(string evaluatedInclude)
         {
             // Even if there are no items in itemsByEvaluatedInclude[], it will return an IEnumerable, which is non-null
-            return new ReadOnlyCollection<ProjectItemInstance>(_itemsByEvaluatedInclude[evaluatedInclude]);
+            return _itemsByEvaluatedInclude[evaluatedInclude];
         }
 
         /// <summary>

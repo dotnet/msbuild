@@ -43,6 +43,7 @@
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.6.35</GitVersioningVersion>
     <NuSpecReferenceGeneratorVersion>1.4.2</NuSpecReferenceGeneratorVersion>
+    <NuGetVersion>4.5.0-preview2-4529</NuGetVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
@@ -56,8 +57,10 @@
     <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning\$(GitVersioningVersion)\build\</GitVersioningDir>
 
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
-    <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
-    <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
+    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)'=='Full'">$(ToolsDir)net45\</BuildToolsTaskDir>
+    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)'!='Full'">$(ToolsDir)</BuildToolsTaskDir>
+    <PackagingTaskDir Condition="'$(MSBuildRuntimeType)'=='Full'">$(ToolsDir)net45\</PackagingTaskDir>
+    <PackagingTaskDir Condition="'$(MSBuildRuntimeType)'!='Full'">$(ToolsDir)</PackagingTaskDir>
 
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
@@ -268,8 +271,8 @@
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOADFROM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOCATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_GETENTRYASSEMBLY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CULTUREINFO</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETCONSTRUCTOR</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>

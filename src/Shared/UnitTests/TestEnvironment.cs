@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +8,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -36,6 +35,8 @@ namespace Microsoft.Build.Engine.UnitTests
             // In most cases, if MSBuild wrote an MSBuild_*.txt to the temp path something went wrong.
             if (!ignoreBuildErrorFiles)
                 env.WithInvariant(new BuildFailureLogInvariant());
+
+            env.SetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS", "1");
 
             return env;
         }
@@ -106,6 +107,7 @@ namespace Microsoft.Build.Engine.UnitTests
             WithEnvironmentVariableInvariant("MSBuildForwardPropertiesFromChild");
             WithEnvironmentVariableInvariant("MsBuildForwardAllPropertiesFromChild");
             WithEnvironmentVariableInvariant("MSBUILDDEBUGFORCECACHING");
+            WithEnvironmentVariableInvariant("MSBUILDRELOADTRAITSONEACHACCESS");
         }
 
         /// <summary>
@@ -189,7 +191,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <param name="files">Files to be created.</param>
         /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to 
         /// the root of the project directory.</param>
-        public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectContents, string[] files,
+        public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectContents, string[] files = null,
             string relativePathFromRootToProject = ".")
         {
             return WithTransientTestState(
@@ -356,13 +358,11 @@ namespace Microsoft.Build.Engine.UnitTests
             _originalValue = Environment.GetEnvironmentVariable(environmentVariableName);
 
             Environment.SetEnvironmentVariable(environmentVariableName, newValue);
-            Traits.Instance = new Traits(); // Reset the traits to re-read environment changes
         }
 
         public override void Revert()
         {
             Environment.SetEnvironmentVariable(_environmentVariableName, _originalValue);
-            Traits.Instance = new Traits(); // Reset the traits to re-read environment changes
         }
     }
 
@@ -406,9 +406,39 @@ namespace Microsoft.Build.Engine.UnitTests
             CreatedFiles = Helpers.CreateFilesInDirectory(TestRoot, files);
         }
 
+        internal MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
+        {
+            MockLogger logger;
+
+            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeFalse();
+
+            return logger;
+        }
+
+        internal MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
+        {
+            MockLogger logger;
+
+            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeTrue();
+
+            return logger;
+        }
+
         public override void Revert()
         {
             _folder.Revert();
+        }
+
+        private bool BuildProject(IDictionary<string, string> globalProperties, string toolsVersion, out MockLogger logger)
+        {
+            logger = new MockLogger();
+
+            using (ProjectCollection projectCollection = new ProjectCollection())
+            {
+                Project project = new Project(ProjectFile, globalProperties, toolsVersion, projectCollection);
+
+                return project.Build(logger);
+            }
         }
     }
 

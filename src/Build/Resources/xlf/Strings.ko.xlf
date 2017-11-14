@@ -225,11 +225,6 @@
         <target state="translated">MSB4142: MSBuildToolsPath가 "{1}"에 정의된 ToolsVersion "{0}"의 MSBuildBinPath와 다릅니다. 두 항목이 모두 있는 경우 값이 같아야 합니다.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
-      <trans-unit id="CustomNamespaceNotAllowedOnThisChildElement">
-        <source>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</source>
-        <target state="translated">MSB4097: &lt;{1}&gt; 요소 아래의 &lt;{0}&gt; 요소에는 사용자 지정 XML 네임스페이스를 사용할 수 없습니다.</target>
-        <note>{StrBegin="MSB4097: "}</note>
-      </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
         <source>MSB4009: The default tasks file could not be successfully loaded. {0}</source>
         <target state="translated">MSB4009: 기본 작업 파일을 로드할 수 없습니다. {0}</target>
@@ -2045,6 +2040,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
         <target state="translated">“{0}” 프로젝트를 ({2},{3})의 “{1}” 프로젝트로 가져오는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
+        <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
+        <target state="translated">"{0}" 대상을 건너뛰었습니다. 대상이 프로젝트에 없고 SkipNonexistentTargets가 true로 설정되어 있습니다.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryTaskTypeIsNotSet">
+        <source>The task factory must return a value for the "TaskType" property.</source>
+        <target state="translated">작업 팩터리에서 "TaskType" 속성의 값을 반환해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">이 프로젝트를 로드할 때 ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition이 설정되었기 때문에 지정된 API "{0}"은(는) 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
     </body>

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -559,88 +560,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, excludeString, normalizeSlashes: false);
         }
 
+        public static IEnumerable<object[]> IncludesAndExcludesWithWildcardsTestData => GlobbingTestData.IncludesAndExcludesWithWildcardsTestData;
+
         [Theory]
-        [InlineData(ItemWithIncludeAndExclude,
-            "a.*",
-            "*.1",
-            new[] { "a.1", "a.2", "a.1" },
-            new[] { "a.2" })]
-        [InlineData(ItemWithIncludeAndExclude,
-            @"**\*.cs",
-            @"a\**",
-            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
-            new[] { "1.cs" })]
-        [InlineData(ItemWithIncludeAndExclude,
-            @"**\*",
-            @"**\b\**",
-            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs" },
-            new[] { "1.cs", @"a\2.cs", "build.proj" })]
-        [InlineData(ItemWithIncludeAndExclude,
-            @"**\*",
-            @"**\b\**\*.cs",
-            new[] { "1.cs", @"a\2.cs", @"a\b\3.cs", @"a\b\c\4.cs", @"a\b\c\5.txt" },
-            new[] { "1.cs", @"a\2.cs", @"a\b\c\5.txt", "build.proj" })]
-        [InlineData(ItemWithIncludeAndExclude,
-            @"src\**\proj\**\*.cs",
-            @"src\**\proj\**\none\**\*",
-            new[]
-            {
-                "1.cs",
-                @"src\2.cs",
-                @"src\a\3.cs",
-                @"src\proj\4.cs",
-                @"src\proj\a\5.cs",
-                @"src\a\proj\6.cs",
-                @"src\a\proj\a\7.cs",
-                @"src\proj\none\8.cs",
-                @"src\proj\a\none\9.cs",
-                @"src\proj\a\none\a\10.cs",
-                @"src\a\proj\a\none\11.cs",
-                @"src\a\proj\a\none\a\12.cs"
-            },
-            new[]
-            {
-                @"src\a\proj\6.cs",
-                @"src\a\proj\a\7.cs",
-                @"src\proj\4.cs",
-                @"src\proj\a\5.cs"
-            })]
-        [InlineData(ItemWithIncludeAndExclude,
-            @"**\*",
-            "foo",
-            new[]
-            {
-                "foo",
-                @"a\foo",
-                @"a\a\foo",
-                @"a\b\foo",
-            },
-            new []
-            {
-                @"a\a\foo",
-                @"a\b\foo",
-                @"a\foo",
-                "build.proj"
-            })]
-        [InlineData(ItemWithIncludeAndExclude,
-            @"**\*",
-            @"a\af*\*",
-            new[]
-            {
-                @"a\foo",
-                @"a\a\foo",
-                @"a\b\foo",
-            },
-            new[]
-            {
-                @"a\a\foo",
-                @"a\b\foo",
-                @"a\foo",
-                "build.proj"
-            })]
-        public void ExcludeVectorWithWildCards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        [MemberData(nameof(IncludesAndExcludesWithWildcardsTestData))]
+        public void ExcludeVectorWithWildCards(string includeString, string excludeString, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute)
         {
-            TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
+            TestIncludeExcludeWithDifferentSlashes(ItemWithIncludeAndExclude, includeString, excludeString, inputFiles, expectedInclude, makeExpectedIncludeAbsolute);
         }
 
         [Theory]
@@ -739,48 +665,63 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"src/**/*.cs",
             new[]
             {
-                @"src\a.cs",
-                @"src\a\b\b.cs",
+                @"src/a.cs",
+                @"src/a/b/b.cs",
             },
             new[]
             {
                 @"src/a.cs",
-                @"src/a\b\b.cs",
+                @"src/a/b/b.cs",
             })]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/test/**/*.cs",
             new[]
             {
-                @"src\test\a.cs",
-                @"src\test\a\b\c.cs",
+                @"src/test/a.cs",
+                @"src/test/a/b/c.cs",
             },
             new[]
             {
                 @"src/test/a.cs",
-                @"src/test/a\b\c.cs",
+                @"src/test/a/b/c.cs",
             })]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/test/**/a/b/**/*.cs",
             new[]
             {
-                @"src\test\dir\a\b\a.cs",
-                @"src\test\dir\a\b\c\a.cs",
+                @"src/test/dir/a/b/a.cs",
+                @"src/test/dir/a/b/c/a.cs",
             },
             new[]
             {
-                @"src/test/dir\a\b\a.cs",
-                @"src/test/dir\a\b\c\a.cs",
+                @"src/test/dir/a/b/a.cs",
+                @"src/test/dir/a/b/c/a.cs",
             })]
-        public void IncludeWithWildcardShouldPreserveUserSlashesInFixedDirPart(string projectContents, string includeString, string[] inputFiles, string[] expectedInclude)
+        public void IncludeWithWildcardShouldNotPreserveUserSlashesInFixedDirectoryPart(string projectContents, string includeString, string[] inputFiles, string[] expectedInclude)
         {
+            Func<string, char, string> setSlashes = (s, c) => s.Replace('/', c).Replace('\\', c);
+
+            // set the include string slashes to the opposite orientation relative to the OS default slash
+            if (NativeMethodsShared.IsWindows)
+            {
+                includeString = setSlashes(includeString, '/');
+            }
+            else
+            {
+                includeString = setSlashes(includeString, '\\');
+            }
+
+            // all the slashes in the expected items should be platform specific
+            expectedInclude = expectedInclude.Select(p => setSlashes(p, Path.DirectorySeparatorChar)).ToArray();
+
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, "");
         }
 
-        private static void TestIncludeExcludeWithDifferentSlashes(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        private static void TestIncludeExcludeWithDifferentSlashes(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false)
         {
             Action<string, string> runTest = (include, exclude) =>
             {
-                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true);
+                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true, makeExpectedIncludeAbsolute:makeExpectedIncludeAbsolute);
             };
 
             var includeWithForwardSlash = Helpers.ToForwardSlash(includeString);
@@ -792,10 +733,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             runTest(includeWithForwardSlash, excludeString);
         }
 
-        private static void TestIncludeExclude(string projectContents, string[] inputFiles, string[] expectedInclude, string include, string exclude, bool normalizeSlashes = false)
+        private static void TestIncludeExclude(string projectContents, string[] inputFiles, string[] expectedInclude, string include, string exclude, bool normalizeSlashes = false, bool makeExpectedIncludeAbsolute = false)
         {
             var formattedProjectContents = string.Format(projectContents, include, exclude);
-            ObjectModelHelpers.AssertItemEvaluation(formattedProjectContents, inputFiles, expectedInclude, expectedMetadataPerItem: null, normalizeSlashes: normalizeSlashes);
+            ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, inputFiles, expectedInclude, expectedMetadataPerItem: null, normalizeSlashes: normalizeSlashes, makeExpectedIncludeAbsolute: makeExpectedIncludeAbsolute);
         }
 
         [Theory]
@@ -2702,7 +2643,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateAndRemoveShouldWorkWithEscapedCharacters(string projectContents, string include, string update, string remove, string[] expectedInclude, Dictionary<string, string>[] expectedMetadata)
         {
             var formattedProjectContents = string.Format(projectContents, include, update, remove);
-            ObjectModelHelpers.AssertItemEvaluation(formattedProjectContents, new string[0], expectedInclude, expectedMetadata);
+            ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, new string[0], expectedInclude, expectedMetadata);
         }
 
         [Theory]

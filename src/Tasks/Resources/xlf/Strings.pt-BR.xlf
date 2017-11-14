@@ -198,14 +198,14 @@
         <note>{StrBegin="MSB3025: "}</note>
       </trans-unit>
       <trans-unit id="Copy.Retrying">
-        <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4}</source>
-        <target state="translated">MSB3026: Não foi possível copiar "{0}" para "{1}". Iniciando nova tentativa {2} em {3}ms. {4}</target>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message.</note>
+        <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
+        <target state="translated">MSB3026: não foi possível copiar "{0}" para "{1}". Iniciando nova tentativa {2} em {3}ms. {4} {5}</target>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
-        <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed.</source>
-        <target state="translated">MSB3027: Não foi possível copiar "{0}" para "{1}". Número de novas tentativas {2} excedido. Falha.</target>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number.</note>
+        <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
+        <target state="translated">MSB3027: não foi possível copiar "{0}" para "{1}". Número de novas tentativas {2} excedido. Falha. {3}</target>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
@@ -1698,8 +1698,8 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: Conflitos entre versões diferentes do mesmo assembly dependente que não puderam ser resolvidos.  Esses conflitos de referência estão relacionados no log de build quando o detalhamento do log está definido como detalhado.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
+        <target state="translated">MSB3277: foram encontrados conflitos entre versões diferentes "{0}" que não puderam ser resolvidos. Esses conflitos de referência estão relacionados no log de build quando o detalhamento do log está definido como detalhado.</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
@@ -2985,9 +2985,9 @@
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
-        <source>MSB3493: </source>
-        <target state="translated">MSB3493: </target>
-        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+        <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>
+        <target state="translated">MSB3493: ignorando a gravação no arquivo "{0}" porque o conteúdo não foi alterado.</target>
+        <note>{StrBegin="MSB3493: "}</note>
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">
         <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
@@ -3003,6 +3003,11 @@
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
         <target state="translated">MSB4801: não há suporte para a fábrica de tarefas "{0}" na versão .NET Core do MSBuild.</target>
         <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="Copy.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">O arquivo é bloqueado por: "{0}"</target>
+        <note />
       </trans-unit>
     </body>
   </file>

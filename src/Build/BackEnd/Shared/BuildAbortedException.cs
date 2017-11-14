@@ -31,7 +31,7 @@ namespace Microsoft.Build.Exceptions
         /// Constructs a standard BuildAbortedException.
         /// </summary>
         public BuildAbortedException()
-            : base(ResourceUtilities.FormatResourceString("BuildAborted"))
+            : base(ResourceUtilities.GetResourceString("BuildAborted"))
         {
             string errorCode;
             string helpKeyword;

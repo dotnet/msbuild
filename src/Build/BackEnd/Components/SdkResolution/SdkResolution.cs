@@ -63,7 +63,12 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         var result = (SdkResultImpl)sdkResolver.Resolve(sdk, context, resultFactory);
-                        if (result != null && result.Success)
+                        if (result == null)
+                        {
+                            continue;
+                        }
+
+                        if (result.Success)
                         {
                             LogWarnings(loggingContext, sdkReferenceLocation, result);
                             return result.Path;

@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -102,7 +103,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The queue of packets we have received but which have not yet been processed.
         /// </summary>
-        private Queue<INodePacket> _receivedPackets;
+        private ConcurrentQueue<INodePacket> _receivedPackets;
 
         /// <summary>
         /// The event which is set when we receive packets.
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Execution
 
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
-            _receivedPackets = new Queue<INodePacket>();
+            _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
             _shutdownEvent = new ManualResetEvent(false);
             _legacyThreadingData = new LegacyThreadingData();
@@ -295,22 +296,8 @@ namespace Microsoft.Build.Execution
                     case 1:
                         INodePacket packet = null;
 
-                        int packetCount = _receivedPackets.Count;
-
-                        while (packetCount > 0)
+                        while (_receivedPackets.TryDequeue(out packet))
                         {
-                            lock (_receivedPackets)
-                            {
-                                if (_receivedPackets.Count > 0)
-                                {
-                                    packet = _receivedPackets.Dequeue();
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-
                             if (packet != null)
                             {
                                 HandlePacket(packet);
@@ -404,11 +391,8 @@ namespace Microsoft.Build.Execution
         /// <param name="packet">The packet.</param>
         void INodePacketHandler.PacketReceived(int node, INodePacket packet)
         {
-            lock (_receivedPackets)
-            {
-                _receivedPackets.Enqueue(packet);
-                _packetReceivedEvent.Set();
-            }
+            _receivedPackets.Enqueue(packet);
+            _packetReceivedEvent.Set();
         }
 
         #endregion

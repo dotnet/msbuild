@@ -519,7 +519,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(0, t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
 
-            string invalidPEMessage = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.ImplementationDllHasInvalidPEHeader");
+            string invalidPEMessage = ResourceUtilities.GetResourceString("ResolveAssemblyReference.ImplementationDllHasInvalidPEHeader");
             string fullMessage = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.ProblemReadingImplementationDll", @"C:\WinMDArchVerification\DependsOnInvalidPeHeader.dll", invalidPEMessage);
             engine.AssertLogContains(fullMessage);
         }

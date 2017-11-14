@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <param name="expected"></param>
         private void VerifySplitSemiColonSeparatedList(string input, params string[] expected)
         {
-            IList<string> actual = ExpressionShredder.SplitSemiColonSeparatedList(input);
+            var actual = ExpressionShredder.SplitSemiColonSeparatedList(input);
             Console.WriteLine(input);
 
             if (null == expected)
@@ -448,12 +448,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 expected = new string[] { };
             }
 
-            Assert.Equal(actual.Count, expected.Length); // "Expected " + expected.Length + " items but got " + actual.Count
-
-            for (int i = 0; i < expected.Length; i++)
-            {
-                Assert.Equal(expected[i], actual[i]);
-            }
+            Assert.Equal(actual, expected, StringComparer.Ordinal);
         }
 
         private void VerifyExpression(string test)

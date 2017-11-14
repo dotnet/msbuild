@@ -253,7 +253,7 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 if (String.IsNullOrEmpty(ToolExe))
                 {
-                    Log.LogError(ResourceUtilities.FormatResourceString("Xaml.RuleMissingToolName"));
+                    Log.LogError(ResourceUtilities.GetResourceString("Xaml.RuleMissingToolName"));
                     return false;
                 }
             }

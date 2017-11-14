@@ -160,12 +160,12 @@
         <note>{StrBegin="MSB3025: "}</note>
       </trans-unit>
       <trans-unit id="Copy.Retrying">
-        <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4}</source>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message.</note>
+        <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
-        <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed.</source>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number.</note>
+        <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
@@ -1362,7 +1362,7 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
@@ -2396,8 +2396,8 @@
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
-        <source>MSB3493: </source>
-        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+        <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>
+        <note>{StrBegin="MSB3493: "}</note>
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">
         <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
@@ -2410,6 +2410,10 @@
       <trans-unit id="TaskFactoryNotSupportedFailure">
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
         <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="Copy.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <note />
       </trans-unit>
     </body>
   </file>

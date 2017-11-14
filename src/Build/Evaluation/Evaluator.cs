@@ -108,13 +108,13 @@ namespace Microsoft.Build.Evaluation
         /// List of ProjectItemElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
-        private readonly IList<ProjectItemGroupElement> _itemGroupElements;
+        private readonly List<ProjectItemGroupElement> _itemGroupElements;
 
         /// <summary>
         /// List of ProjectItemDefinitionElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
-        private readonly IList<ProjectItemDefinitionGroupElement> _itemDefinitionGroupElements;
+        private readonly List<ProjectItemDefinitionGroupElement> _itemDefinitionGroupElements;
 
         /// <summary>
         /// List of ProjectUsingTaskElement's traversing into imports.
@@ -122,13 +122,13 @@ namespace Microsoft.Build.Evaluation
         /// Key is the directory of the file importing the usingTask, which is needed
         /// to handle any relative paths in the usingTask.
         /// </summary>
-        private readonly IList<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
+        private readonly List<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
 
         /// <summary>
         /// List of ProjectTargetElement's traversing into imports. 
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
-        private readonly IList<ProjectTargetElement> _targetElements;
+        private readonly List<ProjectTargetElement> _targetElements;
 
         /// <summary>
         /// Paths to imports already seen and where they were imported from; used to flag duplicate imports
@@ -415,7 +415,7 @@ namespace Microsoft.Build.Evaluation
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedIncludeEscaped.Length > 0)
             {
-                IList<string> includeSplitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
+                var includeSplitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
 
                 foreach (string includeSplitEscaped in includeSplitsEscaped)
                 {
@@ -494,7 +494,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectTaskInstance ReadTaskElement(ProjectTaskElement taskElement)
         {
-            List<ProjectTaskInstanceChild> taskOutputs = new List<ProjectTaskInstanceChild>();
+            List<ProjectTaskInstanceChild> taskOutputs = new List<ProjectTaskInstanceChild>(taskElement.Count);
 
             foreach (ProjectOutputElement output in taskElement.Outputs)
             {
@@ -540,7 +540,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectPropertyGroupTaskInstance ReadPropertyGroupUnderTargetElement(ProjectPropertyGroupElement propertyGroupElement)
         {
-            List<ProjectPropertyGroupTaskPropertyInstance> properties = new List<ProjectPropertyGroupTaskPropertyInstance>();
+            List<ProjectPropertyGroupTaskPropertyInstance> properties = new List<ProjectPropertyGroupTaskPropertyInstance>(propertyGroupElement.Count);
 
             foreach (ProjectPropertyElement propertyElement in propertyGroupElement.Properties)
             {
@@ -570,7 +570,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectItemGroupTaskInstance ReadItemGroupUnderTargetElement(ProjectItemGroupElement itemGroupElement)
         {
-            List<ProjectItemGroupTaskItemInstance> items = new List<ProjectItemGroupTaskItemInstance>();
+            List<ProjectItemGroupTaskItemInstance> items = new List<ProjectItemGroupTaskItemInstance>(itemGroupElement.Count);
 
             foreach (ProjectItemElement itemElement in itemGroupElement.Items)
             {
@@ -630,7 +630,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static ProjectTargetInstance ReadNewTargetElement(ProjectTargetElement targetElement, bool parentProjectSupportsReturnsAttribute)
         {
-            List<ProjectTargetInstanceChild> targetChildren = new List<ProjectTargetInstanceChild>();
+            List<ProjectTargetInstanceChild> targetChildren = new List<ProjectTargetInstanceChild>(targetElement.Count);
             List<ProjectOnErrorInstance> targetOnErrorChildren = new List<ProjectOnErrorInstance>();
 
             foreach (ProjectElement targetChildElement in targetElement.Children)
@@ -791,12 +791,10 @@ namespace Microsoft.Build.Evaluation
             // Pass1: evaluate properties, load imports, and gather everything else
             PerformDepthFirstPass(_projectRootElement);
 
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var initialTargetsListCount = _initialTargetsList.Count;
-            List<string> initialTargets = new List<string>(initialTargetsListCount);
-            for (var i = 0; i < initialTargetsListCount; i++)
+            List<string> initialTargets = new List<string>(_initialTargetsList.Count);
+            foreach (var initialTarget in _initialTargetsList)
             {
-                initialTargets.Add(EscapingUtilities.UnescapeAll(_initialTargetsList[i].Trim()));
+                initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget.Trim()));
             }
 
             _data.InitialTargets = initialTargets;
@@ -808,11 +806,9 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8817, endPass1);
 #endif
             // Pass2: evaluate item definitions
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var itemsDefinitionGroupElementsCount = _itemDefinitionGroupElements.Count;
-            for (var i = 0; i < itemsDefinitionGroupElementsCount; i++)
+            foreach (var itemDefinitionGroupElement in _itemDefinitionGroupElements)
             {
-                EvaluateItemDefinitionGroupElement(_itemDefinitionGroupElements[i]);
+                EvaluateItemDefinitionGroupElement(itemDefinitionGroupElement);
             }
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass2End);
@@ -827,22 +823,16 @@ namespace Microsoft.Build.Evaluation
             lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext);
 
             // Pass3: evaluate project items
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var itemsGroupCount = _itemGroupElements.Count;
-            for (var i = 0; i < itemsGroupCount; i++)
-            {
-                EvaluateItemGroupElement(_itemGroupElements[i], lazyEvaluator);
+            foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
+            { 
+                EvaluateItemGroupElement(itemGroup, lazyEvaluator);
             }
 
             if (lazyEvaluator != null)
             {
                 // Tell the lazy evaluator to compute the items and add them to _data
-                IList<LazyItemEvaluator<P, I, M, D>.ItemData> items = lazyEvaluator.GetAllItems();
-                // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-                var itemsCount = items.Count;
-                for (var i = 0; i < itemsCount; i++)
+                foreach (var itemData in lazyEvaluator.GetAllItemsDeferred())
                 {
-                    var itemData = items[i];
                     if (itemData.ConditionResult)
                     {
                         _data.AddItem(itemData.Item);
@@ -871,11 +861,8 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8819, endPass3);
 #endif
             // Pass4: evaluate using-tasks
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var entryCount = _usingTaskElements.Count;
-            for (var i = 0; i < entryCount; i++)
-            {
-                var entry = _usingTaskElements[i];
+            foreach (var entry in _usingTaskElements)
+            {   
                 EvaluateUsingTaskElement(entry.Key, entry.Value);
             }
 
@@ -968,17 +955,13 @@ namespace Microsoft.Build.Evaluation
         private void PerformDepthFirstPass(ProjectRootElement currentProjectOrImport)
         {
             // We accumulate InitialTargets from the project and each import
-            IList<string> initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
+            var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
             _initialTargetsList.AddRange(initialTargets);
 
             if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
             {
-                IList<string> globalPropertiesToTreatAsLocals = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation);
-                // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-                var globalPropertiesToTreatAsLocalsCount = globalPropertiesToTreatAsLocals.Count;
-                for (var i = 0; i < globalPropertiesToTreatAsLocalsCount; i++)
-                {
-                    var propertyName = globalPropertiesToTreatAsLocals[i];
+                foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation))
+                { 
                     XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
                     _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
                 }
@@ -1017,14 +1000,11 @@ namespace Microsoft.Build.Evaluation
 #endif
 
             // Get all the implicit imports (e.g. <Project Sdk="" />, but not <Import Sdk="" />)
-            var implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
+            List<ProjectImportElement> implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
 
             // Evaluate the "top" implicit imports as if they were the first entry in the file.
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var implicitImportsCount = implicitImports.Count;
-            for (var i = 0; i < implicitImportsCount; i++)
+            foreach (var import in implicitImports)
             {
-                var import = implicitImports[i];
                 if (import.ImplicitImportLocation == ImplicitImportLocation.Top)
                 {
                     EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
@@ -1192,11 +1172,8 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            implicitImportsCount = implicitImports.Count;
-            for (var i = 0; i < implicitImportsCount; i++)
+            foreach (var import in implicitImports)
             {
-                var import = implicitImports[i];
                 if (import.ImplicitImportLocation == ImplicitImportLocation.Bottom)
                 {
                     EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
@@ -1304,7 +1281,7 @@ namespace Microsoft.Build.Evaluation
                 itemGroupConditionResult = EvaluateCondition(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
             }
 
-            if (itemGroupConditionResult || _data.ShouldEvaluateForDesignTime)
+            if (itemGroupConditionResult || (_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
                 foreach (ProjectItemElement itemElement in itemGroupElement.Items)
                 {
@@ -1376,8 +1353,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void AddBeforeAndAfterTargetMappings(ProjectTargetElement targetElement, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets, Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget, Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget)
         {
-            IList<string> beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
-            IList<string> afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
+            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
+            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
 
             foreach (string beforeTarget in beforeTargets)
             {
@@ -1717,7 +1694,7 @@ namespace Microsoft.Build.Evaluation
                 itemConditionResult = EvaluateCondition(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
             }
 
-            if (!itemConditionResult && !_data.ShouldEvaluateForDesignTime)
+            if (!itemConditionResult && !(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
 #if FEATURE_MSBUILD_DEBUGGER
                 if (DebuggerManager.DebuggingEnabled)
@@ -1800,7 +1777,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (evaluatedExclude.Length > 0)
                 {
-                    IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
+                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
 
                     HashSet<string> excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -2283,17 +2260,15 @@ namespace Microsoft.Build.Evaluation
             // Adding the value of $(MSBuildExtensionsPath*) property to the list of search paths
             var prop = _data.GetProperty(fallbackSearchPathMatch.PropertyName);
 
-            var pathsToSearch =
-                // The actual value of the property, with no fallbacks
-                new[] { prop?.EvaluatedValue }
-                // The list of fallbacks, in order
-                .Concat(fallbackSearchPathMatch.SearchPaths).ToList();
-
+            var pathsToSearch = new string[fallbackSearchPathMatch.SearchPaths.Count + 1];
+            pathsToSearch[0] = prop?.EvaluatedValue;                       // The actual value of the property, with no fallbacks
+            fallbackSearchPathMatch.SearchPaths.CopyTo(pathsToSearch, 1);  // The list of fallbacks, in order
+            
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
-                                        String.Join(Path.PathSeparator.ToString(), pathsToSearch));
+                                        String.Join(";", pathsToSearch));
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
@@ -2319,14 +2294,14 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPathExpanded);
+                var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
                 if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
                             _projectRootElementCache))
                 {
                     continue;
                 }
 
-                var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
+                var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
                 _evaluationLoggingContext.LogComment(MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
 
                 List<ProjectRootElement> projects;

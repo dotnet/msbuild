@@ -124,6 +124,9 @@
     <Compile Include="..\Shared\HybridDictionary.cs">
       <Link>Collections\HybridDictionary.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <Link>IConstrainedEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\NGen.cs">
       <Link>SharedUtilities\NGen.cs</Link>
     </Compile>
@@ -133,6 +136,9 @@
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\StringExtensions.cs">
+      <Link>SharedUtilities\StringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
@@ -356,8 +362,6 @@
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
     <Compile Include="Collections\IValued.cs" />
-    <Compile Include="Collections\OrdinalKeyedComparer.cs" />
-    <Compile Include="Collections\OrdinalIgnoreCaseKeyedComparer.cs" />
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
@@ -521,6 +525,7 @@
     <Compile Include="Evaluation\ProjectParser.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
     <Compile Include="Evaluation\ProjectStringCache.cs" />
+    <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
     <Compile Include="Evaluation\Evaluator.cs" />
@@ -614,12 +619,14 @@
     <Compile Include="Utilities\EngineFileUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Utilities\FileSpecMatchTester.cs" />
     <Compile Include="Utilities\RegistryKeyWrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Utilities\Utilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
