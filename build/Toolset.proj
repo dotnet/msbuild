@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
+    <RestoreSources>https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json</RestoreSources>
   </PropertyGroup>
 
   <ItemGroup>

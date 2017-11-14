@@ -3,20 +3,14 @@
 <Project>
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(ProjectLanguage)' == ''">
-    <ProjectLanguage Condition="'$(MSBuildProjectExtension)' == '.csproj' OR '$(Language)' == 'C#'">CSharp</ProjectLanguage>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.props</MSBuildAllProjects>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props" />
   <Import Project="$(RepoToolsetDir)Settings.props" />
 
   <PropertyGroup>
-    <DotNetRoot>$(DOTNET_INSTALL_DIR)</DotNetRoot>
     <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
-    <NoWarn>1701;1702;1705;$(NoWarn)</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
@@ -31,7 +25,7 @@
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
-	<XUnitRunnerAdditionalArguments>-parallel none</XUnitRunnerAdditionalArguments>
+    <XUnitRunnerAdditionalArguments>-parallel none</XUnitRunnerAdditionalArguments>
   </PropertyGroup>
 
 </Project>

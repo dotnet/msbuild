@@ -2,12 +2,6 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
 
-  <!-- This file is imported by all projects at the beginning of the project files -->
-
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
   </PropertyGroup>
@@ -18,6 +12,7 @@
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.microsoft.repotoolset\$(RoslynToolsMicrosoftRepoToolsetVersion)\tools\</RepoToolsetDir>
+    <RestoreSources>https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json</RestoreSources>
     <SignToolDataPath>$(RepoRoot)build\SignToolData.json</SignToolDataPath>
     <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
   </PropertyGroup>

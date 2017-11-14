@@ -15,14 +15,12 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup>
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-    <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.0.2-vspre-006963</DotNetCliVersion>
-    <MicrosoftDotNetBuildTasksFeedVersion>1.0.0-prerelease-01929-02</MicrosoftDotNetBuildTasksFeedVersion>
-    <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha52</RoslynToolsMicrosoftRepoToolsetVersion>
+    <DotNetCliVersion>2.0.2</DotNetCliVersion>
+    <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha54</RoslynToolsMicrosoftRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
 

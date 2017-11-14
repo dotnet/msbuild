@@ -103,81 +103,115 @@ function CreateDirectory {
   fi
 }
 
-function GetDotNetCliVersion {
-  echo "$( awk -F'[<>]' "/<DotNetCliVersion>/{print \$3}" "$RepoRoot/build/Versions.props" )"
+function GetVersionsPropsVersion {
+  echo "$( awk -F'[<>]' "/<$1>/{print \$3}" "$VersionsProps" )"
 }
 
 function InstallDotNetCli {
-  dotnetCliVersion="$( GetDotNetCliVersion )"
-  dotnetInstallVerbosity=""
+  DotNetCliVersion="$( GetVersionsPropsVersion DotNetCliVersion )"
+  DotNetInstallVerbosity=""
 
   if [ -z "$DOTNET_INSTALL_DIR" ]
   then
-    export DOTNET_INSTALL_DIR="$RepoRoot/artifacts/.dotnet/$dotnetCliVersion"
+    export DOTNET_INSTALL_DIR="$RepoRoot/artifacts/.dotnet/$DotNetCliVersion"
   fi
 
-  dotnetInstallScript="$DOTNET_INSTALL_DIR/dotnet-install.sh"
+  DotNetRoot=$DOTNET_INSTALL_DIR
+  DotNetInstallScript="$DotNetRoot/dotnet-install.sh"
 
-  if [ ! -a "$dotnetInstallScript" ]
+  if [ ! -a "$DotNetInstallScript" ]
   then
-    CreateDirectory "$DOTNET_INSTALL_DIR"
-    curl "https://dot.net/v1/dotnet-install.sh" -sSL -o "$dotnetInstallScript"
+    CreateDirectory "$DotNetRoot"
+    curl "https://dot.net/v1/dotnet-install.sh" -sSL -o "$DotNetInstallScript"
   fi
 
   if [[ "$(echo $verbosity | awk '{print tolower($0)}')" == "diagnostic" ]]
   then
-    dotnetInstallVerbosity="--verbose"
+    DotNetInstallVerbosity="--verbose"
   fi
 
   # Install a stage 0
-  sdkInstallDir="$DOTNET_INSTALL_DIR/sdk/$dotnetCliVersion"
+  SdkInstallDir="$DotNetRoot/sdk/$DotNetCliVersion"
 
-  if [ ! -d "$sdkInstallDir" ]
+  if [ ! -d "$SdkInstallDir" ]
   then
-    bash "$dotnetInstallScript" --version $dotnetCliVersion $dotnetInstallVerbosity
+    bash "$DotNetInstallScript" --version $DotNetCliVersion $DotNetInstallVerbosity
+    LASTEXITCODE=$?
 
-    if [ $? != 0 ]
+    if [ $LASTEXITCODE != 0 ]
     then
-      return $?
+      echo "Failed to install stage0"
+      return $LASTEXITCODE
     fi
   fi
 
   # Install 1.0 shared framework
-  netcoreApp10Version="1.0.5"
-  netcoreApp10Dir="$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/$netcoreApp10Version"
+  NetCoreApp10Version="1.0.5"
+  NetCoreApp10Dir="$DotNetRoot/shared/Microsoft.NETCore.App/$NetCoreApp10Version"
 
-  if [ ! -d "$netcoreApp10Dir" ]
+  if [ ! -d "$NetCoreApp10Dir" ]
   then
-    bash "$dotnetInstallScript" --channel "Preview" --version $netcoreApp10Version --shared-runtime $dotnetInstallVerbosity
+    bash "$DotNetInstallScript" --channel "Preview" --version $NetCoreApp10Version --shared-runtime $DotNetInstallVerbosity
+    LASTEXITCODE=$?
 
-    if [ $? != 0 ]
+    if [ $LASTEXITCODE != 0 ]
     then
-      return $?
+      echo "Failed to install 1.0 shared framework"
+      return $LASTEXITCODE
     fi
   fi
 
   # Install 1.1 shared framework
-  netcoreApp11Version="1.1.2"
-  netcoreApp11Dir="$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/$netcoreApp11Version"
+  NetCoreApp11Version="1.1.2"
+  NetCoreApp11Dir="$DotNetRoot/shared/Microsoft.NETCore.App/$NetCoreApp11Version"
 
-  if [ ! -d "$netcoreApp11Dir" ]
+  if [ ! -d "$NetCoreApp11Dir" ]
   then
-    bash "$dotnetInstallScript" --channel "Release/1.1.0" --version $netcoreApp11Version --shared-runtime $dotnetInstallVerbosity
+    bash "$DotNetInstallScript" --channel "Release/1.1.0" --version $NetCoreApp11Version --shared-runtime $DotNetInstallVerbosity
+    LASTEXITCODE=$?
 
-    if [ $? != 0 ]
+    if [ $LASTEXITCODE != 0 ]
     then
-      return $?
+      echo "Failed to install 1.1 shared framework"
+      return $LASTEXITCODE
     fi
   fi
 
   # Put the stage 0 on the path
-  export PATH="$DOTNET_INSTALL_DIR:$PATH"
+  export PATH="$DotNetRoot:$PATH"
 
   # Disable first run since we want to control all package sources
   export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
   # Don't resolve runtime, shared framework, or SDK from other locations
   export DOTNET_MULTILEVEL_LOOKUP=0
+}
+
+function InstallRepoToolset {
+  RepoToolsetVersion="$( GetVersionsPropsVersion RoslynToolsMicrosoftRepoToolsetVersion )"
+  RepoToolsetDir="$NuGetPackageRoot/roslyntools.microsoft.repotoolset/$RepoToolsetVersion/tools"
+  RepoToolsetBuildProj="$RepoToolsetDir/Build.proj"
+
+  if $ci || $log
+  then
+    CreateDirectory $LogDir
+    logCmd="/bl:$LogDir/Build.binlog"
+  else
+    logCmd=""
+  fi
+
+  if [ ! -d "$RepoToolsetBuildProj" ]
+  then
+    ToolsetProj="$ScriptRoot/Toolset.proj"
+    dotnet msbuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
+    LASTEXITCODE=$?
+
+    if [ $LASTEXITCODE != 0 ]
+    then
+      echo "Failed to build $ToolsetProj"
+      return $LASTEXITCODE
+    fi
+  fi
 }
 
 function Build {
@@ -188,10 +222,24 @@ function Build {
     return $?
   fi
 
-  # Preparation of a CI machine
+  InstallRepoToolset
+
+  if [ $? != 0 ]
+  then
+    return $?
+  fi
+
   if $prepareMachine
   then
-    ClearNuGetCache
+    CreateDirectory "$NuGetPackageRoot"
+    dotnet nuget locals all --clear
+    LASTEXITCODE=$?
+
+    if [ $LASTEXITCODE != 0 ]
+    then
+      echo "Failed to clear NuGet cache"
+      return $LASTEXITCODE
+    fi
   fi
 
   if $ci || $log
@@ -202,11 +250,18 @@ function Build {
     logCmd=""
   fi
 
-  dotnet msbuild $BuildProj /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
-
-  if [ $? != 0 ]
+  if [ -z $solution ]
   then
-    return $?
+    solution="$RepoRoot/sdk.sln"
+  fi
+
+  dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
+  LASTEXITCODE=$?
+
+  if [ $LASTEXITCODE != 0 ]
+  then
+    echo "Failed to build $RepoToolsetBuildProj"
+    return $LASTEXITCODE
   fi
 }
 
@@ -214,16 +269,6 @@ function StopProcesses {
   echo "Killing running build processes..."
   pkill -9 "msbuild"
   pkill -9 "vbcscompiler"
-}
-
-function ClearNuGetCache {
-  if [ -z "$NUGET_PACKAGES" ]
-  then
-    export NUGET_PACKAGES="$HOME/.nuget/packages/"
-  fi
-
-  CreateDirectory "$NUGET_PACKAGES"
-  dotnet nuget locals all --clear
 }
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -235,12 +280,10 @@ done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 RepoRoot="$ScriptRoot/../"
-ToolsRoot="$RepoRoot/artifacts/.tools"
-BuildProj="$ScriptRoot/build.proj"
-DependenciesProps="$ScriptRoot/Versions.props"
 ArtifactsDir="$RepoRoot/artifacts"
-LogDir="$ArtifactsDir/$configuration/log"
-TempDir="$ArtifactsDir/$configuration/tmp"
+ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
+LogDir="$ArtifactsConfigurationDir/log"
+VersionsProps="$ScriptRoot/Versions.props"
 
 # HOME may not be defined in some scenarios, but it is required by NuGet
 if [ -z $HOME ]
@@ -251,14 +294,26 @@ fi
 
 if $ci
 then
+  TempDir="$ArtifactsConfigurationDir/tmp"
   CreateDirectory "$TempDir"
+
   export TEMP="$TempDir"
   export TMP="$TempDir"
 fi
 
+if [ -z $NUGET_PACKAGES ]
+then
+  export NUGET_PACKAGES="$HOME/.nuget/packages"
+fi
+
+NuGetPackageRoot=$NUGET_PACKAGES
+
 Build
+LASTEXITCODE=$?
 
 if $ci && $prepareMachine
 then
   StopProcesses
 fi
+
+exit $LASTEXITCODE
