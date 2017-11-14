@@ -15,6 +15,11 @@
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
+  <PropertyGroup>
+    <!-- Strip the '-parallel none' flag here -->
+    <XUnitRunnerAdditionalArguments></XUnitRunnerAdditionalArguments>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />

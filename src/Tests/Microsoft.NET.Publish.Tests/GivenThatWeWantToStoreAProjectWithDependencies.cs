@@ -139,11 +139,11 @@ namespace Microsoft.NET.Publish.Tests
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeWorkingDir={WorkingDir}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeWorkingDir={WorkingDir}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:RestoreSources=https://dotnet.myget.org/F/dotnet-core/api/v3/index.json")
                 .Should()
                 .Pass();
 
-            DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
+           DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
