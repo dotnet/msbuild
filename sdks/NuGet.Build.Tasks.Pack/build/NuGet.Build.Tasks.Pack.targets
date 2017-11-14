@@ -39,6 +39,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AddPriFileDependsOn Condition="'$(MicrosoftPortableCurrentVersionPropsHasBeenImported)' == 'true'">DeterminePortableBuildCapabilities</AddPriFileDependsOn>
     <NuspecOutputPath Condition="'$(NuspecOutputPath)' == ''">$(BaseIntermediateOutputPath)$(Configuration)\</NuspecOutputPath>
     <ImportNuGetBuildTasksPackTargetsFromSdk Condition="'$(ImportNuGetBuildTasksPackTargetsFromSdk)' == ''">false</ImportNuGetBuildTasksPackTargetsFromSdk>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>.dll; .exe; .winmd; .json; .pri; .xml; $(AllowedOutputExtensionsInPackageBuildOutputFolder)</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder>.pdb; .mdb; $(AllowedOutputExtensionsInPackageBuildOutputFolder); $(AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder)</AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NoBuild)' == 'true' ">
     <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
@@ -239,7 +241,9 @@ Copyright (c) .NET Foundation. All rights reserved.
               RestoreOutputPath="$(RestoreOutputAbsolutePath)"
               NuspecFile="$(NuspecFileAbsolutePath)"
               NuspecBasePath="$(NuspecBasePath)"
-              NuspecProperties="$(NuspecProperties)"/>
+              NuspecProperties="$(NuspecProperties)"
+              AllowedOutputExtensionsInPackageBuildOutputFolder="$(AllowedOutputExtensionsInPackageBuildOutputFolder)"
+              AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder="$(AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder)"/>
   </Target>
 
   <!--
@@ -279,7 +283,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </MSBuild>
 
     <MSBuild
-      Condition="'$(IncludeSymbols)' == 'true' OR '$(IncludeSource)' == 'true'"
+      Condition="'$(IncludeBuildOutput)' == 'true'"
       Projects="$(MSBuildProjectFullPath)"
       Targets="_GetDebugSymbolsWithTfm"
       Properties="TargetFramework=%(_TargetFrameworks.Identity);">

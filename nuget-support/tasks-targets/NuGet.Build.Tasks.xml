@@ -56,6 +56,26 @@
             ; delimited list of target frameworks for the project.
             </summary>
         </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.CurrentProjectName">
+            <summary>
+            The current project's name.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.CurrentProjectTargetFramework">
+            <summary>
+            The current project's target framework.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.AnnotatedProjectReferences">
+            <summary>
+            The project references for property lookup.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.AssignedProjects">
+            <summary>
+            The project references with assigned properties.
+            </summary>
+        </member>
         <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.ProjectPath">
             <summary>
             Full path to the msbuild project.
@@ -177,6 +197,11 @@
             Nulls and empty values are ignored.
             </summary>
         </member>
+        <member name="M:NuGet.Build.Tasks.GetRestoreSettingsTask.GetGlobalAbsolutePath(System.String)">
+            <summary>
+            Resolve a path against MSBuildStartupDirectory
+            </summary>
+        </member>
         <member name="T:NuGet.Build.Tasks.GetRestoreSolutionProjectsTask">
             <summary>
             Convert .metaproj paths to project paths.
@@ -265,6 +290,11 @@
               resource lookups using this strongly typed resource class.
             </summary>
         </member>
+        <member name="P:NuGet.Build.Tasks.Strings.NoCompatibleTargetFramework">
+            <summary>
+              Looks up a localized string similar to Project &apos;{0}&apos; targets &apos;{2}&apos;. It cannot be referenced by a project that targets &apos;{1}&apos;..
+            </summary>
+        </member>
         <member name="P:NuGet.Build.Tasks.Strings.NoProjectsProvidedToTask">
             <summary>
               Looks up a localized string similar to Unable to find a project to restore!.
@@ -278,6 +308,11 @@
         <member name="P:NuGet.Build.Tasks.Strings.RestoreCanceled">
             <summary>
               Looks up a localized string similar to Restore canceled!.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.UnsupportedTargetFramework">
+            <summary>
+              Looks up a localized string similar to The framework &apos;{0}&apos; is not a supported target framework..
             </summary>
         </member>
         <member name="P:NuGet.Build.Tasks.WarnForInvalidProjectsTask.AllProjects">
@@ -348,6 +383,12 @@
             null for equality.
             </summary>
         </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
         <member name="T:NuGet.Shared.HashCodeCombiner">
             <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
@@ -369,6 +410,12 @@
             Avoid mutating the return value.
             </summary>
             <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
         </member>
     </members>
 </doc>

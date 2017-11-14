@@ -61,6 +61,16 @@
             Pattern used to identify content files
             </summary>
         </member>
+        <member name="P:NuGet.ContentModel.ContentItemCollection.HasContract">
+            <summary>
+            True if lib/contract exists
+            </summary>
+        </member>
+        <member name="M:NuGet.ContentModel.ContentItemCollection.IsValidAsset(System.String)">
+            <summary>
+            False if the path would not match any patterns.
+            </summary>
+        </member>
         <member name="T:NuGet.ContentModel.ContentPropertyDefinition">
             <summary>
             Defines a property that can be used in Content Model query patterns
@@ -82,9 +92,19 @@
             Patterns used to select a group of items that matches the criteria
             </summary>
         </member>
+        <member name="P:NuGet.ContentModel.PatternSet.GroupExpressions">
+            <summary>
+            Pattern expressions.
+            </summary>
+        </member>
         <member name="P:NuGet.ContentModel.PatternSet.PathPatterns">
             <summary>
             Patterns used to select individual items that match the criteria
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.PathExpressions">
+            <summary>
+            Path expressions.
             </summary>
         </member>
         <member name="P:NuGet.ContentModel.PatternSet.PropertyDefinitions">
@@ -1573,7 +1593,22 @@
               Looks up a localized string similar to Unable to parse the current NuGet client version..
             </summary>
         </member>
+        <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder``1(System.Collections.Generic.IEnumerable{``0},System.StringComparer,System.Func{``0,System.String},System.Func{``0,System.String[]})">
+            <summary>
+            Order dependencies by children first.
+            </summary>
+            <param name="items">Items to sort.</param>
+            <param name="comparer">Comparer for Ids.</param>
+            <param name="getId">Retrieve the id of the item.</param>
+            <param name="getDependencies">Retrieve dependency ids.</param>
+            <returns></returns>
+        </member>
         <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo})">
+            <summary>
+            Order dependencies by children first.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder(System.Collections.Generic.List{NuGet.Packaging.TopologicalSortUtility.ItemDependencyInfo},System.StringComparer)">
             <summary>
             Order dependencies by children first.
             </summary>
@@ -1817,6 +1852,12 @@
             null for equality.
             </summary>
         </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
         <member name="T:NuGet.Shared.HashCodeCombiner">
             <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
@@ -1838,6 +1879,12 @@
             Avoid mutating the return value.
             </summary>
             <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
         </member>
     </members>
 </doc>

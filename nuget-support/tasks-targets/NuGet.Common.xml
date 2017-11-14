@@ -318,6 +318,16 @@
             Resolver conflict
             </summary>
         </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU1107">
+            <summary>
+            Version conflict.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU1108">
+            <summary>
+            Circular dependency.
+            </summary>
+        </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU1201">
             <summary>
             Dependency project has an incompatible framework.
@@ -383,14 +393,9 @@
             Package dependency downgraded.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU1606">
+        <member name="F:NuGet.Common.NuGetLogCode.NU1608">
             <summary>
-            Circular dependency.
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU1607">
-            <summary>
-            Version conflict.
+            Version is higher than upper bound.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU1701">
@@ -939,6 +944,12 @@
             null for equality.
             </summary>
         </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
         <member name="T:NuGet.Shared.HashCodeCombiner">
             <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
@@ -960,6 +971,12 @@
             Avoid mutating the return value.
             </summary>
             <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
         </member>
     </members>
 </doc>

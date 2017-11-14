@@ -24,11 +24,6 @@
             File json.
             </summary>
         </member>
-        <member name="M:NuGet.ProjectModel.DependencyGraphSpec.GetClosure(System.String)">
-            <summary>
-            Retrieve the full project closure including the root project itself.
-            </summary>
-        </member>
         <member name="M:NuGet.ProjectModel.DependencyGraphSpec.WithProjectClosure(System.String)">
             <summary>
             Retrieve a DependencyGraphSpec with the project closure.
@@ -36,9 +31,25 @@
             <param name="projectUniqueName"></param>
             <returns></returns>
         </member>
+        <member name="M:NuGet.ProjectModel.DependencyGraphSpec.GetClosure(System.String)">
+            <summary>
+            Retrieve the full project closure including the root project itself.
+            </summary>
+            <remarks>Results are not sorted in any form.</remarks>
+        </member>
         <member name="M:NuGet.ProjectModel.DependencyGraphSpec.SortPackagesByDependencyOrder(System.Collections.Generic.IEnumerable{NuGet.ProjectModel.PackageSpec})">
             <summary>
             Order dependencies by children first.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.DependencyGraphSpec.GetPackageSpecId(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            PackageSpec -> id
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.DependencyGraphSpec.GetPackageSpecDependencyIds(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            PackageSpec -> Project dependency ids
             </summary>
         </member>
         <member name="T:NuGet.ProjectModel.ExternalProjectReference">
@@ -384,6 +395,17 @@
             <param name="packageSpec">A <c>PackageSpec</c> instance.</param>
             <param name="filePath">A file path to write to.</param>
         </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecWriter.SetMSBuildMetadata(NuGet.RuntimeModel.IObjectWriter,NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            This method sets the msbuild metadata that's important for restore. Ensures that frameworks regardless of which way they're stores in the metadata(full name or short tfm name) are written out the same.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecWriter.SetDependencies(NuGet.RuntimeModel.IObjectWriter,System.String,System.Collections.Generic.IEnumerable{NuGet.LibraryModel.LibraryDependency})">
+            <summary>
+            This method sorts the libraries based on the name
+            This method also writes out the normalized versions to avoid cases where original string is set because it was gotten through project system vs being installed from PM UI
+            </summary>
+        </member>
         <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectStyle">
             <summary>
             Restore behavior type.
@@ -725,6 +747,12 @@
             null for equality.
             </summary>
         </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
         <member name="T:NuGet.Shared.HashCodeCombiner">
             <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
@@ -746,6 +774,12 @@
             Avoid mutating the return value.
             </summary>
             <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
         </member>
     </members>
 </doc>

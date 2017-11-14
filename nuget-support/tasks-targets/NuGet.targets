@@ -81,6 +81,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="NuGet.Build.Tasks.GetRestoreSolutionProjectsTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.GetRestoreSettingsTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.WarnForInvalidProjectsTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
+  <UsingTask TaskName="NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask" AssemblyFile="$(RestoreTaskAssemblyFile)" />
 
   <!--
     ============================================================
@@ -133,6 +134,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       RestoreGraphOutputPath="$(RestoreGraphOutputPath)"
       RestoreRecursive="$(RestoreRecursive)" />
   </Target>
+
+  <!--
+    ============================================================
+    CollectPackageReferences
+    Gathers all PackageReference items from the project.
+    This target may be used as an extension point to modify
+    package references before NuGet reads them.
+    ============================================================
+  -->
+  <Target Name="CollectPackageReferences" Returns="@(PackageReference)" />
 
   <!--
     ============================================================
@@ -369,7 +380,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="_GetRestoreProjectStyle"
-    DependsOnTargets="_GetProjectJsonPath"
+    DependsOnTargets="_GetProjectJsonPath;CollectPackageReferences"
     Returns="$(RestoreProjectStyle)">
     <!-- This may be overridden by setting RestoreProjectStyle in the project. -->
     <PropertyGroup>
@@ -671,7 +682,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="_GenerateProjectRestoreGraphPerFramework"
-    DependsOnTargets="_GetRestoreProjectStyle"
+    DependsOnTargets="_GetRestoreProjectStyle;CollectPackageReferences"
     Returns="@(_RestoreGraphEntry)">
 
     <!-- Write out project references -->
@@ -868,7 +879,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="_GetRestoreSettingsOverrides"
-          Returns="$(_RestorePackagesPathOverride);$(_GetRestoreSourcesOverride);$(_GetRestoreFallbackFoldersOverride)">
+          Returns="$(_RestorePackagesPathOverride);$(_RestoreSourcesOverride);$(_RestoreFallbackFoldersOverride)">
 
     <!-- RestorePackagesPathOverride -->
     <MsBuild
