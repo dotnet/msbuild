@@ -750,6 +750,7 @@ namespace Microsoft.Build.Evaluation
         Default = 0,
         DoNotEvaluateElementsWithFalseCondition = 32,
         IgnoreEmptyImports = 16,
+        IgnoreFaultedImports = 64,
         IgnoreMissingImports = 1,
         RecordDuplicateButNotCircularImports = 2,
         RecordEvaluatedItemElements = 8,
