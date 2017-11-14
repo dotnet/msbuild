@@ -50,7 +50,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- 1. The .NET Standard 2.0 support need to be injected -->
       <_RunGetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true'">true</_RunGetDependsOnNETStandard>
       <!-- 2. The target framework is .NET 4.7.1, which needs to special case some shims -->
-      <_RunGetDependsOnNETStandard Condition="'$(_TargetFrameworkVersionWithoutV)' == '4.7.1'">true</_RunGetDependsOnNETStandard>
+      <_RunGetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(_TargetFrameworkVersionWithoutV)' == '4.7.1'">true</_RunGetDependsOnNETStandard>
     </PropertyGroup>
     
     <GetDependsOnNETStandard Condition="'$(_RunGetDependsOnNETStandard)' == 'true'"
