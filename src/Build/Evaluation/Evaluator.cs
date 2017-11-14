@@ -2668,7 +2668,7 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
-                            // If IgnoreFaultedImports is enabled, log all other non-handled exceptions and continue
+                            // If IgnoreInvalidImports is enabled, log all other non-handled exceptions and continue
                             //
                             if (((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0))
                             {
