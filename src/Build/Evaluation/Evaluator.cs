@@ -2643,34 +2643,25 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
-                            // If IgnoreEmptyImports is enabled, check if the file is considered empty
-                            //
+                            bool ignoreImport = false;
+                            string ignoreImportResource = null;
+
                             if (((_loadSettings & ProjectLoadSettings.IgnoreEmptyImports) != 0 || Traits.Instance.EscapeHatches.IgnoreEmptyImports) && ProjectRootElement.IsEmptyXmlFile(importFileUnescaped))
                             {
-                                atleastOneImportIgnored = true;
-
-                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
-                                    importElement.Location.Line,
-                                    importElement.Location.Column,
-                                    ResourceUtilities.GetResourceString("ProjectImportSkippedEmptyFile"),
-                                    importFileUnescaped,
-                                    importElement.ContainingProject.FullPath,
-                                    importElement.Location.Line,
-                                    importElement.Location.Column)
-                                {
-                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                                    UnexpandedProject = importElement.Project,
-                                    ProjectFile = importElement.ContainingProject.FullPath
-                                };
-
-                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
-
-                                continue;
+                                // If IgnoreEmptyImports is enabled, check if the file is considered empty
+                                //
+                                ignoreImport = true;
+                                ignoreImportResource = "ProjectImportSkippedEmptyFile";
+                            }
+                            else if ((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0)
+                            {
+                                // If IgnoreInvalidImports is enabled, log all other non-handled exceptions and continue
+                                //
+                                ignoreImport = true;
+                                ignoreImportResource = "ProjectImportSkippedInvalidFile";
                             }
 
-                            // If IgnoreInvalidImports is enabled, log all other non-handled exceptions and continue
-                            //
-                            if (((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0))
+                            if (ignoreImport)
                             {
                                 atleastOneImportIgnored = true;
 
@@ -2678,7 +2669,7 @@ namespace Microsoft.Build.Evaluation
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                                     importElement.Location.Line,
                                     importElement.Location.Column,
-                                    ResourceUtilities.GetResourceString("ProjectImportSkippedInvalidFile"),
+                                    ResourceUtilities.GetResourceString(ignoreImportResource),
                                     importFileUnescaped,
                                     importElement.ContainingProject.FullPath,
                                     importElement.Location.Line,
