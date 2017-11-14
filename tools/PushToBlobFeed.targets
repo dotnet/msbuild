@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ItemsToPushGlobPattern Include="$(OutputPath)Packages\Microsoft.NET.Sdk.*.nupkg" />
+    <ItemsToPushGlobPattern Include="$(OutputPath)Packages\Microsoft.NET.Build.Extensions.*.nupkg" />
+  </ItemGroup>
+
+  <Target Name="PushToBlobFeed" >
+    <Error Condition="'$(BlobFeedAccessToken)' == ''" Text="Missing property BlobFeedAccessToken." />
+
+    <PropertyGroup>
+      <ExpectedFeedUrl Condition="'$(ExpectedFeedUrl)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</ExpectedFeedUrl>
+    </PropertyGroup>
+
+    <Message Text="Publish NuPkgs to blob feed started: $(ExpectedFeedUrl)" Importance="High" />
+    <PushToBlobFeed AccountKey="$(BlobFeedAccessToken)"
+                ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                ItemsToPush="@(ItemsToPushGlobPattern)"
+                Overwrite="false" />
+  </Target>
+</Project>
