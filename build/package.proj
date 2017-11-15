@@ -1,6 +1,11 @@
 <!-- Build file -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup>
+    <UseDotNetExe Condition="'$(UseDotNetExe)' == ''">false</UseDotNetExe>
+    <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
+  </PropertyGroup>
+  
   <Target Name="Package" DependsOnTargets="_Package"/>
 
   <PropertyGroup>
@@ -26,19 +31,51 @@
 
   <Target Name="_CreateNuGetPackages">
 
+    <!-- Use dotnet exe -->
     <!-- Publish Package -->
-    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
-    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
-    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
+    
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
+    
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
 
     <!-- Project System package -->
-    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
-    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
-    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
 
     <!--Web Package-->
-    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
-    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
-    <Exec Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion) /p:SkipInvalidConfigurations=true" />
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) pack &quot;$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj&quot; /p:configuration=$(Configuration) /p:WebSdkVersion=$(WebSdkVersion)" />
+    
+    <!-- use msbuild-->
+    <ItemGroup>
+      <PublishPackageProject Include="$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Publish/Microsoft.NET.Sdk.Publish.csproj" />
+      <ProjectSystemPackageProject Include="$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web.ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.csproj" />
+      <WebSdkPackageProject Include="$(WebSdkRoot)/pack/Microsoft.NET.Sdk.Web/Microsoft.NET.Sdk.Web.csproj" />
+    </ItemGroup>
+
+    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
+             Projects="@(PublishPackageProject)"
+             Targets ="Restore;Build;Pack"/>
+
+    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
+         Projects="@(ProjectSystemPackageProject)"
+         Targets ="Restore;Build;Pack"/>
+
+    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
+         Projects="@(WebSdkPackageProject)"
+         Targets ="Restore;Build;Pack"/>
+    
   </Target>
 </Project>

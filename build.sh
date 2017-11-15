@@ -47,4 +47,4 @@ then
 fi
 
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build/build.proj" /t:Build /p:Configuration=$CONFIGURATION /p:SkipInvalidConfigurations=true /p:NETFrameworkSupported=false
+$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build/build.proj" /t:Build /p:Configuration=$CONFIGURATION /p:NETFrameworkSupported=false

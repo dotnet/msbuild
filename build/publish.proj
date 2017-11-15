@@ -1,5 +1,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup>
+    <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
+  </PropertyGroup>
+  
   <!-- ***REQUIRED***
           ItemGroup - SignedPackages : Should contain the list of signed packages.
           Property - MyGetSecurityToken: Should contain the security token for https://dotnet.myget.org/F/dotnet-web/api/v2/package

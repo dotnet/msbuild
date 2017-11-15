@@ -13,6 +13,7 @@
   -->
 
   <PropertyGroup>
+    <UseDotNetExe Condition="'$(UseDotNetExe)' == ''">false</UseDotNetExe>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
   </PropertyGroup>
 
@@ -30,15 +31,52 @@
   <Target Name="_Build" DependsOnTargets="$(_BuildDependsOn)" />
 
   <Target Name="_RestoreSolution">
-    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln&quot; /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+    
+    <!-- Using dotnet exe-->
+    <Exec Condition="'$(UseDotNetExe)' == 'true'" 
+          Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln&quot; /p:configuration=$(Configuration)" />
+
+    <!-- Using msbuild-->
+    <ItemGroup>
+      <SolutionFile Include="$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln" />
+    </ItemGroup>
+    
+    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
+             Projects="@(SolutionFile)"
+             Targets ="Restore"/>
   </Target>
 
   <Target Name="_BuildProduct">
-    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj&quot; /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+
+    <!-- Using dotnet exe-->
+    <Exec Condition="'$(UseDotNetExe)' == 'true'" 
+          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj&quot; /p:configuration=$(Configuration)" />
+
+    <!-- Using msbuild-->
+    <ItemGroup>
+      <ProjectFile Include="$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj" />
+    </ItemGroup>
+
+    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
+             Projects="@(ProjectFile)"
+             Targets ="build"/>
   </Target>
 
   <Target Name="_BuildTests" Condition="'$(PB_SkipTests)' != 'true'">
-    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+
+    <!-- Using dotnet exe-->
+    <Exec Condition="'$(UseDotNetExe)' == 'true'"
+          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; /p:configuration=$(Configuration)" />
+
+    <!-- Using msbuild-->
+    <ItemGroup>
+      <TestProject Include="$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj" />
+    </ItemGroup>
+
+    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
+             Projects="@(TestProject)"
+             Targets ="build"/>
+    
   </Target>
 
   <Import Project="$(WebSdkBuild)/test.proj" Condition="Exists('$(WebSdkBuild)/test.proj')"/>
