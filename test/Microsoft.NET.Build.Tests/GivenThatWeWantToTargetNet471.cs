@@ -274,6 +274,44 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        [Fact]
+        public void It_contains_shims_if_override_property_is_set()
+        {
+            //  https://github.com/dotnet/sdk/issues/1625
+            if (!Net471ReferenceAssembliesAreInstalled())
+            {
+                return;
+            }
+            var testProject = new TestProject()
+            {
+                Name = "Net471App",
+                TargetFrameworks = "net471",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.AdditionalProperties.Add("DependsOnNETStandard", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_with_override_property")
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:normal")
+                .Should()
+                .Pass()
+                .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("Could not determine");
+
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{testProject.Name}.exe",
+                $"{testProject.Name}.pdb",
+            }.Concat(net471Shims));
+        }
+
         static bool Net471ReferenceAssembliesAreInstalled()
         {
             // The version of the MSBuild libraries we are referencing doesn't have an enum value for .NET 4.7.1. So we use the MSBuild API to find 
