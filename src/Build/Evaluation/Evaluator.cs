@@ -2632,9 +2632,32 @@ namespace Microsoft.Build.Evaluation
                         // There's a specific message for file not existing
                         if (!File.Exists(importFileUnescaped))
                         {
-                            if (!throwOnFileNotExistsError ||
-                                (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
+                            bool ignoreMissingImportsFlagSet = (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0;
+                            if (!throwOnFileNotExistsError || ignoreMissingImportsFlagSet)
                             {
+                                if (ignoreMissingImportsFlagSet)
+                                {
+                                    // Log message for import skipped
+                                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                        importElement.Location.Line,
+                                        importElement.Location.Column,
+                                        ResourceUtilities.GetResourceString("ProjectImportSkippedMissingFile"),
+                                        importFileUnescaped,
+                                        importElement.ContainingProject.FullPath,
+                                        importElement.Location.Line,
+                                        importElement.Location.Column)
+                                    {
+                                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                        UnexpandedProject = importElement.Project,
+                                        ProjectFile = importElement.ContainingProject.FullPath,
+                                        ImportedProjectFile = importFileUnescaped,
+                                        ImportException = ex,
+                                    };
+
+                                    _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                                }
+
+
                                 continue;
                             }
 
@@ -2678,6 +2701,8 @@ namespace Microsoft.Build.Evaluation
                                     BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                                     UnexpandedProject = importElement.Project,
                                     ProjectFile = importElement.ContainingProject.FullPath,
+                                    ImportedProjectFile = importFileUnescaped,
+                                    ImportException = ex,
                                 };
 
                                 _evaluationLoggingContext.LogBuildEvent(eventArgs);

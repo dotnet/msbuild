@@ -43,5 +43,11 @@ namespace Microsoft.Build.Framework
         /// Gets or sets the full path to the project file that was imported.  If a project was not imported, the value is <code>null</code>.
         /// </summary>
         public string ImportedProjectFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the exception encountered when evaluating this import, if any. Will only be set when a ProjectLoadSettings
+        /// to ignore imports is set.
+        /// </summary>
+        public Exception ImportException { get; set; }
     }
 }

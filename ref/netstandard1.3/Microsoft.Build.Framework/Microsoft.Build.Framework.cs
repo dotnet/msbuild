@@ -358,6 +358,7 @@ namespace Microsoft.Build.Framework
         public ProjectImportedEventArgs() { }
         public ProjectImportedEventArgs(int lineNumber, int columnNumber, string message, params object[] messageArgs) { }
         public string ImportedProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Exception ImportException { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string UnexpandedProject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public partial class ProjectStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
