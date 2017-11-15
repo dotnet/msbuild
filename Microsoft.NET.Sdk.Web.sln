@@ -20,6 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{1CAF6E2F
 		build.cmd = build.cmd
 		build\build.proj = build\build.proj
 		build.sh = build.sh
+		build_FullMsBuild.cmd = build_FullMsBuild.cmd
 		dotnet-install_1.0.ps1 = dotnet-install_1.0.ps1
 		dotnet-install_2.0.ps1 = dotnet-install_2.0.ps1
 		build\EnsureWebSdkEnv.cmd = build\EnsureWebSdkEnv.cmd
