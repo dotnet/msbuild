@@ -4105,7 +4105,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     MockLogger logger = new MockLogger();
                     collection.RegisterLogger(logger);
 
-                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreInvalidImports);
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreMissingImports);
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
