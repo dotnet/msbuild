@@ -1,0 +1,50 @@
+<!-- Build file -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- 
+    PipeBuild overrides:
+
+    PB_SignType            {''|'public'|'real'|'test'}    Disables signing if set to a value other than 'real' 
+    PB_SkipTests           {''|'true'|'false'}            Disables tests if set to 'true'.
+    PB_RestoreSource       {''|URL}                       URL of pipe build package feed.
+    PB_PublishType         {''|store1-store2-...-storeN}  List of stores where to publish assets to.
+    PB_PublishBlobFeedUrl  {''|URL}                       Target feed URL.
+    PB_PublishBlobFeedKey  {''|string}                    Account key.
+  -->
+
+  <PropertyGroup>
+    <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
+  </PropertyGroup>
+
+  <Target Name="Build" DependsOnTargets="_Build;Test;Sign;Package;Publish"/>
+
+  <PropertyGroup>
+    <_BuildDependsOn>
+      $(_BuildDependsOn);
+      _RestoreSolution;
+      _BuildProduct;
+      _BuildTests;
+    </_BuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_Build" DependsOnTargets="$(_BuildDependsOn)" />
+
+  <Target Name="_RestoreSolution">
+    <Exec Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln&quot; /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+  </Target>
+
+  <Target Name="_BuildProduct">
+    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj&quot; /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+  </Target>
+
+  <Target Name="_BuildTests" Condition="'$(PB_SkipTests)' != 'true'">
+    <Exec Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+  </Target>
+
+  <Import Project="$(WebSdkBuild)/test.proj" Condition="Exists('$(WebSdkBuild)/test.proj')"/>
+  <Import Project="$(WebSdkBuild)/sign.proj" Condition="Exists('$(WebSdkBuild)/sign.proj')"/>
+  <Import Project="$(WebSdkBuild)/package.proj" Condition="Exists('$(WebSdkBuild)/package.proj')"/>
+  <Import Project="$(WebSdkBuild)/publish.proj" Condition="Exists('$(WebSdkBuild)/publish.proj')"/>
+  
+</Project>
+

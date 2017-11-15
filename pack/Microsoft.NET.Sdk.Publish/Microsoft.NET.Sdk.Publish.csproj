@@ -5,7 +5,7 @@
     
     <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\</WebSdkRoot>
     <WebSdkSource Condition="'$(WebSdkSource)' == '' ">$(WebSdkRoot)\src\</WebSdkSource>
-    <WebSdkTools Condition="'$(WebSdkTools)' == '' ">$(WebSdkRoot)\tools\</WebSdkTools>
+    <WebSdkBuild Condition="'$(WebSdkBuild)' == '' ">$(WebSdkRoot)\build\</WebSdkBuild>
 
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
@@ -31,27 +31,29 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.NET.Sdk.Publish.Tasks.dll">
+    <!-- Publish task assembly -->
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.NET.Sdk.Publish.Tasks.dll">
+      <Pack>true</Pack>
+      <PackagePath>tools\net46</PackagePath>
+    </Content>
+   
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
       <Pack>true</Pack>
       <PackagePath>tools\net46</PackagePath>
     </Content>
 
-    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
-      <Pack>true</Pack>
-      <PackagePath>tools\net46</PackagePath>
-    </Content>
-
-    <Content Include="$(WebSdkTools)\WebDeploy\**\*.*">
+    <!-- WebDeploy assemblies should be already signed.-->
+    <Content Include="$(WebSdkBuild)\WebDeploy\**\*.*">
       <Pack>true</Pack>
       <PackagePath>tools\net46\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
     </Content>
 
-    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll">
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll">
       <Pack>true</Pack>
       <PackagePath>tools\netcoreapp1.0</PackagePath>
     </Content>
 
-    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
+    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
       <Pack>true</Pack>
       <PackagePath>tools\netcoreapp1.0</PackagePath>
     </Content>

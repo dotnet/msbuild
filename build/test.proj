@@ -1,0 +1,96 @@
+<!-- Test file -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- 
+	PipeBuild overrides:	
+	PB_SkipTests {''|'true'|'false'} Disables tests if set to 'true'.
+	-->
+
+  <PropertyGroup>
+    <DotNetSdksFolder>$(DOTNET_INSTALL_DIR)/Sdk/$(DOTNET_VERSION)/Sdks</DotNetSdksFolder>
+  </PropertyGroup>
+  
+  <Target Name="Test" DependsOnTargets="_Test"/>
+
+  <PropertyGroup>
+    <_TestDependsOn>
+      $(_TestDependsOn);
+      _CopyBuildArtifacts;
+      _RunTests;
+    </_TestDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_Test" DependsOnTargets="$(_TestDependsOn)" />
+
+  <Target Name="_CopyBuildArtifacts">
+    <!--Copy publish sdks-->
+    <Copy SourceFiles="$(WebSdkSource)/Publish/Microsoft.NET.Sdk.Publish.Targets/Sdk.props"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/Sdk/Sdk.props"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkSource)/Publish/Microsoft.NET.Sdk.Publish.Targets/Sdk.targets"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/Sdk/Sdk.targets"
+        OverwriteReadOnlyFiles="true" />
+
+    <!--Copy projectsystem sdks-->
+    <Copy SourceFiles="$(WebSdkSource)/ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.Targets/Sdk.props"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web.ProjectSystem/Sdk/Sdk.props"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkSource)/ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.Targets/Sdk.targets"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web.ProjectSystem/Sdk/Sdk.targets"
+        OverwriteReadOnlyFiles="true" />
+
+    <!--Copy web sdks-->
+    <Copy SourceFiles="$(WebSdkSource)/Web/Microsoft.NET.Sdk.Web.Targets/Sdk.props"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web/Sdk/Sdk.props"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkSource)/Web/Microsoft.NET.Sdk.Web.Targets/Sdk.targets"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web/Sdk/Sdk.targets"
+        OverwriteReadOnlyFiles="true" />
+
+    <!-- Copy Publish targets and projectsystem targets-->
+    <PropertyGroup>
+      <_PublishTargetDestination>$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/build/netstandard1.0/</_PublishTargetDestination>
+      <_ProjectSystemTargetDestination>$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web.ProjectSystem/build/netstandard1.0/</_ProjectSystemTargetDestination>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_PublishTargets Include="$(WebSdkSource)/Publish/Microsoft.NET.Sdk.Publish.Targets/netstandard1.0/**/*.*" />
+      <_ProjectSystemTargets Include="$(WebSdkSource)/ProjectSystem/Microsoft.NET.Sdk.Web.ProjectSystem.Targets/netstandard1.0/**/*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_PublishTargets)"
+        DestinationFiles="@(_PublishTargets -> '$(_PublishTargetDestination)%(RecursiveDir)%(FileName)%(Extension)')"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="@(_ProjectSystemTargets)"
+        DestinationFiles="@(_ProjectSystemTargets -> '$(_ProjectSystemTargetDestination)%(RecursiveDir)%(FileName)%(Extension)')"
+        OverwriteReadOnlyFiles="true" />
+
+    <!-- Copy Publish tasks-->
+    <Copy SourceFiles="$(WebSdkPublishBin)/$(Configuration)/net46/win7-x86/Microsoft.NET.Sdk.Publish.Tasks.dll"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.NET.Sdk.Publish.Tasks.dll"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkPublishBin)/$(Configuration)/netstandard1.3/Microsoft.NET.Sdk.Publish.Tasks.dll"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp1.0/Microsoft.NET.Sdk.Publish.Tasks.dll"
+        OverwriteReadOnlyFiles="true" />
+
+  </Target>
+
+  <Target Name="_RunTests" Condition="'$(PB_SkipTests)' != 'true'">
+    
+    <!-- Run .NET Core Tests -->
+    <Exec  
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp1.1 --no-build /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+
+    <!-- Run .NET Framework Tests -->
+    <Exec 
+      Condition="'$(NETFrameworkSupported)' != 'false'"
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=net46 --no-build /p:configuration=$(Configuration) /p:SkipInvalidConfigurations=true" />
+  </Target>
+
+
+</Project>

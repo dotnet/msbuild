@@ -10,13 +10,12 @@ if not defined DOTNET_VERSION (
 
 set "WebSdkRoot=%~dp0"
 set "WebSdkRoot=%WebSdkRoot:~0,-7%"
-set "WebSdkBin=%WebSdkRoot%\bin\"
-set "WebSdkIntermediate=%WebSdkRoot%\obj\"
 set "WebSdkReferences=%WebSdkRoot%\references\"
 set "WebSdkSource=%WebSdkRoot%\src\"
-set "WebSdkTools=%WebSdkRoot%\tools\"
+set "WebSdkBuild=%WebSdkRoot%\build\"
+set "WebSdkPublishBin=%WebSdkRoot%\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\"
 
-set "PATH=%PATH%;%WebSdkTools%"
+set "PATH=%PATH%;%WebSdkBuild%"
 
 REM Only required for the signing targets
 if defined ProgramFiles(x86) (

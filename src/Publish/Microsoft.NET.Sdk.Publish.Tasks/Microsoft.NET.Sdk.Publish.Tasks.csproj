@@ -4,14 +4,6 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>Microsoft.NET.Sdk.Publish.Tasks</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <OutputPath>..\..\..\bin\Debug\</OutputPath>
-    <IntermediateOutputPath>..\..\..\obj\Debug\</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <OutputPath>..\..\..\bin\Release\</OutputPath>
-    <IntermediateOutputPath>..\..\..\obj\Release\</IntermediateOutputPath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
   </PropertyGroup>
@@ -49,5 +41,17 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Sign the publish task assembly -->
+    <FilesToSign Include="$(OutDir)\Microsoft.NET.Sdk.Publish.Tasks.dll">
+      <Authenticode>Microsoft</Authenticode> 
+      <StrongName>StrongName</StrongName> 
+    </FilesToSign> 
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="MicroBuild.Core" Version="0.2.0" />
   </ItemGroup>
 </Project>

@@ -14,11 +14,10 @@ export CONFIGURATION="Release"
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 export DOTNET_VERSION=1.0.4
 export WebSdkRoot=$REPOROOT
-export WebSdkBin=$WebSdkRoot/bin/ 
-export WebSdkIntermediate=$WebSdkRoot/obj/ 
 export WebSdkReferences=$WebSdkRoot/references/ 
 export WebSdkSource=$WebSdkRoot/src/ 
-export WebSdkTools=$WebSdkRoot/tools/ 
+export WebSdkBuild=$WebSdkRoot/build/ 
+expot WebSdkPublishBin=$WebSdkRoot/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/bin/"
 
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
@@ -49,4 +48,4 @@ then
 fi
 
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build.proj" /t:Build /p:Configuration=$CONFIGURATION /p:SkipInvalidConfigurations=true /p:NETFrameworkSupported=false
+$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build/build.proj" /t:Build /p:Configuration=$CONFIGURATION /p:SkipInvalidConfigurations=true /p:NETFrameworkSupported=false

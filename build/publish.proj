@@ -1,0 +1,39 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- ***REQUIRED***
+          ItemGroup - SignedPackages : Should contain the list of signed packages.
+          Property - MyGetSecurityToken: Should contain the security token for https://dotnet.myget.org/F/dotnet-web/api/v2/package
+  -->
+  
+  <!-- 
+	PipeBuild overrides:	
+    PB_PublishType         {''|store1-store2-...-storeN}  List of stores where to publish assets to.
+    PB_PublishBlobFeedUrl  {''|URL}                       Target feed URL.
+    PB_PublishBlobFeedKey  {''|string}                    Account key.
+	-->
+
+  <Target Name="Publish" DependsOnTargets="_Publish"/>
+
+  <PropertyGroup>
+    <_PublishDependsOn>
+      $(_PublishDependsOn);
+      _PublishPackagesToMyGet
+    </_PublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_Publish" DependsOnTargets="$(_PublishDependsOn)" />
+
+  <Target Name="_PublishPackagesToMyGet">
+    
+      <PropertyGroup>
+        <MyGetFeed>https://dotnet.myget.org/F/dotnet-web/api/v2/package</MyGetFeed>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <SignedPackages Include="$(CodeSignOutputPath)/Packages/*.nupkg" />
+    </ItemGroup>
+
+    <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) --api-key $(MyGetSecurityToken) --source $(MyGetFeed)"/>
+  </Target>
+
+  </Project>
