@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" />
-    <BuildToolsProjectFile Include="$(RepositoryRootDirectory)tools\BuildTools.proj" />
+    <BuildToolsProjectFile Include="$(RepositoryRootDirectory)tools\BuildTools.csproj" />
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
     <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj" />
