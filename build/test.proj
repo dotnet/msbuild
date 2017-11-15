@@ -5,13 +5,13 @@
 	PipeBuild overrides:	
 	PB_SkipTests {''|'true'|'false'} Disables tests if set to 'true'.
 	-->
- 
+
   <PropertyGroup>
     <UseDotNetExe Condition="'$(UseDotNetExe)' == ''">false</UseDotNetExe>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
     <DotNetSdksFolder>$(DOTNET_INSTALL_DIR)/Sdk/$(DOTNET_VERSION)/Sdks</DotNetSdksFolder>
   </PropertyGroup>
-  
+
   <Target Name="Test" DependsOnTargets="_Test"/>
 
   <PropertyGroup>
@@ -83,7 +83,7 @@
   </Target>
 
   <Target Name="_RunTests" Condition="'$(PB_SkipTests)' != 'true'">
-    
+
     <!-- Use dotnet exe-->
     <!-- Run .NET Core Tests -->
     <Exec
@@ -91,31 +91,9 @@
 
     <!-- Run .NET Framework Tests -->
     <Exec
+      Condition="'$(NETFrameworkSupported)' != 'false'"
       Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=net46 /p:configuration=$(Configuration)" />
 
-    <!-- Using msbuild--><!--
-    --><!-- Run .NET Core Tests --><!--
-    <ItemGroup>
-      <CoreTestProject Include="$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj" >
-        <Properties>framework=netcoreapp1.1</Properties>
-      </CoreTestProject>
-    </ItemGroup>
-
-    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
-             Projects="@(CoreTestProject)"
-             Targets ="VSTest"/>
-
-
-    --><!-- Run .NET Framework Tests --><!--
-    <ItemGroup>
-      <FullFrameworkTestProject Include="$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj" >
-        <Properties>framework=net46</Properties>
-      </FullFrameworkTestProject>
-    </ItemGroup>
-
-    <MSBuild Condition="'$(UseDotNetExe)' == 'false' And '$(NETFrameworkSupported)' != 'false'"
-             Projects="@(FullFrameworkTestProject)"
-             Targets ="VSTest"/>-->
   </Target>
 
 </Project>
