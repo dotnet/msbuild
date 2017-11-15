@@ -17,8 +17,7 @@ export WebSdkRoot=$REPOROOT
 export WebSdkReferences=$WebSdkRoot/references/ 
 export WebSdkSource=$WebSdkRoot/src/ 
 export WebSdkBuild=$WebSdkRoot/build/ 
-expot WebSdkPublishBin=$WebSdkRoot/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/bin/"
-
+export WebSdkPublishBin=$WebSdkRoot/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/bin/
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet
