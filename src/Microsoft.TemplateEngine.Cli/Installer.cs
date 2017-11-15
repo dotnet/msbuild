@@ -29,9 +29,14 @@ namespace Microsoft.TemplateEngine.Cli
             ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
         }
 
-        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null);
+        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false);
 
         public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources)
+        {
+            InstallPackages(installationRequests, nuGetSources, false);
+        }
+
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall)
         {
             List<string> localSources = new List<string>();
             List<Package> packages = new List<Package>();
@@ -60,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (localSources.Count > 0)
             {
-                InstallLocalPackages(localSources);
+                InstallLocalPackages(localSources, debugAllowDevInstall);
             }
 
             if (packages.Count > 0)
@@ -232,10 +237,10 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             _paths.DeleteDirectory(_paths.User.ScratchDir);
-            InstallLocalPackages(newLocalPackages);
+            InstallLocalPackages(newLocalPackages, false);
         }
 
-        private void InstallLocalPackages(IReadOnlyList<string> packageNames)
+        private void InstallLocalPackages(IReadOnlyList<string> packageNames, bool debugAllowDevInstall)
         {
             List<string> toInstall = new List<string>();
 
@@ -268,7 +273,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         string fullDirectory = new DirectoryInfo(pkg).FullName;
                         string fullPathGlob = Path.Combine(fullDirectory, pattern);
-                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(fullPathGlob, out IReadOnlyList<Guid> contentMountPointIds);
+                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(fullPathGlob, out IReadOnlyList<Guid> contentMountPointIds, debugAllowDevInstall);
 
                         foreach (Guid mountPointId in contentMountPointIds)
                         {
@@ -278,7 +283,7 @@ namespace Microsoft.TemplateEngine.Cli
                     else if (_environmentSettings.Host.FileSystem.DirectoryExists(pkg) || _environmentSettings.Host.FileSystem.FileExists(pkg))
                     {
                         string packageLocation = new DirectoryInfo(pkg).FullName;
-                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(packageLocation, out IReadOnlyList<Guid> contentMountPointIds);
+                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(packageLocation, out IReadOnlyList<Guid> contentMountPointIds, debugAllowDevInstall);
 
                         foreach (Guid mountPointId in contentMountPointIds)
                         {
