@@ -314,7 +314,6 @@ namespace Microsoft.TemplateEngine.Cli
         {
             _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, _commandInput.ToInstallList.Count.ToString() } });
 
-            // new
             bool allowDevInstall = _commandInput.HasDebuggingFlag("--dev:install");
             Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList, allowDevInstall);
 
@@ -340,14 +339,6 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 return CreationResultStatus.InvalidParamValues;
-            }
-
-            // duplicate
-            if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
-            {
-                // new
-                bool allowDevInstall = _commandInput.HasDebuggingFlag("--dev:install");
-                Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList, allowDevInstall);
             }
 
             if (_commandInput.ToUninstallList != null)

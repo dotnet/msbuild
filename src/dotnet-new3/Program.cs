@@ -71,10 +71,9 @@ namespace dotnet_new3
 
             var builtIns = new AssemblyComponentCatalog(new[]
             {
-                typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,
-                typeof(ConditionalConfig).GetTypeInfo().Assembly,
-                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly,
-                typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly
+                typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
+                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
+                typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly     // for assembly: Microsoft.TemplateEngine.Cli
             });
 
             DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, new[] { "dotnetcli" });
