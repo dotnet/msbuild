@@ -2668,6 +2668,32 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
+                            // If IgnoreInvalidImports is enabled, log all other non-handled exceptions and continue
+                            //
+                            if (((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0))
+                            {
+                                atleastOneImportIgnored = true;
+
+                                // Log message for import skipped
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ResourceUtilities.GetResourceString("ProjectImportSkippedInvalidFile"),
+                                    importFileUnescaped,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath,
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                                continue;
+                            }
+
                             // If this exception is a wrapped exception (like IOException or XmlException) then wrap it as an invalid import instead
                             if (ex.InnerException != null)
                             {

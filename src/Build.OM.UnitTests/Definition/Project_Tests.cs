@@ -4000,11 +4000,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
 ";
-                string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
+                var importFile = env.CreateFile(".targets");
+                File.WriteAllText(importFile.Path, contents);
                 ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
 
                 pre.AddPropertyGroup().AddProperty("NotUsed", "");
-                var import = pre.AddImport(importPath);
+                var import = pre.AddImport(importFile.Path);
 
                 pre.Save();
                 pre.Reload();
@@ -4030,6 +4031,52 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Assert.Equal(3, eventArgs.ColumnNumber);
 
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being empty.");
+                }
+            }
+        }
+
+        [Fact]
+        public void ProjectImportedEventInvalidFile()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project>BROKEN</Project>
+";
+
+                var importFile = env.CreateFile(".targets");
+                File.WriteAllText(importFile.Path, contents);
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+                var import = pre.AddImport(importFile.Path);
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreInvalidImports);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Null(eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being invalid.");
                 }
             }
         }
