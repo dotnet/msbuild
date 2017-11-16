@@ -43,12 +43,12 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition ="'$(PB_SignType)' == 'real' Or '$(PB_SignType)' == 'test'">
     <!-- Sign the publish task assembly -->
     <FilesToSign Include="$(OutDir)\Microsoft.NET.Sdk.Publish.Tasks.dll">
-      <Authenticode>Microsoft</Authenticode> 
-      <StrongName>StrongName</StrongName> 
-    </FilesToSign> 
+      <Authenticode>Microsoft400</Authenticode>
+      <StrongName>StrongName</StrongName>
+    </FilesToSign>
   </ItemGroup>
   
   <ItemGroup>
