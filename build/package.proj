@@ -6,9 +6,9 @@
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.0.0</VersionPrefix>
     <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
-    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">1</BUILD_NUMBER>
+    <BUILD_BUILDNUMBER Condition="'$(BUILD_BUILDNUMBER)' == ''">1</BUILD_BUILDNUMBER>
     <BuildBranchName Condition="'$(BuildBranchName)' == ''">dev</BuildBranchName>
-    <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(BuildBranchName)$(CurrentDate)-$(BUILD_NUMBER)</WebSdkVersion>
+    <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(BuildBranchName)$(CurrentDate)-$(BUILD_BUILDNUMBER)</WebSdkVersion>
   </PropertyGroup>
   
   <Target Name="Package" DependsOnTargets="_Package"/>
