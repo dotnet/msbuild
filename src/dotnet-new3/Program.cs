@@ -9,7 +9,6 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
-using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
 using Microsoft.TemplateEngine.Utils;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
@@ -26,11 +25,6 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
-            if (args.Any(x => string.Equals(x, "--debug:attach", StringComparison.OrdinalIgnoreCase)))
-            {
-                Console.ReadLine();
-            }
-
             bool emitTimings = args.Any(x => string.Equals(x, "--debug:emit-timings", StringComparison.OrdinalIgnoreCase));
             bool debugTelemetry = args.Any(x => string.Equals(x, "--debug:emit-telemetry", StringComparison.OrdinalIgnoreCase));
     
