@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
+    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">$(MSBuildThisFileDirectory)..\</WebSdkRoot>
   </PropertyGroup>
   
   <!-- ***REQUIRED***
@@ -34,7 +35,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-      <SignedPackages Include="$(CodeSignOutputPath)/Packages/*.nupkg" />
+      <SignedPackages Include="$(WebSdkRoot)/bin/$(Configuration)/*.nupkg" />
     </ItemGroup>
 
     <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) --api-key $(MyGetSecurityToken) --source $(MyGetFeed)"/>
