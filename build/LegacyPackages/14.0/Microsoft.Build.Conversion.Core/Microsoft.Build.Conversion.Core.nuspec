@@ -12,7 +12,7 @@
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</description>
     <tags>MSBuild</tags>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
       <group targetFramework="net45">
         <dependency id="Microsoft.Build" version="[$version$]" />
