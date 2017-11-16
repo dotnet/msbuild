@@ -2651,7 +2651,7 @@ namespace Microsoft.Build.Evaluation
                                         UnexpandedProject = importElement.Project,
                                         ProjectFile = importElement.ContainingProject.FullPath,
                                         ImportedProjectFile = importFileUnescaped,
-                                        ImportException = ex,
+                                        ImportIgnored = true,
                                     };
 
                                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
@@ -2702,7 +2702,7 @@ namespace Microsoft.Build.Evaluation
                                     UnexpandedProject = importElement.Project,
                                     ProjectFile = importElement.ContainingProject.FullPath,
                                     ImportedProjectFile = importFileUnescaped,
-                                    ImportException = ex,
+                                    ImportIgnored = true,
                                 };
 
                                 _evaluationLoggingContext.LogBuildEvent(eventArgs);

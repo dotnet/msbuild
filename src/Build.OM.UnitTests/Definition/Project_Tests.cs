@@ -4020,7 +4020,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
                     Assert.NotNull(eventArgs);
-                    Assert.NotNull(eventArgs.ImportException);
+                    Assert.True(eventArgs.ImportIgnored);
 
                     Assert.Equal(import.Project, eventArgs.UnexpandedProject);
 
@@ -4067,7 +4067,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
                     Assert.NotNull(eventArgs);
-                    Assert.NotNull(eventArgs.ImportException);
+                    Assert.True(eventArgs.ImportIgnored);
 
                     Assert.Equal(import.Project, eventArgs.UnexpandedProject);
 
@@ -4110,7 +4110,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
                     Assert.NotNull(eventArgs);
-                    Assert.NotNull(eventArgs.ImportException);
+                    Assert.True(eventArgs.ImportIgnored);
 
                     Assert.Equal(import.Project, eventArgs.UnexpandedProject);
 
@@ -4165,6 +4165,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     Assert.Equal(pre2.FullPath, eventArgs.ProjectFile);
 
+                    Assert.False(eventArgs.ImportIgnored);
                     Assert.Equal(6, eventArgs.LineNumber);
                     Assert.Equal(3, eventArgs.ColumnNumber);
 
