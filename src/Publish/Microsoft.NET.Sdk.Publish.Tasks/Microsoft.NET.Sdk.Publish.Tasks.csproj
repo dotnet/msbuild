@@ -3,6 +3,9 @@
     <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>Microsoft.NET.Sdk.Publish.Tasks</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(WebSdkRoot)\tools\Key.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
@@ -43,7 +46,7 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup Condition ="'$(PB_SignType)' == 'real' Or '$(PB_SignType)' == 'test'">
+  <ItemGroup>
     <!-- Sign the publish task assembly -->
     <FilesToSign Include="$(OutDir)\Microsoft.NET.Sdk.Publish.Tasks.dll">
       <Authenticode>Microsoft400</Authenticode>

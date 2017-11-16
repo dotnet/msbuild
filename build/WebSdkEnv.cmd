@@ -1,5 +1,9 @@
 @echo off
 
+if not defined BuildConfiguration (
+    set "BuildConfiguration=Release"
+)
+
 if not defined DOTNET_INSTALL_DIR (
     set "DOTNET_INSTALL_DIR=%LocalAppData%\Microsoft\dotnet"
 )

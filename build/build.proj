@@ -15,6 +15,7 @@
   <PropertyGroup>
     <UseDotNetExe Condition="'$(UseDotNetExe)' == ''">false</UseDotNetExe>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
   </PropertyGroup>
 
   <Target Name="Build" DependsOnTargets="_Build;Test;Package;Publish"/>
@@ -34,7 +35,7 @@
     
     <!-- Using dotnet exe-->
     <Exec Condition="'$(UseDotNetExe)' == 'true'" 
-          Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln&quot; /p:configuration=$(Configuration)" />
+          Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln&quot; /p:Configuration=$(Configuration)" />
 
     <!-- Using msbuild-->
     <ItemGroup>
@@ -50,7 +51,7 @@
 
     <!-- Using dotnet exe-->
     <Exec Condition="'$(UseDotNetExe)' == 'true'" 
-          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj&quot; /p:configuration=$(Configuration)" />
+          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj&quot; /p:Configuration=$(Configuration)" />
 
     <!-- Using msbuild-->
     <ItemGroup>
@@ -66,7 +67,7 @@
 
     <!-- Using dotnet exe-->
     <Exec Condition="'$(UseDotNetExe)' == 'true'"
-          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; /p:configuration=$(Configuration)" />
+          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; /p:Configuration=$(Configuration)" />
 
     <!-- Using msbuild-->
     <ItemGroup>

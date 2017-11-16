@@ -87,12 +87,12 @@
     <!-- Use dotnet exe-->
     <!-- Run .NET Core Tests -->
     <Exec
-      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; --no-build -f=netcoreapp1.1 /p:configuration=$(Configuration)" />
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; --no-build -f=netcoreapp1.1 /p:Configuration=$(Configuration)" />
 
     <!-- Run .NET Framework Tests -->
     <Exec
       Condition="'$(NETFrameworkSupported)' != 'false'"
-      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; --no-build -f=net46 /p:configuration=$(Configuration)" />
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; --no-build -f=net46 /p:Configuration=$(Configuration)" />
 
   </Target>
 

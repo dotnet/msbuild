@@ -9,7 +9,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 REPOROOT="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-export CONFIGURATION="Release"
 
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 export DOTNET_VERSION=1.0.4
@@ -18,6 +17,8 @@ export WebSdkReferences=$WebSdkRoot/references/
 export WebSdkSource=$WebSdkRoot/src/ 
 export WebSdkBuild=$WebSdkRoot/build/ 
 export WebSdkPublishBin=$WebSdkRoot/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/bin/
+
+[ -z $BuildConfiguration ] && export BuildConfiguration ="Release"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet
@@ -47,4 +48,4 @@ then
 fi
 
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build/build.proj" /t:Build /p:Configuration=$CONFIGURATION /p:NETFrameworkSupported=false
+$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build/build.proj" /t:Build /p:Configuration=$BuildConfiguration /p:NETFrameworkSupported=false
