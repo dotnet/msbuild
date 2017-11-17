@@ -1,0 +1,85 @@
+﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true'">
+    <StrongNameKeyId>MSBuildTest</StrongNameKeyId>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Test.snk</AssemblyOriginatorKeyFile>
+    <PublicKey>002400000480000094000000060200000024000052534131000400000100010015c01ae1f50e8cc09ba9eac9147cf8fd9fce2cfe9f8dce4f7301c4132ca9fb50ce8cbf1df4dc18dd4d210e4345c744ecb3365ed327efdbc52603faa5e21daa11234c8c4a73e51f03bf192544581ebe107adee3a34928e39d04e524a9ce729d5090bfd7dad9d10c722c0def9ccc08ff0a03790e48bcd1f9b6c476063e1966a1c4</PublicKey>
+    <PublicKeyToken>9d77cc7ad39b68eb</PublicKeyToken>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
+    <StrongNameKeyId>Microsoft</StrongNameKeyId>
+  </PropertyGroup>
+  
+  <!-- Import common project targets provided by RepoToolset -->
+  <Import Project="$(RepoToolsetDir)Imports.targets" />
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <!-- Add DefineConstants values back that were removed by ProjectDefault.props in repo toolset -->
+    <DefineConstants>$(DefineConstants);$(DefineConstantsBackup)</DefineConstants>
+
+    
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
+    <!-- MSBuild isn't xunit analyzer clean, so remove the reference to the xunit package added by the repo toolset and
+         replace it with references to xunit.core and xunit.assert. -->
+    <PackageReference Remove="xunit" />
+    <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.assert" Version="$(XUnitVersion)" />
+  </ItemGroup>
+  
+
+  <!-- copied from Microsoft.Common.CurrentVersion.targets and modified to force anycpu -->
+  <!-- remove when https://github.com/Microsoft/msbuild/issues/1588 is done-->
+  <Target Name="GenerateSatelliteAssemblies"
+          Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+          Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(MSBuildRuntimeType)' != 'Core'">
+
+    <MakeDir
+        Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
+
+    <AL AlgorithmId="$(Satellite_AlgorithmId)"
+        BaseAddress="$(Satellite_BaseAddress)"
+        CompanyName="$(Satellite_CompanyName)"
+        Configuration="$(Satellite_Configuration)"
+        Copyright="$(Satellite_Copyright)"
+        Culture="%(Culture)"
+        DelaySign="$(DelaySign)"
+        Description="$(Satellite_Description)"
+        EmbedResources="@(_SatelliteAssemblyResourceInputs)"
+        EnvironmentVariables="$(AlEnvironment)"
+        EvidenceFile="$(Satellite_EvidenceFile)"
+        FileVersion="$(Satellite_FileVersion)"
+        Flags="$(Satellite_Flags)"
+        GenerateFullPaths="$(Satellite_GenerateFullPaths)"
+        KeyContainer="$(KeyContainerName)"
+        KeyFile="$(KeyOriginatorFile)"
+        LinkResources="@(Satellite_LinkResource)"
+        MainEntryPoint="$(Satellite_MainEntryPoint)"
+        OutputAssembly="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
+        Platform="anycpu"
+        ProductName="$(Satellite_ProductName)"
+        ProductVersion="$(Satellite_ProductVersion)"
+        ResponseFiles="@(AlResponseFile)"
+        SourceModules="@(Satellite_SourceModule)"
+        TargetType="$(Satellite_TargetType)"
+        TemplateFile="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+        Title="$(Satellite_Title)"
+        ToolPath="$(AlToolPath)"
+        ToolExe ="$(AlToolExe)"
+        SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
+        Trademark="$(Satellite_Trademark)"
+        Version="$(Satellite_Version)"
+        Win32Icon="$(Satellite_Win32Icon)"
+        Win32Resource="$(Satellite_Win32Resource)">
+
+      <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
+
+    </AL>
+
+  </Target>
+
+</Project>

@@ -2,33 +2,33 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27031.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework", "Framework\Microsoft.Build.Framework.csproj", "{571F09DB-A81A-4444-945C-6F7B530054CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework", "src\Framework\Microsoft.Build.Framework.csproj", "{571F09DB-A81A-4444-945C-6F7B530054CD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities", "Utilities\Microsoft.Build.Utilities.csproj", "{828566EE-6F6A-4EF4-98B0-513F7DF9C628}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities", "src\Utilities\Microsoft.Build.Utilities.csproj", "{828566EE-6F6A-4EF4-98B0-513F7DF9C628}"
 	ProjectSection(ProjectDependencies) = postProject
 		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "Build\Microsoft.Build.csproj", "{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}"
 	ProjectSection(ProjectDependencies) = postProject
 		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBuild", "MSBuild\MSBuild.csproj", "{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBuild", "src\MSBuild\MSBuild.csproj", "{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks", "Tasks\Microsoft.Build.Tasks.csproj", "{59A73FE0-D3B7-4299-9063-3A587D429AF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks", "src\Tasks\Microsoft.Build.Tasks.csproj", "{59A73FE0-D3B7-4299-9063-3A587D429AF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework.UnitTests", "Framework.UnitTests\Microsoft.Build.Framework.UnitTests.csproj", "{BE53C18D-7E4E-4C57-A359-1D662C384511}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework.UnitTests", "src\Framework.UnitTests\Microsoft.Build.Framework.UnitTests.csproj", "{BE53C18D-7E4E-4C57-A359-1D662C384511}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.CommandLine.UnitTests", "MSBuild.UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj", "{C79756DC-CC78-45D6-AE11-8BB35F201CE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.CommandLine.UnitTests", "src\MSBuild.UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj", "{C79756DC-CC78-45D6-AE11-8BB35F201CE4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities.UnitTests", "Utilities.UnitTests\Microsoft.Build.Utilities.UnitTests.csproj", "{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities.UnitTests", "src\Utilities.UnitTests\Microsoft.Build.Utilities.UnitTests.csproj", "{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks.UnitTests", "Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj", "{32126DCE-7484-4E4B-85DA-12378C0F2FC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks.UnitTests", "src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj", "{32126DCE-7484-4E4B-85DA-12378C0F2FC7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Engine.UnitTests", "Build.UnitTests\Microsoft.Build.Engine.UnitTests.csproj", "{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Engine.UnitTests", "src\Build.UnitTests\Microsoft.Build.Engine.UnitTests.csproj", "{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Engine.OM.UnitTests", "Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.csproj", "{9D858C8F-8D71-467E-808E-4E4F48DD0A49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Engine.OM.UnitTests", "src\Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.csproj", "{9D858C8F-8D71-467E-808E-4E4F48DD0A49}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4900B3B8-4310-4D5B-B1F7-2FDF9199765F}"
 	ProjectSection(SolutionItems) = preProject
@@ -38,23 +38,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{760FF85D-8BEB-4992-8095-A9678F88FD47}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskUsageLogger", "..\Samples\TaskUsageLogger\TaskUsageLogger.csproj", "{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskUsageLogger", "Samples\TaskUsageLogger\TaskUsageLogger.csproj", "{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}"
 	ProjectSection(ProjectDependencies) = postProject
 		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628} = {828566EE-6F6A-4EF4-98B0-513F7DF9C628}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortableTask", "..\Samples\PortableTask\PortableTask.csproj", "{FC1C02BB-1585-4322-840F-B002E25AEAD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortableTask", "Samples\PortableTask\PortableTask.csproj", "{FC1C02BB-1585-4322-840F-B002E25AEAD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreCompileTest", "..\Samples\NetCoreCompileTest\NetCoreCompileTest.csproj", "{11B5D53E-90E4-4BD5-9883-B5921F7DE854}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreCompileTest", "Samples\NetCoreCompileTest\NetCoreCompileTest.csproj", "{11B5D53E-90E4-4BD5-9883-B5921F7DE854}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildTaskHost", "MSBuildTaskHost\MSBuildTaskHost.csproj", "{53733ECF-0D81-43DA-B602-2AE9417F614F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dependency", "Samples\Dependency\Dependency.csproj", "{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dependency", "..\Samples\Dependency\Dependency.csproj", "{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskWithDependency", "Samples\TaskWithDependency\TaskWithDependency.csproj", "{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskWithDependency", "..\Samples\TaskWithDependency\TaskWithDependency.csproj", "{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.LocalizationTasks", "..\build\LocalizationTasks\Microsoft.Build.LocalizationTasks.csproj", "{06347A6C-32A4-4218-A930-0A22699C726C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.LocalizationTasks", "build\LocalizationTasks\Microsoft.Build.LocalizationTasks.csproj", "{06347A6C-32A4-4218-A930-0A22699C726C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGetPackages", "NuGetPackages", "{B3A6667F-80C1-4264-874B-60AF572F641F}"
 	ProjectSection(SolutionItems) = preProject
@@ -68,7 +66,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGetPackages", "NuGetPacka
 		..\build\NuGetPackages\Microsoft.Build.Utilities.Core.nuspec = ..\build\NuGetPackages\Microsoft.Build.Utilities.Core.nuspec
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlFileLogger", "..\Samples\XmlFileLogger\XmlFileLogger.csproj", "{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XmlFileLogger", "Samples\XmlFileLogger\XmlFileLogger.csproj", "{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildTaskHost", "src\MSBuildTaskHost\MSBuildTaskHost.csproj", "{53733ECF-0D81-43DA-B602-2AE9417F614F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -674,41 +674,6 @@ Global
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release-NetCore|x64.Build.0 = Release|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release-NetCore|x86.ActiveCfg = Release|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release-NetCore|x86.Build.0 = Release|Any CPU
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x64.ActiveCfg = Debug|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x64.Build.0 = Debug|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x86.ActiveCfg = Debug|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x86.Build.0 = Debug|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|Any CPU.ActiveCfg = Debug-MONO|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x64.ActiveCfg = Debug-MONO|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x64.Build.0 = Debug-MONO|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x86.ActiveCfg = Debug-MONO|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x86.Build.0 = Debug-MONO|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.Build.0 = Debug-NetCore|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.Build.0 = Port-Progress|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.Build.0 = Port-Progress|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|Any CPU.ActiveCfg = Release|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x64.ActiveCfg = Release|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x64.Build.0 = Release|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x86.ActiveCfg = Release|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x86.Build.0 = Release|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|Any CPU.ActiveCfg = Release-MONO|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x64.ActiveCfg = Release-MONO|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x64.Build.0 = Release-MONO|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x86.ActiveCfg = Release-MONO|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x86.Build.0 = Release-MONO|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|Any CPU.ActiveCfg = Release-NetCore|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x64.ActiveCfg = Release-NetCore|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x64.Build.0 = Release-NetCore|x64
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x86.ActiveCfg = Release-NetCore|x86
-		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x86.Build.0 = Release-NetCore|x86
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -837,46 +802,81 @@ Global
 		{06347A6C-32A4-4218-A930-0A22699C726C}.Release-NetCore|x86.Build.0 = Release-NetCore|Any CPU
 		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x64.ActiveCfg = Debug|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x64.Build.0 = Debug|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x86.ActiveCfg = Debug|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x86.Build.0 = Debug|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|Any CPU.ActiveCfg = Debug-MONO|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|Any CPU.Build.0 = Debug-MONO|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x64.ActiveCfg = Debug-MONO|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x64.Build.0 = Debug-MONO|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x86.ActiveCfg = Debug-MONO|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x86.Build.0 = Debug-MONO|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|Any CPU.Build.0 = Debug-NetCore|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x86.Build.0 = Debug-NetCore|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x64.Build.0 = Port-Progress|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x86.Build.0 = Port-Progress|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x64.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x86.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|Any CPU.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x64.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x64.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x86.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x86.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|Any CPU.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x64.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x64.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x86.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x86.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|Any CPU.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|Any CPU.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x64.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x64.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x86.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x86.Build.0 = Release|Any CPU
 		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x64.ActiveCfg = Release|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x64.Build.0 = Release|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x86.ActiveCfg = Release|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x86.Build.0 = Release|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|Any CPU.ActiveCfg = Release-MONO|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|Any CPU.Build.0 = Release-MONO|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x64.ActiveCfg = Release-MONO|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x64.Build.0 = Release-MONO|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x86.ActiveCfg = Release-MONO|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x86.Build.0 = Release-MONO|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|Any CPU.ActiveCfg = Release-NetCore|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|Any CPU.Build.0 = Release-NetCore|Any CPU
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x64.ActiveCfg = Release-NetCore|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x64.Build.0 = Release-NetCore|x64
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x86.ActiveCfg = Release-NetCore|x86
-		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x86.Build.0 = Release-NetCore|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x64.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x64.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x86.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x86.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|Any CPU.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|Any CPU.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x64.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x64.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x86.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x86.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|Any CPU.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x64.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x64.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x86.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x86.Build.0 = Release|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x64.ActiveCfg = Debug|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x64.Build.0 = Debug|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x86.ActiveCfg = Debug|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug|x86.Build.0 = Debug|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|Any CPU.ActiveCfg = Debug-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x64.ActiveCfg = Debug-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x64.Build.0 = Debug-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x86.ActiveCfg = Debug-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-MONO|x86.Build.0 = Debug-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.Build.0 = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.Build.0 = Port-Progress|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|Any CPU.ActiveCfg = Release|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x64.ActiveCfg = Release|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x64.Build.0 = Release|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x86.ActiveCfg = Release|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x86.Build.0 = Release|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|Any CPU.ActiveCfg = Release-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x64.ActiveCfg = Release-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x64.Build.0 = Release-MONO|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x86.ActiveCfg = Release-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-MONO|x86.Build.0 = Release-MONO|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|Any CPU.ActiveCfg = Release-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x64.ActiveCfg = Release-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x64.Build.0 = Release-NetCore|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x86.ActiveCfg = Release-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release-NetCore|x86.Build.0 = Release-NetCore|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

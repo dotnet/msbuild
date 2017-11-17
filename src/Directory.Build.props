@@ -1,0 +1,9 @@
+﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <!-- Import the repo root props -->
+  <Import Project="..\Directory.Build.props"/>
+
+  <!-- Import common project settings provided by RepoToolset -->
+  <Import Project="$(RepoToolsetDir)Settings.props" />
+
+</Project>

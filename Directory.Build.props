@@ -1,20 +1,33 @@
 ﻿<Project>
+
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+  </PropertyGroup>
+  
+  <Import Project="build\NuGet.props"/>
+  <Import Project="build\Versions.props"/>
+
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.microsoft.repotoolset\$(RoslynToolsMicrosoftRepoToolsetVersion)\tools\</RepoToolsetDir>
+    <SignToolDataPath>$(RepoRoot)build\SignToolData.json</SignToolDataPath>
+    <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
 
+    <!-- Repository and project URLs (used in nuget packages) -->
+    <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
-
-    <SignAssembly>True</SignAssembly>
-    <PublicSign>true</PublicSign>
-
-    <!-- TODO: these should come from a packageref, not the buildtools magic folder. -->
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Tools\MSFT.snk</AssemblyOriginatorKeyFile>
-    <AssemblyOriginatorKeyFile Condition="$(MSBuildProjectFullPath.Contains('UnitTests'))">$(MSBuildThisFileDirectory)\Tools\Test.snk</AssemblyOriginatorKeyFile>
 
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
 
     <!-- NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
@@ -153,15 +166,14 @@
     <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NerdBank.GitVersioning" Version="1.6.35" />
-  </ItemGroup>
-
-  <!-- Setup some common paths -->
   <PropertyGroup>
-    <CommonPath>$(SourceDir)Common\src</CommonPath>
-    <CommonTestPath>$(SourceDir)Common\tests</CommonTestPath>
+    <!-- Repo toolset is setting the DefineConstants property without respecting its previous value.  So back it up here and add these defines back in a .targets file -->
+    <DefineConstantsBackup>$(DefineConstants)</DefineConstantsBackup>
   </PropertyGroup>
+
+  <!--<ItemGroup>
+    <PackageReference Include="NerdBank.GitVersioning" Version="1.6.35" />
+  </ItemGroup>-->
 
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
