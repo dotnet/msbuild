@@ -4153,7 +4153,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
                     Assert.NotNull(eventArgs);
-                    Assert.True(eventArgs.ImportIgnored);
+                    Assert.False(eventArgs.ImportIgnored);
 
                     Assert.Equal(import.Project, eventArgs.UnexpandedProject);
 

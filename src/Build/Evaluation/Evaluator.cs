@@ -2482,7 +2482,6 @@ namespace Microsoft.Build.Evaluation
                             BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                             UnexpandedProject = importElement.Project,
                             ProjectFile = importElement.ContainingProject.FullPath,
-                            ImportIgnored = true,
                         };
 
                         _evaluationLoggingContext.LogBuildEvent(eventArgs);
