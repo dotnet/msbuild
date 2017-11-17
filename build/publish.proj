@@ -13,6 +13,7 @@
       <!-- Respect environment variable for the NuGet Packages Root if set; otherwise, use the current default location -->
     <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(NUGET_PACKAGES)</NuGetPackageRoot> <!-- Respect environment variable if set -->
     <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(UserProfile)\.nuget\packages</NuGetPackageRoot>
+    <SignedPackagesPath Condition="'$(SignedPackagesPath)' == ''">$(WebSdkRoot)/bin/$(Configuration)</SignedPackagesPath>
   </PropertyGroup>
 
   <Import Project="$(NuGetPackageRoot)\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\Microsoft.DotNet.Build.Tasks.Feed.targets" Condition="Exists('$(NuGetPackageRoot)\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\Microsoft.DotNet.Build.Tasks.Feed.targets')" />
@@ -21,7 +22,7 @@
   <Import Project="$(WebSdkRoot)/Publish/obj/Publish.csproj.nuget.g.targets" Condition="Exists('$(WebSdkRoot)/Publish/obj/Publish.csproj.nuget.g.targets')" />
   -->
     <ItemGroup>
-      <SignedPackages Include="$(WebSdkRoot)/artifacts/**/*.nupkg" />
+      <SignedPackages Include="$(SignedPackagesPath)/**/*.nupkg" />
     </ItemGroup>
 
   <Target Name="Publish" DependsOnTargets="_Publish"/>
