@@ -8,8 +8,3 @@ call "%~dp0\build\EnsureWebSdkEnv.cmd"
 xcopy \\aspnetci\share\tools\websdk\WebDeploy\* "%WebSdkBuild%\WebDeploy\*" /y /C /e /s /f
 
 msbuild "%WebSdkBuild%\build.proj" /p:Configuration=%BuildConfiguration% /t:Build %*
-if errorlevel 1 GOTO ERROR
-
-:ERROR
-endlocal
-exit /b 1
