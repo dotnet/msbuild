@@ -462,7 +462,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeTransitiveProjectReferences"
-          Condition="'$(DisableImplicitTransitiveReferences)' != 'true'"
+          Condition="'$(DisableTransitiveProjectReferences)' != 'true'"
           DependsOnTargets="_ComputeActiveTFMPackageDependencies"
           Returns="_TransitiveProjectReferences">
     <ItemGroup>
@@ -480,7 +480,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="IncludeTransitiveProjectReferences"
-          Condition="'$(DisableImplicitTransitiveReferences)' != 'true'"
+          Condition="'$(DisableTransitiveProjectReferences)' != 'true'"
           DependsOnTargets="_ComputeTransitiveProjectReferences" >
     <ItemGroup>
       <!-- Add the references we computed -->

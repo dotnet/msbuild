@@ -141,7 +141,7 @@ namespace Microsoft.NET.Build.Tests
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
             var buildCommand = new BuildCommand(Log, appProjectDirectory);
             buildCommand
-                .Execute("/p:DisableImplicitTransitiveReferences=true")
+                .Execute("/p:DisableTransitiveProjectReferences=true")
                 .Should()
                 .Fail();
         }
