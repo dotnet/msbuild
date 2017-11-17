@@ -1,6 +1,6 @@
 # .NET CLI Tab Completion
 
-In version 2.0 of the .NET Core CLI, we have added support for providing suggestions when you press `tab`. While it's not yet enabled by default, you can try it out today by installing a [preview build](https://github.com/dotnet/cli#installers-and-binaries) from the master branch or by building from source. 
+In version 2.0 of the .NET Core CLI, we have added support for providing suggestions when you press `tab`. While it's not yet enabled by default, you can try it out in PowerShell, bash, or zsh by following the instructions below. 
 
 Here are some examples of what it provides:
 
@@ -69,4 +69,4 @@ To enable tab completion in zsh, edit your `.zshrc` file to add the contents of 
 
 ## How it works
 
-Each of these scripts provides a hook for completions for its respective shell. The logic that determines which suggestions to provide is in the CLI itself, configured using [our new parser](https://github.com/dotnet/CliCommandLineParser). You can see a code example [here](https://github.com/dotnet/cli/blob/master/src/dotnet/commands/dotnet-add/dotnet-add-package/AddPackageParser.cs#L23). 
+Each of these scripts provides a hook for completions for its respective shell. The logic that determines which suggestions to provide is in the CLI itself, configured using [our new parser](https://github.com/dotnet/CliCommandLineParser). You can see a code example [here](https://github.com/dotnet/cli/blob/master/src/dotnet/commands/dotnet-add/dotnet-add-package/AddPackageParser.cs). 
