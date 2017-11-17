@@ -18,7 +18,7 @@ export WebSdkSource=$WebSdkRoot/src/
 export WebSdkBuild=$WebSdkRoot/build/ 
 export WebSdkPublishBin=$WebSdkRoot/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/bin/
 
-[ -z $BuildConfiguration ] && export BuildConfiguration ="Release"
+[ -z "$BuildConfiguration" ] && export BuildConfiguration ="Release"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet
