@@ -78,7 +78,5 @@
 
   <Import Project="$(WebSdkBuild)/test.proj" Condition="Exists('$(WebSdkBuild)/test.proj')"/>
   <Import Project="$(WebSdkBuild)/package.proj" Condition="Exists('$(WebSdkBuild)/package.proj')"/>
-  <Import Project="$(WebSdkBuild)/publish.proj" Condition="Exists('$(WebSdkBuild)/publish.proj')"/>
-  
 </Project>
 
