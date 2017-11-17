@@ -48,7 +48,9 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Gets or sets if this import was ignored. Ignoring imports is controlled by
-        /// <code>ProjectLoadSettings</code>.
+        /// <code>ProjectLoadSettings</code>. This is only set when an import would have been included
+        /// but was ignored to due being invalid. This does not include when a globbed import returned
+        /// no matches, or a conditioned import that evaluated to false.
         /// </summary>
         public bool ImportIgnored { get; set; }
     }
