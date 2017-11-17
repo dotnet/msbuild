@@ -4127,6 +4127,49 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void ProjectImportedEventMissingFileNoGlobMatch()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+
+                string importGlob = Path.Combine(pre.DirectoryPath, @"__NoMatch__\**");
+                var import = pre.AddImport(importGlob);
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+                    Assert.True(eventArgs.ImportIgnored);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Null(eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to no matching files.");
+                }
+            }
+        }
+
+        [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226

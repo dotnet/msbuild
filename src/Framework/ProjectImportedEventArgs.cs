@@ -41,7 +41,8 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Gets or sets the full path to the project file that was imported. Will be <code>null</code>
-        /// if the import statement was a glob, and no files matched.
+        /// if the import statement was a glob and no files matched, or the condition (if any) evaluated
+        /// to false.
         /// </summary>
         public string ImportedProjectFile { get; set; }
 
