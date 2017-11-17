@@ -1,44 +1,64 @@
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <!--
+  
+    PB_PublishType         {''|store1-store2-...-storeN}  List of stores where to publish assets to.
+    PB_PublishBlobFeedUrl  {''|URL}                       Target feed URL.
+    PB_PublishBlobFeedKey  {''|string}                    Account key.   
+  -->
+  
   <PropertyGroup>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
     <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">$(MSBuildThisFileDirectory)..\</WebSdkRoot>
+      <!-- Respect environment variable for the NuGet Packages Root if set; otherwise, use the current default location -->
+    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(NUGET_PACKAGES)</NuGetPackageRoot> <!-- Respect environment variable if set -->
+    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(UserProfile)\.nuget\packages</NuGetPackageRoot>
   </PropertyGroup>
+
+  <Import Project="$(NuGetPackageRoot)\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\Microsoft.DotNet.Build.Tasks.Feed.targets" Condition="Exists('$(NuGetPackageRoot)\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\Microsoft.DotNet.Build.Tasks.Feed.targets')" />
   
-  <!-- ***REQUIRED***
-          ItemGroup - SignedPackages : Should contain the list of signed packages.
-          Property - MyGetSecurityToken: Should contain the security token for https://dotnet.myget.org/F/dotnet-web/api/v2/package
+  <!--
+  <Import Project="$(WebSdkRoot)/Publish/obj/Publish.csproj.nuget.g.targets" Condition="Exists('$(WebSdkRoot)/Publish/obj/Publish.csproj.nuget.g.targets')" />
   -->
-  
-  <!-- 
-	PipeBuild overrides:	
-    PB_PublishType         {''|store1-store2-...-storeN}  List of stores where to publish assets to.
-    PB_PublishBlobFeedUrl  {''|URL}                       Target feed URL.
-    PB_PublishBlobFeedKey  {''|string}                    Account key.
-	-->
+    <ItemGroup>
+      <SignedPackages Include="$(WebSdkRoot)/artifacts/**/*.nupkg" />
+    </ItemGroup>
 
   <Target Name="Publish" DependsOnTargets="_Publish"/>
 
   <PropertyGroup>
     <_PublishDependsOn>
       $(_PublishDependsOn);
-      _PublishPackagesToMyGet
+      _PublishPackagesToMyGet;
+      _PublishPackagesToBlobFeed;
     </_PublishDependsOn>
   </PropertyGroup>
 
   <Target Name="_Publish" DependsOnTargets="$(_PublishDependsOn)" />
 
   <Target Name="_PublishPackagesToMyGet">
-    
-      <PropertyGroup>
+    <PropertyGroup>
         <MyGetFeed>https://dotnet.myget.org/F/dotnet-web/api/v2/package</MyGetFeed>
     </PropertyGroup>
-    
-    <ItemGroup>
-      <SignedPackages Include="$(WebSdkRoot)/bin/$(Configuration)/*.nupkg" />
-    </ItemGroup>
 
+    <Message Text="Publish NuPkgs to MyGet feed: $(ExpectedFeedUrl)" Importance="High" />
     <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) --api-key $(MyGetSecurityToken) --source $(MyGetFeed)"/>
+  </Target>
+  
+
+  <Target Name="_PublishPackagesToBlobFeed" >
+    <Error Condition="!Exists('$(NuGetPackageRoot)\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\Microsoft.DotNet.Build.Tasks.Feed.targets')" Text="Missing the Publish blob target" />
+    <Error Condition="'$(BlobFeedAccessToken)' == ''" Text="Missing property BlobFeedAccessToken." />
+
+    <PropertyGroup>
+      <ExpectedFeedUrl Condition="'$(ExpectedFeedUrl)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</ExpectedFeedUrl>
+    </PropertyGroup>
+
+    <Message Text="Publish NuPkgs to blob feed started: $(ExpectedFeedUrl)" Importance="High" />
+    <PushToBlobFeed AccountKey="$(BlobFeedAccessToken)"
+                ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                ItemsToPush="@(SignedPackages)"
+                Overwrite="false" />
   </Target>
 
   </Project>

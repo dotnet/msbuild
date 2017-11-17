@@ -12,6 +12,14 @@ if not defined DOTNET_VERSION (
     set DOTNET_VERSION=2.0.1-servicing-006924
 )
 
+if not defined FeedTasksPackage (
+    set FeedTasksPackage=Microsoft.DotNet.Build.Tasks.Feed
+)
+
+if not defined FeedTasksPackageVersion (
+    set FeedTasksPackageVersion=1.0.0-prerelease-02203-01
+)
+
 set "WebSdkRoot=%~dp0"
 set "WebSdkRoot=%WebSdkRoot:~0,-7%"
 set "WebSdkReferences=%WebSdkRoot%\references\"

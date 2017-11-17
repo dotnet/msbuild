@@ -36,11 +36,6 @@
       <Pack>true</Pack>
       <PackagePath>tools\net46</PackagePath>
     </Content>
-   
-    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
-      <Pack>true</Pack>
-      <PackagePath>tools\net46</PackagePath>
-    </Content>
 
     <!-- WebDeploy assemblies should be already signed.-->
     <Content Include="$(WebSdkBuild)\WebDeploy\**\*.*">
@@ -49,11 +44,6 @@
     </Content>
 
     <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll">
-      <Pack>true</Pack>
-      <PackagePath>tools\netcoreapp1.0</PackagePath>
-    </Content>
-
-    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll">
       <Pack>true</Pack>
       <PackagePath>tools\netcoreapp1.0</PackagePath>
     </Content>
