@@ -37,7 +37,7 @@
 
   <Target Name="_Publish" DependsOnTargets="$(_PublishDependsOn)" />
 
-  <Target Name="_PublishPackagesToMyGet">
+  <Target Name="_PublishPackagesToMyGet" Condition="'$(MyGetSecurityToken)' != ''" >
     <PropertyGroup>
         <MyGetFeed>https://dotnet.myget.org/F/dotnet-web/api/v2/package</MyGetFeed>
     </PropertyGroup>
@@ -47,9 +47,8 @@
   </Target>
   
 
-  <Target Name="_PublishPackagesToBlobFeed" >
+  <Target Name="_PublishPackagesToBlobFeed" Condition="'$(BlobFeedAccessToken)' != ''" >
     <Error Condition="!Exists('$(NuGetPackageRoot)\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\Microsoft.DotNet.Build.Tasks.Feed.targets')" Text="Missing the Publish blob target" />
-    <Error Condition="'$(BlobFeedAccessToken)' == ''" Text="Missing property BlobFeedAccessToken." />
 
     <PropertyGroup>
       <ExpectedFeedUrl Condition="'$(ExpectedFeedUrl)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</ExpectedFeedUrl>
