@@ -73,3 +73,17 @@ https://github.com/Microsoft/msbuild/blob/master/src/Build/Logging/BinaryLogger/
 It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` objects. The event args objects are serialized and deserialized using:
  * https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BuildEventArgsWriter.cs
  * https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BuildEventArgsReader.cs
+
+## Incrementing the file format
+
+Every .binlog file has the first three bytes that indicate the file version. The current file format version is 2 (`00 00 02`).
+
+When incrementing the file format, keep this in mind:
+ * Increment the version and add a summary of the changes: https://github.com/Microsoft/msbuild/blob/master/src/Build/Logging/BinaryLogger/BinaryLogger.cs#L22
+ * In BuildEventArgsWriter.cs, just add fields, etc. without worrying. 
+ * In BuildEventArgsReader.cs, add exactly the same changes, but wrapped in an `if`-statement like this: `if (fileFormatVersion > version where the field was introduced)
+ * Open an issue over at https://github.com/KirillOsenkov/MSBuildStructuredLog/issues/new so I can adapt the Structured Log Viewer to these changes.
+
+The format is backwards compatible, i.e. MSBuild will be able to play back .binlog files created with an older version of MSBuild. The Viewer will also be able to open files of any older version. Since the viewer updates automatically and I can push out updates easily, we can consider the Viewer is always able to read all .binlogs.
+
+However MSBuild of version 15.3 won't be able to read .binlogs created with MSBuild version 15.6. This means the format is unfortunately not forwards-compatible. It is not self-describing, i.e. it doesn't carry its schema around for performance and compactness reasons. This is not a problem with a Viewer because Viewer is always up-to-date (there isn't an "old version" of the Viewer unless people go to great lengths to prevent it from auto-updating).
