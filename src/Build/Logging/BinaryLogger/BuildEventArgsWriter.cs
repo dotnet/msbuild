@@ -89,7 +89,9 @@ namespace Microsoft.Build.Logging
                     e.Message,
                     e.HelpKeyword,
                     e.SenderName,
-                    MessageImportance.Normal);
+                    MessageImportance.Normal,
+                    e.Timestamp);
+                buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
                 Write(buildMessageEventArgs);
             }
         }
