@@ -103,8 +103,8 @@ O {1} atual é '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>Launch profile is not a JSON object.</source>
-        <target state="translated">O perfil de inicialização não é um objeto JSON.</target>
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">Um perfil com o nome especificado não pôde ser encontrado ou não é um objeto JSON válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

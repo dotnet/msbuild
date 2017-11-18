@@ -16,116 +16,144 @@ namespace Microsoft.DotNet.Tests
         private readonly FakeRecordEventNameTelemetry _fakeTelemetry;
 
         public string EventName { get; set; }
+
         public IDictionary<string, string> Properties { get; set; }
+
         public TelemetryCommandTests()
         {
             _fakeTelemetry = new FakeRecordEventNameTelemetry();
             TelemetryEventEntry.Subscribe(_fakeTelemetry.TrackEvent);
-            TelemetryEventEntry.TelemetryFilter = new TelemetryFilter();
+            TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
         }
 
         [Fact]
         public void TopLevelCommandNameShouldBeSentToTelemetry()
         {
-            string[] args = {"help"};
+            string[] args = { "help" };
             Cli.Program.ProcessArgs(args);
-            _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == args[0]);
+
+            _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("HELP"));
         }
 
         [Fact]
         public void DotnetNewCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "console";
-            string[] args = {"new", argumentToSend};
+            string[] args = { "new", argumentToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-new" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("NEW"));
         }
 
         [Fact]
         public void DotnetHelpCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "something";
-            string[] args = {"help", argumentToSend};
+            string[] args = { "help", argumentToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-help" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("HELP"));
         }
 
         [Fact]
         public void DotnetAddCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "package";
-            string[] args = {"add", argumentToSend, "aPackageName"};
+            string[] args = { "add", argumentToSend, "aPackageName" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-add" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("ADD"));
         }
 
         [Fact]
         public void DotnetAddCommandFirstArgumentShouldBeSentToTelemetry2()
         {
             const string argumentToSend = "reference";
-            string[] args = {"add", argumentToSend, "aPackageName"};
+            string[] args = { "add", argumentToSend, "aPackageName" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-add" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("ADD"));
         }
 
         [Fact]
         public void DotnetRemoveCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "package";
-            string[] args = {"remove", argumentToSend, "aPackageName"};
+            string[] args = { "remove", argumentToSend, "aPackageName" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-remove" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("REMOVE"));
         }
 
         [Fact]
         public void DotnetListCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "reference";
-            string[] args = {"list", argumentToSend, "aPackageName"};
+            string[] args = { "list", argumentToSend, "aPackageName" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-list" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("LIST"));
         }
 
         [Fact]
         public void DotnetSlnCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "list";
-            string[] args = {"sln", "aSolution", argumentToSend};
+            string[] args = { "sln", "aSolution", argumentToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-sln" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("SLN"));
         }
 
         [Fact]
         public void DotnetNugetCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "push";
-            string[] args = {"nuget", argumentToSend, "aRoot"};
+            string[] args = { "nuget", argumentToSend, "aRoot" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-nuget" && e.Properties.ContainsKey("argument") &&
-                              e.Properties["argument"] == argumentToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey("argument") &&
+                              e.Properties["argument"] == Sha256Hasher.Hash(argumentToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("NUGET"));
         }
 
         [Fact]
@@ -133,12 +161,14 @@ namespace Microsoft.DotNet.Tests
         {
             const string optionKey = "language";
             const string optionValueToSend = "c#";
-            string[] args = {"new", "console", "--" + optionKey, optionValueToSend};
+            string[] args = { "new", "console", "--" + optionKey, optionValueToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-new" && e.Properties.ContainsKey(optionKey) &&
-                              e.Properties[optionKey] == optionValueToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey(optionKey) &&
+                              e.Properties[optionKey] == Sha256Hasher.Hash(optionValueToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("NEW"));
         }
 
         [Fact]
@@ -146,12 +176,15 @@ namespace Microsoft.DotNet.Tests
         {
             const string optionKey = "verbosity";
             const string optionValueToSend = "minimal";
-            string[] args = {"restore", "--" + optionKey, optionValueToSend};
+            string[] args = { "restore", "--" + optionKey, optionValueToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-restore" && e.Properties.ContainsKey(optionKey) &&
-                              e.Properties[optionKey] == optionValueToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey(optionKey) &&
+                              e.Properties[optionKey] == Sha256Hasher.Hash(optionValueToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("RESTORE"));
         }
 
         [Fact]
@@ -159,12 +192,15 @@ namespace Microsoft.DotNet.Tests
         {
             const string optionKey = "configuration";
             const string optionValueToSend = "Debug";
-            string[] args = {"build", "--" + optionKey, optionValueToSend};
+            string[] args = { "build", "--" + optionKey, optionValueToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-build" && e.Properties.ContainsKey(optionKey) &&
-                              e.Properties[optionKey] == optionValueToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey(optionKey) &&
+                              e.Properties[optionKey] == Sha256Hasher.Hash(optionValueToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("BUILD"));
         }
 
         [Fact]
@@ -176,40 +212,51 @@ namespace Microsoft.DotNet.Tests
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-publish" && e.Properties.ContainsKey(optionKey) &&
-                              e.Properties[optionKey] == optionValueToSend);
+                .Contain(e => e.EventName == "sublevelparser/command" &&
+                              e.Properties.ContainsKey(optionKey) &&
+                              e.Properties[optionKey] == Sha256Hasher.Hash(optionValueToSend.ToUpper()) &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("PUBLISH"));
         }
 
         [Fact]
         public void DotnetBuildAndPublishCommandOpinionsShouldBeSentToTelemetryWhenThereIsMultipleOption()
         {
-            string[] args = {"build", "--configuration", "Debug", "--runtime", "osx.10.11-x64"};
+            string[] args = { "build", "--configuration", "Debug", "--runtime", "osx.10.11-x64" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-build" && e.Properties.ContainsKey("configuration") &&
-                              e.Properties["configuration"] == "Debug");
+                .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("configuration") &&
+                              e.Properties["configuration"] == Sha256Hasher.Hash("DEBUG") &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("BUILD"));
 
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-build" && e.Properties.ContainsKey("runtime") &&
-                              e.Properties["runtime"] == "osx.10.11-x64");
+                .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("runtime") &&
+                              e.Properties["runtime"] == Sha256Hasher.Hash("OSX.10.11-X64") &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("BUILD"));
         }
 
         [Fact]
         public void DotnetRunCleanTestCommandOpinionsShouldBeSentToTelemetryWhenThereIsMultipleOption()
         {
-            string[] args = {"clean", "--configuration", "Debug", "--framework", "netcoreapp1.0"};
+            string[] args = { "clean", "--configuration", "Debug", "--framework", "netcoreapp1.0" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-clean" && e.Properties.ContainsKey("configuration") &&
-                              e.Properties["configuration"] == "Debug");
+                .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("configuration") &&
+                              e.Properties["configuration"] == Sha256Hasher.Hash("DEBUG") &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("CLEAN"));
 
             _fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "dotnet-clean" && e.Properties.ContainsKey("framework") &&
-                              e.Properties["framework"] == "netcoreapp1.0");
+                .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("framework") &&
+                              e.Properties["framework"] == Sha256Hasher.Hash("NETCOREAPP1.0") &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("CLEAN"));
         }
 
         [WindowsOnlyFact]
@@ -222,8 +269,8 @@ namespace Microsoft.DotNet.Tests
 
             fakeTelemetry
                 .LogEntries.Should()
-                .Contain(e => e.EventName == "reportinstallsuccess" && e.Properties.ContainsKey("exeName") &&
-                              e.Properties["exeName"] == "dotnet-sdk-latest-win-x64.exe");
+                .Contain(e => e.EventName == "install/reportsuccess" && e.Properties.ContainsKey("exeName") &&
+                              e.Properties["exeName"] == Sha256Hasher.Hash("DOTNET-SDK-LATEST-WIN-X64.EXE"));
         }
 
         [Fact]

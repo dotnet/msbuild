@@ -39,9 +39,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             {
                 result.StdOut
                     .Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.", "because .NET 4.6 tests will pass")
-                         .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTestDesktop", "because .NET 4.6 tests will pass")
+                         .And.Contain("Passed   VSTestPassTestDesktop", "because .NET 4.6 tests will pass")
                          .And.Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.", "because netcoreapp2.0 tests will fail")
-                         .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp", "because netcoreapp2.0 tests will fail");
+                         .And.Contain("Failed   VSTestFailTestNetCoreApp", "because netcoreapp2.0 tests will fail");
             }
             result.ExitCode.Should().Be(1);
         }

@@ -103,8 +103,8 @@ Bieżący element {1}: „{2}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>Launch profile is not a JSON object.</source>
-        <target state="translated">Profil uruchamiania nie jest obiektem JSON.</target>
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">Nie można znaleźć profilu o określonej nazwie lub nie jest to prawidłowy obiekt JSON.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

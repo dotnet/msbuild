@@ -37,6 +37,8 @@ namespace Microsoft.DotNet.Tools.Build
 
             var appliedBuildOptions = result["dotnet"]["build"];
 
+            msbuildArgs.Add($"/clp:Summary");
+
             if (appliedBuildOptions.HasOption("--no-incremental"))
             {
                 msbuildArgs.Add("/t:Rebuild");
@@ -49,8 +51,6 @@ namespace Microsoft.DotNet.Tools.Build
             msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(appliedBuildOptions.Arguments);
-
-            msbuildArgs.Add($"/clp:Summary");
 
             bool noRestore = appliedBuildOptions.HasOption("--no-restore");
 
