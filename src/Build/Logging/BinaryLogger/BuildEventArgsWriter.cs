@@ -259,6 +259,7 @@ namespace Microsoft.Build.Logging
         {
             Write(BinaryLogRecordKind.ProjectImported);
             WriteMessageFields(e);
+            Write(e.ImportIgnored);
             WriteOptionalString(e.ImportedProjectFile);
             WriteOptionalString(e.UnexpandedProject);
         }
