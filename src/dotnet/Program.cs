@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli
                         HelpCommand.PrintHelp();
                         return 0;
                     }
-                    else if (args[lastArg].StartsWith("-"))
+                    else if (args[lastArg].StartsWith("-", StringComparison.OrdinalIgnoreCase))
                     {
                         Reporter.Error.WriteLine($"Unknown option: {args[lastArg]}");
                         success = false;
@@ -265,7 +265,8 @@ namespace Microsoft.DotNet.Cli
 
         private static bool IsArg(string candidate, string shortName, string longName)
         {
-            return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
+            return (shortName != null && candidate.Equals("-" + shortName, StringComparison.OrdinalIgnoreCase)) ||
+                   (longName != null && candidate.Equals("--" + longName, StringComparison.OrdinalIgnoreCase));
         }
 
         private static string GetDisplayRid(DotnetVersionFile versionFile)
