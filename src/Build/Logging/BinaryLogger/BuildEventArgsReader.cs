@@ -28,6 +28,7 @@ namespace Microsoft.Build.Logging
         /// Initializes a new instance of BuildEventArgsReader using a BinaryReader instance
         /// </summary>
         /// <param name="binaryReader">The BinaryReader to read BuildEventArgs from</param>
+        /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
             this.binaryReader = binaryReader;
