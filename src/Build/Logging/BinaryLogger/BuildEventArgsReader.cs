@@ -582,9 +582,10 @@ namespace Microsoft.Build.Logging
             int projectInstanceId = ReadInt32();
 
             // evaluationId was introduced in format version 2
+            int evaluationId = BuildEventContext.InvalidEvaluationId;
             if (fileFormatVersion > 1)
             {
-                int evaluationId = ReadInt32();
+                evaluationId = ReadInt32();
             }
 
             var result = new BuildEventContext(
