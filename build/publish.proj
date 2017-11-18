@@ -25,7 +25,9 @@
       <SignedPackages Include="$(SignedPackagesPath)/**/*.nupkg" />
     </ItemGroup>
 
-  <Target Name="Publish" DependsOnTargets="_Publish"/>
+  <Target Name="Publish"
+          Condition="'$(SkipPublish)' != 'true'"
+          DependsOnTargets="_Publish"/>
 
   <PropertyGroup>
     <_PublishDependsOn>

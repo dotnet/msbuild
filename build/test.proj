@@ -12,7 +12,9 @@
     <DotNetSdksFolder>$(DOTNET_INSTALL_DIR)/Sdk/$(DOTNET_VERSION)/Sdks</DotNetSdksFolder>
   </PropertyGroup>
 
-  <Target Name="Test" DependsOnTargets="_Test"/>
+  <Target Name="Test" 
+          Condition="'$(SkipTests)' != 'true'"
+          DependsOnTargets="_Test"/>
 
   <PropertyGroup>
     <_TestDependsOn>
@@ -82,7 +84,7 @@
 
   </Target>
 
-  <Target Name="_RunTests" Condition="'$(PB_SkipTests)' != 'true'">
+  <Target Name="_RunTests">
 
     <!-- Use dotnet exe-->
     <!-- Run .NET Core Tests -->

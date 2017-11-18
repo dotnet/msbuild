@@ -14,7 +14,9 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
   </PropertyGroup>
 
-  <Target Name="Build" DependsOnTargets="_Build;Test;Package"/>
+  <Target Name="Build" 
+          Condition="'$(SkipBuild)' != 'true'"
+          DependsOnTargets="_Build;Test;Package"/>
 
   <PropertyGroup>
     <_BuildDependsOn>
@@ -59,7 +61,7 @@
              Targets ="build"/>
   </Target>
 
-  <Target Name="_BuildTests" Condition="'$(PB_SkipTests)' != 'true'">
+  <Target Name="_BuildTests" Condition="'$(SkipTests)' != 'true'">
 
     <!-- Using dotnet exe-->
     <Exec Condition="'$(UseDotNetExe)' == 'true'"
