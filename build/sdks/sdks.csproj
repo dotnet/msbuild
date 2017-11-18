@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="$(DependencyPackageName)" Version="$(DependencyPackageVersion)" />
+    <PackageReference Condition="'$(DependencyPackageName)' == 'Microsoft.NET.Sdk.Web'" Include="Microsoft.NET.Sdk" Version="$(CLI_NETSDK_Version)" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

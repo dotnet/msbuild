@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName)
+                .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
 

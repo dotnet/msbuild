@@ -1,4 +1,4 @@
-<Project ToolsVersion="14.0">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SdkBrandName>Microsoft .NET Core SDK - 2.0.3</SdkBrandName>
     <MSBuildExtensionsBrandName>.NET Standard Support for Visual Studio 2015</MSBuildExtensionsBrandName>

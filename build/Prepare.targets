@@ -4,7 +4,7 @@
   <Import Project="prepare/CheckPrereqs.targets" />
 
   <Target Name="Prepare"
-          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages" />
+          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;IsolateArtifactsFromDirectoryBuildFiles;CreatePropsForNextStage" />
 
   <Target Name="Init"
           DependsOnTargets="PrintBuildInfo;
@@ -54,7 +54,7 @@
 
     <CallTarget Targets="CleanSrcLockFiles" />
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="&quot;%(RestoreSrcPackagesInput.FullPath)&quot;" />
 
   </Target>
@@ -68,7 +68,8 @@
 
   <Target Name="SetupRestoreSrcPackagesInputsOutputs">
     <ItemGroup>
-      <RestoreSrcPackagesInput Include="$(RepoRoot)/src/**/*.csproj" Exclude="$(RepoRoot)/src/**/%24projectName%24.csproj"/>
+      <RestoreSrcPackagesInput Include="$(RepoRoot)/src/**/*.csproj" />
+      <RestoreSrcPackagesInput Remove="%(RestoreSrcPackagesInput.Identity)" Condition="'%(RestoreSrcPackagesInput.Filename)' == 'Microsoft.DotNet.MSBuildSdkResolver' and '$(IncludeMSBuildSdkResolver)' != 'true'" />
     </ItemGroup>
   </Target>
 
@@ -79,7 +80,7 @@
 
     <CallTarget Targets="CleanToolsLockFiles" />
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;"
                    AdditionalParameters="/p:UsePortableLinuxSharedFramework=$(UsePortableLinuxSharedFramework)" />
 
@@ -96,6 +97,40 @@
     <ItemGroup>
       <RestoreToolsPackagesInput Include="$(RepoRoot)/tools/**/*.csproj" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="IsolateArtifactsFromDirectoryBuildFiles">
+    <Copy SourceFiles="$(RepoRoot)TestAssets\Directory.Build.props"
+          DestinationFolder ="$(RepoRoot)bin"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CreatePropsForNextStage">
+    <PropertyGroup>
+     
+      <NextStagePropsContent>
+&lt;Project&gt;
+    &lt;PropertyGroup&gt;
+        &lt;PreviousStageDirectory&gt;$(OutputDirectory)&lt;/PreviousStageDirectory&gt;
+        &lt;PreviousStageDotnet&gt;$(DotnetInOutputDirectory)&lt;/PreviousStageDotnet&gt;
+        &lt;CliOuterBuildStage&gt;$(CliBuildStage)&lt;/CliOuterBuildStage&gt;
+    &lt;/PropertyGroup&gt;
+&lt;/Project&gt;
+      </NextStagePropsContent>
+
+      <ExistingNextStagePropsContent Condition=" Exists('$(NextStagePropsPath)') ">
+        $([System.IO.File]::ReadAllText($(NextStagePropsPath)))
+      </ExistingNextStagePropsContent>
+
+      <ShouldOverwriteNextStagePropsFile>false</ShouldOverwriteNextStagePropsFile>
+      <ShouldOverwriteNextStagePropsFile
+        Condition=" '$(ExistingNextStagePropsContent.Trim())' != '$(NextStagePropsContent.Trim())' ">true</ShouldOverwriteNextStagePropsFile>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(NextStagePropsPath)"
+                  Lines="$(NextStagePropsContent)"
+                  Condition=" '$(ShouldOverwriteNextStagePropsFile)' == 'true' "
+                  Overwrite="true"  />
   </Target>
 
 </Project>

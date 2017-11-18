@@ -1,6 +1,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <GeneratedPropsDir>$(RepoRoot)/artifacts/obj</GeneratedPropsDir>
+    <GeneratedPropsDir>$(RepoRoot)/bin/obj</GeneratedPropsDir>
     <GitCommitInfoProps>$(GeneratedPropsDir)/GitCommitInfo.props</GitCommitInfoProps>
     <HostInfoProps>$(GeneratedPropsDir)/HostInfo.props</HostInfoProps>
     <BuildInfoProps>$(GeneratedPropsDir)/BuildInfo.props</BuildInfoProps>
