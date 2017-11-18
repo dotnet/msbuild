@@ -24,7 +24,6 @@
   <UsingTask TaskName="GenerateNuGetPackagesArchiveVersion" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="MakeRelative" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="PushToBlobFeed" AssemblyFile="$(BuildTasksFeedDll)" />
   <UsingTask TaskName="RemoveAssetFromDepsPackages" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="SetBlobPropertiesBasedOnFileType" AssemblyFile="$(CLIBuildDll)" />

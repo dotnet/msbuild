@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.0.0</CLI_SharedFrameworkVersion>
+    <CLI_SharedFrameworkVersion>2.0.3</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.4.8</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.2-beta1-61921-05</CLI_Roslyn_Version>
     <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170727-1</CLI_Roslyn_Satellites_Version>
@@ -12,7 +12,7 @@
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
          explicitly use different versions. -->
-    <CLI_NETSDK_Version>2.0.1-servicing-20170926-1</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>2.0.3-servicing-20171109-3</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
 
     <CLI_NuGet_Version>4.4.0-preview3-4475</CLI_NuGet_Version>
@@ -30,16 +30,16 @@
     <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <SpaTemplateVersion>1.0.417</SpaTemplateVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
 
+    <AspNetCoreTemplatePackageVersion>2.0.3</AspNetCoreTemplatePackageVersion>
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
     <!--BranchName and AspNetCoreVersion will not always be the same-->
-    <AspNetCoreBranchName>2.0.0</AspNetCoreBranchName>
+    <AspNetCoreBranchName>2.0.3</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
-    <AspNetCoreVersion>2.0.0</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>26452</AspNetCoreRuntimePackageTimestamp>
+    <AspNetCoreVersion>2.0.3</AspNetCoreVersion>
+    <AspNetCoreRuntimePackageTimestamp>125</AspNetCoreRuntimePackageTimestamp>
 
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
     <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
@@ -50,5 +50,6 @@
   <PropertyGroup>
     <VersionToolsVersion>1.0.27-prerelease-01723-01</VersionToolsVersion>
     <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
+    <BuildTasksFeedToolVersion>1.0.0-prerelease-02203-01</BuildTasksFeedToolVersion>
   </PropertyGroup>
 </Project>
