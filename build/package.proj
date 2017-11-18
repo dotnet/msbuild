@@ -11,7 +11,9 @@
     <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(BuildBranchName)$(CurrentDate)-$(BUILD_BUILDNUMBER)</WebSdkVersion>
   </PropertyGroup>
   
-  <Target Name="Package" DependsOnTargets="_Package"/>
+  <Target Name="Package" 
+          Condition="'$(SkipPackages)' != 'true'"
+          DependsOnTargets="_Package"/>
 
   <PropertyGroup>
     <_PackageDependsOn>

@@ -24,6 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{1CAF6E2F
 		dotnet-install_1.0.ps1 = dotnet-install_1.0.ps1
 		dotnet-install_2.0.ps1 = dotnet-install_2.0.ps1
 		build\EnsureWebSdkEnv.cmd = build\EnsureWebSdkEnv.cmd
+		init.cmd = init.cmd
 		build\package.proj = build\package.proj
 		publish.cmd = publish.cmd
 		build\publish.proj = build\publish.proj

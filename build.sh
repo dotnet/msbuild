@@ -47,4 +47,4 @@ then
     ulimit -n 1024
 fi
 
-$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build/build.proj" /t:Build /p:Configuration=$BuildConfiguration /p:NETFrameworkSupported=false
+$DOTNET_INSTALL_DIR/dotnet msbuild "$REPOROOT/build/build.proj" /t:Build /p:Configuration=$BuildConfiguration /p:NETFrameworkSupported=false $*
