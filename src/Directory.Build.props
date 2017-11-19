@@ -6,10 +6,14 @@
   <!-- Import common project settings provided by RepoToolset -->
   <Import Project="$(RepoToolsetDir)Settings.props" />
 
+  <!-- Override project defaults provided by Repo toolset -->
   <PropertyGroup>
     <!-- Set DebugType.  This logic is repeated in Directory.Build.targets, because xunit.core.targets overrides it -->
     <DebugType>embedded</DebugType>
     <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
+
+    <!-- Some hash code implementations may overflow -->
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
   </PropertyGroup>
 
 </Project>
