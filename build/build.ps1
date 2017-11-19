@@ -4,13 +4,13 @@ Param(
   [switch] $ci,
   [string] $configuration = "Debug",
   [switch] $help,
-  [switch] $log = $True,
+  [switch] $nolog,
   [switch] $pack,
   [switch] $prepareMachine,
   [switch] $rebuild,
-  [switch] $restore = $True,
+  [switch] $norestore,
   [switch] $sign,
-  [switch] $test = $True,
+  [switch] $skiptests,
   [string] $verbosity = "minimal",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
@@ -25,16 +25,16 @@ function Print-Usage() {
     Write-Host "  -help                   Print help and exit"
     Write-Host ""
     Write-Host "Actions:"
-    Write-Host "  -restore                Restore dependencies"
+    Write-Host "  -norestore              Don't automatically run restore"
     Write-Host "  -build                  Build solution"
     Write-Host "  -rebuild                Rebuild solution"
-    Write-Host "  -test                   Run all unit tests in the solution"
+    Write-Host "  -skipTests              Don't run tests"
     Write-Host "  -sign                   Sign build outputs"
     Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
     Write-Host ""
     Write-Host "Advanced settings:"
     Write-Host "  -ci                     Set when running on CI server"
-    Write-Host "  -log                    Enable logging (by default on CI)"
+    Write-Host "  -nolog                  Disable logging"
     Write-Host "  -prepareMachine         Prepare machine for CI run"
     Write-Host ""
     Write-Host "Command line arguments not listed above are passed through to MSBuild."
@@ -200,6 +200,11 @@ $ArtifactsDir = Join-Path $RepoRoot "artifacts"
 $ArtifactsConfigurationDir = Join-Path $ArtifactsDir $configuration
 $LogDir = Join-Path $ArtifactsConfigurationDir "log"
 $VersionsProps = Join-Path $PSScriptRoot "Versions.props"
+
+$log = -not $nolog
+$restore = -not $norestore
+$test = -not $skiptests
+
 
 try {
   if ($ci) {
