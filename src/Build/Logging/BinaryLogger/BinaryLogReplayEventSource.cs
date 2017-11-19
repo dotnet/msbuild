@@ -34,7 +34,7 @@ namespace Microsoft.Build.Logging
                     throw new NotSupportedException(text);
                 }
 
-                var reader = new BuildEventArgsReader(binaryReader);
+                var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
                 while (true)
                 {
                     BuildEventArgs instance = null;
