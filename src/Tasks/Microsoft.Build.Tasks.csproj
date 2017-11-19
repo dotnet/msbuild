@@ -4,7 +4,6 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>

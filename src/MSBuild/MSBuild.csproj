@@ -6,7 +6,6 @@
     <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp2.0</TargetFrameworks>
 
     <EnableDefaultItems>false</EnableDefaultItems>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>MSBuild</AssemblyName>
     <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>

@@ -8,8 +8,10 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionBase>15.6</VersionBase>
+    <VersionBase>15.1.0</VersionBase>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
+
+    <UseShippingAssemblyVersion>true</UseShippingAssemblyVersion>
   </PropertyGroup>
 
   <!-- Repo Toolset Features -->
@@ -33,7 +35,7 @@
 
   <!-- Test Dependencies -->
   <PropertyGroup>
-    <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
+    
   </PropertyGroup>
 
 </Project>
