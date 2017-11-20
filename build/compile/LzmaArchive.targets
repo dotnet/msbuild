@@ -5,7 +5,7 @@
       <!-- In the event of a non-anonymous storage account used for core-setup bits, support appending a SAS token to download files -->
       <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
-      <NugetPackagesArchiveName>nuGetPackagesArchive.$(AspNetCoreRuntimePackageFlavor).lzma</NugetPackagesArchiveName>
+      <NugetPackagesArchiveName>nuGetPackagesArchive-$(AspNetCoreRuntimePackageVersion).lzma</NugetPackagesArchiveName>
       <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
       <NugetPackagesArchiveBlobUrl>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)$(CoreSetupBlobAccessTokenParam)</NugetPackagesArchiveBlobUrl>
     </PropertyGroup>

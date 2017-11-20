@@ -77,7 +77,6 @@ namespace Microsoft.DotNet.Cli
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
-            bool? verbose = null;
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
@@ -92,7 +91,8 @@ namespace Microsoft.DotNet.Cli
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
                     {
-                        verbose = true;
+                        Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
+                        CommandContext.SetVerbose(true);
                     }
                     else if (IsArg(args[lastArg], "version"))
                     {
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli
                         HelpCommand.PrintHelp();
                         return 0;
                     }
-                    else if (args[lastArg].StartsWith("-"))
+                    else if (args[lastArg].StartsWith("-", StringComparison.OrdinalIgnoreCase))
                     {
                         Reporter.Error.WriteLine($"Unknown option: {args[lastArg]}");
                         success = false;
@@ -159,9 +159,8 @@ namespace Microsoft.DotNet.Cli
                 ? Enumerable.Empty<string>()
                 : args.Skip(lastArg + 1).ToArray();
 
-            if (verbose.HasValue)
+            if (CommandContext.IsVerbose())
             {
-                Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
@@ -170,7 +169,12 @@ namespace Microsoft.DotNet.Cli
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
-                TelemetryEventEntry.SendFiltered(Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray()));
+                var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
+                if (!parseResult.Errors.Any())
+                {
+                    TelemetryEventEntry.SendFiltered(parseResult);
+                }
+
                 exitCode = builtIn.Command(appArgs.ToArray());
             }
             else
@@ -261,7 +265,8 @@ namespace Microsoft.DotNet.Cli
 
         private static bool IsArg(string candidate, string shortName, string longName)
         {
-            return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
+            return (shortName != null && candidate.Equals("-" + shortName, StringComparison.OrdinalIgnoreCase)) ||
+                   (longName != null && candidate.Equals("--" + longName, StringComparison.OrdinalIgnoreCase));
         }
 
         private static string GetDisplayRid(DotnetVersionFile versionFile)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.0.3</CLI_SharedFrameworkVersion>
+    <CLI_SharedFrameworkVersion>2.1.0-preview1-25919-02</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.5.179</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.6.0-beta3-62309-01</CLI_Roslyn_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
@@ -18,22 +18,22 @@
 
     <CLI_NuGet_Version>4.5.0-rtm-4651</CLI_NuGet_Version>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-25908-02</CLI_NETStandardLibraryNETFrameworkVersion>
-    <CLI_WEBSDK_Version>2.0.0-rel-20171010-665</CLI_WEBSDK_Version>
+    <CLI_WEBSDK_Version>2.0.0-rel-20171110-671</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.5.0</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20171004-309</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta3-20171110-312</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta3-20171110-312</TemplateEngineTemplate2_0Version>
-    <AspnetTemplateVersion>1.0.0-beta2-20170810-304</AspnetTemplateVersion>
-    <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
-    <DependencyModelVersion>2.0.0</DependencyModelVersion>
-    <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
+    <TemplateEngineVersion>1.0.0-beta3-20171110-312</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta3-20171117-314</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta3-20171117-314</TemplateEngineTemplate2_0Version>
+    <AspnetTemplateVersion>1.0.0-beta2-20171004-309</AspnetTemplateVersion>
+    <PlatformAbstractionsVersion>2.1.0-preview1-25919-02</PlatformAbstractionsVersion>
+    <DependencyModelVersion>2.1.0-preview1-25919-02</DependencyModelVersion>
+    <CliCommandLineParserVersion>0.1.1-alpha-174</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
-
+    <DotNetCliArchiverVersion>0.2.0-beta-000059</DotNetCliArchiverVersion>
     <AspNetCoreTemplatePackageVersion>2.0.3</AspNetCoreTemplatePackageVersion>
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
@@ -42,10 +42,9 @@
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
     <AspNetCoreVersion>2.0.3</AspNetCoreVersion>
     <AspNetCoreRuntimePackageTimestamp>125</AspNetCoreRuntimePackageTimestamp>
-
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
-    <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
-    <AspNetCoreRuntimeAzureblobStoresSubfolderName>$(AspNetCoreBranchName)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeAzureblobStoresSubfolderName>
+    <AspNetCoreRuntimePackageFolderName>dev-26623</AspNetCoreRuntimePackageFolderName>
+    <AspNetCoreRuntimePackageVersion>2.1.0-preview1-26623</AspNetCoreRuntimePackageVersion>
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->

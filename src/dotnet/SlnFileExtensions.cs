@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Common
                 throw new ArgumentException();
             }
 
-            var relativeProjectPath = PathUtility.GetRelativePath(
+            var relativeProjectPath = Path.GetRelativePath(
                 PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
                 fullProjectPath);
 
