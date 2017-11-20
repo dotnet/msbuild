@@ -135,7 +135,15 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
             // Read unused Importance, it defaults to Low
             ReadInt32();
-            bool ignored = ReadBoolean();
+
+            bool importIgnored = false;
+
+            // the ImportIgnored field was introduced in file format version 3
+            if (fileFormatVersion > 2)
+            {
+                importIgnored = ReadBoolean();
+            }
+
             var importedProjectFile = ReadOptionalString();
             var unexpandedProject = ReadOptionalString();
 
@@ -150,7 +158,7 @@ namespace Microsoft.Build.Logging
 
             e.ImportedProjectFile = importedProjectFile;
             e.UnexpandedProject = unexpandedProject;
-            e.ImportIgnored = ignored;
+            e.ImportIgnored = importIgnored;
             return e;
         }
 
