@@ -13,6 +13,7 @@
     </PropertyGroup>
 
     <Message Text="Publish NuPkgs to blob feed started: $(ExpectedFeedUrl)" Importance="High" />
+    <Message Text="-pushing package: %(ItemsToPushGlobPattern.Identity)" Importance="High" />
     <PushToBlobFeed AccountKey="$(BlobFeedAccessToken)"
                 ExpectedFeedUrl="$(ExpectedFeedUrl)"
                 ItemsToPush="@(ItemsToPushGlobPattern)"
