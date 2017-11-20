@@ -113,7 +113,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
     <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.0'">
       <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>2.0</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>2.0.0</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
         <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
       </PropertyGroup>
     </When>
