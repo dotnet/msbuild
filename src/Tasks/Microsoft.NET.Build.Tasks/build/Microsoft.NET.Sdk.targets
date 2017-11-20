@@ -425,6 +425,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="OutputFile" ItemName="FileWrites" />
     </WriteCodeFragment>
 
+    <PropertyGroup Condition="'$(UseSharedCompilation)' == ''">
+      <UseSharedCompilation>true</UseSharedCompilation>
+    </PropertyGroup>
+
     <Csc Resources="@(_SatelliteAssemblyResourceInputs)"
          Sources="$(_AssemblyInfoFile)"
          OutputAssembly="$(_OutputAssembly)"
@@ -443,7 +447,8 @@ Copyright (c) .NET Foundation. All rights reserved.
          WarningsNotAsErrors="$(WarningsNotAsErrors)"
          TargetType="Library"
          ToolExe="$(CscToolExe)"
-         ToolPath="$(CscToolPath)">
+         ToolPath="$(CscToolPath)"
+         UseSharedCompilation="$(UseSharedCompilation)">
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
     </Csc>
