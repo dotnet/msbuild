@@ -27,13 +27,13 @@
 
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.0.1" />
     <PackageReference Include="System.Threading.Tasks.Dataflow">
-      <Version Condition="'$(TargetFramework)' == 'net46'">4.5.24.0</Version>
-      <Version Condition="'$(TargetFramework)' != 'net46'">4.6.0</Version>
+      <Version Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">4.5.24.0</Version>
+      <Version Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">4.6.0</Version>
     </PackageReference>
 
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
 
-    <Reference Include="System.Configuration" Condition="'$(TargetFramework)' == 'net46'" />
+    <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
   </ItemGroup>
 
@@ -81,7 +81,7 @@
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureSpecialFolders)' != 'true'">
+    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
       <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
@@ -404,8 +404,8 @@
     <Compile Include="Definition\ResolvedImport.cs" />
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="$(FeatureSystemConfiguration) == 'true'" />
-    <Compile Include="..\Shared\ToolsetElement.cs" Condition="$(FeatureSystemConfiguration) == 'true'">
+    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Compile Include="..\Shared\ToolsetElement.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />
@@ -724,7 +724,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(NetCoreBuild)'=='true'" />
+    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
     </Compile>

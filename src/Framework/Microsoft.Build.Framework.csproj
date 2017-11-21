@@ -146,7 +146,7 @@
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
   </ItemGroup>
-  <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Compile Include="XamlTypes\Argument.cs" />
     <Compile Include="XamlTypes\BaseProperty.cs" />
     <Compile Include="XamlTypes\BoolProperty.cs" />
@@ -171,7 +171,7 @@
     <Compile Include="XamlTypes\ValueEditor.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(FeatureXamlTypes)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Remove="XamlTypes\**" />
     <EmbeddedResource Remove="XamlTypes\**" />
     <None Remove="XamlTypes\**" />
@@ -182,6 +182,6 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
     <PackageReference Include="System.Threading.Thread" Version="4.0.0" />
 
-    <Reference Include="System.Xaml" Condition="'$(FeatureXamlTypes)' == 'true'" />
+    <Reference Include="System.Xaml" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 </Project>

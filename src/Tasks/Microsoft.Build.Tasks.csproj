@@ -653,7 +653,7 @@
     <Compile Include="WinMDExp.cs" />
     <Compile Include="XslTransformation.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />
     <Compile Include="XamlTaskFactory\CommandLineToolSwitch.cs" />
     <Compile Include="XamlTaskFactory\RelationsParser.cs">
@@ -923,7 +923,7 @@
   <!-- Assemblies Files we depend on -->
   <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
   <!-- ==========================================================================================-->
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reflection" />

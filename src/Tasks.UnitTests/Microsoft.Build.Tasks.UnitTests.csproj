@@ -24,7 +24,7 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
@@ -64,7 +64,7 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(FeatureXamlTypes)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Remove="CommandLineGenerator_Tests.cs" />
     <Compile Remove="XamlDataDrivenToolTask_Tests.cs" />
     <Compile Remove="XamlTaskFactory_Tests.cs" />

@@ -23,11 +23,6 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
-    <!-- Add DefineConstants values back that were removed by ProjectDefault.props in repo toolset -->
-    <DefineConstants>$(DefineConstants);$(DefineConstantsBackup)</DefineConstants>
-
-    
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
