@@ -9,6 +9,10 @@
     <!-- Repeat setting DebugType (already set in Directory.Build.props, because xunit.core.targets overrides it -->
     <DebugType>embedded</DebugType>
     <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
+
+    <!-- When targeting .NET Framework, run tests in an x86 process (even if compiled for AnyCPU -->
+    <TestArchitectures Condition="$(TargetFramework.StartsWith('net4'))">x86</TestArchitectures>
+
   </PropertyGroup>
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
     <StrongNameKeyId>Microsoft</StrongNameKeyId>
@@ -32,6 +36,9 @@
     <PackageReference Remove="xunit" />
     <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
     <PackageReference Include="xunit.assert" Version="$(XUnitVersion)" />
+
+    <Compile Include="$(RepoRoot)build\TestAssemblyInfo.cs" />
+
   </ItemGroup>
   
 
