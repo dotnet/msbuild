@@ -55,6 +55,8 @@
     </Compile>
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
+    <EmbeddedResource Include="SampleResx" />
+    
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
