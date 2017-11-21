@@ -196,6 +196,7 @@ if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $
 }
 
 $RepoRoot = Join-Path $PSScriptRoot "..\"
+$RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot);
 $ArtifactsDir = Join-Path $RepoRoot "artifacts"
 $ArtifactsConfigurationDir = Join-Path $ArtifactsDir $configuration
 $LogDir = Join-Path $ArtifactsConfigurationDir "log"
