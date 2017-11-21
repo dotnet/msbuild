@@ -6,14 +6,12 @@
     <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="TaskWithDependencyTest.proj">
+    <Content Include="portableTaskTest.proj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\..\src\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\Dependency\Dependency.csproj" />
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
 </Project>
