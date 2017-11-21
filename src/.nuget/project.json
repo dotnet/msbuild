@@ -7,7 +7,7 @@
     "MicroBuild.Core": "0.2.0",
     "Microsoft.DotNet.BuildTools.GenAPI": "1.0.0-beta2-00731-01",
     "NuGet.Build.Tasks": "4.5.0-preview2-4529",
-    "Microsoft.DotNet.Build.Tasks.Feed":"1.0.0-prerelease-02121-01"
+    "Microsoft.DotNet.Build.Tasks.Feed":"1.0.0-prerelease-02219-01"
   },
   "frameworks": {
     "net46": {}
