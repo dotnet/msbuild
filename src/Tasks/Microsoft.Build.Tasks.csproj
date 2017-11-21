@@ -950,6 +950,5 @@
     <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Include="System.Resources.Writer" Version="4.0.0" />
-    <PackageReference Include="System.Xml.XPath.XmlDocument" Version="4.0.1" />
   </ItemGroup>
 </Project>
