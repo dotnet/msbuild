@@ -589,7 +589,7 @@ namespace Microsoft.Build.CommandLine
                     // FIXME: remove this mono check once we have /m support
                     if (!NativeMethodsShared.IsMono && cpuCount == 1 && FileUtilities.IsSolutionFilename(projectFile) && verbosity > LoggerVerbosity.Minimal)
                     {
-                        Console.WriteLine(ResourceUtilities.FormatResourceString("PossiblyOmittedMaxCPUSwitch"));
+                        Console.WriteLine(ResourceUtilities.GetResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
                     if (preprocessWriter != null || debugger)
                     {
@@ -818,7 +818,7 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            Console.WriteLine(ResourceUtilities.FormatResourceString("AbortingBuild"));
+            Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task
@@ -1245,7 +1245,7 @@ namespace Microsoft.Build.CommandLine
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags: BuildRequestDataFlags.ClearProjectRootElementCacheAfterBuild);
+                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }
@@ -1815,6 +1815,11 @@ namespace Microsoft.Build.CommandLine
         private const string autoResponseFileName = "MSBuild.rsp";
 
         /// <summary>
+        /// THe name of an auto-response file to search for in the project directory and above.
+        /// </summary>
+        private const string directoryResponseFileName = "Directory.Build.rsp";
+
+        /// <summary>
         /// Whether switches from the auto-response file are being used.
         /// </summary>
         internal static bool usingSwitchesFromAutoResponseFile = false;
@@ -1827,6 +1832,11 @@ namespace Microsoft.Build.CommandLine
         private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile)
         {
             string autoResponseFile = Path.Combine(path, autoResponseFileName);
+            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile);
+        }
+
+        private static bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile)
+        {
             bool found = false;
 
             // if the auto-response file does not exist, only use the switches on the command line
@@ -1847,6 +1857,9 @@ namespace Microsoft.Build.CommandLine
                     // we picked up some switches from the auto-response file
                     usingSwitchesFromAutoResponseFile = true;
                 }
+
+                // Throw errors found in the response file
+                switchesFromAutoResponseFile.ThrowErrors();
             }
 
             return found;
@@ -1946,6 +1959,14 @@ namespace Microsoft.Build.CommandLine
                     {
                         // gather any switches from an msbuild.rsp that is next to the project or solution file itself
                         string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
+
+                        // gather any switches from the first Directory.Build.rsp found in the project directory or above
+                        string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
+
+                        if (!String.IsNullOrWhiteSpace(directoryResponseFile))
+                        {
+                            GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
+                        }
 
                         bool found = false;
 

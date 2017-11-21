@@ -89,6 +89,11 @@ namespace Microsoft.Build.BackEnd
         private BuildRequestDataFlags _buildRequestDataFlags;
 
         /// <summary>
+        /// If set, skip targets that are not defined in the projects to be built.
+        /// </summary>
+        private bool _skipNonexistentTargets;
+
+        /// <summary>
         /// Constructor for serialization.
         /// </summary>
         public BuildRequest()
@@ -133,14 +138,7 @@ namespace Microsoft.Build.BackEnd
             _buildEventContext = BuildEventContext.Invalid;
             _parentBuildEventContext = parentBuildEventContext;
             _globalRequestId = InvalidGlobalRequestId;
-            if (null != parentRequest)
-            {
-                _parentGlobalRequestId = parentRequest.GlobalRequestId;
-            }
-            else
-            {
-                _parentGlobalRequestId = InvalidGlobalRequestId;
-            }
+            _parentGlobalRequestId = parentRequest?.GlobalRequestId ?? InvalidGlobalRequestId;
 
             _nodeRequestId = nodeRequestId;
             _buildRequestDataFlags = buildRequestDataFlags;
@@ -304,6 +302,15 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// If set, skip targets that are not defined in the projects to be built.
+        /// </summary>
+        internal bool SkipNonexistentTargets
+        {
+            get { return _skipNonexistentTargets; }
+            set { _skipNonexistentTargets = value; }
+        }
+
+        /// <summary>
         /// Sets the configuration id to a resolved id.
         /// </summary>
         /// <param name="newConfigId">The new configuration id for this request.</param>
@@ -330,6 +337,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _parentBuildEventContext);
             translator.Translate(ref _buildEventContext);
             translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
+            translator.Translate(ref _skipNonexistentTargets);
 
             // UNDONE: (Compat) Serialize the host object.
         }
@@ -337,7 +345,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new BuildRequest(translator);
         }

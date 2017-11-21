@@ -216,6 +216,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_myLibraries_V1_DDllPath = Path.Combine(s_myLibraries_V1Path, "D.dll");
         protected static readonly string s_myLibraries_V1_E_EDllPath = Path.Combine(s_myLibraries_V1_EPath, "E.dll");
         protected static readonly string s_myLibraries_V2_DDllPath = Path.Combine(s_myLibraries_V2Path, "D.dll");
+        protected static readonly string s_myLibraries_V1_GDllPath = Path.Combine(s_myLibraries_V1Path, "G.dll");
+        protected static readonly string s_myLibraries_V2_GDllPath = Path.Combine(s_myLibraries_V2Path, "G.dll");
 
         protected static readonly string s_regress454863_ADllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "A.dll");
         protected static readonly string s_regress454863_BDllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "B.dll");
@@ -234,6 +236,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_myApp_V10Path = Path.Combine(s_myAppRootPath, "v1.0");
         protected static readonly string s_myApp_V20Path = Path.Combine(s_myAppRootPath, "v2.0");
         protected static readonly string s_myApp_V30Path = Path.Combine(s_myAppRootPath, "v3.0");
+
+        protected static readonly string s_netstandardLibraryDllPath = Path.Combine(s_rootPathPrefix, "NetStandard", "netstandardlibrary.dll");
+        protected static readonly string s_netstandardDllPath = Path.Combine(s_rootPathPrefix, "NetStandard", "netstandard.dll");
+
+        protected static readonly string s_portableDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "Portable.dll");
+        protected static readonly string s_systemRuntimeDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "System.Runtime.dll");
 
         /// <summary>
         /// Search paths to use.
@@ -399,6 +407,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             s_myLibraries_V1_E_EDllPath,
             @"c:\RogueLibraries\v1\D.dll",
             s_myLibraries_V2_DDllPath,
+            s_myLibraries_V1_GDllPath,
+            s_myLibraries_V2_GDllPath,
             @"c:\MyStronglyNamed\A.dll",
             @"c:\MyWeaklyNamed\A.dll",
             @"c:\MyInaccessible\A.dll",
@@ -558,8 +568,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\DirectoryContainsdllAndWinmd\c.winmd",
             @"C:\DirectoryContainstwoWinmd\a.winmd",
             @"C:\DirectoryContainstwoWinmd\c.winmd",
-            @"C:\SystemRuntime\System.Runtime.dll",
-            @"C:\SystemRuntime\Portable.dll",
+            s_systemRuntimeDllPath,
+            s_portableDllPath,
+            s_netstandardLibraryDllPath,
+            s_netstandardDllPath,
             @"C:\SystemRuntime\Regular.dll",
         };
 
@@ -1298,6 +1310,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (path.EndsWith(s_myLibraries_V2_DDllPath))
             {
                 return new AssemblyNameExtension("D, VErsion=2.0.0.0, CulturE=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
+            }
+
+            if (path.EndsWith(s_myLibraries_V1_GDllPath))
+            {
+                return new AssemblyNameExtension("G, Version=1.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
+            }
+
+            if (path.EndsWith(s_myLibraries_V2_GDllPath))
+            {
+                return new AssemblyNameExtension("G, Version=2.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
             }
 
             if (String.Compare(path, @"C:\Regress317975\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
@@ -2122,7 +2144,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return new AssemblyNameExtension[]
                 {
-                    new AssemblyNameExtension("D, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa")
+                    new AssemblyNameExtension("D, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa"),
+                    new AssemblyNameExtension("G, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa")
                 };
             }
 
@@ -2399,15 +2422,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension[0];
             }
 
-            if (String.Compare(path, @"C:\SystemRuntime\Portable.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
-                // Simulate a strongly named assembly.
+                // Simulate a portable assembly with a reference to System.Runtime
                 return new AssemblyNameExtension[]
                 {
-                    GetAssemblyName(@"C:\SystemRuntime\System.Runtime.dll")
+                    GetAssemblyName(s_systemRuntimeDllPath)
                 };
             }
 
+            if (String.Compare(path, s_netstandardLibraryDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                // Simulate a .NET Standard assembly
+                return new AssemblyNameExtension[]
+                {
+                    GetAssemblyName(s_netstandardDllPath)
+                };
+            }
 
             // Use a default list.
             return new AssemblyNameExtension[]

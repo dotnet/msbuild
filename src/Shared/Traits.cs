@@ -13,7 +13,20 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     internal class Traits
     {
-        public static Traits Instance = new Traits();
+        private static Traits _instance = new Traits();
+        public static Traits Instance
+        {
+            get
+            {
+#if DEBUG
+                if (BuildEnvironmentHelper.Instance.RunningTests && Environment.GetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS") == "1")
+                {
+                    return new Traits();
+                }
+#endif
+                return _instance;
+            }
+        }
 
         public EscapeHatches EscapeHatches { get; }
 
@@ -49,6 +62,11 @@ namespace Microsoft.Build.Utilities
 
     internal class EscapeHatches
     {
+        /// <summary>
+        /// Force whether Project based evaluations should evaluate elements with false conditions.
+        /// </summary>
+        public readonly bool? EvaluateElementsWithFalseConditionInProjectEvaluation = ParseNullableBoolFromEnvironmentVariable("MSBUILDEVALUATEELEMENTSWITHFALSECONDITIONINPROJECTEVALUATION");
+
         /// <summary>
         /// Always use the accurate-but-slow CreateFile approach to timestamp extraction.
         /// </summary>
@@ -93,6 +111,26 @@ namespace Microsoft.Build.Utilities
         // be removed (permanently set to false) after establishing that
         // it's unneeded (at least by the 16.0 timeframe).
         public readonly bool UseCaseSensitiveItemNames = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1";
+
+        private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
+        {
+            var value = Environment.GetEnvironmentVariable(environmentVariable);
+
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
+            bool result;
+            if (bool.TryParse(value, out result))
+            {
+                return result;
+            }
+
+            ErrorUtilities.ThrowInternalError($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
+
+            return null;
+        }
 
         private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
         {

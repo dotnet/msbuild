@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd
     /// 
     /// For sensible semantics, only the current primary scope can be modified at any point.
     /// </summary>
-    internal class Lookup
+    internal class Lookup : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>
     {
         #region Fields
 
@@ -83,11 +83,6 @@ namespace Microsoft.Build.BackEnd
         /// a remove or modify of the real item, not the clone we handed over. So we keep a lookup of (clone, original) to consult.
         /// </summary>
         private Dictionary<ProjectItemInstance, ProjectItemInstance> _cloneTable;
-
-        /// <summary>
-        /// Read-only wrapper around this lookup.
-        /// </summary>
-        private ReadOnlyLookup _readOnlyLookup;
 
         /// <summary>
         /// A dictionary of named values for debugger display only. If 
@@ -136,21 +131,6 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Returns a read-only wrapper around this lookup
-        /// </summary>
-        internal ReadOnlyLookup ReadOnlyLookup
-        {
-            get
-            {
-                if (_readOnlyLookup == null)
-                {
-                    _readOnlyLookup = new ReadOnlyLookup(this);
-                }
-                return _readOnlyLookup;
-            }
-        }
 
         // Convenience private properties
         // "Primary" is the "top" or "innermost" scope
@@ -455,7 +435,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns null.
         /// Caller must not modify the property returned.
         /// </summary>
-        internal ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
+        public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
         {
             // Walk down the tables and stop when the first 
             // property with this name is found
@@ -493,7 +473,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns null.
         /// Caller must not modify the property returned.
         /// </summary>
-        internal ProjectPropertyInstance GetProperty(string name)
+        public ProjectPropertyInstance GetProperty(string name)
         {
             ErrorUtilities.VerifyThrowInternalLength(name, "name");
 
@@ -505,13 +485,14 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns an empty list.
         /// Caller must not modify the group returned.
         /// </summary>
-        internal ICollection<ProjectItemInstance> GetItems(string itemType)
+        public ICollection<ProjectItemInstance> GetItems(string itemType)
         {
             // The visible items consist of the adds (accumulated as we go down)
             // plus the first set of regular items we encounter
             // minus any removes
-            ItemDictionary<ProjectItemInstance> allAdds = null;
-            ItemDictionary<ProjectItemInstance> allRemoves = null;
+
+            List<ProjectItemInstance> allAdds = null;
+            List<ProjectItemInstance> allRemoves = null;
             Dictionary<ProjectItemInstance, MetadataModifications> allModifies = null;
             ICollection<ProjectItemInstance> groupFound = null;
 
@@ -523,8 +504,8 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> adds = scope.Adds[itemType];
                     if (adds.Count != 0)
                     {
-                        allAdds = allAdds ?? new ItemDictionary<ProjectItemInstance>();
-                        allAdds.ImportItemsOfType(itemType, adds);
+                        allAdds = allAdds ?? new List<ProjectItemInstance>(adds.Count);
+                        allAdds.AddRange(adds);
                     }
                 }
 
@@ -534,8 +515,8 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> removes = scope.Removes[itemType];
                     if (removes.Count != 0)
                     {
-                        allRemoves = allRemoves ?? new ItemDictionary<ProjectItemInstance>();
-                        allRemoves.ImportItems(removes);
+                        allRemoves = allRemoves ?? new List<ProjectItemInstance>(removes.Count);
+                        allRemoves.AddRange(removes);
                     }
                 }
 
@@ -547,7 +528,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (modifies.Count != 0)
                         {
-                            allModifies = allModifies ?? new Dictionary<ProjectItemInstance, MetadataModifications>();
+                            allModifies = allModifies ?? new Dictionary<ProjectItemInstance, MetadataModifications>(modifies.Count);
 
                             // We already have some modifies for this type
                             foreach (KeyValuePair<ProjectItemInstance, MetadataModifications> modify in modifies)
@@ -587,11 +568,19 @@ namespace Microsoft.Build.BackEnd
                 return groupFound;
             }
 
+            // Set the initial sizes to avoid resizing during import
+            int itemsTypesCount = 1;    // We're only ever importing a single item type
+            int itemsCount = groupFound?.Count ?? 0;    // Start with initial set
+            itemsCount += allAdds?.Count ?? 0;          // Add all the additions
+            itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
+            if (itemsCount < 0)
+                itemsCount = 0;
+
             // We have adds and/or removes and/or modifies to incorporate.
             // We can't modify the group, because that might
             // be visible to other batches; we have to create
             // a new one.
-            ItemDictionary<ProjectItemInstance> result = new ItemDictionary<ProjectItemInstance>();
+            ItemDictionary<ProjectItemInstance> result = new ItemDictionary<ProjectItemInstance>(itemsTypesCount, itemsCount);
 
             if (groupFound != null)
             {
@@ -1475,39 +1464,5 @@ namespace Microsoft.Build.BackEnd
                 _owningLookup.LeaveScope(this);
             }
         }
-    }
-
-    #region Related Types
-
-    /// <summary>
-    /// Read-only wrapper around a lookup.
-    /// Passed to Expander and ItemExpander, which only need to
-    /// use a lookup in a read-only fashion, thus increasing 
-    /// encapsulation of the data in the Lookup.
-    /// </summary>
-    internal class ReadOnlyLookup : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>
-    {
-        private Lookup _lookup;
-
-        internal ReadOnlyLookup(Lookup lookup)
-        {
-            _lookup = lookup;
-        }
-
-        public ICollection<ProjectItemInstance> GetItems(string itemType)
-        {
-            return _lookup.GetItems(itemType);
-        }
-
-        public ProjectPropertyInstance GetProperty(string name)
-        {
-            return _lookup.GetProperty(name);
-        }
-
-        public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
-        {
-            return _lookup.GetProperty(name, startIndex, endIndex);
-        }
-        #endregion
     }
 }

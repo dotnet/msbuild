@@ -3538,9 +3538,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Equal(2, t.ResolvedDependencyFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_DDllPath)); // "Expected to find assembly, but didn't."
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
+            Assert.Equal(3, t.ResolvedDependencyFiles.Length);
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_DDllPath));
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath));
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_GDllPath));
+            
             Assert.Equal(1, t.SuggestedRedirects.Length);
             Assert.True(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
             Assert.Equal(1, e.Warnings); // "Should only be one warning for suggested redirects."
@@ -3770,6 +3772,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
             Assert.Equal(0, t.SuggestedRedirects.Length);
             Assert.Equal(3, t.ResolvedFiles.Length);
@@ -3808,10 +3811,96 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
             Assert.Equal(0, t.SuggestedRedirects.Length);
             Assert.Equal(3, t.ResolvedFiles.Length);
             Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
+        }
+
+        /// <summary>
+        /// Consider this dependency chain:
+        ///
+        /// App
+        ///   References - B
+        ///        Depends on D version 2
+        ///   References - D, version 1
+        ///
+        /// Both D1 and D2 are CopyLocal. This is a warning because D1 is a lower version
+        /// than both D2 so that can't unify. These means that eventually when 
+        /// they're copied to the output directory they'll conflict.
+        /// </summary>
+        [Fact]
+        public void ConflictGeneratesMessageReferencingAssemblyName()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            MockEngine e = new MockEngine();
+            t.BuildEngine = e;
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("B"),
+                new TaskItem("D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")
+            };
+
+            t.SearchPaths = new string[]
+            {
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
+            };
+
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
+
+            bool result = Execute(t);
+
+            Assert.Equal(1, e.Warnings); // @"Expected one warning."
+
+            // Check that we have a message identifying conflicts with "D"
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
+        }
+
+
+        /// <summary>
+        /// Consider this dependency chain:
+        ///
+        /// App
+        ///   References - B
+        ///        Depends on D version 2
+        ///        Depends on G, version 2
+        ///   References - D, version 1
+        ///   References - G, version 1
+        ///
+        /// All of Dv1, Dv2, Gv1 and Gv2 are CopyLocal. We should get two conflict warnings, one for D and one for G.
+        /// </summary>
+        [Fact]
+        public void ConflictGeneratesMessageReferencingEachConflictingAssemblyName()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            MockEngine e = new MockEngine();
+            t.BuildEngine = e;
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("B"),
+                new TaskItem("D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"),
+                new TaskItem("G, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")
+            };
+
+            t.SearchPaths = new string[]
+            {
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
+            };
+
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
+
+            bool result = Execute(t);
+
+            Assert.Equal(2, e.Warnings); // @"Expected two warnings."
+
+            // Check that we have both the expected messages
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "G");
         }
 
         /// <summary>
@@ -3852,8 +3941,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(result); // @"Expected a success because this conflict is solvable."
             Assert.Equal(3, t.ResolvedFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V2_DDllPath)); // "Expected to find assembly, but didn't."
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V2_DDllPath));
+
+            Assert.Equal(2, t.ResolvedDependencyFiles.Length);
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath));
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_GDllPath));
         }
 
 
@@ -4482,9 +4574,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(2, t.ResolvedFiles.Length);
-            Assert.Equal(3, t.ResolvedDependencyFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
+
+            Assert.Equal(4, t.ResolvedDependencyFiles.Length);
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath));
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_DDllPath));
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_GDllPath));
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_E_EDllPath));
 
             foreach (ITaskItem item in t.ResolvedDependencyFiles)
             {

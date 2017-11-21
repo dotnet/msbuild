@@ -181,6 +181,31 @@
             Merge messages with the same code and message, combining the target graphs.
             </summary>
         </member>
+        <member name="T:NuGet.Commands.IndexedRestoreTargetGraph">
+            <summary>
+            Contains a RestoreTargetGraph with the flattened graph indexed on id.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IndexedRestoreTargetGraph.Graph">
+            <summary>
+            RestoreTargetGraph
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IndexedRestoreTargetGraph.GetItemById(System.String)">
+            <summary>
+            Returns the item or null if the id does not exist.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IndexedRestoreTargetGraph.GetItemById(System.String,NuGet.LibraryModel.LibraryType)">
+            <summary>
+            Returns the item or null if the id does not exist or does not match the type.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IndexedRestoreTargetGraph.HasErrors(System.String)">
+            <summary>
+            True if an id has a conflict or cycle error associated with it.
+            </summary>
+        </member>
         <member name="T:NuGet.Commands.UnexpectedDependencyMessages">
             <summary>
             Log warnings for packages that did not resolve to the minimum version of the dependency range.
@@ -202,7 +227,7 @@
             Get warning message for missing minimum dependencies.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetBumpedUpDependencies(System.Collections.Generic.IEnumerable{NuGet.Commands.IRestoreTargetGraph},NuGet.ProjectModel.PackageSpec,System.Collections.Generic.ISet{System.String})">
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetBumpedUpDependencies(System.Collections.Generic.List{NuGet.Commands.IndexedRestoreTargetGraph},NuGet.ProjectModel.PackageSpec,System.Collections.Generic.ISet{System.String})">
             <summary>
             Warn for dependencies that have been bumped up.
             </summary>
@@ -220,6 +245,11 @@
         <member name="M:NuGet.Commands.UnexpectedDependencyMessages.HasMissingLowerBound(NuGet.Versioning.VersionRange)">
             <summary>
             True if the range has an obtainable version for the lower bound.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetDependenciesAboveUpperBounds(System.Collections.Generic.List{NuGet.Commands.IndexedRestoreTargetGraph},NuGet.Common.ILogger)">
+            <summary>
+            Log upgrade warnings from the graphs.
             </summary>
         </member>
         <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetDependencyTargetGraphs(NuGet.ProjectModel.PackageSpec,NuGet.LibraryModel.LibraryDependency)">
@@ -319,18 +349,28 @@
             Gets the resolved dependency graph
             </summary>
         </member>
-        <member name="M:NuGet.Commands.LockFileBuilder.IsAllowedLibraryFile(System.String)">
+        <member name="T:NuGet.Commands.LockFileBuilderCache">
             <summary>
-            True if the file should be added to the lock file library
-            Fale if it is an OPC file or empty directory
+            Cache objects used for building the lock file.
             </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileBuilderCache.GetSelectionCriteria(NuGet.Commands.RestoreTargetGraph,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Get ordered selection criteria.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileBuilderCache.GetContentItems(NuGet.ProjectModel.LockFileLibrary,NuGet.Repositories.LocalPackageInfo)">
+            <summary>
+            Get a ContentItemCollection of the package files.
+            </summary>
+            <remarks>Library is optional.</remarks>
         </member>
         <member name="T:NuGet.Commands.PackageSpecificWarningProperties">
             <summary>
             Contains Package specific properties for Warnings.
             </summary>
         </member>
-        <member name="F:NuGet.Commands.PackageSpecificWarningProperties.Properties">
+        <member name="P:NuGet.Commands.PackageSpecificWarningProperties.Properties">
             <summary>
             Contains Package specific No warn properties.
             NuGetLogCode -> LibraryId -> Set of Frameworks.
@@ -343,6 +383,14 @@
             <param name="packageSpec">PackageSpec containing the Dependencies with WarningProperties</param>
             <returns>PackageSpecific WarningProperties extracted from a PackageSpec</returns>
         </member>
+        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.CreatePackageSpecificWarningProperties(NuGet.ProjectModel.PackageSpec,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Extracts PackageSpecific WarningProperties from a PackageSpec for a specific NuGetFramework
+            </summary>
+            <param name="packageSpec">PackageSpec containing the Dependencies with WarningProperties</param>
+            <param name="framework">NuGetFramework for which the properties should be assessed.</param>
+            <returns>PackageSpecific WarningProperties extracted from a PackageSpec for a specific NuGetFramework</returns>
+        </member>
         <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Add(NuGet.Common.NuGetLogCode,System.String,NuGet.Frameworks.NuGetFramework)">
             <summary>
             Adds a NuGetLogCode into the NoWarn Set for the specified library Id and target graph.
@@ -351,13 +399,21 @@
             <param name="libraryId">Library for which no warning should be thrown.</param>
             <param name="framework">Target graph for which no warning should be thrown.</param>
         </member>
-        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.AddRange(System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode},System.String,NuGet.Frameworks.NuGetFramework)">
+        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.AddRangeOfCodes(System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode},System.String,NuGet.Frameworks.NuGetFramework)">
             <summary>
             Adds a list of NuGetLogCode into the NoWarn Set for the specified library Id and target graph.
             </summary>
             <param name="codes">IEnumerable of NuGetLogCode for which no warning should be thrown.</param>
             <param name="libraryId">Library for which no warning should be thrown.</param>
             <param name="framework">Target graph for which no warning should be thrown.</param>
+        </member>
+        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.AddRangeOfFrameworks(NuGet.Common.NuGetLogCode,System.String,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Adds a list of NuGetLogCode into the NoWarn Set for the specified library Id and target graph.
+            </summary>
+            <param name="code">NuGetLogCode for which no warning should be thrown.</param>
+            <param name="libraryId">Library for which no warning should be thrown.</param>
+            <param name="frameworks">IEnumerable of Target graph for which no warning should be thrown.</param>
         </member>
         <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Contains(NuGet.Common.NuGetLogCode,System.String,NuGet.Frameworks.NuGetFramework)">
             <summary>
@@ -367,6 +423,20 @@
             <param name="libraryId">library Id to be checked.</param>
             <param name="framework">target graph to be checked.</param>
             <returns>True iff the NugetLogCode is part of the NoWarn list for the specified libraryId and Target Graph.</returns>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.ApplyRestoreInputs(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            Stores a reference to PackageSpec for the project from the restore request.
+            This are used to generate the warning properties for the project.
+            </summary>
+            <param name="projectSpec">PackageSpec to be stored for reference.</param>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.ApplyRestoreOutput(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreTargetGraph})">
+            <summary>
+            Stores a reference to RestoreTargetGraphs from the restore output.
+            These graphs are used to generate the transitive warning properties.
+            </summary>
+            <param name="restoreTargetGraphs">RestoreTargetGraphs to be stored for reference.</param>
         </member>
         <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,NuGet.Common.LogLevel,System.Boolean)">
             <summary>
@@ -407,6 +477,145 @@
             <param name="message">IRestoreLogMessage to be logged.</param>
             <returns>bool indicating if this message should be logged.</returns>
         </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.IsWarningSuppressed(NuGet.Common.IRestoreLogMessage)">
+            <summary>
+            This method checks if at least one of the warning properties collections is not null and it suppresses the warning.
+            </summary>
+            <param name="message">IRestoreLogMessage to be logged.</param>
+            <returns>bool indicating if the message should be suppressed.</returns>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.UpgradeWarningToErrorIfNeeded(NuGet.Common.IRestoreLogMessage)">
+            <summary>
+            This method upgrades the warning to an error if the project wide warning properties have set the code in WarningsAsErrors or
+            set TreatWarningsAsErrors to true
+            </summary>
+            <param name="message">IRestoreLogMessage to be logged as an error or warning.</param>
+            <returns>bool indicating if the message should be suppressed.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.CreateTransitiveWarningPropertiesCollection(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreTargetGraph},NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            Creates a PackageSpecificWarningProperties for a project generated by traversing the dependency graph.
+            </summary>
+            <param name="targetGraphs">Parent project restore target graphs.</param>
+            <param name="parentProjectSpec">PackageSpec of the parent project.</param>
+            <returns>WarningPropertiesCollection with the project frameworks and the transitive package specific no warn properties.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.ExtractTransitiveNoWarnProperties(NuGet.Commands.RestoreTargetGraph,System.String,System.Collections.Generic.HashSet{NuGet.Common.NuGetLogCode},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.HashSet{NuGet.Common.NuGetLogCode}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.Dictionary{NuGet.Frameworks.NuGetFramework,NuGet.Commands.WarningPropertiesCollection}})">
+            <summary>
+            Traverses a Dependency grpah starting from the parent project in BF style.
+            </summary>
+            <param name="targetGraph">Parent project restore target graph.</param>
+            <param name="parentProjectName">File path of the parent project.</param>
+            <param name="parentProjectWideNoWarn">Project Wide NoWarn properties of the parent project.</param>
+            <param name="parentPackageSpecificNoWarn">Package Specific NoWarn properties of the parent project.</param>
+            <returns>PackageSpecificWarningProperties containing all the NoWarn's for each package seen in the graph accumulated while traversing the graph.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.AddToSeen(System.Collections.Generic.Dictionary{System.String,NuGet.Commands.TransitiveNoWarnUtils.NodeWarningProperties},NuGet.Commands.TransitiveNoWarnUtils.DependencyNode)">
+            <summary>
+            Add to the seen list for tracking.
+            </summary>
+            <returns>True if the node should be walked</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.ExtractPathNoWarnProperties(NuGet.Commands.TransitiveNoWarnUtils.NodeWarningProperties,System.String)">
+            <summary>
+            Extracts the no warn  codes for a libraryId from the warning properties at the node in the graph.
+            </summary>
+            <param name="nodeWarningProperties">warning properties at the node in the graph.</param>
+            <param name="libraryId">libraryId for which the no warn codes have to be extracted.</param>
+            <returns>HashSet of NuGetLogCodes containing the no warn codes for the libraryId.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.MergeCodes(System.Collections.Generic.HashSet{NuGet.Common.NuGetLogCode},System.Collections.Generic.HashSet{NuGet.Common.NuGetLogCode})">
+            <summary>
+            Merge 2 WarningProperties objects.
+            This method will combine the warning properties from both the collections.
+            </summary>
+            <param name="first">First Object to be merged.</param>
+            <param name="second">Second Object to be merged.</param>
+            <returns>Returns a WarningProperties with the combined warning properties.
+            Returns the reference to one of the inputs if the other input is Null.
+            Returns a Null if both the input properties are Null. </returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.MergePackageSpecificNoWarn(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.HashSet{NuGet.Common.NuGetLogCode}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.HashSet{NuGet.Common.NuGetLogCode}})">
+            <summary>
+            Merge 2 PackageSpecific NoWarns.
+            This method will combine the warning properties from both the collections.
+            </summary>
+            <param name="first">First Object to be merged.</param>
+            <param name="second">Second Object to be merged.</param>
+            <returns>Returns a PackageSpecificWarningProperties with the combined warning properties.
+            Will return the reference to one of the inputs if the other input is Null.
+            Returns a Null if both the input properties are Null. </returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.MergePackageSpecificWarningProperties(NuGet.Commands.PackageSpecificWarningProperties,NuGet.Commands.PackageSpecificWarningProperties)">
+            <summary>
+            Merge 2 PackageSpecificWarningProperties objects.
+            This method will combine the warning properties from both the collections.
+            </summary>
+            <param name="first">First Object to be merged.</param>
+            <param name="second">Second Object to be merged.</param>
+            <returns>Returns a PackageSpecificWarningProperties with the combined warning properties.
+            Will return the reference to one of the inputs if the other input is Null.
+            Returns a Null if both the input properties are Null. </returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.TryMergeNullObjects``1(``0,``0,``0@)">
+            <summary>
+            Try to merge 2 objects if one or both of them are null.
+            </summary>
+            <param name="first">First Object to be merged.</param>
+            <param name="second">Second Object to be merged.</param>
+            <param name="merged">Out Merged Object.</param>
+            <returns>Returns true if atleast one of the objects was Null. 
+            If none of them is null then the returns false, indicating that the merge failed.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.IsProject(NuGet.LibraryModel.LibraryDependencyTarget)">
+            <summary>
+            Checks if a LibraryDependencyTarget is a project.
+            </summary>
+            <param name="type">LibraryDependencyTarget to be checked.</param>
+            <returns>True if a LibraryDependencyTarget is Project or ExternalProject.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.IsProject(NuGet.LibraryModel.LibraryType)">
+            <summary>
+            Checks if a LibraryType is a project.
+            </summary>
+            <param name="type">LibraryType to be checked.</param>
+            <returns>True if a LibraryType is Project or ExternalProject.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.ExtractPackageSpecificNoWarnPerFramework(NuGet.Commands.PackageSpecificWarningProperties)">
+            <summary>
+            Indexes a PackageSpecificWarningProperties collection on framework.
+            </summary>
+            <param name="packageSpecificWarningProperties">PackageSpecificWarningProperties to be converted.</param>
+            <returns>New dictionary containing the data of a PackageSpecificWarningProperties collection on framework.</returns>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.ExtractPackageSpecificNoWarnForFramework(NuGet.Commands.PackageSpecificWarningProperties,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Indexes a PackageSpecificWarningProperties collection on framework.
+            </summary>
+            <param name="packageSpecificWarningProperties">PackageSpecificWarningProperties to be converted.</param>
+            <returns>New dictionary containing the data of a PackageSpecificWarningProperties collection on framework.</returns>
+        </member>
+        <member name="T:NuGet.Commands.TransitiveNoWarnUtils.DependencyNode">
+            <summary>
+            A simple node class to hold the outgoing dependency edge during the graph walk.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.TransitiveNoWarnUtils.LookUpNode">
+            <summary>
+            A simple node class to hold the outgoing dependency edges for a quick look up.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.TransitiveNoWarnUtils.NodeWarningProperties">
+            <summary>
+            A class to hold minimal version of project wide nowarn and package specific no warn for a project.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.TransitiveNoWarnUtils.NodeWarningProperties.IsSubSetOf(NuGet.Commands.TransitiveNoWarnUtils.NodeWarningProperties)">
+            <summary>
+            True if the given set is a subset of this set, or equal to it.
+            </summary>
+            <remarks>Null is considered an empty set, and will return true.</remarks>
+        </member>
         <member name="T:NuGet.Commands.WarningPropertiesCollection">
             <summary>
             Class to hold ProjectWide and PackageSpecific WarningProperties.
@@ -438,12 +647,39 @@
             <returns>Bool indicating is the warning should be suppressed or not. 
             If not then the param message sould have been mutated to an error</returns>
         </member>
-        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyProjectWideWarningProperties(NuGet.Common.ILogMessage)">
+        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyNoWarnProperties(NuGet.Common.IRestoreLogMessage)">
             <summary>
-            Method is used to check is a warning should be suppressed and if not then if it should be treated as an error.
+            Attempts to suppress a warning log message.
+            The decision is made based on the Package Specific or Project wide no warn properties.
             </summary>
-            <param name="logMessage">Message which should be mutated if needed.</param>
+            <param name="message">Message that should be suppressed.</param>
+            <returns>Bool indicating is the warning should be suppressed or not.</returns>
+        </member>
+        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyWarningAsErrorProperties(NuGet.Common.IRestoreLogMessage)">
+            <summary>
+            Method is used to upgrade a warning to an error if needed.
+            </summary>
+            <param name="message">Message which should be upgraded to error if needed.</param>
+        </member>
+        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyPackageSpecificNoWarnProperties(NuGet.Common.IRestoreLogMessage)">
+            <summary>
+            Method is used to check is a warning should be suppressed due to package specific no warn properties.
+            </summary>
+            <param name="message">Message to be checked for no warn.</param>
+            <returns>bool indicating if the IRestoreLogMessage should be suppressed or not.</returns>
+        </member>
+        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyProjectWideNoWarnProperties(NuGet.Common.ILogMessage)">
+            <summary>
+            Method is used to check is a warning should be suppressed due to project wide no warn properties.
+            </summary>
+            <param name="message">Message to be checked for no warn.</param>
             <returns>bool indicating if the ILogMessage should be suppressed or not.</returns>
+        </member>
+        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyProjectWideWarningsAsErrorProperties(NuGet.Common.ILogMessage)">
+            <summary>
+            Method is used to check is a warning should be treated as an error.
+            </summary>
+            <param name="message">Message which should be upgraded to error if needed.</param>
         </member>
         <member name="P:NuGet.Commands.MSBuildOutputFile.Path">
             <summary>
@@ -1079,7 +1315,7 @@
             Node item
             </summary>
         </member>
-        <member name="M:NuGet.Commands.LockFileUtils.AddAssets(NuGet.ProjectModel.LockFileLibrary,NuGet.Repositories.LocalPackageInfo,NuGet.Commands.RestoreTargetGraph,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.String,System.Collections.Generic.IList{System.String},NuGet.ContentModel.ContentItemCollection,NuGet.Packaging.NuspecReader,System.Collections.Generic.IReadOnlyList{NuGet.ContentModel.SelectionCriteria})">
+        <member name="M:NuGet.Commands.LockFileUtils.AddAssets(NuGet.ProjectModel.LockFileLibrary,NuGet.Repositories.LocalPackageInfo,NuGet.Commands.RestoreTargetGraph,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.String,NuGet.ContentModel.ContentItemCollection,NuGet.Packaging.NuspecReader,System.Collections.Generic.IReadOnlyList{NuGet.ContentModel.SelectionCriteria})">
             <summary>
             Populate assets for a <see cref="T:NuGet.ProjectModel.LockFileLibrary"/>.
             </summary>
@@ -1101,7 +1337,7 @@
             Apply filters from the references node in the nuspec.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.LockFileUtils.ApplyLibContract(NuGet.Repositories.LocalPackageInfo,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IList{System.String})">
+        <member name="M:NuGet.Commands.LockFileUtils.ApplyLibContract(NuGet.Repositories.LocalPackageInfo,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,NuGet.ContentModel.ContentItemCollection)">
             <summary>
             COMPAT: Support lib/contract so older packages can be consumed
             </summary>
@@ -1200,6 +1436,11 @@
             Visual Studio ignores these projects so from the command line we should
             also. Build will fail with the appropriate errors for missing projects
             restore should not warn or message for this.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.NormalizePathCasings(System.Collections.Generic.Dictionary{System.String,System.String},NuGet.ProjectModel.DependencyGraphSpec)">
+            <summary>
+            Change all project paths to the same casing.
             </summary>
         </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.ContainsClearKeyword(System.Collections.Generic.IEnumerable{System.String})">
@@ -1308,6 +1549,17 @@
             Calculates the hash value, used for the no-op optimization, for the request
             This methods handles the deduping of tools
             Handles the ignoring of RestoreSettings
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.PersistHashedDGFileIfDebugging(NuGet.ProjectModel.DependencyGraphSpec,NuGet.Common.ILogger)">
+            <summary>
+            Write the dg file to a temp location if NUGET_PERSIST_NOOP_DG.
+            </summary>
+            <remarks>This is a noop if NUGET_PERSIST_NOOP_DG is not set to true.</remarks>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.IsPersistDGSet">
+            <summary>
+            True if NUGET_PERSIST_NOOP_DG is set to true.
             </summary>
         </member>
         <member name="M:NuGet.Commands.NoOpRestoreUtilities.UpdateRequestBestMatchingToolPathsIfAvailable(NuGet.Commands.RestoreRequest)">
@@ -2359,6 +2611,11 @@
               Looks up a localized string similar to {0} was not specified. Using &apos;{1}&apos;..
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Warning_VersionAboveUpperBound">
+            <summary>
+              Looks up a localized string similar to Detected package version outside of dependency constraint: {0} requires {1} but version {2} was resolved..
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.AssetTargetFallbackUtility.EnsureValidFallback(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.String)">
             <summary>
             Throw if an invalid combination exists.
@@ -2382,11 +2639,6 @@
         <member name="T:NuGet.Commands.Extensions">
             <summary>
             Internal extension helpers for NuGet.Commands
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.Extensions.GetItemById(System.Collections.Generic.IEnumerable{NuGet.DependencyResolver.GraphItem{NuGet.DependencyResolver.RemoteResolveResult}},System.String)">
-            <summary>
-            Search on Key.Name for the given package/project id.
             </summary>
         </member>
         <member name="M:NuGet.Commands.Extensions.LogMessagesAsync(NuGet.Common.ILogger,NuGet.Common.ILogMessage[])">
@@ -2488,6 +2740,12 @@
             null for equality.
             </summary>
         </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
         <member name="T:NuGet.Shared.HashCodeCombiner">
             <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
@@ -2509,6 +2767,12 @@
             Avoid mutating the return value.
             </summary>
             <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
         </member>
         <member name="T:Microsoft.Extensions.Primitives.IChangeToken">
             <summary>

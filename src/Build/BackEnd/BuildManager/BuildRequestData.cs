@@ -30,13 +30,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// When this flag is present, the existing ProjectInstance in the build will be replaced by this one.
         /// </summary>
-        ReplaceExistingProjectInstance = 0x1,
+        ReplaceExistingProjectInstance = 1 << 0,
 
         /// <summary>
         /// When this flag is present, <see cref="BuildResult"/> issued in response to this request will
         /// include <see cref="BuildResult.ProjectStateAfterBuild"/>.
         /// </summary>
-        ProvideProjectStateAfterBuild = 0x2,
+        ProvideProjectStateAfterBuild = 1 << 1,
 
         /// <summary>
         /// When this flag is present and the project has previously been built on a node whose affinity is
@@ -54,14 +54,21 @@ namespace Microsoft.Build.Execution
         /// request will not re-build that target (nor will any of the project state mutations which previously
         /// occurred as a consequence of building that target be re-applied.)
         /// </remarks>
-        IgnoreExistingProjectState = 0x4,
+        IgnoreExistingProjectState = 1 << 2,
 
         /// <summary>
-        /// When this flag is present, the <see cref="ProjectRootElementCache"/> will be cleared after the
-        /// build request completes.  This is used when the build request is known to modify a lot of state
-        /// such as restoring packages or generating parts of the import graph.
+        /// When this flag is present, caches including the <see cref="ProjectRootElementCache"/> will be cleared
+        /// after the build request completes.  This is used when the build request is known to modify a lot of
+        /// state such as restoring packages or generating parts of the import graph.
         /// </summary>
-        ClearProjectRootElementCacheAfterBuild = 0x8,
+        ClearCachesAfterBuild = 1 << 3,
+
+        /// <summary>
+        /// When this flag is present, the top level target(s) in the build request will be skipped if those targets
+        /// are not defined in the Project to build. This only applies to this build request (if another target calls
+        /// the "missing target" at any other point this will still result in an error).
+        /// </summary>
+        SkipNonexistentTargets = 1 << 4
     }
 
     /// <summary>

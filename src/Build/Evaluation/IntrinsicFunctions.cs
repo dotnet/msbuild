@@ -281,59 +281,26 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Locate a file in either the directory specified or a location in the
-        /// direcorty structure above that directory.
+        /// Searches upward for a directory containing the specified file, beginning in the specified directory.
         /// </summary>
+        /// <param name="startingDirectory">The directory to start the search in.</param>
+        /// <param name="fileName">The name of the file to search for.</param>
+        /// <returns>The full path of the directory containing the file if it is found, otherwise an empty string. </returns>
         internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
         {
-            // Canonicalize our starting location
-            string lookInDirectory = Path.GetFullPath(startingDirectory);
-
-            do
-            {
-                // Construct the path that we will use to test against
-                string possibleFileDirectory = Path.Combine(lookInDirectory, fileName);
-
-                // If we successfully locate the file in the directory that we're
-                // looking in, simply return that location. Otherwise we'll
-                // keep moving up the tree.
-                if (File.Exists(possibleFileDirectory))
-                {
-                    // We've found the file, return the directory we found it in
-                    return lookInDirectory;
-                }
-                else
-                {
-                    // GetDirectoryName will return null when we reach the root
-                    // terminating our search
-                    lookInDirectory = Path.GetDirectoryName(lookInDirectory);
-                }
-            }
-            while (lookInDirectory != null);
-
-            // When we didn't find the location, then return an empty string
-            return String.Empty;
+            return FileUtilities.GetDirectoryNameOfFileAbove(startingDirectory, fileName);
         }
 
         /// <summary>
-        /// Searches for a file based on the specified <see cref="IElementLocation"/>.
+        /// Searches upward for the specified file, beginning in the specified <see cref="IElementLocation"/>.
         /// </summary>
-        /// <param name="file">The file to search for.</param>
+        /// <param name="file">The name of the file to search for.</param>
         /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
-        /// of the file containing the property funciton.</param>
+        /// of the file containing the property function.</param>
         /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
         internal static string GetPathOfFileAbove(string file, string startingDirectory)
         {
-            // This method does not accept a path, only a file name
-            if(file.Any(i => i.Equals(Path.DirectorySeparatorChar) || i.Equals(Path.AltDirectorySeparatorChar)))
-            {
-                ErrorUtilities.ThrowArgument("InvalidGetPathOfFileAboveParameter", file);
-            }
-
-            // Search for a directory that contains that file
-            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
-
-            return String.IsNullOrWhiteSpace(directoryName) ? String.Empty : NormalizePath(directoryName, file);
+            return FileUtilities.GetPathOfFileAbove(file, startingDirectory);
         }
 
         /// <summary>
@@ -425,7 +392,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A canonicalized full path with the correct directory separators.</returns>
         internal static string NormalizePath(params string[] path)
         {
-            return FileUtilities.NormalizePath(Path.Combine(path));
+            return FileUtilities.NormalizePath(path);
         }
 
         /// <summary>
@@ -480,6 +447,11 @@ namespace Microsoft.Build.Evaluation
         public static string GetMSBuildExtensionsPath()
         {
             return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
+        }
+
+        public static bool IsRunningFromVisualStudio()
+        {
+            return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
         }
 
         #region Debug only intrinsics

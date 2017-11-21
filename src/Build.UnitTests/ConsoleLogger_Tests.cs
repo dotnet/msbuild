@@ -2099,7 +2099,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(messsage1);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
             string actualLog = sc.ToString();
-            actualLog.ShouldContain(ResourceUtilities.FormatResourceString("DeferredMessages"));
+            actualLog.ShouldContain(ResourceUtilities.GetResourceString("DeferredMessages"));
 
             es = new EventSourceSink();
             sc = new SimulatedConsole();
@@ -2113,7 +2113,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(messsage2);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
             actualLog = sc.ToString();
-            actualLog.ShouldContain(ResourceUtilities.FormatResourceString("DeferredMessages"));
+            actualLog.ShouldContain(ResourceUtilities.GetResourceString("DeferredMessages"));
 
             es = new EventSourceSink();
             sc = new SimulatedConsole();

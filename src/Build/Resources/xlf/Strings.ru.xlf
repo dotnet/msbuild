@@ -222,13 +222,8 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: MSBuildToolsPath не соответствует MSBuildBinPath для версии ToolsVersion "{0}", определенной в "{1}". Если заданы оба пути, они должны иметь одинаковое значение.</target>
+        <target state="translated">MSB4142: MSBuildToolsPath не соответствует MSBuildBinPath для ToolsVersion "{0}", определенной в "{1}". Если установлены оба пути, они должны иметь одинаковое значение.</target>
         <note>{StrBegin="MSB4142: "}</note>
-      </trans-unit>
-      <trans-unit id="CustomNamespaceNotAllowedOnThisChildElement">
-        <source>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</source>
-        <target state="translated">MSB4097: элемент &lt;{0}&gt; в элементе &lt;{1}&gt; не может иметь пользовательского пространства имен XML.</target>
-        <note>{StrBegin="MSB4097: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
         <source>MSB4009: The default tasks file could not be successfully loaded. {0}</source>
@@ -2045,6 +2040,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
         <target state="translated">Импортируется проект "{0}" в проект "{1}" в ({2},{3}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
+        <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
+        <target state="translated">Целевой объект "{0}" пропущен. Целевой объект не существует в проекте, а SkipNonexistentTargets имеет значение "Истина".</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryTaskTypeIsNotSet">
+        <source>The task factory must return a value for the "TaskType" property.</source>
+        <target state="translated">Фабрика задач должна вернуть значение для свойства TaskType.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">Указанный API-интерфейс "{0}" недоступен, так как при загрузке проекта был задан элемент ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition.</target>
         <note />
       </trans-unit>
     </body>

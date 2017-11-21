@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -43,7 +42,7 @@ namespace Microsoft.Build.Evaluation
                     matchItemspec = (itemSpec, item) => itemSpec.MatchesItem(item);
                 }
 
-                ICollection<I> matchedItems = ImmutableList.CreateBuilder<I>();
+                var matchedItems = ImmutableList.CreateBuilder<I>();
 
                 for (int i = 0; i < listBuilder.Count; i++)
                 {
@@ -61,18 +60,17 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                DecorateItemsWithMetadata(matchedItems, _metadata);
+                DecorateItemsWithMetadata(matchedItems.ToImmutableList(), _metadata);
             }
 
             private static bool ItemSpecOnlyReferencesOneItemType(ItemSpec<P, I> itemSpec, string itemType)
             {
-                if (itemSpec.Fragments.Count() != 1)
+                if (itemSpec.Fragments.Count != 1)
                 {
                     return false;
                 }
 
-                var itemExpressionFragment = itemSpec.Fragments.Single() as ItemExpressionFragment<P, I>;
-
+                var itemExpressionFragment = itemSpec.Fragments[0] as ItemExpressionFragment<P, I>;
                 if (itemExpressionFragment == null)
                 {
                     return false;

@@ -33,38 +33,15 @@ namespace Microsoft.Build.BackEnd
 
         #region Properties
 
-        // A list of targets to build.  This is a required parameter.  If you want to build the 
-        // default targets, use the <MSBuild> task and pass in Projects=$(MSBuildProjectFile).
-        private string[] _targets = null;
-
         // outputs of all built targets
-        private ArrayList _targetOutputs = new ArrayList();
-
-        // When this is true, instead of calling the engine once to build all the targets,
-        // we would call the engine once per target.  The benefit of this is that
-        // if one target fails, you can still continue with the remaining targets.
-        private bool _runEachTargetSeparately = false;
-
-        // If true the cache will be checked for the result and the result will be stored if the operation 
-        // is run
-        private bool _useResultsCache = false;
+        private readonly ArrayList _targetOutputs = new ArrayList();
 
         /// <summary>
-        /// The targets to build.
+        /// A list of targets to build.  This is a required parameter.  If you want to build the 
+        /// default targets, use the <see cref="MSBuild"/> task and pass in Projects=$(MSBuildProjectFile).
         /// </summary>
         /// <value>Array of target names.</value>
-        public string[] Targets
-        {
-            get
-            {
-                return _targets;
-            }
-
-            set
-            {
-                _targets = value;
-            }
-        }
+        public string[] Targets { get; set; } = null;
 
         /// <summary>
         /// Outputs of the targets built in each project.
@@ -84,35 +61,14 @@ namespace Microsoft.Build.BackEnd
         /// we would call the engine once per target (for each project).  The benefit of this is that
         /// if one target fails, you can still continue with the remaining targets.
         /// </summary>
-        public bool RunEachTargetSeparately
-        {
-            get
-            {
-                return _runEachTargetSeparately;
-            }
-
-            set
-            {
-                _runEachTargetSeparately = value;
-            }
-        }
+        public bool RunEachTargetSeparately { get; set; } = false;
 
         /// <summary>
         /// If true the cached result will be returned if present and a if MSBuild
         /// task is run its result will be cached in a scope (ProjectFileName, GlobalProperties)[TargetNames]
         /// as a list of build items
         /// </summary>
-        public bool UseResultsCache
-        {
-            get
-            {
-                return _useResultsCache;
-            }
-            set
-            {
-                _useResultsCache = value;
-            }
-        }
+        public bool UseResultsCache { get; set; } = false;
 
         #endregion
 
@@ -145,15 +101,7 @@ namespace Microsoft.Build.BackEnd
 
         public TaskLoggingHelper Log
         {
-            get
-            {
-                if (_logHelper == null)
-                {
-                    _logHelper = new TaskLoggingHelper(this);
-                }
-
-                return _logHelper;
-            }
+            get { return _logHelper ?? (_logHelper = new TaskLoggingHelper(this)); }
         }
 
         public bool Execute()
@@ -170,7 +118,7 @@ namespace Microsoft.Build.BackEnd
             // Make sure the list of targets was passed in.
             if ((Targets == null) || (Targets.Length == 0))
             {
-                return Task<bool>.FromResult(true);
+                return Task.FromResult(true);
             }
 
             // This is a list of string[].  That is, each element in the list is a string[].  Each
@@ -181,22 +129,22 @@ namespace Microsoft.Build.BackEnd
 
             ITaskItem[] singleProject = new ITaskItem[1];
             singleProject[0] = null;
+
             // Build the specified targets in the current project.
-            return MSBuild.ExecuteTargets
-                (
-                singleProject,  // project = null (current project)
-                null,           // propertiesTable = null
-                null,           // undefineProperties
-                targetLists,    // list of targets to build
-                false,          // stopOnFirstFailure = false
-                false,          // rebaseOutputs = false
-                this.BuildEngine3,
-                this.Log,
-                _targetOutputs,
-                this.UseResultsCache,
-                false,
-                null            // toolsVersion = null
-                );
+            return MSBuild.ExecuteTargets(
+                projects: singleProject,
+                propertiesTable: null,
+                undefineProperties: null,
+                targetLists: targetLists,
+                stopOnFirstFailure: false,
+                rebaseOutputs: false,
+                buildEngine: this.BuildEngine3,
+                log: this.Log,
+                targetOutputs: _targetOutputs,
+                useResultsCache: this.UseResultsCache,
+                unloadProjectsOnCompletion: false,
+                toolsVersion: null,
+                skipNonexistentTargets: false);
         }
 
         #endregion

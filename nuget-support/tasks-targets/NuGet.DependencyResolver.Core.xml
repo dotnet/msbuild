@@ -27,6 +27,49 @@
             Outgoing edge from <see cref="P:NuGet.DependencyResolver.GraphEdge`1.Item"/>.
             </summary>
         </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetPath``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            A 1.0.0 -> B 1.0.0 -> C 2.0.0
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetPathWithLastRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            A 1.0.0 -> B 1.0.0 -> C (= 2.0.0)
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetIdAndRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Prints the id and version constraint for a node.
+            </summary>
+            <remarks>Projects will not display a range.</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetIdAndVersionOrRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Prints the id and version of a node. If the version does not exist use the range.
+            </summary>
+            <remarks>Projects will not display a version or range.</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetId``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Id of the node.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetVersionOrDefault``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Version of the resolved node version if it exists.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetVersionRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Dependency range for the node.
+            </summary>
+            <remarks>Defaults to All</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.IsPackage``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            True if the node is resolved to a package or allows a package if unresolved.
+            </summary>
+        </member>
         <member name="T:NuGet.DependencyResolver.LibraryRangeCacheKey">
             <summary>
             Helper class to hold a library range and framework.
@@ -271,6 +314,12 @@
             null for equality.
             </summary>
         </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
         <member name="T:NuGet.Shared.HashCodeCombiner">
             <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
@@ -292,6 +341,12 @@
             Avoid mutating the return value.
             </summary>
             <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
         </member>
     </members>
 </doc>

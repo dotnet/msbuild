@@ -647,7 +647,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Write the banner
             setColor(ConsoleColor.Green);
-            WriteMessageAligned(ResourceUtilities.FormatResourceString("PropertyListHeader"), true);
+            WriteMessageAligned(ResourceUtilities.GetResourceString("PropertyListHeader"), true);
             // Write each property name and its value, one per line
             foreach (DictionaryEntry prop in list)
             {
@@ -665,7 +665,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Write the banner
             setColor(ConsoleColor.Green);
-            WriteMessageAligned(ResourceUtilities.FormatResourceString("EnvironmentHeader"), true);
+            WriteMessageAligned(ResourceUtilities.GetResourceString("EnvironmentHeader"), true);
 
             if (environment != null)
             {
@@ -788,7 +788,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                         if (targetOutputs != null)
                         {
-                            WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetOutputItemsHeader"), false);
+                            WriteMessageAligned(ResourceUtilities.GetResourceString("TargetOutputItemsHeader"), false);
                             foreach (ITaskItem item in targetOutputs)
                             {
                                 WriteMessageAligned(ResourceUtilities.FormatResourceString("TargetOutputItem", item.ItemSpec), false);

@@ -134,6 +134,43 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        public void ExtensionPathFallbackIsCaseInsensitive()
+        {
+            string mainTargetsFileContent = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Target Name='Main'>
+                        <Message Text='Running Main'/>
+                    </Target>
+
+                    <Import Project='$(msbuildExtensionsPath)\foo\extn.proj'/>
+                </Project>";
+
+            string extnTargetsFileContent = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Target Name='FromExtn'>
+                        <Message Text='Running {0}'/>
+                    </Target>
+                </Project>
+                ";
+
+            string extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"), extnTargetsFileContent);
+
+            string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
+
+            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath",
+                new[] { extnDir1 },
+                null,
+                (project, logger) =>
+                {
+                    Console.WriteLine(logger.FullLog);
+                    Console.WriteLine("checking FromExtn");
+                    Assert.True(project.Build("FromExtn"));
+                    Console.WriteLine("checking logcontains");
+                    logger.AssertLogDoesntContain("MSB4057"); // Should not contain TargetDoesNotExist
+                });
+        }
+
+        [Fact]
         public void ImportFromExtensionsPathWithWildCard()
         {
             string mainTargetsFileContent = @"

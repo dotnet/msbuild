@@ -20,6 +20,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(CustomBeforeMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonCrossTargetingTargets)')"/>
 
+  <Target Name="GetTargetFrameworks"
+          Returns="@(_ThisProjectBuildMetadata)">
+    <ItemGroup>
+      <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
+        <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">$(TargetFrameworks)</TargetFrameworks>
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
+        <HasSingleTargetFramework>true</HasSingleTargetFramework>
+        <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
+        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
+        <IsRidAgnostic>false</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+      </_ThisProjectBuildMetadata>
+    </ItemGroup>
+  </Target>
+
   <Target Name="_ComputeTargetFrameworkItems" Returns="@(InnerOutput)">
     <ItemGroup>
       <_TargetFramework Include="$(TargetFrameworks)" />
@@ -116,17 +131,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
 
   <!--
-    This will import NuGet restore targets, which is a special case separate from the package -> project extension 
-    mechanism below. For obvious reasons,  we need restore to work before any package assets are available.
-
-    TODO: https://github.com/Microsoft/msbuild/issues/1061: This is now generalized with less coupling to nuget, 
-          but this codepath should remain as a compat shim until NuGet and the CLI use the CrossTargeting imports.
+    This will import NuGet restore targets. We need restore to work before any package assets are available.
   -->
   <PropertyGroup>
-    <ImportByWildcardAfterMicrosoftCommonTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonTargets>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$([MSBuild]::IsRunningFromVisualStudio())'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildToolsPath)\NuGet.targets</NuGetRestoreTargets>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*.NuGet.*.targets"
-          Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
+
+  <Import Project="$(NuGetRestoreTargets)" />
 
   <Import Project="$(CustomAfterMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomAfterMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomAfterMicrosoftCommonCrossTargetingTargets)')"/>
 

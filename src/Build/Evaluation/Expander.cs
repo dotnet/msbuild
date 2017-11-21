@@ -292,7 +292,7 @@ namespace Microsoft.Build.Evaluation
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
-        internal IList<string> ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
@@ -341,13 +341,9 @@ namespace Microsoft.Build.Evaluation
                 return result;
             }
 
-            IList<string> splits = ExpressionShredder.SplitSemiColonSeparatedList(expression);
-
-            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            var splitsCount = splits.Count;
-            for (var i = 0; i < splitsCount; i++)
+            var splits = ExpressionShredder.SplitSemiColonSeparatedList(expression);
+            foreach (string split in splits)
             {
-                var split = splits[i];
                 bool isTransformExpression;
                 IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems<I, T>(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
 
@@ -433,7 +429,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions options,
             bool includeNullEntries,
             out bool isTransformExpression,
-            out List<Tuple<string, I>> itemsFromCapture)
+            out List<Pair<string, I>> itemsFromCapture)
         {
             return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
         }
@@ -1305,7 +1301,7 @@ namespace Microsoft.Build.Evaluation
 
                 object propertyValue;
 
-                if (property == null && MSBuildNameIgnoreCaseComparer.Equals("MSBuild", propertyName, startIndex, 7))
+                if (property == null && ((endIndex - startIndex) >= 7) && MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7))
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
                     // whose values vary according to the file they are in.
@@ -1330,7 +1326,7 @@ namespace Microsoft.Build.Evaluation
                     if (usedUninitializedProperties.Warn && usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName != null)
                     {
                         // Check to see if the property name does not match the property we are currently evaluating, note the property we are currently evaluating in the element name, this means no $( or )
-                        if (!MSBuildNameIgnoreCaseComparer.Equals(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, propertyName, startIndex, endIndex - startIndex + 1))
+                        if (!MSBuildNameIgnoreCaseComparer.Default.Equals(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, propertyName, startIndex, endIndex - startIndex + 1))
                         {
                             string propertyTrimed = propertyName.Substring(startIndex, endIndex - startIndex + 1);
                             if (!usedUninitializedProperties.Properties.ContainsKey(propertyTrimed))
@@ -1543,7 +1539,7 @@ namespace Microsoft.Build.Evaluation
             /// Execute the list of transform functions
             /// </summary>
             /// <typeparam name="S">class, IItem</typeparam>
-            internal static IEnumerable<Tuple<string, S>> Transform<S>(Expander<P, I> expander, bool includeNullEntries, Stack<TransformFunction<S>> transformFunctionStack, IEnumerable<Tuple<string, S>> itemsOfType)
+            internal static IEnumerable<Pair<string, S>> Transform<S>(Expander<P, I> expander, bool includeNullEntries, Stack<TransformFunction<S>> transformFunctionStack, IEnumerable<Pair<string, S>> itemsOfType)
                 where S : class, IItem
             {
                 // If we have transforms on our stack, then we'll execute those first
@@ -1552,7 +1548,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     TransformFunction<S> function = transformFunctionStack.Pop();
 
-                    foreach (Tuple<string, S> item in Transform(expander, includeNullEntries, transformFunctionStack, function.Execute(expander, includeNullEntries, itemsOfType)))
+                    foreach (Pair<string, S> item in Transform(expander, includeNullEntries, transformFunctionStack, function.Execute(expander, includeNullEntries, itemsOfType)))
                     {
                         yield return item;
                     }
@@ -1561,7 +1557,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // When we have no more tranforms on the stack, iterate over the items
                     // that we have to return them
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
                         yield return item;
                     }
@@ -1697,7 +1693,7 @@ namespace Microsoft.Build.Evaluation
                     return result;
                 }
 
-                List<Tuple<string, S>> itemsFromCapture;
+                List<Pair<string, S>> itemsFromCapture;
                 brokeEarlyNonEmpty = ExpandExpressionCapture(expander, expressionCapture, items, elementLocation /* including null items */, options, true, out isTransformExpression, out itemsFromCapture);
 
                 if (brokeEarlyNonEmpty)
@@ -1709,8 +1705,8 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (var itemTuple in itemsFromCapture)
                 {
-                    var itemSpec = itemTuple.Item1;
-                    var originalItem = itemTuple.Item2;
+                    var itemSpec = itemTuple.Key;
+                    var originalItem = itemTuple.Value;
 
                     if (itemSpec != null && originalItem == null)
                     {
@@ -1763,7 +1759,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 bool includeNullEntries,
                 out bool isTransformExpression,
-                out List<Tuple<string, S>> itemsFromCapture
+                out List<Pair<string, S>> itemsFromCapture
                 )
                 where S : class, IItem
             {
@@ -1782,7 +1778,7 @@ namespace Microsoft.Build.Evaluation
                     if (expressionCapture.Captures == null ||
                         !expressionCapture.Captures.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)))
                     {
-                        itemsFromCapture = new List<Tuple<string, S>>();
+                        itemsFromCapture = new List<Pair<string, S>>();
                         return false;
                     }
                 }
@@ -1792,7 +1788,7 @@ namespace Microsoft.Build.Evaluation
                     isTransformExpression = true;
                 }
 
-                itemsFromCapture = new List<Tuple<string, S>>(itemsOfType.Count);
+                itemsFromCapture = new List<Pair<string, S>>(itemsOfType.Count);
 
                 if (!isTransformExpression)
                 {
@@ -1804,7 +1800,7 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
 
-                        itemsFromCapture.Add(new Tuple<string, S>(item.EvaluatedIncludeEscaped, item));
+                        itemsFromCapture.Add(new Pair<string, S>(item.EvaluatedIncludeEscaped, item));
                     }
                 }
                 else
@@ -1812,9 +1808,9 @@ namespace Microsoft.Build.Evaluation
                     Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
 
                     // iterate over the tranform chain, creating the final items from its results
-                    foreach (Tuple<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemTupleEnumerator(itemsOfType)))
+                    foreach (Pair<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType)))
                     {
-                        if (!string.IsNullOrEmpty(itemTuple.Item1) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
+                        if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
                             return true; // broke out early; result cannot be trusted
                         }
@@ -1825,9 +1821,9 @@ namespace Microsoft.Build.Evaluation
 
                 if (expressionCapture.Separator != null)
                 {
-                    var joinedItems = string.Join(expressionCapture.Separator, itemsFromCapture.Select(i => i.Item1));
+                    var joinedItems = string.Join(expressionCapture.Separator, itemsFromCapture.Select(i => i.Key));
                     itemsFromCapture.Clear();
-                    itemsFromCapture.Add(new Tuple<string, S>(joinedItems, null));
+                    itemsFromCapture.Add(new Pair<string, S>(joinedItems, null));
                 }
 
                 return false; // did not break early
@@ -1948,7 +1944,7 @@ namespace Microsoft.Build.Evaluation
                 )
                 where S : class, IItem
             {
-                List<Tuple<string, S>> itemsFromCapture;
+                List<Pair<string, S>> itemsFromCapture;
                 bool throwaway;
                 var brokeEarlyNonEmpty = ExpandExpressionCapture(expander, capture, evaluatedItems, elementLocation /* including null items */, options, true, out throwaway, out itemsFromCapture);
 
@@ -1960,7 +1956,7 @@ namespace Microsoft.Build.Evaluation
                 // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
                 foreach (var item in itemsFromCapture)
                 {
-                    builder.Append(item.Item1);
+                    builder.Append(item.Key);
                     builder.Append(';');
                 }
 
@@ -1987,7 +1983,7 @@ namespace Microsoft.Build.Evaluation
                 /// Delegate that represents the signature of all item transformation functions
                 /// This is used to support calling the functions by name
                 /// </summary>
-                public delegate IEnumerable<Tuple<string, S>> ItemTransformFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments);
+                public delegate IEnumerable<Pair<string, S>> ItemTransformFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments);
 
                 /// <summary>
                 /// Get a delegate to the given item transformation function by supplying the name and the
@@ -2050,7 +2046,7 @@ namespace Microsoft.Build.Evaluation
                 /// Create an enumerator from a base IEnumerable of items into an enumerable
                 /// of transformation result which includes the new itemspec and the base item
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> GetItemTupleEnumerator(IEnumerable<S> itemsOfType)
+                internal static IEnumerable<Pair<string, S>> GetItemPairEnumerable(IEnumerable<S> itemsOfType)
                 {
                     // iterate over the items, and yield out items in the tuple format
                     foreach (var item in itemsOfType)
@@ -2064,12 +2060,12 @@ namespace Microsoft.Build.Evaluation
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))
                             {
-                                yield return new Tuple<string, S>(resultantItem, item);
+                                yield return new Pair<string, S>(resultantItem, item);
                             }
                         }
                         else
                         {
-                            yield return new Tuple<string, S>(item.EvaluatedIncludeEscaped, item);
+                            yield return new Pair<string, S>(item.EvaluatedIncludeEscaped, item);
                         }
                     }
                 }
@@ -2077,24 +2073,24 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that returns the number of items in the list
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> Count(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> Count(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    yield return new Tuple<string, S>(Convert.ToString(itemsOfType.Count(), CultureInfo.InvariantCulture), null /* no base item */);
+                    yield return new Pair<string, S>(Convert.ToString(itemsOfType.Count(), CultureInfo.InvariantCulture), null /* no base item */);
                 }
 
                 /// <summary>
                 /// Intrinsic function that returns the specified built-in modifer value of the items in itemsOfType
                 /// Tuple is {current item include, item under transformation}
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> ItemSpecModifierFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> ItemSpecModifierFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
                         // If the item include has become empty,
                         // this is the end of the pipeline for this item
-                        if (String.IsNullOrEmpty(item.Item1))
+                        if (String.IsNullOrEmpty(item.Key))
                         {
                             continue;
                         }
@@ -2106,10 +2102,10 @@ namespace Microsoft.Build.Evaluation
                             // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
                             // In that case, we're safe to get the current directory as we'll be running on TaskItems which
                             // only exist within a target where we can trust the current directory
-                            string directoryToUse = item.Item2.ProjectDirectory ?? Directory.GetCurrentDirectory();
-                            string definingProjectEscaped = item.Item2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                            string directoryToUse = item.Value.ProjectDirectory ?? Directory.GetCurrentDirectory();
+                            string definingProjectEscaped = item.Value.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
 
-                            result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Item1, definingProjectEscaped, functionName);
+                            result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
                         }
                         catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
                         {
@@ -2120,18 +2116,18 @@ namespace Microsoft.Build.Evaluation
                                 throw;
                             }
 
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Item1, e.Message);
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                         }
 
                         if (!String.IsNullOrEmpty(result))
                         {
                             // GetItemSpecModifier will have returned us an escaped string
                             // there is nothing more to do than yield it into the pipeline
-                            yield return new Tuple<string, S>(result, item.Item2);
+                            yield return new Pair<string, S>(result, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Tuple<string, S>(null, item.Item2);
+                            yield return new Pair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2140,27 +2136,27 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns the DirectoryName of the items in itemsOfType
                 /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
                     Dictionary<string, string> directoryNameTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
                         // If the item include has become empty,
                         // this is the end of the pipeline for this item
-                        if (String.IsNullOrEmpty(item.Item1))
+                        if (String.IsNullOrEmpty(item.Key))
                         {
                             continue;
                         }
 
                         string directoryName = null;
 
-                        if (!directoryNameTable.TryGetValue(item.Item1, out directoryName))
+                        if (!directoryNameTable.TryGetValue(item.Key, out directoryName))
                         {
                             // Unescape as we are passing to the file system
-                            string unescapedPath = EscapingUtilities.UnescapeAll(item.Item1);
+                            string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
 
                             try
                             {
@@ -2177,7 +2173,7 @@ namespace Microsoft.Build.Evaluation
                                     // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
                                     // In that case, we're safe to get the current directory as we'll be running on TaskItems which
                                     // only exist within a target where we can trust the current directory
-                                    string baseDirectoryToUse = item.Item2.ProjectDirectory ?? String.Empty;
+                                    string baseDirectoryToUse = item.Value.ProjectDirectory ?? String.Empty;
                                     rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                                 }
 
@@ -2185,7 +2181,7 @@ namespace Microsoft.Build.Evaluation
                             }
                             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Item1, e.Message);
+                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                             }
 
                             // Escape as this is going back into the engine
@@ -2196,11 +2192,11 @@ namespace Microsoft.Build.Evaluation
                         if (!String.IsNullOrEmpty(directoryName))
                         {
                             // return a result through the enumerator
-                            yield return new Tuple<string, S>(directoryName, item.Item2);
+                            yield return new Pair<string, S>(directoryName, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Tuple<string, S>(null, item.Item2);
+                            yield return new Pair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2208,21 +2204,21 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that returns the contents of the metadata in specified in argument[0]
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> Metadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> Metadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
                     string metadataName = arguments[0];
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
-                        if (item.Item2 != null)
+                        if (item.Value != null)
                         {
                             string metadataValue = null;
 
                             try
                             {
-                                metadataValue = item.Item2.GetMetadataValueEscaped(metadataName);
+                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
                             catch (ArgumentException ex) // Blank metadata name
                             {
@@ -2239,23 +2235,23 @@ namespace Microsoft.Build.Evaluation
                                 // that case.
                                 if (s_invariantCompareInfo.IndexOf(metadataValue, ';') >= 0)
                                 {
-                                    IList<string> splits = ExpressionShredder.SplitSemiColonSeparatedList(metadataValue);
+                                    var splits = ExpressionShredder.SplitSemiColonSeparatedList(metadataValue);
 
                                     foreach (string itemSpec in splits)
                                     {
                                         // return a result through the enumerator
-                                        yield return new Tuple<string, S>(itemSpec, item.Item2);
+                                        yield return new Pair<string, S>(itemSpec, item.Value);
                                     }
                                 }
                                 else
                                 {
                                     // return a result through the enumerator
-                                    yield return new Tuple<string, S>(metadataValue, item.Item2);
+                                    yield return new Pair<string, S>(metadataValue, item.Value);
                                 }
                             }
                             else if (metadataValue != String.Empty && includeNullEntries)
                             {
-                                yield return new Tuple<string, S>(metadataValue, item.Item2);
+                                yield return new Pair<string, S>(metadataValue, item.Value);
                             }
                         }
                     }
@@ -2265,7 +2261,7 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case sensitive comparison
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> DistinctWithCase(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> DistinctWithCase(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     return DistinctWithComparer(expander, elementLocation, includeNullEntries, functionName, itemsOfType, arguments, StringComparer.Ordinal);
                 }
@@ -2274,7 +2270,7 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> Distinct(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> Distinct(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     return DistinctWithComparer(expander, elementLocation, includeNullEntries, functionName, itemsOfType, arguments, StringComparer.OrdinalIgnoreCase);
                 }
@@ -2283,20 +2279,20 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> DistinctWithComparer(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments, StringComparer comparer)
+                internal static IEnumerable<Pair<string, S>> DistinctWithComparer(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments, StringComparer comparer)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
                     // This dictionary will ensure that we only return one result per unique itemspec
                     Dictionary<string, S> seenItems = new Dictionary<string, S>(comparer);
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
-                        if (item.Item1 != null && !seenItems.ContainsKey(item.Item1))
+                        if (item.Key != null && !seenItems.ContainsKey(item.Key))
                         {
-                            seenItems[item.Item1] = item.Item2;
+                            seenItems[item.Key] = item.Value;
 
-                            yield return new Tuple<string, S>(item.Item1, item.Item2);
+                            yield return new Pair<string, S>(item.Key, item.Value);
                         }
                     }
                 }
@@ -2304,23 +2300,23 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function reverses the item list.
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> Reverse(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> Reverse(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
-                    foreach (Tuple<String, S> item in itemsOfType.Reverse())
+                    foreach (Pair<String, S> item in itemsOfType.Reverse())
                     {
-                        yield return new Tuple<string, S>(item.Item1, item.Item2);
+                        yield return new Pair<string, S>(item.Key, item.Value);
                     }
                 }
 
                 /// <summary>
                 /// Intrinsic function that transforms expressions like the %(foo) in @(Compile->'%(foo)')
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> ExpandQuotedExpressionFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> ExpandQuotedExpressionFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
                         MetadataMatchEvaluator matchEvaluator;
                         string include = null;
@@ -2328,9 +2324,9 @@ namespace Microsoft.Build.Evaluation
                         // If we've been handed a null entry by an uptream tranform
                         // then we don't want to try to tranform it with an itempec modification.
                         // Simply allow the null to be passed along (if, we are including nulls as specified by includeNullEntries
-                        if (item.Item1 != null)
+                        if (item.Key != null)
                         {
-                            matchEvaluator = new MetadataMatchEvaluator(item.Item1, item.Item2, elementLocation);
+                            matchEvaluator = new MetadataMatchEvaluator(item.Key, item.Value, elementLocation);
 
                             include = RegularExpressions.ItemMetadataPattern.Value.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
                         }
@@ -2343,11 +2339,11 @@ namespace Microsoft.Build.Evaluation
                         // We pass in the existing item so we can copy over its metadata
                         if (include != null && include.Length > 0)
                         {
-                            yield return new Tuple<string, S>(include, item.Item2);
+                            yield return new Pair<string, S>(include, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Tuple<string, S>(null, item.Item2);
+                            yield return new Pair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2356,13 +2352,13 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that transforms expressions by invoking methods of System.String on the itemspec
                 /// of the item in the pipeline
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> ExecuteStringFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> ExecuteStringFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     // Transform: expression is like @(Compile->'%(foo)'), so create completely new items,
                     // using the Include from the source items
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
-                        Function<P> function = new Expander<P, I>.Function<P>(typeof(string), item.Item1, item.Item1, functionName, arguments,
+                        Function<P> function = new Expander<P, I>.Function<P>(typeof(string), item.Key, item.Key, functionName, arguments,
 #if FEATURE_TYPE_INVOKEMEMBER
                             BindingFlags.Public | BindingFlags.InvokeMethod,
 #else
@@ -2370,18 +2366,18 @@ namespace Microsoft.Build.Evaluation
 #endif
                             String.Empty, expander.UsedUninitializedProperties);
 
-                        object result = function.Execute(item.Item1, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
+                        object result = function.Execute(item.Key, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
                         string include = Expander<P, I>.PropertyExpander<P>.ConvertToString(result);
 
                         // We pass in the existing item so we can copy over its metadata
                         if (include.Length > 0)
                         {
-                            yield return new Tuple<string, S>(include, item.Item2);
+                            yield return new Pair<string, S>(include, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Tuple<string, S>(null, item.Item2);
+                            yield return new Pair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2389,15 +2385,15 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that returns the items from itemsOfType with their metadata cleared, i.e. only the itemspec is retained
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> ClearMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> ClearMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
-                        if (includeNullEntries || item.Item1 != null)
+                        if (includeNullEntries || item.Key != null)
                         {
-                            yield return new Tuple<string, S>(item.Item1, null);
+                            yield return new Pair<string, S>(item.Key, null);
                         }
                     }
                 }
@@ -2406,19 +2402,19 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only those items that have a not-blank value for the metadata specified
                 /// Using a case insensitive comparison
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> HasMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> HasMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
                     string metadataName = arguments[0];
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
                         string metadataValue = null;
 
                         try
                         {
-                            metadataValue = item.Item2.GetMetadataValueEscaped(metadataName);
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2434,7 +2430,7 @@ namespace Microsoft.Build.Evaluation
                         if (metadataValue != null && metadataValue.Length > 0)
                         {
                             // return a result through the enumerator
-                            yield return new Tuple<string, S>(item.Item1, item.Item2);
+                            yield return new Pair<string, S>(item.Key, item.Value);
                         }
                     }
                 }
@@ -2443,20 +2439,20 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only those items have the given metadata value
                 /// Using a case insensitive comparison
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> WithMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> WithMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
                     string metadataName = arguments[0];
                     string metadataValueToFind = arguments[1];
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
                         string metadataValue = null;
 
                         try
                         {
-                            metadataValue = item.Item2.GetMetadataValueEscaped(metadataName);
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
                         catch (ArgumentException ex) // Blank metadata name
                         {
@@ -2470,7 +2466,7 @@ namespace Microsoft.Build.Evaluation
                         if (metadataValue != null && String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
-                            yield return new Tuple<string, S>(item.Item1, item.Item2);
+                            yield return new Pair<string, S>(item.Key, item.Value);
                         }
                     }
                 }
@@ -2479,7 +2475,7 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns a boolean to indicate if any of the items have the given metadata value
                 /// Using a case insensitive comparison
                 /// </summary>
-                internal static IEnumerable<Tuple<string, S>> AnyHaveMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> AnyHaveMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
 
@@ -2487,15 +2483,15 @@ namespace Microsoft.Build.Evaluation
                     string metadataValueToFind = arguments[1];
                     bool metadataFound = false;
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (Pair<string, S> item in itemsOfType)
                     {
-                        if (item.Item2 != null)
+                        if (item.Value != null)
                         {
                             string metadataValue = null;
 
                             try
                             {
-                                metadataValue = item.Item2.GetMetadataValueEscaped(metadataName);
+                                metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
                             catch (ArgumentException ex) // Blank metadata name
                             {
@@ -2511,7 +2507,7 @@ namespace Microsoft.Build.Evaluation
                                 metadataFound = true;
 
                                 // return a result through the enumerator
-                                yield return new Tuple<string, S>("true", item.Item2);
+                                yield return new Pair<string, S>("true", item.Value);
 
                                 // break out as soon as we found a match
                                 yield break;
@@ -2522,7 +2518,7 @@ namespace Microsoft.Build.Evaluation
                     if (!metadataFound)
                     {
                         // We did not locate an item with the required metadata
-                        yield return new Tuple<string, S>("false", null);
+                        yield return new Pair<string, S>("false", null);
                     }
                 }
             }
@@ -2584,7 +2580,7 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Execute this transform function with the arguments contained within this TransformFunction instance
                 /// </summary>
-                public IEnumerable<Tuple<string, S>> Execute(Expander<P, I> expander, bool includeNullEntries, IEnumerable<Tuple<string, S>> itemsOfType)
+                public IEnumerable<Pair<string, S>> Execute(Expander<P, I> expander, bool includeNullEntries, IEnumerable<Pair<string, S>> itemsOfType)
                 {
                     // Execute via the delegate
                     return _transform(expander, _elementLocation, includeNullEntries, _functionName, itemsOfType, _arguments);

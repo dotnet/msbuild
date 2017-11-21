@@ -59,8 +59,7 @@ mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Microsoft.VisualStudioVersion.v* ${DESTD
 
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*UnitTests*
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*xunit*
-rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/NuGet*
-rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/System.Runtime.InteropServices.RuntimeInformation.dll
+rm -f ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/System.Runtime.InteropServices.RuntimeInformation.dll
 #rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Roslyn/csc.exe*
 
 FILES="\
@@ -78,7 +77,7 @@ for f in $FILES; do rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/$f ; done
 test -d ${DESTDIR}${XBUILD_DIR}/14.0/Imports && cp -R ${DESTDIR}${XBUILD_DIR}/14.0/Imports ${DESTDIR}${XBUILD_DIR}/${MSBUILD_TOOLSVERSION}
 
 cp -R nuget-support/tv/* ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
-cp -R nuget-support/tasks-targets/* ${DESTDIR}${XBUILD_DIR}/
+cp -R nuget-support/tasks-targets/* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 
 # man page
 mkdir -p ${DESTDIR}${MONO_PREFIX}/share/man/man1

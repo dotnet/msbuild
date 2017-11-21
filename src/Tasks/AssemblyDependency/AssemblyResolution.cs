@@ -202,19 +202,20 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal static Resolver[] CompileDirectories
         (
-            IEnumerable<string> directories,
+            List<string> directories,
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion
         )
         {
-            List<Resolver> resolvers = new List<Resolver>();
-            foreach (string directory in directories)
+            var resolvers = new Resolver[directories.Count];
+            for (int i = 0; i < directories.Count; i++)
             {
-                resolvers.Add(new DirectoryResolver(directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion));
+                resolvers[i] = new DirectoryResolver(directories[i], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
             }
-            return resolvers.ToArray();
+
+            return resolvers;
         }
     }
 }

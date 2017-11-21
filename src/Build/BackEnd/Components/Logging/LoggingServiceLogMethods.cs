@@ -444,7 +444,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 string message = String.Empty;
                 if (!OnlyLogCriticalEvents)
                 {
-                    message = ResourceUtilities.FormatResourceString("BuildStarted");
+                    message = ResourceUtilities.GetResourceString("BuildStarted");
                 }
 
                 IDictionary<string, string> environmentProperties = null;
@@ -480,7 +480,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 string message = String.Empty;
                 if (!OnlyLogCriticalEvents)
                 {
-                    message = ResourceUtilities.FormatResourceString(success ? "BuildFinishedSuccess" : "BuildFinishedFailure");
+                    message = ResourceUtilities.GetResourceString(success ? "BuildFinishedSuccess" : "BuildFinishedFailure");
                 }
 
                 BuildFinishedEventArgs buildEvent = new BuildFinishedEventArgs(message, null /* no help keyword */, success);

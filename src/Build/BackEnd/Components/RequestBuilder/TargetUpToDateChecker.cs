@@ -354,52 +354,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogUniqueInputsAndOutputs()
         {
-            string inputs = null;
-            string outputs = null;
-
-            if (_uniqueTargetInputs.Count > 0)
-            {
-                StringBuilder inputsBuilder = new StringBuilder();
-                foreach (string input in _uniqueTargetInputs.Keys)
-                {
-                    inputsBuilder.Append(input);
-                    inputsBuilder.Append(";");
-                }
-
-                // We don't want the trailing ; so remove it
-                inputs = inputsBuilder.ToString(0, inputsBuilder.Length - 1);
-            }
-            else
-            {
-                inputs = String.Empty;
-            }
-
-            if (_uniqueTargetOutputs.Count > 0)
-            {
-                StringBuilder outputsBuilder = new StringBuilder();
-                foreach (string input in _uniqueTargetOutputs.Keys)
-                {
-                    outputsBuilder.Append(input);
-                    outputsBuilder.Append(";");
-                }
-
-                // We don't want the trailing ; so remove it
-                outputs = outputsBuilder.ToString(0, outputsBuilder.Length - 1);
-            }
-            else
-            {
-                outputs = String.Empty;
-            }
-
-            if (inputs != null)
-            {
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateInputs", inputs);
-            }
-
-            if (outputs != null)
-            {
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateOutputs", outputs);
-            }
+            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateInputs", string.Join(";", _uniqueTargetInputs.Keys));
+            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateOutputs", string.Join(";", _uniqueTargetOutputs.Keys));
         }
 
         /// <summary>
@@ -425,8 +381,8 @@ namespace Microsoft.Build.BackEnd
         {
             // break down the input/output specifications along the standard separator, after expanding all embedded properties
             // and item metadata
-            IList<string> targetInputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetInputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.InputsLocation);
-            IList<string> targetOutputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetOutputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.OutputsLocation);
+            var targetInputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetInputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.InputsLocation);
+            var targetOutputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetOutputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.OutputsLocation);
 
             itemVectorTransformsInTargetInputs = new ItemVectorPartitionCollection(MSBuildNameIgnoreCaseComparer.Default);
 
@@ -820,7 +776,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="elementLocation"></param>
         private void SeparateItemVectorsFromDiscreteItems
         (
-            IList<string> items,
+            SemiColonTokenizer items,
             ItemBucket bucket,
             out ItemVectorPartitionCollection itemVectors,
             ItemVectorPartitionCollection itemVectorTransforms,

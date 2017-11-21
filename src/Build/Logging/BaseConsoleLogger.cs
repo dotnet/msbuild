@@ -612,7 +612,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Write the banner
             setColor(ConsoleColor.Green);
-            WriteLinePretty(currentIndentLevel, ResourceUtilities.FormatResourceString("EnvironmentHeader"));
+            WriteLinePretty(currentIndentLevel, ResourceUtilities.GetResourceString("EnvironmentHeader"));
 
             if (environment != null)
             {
@@ -633,7 +633,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Write the banner
             setColor(ConsoleColor.Green);
-            WriteLinePretty(currentIndentLevel, ResourceUtilities.FormatResourceString("PropertyListHeader"));
+            WriteLinePretty(currentIndentLevel, ResourceUtilities.GetResourceString("PropertyListHeader"));
             // Write each property name and its value, one per line
             foreach (DictionaryEntry prop in list)
             {
@@ -657,7 +657,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Write the banner
             setColor(ConsoleColor.Green);
-            WriteLinePretty(currentIndentLevel, ResourceUtilities.FormatResourceString("ItemListHeader"));
+            WriteLinePretty(currentIndentLevel, ResourceUtilities.GetResourceString("ItemListHeader"));
 
             // Write each item type and its itemspec, one per line
             foreach (DictionaryEntry entry in itemTypes)

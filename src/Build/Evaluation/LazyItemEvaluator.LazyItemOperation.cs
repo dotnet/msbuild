@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -44,9 +45,14 @@ namespace Microsoft.Build.Evaluation
                 _itemSpec.Expander = _expander;
             }
 
+            /// <summary>
+            /// Cache used for caching IO operation results
+            /// </summary>
+            protected ConcurrentDictionary<string, ImmutableArray<string>> EntriesCache => _lazyEvaluator._entriesCache;
+
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var items = SelectItems(listBuilder, globsToIgnore).ToList();
+                ImmutableList<I> items = SelectItems(listBuilder, globsToIgnore);
                 MutateItems(items);
                 SaveItems(items, listBuilder);
             }
@@ -54,25 +60,23 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Produce the items to operate on. For example, create new ones or select existing ones
             /// </summary>
-            protected virtual ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                return listBuilder.Select(itemData => itemData.Item).ToList();
+                return listBuilder.Select(itemData => itemData.Item)
+                                  .ToImmutableList();
             }
 
             // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
-            protected virtual void MutateItems(ICollection<I> items) { }
+            protected virtual void MutateItems(ImmutableList<I> items) { }
 
-            protected virtual void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
+            protected virtual void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
 
             private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
             {
                 LazyItemList itemList;
                 if (_referencedItemLists.TryGetValue(itemType, out itemList))
                 {
-                    return itemList.GetItems(globsToIgnore)
-                        .Where(ItemData => ItemData.ConditionResult)
-                        .Select(itemData => itemData.Item)
-                        .ToList();
+                    return itemList.GetMatchedItems(globsToIgnore);
                 }
                 else
                 {
@@ -80,9 +84,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<ProjectMetadataElement> metadata)
+            protected void DecorateItemsWithMetadata(ImmutableList<I> items, ImmutableList<ProjectMetadataElement> metadata)
             {
-                if (metadata.Any())
+                if (metadata.Count > 0)
                 {
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
@@ -189,7 +193,7 @@ namespace Microsoft.Build.Evaluation
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.
-                        List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>();
+                        List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>(metadata.Count);
 
                         foreach (var metadataElement in metadata)
                         {
@@ -227,14 +231,6 @@ namespace Microsoft.Build.Evaluation
                         _expander.Metadata = null;
                     }
                 }
-            }
-
-            /// <summary>
-            /// Collects all the items of this item element's type that match the items (represented as operations)
-            /// </summary>
-            protected IEnumerable<I> SelectItemsMatchingItemSpec(ImmutableList<ItemData>.Builder listBuilder, IElementLocation elementLocation)
-            {
-                return _itemSpec.FilterItems(listBuilder.Select(itemData => itemData.Item));
             }
         }
     }

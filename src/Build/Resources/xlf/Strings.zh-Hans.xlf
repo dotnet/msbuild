@@ -225,11 +225,6 @@
         <target state="translated">MSB4142: MSBuildToolsPath 与 ToolsVersion“{0}”(在“{1}”处定义) 的 MSBuildBinPath 不同。如果两者都存在，它们的值必须相同。</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
-      <trans-unit id="CustomNamespaceNotAllowedOnThisChildElement">
-        <source>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</source>
-        <target state="translated">MSB4097: 元素 &lt;{1}&gt; 下的元素 &lt;{0}&gt; 可能没有自定义 XML 命名空间。</target>
-        <note>{StrBegin="MSB4097: "}</note>
-      </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
         <source>MSB4009: The default tasks file could not be successfully loaded. {0}</source>
         <target state="translated">MSB4009: 未能成功加载默认任务文件。{0}</target>
@@ -2045,6 +2040,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
         <target state="translated">正在将项目“{0}”导入 ({2}、{3}) 处的项目“{1}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
+        <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
+        <target state="translated">已跳过目标“{0}”。项目中不存在该目标，SkipNonexistentTargets 设置为 true。</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryTaskTypeIsNotSet">
+        <source>The task factory must return a value for the "TaskType" property.</source>
+        <target state="translated">任务工厂必须对 "TaskType" 属性返回一个值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">指定的 API“{0}”不可用，因为加载此项目时设置了 ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition。</target>
         <note />
       </trans-unit>
     </body>

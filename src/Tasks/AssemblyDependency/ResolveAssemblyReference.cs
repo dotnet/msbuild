@@ -37,6 +37,11 @@ namespace Microsoft.Build.Tasks
         private const string SystemRuntimeAssemblyName = "System.Runtime";
 
         /// <summary>
+        /// additional key assembly used to trigger inclusion of facade references. 
+        /// </summary>
+        private const string NETStandardAssemblyName = "netstandard";
+
+        /// <summary>
         /// Delegate to a method that takes a targetFrameworkDirectory and returns an array of redist or subset list paths
         /// </summary>
         /// <param name="targetFrameworkDirectory">TargetFramework directory to search for redist or subset list</param>
@@ -882,6 +887,17 @@ namespace Microsoft.Build.Tasks
             private set;
         }
 
+        /// <summary>
+        /// Whether the assembly or any of its primary references depends on netstandard
+        /// </summary>
+        [Output]
+        public String DependsOnNETStandard
+        {
+            get;
+            private set;
+        }
+
+
         #endregion
         #region Logging
 
@@ -962,7 +978,6 @@ namespace Microsoft.Build.Tasks
                     if (idealAssemblyRemappings != null)
                     {
                         bool foundAtLeastOneValidBindingRedirect = false;
-                        bool foundAtLeastOneUnresolvableConflict = false;
 
                         var buffer = new StringBuilder();
                         var ns = XNamespace.Get("urn:schemas-microsoft-com:asm.v1");
@@ -974,9 +989,10 @@ namespace Microsoft.Build.Tasks
                             AssemblyName idealRemappingPartialAssemblyName = idealRemapping.PartialAssemblyName;
                             Reference reference = idealAssemblyRemappingsIdentities[i].reference;
 
+                            AssemblyNameExtension[] conflictVictims = reference.GetConflictVictims();
+
                             for (int j = 0; j < idealRemapping.BindingRedirects.Length; j++)
                             {
-                                AssemblyNameExtension[] conflictVictims = reference.GetConflictVictims();
                                 foreach (AssemblyNameExtension conflictVictim in conflictVictims)
                                 {
                                     // Make note we only output a conflict suggestion if the reference has at 
@@ -1036,11 +1052,13 @@ namespace Microsoft.Build.Tasks
                                         buffer.Append(node.ToString(SaveOptions.DisableFormatting));
                                     }
                                 }
+                            }
 
-                                if (conflictVictims.Length == 0)
-                                {
-                                    foundAtLeastOneUnresolvableConflict = true;
-                                }
+                            if (conflictVictims.Length == 0)
+                            {
+                                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
+                                // chosen was not the conflict victor in a version comparison, in other words it was older.
+                                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", idealRemappingPartialAssemblyName.Name);
                             }
                         }
 
@@ -1061,13 +1079,6 @@ namespace Microsoft.Build.Tasks
                             }
                             // else AutoUnify is on and bindingRedirect generation is not supported
                             // we don't warn in this case since the binder will automatically unify these remappings
-                        }
-
-                        if (foundAtLeastOneUnresolvableConflict)
-                        {
-                            // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
-                            // chosen was not the conflict victor in a version comparison, in other words it was older.
-                            Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts");
                         }
                     }
 
@@ -2059,6 +2070,7 @@ namespace Microsoft.Build.Tasks
                     getAssemblyName = _cache.CacheDelegate(getAssemblyName);
                     getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
                     fileExists = _cache.CacheDelegate(fileExists);
+                    directoryExists = _cache.CacheDelegate(directoryExists);
                     getDirectories = _cache.CacheDelegate(getDirectories);
                     getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);
 #endif
@@ -2242,16 +2254,25 @@ namespace Microsoft.Build.Tasks
                     }
 
                     bool useSystemRuntime = false;
+                    bool useNetStandard = false;
                     foreach (var reference in dependencyTable.References.Keys)
                     {
                         if (string.Equals(SystemRuntimeAssemblyName, reference.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             useSystemRuntime = true;
+                        }
+                        if (string.Equals(NETStandardAssemblyName, reference.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            useNetStandard = true;
+                        }
+                        if (useSystemRuntime && useNetStandard)
+                        {
                             break;
                         }
                     }
 
-                    if (!useSystemRuntime && !FindDependencies)
+
+                    if ((!useSystemRuntime || !useNetStandard) && !FindDependencies)
                     {
                         // when we are not producing the dependency graph look for direct dependencies of primary references.
                         foreach (var resolvedReference in dependencyTable.References.Values)
@@ -2266,10 +2287,15 @@ namespace Microsoft.Build.Tasks
                                         useSystemRuntime = true;
                                         break;
                                     }
+                                    if (string.Equals(NETStandardAssemblyName, dependentReference.Name, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        useNetStandard = true;
+                                        break;
+                                    }
                                 }
                             }
 
-                            if (useSystemRuntime)
+                            if (useSystemRuntime && useNetStandard)
                             {
                                 break;
                             }
@@ -2277,6 +2303,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     this.DependsOnSystemRuntime = useSystemRuntime.ToString();
+                    this.DependsOnNETStandard = useNetStandard.ToString();
 
 #if FEATURE_BINARY_SERIALIZATION
                     WriteStateFile();

@@ -399,6 +399,18 @@ namespace Microsoft.Build.Shared
 
         }
 
+        internal static string NormalizePath(string directory, string file)
+        {
+            return NormalizePath(Path.Combine(directory, file));
+        }
+
+#if !CLR2COMPATIBILITY
+        internal static string NormalizePath(params string[] paths)
+        {
+            return NormalizePath(Path.Combine(paths));
+        }
+#endif
+
         internal static string FixFilePath(string path)
         {
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
@@ -520,14 +532,23 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool HasExtension(string fileName, string[] allowedExtensions)
         {
-            string fileExtension = Path.GetExtension(fileName);
-            foreach (string extension in allowedExtensions)
+            Debug.Assert(allowedExtensions != null && allowedExtensions.Length > 0);
+
+            // Easiest way to invoke invalid path chars
+            // check, which callers are relying on.
+            if (Path.HasExtension(fileName))
             {
-                if (String.Compare(fileExtension, extension, StringComparison.CurrentCultureIgnoreCase) == 0)
+                foreach (string extension in allowedExtensions)
                 {
-                    return true;
+                    Debug.Assert(!String.IsNullOrEmpty(extension) && extension[0] == '.');
+
+                    if (fileName.EndsWith(extension, PathComparison))
+                    {
+                        return true;
+                    }
                 }
             }
+
             return false;
         }
 
@@ -665,11 +686,8 @@ namespace Microsoft.Build.Shared
         /// A variation on Directory.Delete that will throw ExceptionHandling.NotExpectedException exceptions
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Int32.TryParse(System.String,System.Int32@)", Justification = "We expect the out value to be 0 if the parse fails and compensate accordingly")]
-        internal static void DeleteDirectoryNoThrow(string path, bool recursive)
+        internal static void DeleteDirectoryNoThrow(string path, bool recursive, int retryCount = 0, int retryTimeOut = 0)
         {
-            int retryCount;
-            int retryTimeOut;
-
             // Try parse will set the out parameter to 0 if the string passed in is null, or is outside the range of an int.
             if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDDIRECTORYDELETERETRYCOUNT"), out retryCount))
             {
@@ -886,7 +904,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsSolutionFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".sln", PathComparison));
+            return HasExtension(filename, ".sln");
         }
 
         /// <summary>
@@ -894,7 +912,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", PathComparison));
+            return HasExtension(filename, ".vcproj");
         }
 
         /// <summary>
@@ -902,12 +920,20 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsMetaprojectFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".metaproj", PathComparison));
+            return HasExtension(filename, ".metaproj");
         }
 
         internal static bool IsBinaryLogFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".binlog", PathComparison));
+            return HasExtension(filename, ".binlog");
+        }
+
+        private static bool HasExtension(string filename, string extension)
+        {
+            if (String.IsNullOrEmpty(filename))
+                return false;
+
+            return filename.EndsWith(extension, PathComparison);
         }
 
         /// <summary>
@@ -1043,12 +1069,24 @@ namespace Microsoft.Build.Shared
             return s.Replace('\\', '/');
         }
 
+        /// <summary>
+        /// Ensure all slashes are the current platform's slash
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        internal static string ToPlatformSlash(this string s)
+        {
+            var separator = Path.DirectorySeparatorChar;
+
+            return s.Replace(separator == '/' ? '\\' : '/', separator);
+        }
+
         internal static string WithTrailingSlash(this string s)
         {
             return EnsureTrailingSlash(s);
         }
 
-        internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();
+        internal static string NormalizeForPathComparison(this string s) => s.ToPlatformSlash().TrimTrailingSlashes();
 
         // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
         internal static bool PathsEqual(string path1, string path2)
@@ -1161,6 +1199,62 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        /// <summary>
+        /// Locate a file in either the directory specified or a location in the
+        /// directory structure above that directory.
+        /// </summary>
+        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
+        {
+            // Canonicalize our starting location
+            string lookInDirectory = Path.GetFullPath(startingDirectory);
+
+            do
+            {
+                // Construct the path that we will use to test against
+                string possibleFileDirectory = Path.Combine(lookInDirectory, fileName);
+
+                // If we successfully locate the file in the directory that we're
+                // looking in, simply return that location. Otherwise we'll
+                // keep moving up the tree.
+                if (File.Exists(possibleFileDirectory))
+                {
+                    // We've found the file, return the directory we found it in
+                    return lookInDirectory;
+                }
+                else
+                {
+                    // GetDirectoryName will return null when we reach the root
+                    // terminating our search
+                    lookInDirectory = Path.GetDirectoryName(lookInDirectory);
+                }
+            }
+            while (lookInDirectory != null);
+
+            // When we didn't find the location, then return an empty string
+            return String.Empty;
+        }
+
+        /// <summary>
+        /// Searches for a file based on the specified starting directory.
+        /// </summary>
+        /// <param name="file">The file to search for.</param>
+        /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
+        /// of the file containing the property function.</param>
+        /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
+        internal static string GetPathOfFileAbove(string file, string startingDirectory)
+        {
+            // This method does not accept a path, only a file name
+            if (file.Any(i => i.Equals(Path.DirectorySeparatorChar) || i.Equals(Path.AltDirectorySeparatorChar)))
+            {
+                ErrorUtilities.ThrowArgument("InvalidGetPathOfFileAboveParameter", file);
+            }
+
+            // Search for a directory that contains that file
+            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
+
+            return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
+        }
+
         // Method is simple set of function calls and may inline;
         // we don't want it inlining into the tight loop that calls it as an exit case,
         // so mark as non-inlining
@@ -1182,5 +1276,15 @@ namespace Microsoft.Build.Shared
 
             return false;
         }
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Clears the file existence cache.
+        /// </summary>
+        internal static void ClearFileExistenceCache()
+        {
+            FileExistenceCache.Clear();
+        }
+#endif
     }
 }

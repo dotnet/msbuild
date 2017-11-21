@@ -222,13 +222,8 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: 對於定義於 "{1}" 的 ToolsVersion "{0}"，MSBuildToolsPath 與 MSBuildBinPath 不相同。若兩者都出現時，其值必須相同。</target>
+        <target state="translated">MSB4142: 對於定義在 "{1}" 的 ToolsVersion "{0}"，MSBuildToolsPath 與 MSBuildBinPath 不相同。如果兩者都出現時，它們的值必須相同。</target>
         <note>{StrBegin="MSB4142: "}</note>
-      </trans-unit>
-      <trans-unit id="CustomNamespaceNotAllowedOnThisChildElement">
-        <source>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</source>
-        <target state="translated">MSB4097: 項目 &lt;{1}&gt; 下的項目 &lt;{0}&gt; 可能沒有自訂 XML 命名空間。</target>
-        <note>{StrBegin="MSB4097: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
         <source>MSB4009: The default tasks file could not be successfully loaded. {0}</source>
@@ -2045,6 +2040,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
         <target state="translated">正在將專案 "{0}" 匯入位於 ({2},{3}) 的專案 "{1}"。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
+        <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
+        <target state="translated">目標 "{0}" 已跳過。目標不在專案中，且 SkipNonexistentTargets 設為 true。</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryTaskTypeIsNotSet">
+        <source>The task factory must return a value for the "TaskType" property.</source>
+        <target state="translated">工作處理站必須傳回 "TaskType" 屬性的值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">因為 ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition 已在載入此專案時設定，所以指定的 API "{0}" 無法使用。</target>
         <note />
       </trans-unit>
     </body>

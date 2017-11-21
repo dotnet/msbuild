@@ -33,9 +33,9 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                List<I> itemsToAdd = new List<I>();
+                var itemsToAdd = ImmutableList.CreateBuilder<I>();
 
                 Lazy<Func<string, bool>> excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
@@ -45,11 +45,11 @@ namespace Microsoft.Build.Evaluation
                     foreach (string exclude in _excludes)
                     {
                         string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
-                        IList<string> excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
+                        var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
                         excludePatterns.AddRange(excludeSplits);
                     }
 
-                    if (excludePatterns.Any())
+                    if (excludePatterns.Count > 0)
                     {
                         excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
                     }
@@ -99,11 +99,9 @@ namespace Microsoft.Build.Evaluation
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                             _rootDirectory,
                             glob,
-                            excludePatternsForGlobs
+                            excludePatternsForGlobs,
+                            entriesCache: EntriesCache
                             );
-
-                        // itemsToAdd might grow 0 or more times during the following iteration. Proactively increase its capacity to ensure only one growth happens
-                        IncreaseListCapacityIfNecessary(itemsToAdd, includeSplitFilesEscaped.Length);
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
@@ -116,7 +114,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                return itemsToAdd;
+                return itemsToAdd.ToImmutable();
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
@@ -132,22 +130,12 @@ namespace Microsoft.Build.Evaluation
                 return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
             }
 
-            private void IncreaseListCapacityIfNecessary(List<I> list, int itemsToAdd)
-            {
-                var newLength = list.Count + itemsToAdd;
-
-                if (list.Capacity < newLength)
-                {
-                    list.Capacity = newLength;
-                }
-            }
-
-            protected override void MutateItems(ICollection<I> items)
+            protected override void MutateItems(ImmutableList<I> items)
             {
                 DecorateItemsWithMetadata(items, _metadata);
             }
 
-            protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
             {
                 foreach (var item in items)
                 {

@@ -178,7 +178,7 @@ namespace Microsoft.Build.BackEnd
             _targetBuilderCallback = targetBuilderCallback;
             _targetSpecification = targetSpecification;
             _parentTarget = parentTarget;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup.ReadOnlyLookup, baseLookup.ReadOnlyLookup);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup);
             _state = TargetEntryState.Dependencies;
             _baseLookup = baseLookup;
             _host = host;
@@ -369,8 +369,8 @@ namespace Microsoft.Build.BackEnd
                 return new List<TargetSpecification>();
             }
 
-            IList<string> dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation);
-            List<TargetSpecification> dependencyTargets = new List<TargetSpecification>(dependencies.Count);
+            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation);
+            List<TargetSpecification> dependencyTargets = new List<TargetSpecification>();
             foreach (string escapedDependency in dependencies)
             {
                 string dependencyTargetName = EscapingUtilities.UnescapeAll(escapedDependency);
@@ -694,7 +694,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (condition)
                 {
-                    IList<string> errorTargets = _expander.ExpandIntoStringListLeaveEscaped(errorTargetInstance.ExecuteTargets, ExpanderOptions.ExpandPropertiesAndItems, errorTargetInstance.ExecuteTargetsLocation);
+                    var errorTargets = _expander.ExpandIntoStringListLeaveEscaped(errorTargetInstance.ExecuteTargets, ExpanderOptions.ExpandPropertiesAndItems, errorTargetInstance.ExecuteTargetsLocation);
 
                     foreach (string escapedErrorTarget in errorTargets)
                     {

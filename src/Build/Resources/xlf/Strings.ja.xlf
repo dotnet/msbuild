@@ -225,11 +225,6 @@
         <target state="translated">MSB4142: MSBuildToolsPath が、"{1}" で定義されている ToolsVersion "{0}" の MSBuildBinPath と同じではありません。両方が存在する場合は、同じ値である必要があります。</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
-      <trans-unit id="CustomNamespaceNotAllowedOnThisChildElement">
-        <source>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</source>
-        <target state="translated">MSB4097: 要素 &lt;{1}&gt; の下の要素 &lt;{0}&gt; は、カスタム XML 名前空間を含んでいない可能性があります。</target>
-        <note>{StrBegin="MSB4097: "}</note>
-      </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
         <source>MSB4009: The default tasks file could not be successfully loaded. {0}</source>
         <target state="translated">MSB4009: 既定タスクのファイルを正しく読み込めませんでした。{0}</target>
@@ -2045,6 +2040,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
         <target state="translated">プロジェクト "{0}" を ({2},{3}) でプロジェクト "{1}" にインポートしています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
+        <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
+        <target state="translated">ターゲット "{0}" はスキップされました。ターゲットがプロジェクトに存在しないので、SkipNonexistentTargets が true に設定されます。</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryTaskTypeIsNotSet">
+        <source>The task factory must return a value for the "TaskType" property.</source>
+        <target state="translated">タスク ファクトリは、"TaskType" プロパティの値を返す必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">このプロジェクトを読み込んだときに ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition が設定されていたため、指定された API "{0}" を使用できません。</target>
         <note />
       </trans-unit>
     </body>

@@ -345,7 +345,11 @@ namespace Microsoft.Build.Shared
 
         private static string GetProcessFromRunningProcess()
         {
+#if RUNTIME_TYPE_NETCORE
+            return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
+#else
             return Process.GetCurrentProcess().MainModule.FileName;
+#endif
         }
 
         private static string GetExecutingAssemblyPath()

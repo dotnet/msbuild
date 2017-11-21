@@ -19,26 +19,52 @@ namespace Microsoft.Build.Globbing
     /// </summary>
     public class MSBuildGlob : IMSBuildGlob
     {
-        internal readonly string _fileSpec;
-        internal readonly string _globRoot;
-        private readonly string _matchFileExpression;
-        internal readonly bool _needsRecursion;
-        private readonly Lazy<Regex> _regex;
+        private struct GlobState
+        {
+            public string GlobRoot { get; }
+            public string FileSpec { get; }
+            public bool IsLegal { get; }
+            public string FixedDirectoryPart { get; }
+            public string WildcardDirectoryPart { get; }
+            public string FilenamePart { get; }
+            public string MatchFileExpression { get; }
+            public bool NeedsRecursion { get; }
+            public Regex Regex { get; }
+
+            public GlobState(string globRoot, string fileSpec, bool isLegal, string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart, string matchFileExpression, bool needsRecursion, Regex regex)
+            {
+                GlobRoot = globRoot;
+                FileSpec = fileSpec;
+                IsLegal = isLegal;
+                FixedDirectoryPart = fixedDirectoryPart;
+                WildcardDirectoryPart = wildcardDirectoryPart;
+                FilenamePart = filenamePart;
+                MatchFileExpression = matchFileExpression;
+                NeedsRecursion = needsRecursion;
+                Regex = regex;
+            }
+        }
+
+        private readonly Lazy<GlobState> _state;
+
+        internal string TestOnlyGlobRoot => _state.Value.GlobRoot;
+        internal string TestOnlyFileSpec => _state.Value.FileSpec;
+        internal bool TestOnlyNeedsRecursion => _state.Value.NeedsRecursion;
 
         /// <summary>
         ///     The fixed directory part.
         /// </summary>
-        public string FixedDirectoryPart { get; }
+        public string FixedDirectoryPart => _state.Value.FixedDirectoryPart;
 
         /// <summary>
         ///     The wildcard directory part
         /// </summary>
-        public string WildcardDirectoryPart { get; }
+        public string WildcardDirectoryPart => _state.Value.WildcardDirectoryPart;
 
         /// <summary>
         ///     The file name part
         /// </summary>
-        public string FilenamePart { get; }
+        public string FilenamePart => _state.Value.FilenamePart;
 
         /// <summary>
         ///     Whether the glob was parsed sucsesfully from a string.
@@ -50,39 +76,22 @@ namespace Microsoft.Build.Globbing
         ///     - cannot contain ".."
         ///     - if ** is present it must appear alone between slashes
         /// </summary>
-        public bool IsLegal { get; }
+        public bool IsLegal => _state.Value.IsLegal;
 
-        private MSBuildGlob(
-            string globRoot,
-            string fileSpec,
-            string fixedDirectoryPart,
-            string wildcardDirectoryPart,
-            string filenamePart,
-            string matchFileExpression,
-            bool needsRecursion,
-            bool isLegalFileSpec)
+        private MSBuildGlob(Lazy<GlobState> state)
         {
-            FixedDirectoryPart = fixedDirectoryPart;
-            WildcardDirectoryPart = wildcardDirectoryPart;
-            FilenamePart = filenamePart;
-            IsLegal = isLegalFileSpec;
-
-            _globRoot = globRoot;
-            _fileSpec = fileSpec;
-            _matchFileExpression = matchFileExpression;
-            _needsRecursion = needsRecursion;
-
-            // compile the regex since it's expected to be used multiple times
-            _regex =
-                new Lazy<Regex>(
-                    () => new Regex(_matchFileExpression, FileMatcher.DefaultRegexOptions | RegexOptions.Compiled),
-                    true);
+            this._state = state;
         }
 
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
             ErrorUtilities.VerifyThrowArgumentNull(stringToMatch, nameof(stringToMatch));
+
+            if (!IsLegal)
+            {
+                return false;
+            }
 
             if (FileUtilities.PathIsInvalid(stringToMatch))
             {
@@ -91,7 +100,7 @@ namespace Microsoft.Build.Globbing
 
             var normalizedString = NormalizeMatchInput(stringToMatch);
 
-            return _regex.Value.IsMatch(normalizedString);
+            return _state.Value.Regex.IsMatch(normalizedString);
         }
 
         /// <summary>
@@ -115,7 +124,7 @@ namespace Microsoft.Build.Globbing
             string fixedDirectoryPart, wildcardDirectoryPart, filenamePart;
             FileMatcher.GetRegexMatchInfo(
                 normalizedInput,
-                _regex.Value,
+                _state.Value.Regex,
                 out isMatch,
                 out fixedDirectoryPart,
                 out wildcardDirectoryPart,
@@ -126,7 +135,7 @@ namespace Microsoft.Build.Globbing
 
         private string NormalizeMatchInput(string stringToMatch)
         {
-            var rootedInput = Path.Combine(_globRoot, stringToMatch);
+            var rootedInput = Path.Combine(_state.Value.GlobRoot, stringToMatch);
             var normalizedInput = FileUtilities.GetFullPathNoThrow(rootedInput);
 
             // Degenerate case when the string to match is empty.
@@ -165,39 +174,42 @@ namespace Microsoft.Build.Globbing
 
             globRoot = FileUtilities.NormalizePath(globRoot).WithTrailingSlash();
 
-            string fixedDirectoryPart = null;
-            string wildcardDirectoryPart = null;
-            string filenamePart = null;
+            var lazyState = new Lazy<GlobState>(() =>
+            {
+                string fixedDirectoryPart = null;
+                string wildcardDirectoryPart = null;
+                string filenamePart = null;
 
-            string matchFileExpression;
-            bool needsRecursion;
-            bool isLegalFileSpec;
+                string matchFileExpression;
+                bool needsRecursion;
+                bool isLegalFileSpec;
 
-            FileMatcher.GetFileSpecInfo(
-                fileSpec,
-                out fixedDirectoryPart,
-                out wildcardDirectoryPart,
-                out filenamePart,
-                out matchFileExpression,
-                out needsRecursion,
-                out isLegalFileSpec,
-                FileMatcher.s_defaultGetFileSystemEntries,
-                (fixedDirPart, wildcardDirPart, filePart) =>
-                {
-                    var normalizedFixedPart = NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(fixedDirPart, globRoot);
+                FileMatcher.GetFileSpecInfo(
+                    fileSpec,
+                    out fixedDirectoryPart,
+                    out wildcardDirectoryPart,
+                    out filenamePart,
+                    out matchFileExpression,
+                    out needsRecursion,
+                    out isLegalFileSpec,
+                    FileMatcher.s_defaultGetFileSystemEntries,
+                    (fixedDirPart, wildcardDirPart, filePart) =>
+                    {
+                        var normalizedFixedPart = NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(fixedDirPart, globRoot);
 
-                    return Tuple.Create(normalizedFixedPart, wildcardDirPart, filePart);
-                });
+                        return Tuple.Create(normalizedFixedPart, wildcardDirPart, filePart);
+                    });
 
-            return new MSBuildGlob(
-                globRoot,
-                fileSpec,
-                fixedDirectoryPart,
-                wildcardDirectoryPart,
-                filenamePart,
-                matchFileExpression,
-                needsRecursion,
-                isLegalFileSpec);
+                // compile the regex since it's expected to be used multiple times
+                var regex = isLegalFileSpec
+                    ? new Regex(matchFileExpression, FileMatcher.DefaultRegexOptions | RegexOptions.Compiled)
+                    : null;
+
+                return new GlobState(globRoot, fileSpec, isLegalFileSpec, fixedDirectoryPart, wildcardDirectoryPart, filenamePart, matchFileExpression, needsRecursion, regex);
+            },
+            true);
+
+            return new MSBuildGlob(lazyState);
         }
 
         private static string NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(string fixedDirPart, string globRoot)

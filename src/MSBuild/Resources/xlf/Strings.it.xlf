@@ -103,7 +103,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       <trans-unit id="HelpMessage_4_HelpSwitch">
         <source>  /help              Display this usage message. (Short form: /? or /h)
 </source>
-        <target state="translated">  /help              Visualizza questo messaggio relativo all'utilizzo (forma breve: /? o /h).
+        <target state="translated">  /help              Visualizza questo messaggio relativo all'utilizzo. Forma breve: /? o /h.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -131,7 +131,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       <trans-unit id="HelpMessage_6_VersionSwitch">
         <source>  /version           Display version information only. (Short form: /ver)
 </source>
-        <target state="translated">  /version           Visualizza solo le informazioni sulla versione (forma breve: /ver).
+        <target state="translated">  /version           Visualizza solo le informazioni sulla versione. Forma breve: /ver.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -146,20 +146,21 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <source>  @&lt;file&gt;            Insert command-line settings from a text file. To specify
                      multiple response files, specify each response file
                      separately.
-                     
-                     Any response files named "msbuild.rsp" are automatically 
-                     consumed from the following locations: 
+
+                     Any response files named "msbuild.rsp" are automatically
+                     consumed from the following locations:
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;            Inserisce le impostazioni della riga di comando da un file di testo. Per specificare
-                     più file di risposta, specificare ciascun file
-                     separatamente.
-                     
-                     Qualsiasi file di risposta denominato "msbuild.rsp" viene usato
-                     automaticamente dai percorsi seguenti: 
+        <target state="translated">  @&lt;file&gt;            Inserisce le impostazioni della riga di comando da un file
+                     di testo. Per specificare più file di risposta, specificare
+                     ciascun file separatamente.
+
+                     Qualsiasi file di risposta denominato "msbuild.rsp" viene
+                     utilizzato automaticamente dai percorsi seguenti:
                      (1) la directory di msbuild.exe
-                     (2) la directory della prima compilazione di soluzione o progetto
+                     (2) la directory della prima compilazione di soluzione o
+                         progetto
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -174,8 +175,8 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <source>  /noautoresponse    Do not auto-include any MSBuild.rsp files. (Short form:
                      /noautorsp)
 </source>
-        <target state="translated">  /noautoresponse    Non include automaticamente alcun file MSBuild.rsp (forma breve:
-                     /noautorsp).
+        <target state="translated">  /noautoresponse    Non include automaticamente alcun file MSBuild.rsp. Forma breve:
+                     /noautorsp.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -195,7 +196,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
 </source>
         <target state="translated">  /target:&lt;targets&gt;  Compila le destinazioni specificate nel progetto. Usare il punto e virgola
                      o la virgola per separare più destinazioni oppure
-                     specificare ciascuna destinazione separatamente (forma breve: /t).
+                     specificare ciascuna destinazione separatamente. Forma breve: /t.
                      Esempio:
                        /target:Resources;Compile
 </target>
@@ -219,7 +220,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <target state="translated">  /property:&lt;n&gt;=&lt;v&gt;  Imposta le proprietà specificate a livello di progetto o ne esegue l'override. &lt;n&gt; rappresenta
                      il nome della proprietà e &lt;v&gt; il valore della proprietà. Usare il
                      punto e virgola o la virgola per separare più proprietà oppure
-                     specificare ogni proprietà separatamente (forma breve: /p).
+                     specificare ogni proprietà separatamente. Forma breve: /p.
                      Esempio:
                        /property:WarningLevel=2;OutDir=bin\Debug\
 </target>
@@ -256,7 +257,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      La sintassi di &lt;logger assembly&gt; è la seguente:
                        {&lt;nome assembly&gt;[,&lt;nome sicuro&gt;] | &lt;file assembly&gt;}
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
-                     logger nel formato in cui vengono specificati (forma breve: /l).
+                     logger nel formato in cui vengono specificati. Forma breve: /l.
                      Esempi:
                        /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -279,7 +280,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
 </source>
         <target state="translated">  /verbosity:&lt;livello&gt; Visualizza la quantità di informazioni specificata nel log eventi.
                      I livelli di dettaglio disponibili sono: q[uiet], m[inimal],
-                     n[ormal], d[etailed] e diag[nostic] (forma breve: /v).
+                     n[ormal], d[etailed] e diag[nostic]. Forma breve: /v.
                      Esempio:
                        /verbosity:quiet
 </target>
@@ -304,22 +305,22 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                         ErrorsOnly--Show only errors.
                         WarningsOnly--Show only warnings.
                         NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.    
-                        ShowCommandLine--Show TaskCommandLineEvent messages  
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
                         ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.                                           
-                        ShowEventId--Show eventId for started events, finished 
+                            message.
+                        ShowEventId--Show eventId for started events, finished
                             events, and messages
                         ForceNoAlign--Does not align the text to the size of
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
                         DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in 
+                            logging style of output when running in
                             non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
-                            mode. This logging style is on by default. 
+                            mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
                         Verbosity--overrides the /verbosity setting for this
@@ -329,40 +330,47 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                                                  Verbosity=minimal
 </source>
         <target state="translated">  /consoleloggerparameters:&lt;parametri&gt;
-                     Parametri per il logger di console (forma breve: /clp).
+                     Parametri per il logger di console. Forma breve: /clp.
                      I parametri disponibili sono:
-                        PerformanceSummary: indica il tempo impiegato per le attività, le destinazioni
-                            e i progetti.
-                        Summary: visualizza un riepilogo degli errori e degli avvisi alla fine.
-                        NoSummary: non visualizza un riepilogo degli errori e degli avvisi alla
-                            fine.
+                        PerformanceSummary: indica il tempo impiegato per le
+                        attività, le destinazioni e i progetti.
+                        Summary: visualizza un riepilogo degli errori e degli
+                                 avvisi alla fine.
+                        NoSummary: non visualizza un riepilogo degli errori e
+                                   degli avvisi alla fine.
                         ErrorsOnly: visualizza solo gli errori.
                         WarningsOnly: visualizza solo gli avvisi.
-                        NoItemAndPropertyList: non visualizza l'elenco di elementi e
-                            proprietà all'inizio di ogni compilazione del progetto.    
-                        ShowCommandLine: visualizza i messaggi TaskCommandLineEvent.  
-                        ShowTimestamp: visualizza il timestamp sotto forma di prefisso per ogni
-                            messaggio.                                           
-                        ShowEventId: mostra l'ID evento per gli eventi iniziati, gli eventi finiti 
-                            e i messaggi.
+                        NoItemAndPropertyList: non visualizza l'elenco di
+                                               elementi e proprietà all'inizio
+                                               di ogni compilazione del 
+                                               progetto.
+                        ShowCommandLine: visualizza i messaggi
+                                         TaskCommandLineEvent.
+                        ShowTimestamp: visualizza il timestamp sotto forma di
+                                       prefisso per ogni messaggio.
+                        ShowEventId: mostra l'ID evento per gli eventi iniziati,
+                                     gli eventi finiti e i messaggi.
                         ForceNoAlign: non allinea il testo alle dimensioni del
-                            buffer della console.
-                        DisableConsoleColor: usa i colori predefiniti della console
-                            per tutti i messaggi di registrazione.
-                        DisableMPLogging: disabilita lo stile di registrazione multiprocessore
-                            dell'output quando è in esecuzione in 
-                            modalità non-multiprocessore.
-                        EnableMPLogging: abilita lo stile di registrazione multiprocessore
-                            anche quando è in esecuzione in modalità
-                            non-multiprocessore. Si tratta dello stile di registrazione predefinito. 
-                        ForceConsoleColor: usa i colori della console ANSI anche se
-                            non sono supportati dalla console.
-                        Verbosity: esegue l'override dell'impostazione /verbosity per questo
-                            logger.
+                                      buffer della console.
+                        DisableConsoleColor: usa i colori predefiniti della
+                                             console per tutti i messaggi di
+                                             registrazione.
+                        DisableMPLogging: disabilita lo stile di registrazione
+                                          multiprocessore dell'output quando è
+                                          in esecuzione in modalità non-
+                                          multiprocessore.
+                        EnableMPLogging: abilita lo stile di registrazione
+                                         multiprocessore anche quando è in
+                                         esecuzione in modalità non-
+                                         multiprocessore. Si tratta dello stile
+                                         di registrazione predefinito.
+                        ForceConsoleColor: usa i colori della console ANSI anche
+                                           se non sono supportati dalla console.
+                        Verbosity: esegue l'override dell'impostazione
+                                          /verbosity per questo logger.
                      Esempio:
                         /consoleloggerparameters:PerformanceSummary;NoSummary;
-                                                 Verbosity=minimal
-</target>
+                                                 Verbosity=minimal</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -377,7 +385,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      to the console. (Short form: /noconlog)
 </source>
         <target state="translated">  /noconsolelogger   Disabilita il logger di console predefinito e non registra gli
-                     eventi nella console (forma breve: /noconlog).
+                     eventi nella console. Forma breve: /noconlog.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -415,17 +423,17 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_17_MaximumCPUSwitch">
-        <source>  /maxcpucount[:n]   Specifies the maximum number of concurrent processes to 
+        <source>  /maxcpucount[:n]   Specifies the maximum number of concurrent processes to
                      build with. If the switch is not used, the default
                      value used is 1. If the switch is used without a value
-                     MSBuild will use up to the number of processors on the 
+                     MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="translated">  /maxcpucount[:n]   Specifica il numero massimo di processi simultanei da 
-                     usare per la compilazione. Se l'opzione non viene usata, verrà
-                     usato il valore predefinito 1. Se viene usata senza un valore,
-                     MSBuild userà un numero non superiore al numero di 
-                     processori del computer (forma breve: /m[:n]).
+        <target state="translated">  /maxcpucount[:n]   Specifica il numero massimo di processi simultanei da
+                     usare per la compilazione. Se l'opzione non viene usata,
+                     verrà usato il valore predefinito 1. Se viene usata senza
+                     un valore, MSBuild userà un numero non superiore al numero
+                     di processori del computer. Forma breve: /m[:n].
       </target>
         <note>
           LOCALIZATION: "maxcpucount" should not be localized.
@@ -436,13 +444,13 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <source>Examples:
 
         MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean 
+        MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </source>
         <target state="translated">Esempi:
 
         MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean 
+        MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -461,10 +469,10 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     LOCALIZATION: "MSBuild /help" should not be localized.</note>
       </trans-unit>
       <trans-unit id="HelpMessage_18_DistributedLoggerSwitch">
-        <source>  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;                     
+        <source>  /distributedlogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
                      Use this logger to log events from MSBuild, attaching a
                      different logger instance to each node. To specify
-                     multiple loggers, specify each logger separately. 
+                     multiple loggers, specify each logger separately.
                      (Short form /dl)
                      The &lt;logger&gt; syntax is:
                        [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
@@ -478,11 +486,11 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  /distributedlogger:&lt;logger centrale&gt;*&lt;logger inoltro&gt;                     
+        <target state="translated">  /distributedlogger:&lt;logger centrale&gt;*&lt;logger inoltro&gt;
                      Usare questo logger per registrare eventi da MSBuild,
-                     associando un'istanza di logger diversa a ogni nodo. Per specificare
-                     più logger, specificare ogni logger separatamente 
-                     (forma breve /dl).
+                     associando un'istanza di logger diversa a ogni nodo. Per
+                     specificare più logger, specificare ogni logger
+                     separatamente. Forma breve /dl.
                      La sintassi di &lt;logger&gt; è la seguente:
                        [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
@@ -490,11 +498,11 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      La sintassi di &lt;logger assembly&gt; è la seguente:
                        {&lt;nome assembly&gt;[,&lt;nome sicuro&gt;] | &lt;file assembly&gt;}
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
-                     logger nel formato in cui vengono specificati (forma breve: /l).
+                     logger nel formato in cui vengono specificati. Forma
+                     breve: /l.
                      Esempi:
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
-</target>
+                       /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -506,18 +514,18 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="HelpMessage_19_IgnoreProjectExtensionsSwitch">
         <source>  /ignoreprojectextensions:&lt;extensions&gt;
-                     List of extensions to ignore when determining which 
-                     project file to build. Use a semicolon or a comma 
+                     List of extensions to ignore when determining which
+                     project file to build. Use a semicolon or a comma
                      to separate multiple extensions.
                      (Short form: /ignore)
                      Example:
                        /ignoreprojectextensions:.sln
     </source>
         <target state="translated">  /ignoreprojectextensions:&lt;estensioni&gt;
-                     Elenco delle estensioni da ignorare per la determinazione 
-                     del file di progetto da compilare. Usare un punto e virgola o una virgola 
-                     per separare più estensioni
-                     (forma breve: /ignore).
+                     Elenco delle estensioni da ignorare per la determinazione
+                     del file di progetto da compilare. Usare un punto e virgola
+                     o una virgola per separare più estensioni. Forma breve:
+                     /ignore.
                      Esempio:
                        /ignoreprojectextensions:.sln
     </target>
@@ -533,17 +541,18 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       <trans-unit id="HelpMessage_23_ToolsVersionSwitch">
         <source>  /toolsversion:&lt;version&gt;
                      The version of the MSBuild Toolset (tasks, targets, etc.)
-                     to use during build. This version will override the 
-                     versions specified by individual projects. (Short form: 
+                     to use during build. This version will override the
+                     versions specified by individual projects. (Short form:
                      /tv)
                      Example:
                        /toolsversion:3.5
    </source>
         <target state="translated">  /toolsversion:&lt;versione&gt;
-                     La versione del set di strumenti di MSBuild (attività, destinazioni e così via)
-                     da usare durante la compilazione. Tale versione eseguirà l'override 
-                     delle versioni specificate nei singoli progetti (forma breve: 
-                     /tv).
+                     La versione del set di strumenti di MSBuild (attività,
+                     destinazioni e così via) da usare durante la compilazione.
+                     Tale versione eseguirà l'override delle versioni
+                     specificate nei singoli progetti. Forma breve:
+                     /tv.
                      Esempio:
                        /toolsversion:3.5
    </target>
@@ -558,22 +567,24 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="HelpMessage_20_FileLoggerSwitch">
         <source>  /fileLogger[n]     Logs the build output to a file. By default
-                     the file is in the current directory and named 
+                     the file is in the current directory and named
                      "msbuild[n].log". Events from all nodes are combined into
                      a single log. The location of the file and other
-                     parameters for the fileLogger can be specified through 
+                     parameters for the fileLogger can be specified through
                      the addition of the "/fileLoggerParameters[n]" switch.
-                     "n" if present can be a digit from 1-9, allowing up to 
+                     "n" if present can be a digit from 1-9, allowing up to
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
-        <target state="translated">  /fileLogger[n]     Registra l'output di compilazione in un file. Per impostazione predefinita,
-                     il file si trova nella 
-                     directory corrente ed è denominato "msbuild[n].log". Gli eventi generati da tutti i nodi sono riuniti in
-                     un unico log. Il percorso del file e altri
-                     parametri di fileLogger possono essere specificati con 
-                     l'aggiunta dell'opzione "/fileLoggerParameters[n]".
-                     Se presente, "n" può essere un numero compreso tra 1 e 9, 
-                     consentendo di impostare fino a 10 logger di file da associare (forma breve: /fl[n]).
+        <target state="translated">  /fileLogger[n]     Registra l'output di compilazione in un file. Per
+                     impostazione predefinita, il file si trova nella directory
+                     corrente ed è denominato "msbuild[n].log". Gli eventi
+                     generati da tutti i nodi sono riuniti in un unico log. Il
+                     percorso del file e altri parametri di fileLogger possono
+                     essere specificati con l'aggiunta dell'opzione
+                     "/fileLoggerParameters[n]".
+                     Se presente, "n" può essere un numero compreso tra 1 e 9,
+                     consentendo di impostare fino a 10 logger di file da
+                     associare. Forma breve: /fl[n].
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -585,31 +596,32 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_21_DistributedFileLoggerSwitch">
-        <source>  /distributedFileLogger                                                       
+        <source>  /distributedFileLogger
                      Logs the build output to multiple log files, one log file
                      per MSBuild node. The initial location for these files is
-                     the current directory. By default the files are called 
+                     the current directory. By default the files are called
                      "MSBuild&lt;nodeid&gt;.log". The location of the files and
-                     other parameters for the fileLogger can be specified 
+                     other parameters for the fileLogger can be specified
                      with the addition of the "/fileLoggerParameters" switch.
 
                      If a log file name is set through the fileLoggerParameters
-                     switch the distributed logger will use the fileName as a 
-                     template and append the node id to this fileName to 
+                     switch the distributed logger will use the fileName as a
+                     template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  /distributedFileLogger                                                       
+        <target state="translated">  /distributedFileLogger
                      Registra l'output di compilazione in più file di log, uno
-                     per ogni nodo MSBuild. Il percorso iniziale di questi file è
-                     la directory corrente. Per impostazione predefinita, ai file viene 
-                     assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il percorso dei file e
-                     altri parametri di fileLogger possono essere specificati 
-                     aggiungendo l'opzione "/fileLoggerParameters".
+                     per ogni nodo MSBuild. Il percorso iniziale di questi file
+                     è la directory corrente. Per impostazione predefinita, ai
+                     file viene assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il
+                     percorso dei file e altri parametri di fileLogger possono
+                     essere specificati aggiungendo l'opzione 
+                     "/fileLoggerParameters".
 
                      Se il nome di un file di log viene impostato con l'opzione
-                     fileLoggerParameters, il logger distribuito userà il nome file come 
-                     modello e aggiungerà l'ID del nodo per 
-                     creare un file di log per ogni nodo.
+                     fileLoggerParameters, il logger distribuito userà il nome
+                     file come modello e aggiungerà l'ID del nodo per creare un
+                     file di log per ogni nodo.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -621,9 +633,9 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_22_FileLoggerParametersSwitch">
-        <source>  /fileloggerparameters[n]:&lt;parameters&gt;                                
+        <source>  /fileloggerparameters[n]:&lt;parameters&gt;
                      Provides any extra parameters for file loggers.
-                     The presence of this switch implies the 
+                     The presence of this switch implies the
                      corresponding /filelogger[n] switch.
                      "n" if present can be a digit from 1-9.
                      /fileloggerparameters is also used by any distributed
@@ -636,40 +648,41 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                         Append--determines if the build log will be appended
                             to or overwrite the log file. Setting the
                             switch appends the build log to the log file;
-                            Not setting the switch overwrites the 
-                            contents of an existing log file. 
+                            Not setting the switch overwrites the
+                            contents of an existing log file.
                             The default is not to append to the log file.
-                        Encoding--specifies the encoding for the file, 
+                        Encoding--specifies the encoding for the file,
                             for example, UTF-8, Unicode, or ASCII
                      Default verbosity is Detailed.
                      Examples:
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       /flp1:warningsonly;logfile=msbuild.wrn 
+                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  /fileloggerparameters[n]:&lt;parametri&gt;                                
-                     Fornisce parametri aggiuntivi per i logger di file.
-                     La presenza di questa opzione implica la presenza 
-                     della corrispondente opzione /filelogger[n].
+        <target state="translated">  /fileloggerparameters[n]:&lt;parametri&gt;
+                     Fornisce parametri aggiuntivi per i logger di file. La
+                     presenza di questa opzione implica la presenza della
+                     corrispondente opzione /filelogger[n].
                      Se presente, "n" può essere un numero compreso tra 1 e 9.
-                     /fileloggerparameters viene usato anche dal file di
-                     logger distribuito. Vedere la descrizione di
-                     /distributedFileLogger (forma breve: /flp[n]).
+                     /fileloggerparameters viene usato anche dal file di logger
+                     distribuito. Vedere la descrizione di 
+                     /distributedFileLogger. Forma breve: /flp[n].
                      Sono disponibili gli stessi parametri elencati per il
                      logger di console. Altri parametri disponibili:
-                        LogFile: percorso del file di log in cui viene
-                            scritto il log di compilazione.
+                        LogFile: percorso del file di log in cui viene scritto
+                                 il log di compilazione.
                         Append: determina se il log di compilazione viene
-                            aggiunto al file di log o se lo sovrascrive. Se impostato, aggiunge il log di compilazione al
-                            file di log; in caso contrario, sovrascrive il
-                            contenuto di un file di log esistente. 
-                            Per impostazione predefinita, il log di compilazione 
-                            non viene aggiunto al file di log.
-                        Encoding: specifica la codifica del file, 
-                            ad esempio UTF-8, Unicode o ASCII
+                                aggiunto al file di log o se lo sovrascrive. Se
+                                impostato, aggiunge il log di compilazione al
+                                file di log; in caso contrario, sovrascrive il
+                                contenuto di un file di log esistente.
+                                Per impostazione predefinita, il log di
+                                compilazione non viene aggiunto al file di log.
+                        Encoding: specifica la codifica del file, ad esempio
+                                  UTF-8, Unicode o ASCII
                      Il livello predefinito di verbosity è Detailed.
                      Esempi:
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
@@ -705,66 +718,67 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      True: i nodi vengono mantenuti dopo il completamento della
                             compilazione e riutilizzati per le compilazioni successive (impostazione predefinita).
                      False: i nodi non vengono mantenuti dopo il completamento
-                     della compilazione (forma breve: /nr).
+                     della compilazione. Forma breve: /nr.
                      Esempio:
                        /nr:true
     </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_25_PreprocessSwitch">
-        <source>  /preprocess[:file] 
+        <source>  /preprocess[:file]
                      Creates a single, aggregated project file by
                      inlining all the files that would be imported during a
                      build, with their boundaries marked. This can be
                      useful for figuring out what files are being imported
                      and from where, and what they will contribute to
                      the build. By default the output is written to
-                     the console window. If the path to an output file 
+                     the console window. If the path to an output file
                      is provided that will be used instead.
                      (Short form: /pp)
                      Example:
                        /pp:out.txt
     </source>
-        <target state="translated">  /preprocess[:file] 
+        <target state="translated">  /preprocess[:file]
                      Crea un singolo file di progetto aggregato
-                     incorporando tutti i file che verrebbero importati durante una
-                     compilazione, contrassegnandone i limiti. Questa opzione può risultare
-                     utile per comprendere quali file verranno importati
-                     e da quali origini, nonché il modo in cui contribuiranno alla
-                     compilazione. Per impostazione predefinita, l'output viene scritto nella
-                     finestra della console. Se specificato, verrà invece usato il percorso di un 
-                     file di output
-                     (forma breve: /pp).
+                     incorporando tutti i file che verrebbero importati durante
+                     una compilazione, contrassegnandone i limiti. Questa
+                     opzione può risultare utile per comprendere quali file
+                     verranno importati e da quali origini, nonché il modo in
+                     cui contribuiranno alla compilazione. Per impostazione
+                     predefinita, l'output viene scritto nella finestra della
+                     console. Se specificato, verrà invece usato il percorso di
+                     un file di output. Forma breve: /pp.
                      Esempio:
                        /pp:out.txt
     </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
-        <source>  /detailedsummary 
+        <source>  /detailedsummary
                      Shows detailed information at the end of the build
                      about the configurations built and how they were
-                     scheduled to nodes. 
+                     scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="translated">  /detailedsummary 
-                     Visualizza informazioni dettagliate al termine della compilazione
-                     relative alle configurazioni compilate e alla relativa modalità di
-                     pianificazione nei nodi 
-                     (forma breve: /ds).
+        <target state="translated">  /detailedsummary
+                     Visualizza informazioni dettagliate al termine della
+                     compilazione relative alle configurazioni compilate e alla
+                     relativa modalità di pianificazione nei nodi. Forma breve:
+                     /ds.
     </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_27_DebuggerSwitch">
         <source>  /debug
-                     Causes a debugger prompt to appear immediately so that 
-                     Visual Studio can be attached for you to debug the 
+                     Causes a debugger prompt to appear immediately so that
+                     Visual Studio can be attached for you to debug the
                      MSBuild XML and any tasks and loggers it uses.
    </source>
         <target state="translated">  /debug
-                     Causa la visualizzazione immediata di un prompt del debugger in modo che sia possibile 
-                     collegare Visual Studio per il debug 
-                     dell'XML di MSBuild e di eventuali attività e logger usati.
+                     Causa la visualizzazione immediata di un prompt del
+                     debugger in modo che sia possibile collegare Visual Studio
+                     per il debug dell'XML di MSBuild e di eventuali attività e
+                     logger usati.
    </target>
         <note />
       </trans-unit>
@@ -1212,7 +1226,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Elenco di codici avviso da considerare come errori. Usare un
                      punto e virgola o una virgola per separare più codici avviso.
                      Per considerare tutti gli avvisi come errori, usare l'opzione senza
-                      specificare alcun valore (forma breve: /err[:c;[c2]])
+                      specificare alcun valore. Forma breve: /err[:c;[c2]].
 
                      Esempio:
                        /warnaserror:MSB4130
@@ -1239,8 +1253,8 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <target state="translated">  /warnasmessage[:codice[;codice2]]
                      Elenco di codici avviso da considerare come messaggi non
                      importanti. Usare un punto e virgola o una virgola per 
-                     separare più codici avviso
-                     (forma breve: /nowarn[:c;[c2]])
+                     separare più codici avviso.
+                     Forma breve: /nowarn[:c;[c2]].
 
                      Esempio:
                        /warnasmessage:MSB3026
@@ -1277,14 +1291,14 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
 
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
-                     files encountered during the build. The optional 
+                     files encountered during the build. The optional
                      ProjectImports switch controls this behavior:
 
                       ProjectImports=None     - Don't collect the project
                                                 imports.
                       ProjectImports=Embed    - Embed project imports in the
                                                 log file.
-                      ProjectImports=ZipFile  - Save project files to 
+                      ProjectImports=ZipFile  - Save project files to
                                                 output.projectimports.zip
                                                 where output is the same name
                                                 as the binary log file name.
@@ -1313,40 +1327,40 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      binario compresso. Per impostazione predefinita, il file
                      si trova nella directory corrente e si chiama
                      "msbuild.binlog". Il log binario è una descrizione 
-                     dettagliata del processo di compilazione utilizzabile in 
-                     seguito per ricostruire i log di testo e viene usato da 
-                     altri strumenti di analisi. Un log binario è in genere 
+                     dettagliata del processo di compilazione utilizzabile in
+                     seguito per ricostruire i log di testo e viene usato da
+                     altri strumenti di analisi. Un log binario è in genere
                      10-20 volte più piccolo del più dettagliato log di testo
                      di livello diagnostico, ma contiene maggiori informazioni.
                      Forma breve: /bl
 
-                     Per impostazione predefinita, il logger binario raccoglie 
-                     il testo di origine di file di progetto, inclusi tutti i 
-                     progetti importati e i file di destinazione rilevati 
+                     Per impostazione predefinita, il logger binario raccoglie
+                     il testo di origine di file di progetto, inclusi tutti i
+                     progetti importati e i file di destinazione rilevati
                      durante la compilazione. L'opzione facoltativa 
                      ProjectImports controlla questo comportamento:
 
-                      ProjectImports=None     - Non viene eseguita la raccolta 
+                      ProjectImports=None     - Non viene eseguita la raccolta
                                                 delle importazioni del progetto.
-                      ProjectImports=Embed    - Le importazioni del progetto 
-                                                vengono incorporate nel file 
+                      ProjectImports=Embed    - Le importazioni del progetto
+                                                vengono incorporate nel file
                                                 di log.
-                      ProjectImports=ZipFile  - I file del progetto vengono 
+                      ProjectImports=ZipFile  - I file del progetto vengono
                                                 salvati in 
                                                 output.projectimports.zip
-                                                dove output corrisponde allo 
-                                                stesso nome del file di 
+                                                dove output corrisponde allo
+                                                stesso nome del file di
                                                 log binario.
 
                      L'impostazione predefinita di ProjectImports è Embed.
-                     Nota: il logger non raccoglie i file di origine non 
-                     MSBuild, ad esempio quelli con estensione cs, cpp 
+                     Nota: il logger non raccoglie i file di origine non
+                     MSBuild, ad esempio quelli con estensione cs, cpp
                      e così via.
 
-                     È possibile riprodurre un file con estensione binlog 
-                     passandolo a msbuild.exe come argomento invece di un 
+                     È possibile riprodurre un file con estensione binlog
+                     passandolo a msbuild.exe come argomento invece di un
                      progetto o di una soluzione. Altri logger riceveranno le
-                     informazioni contenute nel file di log come se fosse in 
+                     informazioni contenute nel file di log come se fosse in
                      corso la compilazione originale. Per maggiori informazioni
                      sul file di log e su come usarlo, vedere:
                      https://github.com/Microsoft/msbuild/wiki/Binary-Log
@@ -1361,10 +1375,52 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </target>
         <note>
       LOCALIZATION: The following should not be localized:
-      1) "msbuild" 
+      1) "msbuild"
       2) the string "binlog" that describes the file extension
       3) all switch names and their short forms e.g. /bl and /binaryLogger
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_31_RestoreSwitch">
+        <source>  /restore[:True|False]
+                     Runs a target named Restore prior to building
+                     other targets.  This is useful when your project
+                     tree requires packages to be restored before they
+                     can be built. Specifying /restore is the same as
+                     specifying /restore:True.  Use the parameter to
+                     override a value that comes from a response file.
+                     (Short form: /r)
+    </source>
+        <target state="translated">  /restore[:True|False]
+                     Esegue una destinazione denominata Restore prima di
+                     compilare altre destinazioni. È utile quando l'albero del
+                     progetto richiede il ripristino dei pacchetti prima della
+                     compilazione. Specificare /restore equivale a specificare
+                     /restore:True. Usare il parametro per eseguire l'override
+                     di un valore che proviene da un file di risposta.
+                     Forma breve: /r.
+    </target>
+        <note>
+      LOCALIZATION: "/restore" and "/r" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidNodeReuseTrueValue">
+        <source>MSBUILD : error MSB1042: Node reuse value is not valid. This version of MSBuild does not support node reuse. If specified, the node reuse switch value must be false.</source>
+        <target state="translated">MSBUILD : error MSB1042: il valore di nodereuse non è valido. Questa versione di MSBuild non supporta il riutilizzo dei nodi. Se specificata, il valore dell'opzione nodereuse deve essere false.</target>
+        <note>{StrBegin="MSBUILD : error MSB1042: "}
+     UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+     This error is shown when a user specifies a node reuse value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+  </note>
+      </trans-unit>
+      <trans-unit id="InvalidRestoreValue">
+        <source>MSBUILD : error MSB1052: Restore value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1052: il valore di restore non è valido. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1052: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
     </body>

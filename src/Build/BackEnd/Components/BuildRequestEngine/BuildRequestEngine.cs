@@ -1148,7 +1148,10 @@ namespace Microsoft.Build.BackEnd
                         // waiting for results.  It is important that we tell the issuing request to wait for a result
                         // prior to issuing any necessary configuration request so that we don't get into a state where
                         // we receive the configuration response before we enter the wait state.
-                        newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(), request.Config.ConfigurationId, request.Targets, issuingEntry.Request.HostServices, issuingEntry.Request.BuildEventContext, issuingEntry.Request);
+                        newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(),
+                            request.Config.ConfigurationId, request.Targets, issuingEntry.Request.HostServices,
+                            issuingEntry.Request.BuildEventContext, issuingEntry.Request,
+                            request.BuildRequestDataFlags);
 
                         issuingEntry.WaitForResult(newRequest);
 
@@ -1162,7 +1165,10 @@ namespace Microsoft.Build.BackEnd
                     else
                     {
                         // We have a configuration, see if we already have results locally.
-                        newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(), matchingConfig.ConfigurationId, request.Targets, issuingEntry.Request.HostServices, issuingEntry.Request.BuildEventContext, issuingEntry.Request);
+                        newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(),
+                            matchingConfig.ConfigurationId, request.Targets, issuingEntry.Request.HostServices,
+                            issuingEntry.Request.BuildEventContext, issuingEntry.Request,
+                            request.BuildRequestDataFlags);
 
                         IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
                         ResultsCacheResponse response = resultsCache.SatisfyRequest(newRequest, matchingConfig.ProjectInitialTargets, matchingConfig.ProjectDefaultTargets, matchingConfig.GetAfterTargetsForDefaultTargets(newRequest), skippedResultsAreOK: false);

@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The fragments that compose an item spec string (values, globs, item references)
         /// </summary>
-        public ImmutableList<ItemFragment> Fragments { get; }
+        public List<ItemFragment> Fragments { get; }
 
         /// <summary>
         /// The expander needs to have a default item factory set.
@@ -43,26 +43,25 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpec">The string containing item syntax</param>
         /// <param name="expander">Expects the expander to have a default item factory set</param>
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
+        /// <param name="projectDirectory">The directory that the project is in.</param>
         /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
-        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation, bool expandProperties = true)
+        public ItemSpec(string itemSpec, Expander<P, I> expander, IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties = true)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, expandProperties);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
         }
 
-        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, bool expandProperties)
+        private List<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
-            var builder = ImmutableList.CreateBuilder<ItemFragment>();
-
             //  Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
 
             if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
             {
-                return builder.ToImmutable();
+                return new List<ItemFragment>();
             }
 
             // STEP 1: Expand properties in Include
@@ -70,6 +69,18 @@ namespace Microsoft.Build.Evaluation
             {
                 evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(ItemSpecString, ExpanderOptions.ExpandProperties, itemSpecLocation);
             }
+
+            var semicolonCount = 0;
+            foreach (var c in evaluatedItemspecEscaped)
+            {
+                if (c == ';')
+                {
+                    semicolonCount++;
+                }
+            }
+
+            // estimate the number of fragments with the number of semicolons. This is will overestimate in case of transforms with semicolons, but won't underestimate.
+            var fragments = new List<ItemFragment>(semicolonCount + 1);
 
             // STEP 2: Split Include on any semicolons, and take each split in turn
             if (evaluatedItemspecEscaped.Length > 0)
@@ -80,11 +91,11 @@ namespace Microsoft.Build.Evaluation
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     bool isItemListExpression;
-                    var itemReferenceFragment = ProcessItemExpression(splitEscaped, itemSpecLocation, out isItemListExpression);
+                    var itemReferenceFragment = ProcessItemExpression(splitEscaped, itemSpecLocation, projectDirectory, out isItemListExpression);
 
                     if (isItemListExpression)
                     {
-                        builder.Add(itemReferenceFragment);
+                        fragments.Add(itemReferenceFragment);
                     }
                     else
                     {
@@ -100,14 +111,14 @@ namespace Microsoft.Build.Evaluation
                         {
 
                             // Just return the original string.
-                            builder.Add(new ValueFragment(splitEscaped, itemSpecLocation.File));
+                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
                         else if (!containsEscapedWildcards && containsRealWildcards)
                         {
                             // Unescape before handing it to the filesystem.
                             var filespecUnescaped = EscapingUtilities.UnescapeAll(splitEscaped);
 
-                            builder.Add(new GlobFragment(filespecUnescaped, itemSpecLocation.File));
+                            fragments.Add(new GlobFragment(filespecUnescaped, projectDirectory));
                         }
                         else
                         {
@@ -115,16 +126,16 @@ namespace Microsoft.Build.Evaluation
                             // escaping ... it should already be escaped appropriately since it came directly
                             // from the project file
 
-                            builder.Add(new ValueFragment(splitEscaped, itemSpecLocation.File));
+                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
                     }
                 }
             }
 
-            return builder.ToImmutable();
+            return fragments;
         }
 
-        private ItemExpressionFragment<P, I> ProcessItemExpression(string expression, IElementLocation elementLocation, out bool isItemListExpression)
+        private ItemExpressionFragment<P, I> ProcessItemExpression(string expression, IElementLocation elementLocation, string projectDirectory, out bool isItemListExpression)
         {
             isItemListExpression = false;
 
@@ -143,15 +154,7 @@ namespace Microsoft.Build.Evaluation
 
             isItemListExpression = true;
 
-            return new ItemExpressionFragment<P, I>(capture, expression, this);
-        }
-
-        /// <summary>
-        /// Return the items in <param name="items"/> that match this itemspec
-        /// </summary>
-        public IEnumerable<I> FilterItems(IEnumerable<I> items)
-        {
-            return items.Where(MatchesItem);
+            return new ItemExpressionFragment<P, I>(capture, expression, this, projectDirectory);
         }
 
         /// <summary>
@@ -214,22 +217,25 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<string> FlattenFragmentsAsStrings()
         {
-            foreach (var valueString in Fragments.OfType<ValueFragment>().Select(v => v.ItemSpecFragment))
+            foreach (var fragment in Fragments)
             {
-                yield return valueString;
-            }
+                if (fragment is ValueFragment || fragment is GlobFragment)
+                {
+                    yield return fragment.ItemSpecFragment;
+                }
+                else if (fragment is ItemExpressionFragment<P, I>)
+                {
+                    var itemExpression = (ItemExpressionFragment<P, I>) fragment;
 
-            foreach (var globString in Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment))
-            {
-                yield return globString;
-            }
-
-            foreach (
-                var referencedItemString in
-                Fragments.OfType<ItemExpressionFragment<P, I>>().SelectMany(f => f.ReferencedItems).Select(v => v.ItemSpecFragment)
-            )
-            {
-                yield return referencedItemString;
+                    foreach (var referencedItem in itemExpression.ReferencedItems)
+                    {
+                        yield return referencedItem.ItemSpecFragment;
+                    }
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                }
             }
         }
 		
@@ -249,48 +255,54 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Path of the project the itemspec is coming from
         /// </summary>
-        protected string ProjectPath { get; }
+        protected string ProjectDirectory { get; }
 
-        /// <summary>
-        /// Function that checks if a given string matches the <see cref="ItemSpecFragment"/>
-        /// </summary>
-        protected Lazy<Func<string, bool>> FileMatcher { get; }
+        private bool _fileMatcherInitialized;
+        private FileSpecMatcherTester _fileMatcher;
 
-        private readonly Lazy<IMSBuildGlob> _msbuildGlob;
-        protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob.Value;
-
-        protected ItemFragment(string itemSpecFragment, string projectPath)
-            : this(
-                itemSpecFragment,
-                projectPath,
-                CreateFileMatcher(itemSpecFragment, projectPath))
+        // not a Lazy to reduce memory
+        private FileSpecMatcherTester FileMatcher
         {
+            get
+            {
+                if (_fileMatcherInitialized)
+                {
+                    return _fileMatcher;
+                }
+
+                _fileMatcher = CreateFileSpecMatcher();
+                _fileMatcherInitialized = true;
+
+                return _fileMatcher;
+            }
         }
 
-        private static Lazy<Func<string, bool>> CreateFileMatcher(string itemSpecFragment, string projectPath)
-        {
-            var projectDirectory = string.IsNullOrEmpty(projectPath)
-                ? string.Empty
-                : Path.GetDirectoryName(projectPath);
+        private IMSBuildGlob _msbuildGlob;
 
-            return
-                new Lazy<Func<string, bool>>(
-                    () => EngineFileUtilities.GetFileSpecMatchTester(itemSpecFragment, projectDirectory));
+        // not a Lazy to reduce memory
+        protected virtual IMSBuildGlob MsBuildGlob
+        {
+            get
+            {
+                if (_msbuildGlob == null)
+                {
+                    _msbuildGlob = CreateMsBuildGlob();
+                }
+
+                return _msbuildGlob;
+            }
         }
 
-        protected ItemFragment(string itemSpecFragment, string projectPath, Lazy<Func<string, bool>> fileMatcher)
+        protected ItemFragment(string itemSpecFragment, string projectDirectory)
         {
             ItemSpecFragment = itemSpecFragment;
-            ProjectPath = projectPath;
-            FileMatcher = fileMatcher;
-
-            _msbuildGlob = new Lazy<IMSBuildGlob>(CreateMsBuildGlob);
+            ProjectDirectory = projectDirectory;
         }
 
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
         public virtual int MatchCount(string itemToMatch)
         {
-            return FileMatcher.Value(itemToMatch) ? 1 : 0;
+            return FileMatcher.IsMatch(itemToMatch) ? 1 : 0;
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()
@@ -300,22 +312,27 @@ namespace Microsoft.Build.Evaluation
 
         protected virtual IMSBuildGlob CreateMsBuildGlob()
         {
-            return Globbing.MSBuildGlob.Parse(ProjectPath, ItemSpecFragment.Unescape());
+            return Globbing.MSBuildGlob.Parse(ProjectDirectory, ItemSpecFragment.Unescape());
+        }
+
+        private FileSpecMatcherTester CreateFileSpecMatcher()
+        {
+            return FileSpecMatcherTester.Parse(ProjectDirectory, ItemSpecFragment);
         }
     }
 
     internal class ValueFragment : ItemFragment
     {
-        public ValueFragment(string itemSpecFragment, string projectPath)
-            : base(itemSpecFragment, projectPath)
+        public ValueFragment(string itemSpecFragment, string projectDirectory)
+            : base(itemSpecFragment, projectDirectory)
         {
         }
     }
 
     internal class GlobFragment : ItemFragment
     {
-        public GlobFragment(string itemSpecFragment, string projectPath)
-            : base(itemSpecFragment, projectPath)
+        public GlobFragment(string itemSpecFragment, string projectDirectory)
+            : base(itemSpecFragment, projectDirectory)
         {
         }
     }
@@ -353,8 +370,8 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec)
-            : base(itemSpecFragment, containingItemSpec.ItemSpecLocation.File)
+        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec, string projectDirectory)
+            : base(itemSpecFragment, projectDirectory)
         {
             Capture = capture;
 
@@ -386,7 +403,7 @@ namespace Microsoft.Build.Evaluation
             {
                 _expander = _containingItemSpec.Expander;
 
-                List<Tuple<string, I>> itemsFromCapture;
+                List<Pair<string, I>> itemsFromCapture;
                 bool throwaway;
                 _expander.ExpandExpressionCapture(
                     Capture,
@@ -395,7 +412,7 @@ namespace Microsoft.Build.Evaluation
                     false /* do not include null expansion results */,
                     out throwaway,
                     out itemsFromCapture);
-                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
+                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Key, ProjectDirectory)).ToList();
 
                 return true;
             }

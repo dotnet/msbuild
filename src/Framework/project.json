@@ -8,6 +8,7 @@
         "SourceLink.Create.CommandLine": "2.1.2",
         "System.Runtime.Serialization.Primitives": "4.1.1",
         "System.Text.Encoding.CodePages" : "4.0.1",
+        "System.Threading.Tasks.Parallel": "4.0.1",
         "System.Threading.Thread": "4.0.0"
       }
     }

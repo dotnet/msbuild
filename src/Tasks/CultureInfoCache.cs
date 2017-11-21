@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -20,17 +21,20 @@ namespace Microsoft.Build.Tasks
 
         static CultureInfoCache()
         {
-#if FEATURE_CULTUREINFO_GETCULTURES
             ValidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var cultureName in CultureInfo.GetCultures(CultureTypes.AllCultures))
+#if !FEATURE_CULTUREINFO_GETCULTURES
+            if (!AssemblyUtilities.CultureInfoHasGetCultures())
+            {
+                ValidCultureNames = HardcodedCultureNames;
+                return;
+            }
+#endif
+
+            foreach (var cultureName in AssemblyUtilities.GetAllCultures())
             {
                 ValidCultureNames.Add(cultureName.Name);
             }
-#else
-            // In CoreCLR we'll populate the cultures from the list of known cultures
-            ValidCultureNames = HardcodedCultureNames;
-#endif
         }
 
         /// <summary>

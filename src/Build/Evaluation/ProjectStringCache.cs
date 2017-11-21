@@ -39,7 +39,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Store interned strings, and also a ref count, one per document using them.
         /// </summary>
-        private RetrievableEntryHashSet<StringCacheEntry> _strings = new RetrievableEntryHashSet<StringCacheEntry>(InitialSize, OrdinalKeyedComparer.Instance);
+        private RetrievableEntryHashSet<StringCacheEntry> _strings = new RetrievableEntryHashSet<StringCacheEntry>(InitialSize, StringComparer.Ordinal);
 
         /// <summary>
         /// Store all the strings a document is using, so their ref count can be decremented.

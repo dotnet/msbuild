@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -69,7 +70,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The packet that is the end result of the task host task execution process
         /// </summary>
-        private Queue<INodePacket> _receivedPackets;
+        private ConcurrentQueue<INodePacket> _receivedPackets;
 
         /// <summary>
         /// The set of parameters used to decide which host to launch.  
@@ -153,7 +154,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
-            _receivedPackets = new Queue<INodePacket>();
+            _receivedPackets = new ConcurrentQueue<INodePacket>();
             _taskHostLock = new Object();
 
             _setParameters = new Dictionary<string, object>();
@@ -300,23 +301,9 @@ namespace Microsoft.Build.BackEnd
 
                             INodePacket packet = null;
 
-                            int packetCount = _receivedPackets.Count;
-
                             // Handle the packet that's coming in
-                            while (packetCount > 0)
+                            while (_receivedPackets.TryDequeue(out packet))
                             {
-                                lock (_receivedPackets)
-                                {
-                                    if (_receivedPackets.Count > 0)
-                                    {
-                                        packet = _receivedPackets.Dequeue();
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-
                                 if (packet != null)
                                 {
                                     HandlePacket(packet, out taskFinished);
@@ -399,11 +386,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            lock (_receivedPackets)
-            {
-                _receivedPackets.Enqueue(packet);
-                _packetReceivedEvent.Set();
-            }
+            _receivedPackets.Enqueue(packet);
+            _packetReceivedEvent.Set();
         }
 
         /// <summary>
