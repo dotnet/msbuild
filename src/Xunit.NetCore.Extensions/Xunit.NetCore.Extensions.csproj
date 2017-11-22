@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</TargetFrameworks>
+    <CLSCompliant>false</CLSCompliant>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0"
+                      Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
+</Project>

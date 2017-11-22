@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.1-servicing-02201-03" />
     <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

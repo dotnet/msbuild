@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.1-servicing-02201-03" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
 
@@ -18,6 +17,7 @@
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
 
     <!-- TODO: get this from a package -->
     <Reference Include="..\..\tools\net45\roslyn\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />

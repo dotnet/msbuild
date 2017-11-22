@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     
     <!-- Tasks are needed for some tests -->
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
