@@ -77,7 +77,7 @@ if [ -z "$HOME" ]; then
 fi
 
 # Install a stage 0
-DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
+DOTNET_INSTALL_SCRIPT_URL="https://dot.net/v1/dotnet-install.sh"
 curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --version $DOTNET_CLI_VERSION --verbose
 
 # Install 1.0.4 shared framework

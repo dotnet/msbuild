@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" />
+    <BuildToolsProjectFile Include="$(RepositoryRootDirectory)tools\BuildTools.csproj" />
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
     <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj" />
@@ -36,9 +37,14 @@
 </__SetNuget_Packages>
     </PropertyGroup>
 
-    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore $(SolutionFile) /v:minimal"
-          WorkingDirectory="$(RepositoryRootDirectory)"
-          />
+    <ItemGroup>
+      <Command Include="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(SolutionFile.Identity) /v:minimal"
+          WorkingDirectory="$(RepositoryRootDirectory)" />
+      <Command Include="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(BuildToolsProjectFile.Identity) /v:minimal"
+          WorkingDirectory="$(RepositoryRootDirectory)" />
+    </ItemGroup>
+    
+    <Exec Command="%(Command.Identity)"/>
   </Target>
 
   <Target Name="BuildSolution">
