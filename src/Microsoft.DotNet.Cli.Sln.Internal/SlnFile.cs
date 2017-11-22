@@ -285,6 +285,14 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             get { return _sections; }
         }
 
+        public SlnSection Dependencies
+        {
+            get
+            {
+                return _sections.GetSection("ProjectDependencies", SlnSectionType.PostProcess);
+            }
+        }
+
         internal void Read(TextReader reader, string line, ref int curLineNum)
         {
             Line = curLineNum;
