@@ -11,16 +11,19 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class PortableTasks_Tests
     {
-        private static readonly string ProjectFilePath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "portableTaskTest.proj");
+        private static readonly string ProjectFilePath = Path.GetFullPath(
+            Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
+                        "..", "..", "Samples", "PortableTask", "netstandard2.0",
+                        "portableTaskTest.proj"));
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2738")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void TestDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(true);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2738")]
         public static void TestNonDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(false);
