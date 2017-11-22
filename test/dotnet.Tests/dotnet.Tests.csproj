@@ -52,6 +52,23 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="WriteExpectedTargetFrameworkMoniker" BeforeTargets="BeforeBuild" DependsOnTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ExpectedTargetFrameworkMonikerFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedTargetFrameworkMoniker.txt</ExpectedTargetFrameworkMonikerFileInIntermediateFolder>
+      <VersionFileContent>$(TargetFrameworkMoniker)</VersionFileContent>
+      <ExistingVersionFileContent Condition=" Exists('$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)') ">
+        $([System.IO.File]::ReadAllText($(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)))
+      </ExistingVersionFileContent>
+      <ShouldOverwriteVersionFile>false</ShouldOverwriteVersionFile>
+      <ShouldOverwriteVersionFile Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" Lines="$(VersionFileContent)" Condition=" '$(ShouldOverwriteVersionFile)' == 'true' " Overwrite="true" />
+    <ItemGroup>
+      <Content Include="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />
+      <FileWrites Include="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
