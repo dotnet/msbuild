@@ -1,12 +1,16 @@
 ﻿using System;
 
-[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class AssemblyFixtureAttribute : Attribute
+namespace Xunit
 {
-    public AssemblyFixtureAttribute(Type fixtureType)
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+    public class AssemblyFixtureAttribute : Attribute
     {
-        FixtureType = fixtureType;
+        public AssemblyFixtureAttribute(Type fixtureType)
+        {
+            FixtureType = fixtureType;
+        }
+
+        public Type FixtureType { get; private set; }
     }
 
-    public Type FixtureType { get; private set; }
 }

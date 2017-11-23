@@ -3,7 +3,7 @@ using System.Reflection;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace AssemblyFixtureExample.XunitExtensions
+namespace Xunit.NetCore.Extensions
 {
     public class XunitTestFrameworkExecutorWithAssemblyFixture : XunitTestFrameworkExecutor
     {
