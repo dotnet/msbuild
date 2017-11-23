@@ -955,8 +955,9 @@
     <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Include="System.Resources.Writer" Version="4.0.0" />
-    
-    <!-- Include .NET Core compilers copied from .NET Core SDK -->
-    <Content Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Roslyn\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
+
+    <!-- Reference compilers package without using assets, so we can copy them to the output directory under the Roslyn folder -->
+    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNetCoreCompilersVersion)" ExcludeAssets="All" />
+    <Content Include="$(NuGetPackageRoot)microsoft.netcore.compilers\$(MicrosoftNetCoreCompilersVersion)\tools\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 </Project>
