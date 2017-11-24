@@ -5,6 +5,7 @@
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Components.Logging
 {
@@ -13,19 +14,25 @@ namespace Microsoft.Build.BackEnd.Components.Logging
     /// </summary>
     internal class EvaluationLoggingContext : LoggingContext
     {
-        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, int evaluationId) : base(
-            loggingService,
-            new BuildEventContext(
-                eventContext.SubmissionId,
-                eventContext.NodeId,
-                evaluationId,
-                eventContext.ProjectInstanceId,
-                eventContext.ProjectContextId,
-                eventContext.TargetId,
-                eventContext.TaskId
-            ))
+        private readonly string _projectFile;
+
+        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext buildEventContext, string projectFile) :
+            base(
+                loggingService,
+                loggingService.LogProjectEvaluationStarted(buildEventContext.NodeId, buildEventContext.SubmissionId, projectFile))
         {
+            _projectFile = projectFile;
             IsValid = true;
+        }
+
+        /// <summary>
+        /// Log that the project has finished
+        /// </summary>
+        internal void LogProjectEvaluationFinished()
+        {
+            ErrorUtilities.VerifyThrow(IsValid, "invalid");
+            LoggingService.LogProjectEvaluationFinished(BuildEventContext, _projectFile);
+            IsValid = false;
         }
     }
 }

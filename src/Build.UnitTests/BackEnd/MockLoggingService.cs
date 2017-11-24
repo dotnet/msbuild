@@ -423,6 +423,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Logs a project evaluation started event
+        /// </summary>
+        public BuildEventContext LogProjectEvaluationStarted(int nodeId, int submissionId, string projectFile)
+        {
+            return new BuildEventContext(0, 0, 0, 0);
+        }
+
+        /// <summary>
+        /// Logs a project evaluation finished event
+        /// </summary>
+        public void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile)
+        {
+        }
+
+        /// <summary>
         /// Logs a project started event
         /// </summary>
         public BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items)

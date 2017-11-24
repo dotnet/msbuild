@@ -89,11 +89,6 @@ namespace Microsoft.Build.Evaluation
         };
 
         /// <summary>
-        /// Each evaluation has a unique ID.
-        /// </summary>
-        private static int s_evaluationId = BuildEventContext.InvalidEvaluationId;
-
-        /// <summary>
         /// Expander for evaluating conditions
         /// </summary>
         private readonly Expander<P, I> _expander;
@@ -720,9 +715,6 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
 
-            _data.EvaluationId = NextEvaluationId();
-            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationId);
-
             _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -777,11 +769,8 @@ namespace Microsoft.Build.Evaluation
 #endif
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"), projectFile)
-            {
-                BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                ProjectFile = projectFile
-            });
+            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
+            _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
 #if MSBUILDENABLEVSPROFILING 
             string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
@@ -934,11 +923,7 @@ namespace Microsoft.Build.Evaluation
 
             _data.FinishEvaluation();
 
-            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
-            {
-                BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                ProjectFile = projectFile
-            });
+            _evaluationLoggingContext.LogProjectEvaluationFinished();
 
 #if FEATURE_MSBUILD_DEBUGGER
             return _projectLevelLocalsForBuild;
@@ -2925,8 +2910,6 @@ namespace Microsoft.Build.Evaluation
 
             return sb.ToString();
         }
-
-        private static int NextEvaluationId() => Interlocked.Increment(ref s_evaluationId);
     }
 
     /// <summary>

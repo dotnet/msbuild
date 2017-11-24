@@ -495,6 +495,55 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Logs that a project evaluation has started
+        /// </summary>
+        /// <param name="nodeId">The id of the node which is evaluating this project.</param>
+        /// <param name="submissionId">The id of the submission.</param>
+        /// <param name="projectFile">Project file to build</param>
+        /// <returns>The evaluation event context for the project.</returns>
+        public BuildEventContext LogProjectEvaluationStarted(int nodeId, int submissionId, string projectFile)
+        {
+            lock (_lockObject)
+            {
+                BuildEventContext projectEvaluationEventContext = new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+
+                ProjectEvaluationStartedEventArgs evaluationEvent =
+                    new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"),
+                        projectFile)
+                    {
+                        BuildEventContext = projectEvaluationEventContext,
+                        ProjectFile = projectFile
+                    };
+
+                ProcessLoggingEvent(evaluationEvent);
+
+                return projectEvaluationEventContext;
+            }
+        }
+
+        /// <summary>
+        /// Logs that a project evaluation has finished
+        /// </summary>
+        /// <param name="projectEvaluationEventContext">Event context for the project.</param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
+        public void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile)
+        {
+            lock (_lockObject)
+            {
+                ErrorUtilities.VerifyThrow(projectEvaluationEventContext != null, "projectBuildEventContext");
+
+                ProjectEvaluationFinishedEventArgs buildEvent =
+                    new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
+                    {
+                        BuildEventContext = projectEvaluationEventContext,
+                        ProjectFile = projectFile
+                    };
+                ProcessLoggingEvent(buildEvent);
+            }
+        }
+
+        /// <summary>
         /// Logs that a project build has started
         /// </summary>
         /// <param name="nodeBuildEventContext">The event context of the node which is spawning this project.</param>
