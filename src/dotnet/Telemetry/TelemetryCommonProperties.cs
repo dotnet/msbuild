@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             _hasher = hasher ?? Sha256Hasher.Hash;
             _getMACAddress = getMACAddress ?? MacAddressGetter.GetMacAddress;
             _dockerContainerDetector = dockerContainerDetector ?? new DockerContainerDetectorForTelemetry();
-            _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter(new CliFallbackFolderPathCalculator());
+            _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter(new CliFolderPathCalculator());
         }
 
         private readonly IDockerContainerDetector _dockerContainerDetector;
