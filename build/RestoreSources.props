@@ -1,14 +1,14 @@
 <Project>
   <PropertyGroup>
-    <RestoreSources>
+    <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
+      $(ExternalRestoreSources);
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://www.myget.org/F/nugetbuild/api/v3/index.json;
       https://dotnet.myget.org/F/msbuild/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-cli/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
-      https://api.nuget.org/v3/index.json
+      https://api.nuget.org/v3/index.json;
     </RestoreSources>
-    <RestoreSources Condition="'$(ExternalRestoreSources)' != ''">$(ExternalRestoreSources);$(RestoreSources)</RestoreSources>
   </PropertyGroup>
 </Project>
