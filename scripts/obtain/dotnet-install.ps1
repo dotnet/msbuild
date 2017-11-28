@@ -203,10 +203,9 @@ function GetHTTPResponse([Uri] $Uri)
             # Default timeout for HttpClient is 100s.  For a 50 MB download this assumes 500 KB/s average, any less will time out
             # 10 minutes allows it to work over much slower connections.
             $HttpClient.Timeout = New-TimeSpan -Minutes 10
-            $ActualUri = if (($Uri -like "$AzureFeed*") -or ($Uri -like "$UncachedFeed*")) { "${Uri}${FeedCredential}" } else { $Uri }
-            $Response = $HttpClient.GetAsync($ActualUri).Result
+            $Response = $HttpClient.GetAsync("${Uri}${FeedCredential}").Result
             if (($Response -eq $null) -or (-not ($Response.IsSuccessStatusCode))) {
-                 # The feed credential is potential sensitive info. Do not log ActualUri to console output.
+                 # The feed credential is potentially sensitive info. Do not log FeedCredential to console output.
                 $ErrorMsg = "Failed to download $Uri."
                 if ($Response -ne $null) {
                     $ErrorMsg += "  $Response"

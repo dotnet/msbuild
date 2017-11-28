@@ -619,9 +619,7 @@ downloadcurl() {
     local out_path="${2:-}"
 
     # Append feed_credential as late as possible before calling curl to avoid logging feed_credential
-    if [[ "$remote_path" == "$azure_feed"* ]] || [[ "$remote_path" == "$uncached_feed"* ]]; then
-        remote_path="${remote_path}${feed_credential}"
-    fi
+    remote_path="${remote_path}${feed_credential}"
 
     local failed=false
     if [ -z "$out_path" ]; then
@@ -642,9 +640,7 @@ downloadwget() {
     local out_path="${2:-}"
 
     # Append feed_credential as late as possible before calling wget to avoid logging feed_credential
-    if [[ "$remote_path" == "$azure_feed"* ]] || [[ "$remote_path" == "$uncached_feed"* ]]; then
-        remote_path="${remote_path}${feed_credential}"
-    fi
+    remote_path="${remote_path}${feed_credential}"
 
     local failed=false
     if [ -z "$out_path" ]; then
