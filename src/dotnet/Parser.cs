@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         private static void ConfigureCommandLineLocalizedStrings()
         {
             DefaultHelpViewText.AdditionalArgumentsSection =
-                $"{UsageCommandsAdditionalArgsHeader}:{NewLine}  {LocalizableStrings.RunCommandAdditionalArgsHelpText}";
+                $"{UsageCommandsAdditionalArgsHeader}{NewLine}  {LocalizableStrings.RunCommandAdditionalArgsHelpText}";
             DefaultHelpViewText.ArgumentsSection.Title = UsageArgumentsHeader;
             DefaultHelpViewText.CommandsSection.Title = UsageCommandsHeader;
             DefaultHelpViewText.OptionsSection.Title = UsageOptionsHeader;
