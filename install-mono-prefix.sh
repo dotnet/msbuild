@@ -51,8 +51,8 @@ mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Mono.Build.Tasks.* ${DESTDIR}${XBUILD_DI
 cp -r $MSBUILD_OUT_DIR/Extensions ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 
 # Deploy files meant for the default $(MSBuildExtensionsPath)
-cp -r mono/ExtensionsPath/ ${DESTDIR}${XBUILD_DIR}
-cp -r mono/ExtensionsPath-ToolsVersion/ ${DESTDIR}${XBUILD_DIR}/${MSBUILD_TOOLSVERSION}
+cp -r mono/ExtensionsPath/* ${DESTDIR}${XBUILD_DIR}
+cp -r mono/ExtensionsPath-ToolsVersion/* ${DESTDIR}${XBUILD_DIR}/${MSBUILD_TOOLSVERSION}
 
 mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Microsoft.Common.props ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Microsoft.VisualStudioVersion.v* ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
