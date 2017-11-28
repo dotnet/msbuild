@@ -578,6 +578,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\NetStandard\netstandardlibrary.dll",
             @"C:\NetStandard\netstandard.dll",
             @"C:\SystemRuntime\Regular.dll",
+            @"C:\DependsOnNuget\A.dll",
+            @"C:\NugetCache\N\lib\N.dll"
         };
 
         /// <summary>
@@ -1731,6 +1733,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
 
+            if (string.Compare(path, @"C:\DependsOnNuget\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
+            }
+
+            if (string.Compare(path, @"C:\NugetCache\N\lib\N.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("N, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
+            }
+
             string defaultName = String.Format("{0}, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral", Path.GetFileNameWithoutExtension(path));
             return new AssemblyNameExtension(defaultName);
         }
@@ -2441,6 +2453,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension[]
                 {
                     GetAssemblyName(@"C:\NetStandard\netstandard.dll")
+                };
+            }
+
+            if (String.Compare(path, @"C:\DependsOnNuget\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension[]
+                {
+                    new AssemblyNameExtension("N, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")
                 };
             }
 
