@@ -4,7 +4,6 @@
     <GitCommitInfoProps>$(GeneratedPropsDir)/GitCommitInfo.props</GitCommitInfoProps>
     <HostInfoProps>$(GeneratedPropsDir)/HostInfo.props</HostInfoProps>
     <BuildInfoProps>$(GeneratedPropsDir)/BuildInfo.props</BuildInfoProps>
-    <BuildInfoProps>$(GeneratedPropsDir)/BuildInfo.props</BuildInfoProps>
     <GeneratedNuGetConfig>$(RepoRoot)/NuGet.Config</GeneratedNuGetConfig>
   </PropertyGroup>
 </Project>
