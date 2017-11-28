@@ -227,10 +227,10 @@ check_pre_reqs() {
         local librarypath=${LD_LIBRARY_PATH:-}
         LDCONFIG_COMMAND="$LDCONFIG_COMMAND -NXv ${librarypath//:/ }"
 
-        [ -z "$($LDCONFIG_COMMAND | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && failing=true
-        [ -z "$($LDCONFIG_COMMAND | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && failing=true
-        [ -z "$($LDCONFIG_COMMAND | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && failing=true
-        [ -z "$($LDCONFIG_COMMAND | grep -F libcurl.so)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && failing=true
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep -F libcurl.so)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && failing=true
     fi
 
     if [ "$failing" = true ]; then
