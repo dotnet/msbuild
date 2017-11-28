@@ -76,6 +76,25 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItDoesNotImplicitlyBuildAProjectWhenRunningWithTheNoBuildOption()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var result = new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput("--no-build -v:m");
+
+            result.Should().Fail();
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.Should().NotHaveStdOutContaining("Restore");
+            }
+        }
+
+        [Fact]
         public void ItDoesNotImplicitlyRestoreAProjectWhenRunningWithTheNoRestoreOption()
         {
             var testAppName = "MSBuildTestApp";
