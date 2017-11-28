@@ -187,6 +187,25 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
         }
 
         [Fact]
+        public void ItDoesNotImplicitlyBuildAProjectWhenPackagingWithTheNoBuildOption()
+        {
+            var testInstance = TestAssets.Get("TestAppSimple")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            var result = new PackCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("--no-build");
+
+            result.Should().Fail();
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.Should().NotHaveStdOutContaining("Restore")
+                    .And.HaveStdOutContaining("project.assets.json");
+            }
+        }
+
+        [Fact]
         public void ItDoesNotImplicitlyRestoreAProjectWhenPackagingWithTheNoRestoreOption()
         {
             var testInstance = TestAssets.Get("TestAppSimple")

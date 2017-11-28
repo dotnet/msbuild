@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="translated">Ignorez la génération du projet avant la compression. Par défaut, le projet est généré.</target>
+        <source>Do not build project before packing.  Implies --no-restore.</source>
+        <target state="needs-review-translation">Ignorez la génération du projet avant la compression. Par défaut, le projet est généré.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
