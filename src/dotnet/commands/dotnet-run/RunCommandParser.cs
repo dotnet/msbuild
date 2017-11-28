@@ -51,7 +51,8 @@ namespace Microsoft.DotNet.Cli
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
                         Accept.NoArguments()),
-                    CommonOptions.NoRestoreOption()
+                    CommonOptions.NoRestoreOption(),
+                    CommonOptions.VerbosityOption()
                 });
     }
 }
