@@ -18,9 +18,6 @@
     <DebugType>embedded</DebugType>
     <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
 
-    <!-- When targeting .NET Framework, run tests in an x86 process (even if compiled for AnyCPU -->
-    <TestArchitectures Condition="$(TargetFramework.StartsWith('net4'))">x86</TestArchitectures>
-
     <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
     <OutputType>Exe</OutputType>
     <GenerateProgramFile>false</GenerateProgramFile>
