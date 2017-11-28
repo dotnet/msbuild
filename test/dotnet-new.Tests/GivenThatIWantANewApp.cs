@@ -75,14 +75,13 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Theory]
-        [InlineData("console", "microsoft.netcore.app")]
-        [InlineData("classlib", "netstandard.library")]
-        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
+        [InlineData("console", "microsoft.netcore.app", "2.0.0")]
+        [InlineData("classlib", "netstandard.library", "2.0.1")]
+        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName, string expectedVersion)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Project";
-            var expectedVersion = "2.0.0";
             var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
             new NewCommand()
