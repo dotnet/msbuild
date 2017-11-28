@@ -89,7 +89,9 @@ namespace Microsoft.Build.Logging
                     e.Message,
                     e.HelpKeyword,
                     e.SenderName,
-                    MessageImportance.Normal);
+                    MessageImportance.Normal,
+                    e.Timestamp);
+                buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
                 Write(buildMessageEventArgs);
             }
         }
@@ -265,6 +267,7 @@ namespace Microsoft.Build.Logging
         {
             Write(BinaryLogRecordKind.ProjectImported);
             WriteMessageFields(e);
+            Write(e.ImportIgnored);
             WriteOptionalString(e.ImportedProjectFile);
             WriteOptionalString(e.UnexpandedProject);
         }

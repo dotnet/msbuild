@@ -3272,8 +3272,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected1Foo, projectContents, @".\1.foo");
 
             using (var env = TestEnvironment.Create())
-            using (var projectCollection = new ProjectCollection())
             {
+                var projectCollection = env.CreateProjectCollection().Collection;
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], "u/x");
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
@@ -3284,6 +3284,39 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 AssertProvenanceResult(expected2Foo, project.GetItemProvenance(@"../x/d13/../../x/d12/d23/../2.foo"));
                 AssertProvenanceResult(new ProvenanceResultTupleList(), project.GetItemProvenance(@"../x/d13/../x/d12/d23/../2.foo"));
+            }
+        }
+
+        [Fact]
+        public void GetItemProvenanceMatchesAbsoluteAndRelativePaths()
+        {
+            var projectContents =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`1.foo`/>
+                    <B Include=`$(MSBuildProjectDirectory)\1.foo`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            using (var env = TestEnvironment.Create())
+            {
+                var projectCollection = env.CreateProjectCollection().Collection;
+
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+
+                var expectedProvenance = new ProvenanceResultTupleList
+                {
+                    Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                    Tuple.Create("B", Operation.Include, Provenance.StringLiteral | Provenance.Inconclusive, 1)
+                };
+
+                AssertProvenanceResult(expectedProvenance, project.GetItemProvenance(@"1.foo"));
+
+                var absoluteFile = Path.Combine(Path.GetDirectoryName(testFiles.ProjectFile), "1.foo");
+                AssertProvenanceResult(expectedProvenance, project.GetItemProvenance(absoluteFile));
             }
         }
 
@@ -3739,6 +3772,36 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetAllGlobsShouldProduceGlobsThatMatchAbsolutePaths()
+        {
+            var projectContents =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*.cs`/>
+                    <B Include=`$(MSBuildProjectDirectory)\*.cs`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            using (var env = TestEnvironment.Create())
+            {
+                var projectCollection = env.CreateProjectCollection().Collection;
+
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+
+                var absoluteFile = Path.Combine(Path.GetDirectoryName(testFiles.ProjectFile), "a.cs");
+
+                foreach (var globResult in project.GetAllGlobs())
+                {
+                    globResult.MsBuildGlob.IsMatch("a.cs").ShouldBeTrue();
+                    globResult.MsBuildGlob.IsMatch(absoluteFile).ShouldBeTrue();
+                }
+            }
+        }
+
+        [Fact]
         public void GetAllGlobsShouldFindGlobsByItemType()
         {
             var project =
@@ -3937,11 +4000,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
 ";
-                string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
+                var importFile = env.CreateFile(".targets");
+                File.WriteAllText(importFile.Path, contents);
                 ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
 
                 pre.AddPropertyGroup().AddProperty("NotUsed", "");
-                var import = pre.AddImport(importPath);
+                var import = pre.AddImport(importFile.Path);
 
                 pre.Save();
                 pre.Reload();
@@ -3956,6 +4020,140 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
                     Assert.NotNull(eventArgs);
+                    Assert.True(eventArgs.ImportIgnored);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Equal(importFile.Path, eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being empty.");
+                }
+            }
+        }
+
+        [Fact]
+        public void ProjectImportedEventInvalidFile()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project>BROKEN</Project>
+";
+
+                var importFile = env.CreateFile(".targets");
+                File.WriteAllText(importFile.Path, contents);
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+                var import = pre.AddImport(importFile.Path);
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreInvalidImports);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+                    Assert.True(eventArgs.ImportIgnored);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Equal(importFile.Path, eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being invalid.");
+                }
+            }
+        }
+
+        [Fact]
+        public void ProjectImportedEventMissingFile()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+
+                string importPath = Path.Combine(pre.DirectoryPath, Guid.NewGuid().ToString());
+                var import = pre.AddImport(importPath);
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreMissingImports);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+                    Assert.True(eventArgs.ImportIgnored);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Equal(importPath, eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file not existing.");
+                }
+            }
+        }
+
+        [Fact]
+        public void ProjectImportedEventMissingFileNoGlobMatch()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+
+                string importGlob = Path.Combine(pre.DirectoryPath, @"__NoMatch__\**");
+                var import = pre.AddImport(importGlob);
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+                    Assert.False(eventArgs.ImportIgnored);
 
                     Assert.Equal(import.Project, eventArgs.UnexpandedProject);
 
@@ -3966,7 +4164,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Assert.Equal(6, eventArgs.LineNumber);
                     Assert.Equal(3, eventArgs.ColumnNumber);
 
-                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being empty.");
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to no matching files.");
                 }
             }
         }
@@ -4010,6 +4208,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     Assert.Equal(pre2.FullPath, eventArgs.ProjectFile);
 
+                    Assert.False(eventArgs.ImportIgnored);
                     Assert.Equal(6, eventArgs.LineNumber);
                     Assert.Equal(3, eventArgs.ColumnNumber);
 

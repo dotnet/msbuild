@@ -12,6 +12,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -245,6 +246,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </ItemGroup>
             </Target>
             </Project>");
+
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
@@ -253,6 +255,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Equal("a1", i1Group.First().EvaluatedInclude);
             Assert.Equal("b1", i2Group.First().EvaluatedInclude);
+        }
+
+        internal const string TargetitemwithIncludeAndExclude = @"
+                    <Project>
+                       <Target Name=`t`>
+                          <ItemGroup>
+                              <i Include='{0}' Exclude='{1}'/>
+                          </ItemGroup>
+                       </Target>
+                    </Project>
+                ";
+
+        public static IEnumerable<object[]> IncludesAndExcludesWithWildcardsTestData => GlobbingTestData.IncludesAndExcludesWithWildcardsTestData;
+
+        [Theory]
+        [MemberData(nameof(IncludesAndExcludesWithWildcardsTestData))]
+        public void ItemsWithWildcards(string includeString, string excludeString, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute)
+        {
+            var projectContents = string.Format(TargetitemwithIncludeAndExclude, includeString, excludeString).Cleanup();
+
+            AssertItemEvaluationFromTarget(projectContents, "t", "i", inputFiles, expectedInclude, makeExpectedIncludeAbsolute, normalizeSlashes: true);
         }
 
         [Fact]
@@ -3554,6 +3577,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             task.ExecuteTask(lookup);
+        }
+
+        internal static void AssertItemEvaluationFromTarget(string projectContents, string targetName, string itemType, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        {
+            ObjectModelHelpers.AssertItemEvaluationFromGenericItemEvaluator((p, c) =>
+                {
+                    var project = new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c);
+                    var projectInstance = project.CreateProjectInstance();
+                    var targetChild = projectInstance.Targets["t"].Children.First();
+
+                    var nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
+                    var entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { targetName }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0"));
+                    entry.RequestConfiguration.Project = projectInstance;
+                    var task = IntrinsicTask.InstantiateTask(
+                        targetChild,
+                        nodeContext.LogProjectStarted(entry).LogTargetBatchStarted(projectInstance.FullPath, projectInstance.Targets["t"], null),
+                        projectInstance,
+                        false);
+
+                    var lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), null);
+                    task.ExecuteTask(lookup);
+
+                    return lookup.GetItems(itemType).Select(i => (ObjectModelHelpers.TestItem)new ObjectModelHelpers.ProjectItemInstanceTestItemAdapter(i)).ToList();
+                },
+                projectContents,
+                inputFiles,
+                expectedInclude,
+                makeExpectedIncludeAbsolute,
+                expectedMetadataPerItem,
+                normalizeSlashes);
         }
         #endregion
     }

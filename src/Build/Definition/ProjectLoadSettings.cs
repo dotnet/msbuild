@@ -43,5 +43,16 @@ namespace Microsoft.Build.Evaluation
         /// Ignore empty targets files when evaluating the project
         /// </summary>
         IgnoreEmptyImports = 16,
+
+        /// <summary>
+        /// By default, evaluations performed via <see cref="Project"/> evaluate and collect elements whose conditions were false (e.g. <see cref="Project.ItemsIgnoringCondition"/>).
+        /// This flag turns off this behaviour. <see cref="Project"/> members that collect such elements will throw when accessed.
+        /// </summary>
+        DoNotEvaluateElementsWithFalseCondition = 32,
+
+        /// <summary>
+        /// Ignore invalid target files when evaluating the project
+        /// </summary>
+        IgnoreInvalidImports = 64,
     }
 }

@@ -78,7 +78,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private AssemblyNameExtension()
         {
-            InitializeRemappedFrom();
         }
 
         /// <summary>
@@ -714,7 +713,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            if (!CompareCulture(that))
+            if (!CompareCultures(AssemblyName, that.AssemblyName))
             {
                 return false;
             }
@@ -735,12 +734,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Allows the comparison of the culture.
         /// </summary>
-        internal bool CompareCulture(AssemblyNameExtension that)
+        internal static bool CompareCultures(AssemblyName a, AssemblyName b)
         {
             // Do the Cultures match?
 #if FEATURE_ASSEMBLYNAME_CULTUREINFO
-            CultureInfo aCulture = CultureInfo;
-            CultureInfo bCulture = that.CultureInfo;
+            CultureInfo aCulture = a.CultureInfo;
+            CultureInfo bCulture = b.CultureInfo;
             if (aCulture == null)
             {
                 aCulture = CultureInfo.InvariantCulture;
@@ -757,7 +756,23 @@ namespace Microsoft.Build.Shared
 
             return true;
 #else
-            return CultureInfo?.Name == that.CultureInfo?.Name;
+            string aCulture = a.CultureName;
+            string bCulture = b.CultureName;
+            if (aCulture == null)
+            {
+                aCulture = CultureInfo.InvariantCulture.Name;
+            }
+            if (bCulture == null)
+            {
+                bCulture = CultureInfo.InvariantCulture.Name;
+            }
+
+            if (aCulture != bCulture)
+            {
+                return false;
+            }
+
+            return true;
 #endif
         }
 
@@ -775,7 +790,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Compare two public key tokens.
         /// </summary>
-        private static bool ComparePublicKeyTokens(byte[] aPKT, byte[] bPKT)
+        internal static bool ComparePublicKeyTokens(byte[] aPKT, byte[] bPKT)
         {
             // Some assemblies (real case was interop assembly) may have null PKTs.
             if (aPKT == null)
@@ -927,7 +942,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            if ((comparisonFlags & PartialComparisonFlags.Culture) != 0 && CultureInfo != null && (that.CultureInfo == null || !CompareCulture(that)))
+            if ((comparisonFlags & PartialComparisonFlags.Culture) != 0 && CultureInfo != null && (that.CultureInfo == null || !CompareCultures(AssemblyName, that.AssemblyName)))
             {
                 return false;
             }

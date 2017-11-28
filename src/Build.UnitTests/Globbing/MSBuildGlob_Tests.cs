@@ -29,7 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         {
             var glob = MSBuildGlob.Parse(globRoot, "*");
 
-            Assert.Equal(glob._globRoot.LastOrDefault(), Path.DirectorySeparatorChar);
+            Assert.Equal(glob.TestOnlyGlobRoot.LastOrDefault(), Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var glob = MSBuildGlob.Parse(globRoot, "*");
 
             var expectedRoot = Path.Combine(Directory.GetCurrentDirectory(), globRoot).WithTrailingSlash();
-            Assert.Equal(expectedRoot, glob._globRoot);
+            Assert.Equal(expectedRoot, glob.TestOnlyGlobRoot);
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         {
             var glob = MSBuildGlob.Parse(string.Empty, "*");
 
-            Assert.Equal(Directory.GetCurrentDirectory().WithTrailingSlash(), glob._globRoot);
+            Assert.Equal(Directory.GetCurrentDirectory().WithTrailingSlash(), glob.TestOnlyGlobRoot);
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var glob = MSBuildGlob.Parse(globRoot, "*");
 
             var expectedRoot = NormalizeRelativePathForGlobRepresentation(globRoot);
-            Assert.Equal(expectedRoot, glob._globRoot);
+            Assert.Equal(expectedRoot, glob.TestOnlyGlobRoot);
         }
 
         [Fact]
@@ -118,11 +118,11 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var expectedFixedDirectory = Path.Combine(globRoot, "b").WithTrailingSlash();
 
             Assert.True(glob.IsLegal);
-            Assert.Equal(true, glob._needsRecursion);
-            Assert.Equal(fileSpec, glob._fileSpec);
+            Assert.Equal(true, glob.TestOnlyNeedsRecursion);
+            Assert.Equal(fileSpec, glob.TestOnlyFileSpec);
 
-            Assert.Equal(globRoot.WithTrailingSlash(), glob._globRoot);
-            Assert.True(glob.FixedDirectoryPart.StartsWith(glob._globRoot));
+            Assert.Equal(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
+            Assert.True(glob.FixedDirectoryPart.StartsWith(glob.TestOnlyGlobRoot));
 
             Assert.Equal(expectedFixedDirectory, glob.FixedDirectoryPart);
             Assert.Equal("**/", glob.WildcardDirectoryPart);
@@ -137,14 +137,16 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var glob = MSBuildGlob.Parse(globRoot, illegalFileSpec);
 
             Assert.False(glob.IsLegal);
-            Assert.Equal(false, glob._needsRecursion);
-            Assert.Equal(illegalFileSpec, glob._fileSpec);
+            Assert.Equal(false, glob.TestOnlyNeedsRecursion);
+            Assert.Equal(illegalFileSpec, glob.TestOnlyFileSpec);
 
-            Assert.Equal(globRoot.WithTrailingSlash(), glob._globRoot);
+            Assert.Equal(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
 
             Assert.Equal(string.Empty, glob.FixedDirectoryPart);
             Assert.Equal(string.Empty, glob.WildcardDirectoryPart);
             Assert.Equal(string.Empty, glob.FilenamePart);
+
+            Assert.False(glob.IsMatch($"b/.../c/d.cs"));
         }
 
         [Fact]

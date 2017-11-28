@@ -2052,6 +2052,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">工作處理站必須傳回 "TaskType" 屬性的值。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">因為 ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition 已在載入此專案時設定，所以指定的 API "{0}" 無法使用。</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

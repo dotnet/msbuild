@@ -31,6 +31,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using System.Globalization;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 
@@ -535,6 +536,8 @@ namespace Microsoft.Build.Evaluation
             UseProjectCollectionSetting
         }
 
+        internal Data TestOnlyGetPrivateData => _data;
+
         /// <summary>
         /// Gets or sets the project collection which contains this project.
         /// Can never be null.
@@ -747,7 +750,14 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return new ReadOnlyCollection<ProjectItem>(_data.ItemsIgnoringCondition); }
+            {
+                if (!(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
+                {
+                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ItemsIgnoringCondition));
+                }
+
+                return new ReadOnlyCollection<ProjectItem>(_data.ItemsIgnoringCondition);
+            }
         }
 
         /// <summary>
@@ -2687,7 +2697,10 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            _data = new Data(this, globalPropertiesCollection, toolsVersion, subToolsetVersion);
+            // For back compat Project based evaluations should, by default, evaluate elements with false conditions
+            var canEvaluateElementsWithFalseConditions = Traits.Instance.EscapeHatches.EvaluateElementsWithFalseConditionInProjectEvaluation ?? !loadSettings.HasFlag(ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+
+            _data = new Data(this, globalPropertiesCollection, toolsVersion, subToolsetVersion, canEvaluateElementsWithFalseConditions);
 
             _loadSettings = loadSettings;
 
@@ -2917,12 +2930,13 @@ namespace Microsoft.Build.Evaluation
             /// Constructor taking the immutable global properties and tools version.
             /// Tools version may be null.
             /// </summary>
-            internal Data(Project project, PropertyDictionary<ProjectPropertyInstance> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion)
+            internal Data(Project project, PropertyDictionary<ProjectPropertyInstance> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, bool CanEvaluateElementsWithFalseConditions)
             {
                 _project = project;
                 _globalProperties = globalProperties;
                 this.ExplicitToolsVersion = explicitToolsVersion;
                 this.ExplicitSubToolsetVersion = explicitSubToolsetVersion;
+                this.CanEvaluateElementsWithFalseConditions = CanEvaluateElementsWithFalseConditions;
             }
 
             /// <summary>
@@ -2930,10 +2944,9 @@ namespace Microsoft.Build.Evaluation
             /// as well as items respecting condition; and collect
             /// conditioned properties, as well as regular properties
             /// </summary>
-            bool IEvaluatorData<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.ShouldEvaluateForDesignTime
-            {
-                get { return true; }
-            }
+            public bool ShouldEvaluateForDesignTime => true;
+
+            public bool CanEvaluateElementsWithFalseConditions { get; }
 
             /// <summary>
             /// Collection of all evaluated item definitions, one per item-type

@@ -1362,7 +1362,7 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
@@ -2413,7 +2413,7 @@
       </trans-unit>
       <trans-unit id="Copy.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

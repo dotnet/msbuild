@@ -2070,6 +2070,7 @@ namespace Microsoft.Build.Tasks
                     getAssemblyName = _cache.CacheDelegate(getAssemblyName);
                     getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
                     fileExists = _cache.CacheDelegate(fileExists);
+                    directoryExists = _cache.CacheDelegate(directoryExists);
                     getDirectories = _cache.CacheDelegate(getDirectories);
                     getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);
 #endif

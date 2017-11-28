@@ -11,7 +11,7 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which is used to implement custom MSBuild tasks.</description>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>MSBuild</tags>
     <dependencies>
       <group targetFramework=".NETStandard1.3">

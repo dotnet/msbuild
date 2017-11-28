@@ -43,7 +43,7 @@
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.6.35</GitVersioningVersion>
     <NuSpecReferenceGeneratorVersion>1.4.2</NuSpecReferenceGeneratorVersion>
-    <NuGetVersion>4.5.0-preview1-4518</NuGetVersion>
+    <NuGetVersion>4.5.0-preview2-4529</NuGetVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
@@ -271,8 +271,8 @@
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOADFROM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOCATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_GETENTRYASSEMBLY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CULTUREINFO</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETCONSTRUCTOR</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
@@ -436,6 +436,20 @@
   <ItemGroup>
     <Languages Include="cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant"/>
   </ItemGroup>
+
+  <!-- Workaround for Orchestrated .NET Core product build
+
+       The buildtools signing/microbuild targets currently used by the msbuild project are very old.
+       They do not have support for 'SignType' == 'public'.  This block of code deals with this by
+       translating the 'public' sign type into 'oss' which will be usable by the buildtools version
+       at this point.  To avoid the problem of the global command line parameter passed in being set to
+       'public' permanantly, we use 'MSSignType' instead as the input.
+       UseOpenSourceSign is used internally to denote OSS signing. -->
+  <PropertyGroup>
+    <UseOpenSourceSign Condition="'$(MSSignType)'=='public'">true</UseOpenSourceSign>
+    <SignType Condition="'$(MSSignType)'=='public'">oss</SignType>
+    <SignType Condition="'$(MSSignType)'!='public'">$(MSSignType)</SignType>
+  </PropertyGroup>
 
   <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props" Condition="'$(IsTestProject)' != 'true' And '$(DebugType)' == 'full' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props')" />
 

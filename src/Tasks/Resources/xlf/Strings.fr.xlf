@@ -1698,8 +1698,8 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: Des conflits entre différentes versions du même assembly dépendant ont été détectés, mais n'ont pas pu être résolus.  Ces conflits de référence sont consignés dans le fichier journal de génération quand le niveau de commentaires est défini sur Detailed.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
+        <target state="translated">MSB3277: Des conflits entre différentes versions de "{0}" ont été trouvés et n'ont pas pu être résolus.  Ces conflits de référence sont consignés dans le journal de génération quand le niveau de détail du journal est défini sur Detailed.</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

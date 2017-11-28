@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using Xunit;
 using ProjectInstanceItemSpec =
     Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance>;
@@ -33,6 +35,26 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         }
 
         [Fact]
+        public void AbsolutePathsShouldMatch()
+        {
+            var absoluteRootPath = NativeMethodsShared.IsWindows
+                ? @"c:\a\b"
+                : "/a/b";
+
+            var projectFile = Path.Combine(absoluteRootPath, "build.proj");
+            var absoluteSpec = Path.Combine(absoluteRootPath, "s.cs");
+
+            var itemSpecFromAbsolute = CreateItemSpecFrom(absoluteSpec, CreateExpander(new Dictionary<string, string[]>()), new MockElementLocation(projectFile));
+            var itemSpecFromRelative = CreateItemSpecFrom("s.cs", CreateExpander(new Dictionary<string, string[]>()), new MockElementLocation(projectFile));
+
+            itemSpecFromRelative.ToMSBuildGlob().IsMatch("s.cs").ShouldBeTrue();
+            itemSpecFromRelative.ToMSBuildGlob().IsMatch(absoluteSpec).ShouldBeTrue();
+
+            itemSpecFromAbsolute.ToMSBuildGlob().IsMatch("s.cs").ShouldBeTrue();
+            itemSpecFromAbsolute.ToMSBuildGlob().IsMatch(absoluteSpec).ShouldBeTrue();
+        }
+
+        [Fact]
         public void FragmentGlobsWorkAfterStateIsPartiallyInitializedByOtherOperations()
         {
             var itemSpec = CreateItemSpecFrom("a;b*;c*;@(foo)", CreateExpander(new Dictionary<string, string[]> {{"foo", new[] {"d", "e"}}}));
@@ -52,9 +74,11 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             Assert.True(itemSpecGlob.IsMatch("e"));
         }
 
-        private ProjectInstanceItemSpec CreateItemSpecFrom(string itemSpec, ProjectInstanceExpander expander)
+        private ProjectInstanceItemSpec CreateItemSpecFrom(string itemSpec, ProjectInstanceExpander expander, IElementLocation location = null)
         {
-            return new ProjectInstanceItemSpec(itemSpec, expander, MockElementLocation.Instance, Path.GetDirectoryName(MockElementLocation.Instance.File));
+            location = location ?? MockElementLocation.Instance;
+
+            return new ProjectInstanceItemSpec(itemSpec, expander, location, Path.GetDirectoryName(location.File));
         }
 
         private ProjectInstanceExpander CreateExpander(Dictionary<string, string[]> items)

@@ -2052,6 +2052,11 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
         <target state="translated">Fabryka zadań musi zwracać wartość właściwości „TaskType”.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+        <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
+        <target state="translated">Określony interfejs API „{0}” jest niedostępny, ponieważ podczas ładowania tego projektu został ustawiony element ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

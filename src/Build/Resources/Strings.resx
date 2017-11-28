@@ -1491,6 +1491,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_ProjectInstanceImmutable">
     <value>Instance object was created as immutable.</value>    
   </data>
+  <data name="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+    <value>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</value>    
+  </data>
   <!-- #################################################################################################-->
   <!-- ############################## Execution-model-related strings #################################-->
   <!-- #################################################################################################-->
@@ -1620,7 +1623,15 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProjectImportSkippedEmptyFile">
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being empty.</value>
   </data>
-  
+
+  <data name="ProjectImportSkippedInvalidFile">
+    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being invalid.</value>
+  </data>
+
+  <data name="ProjectImportSkippedMissingFile">
+    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file not existing.</value>
+  </data>
+
   <data name="ProjectImported">
     <value>Importing project &quot;{0}&quot; into project &quot;{1}&quot; at ({2},{3}).</value>
   </data>

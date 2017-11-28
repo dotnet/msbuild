@@ -748,7 +748,9 @@ namespace Microsoft.Build.Evaluation
     public enum ProjectLoadSettings
     {
         Default = 0,
+        DoNotEvaluateElementsWithFalseCondition = 32,
         IgnoreEmptyImports = 16,
+        IgnoreInvalidImports = 64,
         IgnoreMissingImports = 1,
         RecordDuplicateButNotCircularImports = 2,
         RecordEvaluatedItemElements = 8,
@@ -1361,10 +1363,10 @@ namespace Microsoft.Build.Globbing
     public partial class MSBuildGlob : Microsoft.Build.Globbing.IMSBuildGlob
     {
         internal MSBuildGlob() { }
-        public string FilenamePart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string FixedDirectoryPart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public bool IsLegal { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string WildcardDirectoryPart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string FilenamePart { get { throw null; } }
+        public string FixedDirectoryPart { get { throw null; } }
+        public bool IsLegal { get { throw null; } }
+        public string WildcardDirectoryPart { get { throw null; } }
         public bool IsMatch(string stringToMatch) { throw null; }
         public Microsoft.Build.Globbing.MSBuildGlob.MatchInfoResult MatchInfo(string stringToMatch) { throw null; }
         public static Microsoft.Build.Globbing.MSBuildGlob Parse(string fileSpec) { throw null; }

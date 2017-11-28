@@ -1281,7 +1281,7 @@ namespace Microsoft.Build.Evaluation
                 itemGroupConditionResult = EvaluateCondition(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
             }
 
-            if (itemGroupConditionResult || _data.ShouldEvaluateForDesignTime)
+            if (itemGroupConditionResult || (_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
                 foreach (ProjectItemElement itemElement in itemGroupElement.Items)
                 {
@@ -1694,7 +1694,7 @@ namespace Microsoft.Build.Evaluation
                 itemConditionResult = EvaluateCondition(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
             }
 
-            if (!itemConditionResult && !_data.ShouldEvaluateForDesignTime)
+            if (!itemConditionResult && !(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
 #if FEATURE_MSBUILD_DEBUGGER
                 if (DebuggerManager.DebuggingEnabled)
@@ -2481,7 +2481,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                             UnexpandedProject = importElement.Project,
-                            ProjectFile = importElement.ContainingProject.FullPath
+                            ProjectFile = importElement.ContainingProject.FullPath,
                         };
 
                         _evaluationLoggingContext.LogBuildEvent(eventArgs);
@@ -2632,9 +2632,32 @@ namespace Microsoft.Build.Evaluation
                         // There's a specific message for file not existing
                         if (!File.Exists(importFileUnescaped))
                         {
-                            if (!throwOnFileNotExistsError ||
-                                (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
+                            bool ignoreMissingImportsFlagSet = (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0;
+                            if (!throwOnFileNotExistsError || ignoreMissingImportsFlagSet)
                             {
+                                if (ignoreMissingImportsFlagSet)
+                                {
+                                    // Log message for import skipped
+                                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                        importElement.Location.Line,
+                                        importElement.Location.Column,
+                                        ResourceUtilities.GetResourceString("ProjectImportSkippedMissingFile"),
+                                        importFileUnescaped,
+                                        importElement.ContainingProject.FullPath,
+                                        importElement.Location.Line,
+                                        importElement.Location.Column)
+                                    {
+                                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                        UnexpandedProject = importElement.Project,
+                                        ProjectFile = importElement.ContainingProject.FullPath,
+                                        ImportedProjectFile = importFileUnescaped,
+                                        ImportIgnored = true,
+                                    };
+
+                                    _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                                }
+
+
                                 continue;
                             }
 
@@ -2643,16 +2666,33 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
-                            // If IgnoreEmptyImports is enabled, check if the file is considered empty
-                            //
+                            bool ignoreImport = false;
+                            string ignoreImportResource = null;
+
                             if (((_loadSettings & ProjectLoadSettings.IgnoreEmptyImports) != 0 || Traits.Instance.EscapeHatches.IgnoreEmptyImports) && ProjectRootElement.IsEmptyXmlFile(importFileUnescaped))
+                            {
+                                // If IgnoreEmptyImports is enabled, check if the file is considered empty
+                                //
+                                ignoreImport = true;
+                                ignoreImportResource = "ProjectImportSkippedEmptyFile";
+                            }
+                            else if ((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0)
+                            {
+                                // If IgnoreInvalidImports is enabled, log all other non-handled exceptions and continue
+                                //
+                                ignoreImport = true;
+                                ignoreImportResource = "ProjectImportSkippedInvalidFile";
+                            }
+
+                            if (ignoreImport)
                             {
                                 atleastOneImportIgnored = true;
 
+                                // Log message for import skipped
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                                     importElement.Location.Line,
                                     importElement.Location.Column,
-                                    ResourceUtilities.GetResourceString("ProjectImportSkippedEmptyFile"),
+                                    ResourceUtilities.GetResourceString(ignoreImportResource),
                                     importFileUnescaped,
                                     importElement.ContainingProject.FullPath,
                                     importElement.Location.Line,
@@ -2660,7 +2700,9 @@ namespace Microsoft.Build.Evaluation
                                 {
                                     BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                                     UnexpandedProject = importElement.Project,
-                                    ProjectFile = importElement.ContainingProject.FullPath
+                                    ProjectFile = importElement.ContainingProject.FullPath,
+                                    ImportedProjectFile = importFileUnescaped,
+                                    ImportIgnored = true,
                                 };
 
                                 _evaluationLoggingContext.LogBuildEvent(eventArgs);
