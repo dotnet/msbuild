@@ -113,6 +113,11 @@ namespace Microsoft.Build.BackEnd
         private TargetEntry _parentTarget;
 
         /// <summary>
+        /// Why the parent target built this target.
+        /// </summary>
+        private TargetBuiltReason _buildReason;
+
+        /// <summary>
         /// The expander used to expand item and property markup to evaluated values.
         /// </summary>
         private Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
@@ -165,9 +170,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetSpecification">The specification for the target to build.</param>
         /// <param name="baseLookup">The lookup to use.</param>
         /// <param name="parentTarget">The parent of this entry, if any.</param>
+        /// <param name="buildReason">The reason the parent built this target.</param>
         /// <param name="host">The Build Component Host to use.</param>
         /// <param name="stopProcessingOnCompletion">True if the target builder should stop processing the current target stack when this target is complete.</param>
-        internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, IBuildComponentHost host, bool stopProcessingOnCompletion)
+        internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, TargetBuiltReason buildReason, IBuildComponentHost host, bool stopProcessingOnCompletion)
         {
             ErrorUtilities.VerifyThrowArgumentNull(requestEntry, "requestEntry");
             ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, "targetBuilderCallback");
@@ -179,6 +185,7 @@ namespace Microsoft.Build.BackEnd
             _targetBuilderCallback = targetBuilderCallback;
             _targetSpecification = targetSpecification;
             _parentTarget = parentTarget;
+            _buildReason = buildReason;
             _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup.ReadOnlyLookup, baseLookup.ReadOnlyLookup);
             _state = TargetEntryState.Dependencies;
             _baseLookup = baseLookup;
@@ -297,6 +304,17 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Why the parent target built this target.
+        /// </summary>
+        internal TargetBuiltReason BuildReason
+        {
+            get
+            {
+                return _buildReason;
+            }
+        }
+
         #region IEquatable<TargetEntry> Members
 
         /// <summary>
@@ -372,7 +390,8 @@ namespace Microsoft.Build.BackEnd
                     {
                         BuildEventContext = projectLoggingContext.BuildEventContext,
                         TargetName = _target.Name,
-                        ParentTarget = ParentEntry?.Target?.Name
+                        ParentTarget = ParentEntry?.Target?.Name,
+                        BuildReason = BuildReason
                     };
                     projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
                 }
@@ -438,7 +457,7 @@ namespace Microsoft.Build.BackEnd
                         break;
                     }
 
-                    targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName);
+                    targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
                     WorkUnitResult bucketResult = null;
                     targetSuccess = false;
 

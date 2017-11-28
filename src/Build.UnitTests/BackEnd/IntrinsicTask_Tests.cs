@@ -3534,7 +3534,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             entry.RequestConfiguration.Project = projectInstance;
             IntrinsicTask task = IntrinsicTask.InstantiateTask(
                 targetChild,
-                nodeContext.LogProjectStarted(entry).LogTargetBatchStarted(projectInstance.FullPath, projectInstance.Targets["t"], null),
+                nodeContext.LogProjectStarted(entry).LogTargetBatchStarted(projectInstance.FullPath, projectInstance.Targets["t"], null, TargetBuiltReason.None),
                 projectInstance,
                 false);
 

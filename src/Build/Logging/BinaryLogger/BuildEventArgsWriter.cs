@@ -171,6 +171,7 @@ namespace Microsoft.Build.Logging
             WriteOptionalString(e.ProjectFile);
             WriteOptionalString(e.TargetFile);
             WriteOptionalString(e.ParentTarget);
+            Write((int) e.BuildReason);
         }
 
         private void Write(TargetFinishedEventArgs e)
@@ -273,6 +274,7 @@ namespace Microsoft.Build.Logging
             Write(BinaryLogRecordKind.TargetSkipped);
             WriteMessageFields(e);
             WriteOptionalString(e.ParentTarget);
+            Write((int)e.BuildReason);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)

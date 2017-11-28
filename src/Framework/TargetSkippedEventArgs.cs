@@ -41,5 +41,10 @@ namespace Microsoft.Build.Framework
         /// Gets or sets the parent target of the target being skipped.
         /// </summary>
         public string ParentTarget { get; set; }
+
+        /// <summary>
+        /// Why the parent target built this target.
+        /// </summary>
+        public TargetBuiltReason BuildReason { get; set; }
     }
 }

@@ -108,6 +108,7 @@ namespace Microsoft.Build.UnitTests
                 "C:\\projectfile.proj",
                 "C:\\Common.targets",
                 "ParentTarget",
+                TargetBuiltReason.AfterTargets,
                 DateTime.Parse("12/12/2015 06:11:56 PM"));
 
             Roundtrip(args,
@@ -115,6 +116,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.ProjectFile,
                 e => e.TargetFile,
                 e => e.TargetName,
+                e => e.BuildReason.ToString(),
                 e => e.Timestamp.ToString());
         }
 
@@ -366,7 +368,8 @@ namespace Microsoft.Build.UnitTests
             {
                 BuildEventContext = BuildEventContext.Invalid,
                 ProjectFile = "foo.csproj",
-                ParentTarget = "bar"
+                ParentTarget = "bar",
+                BuildReason = TargetBuiltReason.DependsOn
             };
 
             Roundtrip(args,
@@ -376,7 +379,8 @@ namespace Microsoft.Build.UnitTests
                 e => e.ColumnNumber.ToString(),
                 e => e.LineNumber.ToString(),
                 e => e.Message,
-                e => e.ProjectFile);
+                e => e.ProjectFile,
+                e => e.BuildReason.ToString());
         }
 
         [Fact]

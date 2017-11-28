@@ -158,6 +158,7 @@ namespace Microsoft.Build.Logging
             // Read unused Importance, it defaults to Low
             ReadInt32();
             var parentTarget = ReadOptionalString();
+            var buildReason = (TargetBuiltReason)ReadInt32();
 
             var e = new TargetSkippedEventArgs(
                 fields.Message);
@@ -167,6 +168,7 @@ namespace Microsoft.Build.Logging
             e.ProjectFile = fields.ProjectFile;
 
             e.ParentTarget = parentTarget;
+            e.BuildReason = buildReason;
             return e;
         }
 
@@ -277,6 +279,7 @@ namespace Microsoft.Build.Logging
             var projectFile = ReadOptionalString();
             var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
+            var buildReason = (TargetBuiltReason) ReadInt32();
 
             var e = new TargetStartedEventArgs(
                 fields.Message,
@@ -285,6 +288,7 @@ namespace Microsoft.Build.Logging
                 projectFile,
                 targetFile,
                 parentTarget,
+                buildReason,
                 fields.Timestamp);
             SetCommonFields(e, fields);
             return e;
