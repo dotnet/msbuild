@@ -39,8 +39,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal static Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader = new Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader(ReadMachineTypeFromPEHeader);
 
         // Performance checks.
-        internal static Hashtable uniqueFileExists = null;
-        internal static Hashtable uniqueGetAssemblyName = null;
+        internal static Dictionary<string, int> uniqueFileExists = null;
+        internal static Dictionary<string, int> uniqueGetAssemblyName = null;
+
         internal static bool useFrameworkFileExists = false;
         internal const string REDISTLIST = @"<FileList  Redist=""Microsoft-Windows-CLRCoreComp.4.0"" Name="".NET Framework 4"" RuntimeVersion=""4.0"" ToolsVersion=""12.0"">
   <File AssemblyName=""Accessibility"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
@@ -273,8 +274,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal void StartIOMonitoring()
         {
             // If tables are present then the corresponding IO function will do some monitoring.
-            uniqueFileExists = new Hashtable();
-            uniqueGetAssemblyName = new Hashtable();
+            uniqueFileExists = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            uniqueGetAssemblyName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -283,7 +284,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal void StopIOMonitoringAndAssert_Minimal_IOUse()
         {
             // Check for minimal IO in File.Exists.
-            foreach (DictionaryEntry entry in uniqueFileExists)
+            foreach (var entry in uniqueFileExists)
             {
                 string path = (string)entry.Key;
                 int count = (int)entry.Value;
@@ -305,7 +306,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal void StopIOMonitoringAndAssert_Zero_IOUse()
         {
             // Check for minimal IO in File.Exists.
-            foreach (DictionaryEntry entry in uniqueFileExists)
+            foreach (var entry in uniqueFileExists)
             {
                 string path = (string)entry.Key;
                 int count = (int)entry.Value;
@@ -318,7 +319,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             // Check for zero IO in GetAssemblyName.
-            foreach (DictionaryEntry entry in uniqueGetAssemblyName)
+            foreach (var entry in uniqueGetAssemblyName)
             {
                 string path = (string)entry.Key;
                 int count = (int)entry.Value;
@@ -329,6 +330,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
+            uniqueFileExists = null;
+            uniqueGetAssemblyName = null;
+        }
+
+        internal void StopIOMonitoring()
+        {
             uniqueFileExists = null;
             uniqueGetAssemblyName = null;
         }
@@ -788,14 +795,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (uniqueFileExists != null)
             {
                 string lowerPath = path.ToLower();
-                if (uniqueFileExists[lowerPath] == null)
+
+                if (!uniqueFileExists.ContainsKey(lowerPath))
                 {
                     uniqueFileExists[lowerPath] = 0;
                 }
-                else
-                {
-                    uniqueFileExists[lowerPath] = (int)uniqueFileExists[lowerPath] + 1;
-                }
+                
+                uniqueFileExists[lowerPath] = uniqueFileExists[lowerPath] + 1;
             }
 
 
@@ -986,7 +992,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (uniqueGetAssemblyName != null)
             {
                 string lowerPath = path.ToLower();
-                if (uniqueGetAssemblyName[lowerPath] == null)
+                if (!uniqueGetAssemblyName.ContainsKey(lowerPath))
                 {
                     uniqueGetAssemblyName[lowerPath] = 0;
                 }
