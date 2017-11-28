@@ -157,7 +157,7 @@ function InstallRepoToolset {
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
-    dotnet msbuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
+    dotnet msbuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd | Write-Host
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to build $ToolsetProj"
