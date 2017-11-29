@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 // Manually instantiate a test fixture and run it.
                 t.StartIOMonitoring();
-                t.Exists(rarSimulationMode);
+                t.ExistsImpl(rarSimulationMode);
             }
             finally
             {

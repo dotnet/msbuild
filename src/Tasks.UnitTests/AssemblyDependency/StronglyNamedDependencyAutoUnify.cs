@@ -36,7 +36,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// </summary>
         /// <param name="rarSimulationMode"></param>
         [Fact]
-        public void Exists(RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject)
+        public void Exists()
+        {
+            ExistsImpl();
+        }
+
+        internal void ExistsImpl(RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
             // times out the object used for remoting console writes.  Adding a write in the middle of
