@@ -188,8 +188,8 @@ function InstallDotNetCli {
 }
 
 function InstallRepoToolset {
-  RepoToolsetVersion="$( GetVersionsPropsVersion RoslynToolsMicrosoftRepoToolsetVersion )"
-  RepoToolsetDir="$NuGetPackageRoot/roslyntools.microsoft.repotoolset/$RepoToolsetVersion/tools"
+  RepoToolsetVersion="$( GetVersionsPropsVersion RoslynToolsRepoToolsetVersion )"
+  RepoToolsetDir="$NuGetPackageRoot/roslyntools.repotoolset/$RepoToolsetVersion/tools"
   RepoToolsetBuildProj="$RepoToolsetDir/Build.proj"
 
   if $ci || $log

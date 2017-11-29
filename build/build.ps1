@@ -144,8 +144,8 @@ function InstallNuGet {
 }
 
 function InstallRepoToolset {
-  $RepoToolsetVersion = GetVersionsPropsVersion -Name "RoslynToolsMicrosoftRepoToolsetVersion"
-  $RepoToolsetDir = Join-Path $NuGetPackageRoot "roslyntools.microsoft.repotoolset\$RepoToolsetVersion\tools"
+  $RepoToolsetVersion = GetVersionsPropsVersion -Name "RoslynToolsRepoToolsetVersion"
+  $RepoToolsetDir = Join-Path $NuGetPackageRoot "roslyntools.repotoolset\$RepoToolsetVersion\tools"
   $RepoToolsetBuildProj = Join-Path $RepoToolsetDir "Build.proj"
 
   if ($ci -or $log) {
