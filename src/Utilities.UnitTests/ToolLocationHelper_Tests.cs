@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetApiContractReferencesFindsWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetApiContractReferencesFindsVersionedWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetWinBlueSDKLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetWinBlueContentFolderPath()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetSDKRootLocation()
         {
             string expectedValue = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
@@ -155,7 +155,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2569")]
 #endif
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetUnversionedSDKUnionMetadataLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetVersionedSDKUnionMetadataLocation()
         {
             // Create manifest file
@@ -535,7 +535,7 @@ namespace Microsoft.Build.UnitTests
          * Search for a whidbey when whidbey is the current version.
          */
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindFrameworksPathRunningUnderWhidbey()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
@@ -555,7 +555,7 @@ namespace Microsoft.Build.UnitTests
         * Search for a whidbey when orcas is the current version.
         */
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindFrameworksPathRunningUnderOrcas()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests
         * Search for a whidbey when orcas is the current version.
         */
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindFrameworksPathRunningUnderEverett()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
@@ -925,7 +925,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact (Skip="Registry SDKs not supported")]
 #endif
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetPathToDotNetFrameworkSdk()
         {
             // Test out of range .net version.
@@ -1005,7 +1005,7 @@ namespace Microsoft.Build.UnitTests
 #pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this particular test
 #if FEATURE_WIN32_REGISTRY
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetPathToWindowsSdk()
         {
             // Test out of range .net version.
@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs11()
         {
             string projectContents = @"
@@ -2007,7 +2007,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact(Skip = "Special folders not supported")]
 #endif
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void TestGenerateProgramFiles32()
         {
             string programFilesX86Original = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
@@ -2033,7 +2033,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we get the correct reference assembly path out of the framework location helper
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "No ProgramFiles known location outside Windows"
+        [PlatformSpecific(TestPlatforms.Windows)] // "No ProgramFiles known location outside Windows"
         public void TestGeneratedReferenceAssemblyPath()
         {
             string programFiles32 = FrameworkLocationHelper.GenerateProgramFiles32();
@@ -2530,7 +2530,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we can get a list of directories out of the public API.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetAssemblyFoldersExInfoTest()
         {
             SetupAssemblyFoldersExTestConditionRegistryKey();
@@ -3129,7 +3129,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we get no resolved paths when we pass in a root with invalid chars
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // No invalid characters on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
         public void ResolveFromDirectoryInvalidChar()
         {
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform =
@@ -3173,7 +3173,7 @@ namespace Microsoft.Build.UnitTests
         /// present in the manifest and the SDK is a framework extension SDK
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void VerifyFrameworkSdkWithOldManifest()
         {
             string tmpRootDirectory = Path.GetTempPath();

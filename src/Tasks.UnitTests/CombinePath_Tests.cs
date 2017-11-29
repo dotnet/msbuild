@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests
         /// Specified paths contain invalid characters.  Task should continue processing remaining items.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // No invalid characters on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
         public void InvalidPath()
         {
             CombinePath t = new CombinePath();

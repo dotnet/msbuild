@@ -1,0 +1,48 @@
+﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <!-- Import the repo root props -->
+  <Import Project="..\Directory.Build.props"/>
+
+  <!-- Import common project settings provided by RepoToolset -->
+  <Import Project="$(RepoToolsetDir)Settings.props" />
+
+  <!-- Override project defaults provided by Repo toolset -->
+  <PropertyGroup>
+    <!-- Set DebugType.  This logic is repeated in Directory.Build.targets, because xunit.core.targets overrides it -->
+    <DebugType>embedded</DebugType>
+    <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
+
+    <!-- Some hash code implementations may overflow -->
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+
+    <!-- Set up BeforeCommon.targets -->
+    <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
+
+    <Platforms>AnyCPU;x64</Platforms>
+    
+    <!-- Defaults for target frameworks and architecture -->
+    <LibraryTargetFrameworks>netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</LibraryTargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+
+    <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
+    <RuntimeOutputTargetFrameworks>netcoreapp2.0</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp2.0</RuntimeOutputTargetFrameworks>
+
+    <!-- Don't automatically append target framework to output path, since we want to put the Platform Target beforehand, if it's not AnyCPU -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <!-- When targeting .NET Framework, Exe and unit test projects build with x86 architecture if Platform is AnyCPU,
+         and build for x64 architecture when Platform is x64 -->
+    <RuntimeOutputPlatformTarget>x86</RuntimeOutputPlatformTarget>
+    <RuntimeOutputPlatformTarget Condition="'$(Platform)' == 'x64'">x64</RuntimeOutputPlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <!-- When targeting .NET Core, Exe and unit tests projects always use AnyCPU architecture -->
+    <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
+  </PropertyGroup>
+
+</Project>

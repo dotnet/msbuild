@@ -24,7 +24,8 @@ namespace Microsoft.Build.Shared
         {
             "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER",
             "VSTESTHOST", "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST",
-            "JetBrains.ReSharper.TaskRunner.CLR4.x64", "JetBrains.ReSharper.TaskRunner.CLR45"
+            "JetBrains.ReSharper.TaskRunner.CLR4.x64", "JetBrains.ReSharper.TaskRunner.CLR45",
+            "TESTHOST.X86"
         };
 
         private static readonly string[] s_testAssemblies =
