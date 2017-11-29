@@ -1049,7 +1049,7 @@ namespace Microsoft.Build.Tasks
         internal bool ExternallyResolved
         {
             get;
-            set;
+            private set;
         }
 
         /// <summary>
@@ -1117,8 +1117,7 @@ namespace Microsoft.Build.Tasks
             // This is an assembly file, so we'll need to find dependencies later.
             DependenciesFound = false;
 
-            string externallyResolved = sourceItem.GetMetadata("ExternallyResolved");
-            ExternallyResolved = string.Equals(externallyResolved, "true", StringComparison.OrdinalIgnoreCase);
+            ExternallyResolved = MetadataConversionUtilities.TryConvertItemMetadataToBool(sourceItem, "ExternallyResolved");
 
             // Add source items from the original item.
             AddSourceItem(sourceItem);
