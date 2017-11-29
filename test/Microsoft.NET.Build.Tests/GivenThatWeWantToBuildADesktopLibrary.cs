@@ -26,6 +26,39 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
+        [WindowsOnlyFact]
+        public void It_gets_implicit_designtime_facades_when_package_reference_uses_system_runtime()
+        {
+            // The repro here is very sensitive to the target framework and packages used. This specific case
+            // net46 using only System.Collections.Immutable v1.4.0 will not pull in System.Runtime from a
+            // package or from Microsoft.NET.Build.Extensions as a primary reference and so RARs dependency
+            // walk needs to find it in order for ImplictlyExpandDesignTimeFacades to inject it.
+
+            var netFrameworkLibrary = new TestProject()
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net46",
+                IsSdkProject = true,
+            };
+
+            netFrameworkLibrary.PackageReferences.Add(new TestPackageReference("System.Collections.Immutable", "1.4.0"));
+
+            netFrameworkLibrary.SourceFiles["NETFramework.cs"] = @"
+                using System.Collections.Immutable;
+                public class NETFramework
+                {
+                    public void Method1()
+                    {
+                        ImmutableList<string>.Empty.Add("""");
+                    }
+                }";
+
+            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "FacadesFromTargetFramework").Restore(Log, netFrameworkLibrary.Name);
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            buildCommand.Execute().Should().Pass();
+        }
+
+
         [Fact]
         public void It_can_use_HttpClient_and_exchange_the_type_with_a_NETStandard_library()
         {
@@ -371,6 +404,80 @@ public static class {project.Name}
             valuesWithMetadata.Single(v => v.value == "System.Net.Http")
                 .metadata["HintPath"]
                 .Should().Be(correctHttpReference);            
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(null)]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_marks_extension_references_as_externally_resolved(bool? markAsExternallyResolved)
+        {
+            var project = new TestProject
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net462",
+                IsSdkProject = true
+            };
+
+            var netStandard2Project = new TestProject
+            {
+                Name = "NETStandard20Project",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true
+            };
+
+            project.ReferencedProjects.Add(netStandard2Project);
+
+            var asset = _testAssetsManager.CreateTestProject(
+                project, 
+                "ExternallyResolvedExtensions",
+                markAsExternallyResolved.ToString())
+                .WithProjectChanges((path, p) =>
+                {
+                    if (markAsExternallyResolved != null)
+                    {
+                        var ns = p.Root.Name.Namespace;
+                        p.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "MarkNETFrameworkExtensionAssembliesAsExternallyResolved", 
+                                    markAsExternallyResolved)));
+                    }
+                })
+                .Restore(Log, project.Name);
+
+            var command = new GetValuesCommand(
+                Log, 
+                Path.Combine(asset.Path, project.Name),
+                project.TargetFrameworks, 
+                "Reference", 
+                GetValuesCommand.ValueType.Item);
+
+            command.MetadataNames.AddRange(new[] { "ExternallyResolved", "HintPath" });
+            command.Execute().Should().Pass();
+
+            int frameworkReferenceCount = 0;
+            int extensionReferenceCount = 0;
+            var references = command.GetValuesWithMetadata();
+
+            foreach (var (value, metadata) in references)
+            {
+                if (metadata["HintPath"] == "")
+                {
+                    // implicit framework reference (not externally resolved)
+                    metadata["ExternallyResolved"].Should().BeEmpty();
+                    frameworkReferenceCount++;
+                }
+                else
+                {
+                    // reference added by Microsoft.NET.Build.Extensions
+                    metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true).ToString());
+                    extensionReferenceCount++;
+                }
+            }
+
+            // make sure both cases were encountered
+            frameworkReferenceCount.Should().BeGreaterThan(0);
+            extensionReferenceCount.Should().BeGreaterThan(0);
         }
     }
 }
