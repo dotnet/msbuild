@@ -871,7 +871,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Externally resolved references do not get their related files identified by RAR. In the common
         /// nuget assets case, RAR cannot be the one to identify what to copy because RAR sees only the
-        /// compile-time assets and not the 
+        /// compile-time assets and not the runtime assets.
         /// </summary>
         [Theory]
         [InlineData(true)]
