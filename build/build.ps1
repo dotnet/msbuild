@@ -11,6 +11,7 @@ Param(
   [switch] $norestore,
   [switch] $sign,
   [switch] $skiptests,
+  [switch] $bootstrapOnly,
   [string] $verbosity = "minimal",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
@@ -29,6 +30,7 @@ function Print-Usage() {
     Write-Host "  -build                  Build solution"
     Write-Host "  -rebuild                Rebuild solution"
     Write-Host "  -skipTests              Don't run tests"
+    Write-Host "  -bootstrapOnly          Don't run build again with bootstrapped MSBuild"
     Write-Host "  -sign                   Sign build outputs"
     Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
     Write-Host ""
@@ -64,7 +66,7 @@ function InstallDotNetCli {
   $DotNetInstallVerbosity = ""
 
   if (!$env:DOTNET_INSTALL_DIR) {
-    $env:DOTNET_INSTALL_DIR = Join-Path $RepoRoot "artifacts\.dotnet\$DotNetCliVersion"
+    $env:DOTNET_INSTALL_DIR = Join-Path $RepoRoot "artifacts\.dotnet\$DotNetCliVersion\"
   }
 
   $DotNetRoot = $env:DOTNET_INSTALL_DIR
@@ -125,7 +127,7 @@ function InstallRepoToolset {
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
-    msbuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
+    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to build $ToolsetProj"
@@ -157,6 +159,11 @@ function LocateVisualStudio {
 function Build {
   InstallDotNetCli
   InstallNuget
+
+  # Uncomment this to build with the .NET CLI
+  # TODO: make this configurable via a parameter to the script
+  #$msbuildHost = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
+
   $RepoToolsetBuildProj = InstallRepoToolset
 
   if ($prepareMachine) {
@@ -176,11 +183,59 @@ function Build {
   }
 
   $solution = Join-Path $RepoRoot "MSBuild.sln"
-  
-  msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
 
-  if($LASTEXITCODE -ne 0) {
-    throw "Failed to build $RepoToolsetBuildProj"
+  $commonMSBuildArgs = GetArgs /m /nologo /clp:Summary /warnaserror /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$solution /p:CIBuild=$ci
+  
+  # Only test using stage 0 MSBuild if -bootstrapOnly is specified
+  $testStage0 = $false
+  if ($bootstrapOnly)
+  {
+    $testStage0 = $test
+  }
+
+  CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs $logCmd  /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack $properties
+
+  if (-not $bootstrapOnly)
+  {
+    $msbuildToUse = Join-Path $ArtifactsConfigurationDir "bootstrap\net46\MSBuild\15.0\Bin\MSBuild.exe"
+
+    if ($ci -or $log) {
+      Create-Directory $LogDir
+      $logCmd = "/bl:" + (Join-Path $LogDir "BuildWithBootstrap.binlog")
+    } else {
+      $logCmd = ""
+    }
+
+    # When using bootstrapped MSBuild:
+    # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+    # - Don't restore
+    # - Don't sign
+    # - Don't pack
+    # - Do run tests (if not skipped)
+    # - Don't try to create a bootstrap deployment
+    CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs /nr:false $logCmd /p:Restore=false /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+  }
+
+}
+
+function GetArgs
+{
+  return $args
+}
+
+function CallMSBuild
+{
+  if ($msbuildHost)
+  {
+    & $msbuildHost $msbuildToUse $args
+  }
+  else
+  {
+    & $msbuildToUse $args
+  }
+
+    if($LASTEXITCODE -ne 0) {
+      throw "Failed to build $args"
   }
 }
 
@@ -205,6 +260,9 @@ $VersionsProps = Join-Path $PSScriptRoot "Versions.props"
 $log = -not $nolog
 $restore = -not $norestore
 $test = -not $skiptests
+
+$msbuildHost = $null
+$msbuildToUse = "msbuild"
 
 
 try {

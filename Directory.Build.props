@@ -20,6 +20,8 @@
     <!-- Repository and project URLs (used in nuget packages) -->
     <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+
+    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
   </PropertyGroup>
   
   <PropertyGroup>

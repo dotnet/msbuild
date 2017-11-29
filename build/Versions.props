@@ -37,6 +37,7 @@
   <PropertyGroup>
     <MicrosoftNetCompilersVersion>2.4.0</MicrosoftNetCompilersVersion>
     <MicrosoftNetCoreCompilersVersion>2.6.0-beta3-62309-01</MicrosoftNetCoreCompilersVersion>
+    <!--<NuGetVersion>4.5.0-preview2-4529</NuGetVersion>-->
   </PropertyGroup>
 
 </Project>
