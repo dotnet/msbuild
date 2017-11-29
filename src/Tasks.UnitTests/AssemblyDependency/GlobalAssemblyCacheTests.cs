@@ -355,6 +355,37 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
+        public void SystemRuntimeDepends_Yes_Indirect_ExternallyResolved()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = new MockEngine();
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("Portable"),
+            };
+
+            t.Assemblies[0].SetMetadata("ExternallyResolved", "true");
+            t.Assemblies[0].SetMetadata("HintPath", @"C:\SystemRuntime\Portable.dll");
+
+            t.SearchPaths = DefaultPaths;
+
+            // build mode
+            t.FindDependencies = true;
+
+            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+
+            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
+
+            // intelli build mode
+            t.FindDependencies = false;
+            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+
+            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
+        }
+
+        [Fact]
         public void NETStandardDepends_Yes()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -414,6 +445,38 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during intellibuild."
         }
 
+
+        [Fact]
+        public void NETStandardDepends_Yes_Indirect_ExternallyResolved()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = new MockEngine();
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("netstandardlibrary"),
+            };
+
+            t.Assemblies[0].SetMetadata("ExternallyResolved", "true");
+            t.Assemblies[0].SetMetadata("HintPath", @"C:\NetStandard\netstandardlibrary.dll");
+
+            t.SearchPaths = DefaultPaths;
+
+            // build mode
+            t.FindDependencies = true;
+
+            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+
+            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during build."
+
+            // intelli build mode
+            t.FindDependencies = false;
+            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+
+            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during intellibuild."
+        }
+
         [Fact]
         public void DependsOn_NETStandard_and_SystemRuntime()
         {
@@ -428,6 +491,42 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.Assemblies[0].SetMetadata("HintPath", @"C:\NetStandard\netstandardlibrary.dll");
+            t.Assemblies[1].SetMetadata("HintPath", @"C:\SystemRuntime\Portable.dll");
+
+            t.SearchPaths = DefaultPaths;
+
+            // build mode
+            t.FindDependencies = true;
+
+            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+
+            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
+            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                   "Expected netstandard dependency found during build."
+
+            // intelli build mode
+            t.FindDependencies = false;
+            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+
+            Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
+            Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                   "Expected netstandard dependency found during intellibuild."
+        }
+
+        [Fact]
+        public void DependsOn_NETStandard_and_SystemRuntime_ExternallyResolved()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = new MockEngine();
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("netstandardlibrary"),
+                new TaskItem("Portable"),
+            };
+
+            t.Assemblies[0].SetMetadata("ExternallyResolved", "true");
+            t.Assemblies[0].SetMetadata("HintPath", @"C:\NetStandard\netstandardlibrary.dll");
+            t.Assemblies[1].SetMetadata("ExternallyResolved", "true");
             t.Assemblies[1].SetMetadata("HintPath", @"C:\SystemRuntime\Portable.dll");
 
             t.SearchPaths = DefaultPaths;
