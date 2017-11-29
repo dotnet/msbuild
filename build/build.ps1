@@ -4,6 +4,7 @@ Param(
   [switch] $ci,
   [string] $configuration = "Debug",
   [switch] $deploy,
+  [switch] $dogfood,
   [switch] $fullMSBuild,
   [switch] $help,
   [switch] $log,
@@ -37,6 +38,7 @@ function Print-Usage() {
     Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
     Write-Host ""
     Write-Host "Advanced settings:"
+    Write-Host "  -dogfood                Setup a dogfood environment using the local build"
     Write-Host "  -solution <value>       Path to solution to build"
     Write-Host "  -ci                     Set when running on CI server"
     Write-Host "  -log                    Enable logging (by default on CI)"
@@ -75,6 +77,16 @@ function InstallDotNetCli {
 
   $DotNetRoot = $env:DOTNET_INSTALL_DIR
   $DotNetInstallScript = Join-Path $DotNetRoot "dotnet-install.ps1"
+
+  if ($dogfood) {
+    $env:SDK_REPO_ROOT = $RepoRoot
+    $env:SDK_CLI_VERSION = $DotNetCliVersion
+    $env:MSBuildSDKsPath = Join-Path $ArtifactsConfigurationDir "bin\Sdks"
+    $env:DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = $env:MSBuildSDKsPath
+    $env:NETCoreSdkBundledVersionsProps = Join-Path $DotNetRoot "sdk\$DotNetCliVersion\Microsoft.NETCoreSdk.BundledVersions.props"
+    $env:CustomAfterMicrosoftCommonTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions-ver\Microsoft.Common.Targets\ImportAfter\Microsoft.NET.Build.Extensions.targets"
+    $env:MicrosoftNETBuildExtensionsTargets = $env:CustomAfterMicrosoftCommonTargets
+  }
 
   if (!(Test-Path $DotNetInstallScript)) {
     Create-Directory $DotNetRoot
@@ -259,7 +271,7 @@ try {
   $NuGetPackageRoot = $env:NUGET_PACKAGES
 
   Build
-  exit $lastExitCode
+  exit $LASTEXITCODE
 }
 catch {
   Write-Host $_

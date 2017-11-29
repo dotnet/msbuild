@@ -3,6 +3,7 @@
 build=false
 ci=false
 configuration="Debug"
+dogfood=false
 help=false
 log=false
 pack=false
@@ -30,25 +31,30 @@ while [[ $# > 0 ]]; do
       configuration=$2
       shift 2
       ;;
+    --dogfood)
+      dogfood=true
+      shift 1
+      ;;
     --help)
       echo "Common settings:"
       echo "  --configuration <value>  Build configuration Debug, Release"
-      echo "  --verbosity <value>    Msbuild verbosity (q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic])"
-      echo "  --help           Print help and exit"
+      echo "  --verbosity <value>      Msbuild verbosity (q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic])"
+      echo "  --help                   Print help and exit"
       echo ""
       echo "Actions:"
-      echo "  --restore        Restore dependencies"
-      echo "  --build          Build solution"
-      echo "  --rebuild        Rebuild solution"
-      echo "  --test           Run all unit tests in the solution"
-      echo "  --sign           Sign build outputs"
-      echo "  --pack           Package build outputs into NuGet packages and Willow components"
+      echo "  --restore                Restore dependencies"
+      echo "  --build                  Build solution"
+      echo "  --rebuild                Rebuild solution"
+      echo "  --test                   Run all unit tests in the solution"
+      echo "  --sign                   Sign build outputs"
+      echo "  --pack                   Package build outputs into NuGet packages and Willow components"
       echo ""
       echo "Advanced settings:"
-      echo "  --solution <value>     Path to solution to build"
-      echo "  --ci           Set when running on CI server"
-      echo "  --log          Enable logging (by default on CI)"
-      echo "  --prepareMachine     Prepare machine for CI run"
+      echo "  --dogfood                Setup a dogfood environment using the local build"
+      echo "  --solution <value>       Path to solution to build"
+      echo "  --ci                     Set when running on CI server"
+      echo "  --log                    Enable logging (by default on CI)"
+      echo "  --prepareMachine         Prepare machine for CI run"
       echo ""
       echo "Command line arguments not listed above are passed through to MSBuild."
       exit 0
@@ -110,6 +116,17 @@ function GetVersionsPropsVersion {
 function InstallDotNetCli {
   DotNetCliVersion="$( GetVersionsPropsVersion DotNetCliVersion )"
   DotNetInstallVerbosity=""
+
+  if $dogfood
+  then
+    export SDK_REPO_ROOT="$RepoRoot"
+    export SDK_CLI_VERSION="$DotNetCliVersion"
+    export MSBuildSDKsPath="$ArtifactsConfigurationDir/bin/Sdks"
+    export DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR="$MSBuildSDKsPath"
+    export NETCoreSdkBundledVersionsProps="$DotNetRoot/sdk/$DotNetCliVersion/Microsoft.NETCoreSdk.BundledVersions.props"
+    export CustomAfterMicrosoftCommonTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions-ver/Microsoft.Common.Targets/ImportAfter/Microsoft.NET.Build.Extensions.targets"
+    export MicrosoftNETBuildExtensionsTargets="$CustomAfterMicrosoftCommonTargets"
+  fi
 
   if [ -z "$DOTNET_INSTALL_DIR" ]
   then
