@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     new TaskItem(@"C:\NugetCache\N\lib\N.dll", // version 2.0.0.0
                         new Dictionary<string, string>
                         {
-                            {"FindDependencies", "false"}
+                            {"ExternallyResolved", "true"}
                         }) 
                 };
 
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 bool succeeded = Execute(t);
 
                 Assert.True(succeeded);
-                ;
+
                 uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.winmd");
                 uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.dll");
                 uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.exe");
