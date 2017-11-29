@@ -237,9 +237,6 @@
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
       <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
 
-      <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
-      <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
-
       <!-- Don't crossgen satellite assemblies -->
       <RoslynFiles Remove="$(PublishDir)Roslyn\bincore\**\*.resources.dll" />
       <FSharpFiles Remove="$(PublishDir)FSharp\**\*.resources.dll" />
