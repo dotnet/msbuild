@@ -123,11 +123,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--no-build");
+                                       .ExecuteWithCapturedOutput("--no-build -v:m");
 
             // Verify
             if (!DotnetUnderTest.IsLocalized())
             {
+                result.StdOut.Should().NotContain("Restore");
                 result.StdErr.Should().Contain(expectedError);
             }
 
