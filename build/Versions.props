@@ -3,6 +3,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn/api/v3/index.json</RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
@@ -37,6 +38,7 @@
   <PropertyGroup>
     <MicrosoftNetCompilersVersion>2.4.0</MicrosoftNetCompilersVersion>
     <MicrosoftNetCoreCompilersVersion>2.6.0-beta3-62309-01</MicrosoftNetCoreCompilersVersion>
+    <MicrosoftCodeAnalysisBuildTasksVersion>3.0.0-beta1-61516-01</MicrosoftCodeAnalysisBuildTasksVersion>
     <!--<NuGetVersion>4.5.0-preview2-4529</NuGetVersion>-->
   </PropertyGroup>
 

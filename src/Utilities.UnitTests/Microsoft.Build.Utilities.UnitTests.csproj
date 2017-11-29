@@ -12,10 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
     <PackageReference Include="System.IO.FileSystem.Primitives " Version="4.3.0" />
-
-    <!-- TODO: get this from a package -->
-    <Reference Include="..\..\tools\net45\roslyn\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <Reference Include="..\..\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftCodeAnalysisBuildTasksVersion)" />
 
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
