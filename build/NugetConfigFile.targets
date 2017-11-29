@@ -16,7 +16,7 @@
         ]]>
       </NugetConfigHeader>
 
-      <NugetConfigFeedsNormal>
+      <NugetConfigCLIFeeds>
         <![CDATA[
     <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
     <add key="templating" value="https://dotnet.myget.org/F/templating/api/v3/index.json" />
@@ -32,7 +32,7 @@
     <add key="web-api" value="https://dotnet.myget.org/F/dotnet-web/api/v3/index.json" />
     <add key="symreader-native" value="https://dotnet.myget.org/F/symreader-native/api/v3/index.json" />
         ]]>
-      </NugetConfigFeedsNormal>
+      </NugetConfigCLIFeeds>
 
       <NugetConfigSuffix>
         <![CDATA[
@@ -40,20 +40,21 @@
 </configuration>
         ]]>
       </NugetConfigSuffix>
-    </PropertyGroup>
+    
+  </PropertyGroup>
 
     <WriteLinesToFile File="$(GeneratedNuGetConfig)"
                       Lines="$(NugetConfigHeader)"
                       Overwrite="true" />
     
-    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
+    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != '' and '$(DotNetBuildOffline)' != 'true'"
                       File="$(GeneratedNuGetConfig)"
                       Lines="&lt;add key=&quot;PrivateBlobFeed&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
                       Overwrite="false" />
 
     <WriteLinesToFile Condition="'$(DotNetBuildOffline)' != 'true'"
                       File="$(GeneratedNuGetConfig)"
-                      Lines="$(NugetConfigFeedsNormal)"
+                      Lines="$(NugetConfigCLIFeeds)"
                       Overwrite="false" />
 
     <WriteLinesToFile File="$(GeneratedNuGetConfig)"
