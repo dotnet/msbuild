@@ -1,15 +1,7 @@
 <!-- Build file -->
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <!-- 
-    PipeBuild overrides:
-
-    PB_SignType            {''|'public'|'real'|'test'}    Disables signing if set to a value other than 'real' 
-    PB_SkipTests           {''|'true'|'false'}            Disables tests if set to 'true'.
-  -->
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <UseDotNetExe Condition="'$(UseDotNetExe)' == ''">false</UseDotNetExe>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
   </PropertyGroup>
@@ -29,51 +21,34 @@
 
   <Target Name="_Build" DependsOnTargets="$(_BuildDependsOn)" />
 
+  <!-- Restore the solution -->
   <Target Name="_RestoreSolution">
-    
-    <!-- Using dotnet exe-->
-    <Exec Condition="'$(UseDotNetExe)' == 'true'" 
-          Command="$(DOTNET_EXE_PATH) restore &quot;$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln&quot; /p:Configuration=$(Configuration)" />
-
-    <!-- Using msbuild-->
     <ItemGroup>
       <SolutionFile Include="$(WebSdkRoot)/Microsoft.NET.Sdk.Web.sln" />
     </ItemGroup>
     
-    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
-             Projects="@(SolutionFile)"
+    <MSBuild Projects="@(SolutionFile)"
              Targets ="Restore"/>
   </Target>
 
+  <!-- Build the product dlls-->
   <Target Name="_BuildProduct">
-
-    <!-- Using dotnet exe-->
-    <Exec Condition="'$(UseDotNetExe)' == 'true'" 
-          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj&quot; /p:Configuration=$(Configuration)" />
-
-    <!-- Using msbuild-->
     <ItemGroup>
       <ProjectFile Include="$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj" />
     </ItemGroup>
 
-    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
-             Projects="@(ProjectFile)"
+    <MSBuild Projects="@(ProjectFile)"
              Targets ="build"/>
   </Target>
 
+  <!-- Build the test dlls-->
   <Target Name="_BuildTests" Condition="'$(SkipTests)' != 'true'">
 
-    <!-- Using dotnet exe-->
-    <Exec Condition="'$(UseDotNetExe)' == 'true'"
-          Command="$(DOTNET_EXE_PATH) build &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; /p:Configuration=$(Configuration)" />
-
-    <!-- Using msbuild-->
     <ItemGroup>
       <TestProject Include="$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj" />
     </ItemGroup>
 
-    <MSBuild Condition="'$(UseDotNetExe)' == 'false'"
-             Projects="@(TestProject)"
+    <MSBuild Projects="@(TestProject)"
              Targets ="build"/>
     
   </Target>

@@ -1,13 +1,7 @@
 <!-- Test file -->
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <!-- 
-	PipeBuild overrides:	
-	PB_SkipTests {''|'true'|'false'} Disables tests if set to 'true'.
-	-->
+<Project ToolsVersion="4.0" DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <UseDotNetExe Condition="'$(UseDotNetExe)' == ''">false</UseDotNetExe>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
     <DotNetSdksFolder>$(DOTNET_INSTALL_DIR)/Sdk/$(DOTNET_VERSION)/Sdks</DotNetSdksFolder>
   </PropertyGroup>
@@ -86,15 +80,14 @@
 
   <Target Name="_RunTests">
 
-    <!-- Use dotnet exe-->
     <!-- Run .NET Core Tests -->
     <Exec
-      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; --no-build -f=netcoreapp1.1 /p:Configuration=$(Configuration)" />
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp1.1 /p:Configuration=$(Configuration)" />
 
     <!-- Run .NET Framework Tests -->
     <Exec
       Condition="'$(NETFrameworkSupported)' != 'false'"
-      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; --no-build -f=net46 /p:Configuration=$(Configuration)" />
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=net46 /p:Configuration=$(Configuration)" />
 
   </Target>
 
