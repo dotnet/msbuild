@@ -357,6 +357,26 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Indicates that at least one reference was <see cref="Reference.ExternallyResolved"/> and
+        /// we skipped finding its dependencies as a result.
+        /// </summary>
+        /// <remarks>
+        /// This is currently used to perform a shallow search for System.Runtime/netstandard usage
+        /// within the externally resolved graph.
+        /// </remarks>
+        internal bool SkippedFindingExternallyResolvedDependencies { get; private set; }
+
+        /// <summary>
+        /// Force dependencies to be walked even when a reference is marked with ExternallyResolved=true
+        /// metadata.
+        /// </summary>
+        /// <remarks>
+        /// This is currently used to ensure that we suggest appropriate binding redirects for
+        /// assembly version conflicts within an externally resolved graph.
+        /// </remarks>
+        internal bool FindDependenciesOfExternallyResolvedReferences { get; set; }
+
+        /// <summary>
         /// Adds a reference to the table.
         /// </summary>
         /// <param name="assemblyName">The assembly name to be used as a key.</param>
@@ -1628,6 +1648,8 @@ namespace Microsoft.Build.Tasks
 #endif
             {
                 _references.Clear();
+                SkippedFindingExternallyResolvedDependencies = false;
+
                 _remappedAssemblies = remappedAssembliesValue;
                 SetPrimaryItems(referenceAssemblyFiles, referenceAssemblyNames, exceptions);
 
@@ -1721,32 +1743,41 @@ namespace Microsoft.Build.Tasks
                         // We do not want to find dependencies of framework assembles, embedded interoptypes or assemblies in sdks.
                         if (!hasFrameworkPath && !reference.EmbedInteropTypes && reference.SDKName.Length == 0)
                         {
-                            // Look for companion files like pdbs and xmls that ride along with 
-                            // assemblies.
-                            if (_findRelatedFiles)
+                            if (!reference.ExternallyResolved)
                             {
-                                FindRelatedFiles(reference);
+                                // Look for companion files like pdbs and xmls that ride along with 
+                                // assemblies.
+                                if (_findRelatedFiles)
+                                {
+                                    FindRelatedFiles(reference);
+                                }
+
+                                // Satellite assemblies are named <CultureDir>\<AppBaseName>.resources.dll
+                                // where <CultureDir> is like 'en', 'fr', etc.
+                                if (_findSatellites)
+                                {
+                                    FindSatellites(reference);
+                                }
+
+                                // Look for serialization assemblies.
+                                if (_findSerializationAssemblies)
+                                {
+                                    FindSerializationAssemblies(reference);
+                                }
                             }
 
-                            // Satellite assemblies are named <CultureDir>\<AppBaseName>.resources.dll
-                            // where <CultureDir> is like 'en', 'fr', etc.
-                            if (_findSatellites)
+                            if (!reference.ExternallyResolved || FindDependenciesOfExternallyResolvedReferences)
                             {
-                                FindSatellites(reference);
+                                // Look for dependent assemblies.
+                                if (_findDependencies)
+                                {
+                                    FindDependenciesAndScatterFiles(reference, newEntries);
+                                }
                             }
-
-                            // Look for serialization assemblies.
-                            if (_findSerializationAssemblies)
+                            else
                             {
-                                FindSerializationAssemblies(reference);
+                                SkippedFindingExternallyResolvedDependencies = true;
                             }
-
-                            // Look for dependent assemblies.
-                            if (_findDependencies)
-                            {
-                                FindDependenciesAndScatterFiles(reference, newEntries);
-                            }
-
 
                             // If something was found, then break out and start fresh.
                             if (newEntries.Count > 0)
