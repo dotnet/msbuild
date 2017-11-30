@@ -62,4 +62,5 @@
   </PropertyGroup>
 
   <Import Project="build\DependencyVersions.props" />
+  <Import Project="build\RestoreSources.props" />
 </Project>

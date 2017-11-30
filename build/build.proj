@@ -105,14 +105,21 @@
   <Target Name="CleanNuGetPackages">
     <Delete Files="$(OutputPath)Packages\*.nupkg" />
   </Target>
- 
+
   <Target Name="RebuildNuGetPackages" DependsOnTargets="CleanNuGetPackages;BuildNuGetPackages" />
 
-  <Target Name="Test">
+  <Target Name="Test" DependsOnTargets="CopyGlobalTestNuGetConfig" >
     <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot; -verbose"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"
           />
+  </Target>
+
+  <Target Name="CopyGlobalTestNuGetConfig">
+    <PropertyGroup>
+      <NuGetConfigToCopy>$(RepositoryRootDirectory)TestAssets\NuGet.config</NuGetConfigToCopy>
+    </PropertyGroup>
+    <Copy SourceFiles="$(NuGetConfigToCopy)" DestinationFolder="$(OutputPath)Tests\" />
   </Target>
 
   <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages" />

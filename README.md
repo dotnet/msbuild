@@ -8,9 +8,12 @@ Please refer to [dotnet/cli](https://github.com/dotnet/cli) for .NET Core CLI so
 
 ## Build Status
 
-|Windows x64 |
+| Latest Daily Build<br>*Windows x64* |
 |:------:|
-|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/3736/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=3736)|
+| [![][win-x64-build-badge]][win-x64-build] |
+
+[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/3736/badge
+[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=3736
 
 ## How do I engage and contribute?
 We welcome you to try things out, [file issues](https://github.com/dotnet/sdk/issues), make feature requests and join us in design conversations.
