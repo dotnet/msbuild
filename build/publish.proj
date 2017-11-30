@@ -41,11 +41,11 @@
 
   <Target Name="PublishToMyGet" Condition="'$(MyGetSecurityToken)' != ''" >
     <PropertyGroup>
-        <MyGetFeed>https://dotnet.myget.org/F/dotnet-web/api/v2/package</MyGetFeed>
+        <MyGetFeedUrl Condition="'$(MyGetFeedUrl)' == ''">https://dotnet.myget.org/F/dotnet-web/api/v2/package</MyGetFeedUrl>
     </PropertyGroup>
 
-    <Message Text="Publish NuPkgs to MyGet feed: $(ExpectedFeedUrl)" Importance="High" />
-    <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) --api-key $(MyGetSecurityToken) --source $(MyGetFeed)"/>
+    <Message Text="Publish NuPkgs to MyGet feed: $(MyGetFeedUrl)" Importance="High" />
+    <Exec Condition="'$(MyGetSecurityToken)' != ''" Command="$(DOTNET_EXE_PATH) nuget push %(SignedPackages.Identity) --api-key $(MyGetSecurityToken) --source $(MyGetFeedUrl)"/>
   </Target>
   
 
