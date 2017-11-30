@@ -1669,7 +1669,7 @@ namespace Microsoft.Build.Tasks
             {
                 _references.Clear();
                 _externallyResolvedPrimaryReferences.Clear();
-				SkippedFindingExternallyResolvedDependencies = false;
+                SkippedFindingExternallyResolvedDependencies = false;
 
                 _remappedAssemblies = remappedAssembliesValue;
                 SetPrimaryItems(referenceAssemblyFiles, referenceAssemblyNames, exceptions);
