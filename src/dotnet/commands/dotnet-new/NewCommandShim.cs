@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.New
             var sessionId =
                 Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
             var telemetry =
-                new Telemetry(new FirstTimeUseNoticeSentinel(new CliFallbackFolderPathCalculator()), sessionId);
+                new Telemetry(new FirstTimeUseNoticeSentinel(new CliFolderPathCalculator()), sessionId);
             var logger = new TelemetryLogger(null);
 
             if (telemetry.Enabled)

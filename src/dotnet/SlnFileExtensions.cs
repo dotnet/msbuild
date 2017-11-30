@@ -247,6 +247,22 @@ namespace Microsoft.DotNet.Tools.Common
                         string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, slnProject.FilePath));
                 }
 
+                foreach (var project in slnFile.Projects)
+                {
+                    var dependencies = project.Dependencies;
+                    if (dependencies == null)
+                    {
+                        continue;
+                    }
+
+                    dependencies.SkipIfEmpty = true;
+
+                    foreach (var removed in projectsToRemove)
+                    {
+                        dependencies.Properties.Remove(removed.Id);
+                    }
+                }
+
                 projectRemoved = true;
             }
 

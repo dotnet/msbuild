@@ -219,7 +219,7 @@
 
   <Target Name="CrossgenPublishDir"
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
-          AfterTargets="GenerateCliRuntimeConfigurationFiles">
+          AfterTargets="PublishSdks">
     <ItemGroup>
       <RoslynFiles Include="$(PublishDir)Roslyn\bincore\**\*" />
       <FSharpFiles Include="$(PublishDir)FSharp\**\*" Exclude="$(PublishDir)FSharp\FSharp.Build.dll" />
@@ -230,11 +230,12 @@
       <RemainingFiles Remove="$(PublishDir)Sdks\**\*" />
       <RemainingFiles Remove="$(PublishDir)**\Microsoft.TestPlatform.Extensions.EventLogCollector.dll" />
 
+      <!-- Add back the .NET Core assemblies in the Sdks folder -->
+      <RemainingFiles Include="$(PublishDir)Sdks\Microsoft.NET.Sdk\tools\netcoreapp2.0\**\*" />
+      <RemainingFiles Include="$(PublishDir)Sdks\NuGet.Build.Tasks.Pack\CoreCLR\**\*" />
+
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
       <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
-
-      <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
-      <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
 
       <!-- Don't crossgen satellite assemblies -->
       <RoslynFiles Remove="$(PublishDir)Roslyn\bincore\**\*.resources.dll" />
@@ -297,7 +298,7 @@
         CreateSymbols="$(CreateCrossgenSymbols)"
         DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(FSharpFolders);$(SharedFrameworkNameVersionPath)" />
- 
+
     <Crossgen
         SourceAssembly="%(RemainingTargets.FullPath)"
         DestinationPath="%(RemainingTargets.FullPath)"

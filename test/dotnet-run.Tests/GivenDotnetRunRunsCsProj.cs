@@ -76,6 +76,25 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItDoesNotImplicitlyBuildAProjectWhenRunningWithTheNoBuildOption()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var result = new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput("--no-build -v:m");
+
+            result.Should().Fail();
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.Should().NotHaveStdOutContaining("Restore");
+            }
+        }
+
+        [Fact]
         public void ItDoesNotImplicitlyRestoreAProjectWhenRunningWithTheNoRestoreOption()
         {
             var testAppName = "MSBuildTestApp";
@@ -517,6 +536,28 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("(NO MESSAGE)")
                 .And.HaveStdErrContaining(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, LocalizableStrings.DefaultLaunchProfileDisplayName, "").Trim());
+        }
+
+        [Fact]
+        public void ItRunsWithTheSpecifiedVerbosity()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var result = new RunCommand()
+                .WithWorkingDirectory( testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput("-v:n");
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining("Hello World!");
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.Should().HaveStdOutContaining("Restore")
+                    .And.HaveStdOutContaining("CoreCompile");
+            }
         }
     }
 }
