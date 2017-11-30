@@ -191,10 +191,10 @@
       <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
     </PropertyGroup>
     <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName200)$(CoreSetupBlobAccessTokenParam)"
+               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName200)$(PrivateBlobAccessTokenParam)"
                DestinationPath="$(DownloadedSharedAspNetCoreRuntime200)"/>
     <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName)$(CoreSetupBlobAccessTokenParam)"
+               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName)$(PrivateBlobAccessTokenParam)"
                DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
   </Target>
 

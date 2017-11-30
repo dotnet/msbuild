@@ -21,13 +21,12 @@
     <BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>$(BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel)/Installers</BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>
     <BackwardsCompatibility110CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(BackwardsCompatibility110SharedFrameworkVersion)</BackwardsCompatibility110CoreSetupDownloadDirectory>
     <BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>$(BackwardsCompatibility110CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive$(ArchiveExtension)</BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>
-    <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(IncludeSharedFrameworksForBackwardsCompatibilityTests)' == 'true' ">
     <_DownloadAndExtractItem Include="BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive"
                              Condition="!Exists('$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)')">
-      <Url>$(BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl)/$(BackwardsCompatibility110CombinedFrameworkHostCompressedFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl)/$(BackwardsCompatibility110CombinedFrameworkHostCompressedFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
       <ExtractDestination>$(BackwardsCompatibleSharedFrameworksPublishDirectory)</ExtractDestination>
       <!-- don't overwrite the destination because there can be multiple shared fx's and they need to be combined -->
@@ -36,21 +35,21 @@
 
     <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile"
                              Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile)') And '$(OSName)' != 'linux'">
-      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedFrameworkVersion)/$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedFrameworkVersion)/$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedSharedHostInstallerFile"
                              Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedHostInstallerFile)') And '$(OSName)' != 'linux'">
-      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedHostVersion)/$(BackwardsCompatibility110DownloadedSharedHostInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedHostVersion)/$(BackwardsCompatibility110DownloadedSharedHostInstallerFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110DownloadedSharedHostInstallerFile)</DownloadFileName>
       <ExtractDestintation></ExtractDestintation>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedHostFxrInstallerFile"
                              Condition="!Exists('$(BackwardsCompatibility110DownloadedHostFxrInstallerFile)') And '$(OSName)' != 'linux'">
-      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110HostFxrVersion)/$(BackwardsCompatibility110DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110HostFxrVersion)/$(BackwardsCompatibility110DownloadedHostFxrInstallerFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110DownloadedHostFxrInstallerFile)</DownloadFileName>
       <ExtractDestintation></ExtractDestintation>
     </_DownloadAndExtractItem>

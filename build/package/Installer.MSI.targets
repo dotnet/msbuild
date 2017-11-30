@@ -3,7 +3,7 @@
     <!-- AcquireWix Properties -->
     <PropertyGroup>
       <WixVersion>3.10.2</WixVersion>
-      <WixDownloadUrl>https://dotnetcli.azureedge.net/build/wix/wix.$(WixVersion).zip</WixDownloadUrl>
+      <WixDownloadUrl>$(AssetDownloadRootUrl)/build/wix/wix.$(WixVersion).zip</WixDownloadUrl>
       <WixRoot>$(IntermediateDirectory)/WixTools/$(WixVersion)</WixRoot>
       <WixDestinationPath>$(WixRoot)/WixTools.$(WixVersion).zip</WixDestinationPath>
       <WixDownloadSentinel>$(WixRoot)/WixDownload.$(WixVersion).sentinel</WixDownloadSentinel>
@@ -85,7 +85,7 @@
           Encoding="Unicode"/>
 
       <DownloadFile
-          Uri="$(WixDownloadUrl)"
+          Uri="$(WixDownloadUrl)$(PrivateBlobAccessTokenParam)"
           DestinationPath="$(WixDestinationPath)"
           Overwrite="false" />
 

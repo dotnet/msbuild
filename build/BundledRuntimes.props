@@ -27,8 +27,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
-    <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
+    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">$(AssetDownloadRootUrl)/dotnet/</CoreSetupBlobRootUrl>
     <CoreSetupRootUrl>$(CoreSetupBlobRootUrl)Runtime/</CoreSetupRootUrl>
     <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
     <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive$(ArchiveExtension)</CombinedSharedHostAndFrameworkArchive>
@@ -56,49 +55,49 @@
   <ItemGroup>
     <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
                              Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
-      <Url>$(CoreSetupRootUrl)$(SharedFrameworkVersion)/$(CombinedFrameworkHostCompressedFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(CoreSetupRootUrl)$(SharedFrameworkVersion)/$(CombinedFrameworkHostCompressedFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
       <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
-      <Url>$(CoreSetupRootUrl)$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(CoreSetupRootUrl)$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
-      <Url>$(CoreSetupRootUrl)$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(CoreSetupRootUrl)$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
-      <Url>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
   <_DownloadAndExtractItem Include="AspNetCoreRuntimeInstallerWixLibFile"
                            Condition=" '$(AspNetCoreRuntimeInstallerWixLibFile)' != '' And !Exists('$(AspNetCoreRuntimeInstallerWixLibFile)')">
-      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerWixLibFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerWixLibFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(AspNetCoreRuntimeInstallerWixLibFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
   </_DownloadAndExtractItem>
 
   <_DownloadAndExtractItem Include="AspNetCoreRuntimeInstallerArchiveFile"
                            Condition="!Exists('$(AspNetCoreRuntimeInstallerArchiveFile)')">
-      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerArchiveFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerArchiveFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(AspNetCoreRuntimeInstallerArchiveFile)</DownloadFileName>
       <ExtractDestination>$(AspNetRuntimePackageStorePublishDirectory)</ExtractDestination>
   </_DownloadAndExtractItem>
 
   <_DownloadAndExtractItem Include="AspNetCoreSharedRuntimeVersionFile"
                            Condition="!Exists('$(AspNetCoreSharedRuntimeVersionFile)')">
-      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreSharedRuntimeVersionFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreSharedRuntimeVersionFileName)$(PrivateBlobAccessTokenParam)</Url>
       <DownloadFileName>$(AspNetCoreSharedRuntimeVersionFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>

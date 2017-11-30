@@ -129,10 +129,10 @@
       <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeDebInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
     </PropertyGroup>
     <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName200)$(CoreSetupBlobAccessTokenParam)"
+               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName200)$(PrivateBlobAccessTokenParam)"
                DestinationPath="$(DownloadedSharedAspNetCoreRuntime200)"/>
     <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName)$(CoreSetupBlobAccessTokenParam)"
+               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName)$(PrivateBlobAccessTokenParam)"
                DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
   </Target>
 </Project>
