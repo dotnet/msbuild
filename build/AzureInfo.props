@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
     <Product>Sdk</Product>
-    <AssetDownloadRootUrl>$(PB_AssetRootUrl)</AssetDownloadRootUrl>
-    <AssetDownloadRootUrl Condition="'$(AssetDownloadRootUrl)' == ''">https://dotnetcli.azureedge.net</AssetDownloadRootUrl>
-    <PrivateBlobAccessToken>$(PB_AssetRootAccessTokenSuffix)</PrivateBlobAccessToken>
-    <PrivateBlobAccessTokenParam Condition="'$(PrivateBlobAccessToken)' != ''">?$(PrivateBlobAccessToken)</PrivateBlobAccessTokenParam>
+    <CoreSetupBlobRootUrl>$(PB_AssetRootUrl)</CoreSetupBlobRootUrl>
+    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
+    <CoreSetupBlobAccessToken>$(PB_AssetRootAccessTokenSuffix)</CoreSetupBlobAccessToken>
+    <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
     <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
     <ArtifactContainerName Condition="'$(ArtifactContainerName)' == ''">dotnet</ArtifactContainerName>
     <ArtifactCloudDropAccessToken>$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>

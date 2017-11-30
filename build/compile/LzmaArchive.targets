@@ -12,7 +12,7 @@
             Inputs="$(IntermediateArchive)"
             Outputs="$(FinalArchive)"
             Condition=" '$(IncludeNuGetPackageArchive)' == 'true' ">
-      <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)$(PrivateBlobAccessTokenParam)"
+      <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)$(CoreSetupBlobAccessTokenParam)"
                     DestinationPath="$(IntermediateArchive)"
                     ContinueOnError="WarnAndContinue" />
 
