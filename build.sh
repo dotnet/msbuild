@@ -15,8 +15,7 @@ export DOTNET_VERSION=1.0.4
 export WebSdkRoot=$REPOROOT
 export WebSdkReferences=$WebSdkRoot/references/ 
 export WebSdkSource=$WebSdkRoot/src/ 
-export WebSdkBuild=$WebSdkRoot/build/ 
-export WebSdkPublishBin=$WebSdkRoot/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/bin/
+export WebSdkBuild=$WebSdkRoot/build/
 
 [ -z "$BuildConfiguration" ] && export BuildConfiguration=Release
 

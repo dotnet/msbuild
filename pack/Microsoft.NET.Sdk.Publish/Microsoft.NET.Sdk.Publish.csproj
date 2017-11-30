@@ -9,7 +9,7 @@
 
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
-	  <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
+    <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
     <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
     <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">2.0.0-dev$(CurrentDate)-1</WebSdkVersion>
     
@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <!-- Publish task assembly -->
-    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.NET.Sdk.Publish.Tasks.dll">
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.NET.Sdk.Publish.Tasks.dll">
       <Pack>true</Pack>
       <PackagePath>tools\net46</PackagePath>
     </Content>
@@ -43,7 +43,7 @@
       <PackagePath>tools\net46\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
     </Content>
 
-    <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll">
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll">
       <Pack>true</Pack>
       <PackagePath>tools\netcoreapp1.0</PackagePath>
     </Content>

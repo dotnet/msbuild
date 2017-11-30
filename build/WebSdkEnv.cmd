@@ -25,7 +25,6 @@ set "WebSdkRoot=%WebSdkRoot:~0,-7%"
 set "WebSdkReferences=%WebSdkRoot%\references\"
 set "WebSdkSource=%WebSdkRoot%\src\"
 set "WebSdkBuild=%WebSdkRoot%\build\"
-set "WebSdkPublishBin=%WebSdkRoot%\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\bin\"
 
 set "PATH=%PATH%;%WebSdkBuild%"
 

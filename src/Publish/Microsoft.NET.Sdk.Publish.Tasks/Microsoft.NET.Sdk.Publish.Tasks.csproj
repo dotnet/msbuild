@@ -3,9 +3,12 @@
     <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>Microsoft.NET.Sdk.Publish.Tasks</AssemblyName>
-    <SignAssembly>true</SignAssembly>
+    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\..\</WebSdkRoot>
     <AssemblyOriginatorKeyFile>$(WebSdkRoot)\tools\Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
+    <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
@@ -44,17 +47,5 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Sign the publish task assembly -->
-    <FilesToSign Include="$(OutDir)\Microsoft.NET.Sdk.Publish.Tasks.dll">
-      <Authenticode>Microsoft400</Authenticode>
-      <StrongName>StrongName</StrongName>
-    </FilesToSign>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="MicroBuild.Core" Version="0.2.0" />
   </ItemGroup>
 </Project>
