@@ -3317,7 +3317,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (Reference parentReference in referenceList)
             {
-                ReferenceTable.CalcuateParentAssemblyDirectories(parentReferenceFolderHash, parentReferenceFolders, parentReference);
+                ReferenceTable.CalculateParentAssemblyDirectories(parentReferenceFolderHash, parentReferenceFolders, parentReference);
             }
 
             Assert.Equal(1, parentReferenceFolders.Count);

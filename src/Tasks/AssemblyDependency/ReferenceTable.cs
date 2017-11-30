@@ -43,6 +43,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private Dictionary<AssemblyNameExtension, Reference> _references = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
 
+        /// <summary>
+        /// Reference simple names that were resolved by an external entity to RAR.
+        /// </summary>
+        private HashSet<string> _externallyResolvedPrimaryReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
         private DependentAssembly[] _remappedAssemblies = Array.Empty<DependentAssembly>();
         /// <summary>If true, then search for dependencies.</summary>
@@ -721,6 +726,11 @@ namespace Microsoft.Build.Tasks
 
             AddReference(assemblyName, reference);
 
+            if (reference.ExternallyResolved)
+            {
+                _externallyResolvedPrimaryReferences.Add(assemblyName.Name);
+            }
+
             return null;
         }
 
@@ -881,6 +891,11 @@ namespace Microsoft.Build.Tasks
                 }
 
                 AddReference(assemblyName, reference);
+
+                if (reference.ExternallyResolved)
+                {
+                    _externallyResolvedPrimaryReferences.Add(assemblyName.Name);
+                }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -1248,7 +1263,7 @@ namespace Microsoft.Build.Tasks
         /// The only time we do not want to do this is if the parent assembly came from the GAC or AssemblyFoldersEx then we want the assembly 
         /// to be found using those resolvers so that our GAC and AssemblyFolders checks later on will work on those assemblies.
         /// </summary>
-        internal static void CalcuateParentAssemblyDirectories(Hashtable parentReferenceFolderHash, List<string> parentReferenceFolders, Reference parentReference)
+        internal static void CalculateParentAssemblyDirectories(Hashtable parentReferenceFolderHash, List<string> parentReferenceFolders, Reference parentReference)
         {
             string parentReferenceFolder = parentReference.DirectoryName;
             string parentReferenceResolvedSearchPath = parentReference.ResolvedSearchPath;
@@ -1301,7 +1316,7 @@ namespace Microsoft.Build.Tasks
             List<string> parentReferenceFolders = new List<string>();
             foreach (Reference parentReference in reference.GetDependees())
             {
-                CalcuateParentAssemblyDirectories(parentReferenceFolderHash, parentReferenceFolders, parentReference);
+                CalculateParentAssemblyDirectories(parentReferenceFolderHash, parentReferenceFolders, parentReference);
             }
 
             // Build the set of resolvers.
@@ -1316,7 +1331,12 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
+                if (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name))
+                {
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                }
+
                 jaggedResolvers.Add(_compiledSearchPaths);
             }
 
@@ -1648,7 +1668,8 @@ namespace Microsoft.Build.Tasks
 #endif
             {
                 _references.Clear();
-                SkippedFindingExternallyResolvedDependencies = false;
+                _externallyResolvedPrimaryReferences.Clear();
+				SkippedFindingExternallyResolvedDependencies = false;
 
                 _remappedAssemblies = remappedAssembliesValue;
                 SetPrimaryItems(referenceAssemblyFiles, referenceAssemblyNames, exceptions);
