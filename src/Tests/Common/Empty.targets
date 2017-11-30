@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+  <!-- This is an empty targets file used to ensure that other Directory.Build.targets higher on the path aren't imported -->
+</Project>

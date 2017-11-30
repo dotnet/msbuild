@@ -1,23 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside
-       of SDK projects -->
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+
+  <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside of SDK projects -->
 
   <PropertyGroup>
+    <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
+    <Description>The MSBuild targets and tasks which extend MSBuild's common targets.</Description>
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Build.Extensions</PackageId>
-    <Description>The MSBuild targets and tasks which extend MSBuild's common targets.</Description>
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
-    <PackageOutputPath>$(OutputPath)Packages\</PackageOutputPath>
-    <PackageLayoutOutputPath>$(OutputPath)Sdks\$(PackageId)\</PackageLayoutOutputPath>
-    <OutputPath>$(PackageLayoutOutputPath)msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutputPath>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
-    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <OutDirName>Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -28,11 +38,10 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="$(SystemDiagnosticsFileVersionInfoVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
-    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,38 +50,41 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
-    <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <Compile Include="**\*.cs" />
-    <Compile Include="..\Common\src\**\*.cs">
-      <Link>Common\%(RecursiveDir)\%(FileName)%(Extension)</Link>
-    </Compile>
-    <None Include="..\Common\Resources\xlf\**\*">
-      <Link>Resources\xlf\%(FileName)%(Extension)</Link>
-    </None>
-    <EmbeddedResource Include="..\Common\Resources\Strings.resx">
-      <Link>Resources\%(FileName)%(Extension)</Link>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
-    </EmbeddedResource>
-    <Compile Include="..\Common\Resources\Strings.Designer.cs">
-      <Link>Resources\%(FileName)%(Extension)</Link>
+    <Compile Include="..\Common\**\*.cs" Link="Common\%(RecursiveDir)\%(FileName)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="..\Common\Resources\Strings.Designer.cs" Link="Resources\%(FileName)%(Extension)">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx" Link="Resources\%(FileName)%(Extension)">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
+    <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
+    <None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
+  </ItemGroup>
+
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
-      <_netstandardLibraryNetFrameworkPath>$(NUGET_PACKAGES)\NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_netstandardLibraryNetFrameworkPath>
+      <_NETStandardLibraryNETFrameworkPath>$(NuGetPackageRoot)NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_NETStandardLibraryNETFrameworkPath>
     </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
       </LayoutFile>
-      <NetStandardNetFxFile Include="$(_netstandardLibraryNetFrameworkPath)\**\*" Exclude="$(_netstandardLibraryNetFrameworkPath)\**\*.props;$(_netstandardLibraryNetFrameworkPath)\**\*.targets" />
+      <NetStandardNetFxFile Include="$(_NETStandardLibraryNETFrameworkPath)\**\*" Exclude="$(_NETStandardLibraryNETFrameworkPath)\**\*.props;$(_NETStandardLibraryNETFrameworkPath)\**\*.targets" />
       <LayoutFile Include="@(NetStandardNetFxFile)">
         <TargetPath>msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\%(NetStandardNetFxFile.RecursiveDir)%(NetStandardNetFxFile.FileName)%(NetStandardNetFxFile.Extension)</TargetPath>
       </LayoutFile>
@@ -99,6 +111,7 @@
       <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
     </ItemGroup>
   </Target>
-  <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
