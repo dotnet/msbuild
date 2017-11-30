@@ -1,4 +1,4 @@
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Publish" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!--
   
@@ -32,14 +32,14 @@
   <PropertyGroup>
     <_PublishDependsOn>
       $(_PublishDependsOn);
-      _PublishPackagesToMyGet;
-      _PublishPackagesToBlobFeed;
+      PublishToMyGet;
+      PublishToBlob;
     </_PublishDependsOn>
   </PropertyGroup>
 
   <Target Name="_Publish" DependsOnTargets="$(_PublishDependsOn)" />
 
-  <Target Name="_PublishPackagesToMyGet" Condition="'$(MyGetSecurityToken)' != ''" >
+  <Target Name="PublishToMyGet" Condition="'$(MyGetSecurityToken)' != ''" >
     <PropertyGroup>
         <MyGetFeed>https://dotnet.myget.org/F/dotnet-web/api/v2/package</MyGetFeed>
     </PropertyGroup>
@@ -49,7 +49,7 @@
   </Target>
   
 
-  <Target Name="_PublishPackagesToBlobFeed" Condition="'$(BlobFeedAccessToken)' != ''" >
+  <Target Name="PublishToBlob" Condition="'$(BlobFeedAccessToken)' != ''" >
     <Error Condition="!Exists('$(NuGetPackageRoot)\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\Microsoft.DotNet.Build.Tasks.Feed.targets')" Text="Missing the Publish blob target" />
 
     <PropertyGroup>

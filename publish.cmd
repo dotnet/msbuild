@@ -4,4 +4,4 @@ call "%~dp0\build\EnsureWebSdkEnv.cmd"
 
 msbuild "%WebSdkRoot%\publish\Publish.csproj" /t:Restore
 
-msbuild "%WebSdkBuild%\publish.proj" /p:Configuration=%BuildConfiguration% /t:Publish %*
+msbuild "%WebSdkBuild%\publish.proj" /p:Configuration=%BuildConfiguration% %*
