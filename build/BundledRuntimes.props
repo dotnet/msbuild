@@ -21,9 +21,6 @@
     <SharedFrameworkRid>$(CoreSetupRid)</SharedFrameworkRid>
     <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
     <CombinedFrameworkHostCompressedFileName>dotnet-runtime-$(SharedFrameworkVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
-
-    <IsSharedFrameworkPreReleaseVersion>$([System.Text.RegularExpressions.Regex]::IsMatch($(SharedFrameworkVersion), '\d*\.\d*\.\d*-'))</IsSharedFrameworkPreReleaseVersion>
-    <SharedFrameworkStableVersion>$([System.Text.RegularExpressions.Regex]::Match($(SharedFrameworkVersion), '\d*\.\d*\.\d*').get_Groups().get_Item(0).ToString())</SharedFrameworkStableVersion>
   </PropertyGroup>
 
   <PropertyGroup>

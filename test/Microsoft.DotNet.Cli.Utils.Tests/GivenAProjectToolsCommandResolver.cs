@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.Tests
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
 
             result.Should().NotBeNull();
-            
+
             result.Args.Should().Contain("--fx-version 2.1.0");
         }
 

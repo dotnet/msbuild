@@ -97,7 +97,7 @@
   </Target>
 
   <Target Name="TestSdkDeb"
-      Condition=" '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' and '$(IsSharedFrameworkPreReleaseVersion)' != 'True' "
+      Condition=" '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' "
       DependsOnTargets="RestoreTests"
       Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
