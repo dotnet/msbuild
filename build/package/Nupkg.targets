@@ -11,7 +11,7 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
-      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver" >
+      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver" Condition="'$(IncludeMSBuildSdkResolver)' == 'true'" >
         <ProjectName>Microsoft.DotNet.MSBuildSdkResolver</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
@@ -24,7 +24,7 @@
     <DotNetPack NoBuild="True"
                 Output="$(PackagesDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
-                ToolPath="$(Stage0Directory)"
+                ToolPath="$(PreviousStageDirectory)"
                 VersionSuffix="$(VersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
@@ -34,7 +34,7 @@
 
     <MakeDir Directories="$(PackagingBuildBasePath)" />
 
-    <DotNetBuild ToolPath="$(Stage0Directory)"
+    <DotNetBuild ToolPath="$(PreviousStageDirectory)"
                  Configuration="$(Configuration)"
                  ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj" />
   </Target>

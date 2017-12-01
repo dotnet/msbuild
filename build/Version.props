@@ -1,9 +1,9 @@
-<Project>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>0</VersionMinor>
     <VersionPatch>3</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">servicing</ReleaseSuffix>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">infra</ReleaseSuffix>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
     <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 

@@ -14,11 +14,12 @@
              Targets="Publish" />
 
     <!-- Build MSBuildSdkResolver for all target frameworks (so we can build and test it x-plat) -->
-    <MSBuild Projects="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver/Microsoft.DotNet.MSBuildSdkResolver.csproj" />
+    <MSBuild Projects="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver/Microsoft.DotNet.MSBuildSdkResolver.csproj"
+             Condition="'$(IncludeMSBuildSdkResolver)' == 'true'" />
 
     <!-- Publish MSBuildSdkResolver for net46 (to prepare it for the VS insertion nupkg packaging) -->
     <MSBuild Projects="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver/Microsoft.DotNet.MSBuildSdkResolver.csproj"
-             Condition="'$(OS)' == 'Windows_NT'"
+             Condition="'$(IncludeMSBuildSdkResolver)' == 'true' and '$(OS)' == 'Windows_NT'"
              Properties="TargetFramework=net46"
              Targets="Publish" />
   </Target>
