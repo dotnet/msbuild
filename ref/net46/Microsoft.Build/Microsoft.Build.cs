@@ -38,17 +38,19 @@ namespace Microsoft.Build.Construction
         public bool IncludeInBuild { get { throw null; } }
         public string PlatformName { get { throw null; } }
     }
-    public abstract partial class ProjectElement
+    public abstract partial class ProjectElement : Microsoft.Build.Framework.IProjectElement
     {
         internal ProjectElement() { }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Construction.ProjectElementContainer> AllParents { get { throw null; } }
         public virtual string Condition { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public virtual Microsoft.Build.Construction.ElementLocation ConditionLocation { get { throw null; } }
         public Microsoft.Build.Construction.ProjectRootElement ContainingProject { get { throw null; } }
+        public string ElementName { get { throw null; } }
         public string Label { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public Microsoft.Build.Construction.ElementLocation LabelLocation { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement NextSibling { [System.Diagnostics.DebuggerStepThroughAttribute, System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string OuterXmlElement { get { throw null; } }
         public Microsoft.Build.Construction.ProjectElementContainer Parent { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement PreviousSibling { [System.Diagnostics.DebuggerStepThroughAttribute, System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement Clone() { throw null; }
@@ -534,6 +536,11 @@ namespace Microsoft.Build.Evaluation
         Remove = 3,
         Update = 2,
     }
+    public sealed partial class ProfilerResultPrettyPrinter
+    {
+        public ProfilerResultPrettyPrinter() { }
+        public static string GetMarkdownContent(Microsoft.Build.Framework.Profiler.ProfilerResult result) { throw null; }
+    }
     [System.Diagnostics.DebuggerDisplayAttribute("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={_data._globalProperties.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
     public partial class Project
     {
@@ -764,6 +771,7 @@ namespace Microsoft.Build.Evaluation
         IgnoreEmptyImports = 16,
         IgnoreInvalidImports = 64,
         IgnoreMissingImports = 1,
+        ProfileEvaluation = 128,
         RecordDuplicateButNotCircularImports = 2,
         RecordEvaluatedItemElements = 8,
         RejectCircularImports = 4,
@@ -965,6 +973,7 @@ namespace Microsoft.Build.Execution
         public int MemoryUseLimit { get { throw null; } set { } }
         public string NodeExeLocation { get { throw null; } set { } }
         public bool OnlyLogCriticalEvents { get { throw null; } set { } }
+        public Microsoft.Build.Evaluation.ProjectLoadSettings ProjectLoadSettings { get { throw null; } set { } }
         public bool ResetCaches { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool SaveOperatingEnvironment { get { throw null; } set { } }
         public bool ShutdownInProcNodeOnBuildFinish { get { throw null; } set { } }
@@ -1531,6 +1540,16 @@ namespace Microsoft.Build.Logging
         public string LoggerSwitchParameters { get { throw null; } }
         public Microsoft.Build.Framework.LoggerVerbosity Verbosity { get { throw null; } }
         public Microsoft.Build.Framework.ILogger CreateLogger() { throw null; }
+    }
+    public sealed partial class ProfilerLogger : Microsoft.Build.Framework.ILogger
+    {
+        public ProfilerLogger(string fileToLog) { }
+        public string FileToLog { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.Profiler.ProfilerResult GetAggregatedResult() { throw null; }
+        public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
+        public void Shutdown() { }
     }
     public delegate void WriteHandler(string message);
 }

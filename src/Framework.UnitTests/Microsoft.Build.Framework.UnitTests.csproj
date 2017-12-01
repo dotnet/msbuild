@@ -45,6 +45,14 @@
     <Compile Include="TaskStartedEventArgs_Tests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Build.UnitTests\Microsoft.Build.Engine.UnitTests.csproj">
+      <Project>{d06d5d07-9dfb-4896-b11f-0a8c44f8f971}</Project>
+      <Name>Microsoft.Build.Engine.UnitTests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj">
+      <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
+      <Name>Microsoft.Build</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571f09db-a81a-4444-945c-6f7b530054cd}</Project>
       <Name>Microsoft.Build.Framework</Name>
@@ -62,6 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>

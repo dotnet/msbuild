@@ -1125,7 +1125,8 @@ namespace Microsoft.Build.UnitTests
                                         false, 
                                         warningsAsErrors: null,
                                         warningsAsMessages: null,
-                                        enableRestore: false);
+                                        enableRestore: false,
+                                        profilerLogger: null);
                 }
                 finally
                 {
@@ -1327,6 +1328,37 @@ namespace Microsoft.Build.UnitTests
             Assert.NotNull(actualWarningsAsMessages);
 
             Assert.Equal(expectedWarningsAsMessages, actualWarningsAsMessages, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Verifies that when the /profileevaluation switch is used with no values that an error is shown.
+        /// </summary>
+        [Fact]
+        public void ProcessProfileEvaluationEmpty()
+        {
+            CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
+
+            VerifySwitchError(commandLineSwitches, "/profileevaluation", AssemblyResources.GetString("MissingProfileParameterError"));
+        }
+
+        /// <summary>
+        /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
+        /// </summary>
+        [InlineData(" ")]
+        [InlineData("a_file_with?invalid_chars")]
+        [InlineData("C:\\a_path\\with?invalid\\chars")]
+        [Theory]
+        public void ProcessProfileEvaluationInvalidFilename(string filename)
+        {
+            try
+            {
+                MSBuildApp.ProcessProfileEvaluationSwitch(new string[] {filename}, new ArrayList());
+                Assert.True(false, $"Processing the profile evaluation parameter '{filename}' should have failed");
+            }
+            catch (CommandLineSwitchException)
+            {}
         }
 
 #if FEATURE_RESOURCEMANAGER_GETRESOURCESET

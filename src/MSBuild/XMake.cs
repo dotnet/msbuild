@@ -21,6 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 using Microsoft.Build.Utilities;
@@ -553,6 +554,7 @@ namespace Microsoft.Build.CommandLine
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsAsMessages = null;
                 bool enableRestore = Traits.Instance.EnableRestoreFirst;
+                ProfilerLogger profilerLogger = null;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -580,6 +582,7 @@ namespace Microsoft.Build.CommandLine
                         ref warningsAsErrors,
                         ref warningsAsMessages,
                         ref enableRestore,
+                        ref profilerLogger,
                         recursing: false
                         ))
                 {
@@ -616,7 +619,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore))
+                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -766,6 +769,40 @@ namespace Microsoft.Build.CommandLine
 
             return exitType;
         }
+
+        /// <summary>
+        /// Generates a markdown file on disk with the result of profiling the evaluation
+        /// </summary>
+        private static void GenerateProfilerReport(ProfilerLogger profilerLogger)
+        {
+            try
+            {
+                var profilerFile = profilerLogger.FileToLog;
+                Console.WriteLine(ResourceUtilities.FormatResourceString("WritingProfilerReport", profilerFile));
+
+                var content = ProfilerResultPrettyPrinter.GetMarkdownContent(profilerLogger.GetAggregatedResult());
+                File.WriteAllText(profilerFile, content);
+
+                Console.WriteLine(ResourceUtilities.GetResourceString("WritingProfilerReportDone"));
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+            }
+            catch (SecurityException ex)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
+            }
+        }
+
 #if (!STANDALONEBUILD)
         /// <summary>
         /// Use the Orcas Engine to build the project
@@ -912,7 +949,8 @@ namespace Microsoft.Build.CommandLine
             bool detailedSummary,
             ISet<string> warningsAsErrors,
             ISet<string> warningsAsMessages,
-            bool enableRestore
+            bool enableRestore,
+            ProfilerLogger profilerLogger
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1079,6 +1117,13 @@ namespace Microsoft.Build.CommandLine
                     parameters.WarningsAsErrors = warningsAsErrors;
                     parameters.WarningsAsMessages = warningsAsMessages;
 
+                    // Propagate the profiler flag into the project load settings so the evaluator
+                    // can pick it up
+                    if (profilerLogger != null)
+                    {
+                        parameters.ProjectLoadSettings |= ProjectLoadSettings.ProfileEvaluation;
+                    }
+
                     if (!String.IsNullOrEmpty(toolsVersion))
                     {
                         parameters.DefaultToolsVersion = toolsVersion;
@@ -1124,6 +1169,12 @@ namespace Microsoft.Build.CommandLine
                         }
                         finally
                         {
+                            // If the profiler logger is not null, this means the option is specified and there is actual data to report
+                            if (profilerLogger != null)
+                            {
+                                GenerateProfilerReport(profilerLogger);
+                            }
+
                             buildManager.EndBuild();
                         }
                     }
@@ -1883,6 +1934,7 @@ namespace Microsoft.Build.CommandLine
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
             ref bool enableRestore,
+            ref ProfilerLogger profilerLogger,
             bool recursing
         )
         {
@@ -1996,6 +2048,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
                                                                ref enableRestore,
+                                                               ref profilerLogger,
                                                                recursing: true
                                                              );
                         }
@@ -2050,11 +2103,13 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
                         out distributedLoggerRecords,
                         out verbosity,
                         ref detailedSummary,
-                        cpuCount
+                        cpuCount,
+                        out profilerLogger
                         );
 
                     // If we picked up switches from the autoreponse file, let the user know. This could be a useful
@@ -2228,6 +2283,51 @@ namespace Microsoft.Build.CommandLine
             }
 
             return enableRestore;
+        }
+
+        /// <summary>
+        /// Processes the profiler evaluation switch
+        /// </summary>
+        /// <remarks>
+        /// If the switch is provided, it adds a <see cref="ProfilerLogger"/> to the collection of loggers
+        /// and also returns the created logger. Otherwise, the collection of loggers is not affected and null
+        /// is returned
+        /// </remarks>
+        internal static ProfilerLogger ProcessProfileEvaluationSwitch(string[] parameters, ArrayList loggers)
+        {
+            if (parameters == null || parameters.Length == 0)
+            {
+                return null;
+            }
+
+            var profilerFile = parameters[parameters.Length - 1];
+
+            // Check if the file name is valid
+            try
+            {
+                new FileInfo(profilerFile);
+            }
+            catch (ArgumentException ex)
+            {
+                CommandLineSwitchException.Throw("InvalidProfilerValue", parameters[parameters.Length - 1],
+                    ex.Message);
+            }
+            catch (PathTooLongException ex)
+            {
+                CommandLineSwitchException.Throw("InvalidProfilerValue", parameters[parameters.Length - 1],
+                    ex.Message);
+            }
+            catch (NotSupportedException ex)
+            {
+                CommandLineSwitchException.Throw("InvalidProfilerValue", parameters[parameters.Length - 1],
+                    ex.Message);
+            }
+
+
+            var logger = new ProfilerLogger(profilerFile);
+            loggers.Add(logger);
+
+            return logger;
         }
 
         /// <summary>
@@ -2704,11 +2804,13 @@ namespace Microsoft.Build.CommandLine
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
+            string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
             ref bool detailedSummary,
-            int cpuCount
+            int cpuCount,
+            out ProfilerLogger profilerLogger
         )
         {
             // if verbosity level is not specified, use the default
@@ -2732,6 +2834,8 @@ namespace Microsoft.Build.CommandLine
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
+
+            profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers);
 
             if (verbosity == LoggerVerbosity.Diagnostic)
             {
@@ -3441,6 +3545,7 @@ namespace Microsoft.Build.CommandLine
             }
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));
