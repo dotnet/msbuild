@@ -3,8 +3,7 @@
     <Product>Sdk</Product>
     <CoreSetupBlobRootUrl>$(PB_AssetRootUrl)</CoreSetupBlobRootUrl>
     <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
-    <CoreSetupBlobAccessToken>$(PB_AssetRootAccessTokenSuffix)</CoreSetupBlobAccessToken>
-    <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
+    <CoreSetupBlobAccessTokenParam Condition=" '$(PB_AssetRootAccessTokenSuffix)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
     <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
     <ArtifactContainerName Condition="'$(ArtifactContainerName)' == ''">dotnet</ArtifactContainerName>
     <ArtifactCloudDropAccessToken>$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>

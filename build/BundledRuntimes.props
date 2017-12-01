@@ -27,7 +27,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">$(AssetDownloadRootUrl)/dotnet/</CoreSetupBlobRootUrl>
     <CoreSetupRootUrl>$(CoreSetupBlobRootUrl)Runtime/</CoreSetupRootUrl>
     <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
     <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive$(ArchiveExtension)</CombinedSharedHostAndFrameworkArchive>
