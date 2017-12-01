@@ -80,44 +80,21 @@ namespace Microsoft.TemplateEngine.Cli
             return Run(commandName, host, telemetryLogger, onFirstRun, args, null);
         }
 
-        static Mutex _entryMutex = new Mutex(false, "{5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2}");
+        private static Mutex _entryMutex = new Mutex(false, "{5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2}");
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
         {
-            bool holdingMutex = false;
+            if (!_entryMutex.WaitOne())
+            {
+                return -1;
+            }
 
             try
             {
-                if (_entryMutex.WaitOne())
-                {
-                    holdingMutex = true;
-                }
-
-                int result;
-                try
-                {
-                    result = ActualRun(commandName, host, telemetryLogger, onFirstRun, args, hivePath);
-                }
-                catch
-                {
-                    result = -1;
-                }
-
-                if (holdingMutex)
-                {
-                    _entryMutex.ReleaseMutex();
-                    holdingMutex = false;
-                }
-
-                return result;
+                return ActualRun(commandName, host, telemetryLogger, onFirstRun, args, hivePath);
             }
-            catch
+            finally
             {
-                if (holdingMutex && _entryMutex != null)
-                {
-                    _entryMutex.ReleaseMutex();
-                    holdingMutex = false;
-                }
-                return -1;
+                _entryMutex.ReleaseMutex();
             }
         }
 
