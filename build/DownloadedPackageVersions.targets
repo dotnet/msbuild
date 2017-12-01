@@ -1,10 +1,7 @@
 <Project ToolsVersion="15.0">
   <Target Name="DownloadPackageVersionsProps">
-    <PropertyGroup>
-      <PB_AssetRootAccessTokenSuffixParam Condition=" '$(PB_AssetRootAccessTokenSuffix)' != '' ">?$(PB_AssetRootAccessTokenSuffix)</PB_AssetRootAccessTokenSuffixParam>
-    </PropertyGroup>
 
-    <DownloadFile Uri="$(PB_PackageVersionPropsUrl)$(PB_AssetRootAccessTokenSuffixParam)"
+    <DownloadFile Uri="$(PB_PackageVersionPropsUrl)$(CoreSetupBlobAccessTokenParam)"
                   DestinationPath="$(DownloadedPackageVersionsProps)"
                   Condition=" '$(PB_PackageVersionPropsUrl)' != '' " />
   </Target>
