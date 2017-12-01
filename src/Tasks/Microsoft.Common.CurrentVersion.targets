@@ -731,7 +731,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         _CheckForInvalidConfigurationAndPlatform
 
     This target checks for errors in statically defined properties.  By setting BeforeTargets, we try
-    to ensure that the target runs before any build related targets.  
+    to ensure that the target runs before any build related targets.
     If your target requires this check and is running as a BeforeTargets of one of the first targets
     of $(BuildDependsOn), $(RebuildDependsOn), or $(CleanDependsOn) you will need to set your DependsOn
     to this target.
@@ -1526,8 +1526,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <Target Name="_GetProjectReferenceTargetFrameworkProperties">
     <!--
-      Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
-      TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 
+      Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over
+      TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and
       has floating NTM=UAP,Version=vX.Y.Z. However, in other cases (classic PCLs), NTM contains multiple values and that will cause the MSBuild
       invocation below to fail by passing invalid properties. Therefore we do not use the NTM if it contains a semicolon.
     -->
@@ -1558,7 +1558,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           to unit test the .NETStandard implementation using a .NETFramework caller even though
           there is also a .NETFramework implementation.
 
-       2. As an escape hatch for cases where the compatibility check performed by 
+       2. As an escape hatch for cases where the compatibility check performed by
           GetTargetFrameworkProperties is faulty.
     -->
     <ItemGroup>
@@ -1631,8 +1631,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier</UndefineProperties>
       </AnnotatedProjects>
 
-      <!-- 
-         Remove the items we've touched from _MSBuildProjectReferenceExistent. This will leave all projects where 
+      <!--
+         Remove the items we've touched from _MSBuildProjectReferenceExistent. This will leave all projects where
          SkipGetTargetFrameworkProperties was set. Then add all AnnotatedProjects back.
       -->
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'" />
@@ -1664,7 +1664,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     to build it with the best target for the referring project's
     target framework.
 
-    The referring project's $(TargetFrameworkMoniker) is passed 
+    The referring project's $(TargetFrameworkMoniker) is passed
     in as $(ReferringTargetFramework)
   -->
   <Target Name="GetTargetFrameworkProperties" />
@@ -1680,7 +1680,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
         [OUT]
         @(ProjectReferenceWithConfiguration)   - Project references with apporpriate metadata
-        @(_MSBuildProjectReferenceExistent)    - Subset of @(ProjectReferenceWithConfiguration) that exist 
+        @(_MSBuildProjectReferenceExistent)    - Subset of @(ProjectReferenceWithConfiguration) that exist
                                                  with added SetTargetFramework metadata for cross-targeting
         @(_MSBuildProjectReferenceNonExistent) - Subset of  @(ProjectReferenceWithConfiguration) that do not exist
     ============================================================
@@ -3352,8 +3352,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     Generate a file used to track compiler dependencies between incremental build
     executions. This handles cases where items are added or removed from a glob (e.g.
-    <Compile Include="**\*.cs" />) and can't otherwise be detected with timestamp 
-    comparisons. The file contains a hash of compiler inputs that are known to 
+    <Compile Include="**\*.cs" />) and can't otherwise be detected with timestamp
+    comparisons. The file contains a hash of compiler inputs that are known to
     contribute to incremental build inconsistencies.
     ============================================================
     -->
@@ -4426,10 +4426,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         GetCopyToPublishDirectoryItems
 
-    Default implementation of GetCopyToPublishDirectoryItems for projects that do not 
-    use Microsoft.NET.Sdk. It simply returns whatever GetCopyToOutputDirectoryItems 
-    does with CopyToPublishDirectory implied  by CopyToOutputDirectory, which is the 
-    same as Microsoft.NET.Sdk default when its CopyToPublishDirectory is not used. 
+    Default implementation of GetCopyToPublishDirectoryItems for projects that do not
+    use Microsoft.NET.Sdk. It simply returns whatever GetCopyToOutputDirectoryItems
+    does with CopyToPublishDirectory implied  by CopyToOutputDirectory, which is the
+    same as Microsoft.NET.Sdk default when its CopyToPublishDirectory is not used.
 
     Microsoft.NET.Sdk projects  will override this to allow the publish output to be
     customized independently from the build output.
@@ -4440,7 +4440,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
     <Target
-      Name="GetCopyToPublishDirectoryItems" 
+      Name="GetCopyToPublishDirectoryItems"
       DependsOnTargets="GetCopyToOutputDirectoryItems"
       Returns="@(AllPublishItemsFullPathWithTargetPath)">
 
@@ -5667,7 +5667,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Get the resolved SDK reference items -->
   <Target Name="GetResolvedSDKReferences" DependsOnTargets="ResolveSDKReferences" Returns="@(ResolvedSDKReference)"/>
 
-  <!-- Target will return no results by default but will be overridden by other targets elsewhere.
+  <!-- Target will return no results by default but will be populated by other targets elsewhere.
        Needed for certain build environments that import partial sets of targets. -->
   <Target Name="CollectReferencedNuGetPackages" Returns="@(ReferencedNuGetPackages)"/>
 
