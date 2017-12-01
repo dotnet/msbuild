@@ -2,19 +2,17 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <PropertyGroup>
-      <!-- In the event of a non-anonymous storage account used for core-setup bits, support appending a SAS token to download files -->
-      <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
       <NugetPackagesArchiveName>nuGetPackagesArchive.$(AspNetCoreRuntimePackageFlavor).lzma</NugetPackagesArchiveName>
       <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
-      <NugetPackagesArchiveBlobUrl>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)$(CoreSetupBlobAccessTokenParam)</NugetPackagesArchiveBlobUrl>
+      <NugetPackagesArchiveBlobUrl>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
     </PropertyGroup>
 
     <Target Name="GetNuGetPackagesArchive"
             Inputs="$(IntermediateArchive)"
             Outputs="$(FinalArchive)"
             Condition=" '$(IncludeNuGetPackageArchive)' == 'true' ">
-      <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)"
+      <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)$(CoreSetupBlobAccessTokenParam)"
                     DestinationPath="$(IntermediateArchive)"
                     ContinueOnError="WarnAndContinue" />
 
