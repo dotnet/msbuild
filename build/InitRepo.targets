@@ -1,6 +1,7 @@
 <Project ToolsVersion="15.0">
   <Target Name="WriteDynamicPropsToStaticPropsFiles"
-          DependsOnTargets="WriteNugetConfigFile;
+          DependsOnTargets="DownloadPackageVersionsProps;
+                            WriteNugetConfigFile;
                             BuildDotnetCliBuildFramework;
                             EnsureGeneratedPropsDirectory;
                             WriteGitCommitInfoProps;

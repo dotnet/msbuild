@@ -33,7 +33,8 @@
   <Target Name="RestoreDotnetCliBuildFramework"
           Inputs="$(DotnetCliBuildDirectory)/dotnet-cli-build.csproj"
           Outputs="@(RestoreDotnetCliBuildFrameworkOutputs)"
-          DependsOnTargets="WriteNugetConfigFile">
+          DependsOnTargets="DownloadPackageVersionsProps;
+                            WriteNugetConfigFile"/>
 
     <PropertyGroup>
       <ExtraRestoreArgs>$(ExtraRestoreArgs) /p:GeneratePropsFile=$(GeneratePropsFile)</ExtraRestoreArgs>
@@ -46,10 +47,11 @@
 
   <Target Name="BuildTheWholeCli" DependsOnTargets="$(CLITargets)" />
 
+  <Import Project="build/DownloadedPackageVersions.targets" />
+  <Import Project="build/NugetConfigFile.targets" />
   <Import Project="build/GitCommitInfo.targets" />
   <Import Project="build/HostInfo.targets" />
   <Import Project="build/BuildInfo.targets" />
-  <Import Project="build/NugetConfigFile.targets" />
   <Import Project="build/Prepare.targets" />
   <Import Project="build/Compile.targets" />
   <Import Project="build/Package.targets" />
