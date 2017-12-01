@@ -5667,6 +5667,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Get the resolved SDK reference items -->
   <Target Name="GetResolvedSDKReferences" DependsOnTargets="ResolveSDKReferences" Returns="@(ResolvedSDKReference)"/>
 
+  <!-- Target will return no results by default but will be overridden by other targets elsewhere.
+       Needed for certain build environments that import partial sets of targets. -->
+  <Target Name="CollectReferencedNuGetPackages" Returns="@(ReferencedNuGetPackages)"/>
+
   <!--
     ============================================================
                                         PriFilesOutputGroup
