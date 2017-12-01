@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
         <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
-        <target state="new">Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</target>
+        <target state="translated">無法產生專案 '{0}' 的暫存檔案。無法新增套件參考。請清除暫存目錄並再試一次。</target>
         <note />
       </trans-unit>
     </body>

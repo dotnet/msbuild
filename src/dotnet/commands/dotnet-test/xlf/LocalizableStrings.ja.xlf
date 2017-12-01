@@ -77,9 +77,11 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">テスト結果のロガーを指定します。
-                                        例: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
-                                        ロガー引数サポートの詳細:https://aka.ms/vstest-report</target>
+        <target state="translated">テスト結果のロガーを指定します。
+                                        例:
+                                        一意のファイル名を使用して trx 形式でログインします: --ロガー trx
+                                        指定されたファイル名を使用して trx 形式でログインします: --ロガー "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        ロガーの引数の詳細情報: https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -125,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
-        <source>Do not build project before testing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">テストする前にプロジェクトを構築しないでください。</target>
+        <source>Do not build project before testing.</source>
+        <target state="translated">テストする前にプロジェクトを構築しないでください。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
@@ -177,7 +179,7 @@ RunSettings 引数:
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
-        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
+        <target state="translated">変更履歴モードでテストを実行します。このオプションは、テスト ホストのクラッシュの原因となる問題のあるテストを分離する場合に役立ちます。現在のディレクトリに、クラッシュする前のテスト実行順序を示す出力ファイル "Sequence.xml" が作成されます。</target>
         <note />
       </trans-unit>
     </body>

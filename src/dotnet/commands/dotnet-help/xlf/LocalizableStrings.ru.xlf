@@ -234,12 +234,12 @@
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
-        <target state="needs-review-translation">Путь к дополнительному файлу deps.json.</target>
+        <target state="translated">Путь к дополнительному файлу deps.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="new">Stores the specified assemblies in the runtime store.</target>
+        <target state="translated">Он сохраняет указанные сборки в хранилище среды выполнения.</target>
         <note />
       </trans-unit>
     </body>

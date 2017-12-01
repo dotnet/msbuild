@@ -77,8 +77,10 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">Zadejte protokolovací nástroj pro výsledky testů. 
-                                        Příklad: --logger "trx[;LogFileName=&lt;Standardně se nastaví jedinečný název souboru&gt;]"
+        <target state="translated">Zadejte protokolovací nástroj pro výsledky testů. 
+                                        Příklady:
+                                        Protokol ve formátu trx s použitím jedinečného názvu souboru: --logger trx
+                                        Protokol ve formátu trx s použitím zadaného názvu souboru: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         Další informace o podpoře argumentů protokolovacího nástroje: https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
@@ -125,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
-        <source>Do not build project before testing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">Nesestavujte projekt dříve, než ho otestujete.</target>
+        <source>Do not build project before testing.</source>
+        <target state="translated">Nesestavujte projekt dříve, než ho otestujete.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
@@ -177,7 +179,7 @@ Argumenty RunSettings:
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
-        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
+        <target state="translated">Spustí test v režimu blame. Tato možnost je užitečná pro izolování problematického testu, který způsobuje chybové ukončení hostitele testů. V aktuálním adresáři se vytvoří výstupní soubor Sequence.xml, do kterého se zaznamená pořadí provádění testů před chybovým ukončením.</target>
         <note />
       </trans-unit>
     </body>

@@ -13,15 +13,16 @@ Telemetry
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="needs-review-translation">.NET Core — Zapraszamy!
------------------------
-Więcej informacji o programie .NET Core znajdziesz na stronie https://aka.ms/dotnet-docs. Aby wyświetlić dostępne polecenia, użyj polecenia dotnet --help lub przejdź na stronę https://aka.ms/dotnet-cli-docs.
+        <target state="translated">.NET Core — Zapraszamy!
+---------------------
+Więcej informacji o programie .NET Core: https://aka.ms/dotnet-docs
+Aby wyświetlić dostępne polecenia, użyj polecenia „dotnet --help” lub przejdź na stronę: https://aka.ms/dotnet-cli-docs
 
 Telemetria
-----------
-Narzędzia programu .NET Core zbierają dane dotyczące użycia w celu ulepszenia Twojego środowiska pracy. Dane te są anonimowe i nie obejmują argumentów wiersza polecenia. Zbiera je firma Microsoft i udostępnia społeczności.
-Z telemetrii można zrezygnować, ustawiając zmienną środowiskową DOTNET_CLI_TELEMETRY_OPTOUT na wartość 1 przy użyciu ulubionej powłoki.
-Więcej informacji na temat telemetrii narzędzi programu .NET Core możesz znaleźć na stronie https://aka.ms/dotnet-cli-telemetry.</target>
+---------
+Narzędzia programu .NET Core zbierają dane użycia mające pomóc nam ulepszyć Twoje środowisko pracy. Dane te są anonimowe i nie obejmują argumentów wiersza polecenia. Zbiera je firma Microsoft i udostępnia społeczności. Z telemetrii możesz zrezygnować, ustawiając zmienną środowiskową DOTNET_CLI_TELEMETRY_OPTOUT na wartość „1” lub „true” przy użyciu ulubionej powłoki.
+
+Przeczytaj więcej na temat telemetrii narzędzi interfejsu wiersza polecenia programu .NET Core: https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -34,8 +35,8 @@ Więcej informacji na temat telemetrii narzędzi programu .NET Core możesz znal
 --------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">Trwa konfigurowanie…
----------------------
-Wykonywane jest polecenie w celu wstępnego wypełnienia lokalnej pamięci podręcznej pakietów, poprawy szybkości przywracania i włączenia dostępu offline. Wykonanie tego polecenia jest jednorazowe i zajmie maksymalnie minutę.</target>
+--------------
+Wykonywane jest polecenie w celu wypełnienia lokalnej pamięci podręcznej pakietów, poprawy szybkości przywracania i włączenia dostępu offline. Wykonanie tego polecenia jest jednorazowe i zajmie maksymalnie minutę.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -50,7 +51,7 @@ Here are some options to fix this error:
         <target state="translated">Odmowa uprawnień do zmodyfikowania folderu „{0}”.
 
 Oto kilka opcji naprawiania tego błędu:
----------------------------------------
+----------------------------------------
 1. Uruchom to polecenie ponownie z podwyższonym poziomem uprawnień.
 2. Wyłącz środowisko pierwszego uruchomienia, ustawiając dla zmiennej środowiskowej DOTNET_SKIP_FIRST_TIME_EXPERIENCE wartość true.
 3. Skopiuj zestaw .NET Core SDK do lokalizacji niechronionej i tam z niego korzystaj.

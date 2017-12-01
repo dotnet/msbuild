@@ -33,8 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
-        <source>Do not build project before running.  Implies --no-restore.</source>
-        <target state="needs-review-translation">Ignorez la génération du projet avant l'exécution. Par défaut, le projet est généré.</target>
+        <source>Skip building the project prior to running. By default, the project will be built.</source>
+        <target state="translated">Ignorez la génération du projet avant l'exécution. Par défaut, le projet est généré.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuild">
+        <source>Do not build the project before running.</source>
+        <target state="translated">Ne générez pas le projet avant l'exécution.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">

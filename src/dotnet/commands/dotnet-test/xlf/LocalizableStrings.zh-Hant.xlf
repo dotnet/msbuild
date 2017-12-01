@@ -77,8 +77,10 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">指定測試結果的記錄器。
-                                        範例: --logger "trx[;LogFileName=&lt;預設為唯一的檔案名稱&gt;]"
+        <target state="translated">指定測試結果的記錄器。
+                                        範例:
+                                        使用唯一的檔案名稱以 trx 格式記錄: --logger trx
+                                        使用指定的檔案名稱以 trx 格式記錄: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         記錄器引數支援的詳細資訊: https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
@@ -125,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
-        <source>Do not build project before testing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">請勿在測試前建置專案。</target>
+        <source>Do not build project before testing.</source>
+        <target state="translated">請勿在測試前建置專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
@@ -177,7 +179,7 @@ RunSettings 引數:
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
-        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
+        <target state="translated">在 Blame 模式中執行測試。此選項有助於隔離造成測試主機損毀的問題測試。其會在目前的目錄中建立 "Sequence.xml" 這樣的輸出檔案，以擷取損毀前執行測試的順序。</target>
         <note />
       </trans-unit>
     </body>

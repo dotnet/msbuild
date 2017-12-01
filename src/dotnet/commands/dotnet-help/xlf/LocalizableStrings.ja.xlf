@@ -234,12 +234,12 @@
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
-        <target state="needs-review-translation">追加 deps.json ファイルへのパス。</target>
+        <target state="translated">追加の deps.json ファイルへのパス。</target>
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="new">Stores the specified assemblies in the runtime store.</target>
+        <target state="translated">指定されたアセンブリを実行時ストアに格納します。</target>
         <note />
       </trans-unit>
     </body>

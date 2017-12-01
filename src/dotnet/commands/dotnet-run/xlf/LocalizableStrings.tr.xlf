@@ -33,8 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
-        <source>Do not build project before running.  Implies --no-restore.</source>
-        <target state="needs-review-translation">Projeyi çalıştırmadan önce derlemeyi atlayın. Varsayılan olarak, proje derlenir.</target>
+        <source>Skip building the project prior to running. By default, the project will be built.</source>
+        <target state="translated">Projeyi çalıştırmadan önce derlemeyi atlayın. Varsayılan olarak, proje derlenir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuild">
+        <source>Do not build the project before running.</source>
+        <target state="translated">Projeyi çalıştırmadan önce derleme.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">

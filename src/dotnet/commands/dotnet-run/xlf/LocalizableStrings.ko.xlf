@@ -33,8 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
-        <source>Do not build project before running.  Implies --no-restore.</source>
-        <target state="needs-review-translation">실행하기 전에 프로젝트를 빌드하지 않습니다. 기본적으로 프로젝트가 빌드됩니다.</target>
+        <source>Skip building the project prior to running. By default, the project will be built.</source>
+        <target state="translated">실행하기 전에 프로젝트를 빌드하지 않습니다. 기본적으로 프로젝트가 빌드됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuild">
+        <source>Do not build the project before running.</source>
+        <target state="translated">실행하기 전에 프로젝트를 빌드하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">

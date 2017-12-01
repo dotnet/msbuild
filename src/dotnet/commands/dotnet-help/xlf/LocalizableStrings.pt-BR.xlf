@@ -234,12 +234,12 @@
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
-        <target state="needs-review-translation">Caminho para o arquivo deps.json adicional.</target>
+        <target state="translated">Caminho para o arquivo deps.json adicional.</target>
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="new">Stores the specified assemblies in the runtime store.</target>
+        <target state="translated">Armazena os assemblies especificados no repositório de tempo de execução.</target>
         <note />
       </trans-unit>
     </body>
