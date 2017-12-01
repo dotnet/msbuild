@@ -70,8 +70,8 @@ if (!$env:DOTNET_TOOL_DIR)
 {
     $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
 
-    Write-Output "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
-    Invoke-Expression "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+    Write-Output "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
+    Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
     if ($LastExitCode -ne 0)
     {
         Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
@@ -93,7 +93,7 @@ if ($NoBuild)
 }
 else
 {
-    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParameters
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }
