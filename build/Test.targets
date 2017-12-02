@@ -46,7 +46,7 @@
     </PropertyGroup>
 
     <ItemGroup>  
-        <Stabilize_SourceFiles_2_0 Include="$(OutputDirectory)/shared/Microsoft.NETCore.App/$(CLI_SharedFrameworkVersion)/*.*"/>
+        <Stabilize_SourceFiles_2_0 Include="$(OutputDirectory)/shared/Microsoft.NETCore.App/$(MicrosoftNETCoreAppPackageVersion)/*.*"/>
         <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
                                           Include="$(StableSharedFrameworkDirectory)" />
         <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "

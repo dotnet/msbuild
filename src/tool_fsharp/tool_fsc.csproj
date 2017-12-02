@@ -11,8 +11,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.NetCore.App" Version="$(CLI_SharedFrameworkVersion)" />
-    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(CLI_FSharp_Version)" />
+    <PackageReference Include="Microsoft.NetCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
+    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" />
     <PackageReference Include="CliDeps.Satellites.FSharp" Version="$(CLI_FSharp_Satellites_Version)" />
   </ItemGroup>
 
