@@ -1043,6 +1043,16 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Indicates that the reference is primary and has ExternallyResolved=true metadata to denote that 
+        /// it was resolved by an external system (commonly from nuget). Such a system has already provided a
+        /// resolved closure as primary references and therefore we can skip the expensive closure walk.
+        internal bool ExternallyResolved
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Make this reference an assembly that is a dependency of 'sourceReference'
         ///
         /// For example, if 'sourceReference' is MyAssembly.dll then a dependent assembly file
@@ -1106,6 +1116,8 @@ namespace Microsoft.Build.Tasks
 
             // This is an assembly file, so we'll need to find dependencies later.
             DependenciesFound = false;
+
+            ExternallyResolved = MetadataConversionUtilities.TryConvertItemMetadataToBool(sourceItem, "ExternallyResolved");
 
             // Add source items from the original item.
             AddSourceItem(sourceItem);
