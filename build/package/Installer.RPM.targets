@@ -176,7 +176,6 @@
       <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
       <HostRpmPackageName>dotnet-host</HostRpmPackageName>
       <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageVersion>$(AspNetCoreRuntimePackageVersion)</AspNetCoreRuntimePackageVersion>
       <AspNetCoreRuntimeRpmInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)-$(HostRid).rpm</AspNetCoreRuntimeRpmInstallerFileName>
       <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
       <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
@@ -193,7 +192,7 @@
       <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
     </PropertyGroup>
     <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName)"
+               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName)$(CoreSetupBlobAccessTokenParam)"
                DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
   </Target>
 
