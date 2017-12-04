@@ -64,13 +64,7 @@ namespace Microsoft.DotNet.Cli.Utils
             StaticLib = ".a"
         };
 
-        public static PlatformFileNameSuffixes FreeBSD { get; } = new PlatformFileNameSuffixes
-        {
-            DynamicLib = ".so",
-            Exe = "",
-            ProgramDatabase = ".pdb",
-            StaticLib = ".a"
-        };
+        public static PlatformFileNameSuffixes FreeBSD { get; } = Linux;
 
         public struct PlatformFileNameSuffixes
         {
