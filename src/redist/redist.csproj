@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="NuGet.Build.Tasks" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(CLI_TestPlatform_Version)" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(CLI_TestPlatform_Version)" />

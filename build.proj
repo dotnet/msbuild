@@ -33,8 +33,7 @@
   <Target Name="RestoreDotnetCliBuildFramework"
           Inputs="$(DotnetCliBuildDirectory)/dotnet-cli-build.csproj"
           Outputs="@(RestoreDotnetCliBuildFrameworkOutputs)"
-          DependsOnTargets="DownloadPackageVersionsProps;
-                            WriteNugetConfigFile">
+          DependsOnTargets="WriteNugetConfigFile">
 
     <PropertyGroup>
       <ExtraRestoreArgs>$(ExtraRestoreArgs) /p:GeneratePropsFile=$(GeneratePropsFile)</ExtraRestoreArgs>
