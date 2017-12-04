@@ -47,10 +47,13 @@
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
     <CliDepsSatellitesRoslynPackageVersion>2.3.0-pre-20170727-1</CliDepsSatellitesRoslynPackageVersion>
     <CliDepsSatellitesFSharpPackageVersion>4.4.1-pre-20170727-1</CliDepsSatellitesFSharpPackageVersion>
+  </PropertyGroup>
+
+  <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->
+  <Import Condition=" Exists('$(OrchestratedPackageVersionsProps)') " Project="$(OrchestratedPackageVersionsProps)" />
 
 
-    
-    
+  <PropertyGroup>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.0-preview3-25514-04</CLI_NETStandardLibraryNETFrameworkVersion>
 
     <SharedFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFrameworkVersion>
@@ -78,6 +81,4 @@
     <BuildTasksFeedToolVersion>2.1.0-prerelease-02221-02</BuildTasksFeedToolVersion>
   </PropertyGroup>
 
-  <Import Condition=" Exists('$(OrchestratedPackageVersionsProps)') " Project="$(OrchestratedPackageVersionsProps)" />
-  
 </Project>
