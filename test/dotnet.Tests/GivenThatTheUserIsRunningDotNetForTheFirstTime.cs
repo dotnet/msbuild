@@ -28,6 +28,8 @@ namespace Microsoft.DotNet.Tests
             _testDirectory = TestAssets.CreateTestDirectory("Dotnet_first_time_experience_tests").FullName;
             var testNuGetHome = Path.Combine(_testDirectory, "nuget_home");
             var cliTestFallbackFolder = Path.Combine(testNuGetHome, ".dotnet", "NuGetFallbackFolder");
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(_testDirectory);
@@ -35,6 +37,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = testNuGetHome;
             command.Environment["APPDATA"] = testNuGetHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = cliTestFallbackFolder;
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
@@ -92,6 +96,8 @@ namespace Microsoft.DotNet.Tests
         public void ItDoesNotCreateAFirstUseSentinelFileUnderTheDotDotNetFolderWhenInternalReportInstallSuccessIsInvoked()
         {
             var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(_testDirectory);
@@ -100,6 +106,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             // Disable to prevent the creation of the .dotnet folder by optimizationdata.
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
@@ -116,6 +124,8 @@ namespace Microsoft.DotNet.Tests
         {
             var newHome = Path.Combine(_testDirectory, "new_home");
             var newHomeFolder = new DirectoryInfo(Path.Combine(newHome, ".dotnet"));
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(_testDirectory);
@@ -123,6 +133,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = newHome;
             command.Environment["APPDATA"] = newHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 

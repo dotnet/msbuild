@@ -1,23 +1,24 @@
-<Project ToolsVersion="14.0">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core SDK - 2.1.2</SdkBrandName>
+    <SdkBrandName>Microsoft .NET Core SDK 2.2.0 - Preview</SdkBrandName>
     <MSBuildExtensionsBrandName>.NET Standard Support for Visual Studio 2015</MSBuildExtensionsBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core Runtime - 2.0.3</SharedFrameworkBrandName>
-    <SharedHostBrandName>Microsoft .NET Core Host - 2.0.1</SharedHostBrandName>
-    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver - 2.0.0</HostFxrBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core Runtime 2.1.0 - Preview</SharedFrameworkBrandName>
+    <SharedHostBrandName>Microsoft .NET Core Host 2.1.0 - Preview</SharedHostBrandName>
+    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver 2.1.0 - Preview</HostFxrBrandName>
 
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkNugetName>$(SharedFrameworkName)</SharedFrameworkNugetName>
 
     <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' OR
-                                   '$(Rid)' == 'ubuntu.16.10-x64' OR
                                    '$(Rid)' == 'fedora.24-x64' OR
+                                   '$(Rid)' == 'rhel.6-x64' OR
                                    '$(Rid)' == 'opensuse.42.1-x64' ">$(Rid)</ProductMonikerRid>
     <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
+
     <HostMonikerRid Condition=" '$(HostRid)' == 'ubuntu.16.04-x64' OR
-        '$(HostRid)' == 'ubuntu.16.10-x64' OR
-        '$(HostRid)' == 'fedora.24-x64' OR
-        '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
+                                '$(HostRid)' == 'fedora.24-x64' OR
+                                '$(HostRid)' == 'rhel.6-x64' OR
+                                '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
     <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
 
     <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
@@ -31,6 +32,7 @@
     <ArtifactNameWithVersionSdkSymbols>$(ArtifactNameSdkSymbols)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkSymbols>
     <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
     <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkLanguagePack>
-    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(HostMonikerRid)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
+    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>
+    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid)$(HostMonikerRid)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
   </PropertyGroup>
 </Project>

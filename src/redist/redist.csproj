@@ -1,16 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
   <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
   <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
-    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
+    <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <PublishDir>$(SdkOutputDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
@@ -28,7 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj" />
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
@@ -94,7 +92,7 @@
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
     <DotNetPublish
-      ToolPath="$(Stage0Directory)"
+      ToolPath="$(PreviousStageDirectory)"
       Configuration="$(Configuration)"
       ProjectPath="$(SrcDirectory)/tool_roslyn_satellites/tool_roslyn_satellites.csproj" />
     <AddToDeps TargetDeps="@(RoslynDeps)" AdditionalDeps="@(RoslynSatelliteDeps)" />
@@ -104,7 +102,7 @@
   <Target Name="PublishFSharp"
           BeforeTargets="Publish">
           
-    <DotNetPublish ToolPath="$(Stage0Directory)"
+    <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
   </Target>
@@ -183,7 +181,7 @@
           SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);
           DependencyPackageVersion=%(BundledSdk.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </SdksToBundle>
     </ItemGroup>
@@ -202,7 +200,7 @@
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
           TemplatePackageName=%(BundledTemplate.Identity);
           TemplatePackageVersion=%(BundledTemplate.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </TemplatesToBundle>
     </ItemGroup>
@@ -221,7 +219,7 @@
 
   <Target Name="CrossgenPublishDir"
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
-          AfterTargets="GenerateCliRuntimeConfigurationFiles">
+          AfterTargets="PublishSdks">
     <ItemGroup>
       <RoslynFiles Include="$(PublishDir)Roslyn\bincore\**\*" />
       <FSharpFiles Include="$(PublishDir)FSharp\**\*" Exclude="$(PublishDir)FSharp\FSharp.Build.dll" />
@@ -230,12 +228,14 @@
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
       <RemainingFiles Remove="$(PublishDir)TestHost*\**\*" />
       <RemainingFiles Remove="$(PublishDir)Sdks\**\*" />
+      <RemainingFiles Remove="$(PublishDir)**\Microsoft.TestPlatform.Extensions.EventLogCollector.dll" />
+
+      <!-- Add back the .NET Core assemblies in the Sdks folder -->
+      <RemainingFiles Include="$(PublishDir)Sdks\Microsoft.NET.Sdk\tools\netcoreapp2.0\**\*" />
+      <RemainingFiles Include="$(PublishDir)Sdks\NuGet.Build.Tasks.Pack\CoreCLR\**\*" />
 
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
       <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
-
-      <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
-      <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
 
       <!-- Don't crossgen satellite assemblies -->
       <RoslynFiles Remove="$(PublishDir)Roslyn\bincore\**\*.resources.dll" />
@@ -298,7 +298,7 @@
         CreateSymbols="$(CreateCrossgenSymbols)"
         DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(FSharpFolders);$(SharedFrameworkNameVersionPath)" />
- 
+
     <Crossgen
         SourceAssembly="%(RemainingTargets.FullPath)"
         DestinationPath="%(RemainingTargets.FullPath)"
