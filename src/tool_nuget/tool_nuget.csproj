@@ -10,6 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-    <PackageReference Include="NuGet.CommandLine.XPlat" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="NuGet.CommandLine.XPlat" Version="$(NuGetCommandLineXPlatPackageVersion)" />
   </ItemGroup>
 </Project>

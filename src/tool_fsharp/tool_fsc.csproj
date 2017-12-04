@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NetCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" />
-    <PackageReference Include="CliDeps.Satellites.FSharp" Version="$(CLI_FSharp_Satellites_Version)" />
+    <PackageReference Include="CliDeps.Satellites.FSharp" Version="$(CliDepsSatellitesFSharpPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

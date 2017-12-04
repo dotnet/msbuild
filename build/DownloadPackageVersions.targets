@@ -3,7 +3,7 @@
     DependsOnTargets="BuildDotnetCliBuildFramework">
 
     <DownloadFile Uri="$(PB_PackageVersionPropsUrl)$(CoreSetupBlobAccessTokenParam)"
-                  DestinationPath="$(DownloadedPackageVersionsProps)"
+                  DestinationPath="$(OrchestratedPackageVersionsProps)"
                   Condition=" '$(PB_PackageVersionPropsUrl)' != '' " />
   </Target>
 </Project>

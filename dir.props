@@ -25,7 +25,6 @@
   <Import Project="build/BundledSdks.props" />
   <Import Project="build/BundledTemplates.props" />
   <Import Project="build/DependencyVersions.props" />
-  <Import Condition=" Exists('$(DownloadedPackageVersionsProps)') " Project="$(DownloadedPackageVersionsProps)" />
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
 
