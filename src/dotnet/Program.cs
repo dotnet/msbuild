@@ -11,7 +11,7 @@ using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.ShellShimMaker;
+using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;

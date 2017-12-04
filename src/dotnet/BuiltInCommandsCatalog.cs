@@ -20,6 +20,7 @@ using Microsoft.DotNet.Tools.Store;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
+using Microsoft.DotNet.Tools.Install;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -143,6 +144,10 @@ namespace Microsoft.DotNet.Cli
             ["parse"] = new BuiltInCommandMetadata
             {
                 Command = ParseCommand.Run
+            },
+            ["install"] = new BuiltInCommandMetadata
+            {
+                Command = InstallCommand.Run
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {

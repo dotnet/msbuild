@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Cli
                                     Create.Command("vstest", ""),
                                     CompleteCommandParser.Complete(),
                                     InternalReportinstallsuccessCommandParser.InternalReportinstallsuccess(),
+                                    InstallCommandParser.Install(),
                                     CommonOptions.HelpOption(),
                                     Create.Option("--info", ""),
                                     Create.Option("-d", ""),

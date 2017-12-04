@@ -18,8 +18,16 @@ namespace Microsoft.DotNet.Configurer
         public string CliFallbackFolderPath => Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
                                                Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
         
-        public string ExecutablePackagesPath => Path.Combine(DotnetUserProfileFolderPath, ToolsFolderName) ;
-        public readonly string ExecutablePackagesPathOnMacEnvPath = $"~/{DotnetProfileDirectoryName}/{ToolsFolderName}";
+        public string ExecutablePackagesPath => Path.Combine(DotnetUserProfileFolderPath, ToolsFolderName);
+
+        public BashPathUnderHomeDirectory ExecutablePackagesPathInUnix
+        {
+            get
+            {
+                return new BashPathUnderHomeDirectory(Environment.GetEnvironmentVariable("HOME"),
+                    Path.Combine(DotnetProfileDirectoryName, ToolsFolderName));
+            }
+        }
 
         public static string DotnetUserProfileFolderPath
         {
