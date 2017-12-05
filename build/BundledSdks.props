@@ -1,6 +1,6 @@
 <Project>
   <ItemGroup>
-    <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackageVersion)" />
+    <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(MicrosoftNETSdkWebPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(MicrosoftNETSdkPublishPackageVersion)" />
