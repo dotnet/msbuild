@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public BuildEventContext LogProjectEvaluationStarted(int nodeId, int submissionId, string projectFile)
         {
-            return new BuildEventContext(0, 0, 0, 0);
+            return new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
         }
 
         /// <summary>
