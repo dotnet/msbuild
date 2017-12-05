@@ -76,7 +76,10 @@
     <None Include="build\**\*" PackagePath="build\" />
     <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
-    <None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
+    <None Include="..\Common\build\**\*" PackagePath="build\">
+      <Link>build\%(FileName)%(Extension)</Link>
+    </None>
+	<None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">

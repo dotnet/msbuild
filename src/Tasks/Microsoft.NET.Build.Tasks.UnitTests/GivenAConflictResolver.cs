@@ -341,7 +341,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 .OrderBy(id => id)
                 .ToArray();
 
-            var resolver = new ConflictResolver<MockConflictItem>(new PackageRank(packagesForRank), new MockLog());
+            PackageOverrideResolver<MockConflictItem> packageOverrides = new PackageOverrideResolver<MockConflictItem>(new ITaskItem[] { });
+
+            var resolver = new ConflictResolver<MockConflictItem>(new PackageRank(packagesForRank), packageOverrides, new MockLog());
 
             resolver.ResolveConflicts(itemsToCommit, GetItemKey, ConflictHandler,
                 unresolvedConflict: UnresolvedConflictHandler);
@@ -375,6 +377,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 FileName = name + ".dll";
                 FileVersion = new Version("1.0.0.0");
                 PackageId = name;
+                PackageVersion = new Version("1.0.0");
                 DisplayName = name;
             }
             public string Key { get; set; }
@@ -390,6 +393,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             public Version FileVersion { get; set; }
 
             public string PackageId { get; set; }
+
+            public Version PackageVersion { get; set; }
 
             public string DisplayName { get; set; }
         }

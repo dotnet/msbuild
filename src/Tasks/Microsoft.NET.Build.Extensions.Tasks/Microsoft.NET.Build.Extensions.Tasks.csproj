@@ -73,6 +73,9 @@
     <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
     <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
+    <None Include="..\Common\build\**\*" PackagePath="msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\">
+      <Link>msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\%(FileName)%(Extension)</Link>
+    </None>
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
