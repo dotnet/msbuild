@@ -3564,5 +3564,70 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _buildManager.EndBuild();
             }
         }
+
+        [Fact]
+        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
+        public void OutOfProcEvaluationIdsUnique()
+        {
+            var mainProject =
+                @"<Project>
+
+  <Target Name=`MainTarget`>
+    <MSBuild Projects=`{0};{1}` Targets=`DummyTarget` />
+  </Target>
+
+</Project>";
+
+            var childProject =
+                @"<Project>
+
+  <Target Name=`DummyTarget`>
+    <Message Text=`Bar` Importance=`High` />
+  </Target>
+
+</Project>";
+
+            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1", "child2" }, string.Empty);
+
+            var buildParameters = new BuildParameters(_projectCollection)
+            {
+                DisableInProcNode = true,
+                Loggers = new ILogger[] { _logger }
+            };
+
+            _buildManager.BeginBuild(buildParameters);
+
+            try
+            {
+                var child1ProjectPath = testFiles.CreatedFiles[1];
+                var child2ProjectPath = testFiles.CreatedFiles[2];
+                var cleanedUpChildContents = CleanupFileContents(childProject);
+                File.WriteAllText(child1ProjectPath, cleanedUpChildContents);
+                File.WriteAllText(child2ProjectPath, cleanedUpChildContents);
+
+                var mainProjectPath = testFiles.CreatedFiles[0];
+                var cleanedUpMainContents = CleanupFileContents(string.Format(mainProject, child1ProjectPath, child2ProjectPath));
+                File.WriteAllText(mainProjectPath, cleanedUpMainContents);
+
+                var buildRequestData = new BuildRequestData(
+                    mainProjectPath,
+                    new Dictionary<string, string>(),
+                    MSBuildConstants.CurrentToolsVersion,
+                    new[] { "MainTarget" },
+                    null
+                );
+
+                var submission = _buildManager.PendBuildRequest(buildRequestData);
+
+                var result = submission.Execute();
+
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                Assert.True(_logger.AllBuildEvents.OfType<ProjectEvaluationStartedEventArgs>().GroupBy(args => args.BuildEventContext.EvaluationId).All(g => g.Count() == 1));
+            }
+            finally
+            {
+                _buildManager.EndBuild();
+            }
+        }
     }
 }

@@ -771,6 +771,7 @@ namespace Microsoft.Build.Evaluation
 
             _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
             _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
+            ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
 #if MSBUILDENABLEVSPROFILING 
             string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
