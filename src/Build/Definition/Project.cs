@@ -2640,6 +2640,8 @@ namespace Microsoft.Build.Evaluation
         {
             Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */, _projectCollection.SdkResolution);
 
+            ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
+
             // We have to do this after evaluation, because evaluation might have changed
             // the imports being pulled in.
             int highestXmlVersion = Xml.Version;
