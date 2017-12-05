@@ -869,6 +869,47 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// Externally resolved references do not get their related files identified by RAR. In the common
+        /// nuget assets case, RAR cannot be the one to identify what to copy because RAR sees only the
+        /// compile-time assets and not the runtime assets.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RelatedFilesAreNotFoundForExternallyResolvedReferences(bool findDependenciesOfExternallyResolvedReferences)
+        {
+            // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
+            // times out the object used for remoting console writes.  Adding a write in the middle of
+            // keeps remoting from timing out the object.
+            Console.WriteLine("Performing Miscellaneous.DefaultRelatedFileExtensionsAreUsed() test");
+
+            // Create the engine.
+            MockEngine engine = new MockEngine();
+
+            // Construct a list of assembly files.
+            ITaskItem[] assemblies = new TaskItem[]
+            {
+                new TaskItem(@"c:\AssemblyFolder\SomeAssembly.dll")
+            };
+
+            assemblies[0].SetMetadata("ExternallyResolved", "true");
+
+            // Now, pass feed resolved primary references into ResolveAssemblyReference.
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = engine;
+            t.Assemblies = assemblies;
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
+            t.SearchPaths = DefaultPaths;
+            t.FindDependenciesOfExternallyResolvedReferences = findDependenciesOfExternallyResolvedReferences; // does not impact related file search
+            Execute(t);
+
+            Assert.Equal(1, t.ResolvedFiles.Length);
+            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.dll"));
+            Assert.Equal(0, t.RelatedFiles.Length);
+        }
+
+        /// <summary>
         /// RAR should use any given related file extensions.
         /// </summary>
         [Fact]
@@ -1161,6 +1202,31 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
             Assert.Equal(1, t.ResolvedDependencyFiles.Length);
             Assert.Equal(@"c:\MyWeaklyNamed\A.dll", t.ResolvedDependencyFiles[0].ItemSpec);
+        }
+
+        /// <summary>
+        /// When a reference is marked as externally resolved, it is supposed to have provided
+        /// everything needed as primary references and dependencies are therefore not searched
+        /// as an optimization. This is a contrived case of a dangling dependency off of an
+        /// externally resolved reference, so that we can observe that the dependency search is
+        /// not performed in a test.
+        /// </summary>
+        [Fact]
+        public void DependenciesOfExternallyResolvedReferencesAreNotSearched()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = new MockEngine();
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("DependsOnSimpleA")
+            };
+
+            t.Assemblies[0].SetMetadata("ExternallyResolved", "true");
+
+            t.SearchPaths = new string[] { s_myAppRootPath, @"c:\MyStronglyNamed", @"c:\MyWeaklyNamed" };
+            Execute(t);
+            Assert.Equal(0, t.ResolvedDependencyFiles.Length);
         }
 
         /// <summary>
@@ -7999,6 +8065,44 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings);
         }
 
+        /// <summary>
+        /// Consider this dependency chain:
+        ///
+        /// (1) Primary reference A v 2.0.0.0 is found and marked externally resolved.
+        /// (2) Primary reference B is externally resolved and depends on A v 1.0.0.0
+        ///
+        /// When AutoGenerateBindingRedirects is used, we need to find the redirect
+        /// in the externally resolved graph.
+        /// </summary>
+        [Fact]
+        public void RedirectsAreSuggestedInExternallyResolvedGraph()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            MockEngine e = new MockEngine();
+            t.BuildEngine = e;
+
+            // NB: These are what common targets would set when AutoGenerateBindingRedirects is enabled.
+            t.AutoUnify = true;
+            t.FindDependenciesOfExternallyResolvedReferences = true;
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("A", new Dictionary<string, string> { ["ExternallyResolved"] = "true" } ),
+                new TaskItem("B", new Dictionary<string, string> { ["ExternallyResolved"] = "true" } ),
+            };
+
+            t.SearchPaths = new string[]
+            {
+                @"c:\Regress442570",
+            };
+
+            Execute(t);
+
+            // Expect a suggested redirect with no warning.
+            Assert.Equal(1, t.SuggestedRedirects.Length);
+            Assert.Equal(0, e.Warnings);
+        }
 
         /// Consider this dependency chain:
         ///

@@ -104,25 +104,6 @@
 
   </Target>
 
-  <!-- Copy paste and modify OpenSourceSign from sign.targets because it only signs the main assembly 
-  and provides no extension mechanism to add more assemblies to it
-  
-  If satellite assemblies do not get their delay sign bit switched off, the main assemblies won't load them
-  -->
-  <Target Name="OpenSourceSignSatelliteAssemblies"
-          Condition="'$(DelaySign)' == 'true' and '@(IntermediateSatelliteAssembliesWithTargetPath)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' == 'oss'"
-          DependsOnTargets="ComputeIntermediateSatelliteAssemblies"
-          BeforeTargets="CopyFilesToOutputDirectory"
-          Inputs="@(IntermediateSatelliteAssembliesWithTargetPath)"
-          Outputs="%(IntermediateSatelliteAssembliesWithTargetPath.Identity).oss_signed"
-          >
-    <OpenSourceSign AssemblyPath="%(IntermediateSatelliteAssembliesWithTargetPath.Identity)" />
-    <Touch Files="%(IntermediateSatelliteAssembliesWithTargetPath.Identity).oss_signed" AlwaysCreate="true" />
-    <ItemGroup>
-       <FileWrites Include="%(IntermediateSatelliteAssembliesWithTargetPath.Identity).oss_signed" />
-    </ItemGroup>
-  </Target>
-
   <!-- Target SignFiles from MicroBuild.Plugins.Signing.targets signs @(FilesToSign) -->
   <Target Name="AddSatelliteAssembliesToFilesToSignItem"
           Condition="('$(SignType)' == 'real' OR '$(SignType)' == 'test')"

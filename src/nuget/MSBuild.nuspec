@@ -18,7 +18,7 @@
     <releaseNotes>
       NOTE: This package is deprecated.  Please move to the Microsoft.Build.Runtime 15.1.X package available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
     </releaseNotes>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
       <group targetFramework="netstandard1.3">
         <dependency id="Microsoft.Build.Framework" />

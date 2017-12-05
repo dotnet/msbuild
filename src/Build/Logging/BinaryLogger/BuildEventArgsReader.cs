@@ -13,6 +13,7 @@ namespace Microsoft.Build.Logging
     internal class BuildEventArgsReader
     {
         private readonly BinaryReader binaryReader;
+        private readonly int fileFormatVersion;
 
         // reflection is needed to set these three fields because public constructors don't provide
         // a way to set these from the outside
@@ -27,9 +28,11 @@ namespace Microsoft.Build.Logging
         /// Initializes a new instance of BuildEventArgsReader using a BinaryReader instance
         /// </summary>
         /// <param name="binaryReader">The BinaryReader to read BuildEventArgs from</param>
-        public BuildEventArgsReader(BinaryReader binaryReader)
+        /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
+        public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
             this.binaryReader = binaryReader;
+            this.fileFormatVersion = fileFormatVersion;
         }
 
         /// <summary>
@@ -132,6 +135,15 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
             // Read unused Importance, it defaults to Low
             ReadInt32();
+
+            bool importIgnored = false;
+
+            // the ImportIgnored field was introduced in file format version 3
+            if (fileFormatVersion > 2)
+            {
+                importIgnored = ReadBoolean();
+            }
+
             var importedProjectFile = ReadOptionalString();
             var unexpandedProject = ReadOptionalString();
 
@@ -146,6 +158,7 @@ namespace Microsoft.Build.Logging
 
             e.ImportedProjectFile = importedProjectFile;
             e.UnexpandedProject = unexpandedProject;
+            e.ImportIgnored = importIgnored;
             return e;
         }
 
@@ -578,7 +591,13 @@ namespace Microsoft.Build.Logging
             int taskId = ReadInt32();
             int submissionId = ReadInt32();
             int projectInstanceId = ReadInt32();
-            int evaluationId = ReadInt32();
+
+            // evaluationId was introduced in format version 2
+            int evaluationId = BuildEventContext.InvalidEvaluationId;
+            if (fileFormatVersion > 1)
+            {
+                evaluationId = ReadInt32();
+            }
 
             var result = new BuildEventContext(
                 submissionId,
