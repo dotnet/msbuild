@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\Common\Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+    <PackageReference Include="xunit.console" Version="$(XUnitConsoleVersion)" Private="true" />
+  </ItemGroup>
+
+  <Import Project="$(RepoToolsetDir)Imports.targets" />
+
+</Project>

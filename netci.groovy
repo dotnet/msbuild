@@ -8,62 +8,58 @@ import jobs.generation.Utilities;
 
 def project = GithubProject
 def branch = GithubBranchName
-def isPR = true
-
-def osList = ['Windows_NT', 'Windows_NT_FullFramework', 'Ubuntu14.04', 'Ubuntu16.04', 'OSX10.12']
-def configList = ['Release', 'Debug']
 
 def static getBuildJobName(def configuration, def os) {
     return configuration.toLowerCase() + '_' + os.toLowerCase()
 }
 
-osList.each { os ->
-    configList.each { config ->
-        // Calculate job name
-        def jobName = getBuildJobName(config, os)
-        def buildCommand = '';
+['Windows_NT', 'Windows_NT_FullFramework', 'Ubuntu14.04', 'Ubuntu16.04', 'OSX10.12'].each { os ->
+    ['Debug', 'Release'].each { config ->
+        [true, false].each { isPR ->
+            // Calculate job name
+            def jobName = getBuildJobName(config, os)
+            def buildCommand = '';
 
-        def osBase = os
-        def machineAffinity = 'latest-or-auto'
+            def osBase = os
+            def machineAffinity = 'latest-or-auto'
 
-        // Calculate the build command
-        if (os == 'Windows_NT') {
-            buildCommand = ".\\build.cmd -Configuration $config"
-            machineAffinity = 'latest-dev15-3-preview1'
-        } else if (os == 'Windows_NT_FullFramework') {
-            buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
-            osBase = 'Windows_NT'
-            machineAffinity = 'latest-dev15-3-preview1'
-        } else {
-            // Jenkins non-Ubuntu CI machines don't have docker
-            buildCommand = "./build.sh --configuration $config"
-        }
+            // Calculate the build command
+            if (os == 'Windows_NT') {
+                buildCommand = ".\\build\\cibuild.cmd -configuration $config"
+                machineAffinity = 'latest-dev15-3-preview1'
+            } else if (os == 'Windows_NT_FullFramework') {
+                buildCommand = ".\\build\\cibuild.cmd -configuration $config -fullMSBuild"
+                osBase = 'Windows_NT'
+                machineAffinity = 'latest-dev15-3-preview1'
+            } else {
+                // Jenkins non-Ubuntu CI machines don't have docker
+                buildCommand = "./build/cibuild.sh --configuration $config"
+            }
 
-        def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
-            // Set the label.
-            steps {
-                if (osBase == 'Windows_NT') {
-                    // Batch
-                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\Preview\\Enterprise\\Common7\\Tools\\
-${buildCommand}""")
-                }
-                else {
-                    // Shell
-                    shell(buildCommand)
+            def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
+                // Set the label.
+                steps {
+                    if (osBase == 'Windows_NT') {
+                        // Batch
+                        batchFile(buildCommand)
+                    }
+                    else {
+                        // Shell
+                        shell(buildCommand)
+                    }
                 }
             }
-        }
 
-        def archiveSettings = new ArchivalSettings()
-        archiveSettings.addFiles("bin/**/*")
-        archiveSettings.addFiles("bin/log/**/*")
-        archiveSettings.excludeFiles("bin/obj/*")
-        archiveSettings.setFailIfNothingArchived()
-        archiveSettings.setArchiveOnFailure()
-        Utilities.addArchival(newJob, archiveSettings)
-        Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
-        Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-        Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/*TestResults.xml", false)
-        Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
+            def archiveSettings = new ArchivalSettings()
+            archiveSettings.addFiles("artifacts/$config/log/*")
+            archiveSettings.addFiles("artifacts/$config/TestResults/*")
+            archiveSettings.setFailIfNothingArchived()
+            archiveSettings.setArchiveOnFailure()
+            Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+            Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
+            Utilities.addXUnitDotNETResults(newJob, "artifacts/$config/TestResults/*.xml", false)
+            Utilities.addArchival(newJob, archiveSettings)
+        }
     }
 }
