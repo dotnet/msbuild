@@ -155,8 +155,9 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         public override bool Equals(object obj)
         {
-            if (obj is EvaluationLocation other)
+            if (obj is EvaluationLocation)
             {
+                var other = (EvaluationLocation) obj;
                 return
                     EvaluationPass == other.EvaluationPass &&
                     EvaluationDescription == other.EvaluationDescription &&
