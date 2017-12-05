@@ -770,39 +770,6 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-        /// <summary>
-        /// Generates a markdown file on disk with the result of profiling the evaluation
-        /// </summary>
-        private static void GenerateProfilerReport(ProfilerLogger profilerLogger)
-        {
-            try
-            {
-                var profilerFile = profilerLogger.FileToLog;
-                Console.WriteLine(ResourceUtilities.FormatResourceString("WritingProfilerReport", profilerFile));
-
-                var content = ProfilerResultPrettyPrinter.GetMarkdownContent(profilerLogger.GetAggregatedResult());
-                File.WriteAllText(profilerFile, content);
-
-                Console.WriteLine(ResourceUtilities.GetResourceString("WritingProfilerReportDone"));
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (SecurityException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ErrorWritingProfilerReport", ex.Message));
-            }
-        }
-
 #if (!STANDALONEBUILD)
         /// <summary>
         /// Use the Orcas Engine to build the project
@@ -1169,12 +1136,6 @@ namespace Microsoft.Build.CommandLine
                         }
                         finally
                         {
-                            // If the profiler logger is not null, this means the option is specified and there is actual data to report
-                            if (profilerLogger != null)
-                            {
-                                GenerateProfilerReport(profilerLogger);
-                            }
-
                             buildManager.EndBuild();
                         }
                     }

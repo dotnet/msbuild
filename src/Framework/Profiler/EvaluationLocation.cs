@@ -100,7 +100,7 @@ namespace Microsoft.Build.Framework.Profiler
         /// Constructs the project element case
         /// </summary>
         public EvaluationLocation(EvaluationPass evaluationPass, string evaluationDescription, string file, int? line, IProjectElement element)
-            : this(evaluationPass, evaluationDescription, file, line, element?.ElementName, element?.OuterXmlElement, isElement: true)
+            : this(evaluationPass, evaluationDescription, file, line, element?.ElementName, element?.OuterElement, isElement: true)
         {}
 
         /// <summary>

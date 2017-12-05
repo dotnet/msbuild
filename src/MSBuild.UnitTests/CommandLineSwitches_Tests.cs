@@ -1346,9 +1346,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
         /// </summary>
-        [InlineData(" ")]
-        [InlineData("a_file_with?invalid_chars")]
-        [InlineData("C:\\a_path\\with?invalid\\chars")]
+        [MemberData(nameof(GetInvalidFilenames))]
         [Theory]
         public void ProcessProfileEvaluationInvalidFilename(string filename)
         {
@@ -1359,6 +1357,12 @@ namespace Microsoft.Build.UnitTests
             }
             catch (CommandLineSwitchException)
             {}
+        }
+
+        private static IEnumerable<object[]> GetInvalidFilenames()
+        {
+            yield return new object[] { $"a_file_with${Path.GetInvalidFileNameChars().First()}invalid_chars" };
+            yield return new object[] { $"C:\\a_path\\with{Path.GetInvalidPathChars().First()}invalid\\chars" };
         }
 
 #if FEATURE_RESOURCEMANAGER_GETRESOURCESET

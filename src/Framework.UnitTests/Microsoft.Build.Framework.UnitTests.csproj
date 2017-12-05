@@ -35,6 +35,7 @@
     <Compile Include="ExternalProjectFinishedEventArgs_Tests.cs" />
     <Compile Include="ExternalProjectStartedEventArgs_Tests.cs" />
     <Compile Include="LoggerException_Tests.cs" />
+    <Compile Include="ProjectEvaluationFinishedEventArgs_Tests.cs" />
     <Compile Include="ProjectFinishedEventArgs_Tests.cs" />
     <Compile Include="ProjectStartedEventArgs_Tests.cs" />
     <Compile Include="SdkReference_Tests.cs" />
@@ -60,6 +61,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
+	<Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shared\UnitTests\App.config">
@@ -70,9 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>

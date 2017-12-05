@@ -21,8 +21,8 @@ namespace Microsoft.Build.Framework
 
 
         /// <summary>
-        /// The outer xml markup of the xml element associated with this project element/>
+        /// The outer markup associated with this project element
         /// </summary>
-        string OuterXmlElement { get; }
+        string OuterElement { get; }
     }
 }

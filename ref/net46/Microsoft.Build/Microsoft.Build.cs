@@ -50,7 +50,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ElementLocation LabelLocation { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement NextSibling { [System.Diagnostics.DebuggerStepThroughAttribute, System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string OuterXmlElement { get { throw null; } }
+        public string OuterElement { get { throw null; } }
         public Microsoft.Build.Construction.ProjectElementContainer Parent { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement PreviousSibling { [System.Diagnostics.DebuggerStepThroughAttribute, System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement Clone() { throw null; }
@@ -1547,7 +1547,6 @@ namespace Microsoft.Build.Logging
         public string FileToLog { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public Microsoft.Build.Framework.Profiler.ProfilerResult GetAggregatedResult() { throw null; }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Shutdown() { }
     }

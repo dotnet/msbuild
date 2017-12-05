@@ -246,7 +246,7 @@ namespace Microsoft.Build.Framework
     public partial interface IProjectElement
     {
         string ElementName { get; }
-        string OuterXmlElement { get; }
+        string OuterElement { get; }
     }
     public partial interface ITask
     {

@@ -177,7 +177,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <inheritdoc/>
-        public string OuterXmlElement => XmlElement.OuterXml;
+        public string OuterElement => XmlElement.OuterXml;
 
         /// <summary>
         /// All parent elements of this element, going up to the ProjectRootElement.
