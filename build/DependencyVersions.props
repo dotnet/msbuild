@@ -18,7 +18,7 @@
 
     <CLI_NuGet_Version>4.5.0-rtm-4651</CLI_NuGet_Version>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-25908-02</CLI_NETStandardLibraryNETFrameworkVersion>
-    <CLI_WEBSDK_Version>2.0.0-rel-20171010-665</CLI_WEBSDK_Version>
+    <CLI_WEBSDK_Version>2.0.0-rel-20171110-671</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.5.0</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
