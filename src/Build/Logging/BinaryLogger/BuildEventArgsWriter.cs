@@ -257,6 +257,7 @@ namespace Microsoft.Build.Logging
             if (e is TargetSkippedEventArgs)
             {
                 Write((TargetSkippedEventArgs)e);
+                return;
             }
 
             Write(BinaryLogRecordKind.Message);
