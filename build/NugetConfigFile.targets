@@ -31,7 +31,7 @@
     <add key="web-api" value="https://dotnet.myget.org/F/dotnet-web/api/v3/index.json" />
     <add key="symreader-native" value="https://dotnet.myget.org/F/symreader-native/api/v3/index.json" />
     <add key="AspNetMaster" value="https://dotnet.myget.org/F/aspnetcore-master/api/v3/index.json" /> 
-    <add key="nuget-build" value="https://dotnet.myget.org/feed/nuget-build/api/v3/index.json" /> 
+    <add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" /> 
         ]]>
       </NugetConfigCLIFeeds>
 
