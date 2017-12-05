@@ -27,17 +27,24 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public static string GetMarkdownContent(ProfilerResult result)
         {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine("Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Bug");
+            stringBuilder.AppendLine("---|---|---:|---|---:|---:|---:|---:|---:|---");
+
             var profiledLocations = result.ProfiledLocations;
+
+            // If there are no profiled locations, then just return
+            if (profiledLocations.Count == 0)
+            {
+                return stringBuilder.ToString();
+            }
+
             var evaluationPasses = profiledLocations.Where(l => l.Key.File == null)
                                                   .OrderBy(l => l.Key.EvaluationPass);
 
             var orderedLocations = profiledLocations.Where(l => l.Key.File != null)
                                                   .OrderByDescending(l => l.Value.ExclusiveTime);
-
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.AppendLine("Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Bug");
-            stringBuilder.AppendLine("---|---|---:|---|---:|---:|---:|---:|---:|---");
 
             TimeSpan? totalTime = null;
             foreach (var pair in evaluationPasses)
