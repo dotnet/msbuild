@@ -1,44 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
 
-  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.props" />
-  
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <NonShipping>true</NonShipping>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel">
-      <Version>$(NuGetVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel">
-      <Version>$(DependencyModelVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Framework">
-      <Version>$(MsBuildPackagesVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core">
-      <Version>$(MsBuildPackagesVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="FluentAssertions.Json">
-      <Version>$(FluentAssertionsJsonVersion)</Version>
-    </PackageReference>
+    <PackageReference Include="FluentAssertions.Json" Version="$(FluentAssertionsJsonVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="..\Common\CommandLine\TestCommandLine.Default.cs" />
-    <Compile Include="GivenAGetDependsOnNETStandardTask.cs" />
+    <ProjectReference Include="..\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="**\*.cs" />
     <Compile Include="..\Microsoft.NET.Build.Tasks.UnitTests\Mocks\MockBuildEngine.cs" />
     <Compile Include="..\Microsoft.NET.Build.Tasks.UnitTests\Mocks\MockTaskItem.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\..\Tests\Common\CommandLine\TestCommandLine.Default.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj">
-      <Project>{88723307-6bfa-4cb5-a518-2ffd5f91b891}</Project>
-      <Name>Microsoft.NET.Build.Extensions.Tasks</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
-  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.targets" />
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
 </Project>

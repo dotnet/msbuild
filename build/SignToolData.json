@@ -1,0 +1,18 @@
+{
+    "sign": [
+        {
+            "certificate": "Microsoft402",
+            "strongName": "MsSharedLib72",
+            "values": [
+                "bin/Sdks/Microsoft.NET.Sdk/tools/netcoreapp1.0/Microsoft.NET.Build.Tasks.dll",
+                "bin/Sdks/Microsoft.NET.Sdk/tools/netcoreapp1.0/*/Microsoft.NET.Build.Tasks.resources.dll",
+                "bin/Sdks/Microsoft.NET.Sdk/tools/net46/Microsoft.NET.Build.Tasks.dll",
+                "bin/Sdks/Microsoft.NET.Sdk/tools/net46/*/Microsoft.NET.Build.Tasks.resources.dll",
+                "bin/Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/netcoreapp1.0/Microsoft.NET.Build.Extensions.Tasks.dll",
+                "bin/Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/netcoreapp1.0/*/Microsoft.NET.Build.Extensions.Tasks.resources.dll",
+                "bin/Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/net46/Microsoft.NET.Build.Extensions.Tasks.dll",
+                "bin/Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/net46/*/Microsoft.NET.Build.Extensions.Tasks.resources.dll",
+            ]
+        }
+    ]
+}
