@@ -40,6 +40,10 @@ cd .\msbuild
 ## Debugging MSBuild 
 - Breaking into the main method of MSBuild.exe: set the environment variable `MSBUILDDEBUGONSTART` to 1 or 2: https://github.com/Microsoft/msbuild/blob/master/src/MSBuild/XMake.cs#L488-L501
 - Dumping scheduler state: set `MSBUILDDEBUGSCHEDULER` to 1; set `MSBUILDDEBUGPATH` to where to dump the scheduling state
+- Example of manually running a single unit test:
+```
+packages\xunit.runner.console\2.1.0\tools\xunit.console.x86.exe bin\Debug\x86\Windows_NT\Windows_NT_Deployment_Test\Microsoft.Build.Engine.UnitTests.dll -noshadow -method Microsoft.Build.UnitTests.Evaluation.ItemEvaluation_Tests.ImmutableListBuilderBug
+```
 
 ## Build a Console App
 To build a console app, you first need a drop of MSBuild (built on your machine) with all the required dependencies. To do this, open a 'Developer Command Prompt for VS2015' and run the following command from your msbuild folder:
