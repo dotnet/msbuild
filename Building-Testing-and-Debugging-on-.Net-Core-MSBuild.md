@@ -37,3 +37,14 @@ Tests are currently disabled on platforms other than Windows. If you'd like to r
 
 ## Getting .Net Core MSBuild binaries without building the code ##
 The best way to get .NET Core MSBuild is through the [dotnet CLI](https://github.com/dotnet/cli/), which redistributes us. It's not always the very very latest but they take regular drops. After installing it, you can use MSBuild through `dotnet build` or by manual invocation of the `MSBuild.dll` in the dotnet distribution.
+
+## Debugging
+
+### Wait in Main
+Set the environment variable `MSBUILDDEBUGONSTART` to 2.
+
+### Debugging a test
+Add a `Console.ReadKey` in the test and manually invoke it via xunit. Example:
+```
+Tools\dotnetcli\dotnet.exe bin\Debug-NetCore\AnyCPU\Windows_NT\Windows_NT_Deployment_Test\xunit.console.netcore.exe bin\Debug-NetCore\AnyCPU\Windows_NT\Windows_NT_Deployment_Test\Microsoft.Build.Engine.UnitTests.dll -noshadow -method Microsoft.Build.UnitTests.Evaluation.ItemEvaluation_Tests.ImmutableListBuilderBug
+```
