@@ -1,23 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside
-       of SDK projects -->
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+
+  <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside of SDK projects -->
 
   <PropertyGroup>
+    <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
+    <Description>The MSBuild targets and tasks which extend MSBuild's common targets.</Description>
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Build.Extensions</PackageId>
-    <Description>The MSBuild targets and tasks which extend MSBuild's common targets.</Description>
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <TargetFrameworks>netcoreapp2.0;net46</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp2.0</TargetFrameworks>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
-    <PackageOutputPath>$(OutputPath)Packages\</PackageOutputPath>
-    <PackageLayoutOutputPath>$(OutputPath)Sdks\$(PackageId)\</PackageLayoutOutputPath>
-    <OutputPath>$(PackageLayoutOutputPath)msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutputPath>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
-    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <OutDirName>Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -28,9 +38,8 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="NETStandard.Library.NETFramework" Version="$(NETStandardLibraryNETFrameworkVersion)" ExcludeAssets="All" NoWarn="NU1701" />
   </ItemGroup>
 
@@ -40,23 +49,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
-    <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <Compile Include="**\*.cs" />
-    <Compile Include="..\Common\src\**\*.cs">
-      <Link>Common\%(RecursiveDir)\%(FileName)%(Extension)</Link>
-    </Compile>
-    <None Include="..\Common\Resources\xlf\**\*">
-      <Link>Resources\xlf\%(FileName)%(Extension)</Link>
-    </None>
-    <EmbeddedResource Include="..\Common\Resources\Strings.resx">
-      <Link>Resources\Strings.resx</Link>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
-    </EmbeddedResource>
-    <Compile Include="..\Common\Resources\Strings.Designer.cs">
-      <Link>Resources\Strings.Designer.cs</Link>
+    <Compile Include="..\Common\**\*.cs" Link="Common\%(RecursiveDir)\%(FileName)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="..\Common\Resources\Strings.Designer.cs" Link="Resources\%(FileName)%(Extension)">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
@@ -64,117 +62,28 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="..\Common\src\BuildErrorException.cs">
-      <Link>Common\.\\BuildErrorException.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\DiagnosticMessageSeverity.cs">
-      <Link>Common\.\\DiagnosticMessageSeverity.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\DiagnosticsHelper.cs">
-      <Link>Common\.\\DiagnosticsHelper.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\FileUtilities.cs">
-      <Link>Common\.\\FileUtilities.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\FileUtilities.net45.cs">
-      <Link>Common\.\\FileUtilities.net45.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\FileUtilities.netstandard.cs">
-      <Link>Common\.\\FileUtilities.netstandard.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ILog.cs">
-      <Link>Common\.\\ILog.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ItemUtilities.cs">
-      <Link>Common\.\\ItemUtilities.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\MSBuildLog.cs">
-      <Link>Common\.\\MSBuildLog.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\MetadataKeys.cs">
-      <Link>Common\.\\MetadataKeys.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\NETSdkError.cs">
-      <Link>Common\.\\NETSdkError.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\NuGetUtils.cs">
-      <Link>Common\.\\NuGetUtils.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\TaskBase.cs">
-      <Link>Common\.\\TaskBase.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ConflictResolution\ConflictItem.cs">
-      <Link>Common\ConflictResolution\\ConflictItem.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ConflictResolution\ConflictResolver.cs">
-      <Link>Common\ConflictResolution\\ConflictResolver.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ConflictResolution\MSBuildUtilities.cs">
-      <Link>Common\ConflictResolution\\MSBuildUtilities.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ConflictResolution\MetadataNames.cs">
-      <Link>Common\ConflictResolution\\MetadataNames.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ConflictResolution\PackageRank.cs">
-      <Link>Common\ConflictResolution\\PackageRank.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ConflictResolution\PlatformManifestReader.cs">
-      <Link>Common\ConflictResolution\\PlatformManifestReader.cs</Link>
-    </Compile>
-    <Compile Update="..\Common\src\ConflictResolution\ResolvePackageFileConflicts.cs">
-      <Link>Common\ConflictResolution\\ResolvePackageFileConflicts.cs</Link>
-    </Compile>
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx" Link="Resources\%(FileName)%(Extension)">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
+    </EmbeddedResource>
   </ItemGroup>
+
   <ItemGroup>
-    <None Update="..\Common\Resources\xlf\Strings.cs.xlf">
-      <Link>Resources\xlf\Strings.cs.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.de.xlf">
-      <Link>Resources\xlf\Strings.de.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.es.xlf">
-      <Link>Resources\xlf\Strings.es.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.fr.xlf">
-      <Link>Resources\xlf\Strings.fr.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.it.xlf">
-      <Link>Resources\xlf\Strings.it.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.ja.xlf">
-      <Link>Resources\xlf\Strings.ja.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.ko.xlf">
-      <Link>Resources\xlf\Strings.ko.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.pl.xlf">
-      <Link>Resources\xlf\Strings.pl.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.pt-BR.xlf">
-      <Link>Resources\xlf\Strings.pt-BR.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.ru.xlf">
-      <Link>Resources\xlf\Strings.ru.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.tr.xlf">
-      <Link>Resources\xlf\Strings.tr.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.zh-Hans.xlf">
-      <Link>Resources\xlf\Strings.zh-Hans.xlf</Link>
-    </None>
-    <None Update="..\Common\Resources\xlf\Strings.zh-Hant.xlf">
-      <Link>Resources\xlf\Strings.zh-Hant.xlf</Link>
-    </None>
+    <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
+    <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
+    <None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
   </ItemGroup>
+
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
-      <_netstandardLibraryNetFrameworkPath>$(NUGET_PACKAGES)\NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_netstandardLibraryNetFrameworkPath>
+      <_NETStandardLibraryNETFrameworkPath>$(NuGetPackageRoot)NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_NETStandardLibraryNETFrameworkPath>
     </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
       </LayoutFile>
-      <NetStandardNetFxFile Include="$(_netstandardLibraryNetFrameworkPath)\**\*" Exclude="$(_netstandardLibraryNetFrameworkPath)\**\*.props;$(_netstandardLibraryNetFrameworkPath)\**\*.targets" />
+      <NetStandardNetFxFile Include="$(_NETStandardLibraryNETFrameworkPath)\**\*" Exclude="$(_NETStandardLibraryNETFrameworkPath)\**\*.props;$(_NETStandardLibraryNETFrameworkPath)\**\*.targets" />
       <LayoutFile Include="@(NetStandardNetFxFile)">
         <TargetPath>msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\%(NetStandardNetFxFile.RecursiveDir)%(NetStandardNetFxFile.FileName)%(NetStandardNetFxFile.Extension)</TargetPath>
       </LayoutFile>
@@ -201,6 +110,7 @@
       <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
     </ItemGroup>
   </Target>
-  <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

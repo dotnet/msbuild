@@ -1,19 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
 
   <PropertyGroup>
+    <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Sdk</PackageId>
-    <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
     <TargetFrameworks>netcoreapp2.0;net46</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp2.0</TargetFrameworks>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
-    <PackageOutputPath>$(OutputPath)Packages\</PackageOutputPath>
-    <PackageLayoutOutputPath>$(OutputPath)Sdks\$(PackageId)\</PackageLayoutOutputPath>
-    <OutputPath>$(PackageLayoutOutputPath)tools\</OutputPath>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
-    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <OutDirName>Sdks\$(PackageId)\tools</OutDirName>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -24,51 +34,60 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetVersion)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(DependencyModelVersion)" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackVersion)" ExcludeAssets="All" />
   </ItemGroup>
 
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Update="NuGet.ProjectModel" ExcludeAssets="Runtime" />
     <PackageReference Update="Microsoft.Extensions.DependencyModel" ExcludeAssets="Runtime" />
+    <PackageReference Update="NuGet.ProjectModel" ExcludeAssets="Runtime" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <Compile Include="..\Common\src\**\*.cs">
-      <Link>Common\%(RecursiveDir)\%(FileName)%(Extension)</Link>
-    </Compile>
-    <None Include="build\**\*" PackagePath="build\" />
-    <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
-    <None Include="sdk\**\*" PackagePath="Sdk\" />
-    <None Include="..\Common\Resources\xlf\**\*">
-      <Link>Resources\xlf\%(FileName)%(Extension)</Link>
-    </None>
-    <EmbeddedResource Include="..\Common\Resources\Strings.resx">
-      <Link>Resources\%(FileName)%(Extension)</Link>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
-    </EmbeddedResource>
-    <Compile Include="..\Common\Resources\Strings.Designer.cs">
-      <Link>Resources\%(FileName)%(Extension)</Link>
+    <Compile Include="..\Common\**\*.cs" Link="Common\%(RecursiveDir)\%(FileName)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="..\Common\Resources\Strings.Designer.cs" Link="Resources\%(FileName)%(Extension)">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx" Link="Resources\%(FileName)%(Extension)">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Microsoft.NET.Build.Tasks.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="build\**\*" PackagePath="build\" />
+    <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
+    <None Include="sdk\**\*" PackagePath="Sdk\" />
+    <None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
+  </ItemGroup>
+
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
+    <PropertyGroup>
+      <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackVersion)</_NugetBuildTasksPackPath>
+    </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
       </LayoutFile>
-      <PackFile Include="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\**\*" Exclude="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\*" />
+      <PackFile Include="$(_NugetBuildTasksPackPath)\**\*" Exclude="$(_NugetBuildTasksPackPath)\*" />
       <LayoutFile Include="@(PackFile)">
         <TargetPath>..\NuGet.Build.Tasks.Pack\%(PackFile.RecursiveDir)%(PackFile.Filename)%(PackFile.Extension)</TargetPath>
       </LayoutFile>
@@ -96,6 +115,6 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
