@@ -1424,7 +1424,7 @@ namespace Microsoft.Build.BackEnd
                     var val = (ProfilerResult?)FieldValue;
                     if (translator.TranslateNullable(val))
                     {
-                        var profilerResult = val.Value;
+                        var profilerResult = val ?? default(ProfilerResult);
                         ProfilerResultTranslator.Translate(translator, ref profilerResult);
                         val = profilerResult;
                     }
@@ -1488,22 +1488,19 @@ namespace Microsoft.Build.BackEnd
         {
             public static void Translate(INodePacketTranslator translator, ref ProfilerResult profilerResult)
             {
-                if (translator.TranslateNullable(profilerResult))
+                IDictionary<EvaluationLocation, ProfiledLocation> profiledLocations = new Dictionary<EvaluationLocation, ProfiledLocation>();
+                if (translator.Mode == TranslationDirection.WriteToStream)
                 {
-                    IDictionary<EvaluationLocation, ProfiledLocation> profiledLocations = new Dictionary<EvaluationLocation, ProfiledLocation>();
-                    if (translator.Mode == TranslationDirection.WriteToStream)
-                    {
-                        profiledLocations = profilerResult.ProfiledLocations.ToDictionary(kv => kv.Key, kv => kv.Value);
-                    }
+                    profiledLocations = profilerResult.ProfiledLocations.ToDictionary(kv => kv.Key, kv => kv.Value);
+                }
 
-                    translator.TranslateDictionary(ref profiledLocations,
-                        TranslatorForEvaluationLocation, TranslatorForProfiledLocation,
-                        count => new Dictionary<EvaluationLocation, ProfiledLocation>());
+                translator.TranslateDictionary(ref profiledLocations,
+                    TranslatorForEvaluationLocation, TranslatorForProfiledLocation,
+                    count => new Dictionary<EvaluationLocation, ProfiledLocation>());
 
-                    if (translator.Mode == TranslationDirection.ReadFromStream)
-                    {
-                        profilerResult = new ProfilerResult(new ReadOnlyDictionary<EvaluationLocation, ProfiledLocation>(profiledLocations));
-                    }
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    profilerResult = new ProfilerResult(new ReadOnlyDictionary<EvaluationLocation, ProfiledLocation>(profiledLocations));
                 }
             }
 
