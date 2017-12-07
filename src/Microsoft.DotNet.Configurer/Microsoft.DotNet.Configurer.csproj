@@ -16,10 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Common" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="NuGet.Configuration" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(DotNetCliArchiverVersion)" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
+    <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" />
+    <PackageReference Include="NuGet.Configuration" Version="$(NuGetConfigurationPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

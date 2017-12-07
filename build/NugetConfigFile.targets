@@ -10,9 +10,9 @@
         <![CDATA[
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-  <packageSources>
-    <!--To inherit the global NuGet package sources remove the <clear/> line below -->
-    <clear />
+<packageSources>
+<!--To inherit the global NuGet package sources remove the <clear/> line below -->
+<clear />
         ]]>
       </NugetConfigHeader>
 
@@ -37,7 +37,7 @@
 
       <NugetConfigSuffix>
         <![CDATA[
-  </packageSources>
+</packageSources>
 </configuration>
         ]]>
       </NugetConfigSuffix>

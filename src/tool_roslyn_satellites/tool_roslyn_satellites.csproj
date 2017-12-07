@@ -4,7 +4,7 @@
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <PublishDir>$(RoslynDirectory)/bincore</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
     <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
@@ -13,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NetCore.App" Version="$(CLI_SharedFrameworkVersion)" />
-    <PackageReference Include="CliDeps.Satellites.Roslyn" Version="$(CLI_Roslyn_Satellites_Version)" />
+    <PackageReference Include="Microsoft.NetCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
+    <PackageReference Include="CliDeps.Satellites.Roslyn" Version="$(CliDepsSatellitesRoslynPackageVersion)" />
   </ItemGroup>
 
   <Target Name="MoveBuildTasksSatellitesAndRemoveBuildOutputAsset"

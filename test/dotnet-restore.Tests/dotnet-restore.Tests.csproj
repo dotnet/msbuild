@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>dotnet-restore.Tests</AssemblyName>
     <AssetTargetFallback>$(AssetTargetFallback);dnxcore50;portable-net45+win8</AssetTargetFallback>
@@ -13,11 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Build" Version="$(CLI_MSBuild_Version)" />
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="xunit" Version="2.2.0" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="FluentAssertions" Version="4.18.0" />
   </ItemGroup>
 </Project>

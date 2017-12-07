@@ -46,10 +46,11 @@
 
   <Target Name="BuildTheWholeCli" DependsOnTargets="$(CLITargets)" />
 
+  <Import Project="build/NugetConfigFile.targets" />
   <Import Project="build/GitCommitInfo.targets" />
   <Import Project="build/HostInfo.targets" />
   <Import Project="build/BuildInfo.targets" />
-  <Import Project="build/NugetConfigFile.targets" />
+  <Import Project="build/DownloadPackageVersions.targets" />
   <Import Project="build/Prepare.targets" />
   <Import Project="build/Compile.targets" />
   <Import Project="build/BuildAndPublishAllLinuxDistrosNativeInstallers.targets" />

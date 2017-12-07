@@ -1,6 +1,10 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Product>Sdk</Product>
+    <CoreSetupBlobRootUrl Condition="'$(PB_AssetRootUrl)' != ''">$(PB_AssetRootUrl)</CoreSetupBlobRootUrl>
+    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
+    <CoreSetupBlobAccessToken Condition="'$(PB_AssetRootAccessTokenSuffix)' != ''">$(PB_AssetRootAccessTokenSuffix)</CoreSetupBlobAccessToken>
+    <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
     <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
     <ArtifactContainerName Condition="'$(ArtifactContainerName)' == ''">dotnet</ArtifactContainerName>
     <ArtifactCloudDropAccessToken>$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>
@@ -12,10 +16,10 @@
     <ChecksumCloudDropAccessToken>$(CHECKSUM_STORAGE_KEY)</ChecksumCloudDropAccessToken>
     <ChecksumCloudDropAccountName>$(CHECKSUM_STORAGE_ACCOUNT)</ChecksumCloudDropAccountName>
     <ChecksumCloudDropAccountName Condition="'$(ChecksumCloudDropAccountName)' == ''">dotnetclichecksums</ChecksumCloudDropAccountName>
-    <TransportFeedContainerName>$(TRANSPORTFEED_STORAGE_CONTAINER)</TransportFeedContainerName>
-    <TransportFeedContainerName Condition="'$(TransportFeedContainerName)' == ''">dotnet-core</TransportFeedContainerName>
-    <TransportFeedExpectedURL>$(TRANSPORTFEED_EXPECTED_URL)</TransportFeedExpectedURL>
-    <TransportFeedExpectedURL Condition="'$(TransportFeedExpectedURL)' == ''">https://dotnetfeed.blob.core.windows.net/$(TransportFeedContainerName)/index.json</TransportFeedExpectedURL>
-    <TransportFeedCloudDropAccessToken>$(TRANSPORTFEED_STORAGE_KEY)</TransportFeedCloudDropAccessToken>
+    <BlobFeedContainerName>$(BLOBFEED_STORAGE_CONTAINER)</BlobFeedContainerName>
+    <BlobFeedContainerName Condition="'$(BlobFeedContainerName)' == ''">dotnet-core</BlobFeedContainerName>
+    <BlobFeedExpectedURL>$(BLOBFEED_EXPECTED_URL)</BlobFeedExpectedURL>
+    <BlobFeedExpectedURL Condition="'$(BlobFeedExpectedURL)' == ''">https://dotnetfeed.blob.core.windows.net/$(BlobFeedContainerName)/index.json</BlobFeedExpectedURL>
+    <BlobFeedCloudDropAccessToken>$(BLOBFEED_STORAGE_KEY)</BlobFeedCloudDropAccessToken>
   </PropertyGroup>
 </Project>
