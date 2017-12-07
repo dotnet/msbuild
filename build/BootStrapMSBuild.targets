@@ -52,22 +52,6 @@
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 
       <NuGetCommonExtensions Include="$(VSInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*" />
-      <!-- TODO: Automate getting NuGet.Build.Tasks.dll + all dependencies. -->
-      <!--<NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetVersion)\runtimes\any\native\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.commands\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.common\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.configuration\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.dependencyresolver.core\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.frameworks\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.librarymodel\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.packaging\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.packaging.core\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.projectmodel\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.protocol\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.versioning\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuspec.referencegenerator\$(NuGetVersion)\lib\net45\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)Newtonsoft.Json\9.0.1\lib\net45\**\*.*" />-->
 
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe" />
@@ -109,34 +93,30 @@
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
+  <!--
+    To build a .NET Core app, we need a lot of stuff from the CLI. This target will copy everything from the current one and 
+    overwrite what it needs to.
+    TODO: We should have another project with the correct dependencies specified and "publish" that to replace this. Similar
+    to what the CLI does to create a distributable.
+  -->
   <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
     <ItemGroup>
-      <DeployedItems Include="$(OutputPath)\**\*.*"/>
-
-      <!-- TODO: Automate getting NuGet.Build.Tasks.dll + all dependencies. -->
-      <!--<NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetVersion)\runtimes\any\native\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.commands\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.common\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.configuration\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.dependencyresolver.core\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.frameworks\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.librarymodel\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.packaging\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.packaging.core\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.projectmodel\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.protocol\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuget.versioning\$(NuGetVersion)\lib\netstandard1.0\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)nuspec.referencegenerator\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
-      <NuGetCommonExtensions Include="$(NuGetPackageRoot)Newtonsoft.Json\9.0.1\lib\netstandard1.0\**\*.*" />-->
+      <DeployedItems Include="$(OutputPath)\**\*.*" Exclude="$(OutputPath)\MSBuild.deps.json"/>
+      <DotNetCli Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\**\*" />
     </ItemGroup>
 
+    <!-- Copy the CLI -->
+    <Copy SourceFiles="@(DotNetCli)"
+          DestinationFiles="@(DotNetCli->'$(BootstrapDestination)%(RecursiveDir)%(Filename)%(Extension)')" />
+    
+    <!-- Overwrite stuff we built locally -->
     <Copy SourceFiles="@(DeployedItems)"
           DestinationFolder="$(BootstrapDestination)\%(RecursiveDir)" />
-
-    <Copy SourceFiles="@(NuGetCommonExtensions)"
-          DestinationFiles="@(NuGetCommonExtensions -> '$(BootstrapDestination)%(RecursiveDir)%(FileName)%(Extension)')" />
-
+    
+    <!-- Not really sure why but we need to have the wrong version of this dll by default -->
+    <Copy SourceFiles="$(NuGetPackageRoot)\system.text.encoding.codepages\4.4.0\runtimes\win\lib\netcoreapp2.0\System.Text.Encoding.CodePages.dll"
+          DestinationFolder="$(BootstrapDestination)runtimes\win\lib\netstandard1.3\" />
+    
     <!-- Microsoft.Portable.CSharp.targets imports this file with a capital T -->
     <Copy SourceFiles="$(OutputPath)\Microsoft.CSharp.targets"
           DestinationFiles="$(BootstrapDestination)\Microsoft.CSharp.Targets" />
