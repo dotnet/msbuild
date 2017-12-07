@@ -86,7 +86,7 @@
     </ItemGroup>
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
       InputFile="%(RoslynRuntimeConfigs.Identity)"
