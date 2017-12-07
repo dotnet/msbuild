@@ -77,9 +77,11 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">Especifique um agente para os resultados de teste.
-                                        Exemplo: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
-                                        Mais informações sobre suporte a argumentos de agente: https://aka.ms/vstest-report</target>
+        <target state="translated">Especifique um agente para os resultados de teste.
+                                        Exemplos:
+                                        Log no formato trx usando uma nome de arquivo exclusivo: --logger trx
+                                        Log no formato trx usando o nome de arquivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Mais informações sobre os argumentos do agente support:https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -177,7 +179,7 @@ Argumentos RunSettings:
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
-        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
+        <target state="translated">Executa o teste em modo de acusação. Essa opção é útil para isolar o teste problemático, causando uma falha no host de teste. Cria um arquivo de saída no diretório atual como "Sequence.xml", que captura a ordem de execução do teste antes da falha.</target>
         <note />
       </trans-unit>
     </body>

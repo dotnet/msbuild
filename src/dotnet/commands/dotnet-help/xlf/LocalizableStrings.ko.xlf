@@ -234,12 +234,12 @@
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
-        <target state="needs-review-translation">추가 deps.json 파일의 경로입니다.</target>
+        <target state="translated">추가 deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="new">Stores the specified assemblies in the runtime store.</target>
+        <target state="translated">지정된 어셈블리를 런타임 저장소에 저장합니다.</target>
         <note />
       </trans-unit>
     </body>

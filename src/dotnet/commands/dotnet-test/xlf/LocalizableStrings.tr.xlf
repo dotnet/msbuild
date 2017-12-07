@@ -77,9 +77,11 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">Test sonuçları için bir günlükçü belirtin. 
-                                        Örnek: --logger "trx[;LogFileName=&lt;Varsayılan olarak benzersiz dosya adı kullanılır&gt;]"
-                                        Günlükçü bağımsız değişkenleri desteği hakkında daha fazla bilgi: https://aka.ms/vstest-report</target>
+        <target state="translated">Test sonuçları için bir günlükçü belirtin.
+                                        Örnekler:
+                                        Benzersiz dosya adı kullanarak trx biçiminde günlük kaydı: --logger trx
+                                        Belirtilen dosya adını kullanarak trx biçiminde günlük kaydı: --logger "trx;LogFileName=&lt;TestSonuçları.trx&gt;"
+                                        Günlükçü bağımsız değişkenleri desteği hakkında daha fazla bilgi:https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -177,7 +179,7 @@ RunSettings bağımsız değişkenleri:
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
-        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
+        <target state="translated">Testi blame modunda çalıştırır. Bu seçenek, test konağının kilitlenmesine neden olan sorunlu testi belirlemek için kullanışlıdır. Geçerli dizinde testin kilitlenmeden önceki yürütme sırasını yakalayan "Sequence.xml" adlı bir çıkış dosyası oluşturur.</target>
         <note />
       </trans-unit>
     </body>

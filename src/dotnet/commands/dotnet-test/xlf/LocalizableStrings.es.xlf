@@ -77,9 +77,11 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">Especifica un registrador para los resultados de prueba.
-                                        Ejemplo: --logger "trx[;LogFileName=&lt;Adopta como valor predeterminado un nombre de archivo único&gt;]"
-                                        Más información sobre la compatibilidad con los argumentos de registrador: https://aka.ms/vstest-report</target>
+        <target state="translated">Especifique un registrador para los resultados de la prueba.
+                                        Ejemplo:
+                                        Inicie sesión en formato trx mediante un nombre de archivo único: --logger trx
+                                        Inicie sesión en formato trx mediante el nombre de archivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Más informacióin sobre la compatibilidad de los argumentos del registrador: https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -177,7 +179,7 @@ Argumentos RunSettings:
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
-        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
+        <target state="translated">Ejecuta la prueba en modo de culpa. Esta opción es útil para aislar la prueba problemática que provoca el bloqueo del host de prueba. Crea un archivo de salida en el directorio actual como "Sequence.xml" que captura el orden de ejecución de la prueba antes del bloqueo.</target>
         <note />
       </trans-unit>
     </body>

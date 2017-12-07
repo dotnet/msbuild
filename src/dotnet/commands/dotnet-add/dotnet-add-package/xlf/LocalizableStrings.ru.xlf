@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
         <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
-        <target state="new">Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</target>
+        <target state="translated">Не удалось создать временный файл для проекта "{0}". Невозможно добавить ссылку на пакет. Очистите временный каталог и повторите попытку.</target>
         <note />
       </trans-unit>
     </body>

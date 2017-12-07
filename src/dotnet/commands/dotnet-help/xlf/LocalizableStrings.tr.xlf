@@ -234,12 +234,12 @@
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
-        <target state="needs-review-translation">Ek deps.json dosyasının yolu.</target>
+        <target state="translated">Ek deps.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="new">Stores the specified assemblies in the runtime store.</target>
+        <target state="translated">Belirtilen bütünleştirilmiş kodları çalışma zamanı deposunda depolar.</target>
         <note />
       </trans-unit>
     </body>

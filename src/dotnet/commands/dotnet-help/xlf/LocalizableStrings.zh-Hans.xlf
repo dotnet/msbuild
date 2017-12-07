@@ -234,12 +234,12 @@
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
-        <target state="needs-review-translation">其他 deps.json 文件的路径。</target>
+        <target state="translated">指向其他 deps.json 文件的路径。</target>
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="new">Stores the specified assemblies in the runtime store.</target>
+        <target state="translated">在运行时存储中存储指定的程序集。</target>
         <note />
       </trans-unit>
     </body>
