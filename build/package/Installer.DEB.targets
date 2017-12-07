@@ -27,7 +27,7 @@
     <PropertyGroup>
       <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
       <SdkDebianPackageName>dotnet-sdk-$(SdkDebianPackageVersion)</SdkDebianPackageName>
-      <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
+      <SharedFxDebianPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxDebianPackageVersion>
       <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
       <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>

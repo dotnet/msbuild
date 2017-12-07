@@ -3,6 +3,6 @@
     <RuntimeNETCoreAppPackageName>runtime.$(SharedFrameworkRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
     <CrossgenPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(MicrosoftNETCoreAppPackageVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
     <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(MicrosoftNETCoreAppPackageVersion)/runtimes/$(SharedFrameworkRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
-    <SharedFrameworkNameVersionPath>$(OutputDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
+    <SharedFrameworkNameVersionPath>$(OutputDirectory)/shared/$(SharedFrameworkName)/$(MicrosoftNETCoreAppPackageVersion)</SharedFrameworkNameVersionPath>
   </PropertyGroup>
 </Project>

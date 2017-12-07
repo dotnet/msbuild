@@ -68,7 +68,7 @@
     <!-- Replace config json variables -->
     <ItemGroup>
       <SDKTokenValue Include="%SHARED_HOST_RPM_VERSION%">
-        <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
+        <ReplacementString>$(MicrosoftNETCoreAppPackageVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_NAME%">
         <ReplacementString>$(AspNetCoreRuntimePackageName)</ReplacementString>
@@ -168,7 +168,7 @@
     <PropertyGroup>
       <SdkRpmPackageVersion>$(SdkVersion)</SdkRpmPackageVersion>
       <SdkRpmPackageName>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkRpmPackageVersion)</SdkRpmPackageName>
-      <SharedFxRpmPackageVersion>$(SharedFrameworkVersion)</SharedFxRpmPackageVersion>
+      <SharedFxRpmPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxRpmPackageVersion>
       <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageVersion)</SharedFxRpmPackageName>
       <SharedFxRpmPackageName>$(SharedFxRpmPackageName.ToLower())</SharedFxRpmPackageName>
       <HostFxrRpmPackageVersion>$(HostFxrVersion)</HostFxrRpmPackageVersion>
