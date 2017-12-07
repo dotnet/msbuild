@@ -4,7 +4,7 @@ The Microsoft Build Engine is a platform for building applications. This engine,
 For more information on MSBuild, see the [MSBuild documentation](https://docs.microsoft.com/visualstudio/msbuild/msbuild) on docs.microsoft.com.
 
 ### Build Status
-
+ 
 The current development branch is `master`. It builds for .NET Core and the full desktop .NET framework. Changes in `master` will go into the next "major" update of MSBuild.
 
 | Runtime\OS | Windows | Ubuntu 14.04 | Ubuntu 16.04 |Mac OS X|
