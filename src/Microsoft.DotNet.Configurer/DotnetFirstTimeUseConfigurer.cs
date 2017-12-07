@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Configurer
         private INuGetCachePrimer _nugetCachePrimer;
         private INuGetCacheSentinel _nugetCacheSentinel;
         private IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
+        private IAspNetCertificateSentinel _aspNetCertificateSentinel;
+        private IAspNetCoreCertificateGenerator _aspNetCoreCertificateGenerator;
         private string _cliFallbackFolderPath;
         private readonly IEnvironmentPath _pathAdder;
 
@@ -23,6 +25,8 @@ namespace Microsoft.DotNet.Configurer
             INuGetCachePrimer nugetCachePrimer,
             INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
+            IAspNetCertificateSentinel aspNetCertificateSentinel,
+            IAspNetCoreCertificateGenerator aspNetCoreCertificateGenerator,
             IEnvironmentProvider environmentProvider,
             IReporter reporter,
             string cliFallbackFolderPath,
@@ -31,6 +35,8 @@ namespace Microsoft.DotNet.Configurer
             _nugetCachePrimer = nugetCachePrimer;
             _nugetCacheSentinel = nugetCacheSentinel;
             _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
+            _aspNetCertificateSentinel = aspNetCertificateSentinel;
+            _aspNetCoreCertificateGenerator = aspNetCoreCertificateGenerator;
             _environmentProvider = environmentProvider;
             _reporter = reporter;
             _cliFallbackFolderPath = cliFallbackFolderPath;
@@ -59,6 +65,31 @@ namespace Microsoft.DotNet.Configurer
                     _nugetCachePrimer.PrimeCache();
                 }
             }
+
+            if(ShouldGenerateAspNetCertificate())
+            {
+                GenerateAspNetCertificate();
+            }
+        }
+
+        private void GenerateAspNetCertificate()
+        {
+            _aspNetCoreCertificateGenerator.GenerateAspNetCoreDevelopmentCertificate();
+
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.AspNetCertificateInstalled);
+
+            _aspNetCertificateSentinel.CreateIfNotExists();
+        }
+
+        private bool ShouldGenerateAspNetCertificate()
+        {
+            var generateAspNetCertificate =
+                _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
+
+            return ShouldRunFirstRunExperience() &&
+                generateAspNetCertificate &&
+                !_aspNetCertificateSentinel.Exists();
         }
 
         private void AddPackageExecutablePath()

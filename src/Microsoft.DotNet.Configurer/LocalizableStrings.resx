@@ -137,7 +137,7 @@ A command is running to populate your local package cache to improve restore spe
   <data name="FailedToPrimeCacheError" xml:space="preserve">
     <value>Failed to prime the NuGet cache. {0} failed with: {1}</value>
   </data>
-  <data name="UnauthorizedAccessMessage"  xml:space="preserve">
+  <data name="UnauthorizedAccessMessage" xml:space="preserve">
     <value>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
@@ -146,5 +146,10 @@ Here are some options to fix this error:
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </value>
+  </data>
+  <data name="AspNetCertificateInstalled" xml:space="preserve">
+    <value>ASP.NET Core
+------------
+Installed ASP.NET Core HTTPS development certificate. For more information go to https://go.microsoft.com/fwlink/?linkid=84805</value>
   </data>
 </root>

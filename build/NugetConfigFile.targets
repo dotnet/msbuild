@@ -21,6 +21,8 @@
     <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
     <add key="templating" value="https://dotnet.myget.org/F/templating/api/v3/index.json" />
     <add key="aspnet" value="https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json" />
+    <!-- Remove all other 2.0.0 aspnet entries when we start taking new ASP.NET packages -->
+    <add key="aspnet-next" value="https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json" />
     <add key="websdkfeed" value="https://dotnet.myget.org/F/dotnet-web/api/v3/index.json" />
     <add key="cli-deps" value="https://dotnet.myget.org/F/cli-deps/api/v3/index.json" />
     <add key="roslyn" value="https://dotnet.myget.org/f/roslyn/api/v3/index.json" />
