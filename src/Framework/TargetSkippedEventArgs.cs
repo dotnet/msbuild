@@ -43,6 +43,11 @@ namespace Microsoft.Build.Framework
         public string ParentTarget { get; set; }
 
         /// <summary>
+        /// File where this target was declared.
+        /// </summary>
+        public string TargetFile { get; set; }
+
+        /// <summary>
         /// Why the parent target built this target.
         /// </summary>
         public TargetBuiltReason BuildReason { get; set; }

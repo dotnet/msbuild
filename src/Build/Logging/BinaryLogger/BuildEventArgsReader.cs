@@ -170,6 +170,7 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
             // Read unused Importance, it defaults to Low
             ReadInt32();
+            var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
             var buildReason = (TargetBuiltReason)ReadInt32();
 
@@ -179,7 +180,7 @@ namespace Microsoft.Build.Logging
             SetCommonFields(e, fields);
 
             e.ProjectFile = fields.ProjectFile;
-
+            e.TargetFile = targetFile;
             e.ParentTarget = parentTarget;
             e.BuildReason = buildReason;
             return e;
@@ -292,7 +293,8 @@ namespace Microsoft.Build.Logging
             var projectFile = ReadOptionalString();
             var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
-            var buildReason = (TargetBuiltReason) ReadInt32();
+            // BuildReason was introduced in version 4
+            var buildReason = fileFormatVersion > 3 ? (TargetBuiltReason) ReadInt32() : TargetBuiltReason.None;
 
             var e = new TargetStartedEventArgs(
                 fields.Message,

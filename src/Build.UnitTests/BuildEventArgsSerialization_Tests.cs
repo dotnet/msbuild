@@ -380,6 +380,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile,
+                e => e.TargetFile,
                 e => e.BuildReason.ToString());
         }
 

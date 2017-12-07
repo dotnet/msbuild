@@ -390,6 +390,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         BuildEventContext = projectLoggingContext.BuildEventContext,
                         TargetName = _target.Name,
+                        TargetFile = _target.Location.File,
                         ParentTarget = ParentEntry?.Target?.Name,
                         BuildReason = BuildReason
                     };
