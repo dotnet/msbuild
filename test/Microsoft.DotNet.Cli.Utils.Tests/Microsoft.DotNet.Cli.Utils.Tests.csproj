@@ -39,6 +39,6 @@
     <PackageReference Include="Moq" Version="4.7.25" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(CLI_MSBuild_Version)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(ClI_MSBUILD_Runtime_Version)" />
   </ItemGroup>
 </Project>
