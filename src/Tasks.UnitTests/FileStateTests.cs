@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // On Unix there no invalid file name characters
+        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
         public void BadChars()
         {
             var state = new FileState("|");

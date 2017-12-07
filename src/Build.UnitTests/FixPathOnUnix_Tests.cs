@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]
     public  class FixPathOnUnixTests
     {
         [Fact]

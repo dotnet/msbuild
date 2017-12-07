@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj">
+    <ProjectReference Include="..\..\Microsoft.Build\Microsoft.Build.csproj">
       <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
       <Name>Microsoft.Build</Name>
     </ProjectReference>

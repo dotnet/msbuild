@@ -1,0 +1,56 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+  </PropertyGroup>
+  
+  <Import Project="build\NuGet.props"/>
+  <Import Project="build\Versions.props"/>
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.microsoft.repotoolset\$(RoslynToolsMicrosoftRepoToolsetVersion)\tools\</RepoToolsetDir>
+    <SignToolDataPath>$(RepoRoot)build\SignToolData.json</SignToolDataPath>
+    <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
+
+    <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\</DOTNET_INSTALL_DIR>
+
+    <!-- Repository and project URLs (used in nuget packages) -->
+    <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+
+    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+
+    <!-- NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
+        CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
+        you don't get those defaults.
+    -->
+
+    <NoWarn>$(NoWarn);NU1603;1701;1702</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
+    Possible Values: Windows_NT / Unix / OSX
+  -->
+  <PropertyGroup>
+    <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
+    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
+  </PropertyGroup>
+
+  <!--<ItemGroup>
+    <PackageReference Include="NerdBank.GitVersioning" Version="1.6.35" />
+  </ItemGroup>-->
+
+
+</Project>

@@ -9,7 +9,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
-using PlatformID = Xunit.PlatformID;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -108,7 +107,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void WindowsNewLineCharactersInCommandOnUnix()
         {
             var exec = PrepareExec("echo hello\r\n\r\n");
@@ -187,7 +186,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]   // UNC is Windows-Only
+        [PlatformSpecific(TestPlatforms.Windows)]   // UNC is Windows-Only
         public void UNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");

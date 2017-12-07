@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("ab", "", "x", StringComparison.CurrentCulture, typeof(ArgumentException))]
         public void ReplaceWithStringComparerExceptionCases(string aString, string oldValue, string newValue, StringComparison stringComparison, Type expectedException)
         {
-            Should.Throw(() => aString.Replace(oldValue, newValue, stringComparison), expectedException);
+            Should.Throw(() => StringExtensions.Replace(aString, oldValue, newValue, stringComparison), expectedException);
         }
     }
 }

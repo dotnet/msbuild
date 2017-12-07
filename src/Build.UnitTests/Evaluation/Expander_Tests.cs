@@ -589,7 +589,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "Cannot fail on path too long with Unix"
+        [PlatformSpecific(TestPlatforms.Windows)] // "Cannot fail on path too long with Unix"
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -873,7 +873,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -894,7 +894,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path with illegal windows chars when getting metadata through ->Metadata function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -934,7 +934,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -955,7 +955,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -995,7 +995,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1016,7 +1016,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemInvalidWindowsPathChars3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"

@@ -179,7 +179,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  ResX to Resources with references that are used in the resx
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "Depends on referencing System.dll")]
+#else
         [Fact]
+#endif
         public void ResX2ResourcesWithReferences()
         {
             string systemDll = Utilities.GetPathToCopiedSystemDLL();
@@ -600,7 +604,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// otherwise up to date
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "Depends on referencing System.dll")]
+#else
         [Fact]
+#endif
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -2125,7 +2133,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
 #endif
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2511,7 +2519,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;
@@ -2700,12 +2708,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             t.References = new ITaskItem[]
                 {
                     new TaskItem(p2pReference),
-#if FEATURE_ASSEMBLY_LOCATION
+#if !RUNTIME_TYPE_NETCORE
                     // Path to System.dll
                     new TaskItem(new Uri((typeof(string)).Assembly.EscapedCodeBase).LocalPath)
 #else
-                    // Path to System.dll
-                    new TaskItem(new Uri(Path.Combine(Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath), "System.dll")).LocalPath)
 #endif
                 };
 

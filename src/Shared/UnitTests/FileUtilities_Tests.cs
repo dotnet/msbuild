@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void HasExtension_WhenInvalidFileName_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -390,7 +390,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -402,7 +402,7 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_LEGACY_GETFULLPATH
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetItemSpecModifierRootDirThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -451,7 +451,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadUNC1()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -462,7 +462,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadUNC2()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadUNC3()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -484,14 +484,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathGoodUNC()
         {
             Assert.Equal(@"\\localhost\share", FileUtilities.NormalizePath(@"\\localhost\share"));
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathTooLongWithDots()
         {
             string longPart = new string('x', 300);
@@ -500,7 +500,7 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_LEGACY_GETFULLPATH
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadGlobalroot()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -520,7 +520,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathInvalid()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -883,7 +883,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void AbsolutePathLooksLikeUnixPathOnUnix()
         {
             var secondSlash = SystemSpecificAbsolutePath.Substring(1).IndexOf(Path.DirectorySeparatorChar) + 1;
@@ -894,7 +894,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void PathDoesNotLookLikeUnixPathOnWindows()
         {
             Assert.False(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
@@ -903,7 +903,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void RelativePathLooksLikeUnixPathOnUnixWithBaseDirectory()
         {
             string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", String.Empty);
@@ -934,7 +934,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void RelativePathMaybeAdjustFilePathWithBaseDirectory()
         {
             // <tmp_dir>/first/second/file.txt

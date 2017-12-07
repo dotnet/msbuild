@@ -28,6 +28,9 @@ goto :usage
 
 :doneParsingArguments
 
+:: Restore build tools
+call %~dp0init-tools.cmd
+
 :: Default target
 set TARGET_ARG=RebuildAndTest
 
@@ -78,11 +81,8 @@ if not defined HOST (
 
 set RUNTIME_HOST=
 if /i "%HOST%"=="CoreCLR" (
-    set RUNTIME_HOST=%~dp0Tools\DotNetCLI\Dotnet.exe
-    set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
-    :: The LKG MSBuild on Core is too old to support
-    :: SourceLink targets, so disable them.
-    set SOURCE_LINK_ARGUMENT=/p:SourceLinkCreate=false /p:DebugType=full
+    set RUNTIME_HOST=%DOTNET_PATH%Dotnet.exe
+    set MSBUILD_CUSTOM_PATH=%DOTNET_PATH%sdk\%DOTNET_VERSION%\MSBuild.exe
 ) else if /i "%HOST%"=="Full" (
     set RUNTIME_HOST=
 ) else (
@@ -99,9 +99,6 @@ set SYNC_XLF_ARGUMENT=
 if "%SYNC_XLF%"=="true" (
     set SYNC_XLF_ARGUMENT="/p:SyncXlf=true"
 )
-
-:: Restore build tools
-call %~dp0init-tools.cmd
 
 echo.
 echo ** Rebuilding MSBuild with downloaded binaries
