@@ -73,7 +73,7 @@
           BeforeTargets="Publish">
           
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(CLI_Roslyn_Version)/tools/**/*" />
+      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(RoslynSatelliteBits)" DestinationFiles="@(RoslynSatelliteBits->'$(RoslynDirectory)/bincore/%(RecursiveDir)%(Filename)%(Extension)')" />

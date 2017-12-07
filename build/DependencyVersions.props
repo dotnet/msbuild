@@ -3,11 +3,11 @@
   <PropertyGroup>
     <MicrosoftNETCoreAppPackageVersion>2.0.3</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftBuildPackageVersion>15.5.180.1</MicrosoftBuildPackageVersion>
-    <MicrosoftBuildFrameworkPackageVersion>15.5.179</MicrosoftBuildFrameworkPackageVersion>
-    <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildFrameworkPackageVersion)</MicrosoftBuildRuntimePackageVersion>
-    <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildFrameworkPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
-    <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildFrameworkPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildPackageVersion>15.5.180</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
+    <MicrosoftBuildRuntimePackageVersion>15.5.180.1</MicrosoftBuildRuntimePackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftFSharpCompilerPackageVersion>4.2.0-rtm-171104-0</MicrosoftFSharpCompilerPackageVersion>
     <MicrosoftCodeAnalysisCSharpPackageVersion>2.6.0-beta3-62309-01</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
