@@ -383,7 +383,7 @@ namespace Microsoft.Build.BackEnd
                     // the context of the target, not the task.  This should be the same, especially given that we
                     // wish to allow batching on the condition of a target.
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(
-                        "TargetSkippedFalseCondition",
+                        ResourceUtilities.GetResourceString("TargetSkippedFalseCondition"),
                         _target.Name,
                         _target.Condition,
                         expanded)
@@ -393,6 +393,7 @@ namespace Microsoft.Build.BackEnd
                         ParentTarget = ParentEntry?.Target?.Name,
                         BuildReason = BuildReason
                     };
+
                     projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
                 }
 

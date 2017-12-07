@@ -535,14 +535,17 @@ namespace Microsoft.Build.BackEnd
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(
-                        targetResult.ResultCode == TargetResultCode.Success ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
+                        ResourceUtilities.GetResourceString(targetResult.ResultCode == TargetResultCode.Success
+                            ? "TargetAlreadyCompleteSuccess"
+                            : "TargetAlreadyCompleteFailure"),
                         currentTargetEntry.Name)
                     {
                         BuildEventContext = _projectLoggingContext.BuildEventContext,
                         TargetName = currentTargetEntry.Name,
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
-                        BuildReason = currentTargetEntry.BuildReason 
+                        BuildReason = currentTargetEntry.BuildReason
                     };
+
                     _projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
 
                     if (currentTargetEntry.StopProcessingOnCompletion)

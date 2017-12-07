@@ -292,7 +292,12 @@ namespace Microsoft.Build.Logging
             var projectFile = ReadOptionalString();
             var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
-            var buildReason = (TargetBuiltReason) ReadInt32();
+
+            TargetBuiltReason buildReason = TargetBuiltReason.None;
+            if (fileFormatVersion > 3)
+            {
+                buildReason = (TargetBuiltReason) ReadInt32();
+            }
 
             var e = new TargetStartedEventArgs(
                 fields.Message,
