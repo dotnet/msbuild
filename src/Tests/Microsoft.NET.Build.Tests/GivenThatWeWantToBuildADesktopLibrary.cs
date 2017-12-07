@@ -262,7 +262,7 @@ public class NETFramework
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/1803")]
         public void It_resolves_assembly_conflicts_with_a_NETFramework_library()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
