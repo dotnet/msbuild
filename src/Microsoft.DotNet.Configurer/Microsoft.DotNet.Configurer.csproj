@@ -17,9 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Common" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="NuGet.Configuration" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
+    <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" />
+    <PackageReference Include="NuGet.Configuration" Version="$(NuGetConfigurationPackageVersion)" />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

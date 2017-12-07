@@ -7,7 +7,7 @@
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
@@ -16,12 +16,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
-    <PackageReference Include="NuGet.Build.Tasks" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(CLI_TestPlatform_Version)" />
-    <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(CLI_TestPlatform_Version)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(CLI_Roslyn_Version)">
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
+    <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
+    <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" />
+    <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
+    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNETCoreCompilersPackageVersion)">
       <ExcludeAssets>All</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
@@ -73,7 +73,7 @@
           BeforeTargets="Publish">
           
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(CLI_Roslyn_Version)/tools/**/*" />
+      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(RoslynSatelliteBits)" DestinationFiles="@(RoslynSatelliteBits->'$(RoslynDirectory)/bincore/%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -86,7 +86,7 @@
     </ItemGroup>
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
       InputFile="%(RoslynRuntimeConfigs.Identity)"
@@ -354,7 +354,7 @@
     <PropertyGroup>
       <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
       InputFile="$(VSTestRuntimeConfigPath)"
