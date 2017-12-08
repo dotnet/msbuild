@@ -296,7 +296,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-RepoRoot="$ScriptRoot/../"
+RepoRoot="$ScriptRoot/.."
 ArtifactsDir="$RepoRoot/artifacts"
 ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
 LogDir="$ArtifactsConfigurationDir/log"
