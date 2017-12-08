@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AutoUnify;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -14,21 +15,30 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class Perf : ResolveAssemblyReferenceTestFixture
     {
-        [Fact]
+        [Theory]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "mono-windows-failing")]
-        public void AutoUnifyUsesMinimumIO()
+        [InlineData(RARSimulationMode.LoadProject, 1)]
+        [InlineData(RARSimulationMode.BuildProject, 2)]
+        public void AutoUnifyUsesMinimumIO(RARSimulationMode rarSimulationMode, int ioThreshold)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
             // times out the object used for remoting console writes.  Adding a write in the middle of
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing Perf.AutoUnifyUsesMinimumIO() test");
 
-            // Manually instantiate a test fixture and run it.
-            VersioningAndUnification.AutoUnify.StronglyNamedDependencyAutoUnify t = new VersioningAndUnification.AutoUnify.StronglyNamedDependencyAutoUnify();
-            t.StartIOMonitoring();
-            t.Exists();
-            t.StopIOMonitoringAndAssert_Minimal_IOUse();
+            StronglyNamedDependencyAutoUnify t = new StronglyNamedDependencyAutoUnify();
+
+            try
+            {
+                // Manually instantiate a test fixture and run it.
+                t.StartIOMonitoring();
+                t.Exists(rarSimulationMode);
+            }
+            finally
+            {
+                t.StopIOMonitoringAndAssert_Minimal_IOUse(ioThreshold);
+            }
         }
 
         [Fact]
