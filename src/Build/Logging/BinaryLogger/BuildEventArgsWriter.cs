@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 
 namespace Microsoft.Build.Logging
 {
@@ -129,6 +130,18 @@ namespace Microsoft.Build.Logging
             Write(BinaryLogRecordKind.ProjectEvaluationFinished);
             WriteBuildEventArgsFields(e);
             Write(e.ProjectFile);
+
+            Write(e.ProfilerResult.HasValue);
+            if (e.ProfilerResult.HasValue && e.ProfilerResult.Value.ProfiledLocations.Count > 0)
+            {
+                Write(e.ProfilerResult.Value.ProfiledLocations.Count);
+
+                foreach (var item in e.ProfilerResult.Value.ProfiledLocations)
+                {
+                    Write(item.Key);
+                    Write(item.Value);
+                }
+            }
         }
 
         private void Write(ProjectStartedEventArgs e)
@@ -644,6 +657,35 @@ namespace Microsoft.Build.Logging
         {
             binaryWriter.Write(timestamp.Ticks);
             Write((int)timestamp.Kind);
+        }
+
+        private void Write(TimeSpan timeSpan)
+        {
+            binaryWriter.Write(timeSpan.Ticks);
+        }
+
+        private void Write(EvaluationLocation item)
+        {
+            Write(item.ElementName);
+            Write(item.ElementOrCondition);
+            Write(item.EvaluationDescription);
+            Write(item.File);
+            Write(item.IsElement);
+            Write((int)item.EvaluationPass);
+
+            if (item.Line.HasValue)
+                Write(item.Line.Value);
+            else
+            {
+                Write(-1);
+            }
+        }
+
+        private void Write(ProfiledLocation e)
+        {
+            Write(e.NumberOfHits);
+            Write(e.ExclusiveTime);
+            Write(e.InclusiveTime);
         }
     }
 }

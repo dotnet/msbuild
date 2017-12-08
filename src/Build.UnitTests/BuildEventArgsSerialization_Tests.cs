@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
 using Xunit;
 
@@ -333,6 +334,27 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => e.Message,
                 e => e.ProjectFile);
+        }
+
+        [Fact]
+        public void RoundtripProjectEvaluationFinishedEventArgsWithProfileData()
+        {
+            var args = new ProjectEvaluationFinishedEventArgs("Message")
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+                ProjectFile = @"C:\foo\bar.proj",
+                ProfilerResult = new ProfilerResult(new Dictionary<EvaluationLocation, ProfiledLocation>
+                {
+                    {new EvaluationLocation(EvaluationPass.InitialProperties, "desc1", "file1", 7, "element1", "elementorcondition1", true), new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 1)  },
+                    {new EvaluationLocation(EvaluationPass.LazyItems, "desc2", "file1", null, "element2", "elementorcondition2", false), new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 2)  }
+                    
+                })
+            };
+
+            Roundtrip(args,
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.ProfilerResult.ToString());
         }
 
         [Fact]

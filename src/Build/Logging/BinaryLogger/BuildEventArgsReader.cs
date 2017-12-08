@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 
 namespace Microsoft.Build.Logging
 {
@@ -239,6 +240,24 @@ namespace Microsoft.Build.Logging
                 ProjectFile = projectFile
             };
             SetCommonFields(e, fields);
+
+            // ProfilerResult was introduced in version 5
+            if (fileFormatVersion > 4)
+            {
+                var hasProfileData = ReadBoolean();
+                if (hasProfileData)
+                {
+                    var count = ReadInt32();
+
+                    var d = new Dictionary<EvaluationLocation, ProfiledLocation>(count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        d.Add(ReadEvaluationLocation(), ReadProfiledLocation());
+                    }
+                    e.ProfilerResult = new ProfilerResult(d);
+                }
+            }
+
             return e;
         }
 
@@ -782,6 +801,11 @@ namespace Microsoft.Build.Logging
             return new DateTime(binaryReader.ReadInt64(), (DateTimeKind)ReadInt32());
         }
 
+        private TimeSpan ReadTimeSpan()
+        {
+            return new TimeSpan(binaryReader.ReadInt64());
+        }
+
         private int Read7BitEncodedInt(BinaryReader reader)
         {
             // Read out an Int32 7 bits at a time.  The high bit
@@ -804,6 +828,30 @@ namespace Microsoft.Build.Logging
                 shift += 7;
             } while ((b & 0x80) != 0);
             return count;
+        }
+
+        private ProfiledLocation ReadProfiledLocation()
+        {
+            var numberOfHits = ReadInt32();
+            var exclusiveTime = ReadTimeSpan();
+            var inclusiveTime = ReadTimeSpan();
+
+            return new ProfiledLocation(inclusiveTime, exclusiveTime, numberOfHits);
+        }
+
+        private EvaluationLocation ReadEvaluationLocation()
+        {
+            var elementName = ReadString();
+            var elementOrCondition = ReadString();
+            var evaluationDescription = ReadString();
+            var file = ReadString();
+            var isElement = ReadBoolean();
+            var evaluationPass = (EvaluationPass)ReadInt32();
+            var lineValue = ReadInt32();
+
+            int? line = null;
+            if (lineValue != -1) line = lineValue;
+            return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, elementName, elementOrCondition, isElement);
         }
     }
 }
