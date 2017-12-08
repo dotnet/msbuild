@@ -277,14 +277,56 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // build mode
             t.FindDependencies = true;
-            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+            Assert.True(
+                t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                    getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                    getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                    openBaseKey,
+#endif
+                    checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                )
+            );
 
             Assert.True(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase)); //                 "Expected no System.Runtime dependency found during build."
             Assert.True(string.Equals(t.DependsOnNETStandard, "false", StringComparison.OrdinalIgnoreCase)); //                   "Expected no netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+            Assert.True(
+                t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                    getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                    getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                    openBaseKey,
+#endif
+                    checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                )
+            );
 
             Assert.True(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase)); //                 "Expected no System.Runtime dependency found during intellibuild."
             Assert.True(string.Equals(t.DependsOnNETStandard, "false", StringComparison.OrdinalIgnoreCase)); //                   "Expected no netstandard dependency found during intellibuild."
@@ -311,13 +353,55 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+            Assert.True(
+                t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                    getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                    getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                    openBaseKey,
+#endif
+                    checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                )
+            );
 
             Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+            Assert.True(
+                t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                    getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                    getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                    openBaseKey,
+#endif
+                    checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                )
+            );
 
             Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
         }
@@ -343,13 +427,55 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+            Assert.True(
+                t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                    getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                    getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                    openBaseKey,
+#endif
+                    checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                )
+            );
 
             Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
+            Assert.True(
+                t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                    getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                    getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                    openBaseKey,
+#endif
+                    checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                )
+            );
 
             Assert.True(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected System.Runtime dependency found during intellibuild."
         }
