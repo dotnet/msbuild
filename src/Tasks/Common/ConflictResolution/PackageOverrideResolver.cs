@@ -13,28 +13,45 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     /// </summary>
     internal class PackageOverrideResolver<TConflictItem> where TConflictItem : class, IConflictItem
     {
-        private Dictionary<string, PackageOverride> _packageOverrides;
+        private ITaskItem[] _packageOverrideItems;
+        private Lazy<Dictionary<string, PackageOverride>> _packageOverrides;
 
         public PackageOverrideResolver(ITaskItem[] packageOverrideItems)
         {
-            if (packageOverrideItems?.Length > 0)
-            {
-                _packageOverrides = new Dictionary<string, PackageOverride>(packageOverrideItems.Length, StringComparer.OrdinalIgnoreCase);
+            _packageOverrideItems = packageOverrideItems;
+            _packageOverrides = new Lazy<Dictionary<string, PackageOverride>>(() => BuildPackageOverrides());
+        }
 
-                foreach (ITaskItem packageOverrideItem in packageOverrideItems)
+        private Dictionary<string, PackageOverride> PackageOverrides => _packageOverrides.Value;
+
+        private Dictionary<string, PackageOverride> BuildPackageOverrides()
+        {
+            Dictionary<string, PackageOverride> result;
+
+            if (_packageOverrideItems?.Length > 0)
+            {
+                result = new Dictionary<string, PackageOverride>(_packageOverrideItems.Length, StringComparer.OrdinalIgnoreCase);
+
+                foreach (ITaskItem packageOverrideItem in _packageOverrideItems)
                 {
                     PackageOverride packageOverride = PackageOverride.Create(packageOverrideItem);
 
-                    if (_packageOverrides.TryGetValue(packageOverride.PackageName, out PackageOverride existing))
+                    if (result.TryGetValue(packageOverride.PackageName, out PackageOverride existing))
                     {
                         MergePackageOverrides(packageOverride, existing);
                     }
                     else
                     {
-                        _packageOverrides[packageOverride.PackageName] = packageOverride;
+                        result[packageOverride.PackageName] = packageOverride;
                     }
                 }
             }
+            else
+            {
+                result = null;
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -61,12 +78,12 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
         public TConflictItem Resolve(TConflictItem item1, TConflictItem item2)
         {
-            if (_packageOverrides != null)
+            if (PackageOverrides != null)
             {
                 PackageOverride packageOverride;
                 Version version;
                 if (item1.PackageId != null
-                    && _packageOverrides.TryGetValue(item1.PackageId, out packageOverride)
+                    && PackageOverrides.TryGetValue(item1.PackageId, out packageOverride)
                     && packageOverride.OverridenPackages.TryGetValue(item2.PackageId, out version)
                     && item2.PackageVersion != null
                     && item2.PackageVersion <= version)
@@ -74,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     return item1;
                 }
                 else if (item2.PackageId != null
-                    && _packageOverrides.TryGetValue(item2.PackageId, out packageOverride)
+                    && PackageOverrides.TryGetValue(item2.PackageId, out packageOverride)
                     && packageOverride.OverridenPackages.TryGetValue(item1.PackageId, out version)
                     && item1.PackageVersion != null
                     && item1.PackageVersion <= version)
