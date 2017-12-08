@@ -437,7 +437,7 @@ public static class Program
                 userDir = "HOME";
             }
 
-            return Path.GetFullPath(Environment.GetEnvironmentVariable(userDir));
+            return Environment.GetEnvironmentVariable(userDir);
         }
     }
 }
