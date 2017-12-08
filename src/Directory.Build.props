@@ -33,6 +33,11 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="2.1.7" PrivateAssets="All" />
+  </ItemGroup>
+
   
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <!-- When targeting .NET Framework, Exe and unit test projects build with x86 architecture if Platform is AnyCPU,

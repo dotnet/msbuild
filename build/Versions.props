@@ -8,7 +8,8 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <!-- Repo Version Information -->
+  <!-- Repo Version Information (these versions shouldn't actually be used because NerdBank.GitVersioning should
+       override the versions set by Repo Toolset) -->
   <PropertyGroup>
     <VersionBase>15.1.0</VersionBase>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
