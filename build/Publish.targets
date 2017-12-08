@@ -6,7 +6,7 @@
   
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
-          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
+          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
                             Package;
                             PublishArtifacts;

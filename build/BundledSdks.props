@@ -1,5 +1,5 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <BundledSdk Include="Microsoft.NET.Sdk" Version="$(CLI_NETSDK_Version)" />
+    <BundledSdk Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
   </ItemGroup>
 </Project>

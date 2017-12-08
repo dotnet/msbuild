@@ -5,7 +5,7 @@
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
@@ -14,11 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
     <!-- The project json migration commands depend on an older version of Roslyn.
          Lift the version here to match what tool_roslyn depends on (otherwise an older version will
          be added to the TPA when we crossgen and we won't be able to crossgen tool_roslyn -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,7 +44,8 @@
 
     <Delete Files="$(PublishDir)/$(TargetName).deps.json;
                    $(PublishDir)/$(TargetName).runtimeconfig.json;
-                   $(PublishDir)/%(BundledToolProjects.Identity).dll" />
+                   $(PublishDir)/%(BundledToolProjects.Identity).dll;
+                   $(PublishDir)/%(BundledToolProjects.Identity).pdb" />
 
     <ChangeEntryPointLibraryName
           DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
@@ -103,22 +103,15 @@
     <Exec Command="find $(PublishDir) -type f -exec chmod 644 {} \;" />
   </Target>
 
-  <Target Name="CreateSymbolsDirectory"
-          AfterTargets="PublishMSBuildExtensions">
+  <Target Name="SeparateSymbolsFromPublishDir"
+          AfterTargets="PublishMSBuildExtensions"
+          Condition="'$(SeparateSymbolsArchive)' != 'false'">
     <ItemGroup>
-      <_AllSdkFiles Include="$(PublishDir)/**/*" />
+      <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
+      <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(_AllSdkFiles)"
-        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)/sdk/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
-  <Target Name="RemovePdbsFromPublishDir"
-          AfterTargets="CreateSymbolsDirectory">
-    <ItemGroup>
-      <PdbsToClean Include="$(PublishDir)/**/*.pdb" />
-    </ItemGroup>
-
-    <Delete Files="@(PdbsToClean)" />
+    <Move SourceFiles="@(PdbsToMove)" 
+          DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>
