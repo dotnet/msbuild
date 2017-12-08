@@ -141,9 +141,11 @@
     <Compile Include="Sdk\SdkResolverContext.cs" />
     <Compile Include="Sdk\SdkResult.cs" />
     <Compile Include="Sdk\SdkResultFactory.cs" />
+    <Compile Include="TargetBuiltReason.cs" />
     <Compile Include="TargetFinishedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="TargetSkippedEventArgs.cs" />
     <Compile Include="TargetStartedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

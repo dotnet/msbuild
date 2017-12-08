@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties), null);
-                TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, _host, false);
+                TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, TargetBuiltReason.None, _host, false);
             }
            );
         }
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
-                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, _host, false);
+                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, TargetBuiltReason.None, _host, false);
             }
            );
         }
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
 
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties), null);
-                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, null, false);
+                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, TargetBuiltReason.None, null, false);
             }
            );
         }
@@ -1017,7 +1017,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
 
             Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties), null);
-            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(targetName, project.Targets[targetName].Location), lookup, null, _host, false);
+            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(targetName, project.Targets[targetName].Location), lookup, null, TargetBuiltReason.None, _host, false);
             return entry;
         }
 
@@ -1033,7 +1033,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
             config.Project = project;
             BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[1] { "foo" }), config);
-            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(target, project.Targets[target].Location), baseEntry.Lookup, baseEntry, _host, false);
+            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(target, project.Targets[target].Location), baseEntry.Lookup, baseEntry, TargetBuiltReason.None, _host, false);
             return entry;
         }
 

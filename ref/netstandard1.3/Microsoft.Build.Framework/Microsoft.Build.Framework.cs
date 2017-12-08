@@ -455,6 +455,13 @@ namespace Microsoft.Build.Framework
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
     }
+    public enum TargetBuiltReason
+    {
+        AfterTargets = 3,
+        BeforeTargets = 1,
+        DependsOn = 2,
+        None = 0,
+    }
     public partial class TargetFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected TargetFinishedEventArgs() { }
@@ -468,11 +475,22 @@ namespace Microsoft.Build.Framework
         public System.Collections.IEnumerable TargetOutputs { get { throw null; } set { } }
     }
     public delegate void TargetFinishedEventHandler(object sender, Microsoft.Build.Framework.TargetFinishedEventArgs e);
+    public partial class TargetSkippedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public TargetSkippedEventArgs() { }
+        public TargetSkippedEventArgs(string message, params object[] messageArgs) { }
+        public Microsoft.Build.Framework.TargetBuiltReason BuildReason { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ParentTarget { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string TargetFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string TargetName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
     public partial class TargetStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected TargetStartedEventArgs() { }
         public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile) { }
+        public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, string parentTarget, Microsoft.Build.Framework.TargetBuiltReason buildReason, System.DateTime eventTimestamp) { }
         public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, string parentTarget, System.DateTime eventTimestamp) { }
+        public Microsoft.Build.Framework.TargetBuiltReason BuildReason { get { throw null; } }
         public string ParentTarget { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public string TargetFile { get { throw null; } }

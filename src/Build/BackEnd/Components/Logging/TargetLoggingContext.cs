@@ -42,13 +42,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Creates a new target logging context from an existing project context and target.
         /// </summary>
-        internal TargetLoggingContext(ProjectLoggingContext projectLoggingContext, string projectFullPath, ProjectTargetInstance target, string parentTargetName)
+        internal TargetLoggingContext(ProjectLoggingContext projectLoggingContext, string projectFullPath, ProjectTargetInstance target, string parentTargetName, TargetBuiltReason buildReason)
             : base(projectLoggingContext)
         {
             _projectLoggingContext = projectLoggingContext;
             _target = target;
 
-            this.BuildEventContext = LoggingService.LogTargetStarted(projectLoggingContext.BuildEventContext, target.Name, projectFullPath, target.Location.File, parentTargetName);
+            this.BuildEventContext = LoggingService.LogTargetStarted(projectLoggingContext.BuildEventContext, target.Name, projectFullPath, target.Location.File, parentTargetName, buildReason);
             this.IsValid = true;
         }
 

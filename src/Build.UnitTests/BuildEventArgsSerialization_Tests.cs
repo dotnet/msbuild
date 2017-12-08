@@ -108,6 +108,7 @@ namespace Microsoft.Build.UnitTests
                 "C:\\projectfile.proj",
                 "C:\\Common.targets",
                 "ParentTarget",
+                TargetBuiltReason.AfterTargets,
                 DateTime.Parse("12/12/2015 06:11:56 PM"));
 
             Roundtrip(args,
@@ -115,6 +116,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.ProjectFile,
                 e => e.TargetFile,
                 e => e.TargetName,
+                e => e.BuildReason.ToString(),
                 e => e.Timestamp.ToString());
         }
 
@@ -356,6 +358,30 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile);
+        }
+
+        [Fact]
+        public void RoundtripTargetSkippedEventArgs()
+        {
+            var args = new TargetSkippedEventArgs(
+                "Message")
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+                ProjectFile = "foo.csproj",
+                ParentTarget = "bar",
+                BuildReason = TargetBuiltReason.DependsOn
+            };
+
+            Roundtrip(args,
+                e => e.ParentTarget,
+                e => e.Importance.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.TargetFile,
+                e => e.BuildReason.ToString());
         }
 
         [Fact]
