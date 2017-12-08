@@ -40,11 +40,14 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
             }
 
-            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.ProjectDoesNotExist);
+            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
 
-            var fullProjectPaths = _appliedCommand.Arguments
-                                                  .Select(Path.GetFullPath)
-                                                  .ToList();
+            var fullProjectPaths = _appliedCommand.Arguments.Select(p => {
+                var fullPath = Path.GetFullPath(p);
+                return Directory.Exists(fullPath) ?
+                    MsbuildProject.GetProjectFileFromDirectory(fullPath).FullName :
+                    fullPath;
+            }).ToList();
 
             var preAddProjectCount = slnFile.Projects.Count;
 

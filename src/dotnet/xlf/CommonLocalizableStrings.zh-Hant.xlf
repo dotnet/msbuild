@@ -674,6 +674,11 @@
         <target state="translated">執行此命令時，請勿進行隱含還原。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="new">Project `{0}` removed from the solution.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

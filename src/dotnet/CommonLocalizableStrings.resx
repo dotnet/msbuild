@@ -384,6 +384,9 @@
   <data name="ProjectAddedToTheSolution" xml:space="preserve">
     <value>Project `{0}` added to the solution.</value>
   </data>
+  <data name="ProjectRemovedFromTheSolution" xml:space="preserve">
+    <value>Project `{0}` removed from the solution.</value>
+  </data>
   <data name="SolutionAlreadyContainsProject" xml:space="preserve">
     <value>Solution {0} already contains project {1}.</value>
   </data>

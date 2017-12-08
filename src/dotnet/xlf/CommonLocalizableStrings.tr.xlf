@@ -674,6 +674,11 @@
         <target state="translated">Komut yürütülürken örtük geri yükleme gerçekleştirmez.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="new">Project `{0}` removed from the solution.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

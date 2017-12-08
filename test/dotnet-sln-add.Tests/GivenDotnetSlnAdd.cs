@@ -360,6 +360,81 @@ EndGlobal
         }
 
         [Fact]
+        public void WhenDirectoryContainingProjectIsGivenProjectIsAdded()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojFiles")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput("sln add Lib");
+            cmd.Should().Pass();
+
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingLibProj);
+            File.ReadAllText(slnPath)
+                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsNoProjectsItCancelsWholeOperation()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojFiles")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var slnFullPath = Path.Combine(projectDirectory, "App.sln");
+            var contentBefore = File.ReadAllText(slnFullPath);
+            var directoryToAdd = "Empty";
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln add {directoryToAdd}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be(
+                string.Format(
+                    CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory,
+                    Path.Combine(projectDirectory, directoryToAdd)));
+
+            File.ReadAllText(slnFullPath)
+                .Should().BeVisuallyEquivalentTo(contentBefore);
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsMultipleProjectsItCancelsWholeOperation()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojFiles")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var slnFullPath = Path.Combine(projectDirectory, "App.sln");
+            var contentBefore = File.ReadAllText(slnFullPath);
+            var directoryToAdd = "Multiple";
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln add {directoryToAdd}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be(
+                string.Format(
+                    CommonLocalizableStrings.MoreThanOneProjectInDirectory,
+                    Path.Combine(projectDirectory, directoryToAdd)));
+
+            File.ReadAllText(slnFullPath)
+                .Should().BeVisuallyEquivalentTo(contentBefore);
+        }
+
+        [Fact]
         public void WhenProjectDirectoryIsAddedSolutionFoldersAreNotCreated()
         {
             var projectDirectory = TestAssets
@@ -597,7 +672,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd} idonotexist.csproj");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectDoesNotExist, "idonotexist.csproj"));
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, "idonotexist.csproj"));
 
             File.ReadAllText(slnFullPath)
                 .Should().BeVisuallyEquivalentTo(contentBefore);

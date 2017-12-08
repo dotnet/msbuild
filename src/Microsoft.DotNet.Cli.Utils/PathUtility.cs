@@ -330,13 +330,14 @@ namespace Microsoft.DotNet.Tools.Common
 
         public static void EnsureAllPathsExist(
             IReadOnlyCollection<string> paths,
-            string pathDoesNotExistLocalizedFormatString)
+            string pathDoesNotExistLocalizedFormatString,
+            bool allowDirectories = false)
         {
             var notExisting = new List<string>();
 
             foreach (var p in paths)
             {
-                if (!File.Exists(p))
+                if (!File.Exists(p) && (!allowDirectories || !Directory.Exists(p)))
                 {
                     notExisting.Add(p);
                 }
