@@ -159,7 +159,10 @@ namespace Microsoft.Build.Tasks
         public bool IsFrameworkAssembly(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            if (entry != null && !String.IsNullOrEmpty(entry.RedistName))
+            AssemblyNameExtension assembly = new AssemblyNameExtension(assemblyName);
+            if (entry != null && !String.IsNullOrEmpty(entry.RedistName) &&
+                // The version of the checking assembly should be lower than the one of the unified assembly
+                assembly.Version <= entry.AssemblyNameExtension.Version)
                 return entry.RedistName.StartsWith("Microsoft-Windows-CLRCoreComp", StringComparison.OrdinalIgnoreCase);
             else
                 return false;
