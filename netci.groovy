@@ -26,11 +26,11 @@ def static getBuildJobName(def configuration, def os) {
             // Calculate the build command
             if (os == 'Windows_NT') {
                 buildCommand = ".\\build\\cibuild.cmd -configuration $config"
-                machineAffinity = 'latest-dev15-3-preview1'
+                machineAffinity = 'latest-dev15-3'
             } else if (os == 'Windows_NT_FullFramework') {
                 buildCommand = ".\\build\\cibuild.cmd -configuration $config -fullMSBuild"
                 osBase = 'Windows_NT'
-                machineAffinity = 'latest-dev15-3-preview1'
+                machineAffinity = 'latest-dev15-3'
             } else {
                 // Jenkins non-Ubuntu CI machines don't have docker
                 buildCommand = "./build/cibuild.sh --configuration $config"
@@ -50,15 +50,20 @@ def static getBuildJobName(def configuration, def os) {
                 }
             }
 
+            Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+
+            if (isPR) {
+                Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
+            }
+
+            Utilities.addXUnitDotNETResults(newJob, "artifacts/$config/TestResults/*.xml", false)
+
             def archiveSettings = new ArchivalSettings()
             archiveSettings.addFiles("artifacts/$config/log/*")
             archiveSettings.addFiles("artifacts/$config/TestResults/*")
             archiveSettings.setFailIfNothingArchived()
             archiveSettings.setArchiveOnFailure()
-            Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
-            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-            Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
-            Utilities.addXUnitDotNETResults(newJob, "artifacts/$config/TestResults/*.xml", false)
             Utilities.addArchival(newJob, archiveSettings)
         }
     }
