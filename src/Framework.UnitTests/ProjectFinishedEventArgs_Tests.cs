@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-
 using Microsoft.Build.Framework;
 using Xunit;
 
@@ -21,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         /// Default event to use in tests.
         /// </summary>
         private ProjectFinishedEventArgs _baseProjectFinishedEvent = new ProjectFinishedEventArgs("Message", "HelpKeyword", "ProjectFile", true);
-
+        
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>

@@ -68,6 +68,7 @@
     <Compile Include="IBuildEngine5.cs" />
     <Compile Include="IEventSource2.cs" />
     <Compile Include="IGeneratedTask.cs" />
+    <Compile Include="IProjectElement.cs" />
     <Compile Include="LazyFormattedBuildEventArgs.cs" />
     <Compile Include="IBuildEngine.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -115,6 +116,8 @@
     <Compile Include="OutputAttribute.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Profiler\EvaluationLocation.cs" />
+    <Compile Include="Profiler\ProfilerResult.cs" />
     <Compile Include="ProjectEvaluationFinishedEventArgs.cs" />
     <Compile Include="ProjectEvaluationStartedEventArgs.cs" />
     <Compile Include="ProjectImportedEventArgs.cs" />
