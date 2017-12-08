@@ -1966,18 +1966,13 @@ namespace Microsoft.Build.CommandLine
                         // gather any switches from the first Directory.Build.rsp found in the project directory or above
                         string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
 
-                        if (!String.IsNullOrWhiteSpace(directoryResponseFile))
-                        {
-                            GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
-                        }
-
-                        bool found = false;
+                        bool found = !String.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
 
                         // Don't look for more response files if it's only in the same place we already looked (next to the exe)
                         if (!String.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
                         {
                             // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                            found = GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
+                            found = found | GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
                         }
 
                         if (found)
