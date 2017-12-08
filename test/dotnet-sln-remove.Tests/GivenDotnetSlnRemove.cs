@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
@@ -588,6 +589,32 @@ EndGlobal
             releaseDirectory.Count().Should().Be(1, $"App {reasonString}");
             Directory.EnumerateFiles(releaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
                 .Count().Should().Be(1, $"App {reasonString}");
+        }
+
+        [Fact]
+        public void WhenProjectIsRemovedSolutionHasUTF8BOM()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojToRemove")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln remove {projectToRemove}");
+            cmd.Should().Pass();
+
+            var preamble = Encoding.UTF8.GetPreamble();
+            preamble.Length.Should().Be(3);
+            using (var stream = new FileStream(Path.Combine(projectDirectory, "App.sln"), FileMode.Open))
+            {
+                var bytes = new byte[preamble.Length];
+                stream.Read(bytes, 0, bytes.Length);
+                bytes.Should().BeEquivalentTo(preamble);
+            }
         }
 
         [Fact]

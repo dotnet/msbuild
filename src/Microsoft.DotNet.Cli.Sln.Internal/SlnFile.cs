@@ -33,6 +33,7 @@ using System.IO;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
+using System.Text;
 using Microsoft.DotNet.Cli.Sln.Internal.FileManipulation;
 using Microsoft.DotNet.Tools.Common;
 
@@ -211,7 +212,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             var sw = new StringWriter();
             Write(sw);
-            File.WriteAllText(FullPath, sw.ToString());
+            File.WriteAllText(FullPath, sw.ToString(), Encoding.UTF8);
         }
 
         private void Write(TextWriter writer)
