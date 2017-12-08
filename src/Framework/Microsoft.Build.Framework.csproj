@@ -139,6 +139,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="TelemetryEventArgs.cs" />
+    <Compile Include="TestInfo.cs" />
     <None Include="Event args classes.cd" />
     <None Include="project.json" />
     <!-- Win32 RC Files -->
