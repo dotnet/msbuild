@@ -221,7 +221,7 @@ namespace Microsoft.DotNet.Tools.Common
             if (projectsToRemove.Count == 0)
             {
                 Reporter.Output.WriteLine(string.Format(
-                    CommonLocalizableStrings.ProjectReferenceCouldNotBeFound,
+                    CommonLocalizableStrings.ProjectNotFoundInTheSolution,
                     projectPath));
             }
             else
@@ -244,7 +244,7 @@ namespace Microsoft.DotNet.Tools.Common
 
                     slnFile.Projects.Remove(slnProject);
                     Reporter.Output.WriteLine(
-                        string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, slnProject.FilePath));
+                        string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, slnProject.FilePath));
                 }
 
                 foreach (var project in slnFile.Projects)
