@@ -7,13 +7,13 @@
     <NupkgsForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.MSBuildSdkResolver.*.nupkg" />
   </ItemGroup>
 
-  <Target Name="PublishNupkgToTransportFeed" Condition=" '$(PUBLISH_NUPKG_TO_TRANSPORT_FEED)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
-    <Error Condition="'$(TransportFeedCloudDropAccessToken)' == ''" Text="Missing property TransportFeedCloudDropAccessToken." />
-    <Error Condition="'$(TransportFeedExpectedURL)' == ''" Text="Missing property TransportFeedExpectedURL." />
+  <Target Name="PublishNupkgToBlobFeed" Condition=" '$(PUBLISH_NUPKG_TO_BLOB_FEED)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
+    <Error Condition="'$(BlobFeedCloudDropAccessToken)' == ''" Text="Missing property BlobFeedCloudDropAccessToken." />
+    <Error Condition="'$(BlobFeedExpectedURL)' == ''" Text="Missing property BlobFeedExpectedURL." />
     
-    <Message Text="Publish NuPkgs to Transport feed started" />
-    <PushToBlobFeed AccountKey="$(TransportFeedCloudDropAccessToken)"
-                ExpectedFeedUrl="$(TransportFeedExpectedURL)"
+    <Message Text="Publish NuPkgs to Blob feed started" />
+    <PushToBlobFeed AccountKey="$(BlobFeedCloudDropAccessToken)"
+                ExpectedFeedUrl="$(BlobFeedExpectedURL)"
                 ItemsToPush="@(NupkgsForPublishing)"
                 Overwrite="false" />
   </Target>
