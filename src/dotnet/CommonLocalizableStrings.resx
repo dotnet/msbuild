@@ -345,9 +345,6 @@
   <data name="SolutionDoesNotExist" xml:space="preserve">
     <value>Specified solution file {0} does not exist, or there is no solution file in the directory.</value>
   </data>
-  <data name="ReferenceDoesNotExist" xml:space="preserve">
-    <value>Reference {0} does not exist.</value>
-  </data>
   <data name="ReferenceIsInvalid" xml:space="preserve">
     <value>Reference `{0}` is invalid.</value>
   </data>

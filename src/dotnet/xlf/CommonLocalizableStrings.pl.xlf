@@ -97,11 +97,6 @@
         <target state="translated">Aplikacja</target>
         <note />
       </trans-unit>
-      <trans-unit id="ReferenceDoesNotExist">
-        <source>Reference {0} does not exist.</source>
-        <target state="translated">Odwołanie {0} nie istnieje.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
         <target state="translated">Do projektu zostało dodane odwołanie „{0}”.</target>

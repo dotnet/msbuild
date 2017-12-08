@@ -97,11 +97,6 @@
         <target state="translated">アプリケーション</target>
         <note />
       </trans-unit>
-      <trans-unit id="ReferenceDoesNotExist">
-        <source>Reference {0} does not exist.</source>
-        <target state="translated">参照 {0} は存在しません。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
         <target state="translated">参照 `{0}` がプロジェクトに追加されました。</target>

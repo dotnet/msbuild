@@ -45,9 +45,9 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             var frameworkString = _appliedCommand.ValueOrDefault<string>("framework");
 
-            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.ReferenceDoesNotExist);
+            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
             List<MsbuildProject> refs = _appliedCommand.Arguments
-                                                       .Select((r) => MsbuildProject.FromFile(projects, r))
+                                                       .Select((r) => MsbuildProject.FromFileOrDirectory(projects, r))
                                                        .ToList();
 
             if (frameworkString == null)
@@ -90,9 +90,10 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 }
             }
 
-            var relativePathReferences = _appliedCommand.Arguments.Select((r) =>
-                                                                              Path.GetRelativePath(msbuildProj.ProjectDirectory, Path.GetFullPath(r)))
-                                                        .ToList();
+            var relativePathReferences = refs.Select((r) =>
+                                                        Path.GetRelativePath(
+                                                            msbuildProj.ProjectDirectory,
+                                                            r.ProjectRootElement.FullPath)).ToList();
 
             int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
                 frameworkString,
