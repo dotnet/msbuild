@@ -454,7 +454,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifyinternalGetPathToDotNetFrameworkSdkFile40()
         {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), "VGPTDNFSFN40");
+            string tempDirectory = Path.Combine(Path.GetTempPath(), "VGPTDNFSF40");
             string temp35Directory = Path.Combine(tempDirectory, "bin");
             string temp40Directory = Path.Combine(temp35Directory, "NETFX 4.0 Tools");
             string toolPath = Path.Combine(temp35Directory, "MyTool.exe");
