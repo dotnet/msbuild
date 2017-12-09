@@ -58,6 +58,7 @@ source "$REPOROOT/scripts/common/_prettyprint.sh"
 BUILD=1
 
 LINUX_PORTABLE_INSTALL_ARGS=
+ALL_LINUX_INSTALLERS_TARGET=
 CUSTOM_BUILD_ARGS=
 
 # Set nuget package cache under the repo
@@ -98,6 +99,9 @@ while [[ $# > 0 ]]; do
             LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
             CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\" /p:IslinuxPortable=\"true\""
             ;;
+        --all-linux-installers)
+            ALL_LINUX_INSTALLERS_TARGET="/t:BuildAndPublishAllLinuxDistrosNativeInstallers"
+            ;;
         --stage0)
             STAGE0_SOURCE_DIR=$2
             shift
@@ -112,6 +116,7 @@ while [[ $# > 0 ]]; do
             echo "  --nobuild                           Skip building, showing the command that would be used to build"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --linux-portable                    Builds the Linux portable .NET Tools instead of a distro-specific version."
+            echo "  --all-linux-installers              Builds and publishes all the Linux distros' native installers."
             echo "  --stage0                            Set the stage0 source directory. The default is to download it from Azure."
             echo "  --help                              Display this help message"
             exit 0
@@ -141,7 +146,7 @@ export DOTNET_MULTILEVEL_LOOKUP=0
 
 # Install a stage 0
 if [ "$STAGE0_SOURCE_DIR" == "" ]; then
-    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --version "2.1.0-preview1-007172" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.1.0-preview1-007172" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 else
     echo "Copying bootstrap cli from $BOOTSTRAP_CLI"
     cp -r $STAGE0_SOURCE_DIR/* "$DOTNET_INSTALL_DIR"
@@ -171,8 +176,8 @@ echo "${args[@]}"
 
 if [ $BUILD -eq 1 ]; then
     dotnet msbuild build.proj /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $args
-    dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args
+    dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $ALL_LINUX_INSTALLERS_TARGET $args
 else
     echo "Not building due to --nobuild"
-    echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args'"
+    echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $ALL_LINUX_INSTALLERS_TARGET $args'"
 fi
