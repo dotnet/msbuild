@@ -1126,7 +1126,8 @@ namespace Microsoft.Build.UnitTests
                                         warningsAsErrors: null,
                                         warningsAsMessages: null,
                                         enableRestore: false,
-                                        profilerLogger: null);
+                                        profilerLogger: null,
+                                        enableProfiler: false);
                 }
                 finally
                 {
@@ -1331,7 +1332,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that when the /profileevaluation switch is used with no values that an error is shown.
+        /// Verifies that when the /profileevaluation switch is used with no values "no-file" is specified.
         /// </summary>
         [Fact]
         public void ProcessProfileEvaluationEmpty()
@@ -1339,8 +1340,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
-
-            VerifySwitchError(commandLineSwitches, "/profileevaluation", AssemblyResources.GetString("MissingProfileParameterError"));
+            Assert.Equal("no-file", commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0]);
         }
 
         /// <summary>
@@ -1352,7 +1352,8 @@ namespace Microsoft.Build.UnitTests
         {
             try
             {
-                MSBuildApp.ProcessProfileEvaluationSwitch(new string[] {filename}, new ArrayList());
+                bool enableProfiler = false;
+                MSBuildApp.ProcessProfileEvaluationSwitch(new string[] {filename}, new ArrayList(), out enableProfiler);
                 Assert.True(false, $"Processing the profile evaluation parameter '{filename}' should have failed");
             }
             catch (CommandLineSwitchException)

@@ -132,7 +132,7 @@ namespace Microsoft.Build.Logging
             Write(e.ProjectFile);
 
             Write(e.ProfilerResult.HasValue);
-            if (e.ProfilerResult.HasValue && e.ProfilerResult.Value.ProfiledLocations.Count > 0)
+            if (e.ProfilerResult.HasValue)
             {
                 Write(e.ProfilerResult.Value.ProfiledLocations.Count);
 
@@ -666,10 +666,10 @@ namespace Microsoft.Build.Logging
 
         private void Write(EvaluationLocation item)
         {
-            Write(item.ElementName);
-            Write(item.ElementOrCondition);
-            Write(item.EvaluationDescription);
-            Write(item.File);
+            WriteOptionalString(item.ElementName);
+            WriteOptionalString(item.ElementOrCondition);
+            WriteOptionalString(item.EvaluationDescription);
+            WriteOptionalString(item.File);
             Write(item.IsElement);
             Write((int)item.EvaluationPass);
 

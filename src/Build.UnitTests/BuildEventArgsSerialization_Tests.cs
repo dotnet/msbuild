@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -345,16 +346,22 @@ namespace Microsoft.Build.UnitTests
                 ProjectFile = @"C:\foo\bar.proj",
                 ProfilerResult = new ProfilerResult(new Dictionary<EvaluationLocation, ProfiledLocation>
                 {
-                    {new EvaluationLocation(EvaluationPass.InitialProperties, "desc1", "file1", 7, "element1", "elementorcondition1", true), new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 1)  },
-                    {new EvaluationLocation(EvaluationPass.LazyItems, "desc2", "file1", null, "element2", "elementorcondition2", false), new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 2)  }
-                    
+                    {
+                        new EvaluationLocation(EvaluationPass.InitialProperties, "desc1", "file1", 7, "element1", "elementorcondition1", true),
+                        new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 1)
+                    },
+                    {
+                        new EvaluationLocation(EvaluationPass.LazyItems, "desc2", "file1", null, "element2", "elementorcondition2", false),
+                        new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 2)
+                    }
+
                 })
             };
 
             Roundtrip(args,
                 e => e.Message,
                 e => e.ProjectFile,
-                e => e.ProfilerResult.ToString());
+                e => ToString(e.ProfilerResult.Value.ProfiledLocations));
         }
 
         [Fact]
@@ -459,6 +466,18 @@ namespace Microsoft.Build.UnitTests
         private string ToString(ITaskItem i)
         {
             return i.ItemSpec + string.Join(";", i.CloneCustomMetadata().Keys.OfType<string>().Select(k => i.GetMetadata(k)));
+        }
+
+        private string ToString(IReadOnlyDictionary<EvaluationLocation, ProfiledLocation> items)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in items)
+            {
+                sb.AppendLine(item.Key.ToString());
+                sb.AppendLine(item.Value.ToString());
+            }
+
+            return sb.ToString();
         }
 
         private void Roundtrip<T>(T args, params Func<T, string>[] fieldsToCompare)

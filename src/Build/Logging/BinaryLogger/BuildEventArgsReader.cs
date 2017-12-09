@@ -841,10 +841,10 @@ namespace Microsoft.Build.Logging
 
         private EvaluationLocation ReadEvaluationLocation()
         {
-            var elementName = ReadString();
-            var elementOrCondition = ReadString();
-            var evaluationDescription = ReadString();
-            var file = ReadString();
+            var elementName = ReadOptionalString();
+            var elementOrCondition = ReadOptionalString();
+            var evaluationDescription = ReadOptionalString();
+            var file = ReadOptionalString();
             var isElement = ReadBoolean();
             var evaluationPass = (EvaluationPass)ReadInt32();
             var lineValue = ReadInt32();
