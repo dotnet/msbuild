@@ -573,7 +573,7 @@ namespace Microsoft.Build.Framework.Profiler
     public enum EvaluationPass : byte
     {
         InitialProperties = (byte)1,
-        ItemDefintionGroups = (byte)3,
+        ItemDefinitionGroups = (byte)3,
         Items = (byte)4,
         LazyItems = (byte)5,
         Properties = (byte)2,

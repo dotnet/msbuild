@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -835,7 +835,7 @@ namespace Microsoft.Build.Evaluation
 #endif
             // Pass2: evaluate item definitions
             // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
-            using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefintionGroups))
+            using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
             {
                 foreach (var itemDefinitionGroupElement in _itemDefinitionGroupElements)
                 {

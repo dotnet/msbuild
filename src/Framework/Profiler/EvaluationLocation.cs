@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -26,7 +26,7 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         Properties,
         /// <nodoc/>
-        ItemDefintionGroups,
+        ItemDefinitionGroups,
         /// <nodoc/>
         Items,
         /// <nodoc/>
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Framework.Profiler
                 {EvaluationPass.TotalEvaluation, "Total Evaluation"},
                 {EvaluationPass.InitialProperties, "Initial properties (pass 0)"},
                 {EvaluationPass.Properties, "Properties (pass 1)"},
-                {EvaluationPass.ItemDefintionGroups, "Item definition groups (pass 2)"},
+                {EvaluationPass.ItemDefinitionGroups, "Item definition groups (pass 2)"},
                 {EvaluationPass.Items, "Items (pass 3)"},
                 {EvaluationPass.LazyItems, "Lazy items (pass 3.1)"},
                 {EvaluationPass.UsingTasks, "Using tasks (pass 4)"},

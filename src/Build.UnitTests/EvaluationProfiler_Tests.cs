@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -48,11 +48,11 @@ namespace Microsoft.Build.Engine.UnitTests
         /// Verifies that a given element name shows up in a profiled MSBuild project
         /// </summary>
         [InlineData("Target", "<Target Name='test'/>")]
-        [InlineData("Message", 
+        [InlineData("Message",
 @"<Target Name='echo'>
     <Message text='echo!'/>
 </Target>")]
-        [InlineData("appname", 
+        [InlineData("appname",
 @"<Target Name='test'/>
 <PropertyGroup>
     <appname>Hello</appname>
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Item definition group (pass 2)
             Assert.Equal(1, profiledElements.Count(location => location.ElementName == "ItemDefinitionGroup"));
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefintionGroups));
+            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups));
 
             // Item groups (pass 3 and 3.1)
             Assert.Equal(1, profiledElements.Count(location => location.ElementName == "ItemGroup"));
