@@ -937,7 +937,6 @@ namespace Microsoft.Build.Execution
         public BuildManager() { }
         public BuildManager(string hostName) { }
         public static Microsoft.Build.Execution.BuildManager DefaultBuildManager { get { throw null; } }
-        public static bool WaitForDebugger { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public void BeginBuild(Microsoft.Build.Execution.BuildParameters parameters) { }
         public Microsoft.Build.Execution.BuildResult Build(Microsoft.Build.Execution.BuildParameters parameters, Microsoft.Build.Execution.BuildRequestData requestData) { throw null; }
         public Microsoft.Build.Execution.BuildResult BuildRequest(Microsoft.Build.Execution.BuildRequestData requestData) { throw null; }
@@ -1551,6 +1550,110 @@ namespace Microsoft.Build.Logging
         public void Shutdown() { }
     }
     public delegate void WriteHandler(string message);
+}
+namespace Microsoft.Build.Shared.FileSystem
+{
+    public static partial class FileSystemFactory
+    {
+        public static Microsoft.Build.Shared.FileSystem.IFileSystemAbstraction GetFileSystem() { throw null; }
+    }
+    public partial interface IFileSystemAbstraction
+    {
+        bool DirectoryEntryExists(string path);
+        bool DirectoryExists(string path);
+        System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        bool FileExists(string path);
+    }
+    public sealed partial class ManagedFileSystem : Microsoft.Build.Shared.FileSystem.IFileSystemAbstraction
+    {
+        internal ManagedFileSystem() { }
+        public bool DirectoryEntryExists(string path) { throw null; }
+        public bool DirectoryExists(string path) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern, System.IO.SearchOption searchOption) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern, System.IO.SearchOption searchOption) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, System.IO.SearchOption searchOption) { throw null; }
+        public bool FileExists(string path) { throw null; }
+        public static Microsoft.Build.Shared.FileSystem.ManagedFileSystem Singleton() { throw null; }
+    }
+    public sealed partial class NativeWin32Exception : System.ComponentModel.Win32Exception
+    {
+        public NativeWin32Exception(int nativeErrorCode) { }
+        public NativeWin32Exception(int nativeErrorCode, [System.ComponentModel.LocalizableAttribute(false)]string messagePrefix) { }
+        public static string GetFormattedMessageForNativeErrorCode(int nativeErrorCode, [System.ComponentModel.LocalizableAttribute(false)]string messagePrefix=null) { throw null; }
+        public static int HResultFromWin32(int nativeErrorCode) { throw null; }
+    }
+    public sealed partial class SafeFindFileHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+    {
+        internal SafeFindFileHandle() : base (default(bool)) { }
+        protected override bool ReleaseHandle() { throw null; }
+    }
+    public partial class WindowsFileSystem : Microsoft.Build.Shared.FileSystem.IFileSystemAbstraction
+    {
+        internal WindowsFileSystem() { }
+        public bool DirectoryEntryExists(string path) { throw null; }
+        public bool DirectoryExists(string path) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern, System.IO.SearchOption searchOption) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern, System.IO.SearchOption searchOption) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, System.IO.SearchOption searchOption) { throw null; }
+        public bool FileExists(string path) { throw null; }
+        public static Microsoft.Build.Shared.FileSystem.WindowsFileSystem Singleton() { throw null; }
+    }
+    [System.CLSCompliantAttribute(false)]
+    public static partial class WindowsNative
+    {
+        public const int ErrorAccessDenied = 5;
+        public const int ErrorDirectory = 267;
+        public const int ErrorFileNotFound = 2;
+        public const uint ErrorNoMoreFiles = (uint)18;
+        public const int ErrorPathNotFound = 3;
+        public const int ErrorSuccess = 0;
+        public const int MaxPath = 260;
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")][System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.PreserveSig)]public static extern Microsoft.Build.Shared.FileSystem.SafeFindFileHandle FindFirstFileW(string lpFileName, out Microsoft.Build.Shared.FileSystem.WindowsNative.Win32FindData lpFindFileData);
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")][System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.PreserveSig)]public static extern bool FindNextFileW(System.Runtime.InteropServices.SafeHandle hFindFile, out Microsoft.Build.Shared.FileSystem.WindowsNative.Win32FindData lpFindFileData);
+        [System.Runtime.InteropServices.DllImport("shlwapi.dll")][System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.PreserveSig)]public static extern int PathMatchSpecExW(string pszFileParam, string pszSpec, int flags);
+        public static partial class DwFlags
+        {
+            public const int PmsfDontStripSpaces = 65536;
+            public const int PmsfMultiple = 1;
+            public const int PmsfNormal = 0;
+        }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public partial struct EnumerateDirectoryResult
+        {
+            public readonly string Directory;
+            public readonly int NativeErrorCode;
+            public readonly Microsoft.Build.Shared.FileSystem.WindowsNative.EnumerateDirectoryStatus Status;
+            public EnumerateDirectoryResult(string directory, Microsoft.Build.Shared.FileSystem.WindowsNative.EnumerateDirectoryStatus status, int nativeErrorCode) { throw null;}
+            public bool Succeeded { get { throw null; } }
+            public Microsoft.Build.Shared.FileSystem.NativeWin32Exception CreateExceptionForError() { throw null; }
+            public Microsoft.Build.Shared.FileSystem.NativeWin32Exception ThrowForKnownError() { throw null; }
+            public Microsoft.Build.Shared.FileSystem.NativeWin32Exception ThrowForUnknownError() { throw null; }
+        }
+        public enum EnumerateDirectoryStatus
+        {
+            AccessDenied = 3,
+            CannotEnumerateFile = 2,
+            SearchDirectoryNotFound = 1,
+            Success = 0,
+            UnknownError = 4,
+        }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public partial struct Win32FindData
+        {
+            public string CAlternate;
+            public string CFileName;
+            public System.IO.FileAttributes DwFileAttributes;
+            public uint DwReserved0;
+            public uint DwReserved1;
+            public System.Runtime.InteropServices.ComTypes.FILETIME FtCreationTime;
+            public System.Runtime.InteropServices.ComTypes.FILETIME FtLastAccessTime;
+            public System.Runtime.InteropServices.ComTypes.FILETIME FtLastWriteTime;
+            public uint NFileSizeHigh;
+            public uint NFileSizeLow;
+        }
+    }
 }
 namespace Microsoft.VisualStudio.Setup.Configuration
 {
