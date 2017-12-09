@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -155,7 +155,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
                 GenerateResource t2 = Utilities.CreateTask(_output);
@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -563,7 +563,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t.FilesWritten[1].ItemSpec, resourcesFile2);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -584,7 +584,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t2.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t2.FilesWritten[1].ItemSpec, resourcesFile2);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t2);
 #endif
 
@@ -1417,7 +1417,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
                 // Should not have created an output for the invalid resx
@@ -1471,7 +1471,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -1836,7 +1836,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
             Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -1899,7 +1899,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -2129,7 +2129,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Read-only StateFile yields message
         /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
         [Fact]
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
