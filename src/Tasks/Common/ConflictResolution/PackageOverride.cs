@@ -35,9 +35,9 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         public static PackageOverride Create(ITaskItem packageOverrideItem)
         {
             string packageName = packageOverrideItem.ItemSpec;
-            IEnumerable<Tuple<string, Version>> overridenPackages = CreateOverridenPackages(packageOverrideItem.GetMetadata("OverridenPackages"));
+            string overridenPackagesString = packageOverrideItem.GetMetadata(MetadataKeys.OverridenPackages);
 
-            return new PackageOverride(packageName, overridenPackages);
+            return new PackageOverride(packageName, CreateOverridenPackages(overridenPackagesString));
         }
 
         private static IEnumerable<Tuple<string, Version>> CreateOverridenPackages(string overridenPackagesString)

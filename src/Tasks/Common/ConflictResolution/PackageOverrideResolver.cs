@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             _packageOverrides = new Lazy<Dictionary<string, PackageOverride>>(() => BuildPackageOverrides());
         }
 
-        private Dictionary<string, PackageOverride> PackageOverrides => _packageOverrides.Value;
+        public Dictionary<string, PackageOverride> PackageOverrides => _packageOverrides.Value;
 
         private Dictionary<string, PackageOverride> BuildPackageOverrides()
         {
