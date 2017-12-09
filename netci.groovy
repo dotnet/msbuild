@@ -50,15 +50,20 @@ def static getBuildJobName(def configuration, def os) {
                 }
             }
 
+            Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+
+            if (isPR) {
+                Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
+            }
+
+            Utilities.addXUnitDotNETResults(newJob, "artifacts/$config/TestResults/*.xml", false)
+
             def archiveSettings = new ArchivalSettings()
             archiveSettings.addFiles("artifacts/$config/log/*")
             archiveSettings.addFiles("artifacts/$config/TestResults/*")
             archiveSettings.setFailIfNothingArchived()
             archiveSettings.setArchiveOnFailure()
-            Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
-            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-            Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
-            Utilities.addXUnitDotNETResults(newJob, "artifacts/$config/TestResults/*.xml", false)
             Utilities.addArchival(newJob, archiveSettings)
         }
     }
