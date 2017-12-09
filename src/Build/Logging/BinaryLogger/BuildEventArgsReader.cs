@@ -108,6 +108,9 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.ProjectImported:
                     result = ReadProjectImportedEventArgs();
                     break;
+                case BinaryLogRecordKind.TargetSkipped:
+                    result = ReadTargetSkippedEventArgs();
+                    break;
                 default:
                     break;
             }
@@ -159,6 +162,27 @@ namespace Microsoft.Build.Logging
             e.ImportedProjectFile = importedProjectFile;
             e.UnexpandedProject = unexpandedProject;
             e.ImportIgnored = importIgnored;
+            return e;
+        }
+
+        private BuildEventArgs ReadTargetSkippedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            // Read unused Importance, it defaults to Low
+            ReadInt32();
+            var targetFile = ReadOptionalString();
+            var parentTarget = ReadOptionalString();
+            var buildReason = (TargetBuiltReason)ReadInt32();
+
+            var e = new TargetSkippedEventArgs(
+                fields.Message);
+
+            SetCommonFields(e, fields);
+
+            e.ProjectFile = fields.ProjectFile;
+            e.TargetFile = targetFile;
+            e.ParentTarget = parentTarget;
+            e.BuildReason = buildReason;
             return e;
         }
 
@@ -269,6 +293,8 @@ namespace Microsoft.Build.Logging
             var projectFile = ReadOptionalString();
             var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
+            // BuildReason was introduced in version 4
+            var buildReason = fileFormatVersion > 3 ? (TargetBuiltReason) ReadInt32() : TargetBuiltReason.None;
 
             var e = new TargetStartedEventArgs(
                 fields.Message,
@@ -277,6 +303,7 @@ namespace Microsoft.Build.Logging
                 projectFile,
                 targetFile,
                 parentTarget,
+                buildReason,
                 fields.Timestamp);
             SetCommonFields(e, fields);
             return e;

@@ -655,9 +655,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFile">Project file being built</param>
         /// <param name="projectFileOfTargetElement">Project file which contains the target</param>
         /// <param name="parentTargetName">The name of the parent target.</param>
+        /// <param name="buildReason">The reason the parent target built the target.</param>
         /// <returns>The build event context for the target.</returns>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName)
+        public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason)
         {
             lock (_lockObject)
             {
@@ -706,6 +707,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             projectFile,
                             projectFileOfTargetElement,
                             parentTargetName,
+                            buildReason,
                             DateTime.UtcNow
                         );
                     buildEvent.BuildEventContext = targetBuildEventContext;
