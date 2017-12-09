@@ -24,9 +24,7 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public abstract class BuildEventArgs : EventArgs
     {
         /// <summary>
@@ -182,14 +180,13 @@ namespace Microsoft.Build.Framework
         }
 
 #if FEATURE_BINARY_SERIALIZATION
-        #region CustomSerializationToStream
+#region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
         /// </summary>
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
         internal virtual void WriteToStream(BinaryWriter writer)
         {
-            #region Message
             if (message == null)
             {
                 writer.Write((byte)0);
@@ -199,8 +196,7 @@ namespace Microsoft.Build.Framework
                 writer.Write((byte)1);
                 writer.Write(message);
             }
-            #endregion
-            #region HelpKeyword
+
             if (helpKeyword == null)
             {
                 writer.Write((byte)0);
@@ -210,8 +206,7 @@ namespace Microsoft.Build.Framework
                 writer.Write((byte)1);
                 writer.Write(helpKeyword);
             }
-            #endregion
-            #region SenderName
+
             if (senderName == null)
             {
                 writer.Write((byte)0);
@@ -221,13 +216,12 @@ namespace Microsoft.Build.Framework
                 writer.Write((byte)1);
                 writer.Write(senderName);
             }
-            #endregion
-            #region TimeStamp
+
             writer.Write((Int64)timestamp.Ticks);
             writer.Write((Int32)timestamp.Kind);
-            #endregion
+
             writer.Write((Int32)threadId);
-            #region BuildEventContext
+
             if (buildEventContext == null)
             {
                 writer.Write((byte)0);
@@ -243,7 +237,6 @@ namespace Microsoft.Build.Framework
                 writer.Write((Int32)buildEventContext.ProjectInstanceId);
                 writer.Write((Int32)buildEventContext.EvaluationId);
             }
-            #endregion
         }
 
         /// <summary>
@@ -253,38 +246,12 @@ namespace Microsoft.Build.Framework
         /// <param name="version">The version of the runtime the message packet was created from</param>
         internal virtual void CreateFromStream(BinaryReader reader, int version)
         {
-            #region Message
-            if (reader.ReadByte() == 0)
-            {
-                message = null;
-            }
-            else
-            {
-                message = reader.ReadString();
-            }
-            #endregion
-            #region HelpKeyword
-            if (reader.ReadByte() == 0)
-            {
-                helpKeyword = null;
-            }
-            else
-            {
-                helpKeyword = reader.ReadString();
-            }
-            #endregion
-            #region SenderName
-            if (reader.ReadByte() == 0)
-            {
-                senderName = null;
-            }
-            else
-            {
-                senderName = reader.ReadString();
-            }
-            #endregion
-            #region TimeStamp
+            message = reader.ReadByte() == 0 ? null : reader.ReadString();
+            helpKeyword = reader.ReadByte() == 0 ? null : reader.ReadString();
+            senderName = reader.ReadByte() == 0 ? null : reader.ReadString();
+
             long timestampTicks = reader.ReadInt64();
+
             if (version > 20)
             {
                 DateTimeKind kind = (DateTimeKind)reader.ReadInt32();
@@ -294,9 +261,9 @@ namespace Microsoft.Build.Framework
             {
                 timestamp = new DateTime(timestampTicks);
             }
-            #endregion
+
             threadId = reader.ReadInt32();
-            #region BuildEventContext
+
             if (reader.ReadByte() == 0)
             {
                 buildEventContext = null;
@@ -320,13 +287,12 @@ namespace Microsoft.Build.Framework
                     buildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
                 }
             }
-            #endregion
         }
-        #endregion
+#endregion
 #endif
 
 #if FEATURE_BINARY_SERIALIZATION
-        #region SetSerializationDefaults
+#region SetSerializationDefaults
         /// <summary>
         /// Run before the object has been deserialized
         /// UNDONE (Logging.)  Can this and the next function go away, and instead return a BuildEventContext.Invalid from
@@ -357,7 +323,10 @@ namespace Microsoft.Build.Framework
                                        );
             }
         }
-        #endregion
+#endregion
+
+        //private BuildErrorEventArgs()
+
 #endif
     }
 }
