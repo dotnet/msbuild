@@ -671,6 +671,7 @@ namespace Microsoft.Build.Tasks
     public partial class XmlPeek : Microsoft.Build.Tasks.TaskExtension
     {
         public XmlPeek() { }
+        public bool DisallowDtd { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string Namespaces { get { throw null; } set { } }
         public string Query { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
