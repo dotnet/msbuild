@@ -368,6 +368,7 @@ namespace Microsoft.Build.UnitTests
             {
                 BuildEventContext = BuildEventContext.Invalid,
                 ProjectFile = "foo.csproj",
+                TargetName = "target",
                 ParentTarget = "bar",
                 BuildReason = TargetBuiltReason.DependsOn
             };
@@ -381,6 +382,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.TargetFile,
+                e => e.TargetName,
                 e => e.BuildReason.ToString());
         }
 

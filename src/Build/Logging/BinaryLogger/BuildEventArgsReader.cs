@@ -171,6 +171,7 @@ namespace Microsoft.Build.Logging
             // Read unused Importance, it defaults to Low
             ReadInt32();
             var targetFile = ReadOptionalString();
+            var targetName = ReadOptionalString();
             var parentTarget = ReadOptionalString();
             var buildReason = (TargetBuiltReason)ReadInt32();
 
@@ -181,8 +182,10 @@ namespace Microsoft.Build.Logging
 
             e.ProjectFile = fields.ProjectFile;
             e.TargetFile = targetFile;
+            e.TargetName = targetName;
             e.ParentTarget = parentTarget;
             e.BuildReason = buildReason;
+
             return e;
         }
 

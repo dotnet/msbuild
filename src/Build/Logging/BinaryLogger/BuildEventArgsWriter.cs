@@ -278,6 +278,7 @@ namespace Microsoft.Build.Logging
             Write(BinaryLogRecordKind.TargetSkipped);
             WriteMessageFields(e);
             WriteOptionalString(e.TargetFile);
+            WriteOptionalString(e.TargetName);
             WriteOptionalString(e.ParentTarget);
             Write((int)e.BuildReason);
         }
