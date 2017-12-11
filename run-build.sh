@@ -59,6 +59,7 @@ BUILD=1
 
 LINUX_PORTABLE_INSTALL_ARGS=
 ALL_LINUX_INSTALLERS_TARGET=
+GENERATE_INSTALLERS_TARGET=
 CUSTOM_BUILD_ARGS=
 
 # Set nuget package cache under the repo
@@ -102,6 +103,9 @@ while [[ $# > 0 ]]; do
         --all-linux-installers)
             ALL_LINUX_INSTALLERS_TARGET="/t:BuildAndPublishAllLinuxDistrosNativeInstallers"
             ;;
+        --generate-installers)
+            GENERATE_INSTALLERS_TARGET="/t:GenerateInstallersAndCopyOutOfSandBox"
+            ;;
         --stage0)
             STAGE0_SOURCE_DIR=$2
             shift
@@ -116,7 +120,8 @@ while [[ $# > 0 ]]; do
             echo "  --nobuild                           Skip building, showing the command that would be used to build"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --linux-portable                    Builds the Linux portable .NET Tools instead of a distro-specific version."
-            echo "  --all-linux-installers              Builds and publishes all the Linux distros' native installers."
+            echo "  --all-linux-installers              Builds and publishes all the Linux distros' native installers; outer call"
+            echo "  --generate-installers               Builds and publishes all the Linux distros' native installers; inner call"
             echo "  --stage0                            Set the stage0 source directory. The default is to download it from Azure."
             echo "  --help                              Display this help message"
             exit 0
@@ -176,8 +181,8 @@ echo "${args[@]}"
 
 if [ $BUILD -eq 1 ]; then
     dotnet msbuild build.proj /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $args
-    dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $ALL_LINUX_INSTALLERS_TARGET $args
+    dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $ALL_LINUX_INSTALLERS_TARGET $GENERATE_INSTALLERS_TARGET $args
 else
     echo "Not building due to --nobuild"
-    echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $ALL_LINUX_INSTALLERS_TARGET $args'"
+    echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $ALL_LINUX_INSTALLERS_TARGET $GENERATE_INSTALLERS_TARGET $args'"
 fi
