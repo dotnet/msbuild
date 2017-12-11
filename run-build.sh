@@ -121,7 +121,9 @@ while [[ $# > 0 ]]; do
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --linux-portable                    Builds the Linux portable .NET Tools instead of a distro-specific version."
             echo "  --all-linux-installers              Builds and publishes all the Linux distros' native installers; outer call"
+            echo "                                          Note: used primarily for 'AllLinuxDistrosNativeInstallers' VSO build."
             echo "  --generate-installers               Builds and publishes all the Linux distros' native installers; inner call"
+            echo "                                          Note: used primarily for 'AllLinuxDistrosNativeInstallers' VSO build."
             echo "  --stage0                            Set the stage0 source directory. The default is to download it from Azure."
             echo "  --help                              Display this help message"
             exit 0
