@@ -128,6 +128,7 @@ namespace Microsoft.Build.Logging
         private void Write(ProjectEvaluationFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectEvaluationFinished);
+            
             WriteBuildEventArgsFields(e);
             Write(e.ProjectFile);
 
@@ -673,11 +674,10 @@ namespace Microsoft.Build.Logging
             Write(item.IsElement);
             Write((int)item.EvaluationPass);
 
+            Write(item.Line.HasValue);
             if (item.Line.HasValue)
-                Write(item.Line.Value);
-            else
             {
-                Write(-1);
+                Write(item.Line.Value);
             }
         }
 

@@ -21,6 +21,9 @@ namespace Microsoft.Build.Logging
         //   - new record kinds: ProjectEvaluationStarted, ProjectEvaluationFinished
         // version 3:
         //   - new ProjectImportedEventArgs.ImportIgnored
+        // version 4:
+        //   - new TargetSkippedEventArgs
+        //   - new TargetStartedEventArgs.BuildReason
         // version 5:
         //   - new EvaluationFinished.ProfilerResult
         internal const int FileFormatVersion = 5;

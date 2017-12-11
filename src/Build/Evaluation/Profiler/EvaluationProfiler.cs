@@ -70,6 +70,11 @@ namespace Microsoft.Build.Evaluation
             return _shouldTrackElements ? new EvaluationFrame(this, CurrentLocation.WithFileLineAndCondition(location.File, location.Line, condition)) : null;
         }
 
+        internal void AssertEmpty()
+        {
+            ErrorUtilities.VerifyThrow(_evaluationStack.Count == 0, "Evaluation profiler stack is not empty.");
+        }
+
         /// <summary>
         /// A frame in the evaluation tracker
         /// </summary>

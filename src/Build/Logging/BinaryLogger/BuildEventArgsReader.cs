@@ -847,10 +847,11 @@ namespace Microsoft.Build.Logging
             var file = ReadOptionalString();
             var isElement = ReadBoolean();
             var evaluationPass = (EvaluationPass)ReadInt32();
-            var lineValue = ReadInt32();
 
             int? line = null;
-            if (lineValue != -1) line = lineValue;
+            var hasLine = ReadBoolean();
+            if (hasLine) line = ReadInt32();
+
             return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, elementName, elementOrCondition, isElement);
         }
     }
