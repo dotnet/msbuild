@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -22,6 +22,8 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         TotalEvaluation,
         /// <nodoc/>
+        TotalGlobbing,
+        /// <nodoc/>
         InitialProperties,
         /// <nodoc/>
         Properties,
@@ -38,6 +40,19 @@ namespace Microsoft.Build.Framework.Profiler
     }
 
     /// <summary>
+    /// The kind of the evaluated location being tracked
+    /// </summary>
+    public enum EvaluationLocationKind : byte
+    {
+        /// <nodoc/>
+        Item,
+        /// <nodoc/>
+        Condition,
+        /// <nodoc/>
+        Glob
+    }
+
+    /// <summary>
     /// Represents a location for different evaluation elements tracked by the EvaluationProfiler.
     /// </summary>
 #if FEATURE_BINARY_SERIALIZATION
@@ -51,7 +66,8 @@ namespace Microsoft.Build.Framework.Profiler
         private static readonly Dictionary<EvaluationPass, string> PassDefaultDescription =
             new Dictionary<EvaluationPass, string>
             {
-                {EvaluationPass.TotalEvaluation, "Total Evaluation"},
+                {EvaluationPass.TotalEvaluation, "Total evaluation"},
+                {EvaluationPass.TotalGlobbing, "Total evaluation for globbing"},
                 {EvaluationPass.InitialProperties, "Initial properties (pass 0)"},
                 {EvaluationPass.Properties, "Properties (pass 1)"},
                 {EvaluationPass.ItemDefinitionGroups, "Item definition groups (pass 2)"},
@@ -77,31 +93,40 @@ namespace Microsoft.Build.Framework.Profiler
         public string ElementName { get; }
 
         /// <nodoc/>
-        public string ElementOrCondition { get; }
+        public string Description { get; }
 
-        /// <summary>
-        /// True when <see cref="ElementOrCondition"/> is an element
-        /// </summary>
-        public bool IsElement { get; }
+        /// <nodoc/>
+        public EvaluationLocationKind Kind { get; }
 
-        /// <summary>
-        /// True when <see cref="ElementOrCondition"/> is a condition
-        /// </summary>
-        public bool IsCondition => !IsElement;
+        /// <nodoc/>
+        public static EvaluationLocation CreateLocationForCondition(EvaluationPass evaluationPass, string evaluationDescription, string file,
+            int? line, string condition)
+        {
+            return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, "Condition", condition, kind: EvaluationLocationKind.Condition);
+        }
 
-        /// <summary>
-        /// Constructs the condition case
-        /// </summary>
-        public EvaluationLocation(EvaluationPass evaluationPass, string evaluationDescription, string file, int? line, string condition)
-            : this(evaluationPass, evaluationDescription, file, line, "Condition", condition, isElement: false)
-        {}
+        /// <nodoc/>
+        public static EvaluationLocation CreateLocationForProject(EvaluationPass evaluationPass, string evaluationDescription, string file,
+            int? line, IProjectElement element)
+        {
+            return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, element?.ElementName,
+                element?.OuterElement, kind: EvaluationLocationKind.Item);
+        }
 
-        /// <summary>
-        /// Constructs the project element case
-        /// </summary>
-        public EvaluationLocation(EvaluationPass evaluationPass, string evaluationDescription, string file, int? line, IProjectElement element)
-            : this(evaluationPass, evaluationDescription, file, line, element?.ElementName, element?.OuterElement, isElement: true)
-        {}
+        /// <nodoc/>
+        public static EvaluationLocation CreateLocationForGlob(EvaluationPass evaluationPass,
+            string evaluationDescription, string file, int? line, string globDescription)
+        {
+            return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, "Glob", globDescription, kind: EvaluationLocationKind.Glob);
+        }
+
+        /// <nodoc/>
+        public static EvaluationLocation CreateLocationForAggregatedGlob()
+        {
+            return new EvaluationLocation(EvaluationPass.TotalGlobbing,
+                PassDefaultDescription[EvaluationPass.TotalGlobbing], file: null, kind: EvaluationLocationKind.Glob,
+                line: null, elementName: null, description: null);
+        }
 
         /// <summary>
         /// Constructs the generic case.
@@ -109,15 +134,15 @@ namespace Microsoft.Build.Framework.Profiler
         /// <remarks>
         /// Used by serialization/deserialization purposes
         /// </remarks>
-        public EvaluationLocation(EvaluationPass evaluationPass, string evaluationDescription, string file, int? line, string elementName, string elementOrCondition, bool isElement)
+        public EvaluationLocation(EvaluationPass evaluationPass, string evaluationDescription, string file, int? line, string elementName, string description, EvaluationLocationKind kind)
         {
             EvaluationPass = evaluationPass;
             EvaluationDescription = evaluationDescription;
             File = file;
             Line = line;
             ElementName = elementName;
-            ElementOrCondition = elementOrCondition;
-            IsElement = isElement;
+            Description = description;
+            Kind = kind;
         }
 
         private static readonly EvaluationLocation Empty = new EvaluationLocation();
@@ -131,25 +156,31 @@ namespace Microsoft.Build.Framework.Profiler
         public EvaluationLocation WithEvaluationPass(EvaluationPass evaluationPass, string passDescription = null)
         {
             return new EvaluationLocation(evaluationPass, passDescription ?? PassDefaultDescription[evaluationPass],
-                this.File, this.Line, this.ElementName, this.ElementOrCondition, this.IsElement);
+                this.File, this.Line, this.ElementName, this.Description, this.Kind);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithFile(string file)
         {
-            return new EvaluationLocation(this.EvaluationPass, this.EvaluationDescription, file, null, null, null, this.IsElement);
+            return new EvaluationLocation(this.EvaluationPass, this.EvaluationDescription, file, null, null, null, this.Kind);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithFileLineAndElement(string file, int? line, IProjectElement element)
         {
-            return new EvaluationLocation(this.EvaluationPass, this.EvaluationDescription, file, line, element);
+            return CreateLocationForProject(this.EvaluationPass, this.EvaluationDescription, file, line, element);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithFileLineAndCondition(string file, int? line, string condition)
         {
-            return new EvaluationLocation(this.EvaluationPass, this.EvaluationDescription, file, line, condition);
+            return CreateLocationForCondition(this.EvaluationPass, this.EvaluationDescription, file, line, condition);
+        }
+
+        /// <nodoc/>
+        public EvaluationLocation WithGlob(string globDescription)
+        {
+            return CreateLocationForGlob(this.EvaluationPass, this.EvaluationDescription, this.File, this.Line, globDescription);
         }
 
         /// <nodoc/>
@@ -166,6 +197,8 @@ namespace Microsoft.Build.Framework.Profiler
                     ElementName == other.ElementName &&
                     ElementOrCondition == other.ElementOrCondition &&
                     IsElement == other.IsElement;
+					Description == other.Description &&
+					Kind == other.Kind;
             }
             return false;
         }
@@ -186,7 +219,8 @@ namespace Microsoft.Build.Framework.Profiler
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(File);
             hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(Line);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementOrCondition);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Description);
+            hashCode = hashCode * -1521134295 + EqualityComparer<EvaluationLocationKind>.Default.GetHashCode(Kind);
             hashCode = hashCode * -1521134295 + IsElement.GetHashCode();
             hashCode = hashCode * -1521134295 + IsCondition.GetHashCode();
             return hashCode;

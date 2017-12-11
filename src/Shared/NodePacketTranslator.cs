@@ -1512,8 +1512,8 @@ namespace Microsoft.Build.BackEnd
                 string file = null;
                 int? line = null;
                 string elementName = null;
-                string elementOrCondition = null;
-                bool isElement = false;
+                string description = null;
+                EvaluationLocationKind kind = default(EvaluationLocationKind);
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
@@ -1522,8 +1522,8 @@ namespace Microsoft.Build.BackEnd
                     file = evaluationLocation.File;
                     line = evaluationLocation.Line;
                     elementName = evaluationLocation.ElementName;
-                    elementOrCondition = evaluationLocation.ElementOrCondition;
-                    isElement = evaluationLocation.IsElement;
+                    description = evaluationLocation.Description;
+                    kind = evaluationLocation.Kind;
                 }
 
                 translator.TranslateEnum(ref evaluationPass, (int)evaluationPass);
@@ -1545,12 +1545,12 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 translator.Translate(ref elementName);
-                translator.Translate(ref elementOrCondition);
-                translator.Translate(ref isElement);
+                translator.Translate(ref description);
+                translator.TranslateEnum(ref kind, (byte)kind);
 
                 if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
-                    evaluationLocation = new EvaluationLocation(evaluationPass, evaluationPassDescription, file, line, elementName, elementOrCondition, isElement);
+                    evaluationLocation = new EvaluationLocation(evaluationPass, evaluationPassDescription, file, line, elementName, description, kind);
                 }
             }
 
