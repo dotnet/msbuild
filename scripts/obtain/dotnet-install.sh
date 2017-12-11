@@ -688,9 +688,16 @@ install_dotnet() {
     eval $invocation
     local download_failed=false
 
-    if is_dotnet_package_installed "$install_root" "sdk" "$specific_version"; then
-        say ".NET SDK version $specific_version is already installed."
-        return 0
+    if [ "$shared_runtime" = true ]; then
+        if is_dotnet_package_installed "$install_root" "shared/Microsoft.NETCore.App" "$specific_version"; then
+            say ".NET Core Runtime version $specific_version is already installed."
+            return 0
+        fi
+    else
+        if is_dotnet_package_installed "$install_root" "sdk" "$specific_version"; then
+            say ".NET Core SDK version $specific_version is already installed."
+            return 0
+        fi
     fi
     
     mkdir -p "$install_root"
@@ -786,7 +793,6 @@ do
             runtime_id="$1"
             ;;
         --skip-non-versioned-files|-[Ss]kip[Nn]on[Vv]ersioned[Ff]iles)
-            shift
             override_non_versioned_files=false
             ;;
         -?|--?|-h|--help|-[Hh]elp)

@@ -472,10 +472,15 @@ if ($DryRun) {
 $InstallRoot = Resolve-Installation-Path $InstallDir
 Say-Verbose "InstallRoot: $InstallRoot"
 
-$IsSdkInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -RelativePathToPackage "sdk" -SpecificVersion $SpecificVersion
-Say-Verbose ".NET SDK installed? $IsSdkInstalled"
-if ($IsSdkInstalled) {
-    Say ".NET SDK version $SpecificVersion is already installed."
+$dotnetPackageRelativePath = if ($SharedRuntime) { "shared\Microsoft.NETCore.App" } else { "sdk" }
+
+$isAssetInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -RelativePathToPackage $dotnetPackageRelativePath -SpecificVersion $SpecificVersion
+if ($isAssetInstalled) {
+    if ($SharedRuntime) {
+        Say ".NET Core Runtime version $SpecificVersion is already installed."
+    } else {
+        Say ".NET Core SDK version $SpecificVersion is already installed."
+    }
     Prepend-Sdk-InstallRoot-To-Path -InstallRoot $InstallRoot -BinFolderRelativePath $BinFolderRelativePath
     exit 0
 }
