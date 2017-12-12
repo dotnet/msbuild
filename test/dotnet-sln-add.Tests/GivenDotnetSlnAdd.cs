@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -552,6 +553,33 @@ EndGlobal
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, projectPath));
             cmd.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void WhenProjectIsAddedSolutionHasUTF8BOM()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithEmptySln")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = "Lib/Lib.csproj";
+            var projectPath = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
+            cmd.Should().Pass();
+
+            var preamble = Encoding.UTF8.GetPreamble();
+            preamble.Length.Should().Be(3);
+            using (var stream = new FileStream(Path.Combine(projectDirectory, "App.sln"), FileMode.Open))
+            {
+                var bytes = new byte[preamble.Length];
+                stream.Read(bytes, 0, bytes.Length);
+                bytes.Should().BeEquivalentTo(preamble);
+            }
         }
 
         [Theory]
