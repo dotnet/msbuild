@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -131,17 +132,29 @@ namespace Microsoft.Build.Logging
                         previousTimeSpent = new ProfiledLocation(TimeSpan.Zero, TimeSpan.Zero, 0);
                     }
 
-                    var updatedTimeSpent = new ProfiledLocation(
-                        previousTimeSpent.InclusiveTime + pair.Value.InclusiveTime,
-                        previousTimeSpent.ExclusiveTime + pair.Value.ExclusiveTime,
-                        previousTimeSpent.NumberOfHits + 1
-                    );
+                    var updatedTimeSpent = AggregateProfiledLocation(previousTimeSpent, pair.Value);
 
                     _aggregatedLocations[pair.Key] = updatedTimeSpent;
                 }
             }
 
+            // Add one single item representing the total aggregated evaluation time for globs
+            var aggregatedGlobs = _aggregatedLocations.Keys
+                .Where(key => key.Kind == EvaluationLocationKind.Glob)
+                .Aggregate(new ProfiledLocation(), (profiledLocation, evaluationLocation) => AggregateProfiledLocation(profiledLocation, _aggregatedLocations[evaluationLocation]));
+
+            _aggregatedLocations[EvaluationLocation.CreateLocationForAggregatedGlob()] = aggregatedGlobs;
+
             return new ProfilerResult(_aggregatedLocations);
+        }
+
+        private static ProfiledLocation AggregateProfiledLocation(ProfiledLocation location, ProfiledLocation otherLocation)
+        {
+            return new ProfiledLocation(
+                location.InclusiveTime + otherLocation.InclusiveTime,
+                location.ExclusiveTime + otherLocation.ExclusiveTime,
+                location.NumberOfHits + 1
+            );
         }
 
         /// <summary>

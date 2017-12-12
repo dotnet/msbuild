@@ -134,6 +134,36 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(1, profiledElements.Count(location => location.ElementName == "Target"));
         }
 
+        [Fact]
+        public void VerifyProfiledGlobData()
+        {
+            string contents = @"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+    <ItemGroup>
+        <TestGlob Include='wwwroot\dist\**' />
+        <TestGlob Include='ClientApp\dist\**' />
+    </ItemGroup>
+    <Target Name='echo'>
+        <Message text='echo!'/>
+    </Target>
+</Project>";
+
+            var result = BuildAndGetProfilerResult(contents);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            // Item groups (pass 3 and 3.1)
+            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.Items));
+            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.LazyItems));
+
+            // There should be one aggregated entry representing the total glob time
+            Assert.Equal(1, profiledElements.Count(location => location.EvaluationPass == EvaluationPass.TotalGlobbing));
+            var totalGlob = profiledElements.Find(evaluationLocation =>
+                evaluationLocation.EvaluationPass == EvaluationPass.TotalGlobbing);
+            // And it should aggregate the result of the 2 glob locations
+            var totalGlobLocation = result.ProfiledLocations[totalGlob];
+            Assert.Equal(2, totalGlobLocation.NumberOfHits);
+        }
+
         /// <summary>
         /// Runs a build for a given project content with the profiler option on and returns the result of profiling it
         /// </summary>

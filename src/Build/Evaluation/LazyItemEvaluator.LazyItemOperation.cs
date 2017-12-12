@@ -16,8 +16,8 @@ namespace Microsoft.Build.Evaluation
         {
             private readonly string _itemType;
             private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-            private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
 
+            protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
             protected readonly ProjectItemElement _itemElement;
             protected readonly ItemSpec<P, I> _itemSpec;
             protected readonly EvaluatorData _evaluatorData;

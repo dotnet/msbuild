@@ -58,6 +58,17 @@ namespace Microsoft.Build.Evaluation
 
         /// <nodoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IDisposable TrackGlob(string rootDirectory, string glob, ISet<string> excludePatterns)
+        {
+            return _shouldTrackElements
+                ? new EvaluationFrame(this,
+                    CurrentLocation.WithGlob(
+                        $"root: '${rootDirectory}', pattern: '${glob}', excludes: '${string.Join(";", excludePatterns)}'"))
+                : null;
+        }
+
+        /// <nodoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable TrackElement(ProjectElement element)
         {
             return _shouldTrackElements ? new EvaluationFrame(this, CurrentLocation.WithFileLineAndElement(element.Location.File, element.Location.Line, element)) : null;
