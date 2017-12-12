@@ -12,6 +12,7 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -1126,7 +1127,8 @@ namespace Microsoft.Build.UnitTests
                                         warningsAsErrors: null,
                                         warningsAsMessages: null,
                                         enableRestore: false,
-                                        profilerLogger: null);
+                                        profilerLogger: null,
+                                        enableProfiler: false);
                 }
                 finally
                 {
@@ -1331,7 +1333,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that when the /profileevaluation switch is used with no values that an error is shown.
+        /// Verifies that when the /profileevaluation switch is used with no values "no-file" is specified.
         /// </summary>
         [Fact]
         public void ProcessProfileEvaluationEmpty()
@@ -1339,8 +1341,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
-
-            VerifySwitchError(commandLineSwitches, "/profileevaluation", AssemblyResources.GetString("MissingProfileParameterError"));
+            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 
         /// <summary>
@@ -1350,13 +1351,10 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         public void ProcessProfileEvaluationInvalidFilename(string filename)
         {
-            try
-            {
-                MSBuildApp.ProcessProfileEvaluationSwitch(new string[] {filename}, new ArrayList());
-                Assert.True(false, $"Processing the profile evaluation parameter '{filename}' should have failed");
-            }
-            catch (CommandLineSwitchException)
-            {}
+            bool enableProfiler = false;
+            Should.Throw(
+                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new ArrayList(), out enableProfiler),
+                typeof(CommandLineSwitchException));
         }
 
         private static IEnumerable<object[]> GetInvalidFilenames()

@@ -163,31 +163,33 @@ namespace Microsoft.Build.Framework.Profiler
                     EvaluationDescription == other.EvaluationDescription &&
                     string.Equals(File, other.File, StringComparison.OrdinalIgnoreCase) &&
                     Line == other.Line &&
-                    ElementName == other.ElementName;
+                    ElementName == other.ElementName &&
+                    ElementOrCondition == other.ElementOrCondition &&
+                    IsElement == other.IsElement;
             }
             return false;
         }
 
         /// <nodoc/>
-        public override int GetHashCode()
+        public override string ToString()
         {
-            var hashCode = 590978104;
-            hashCode = hashCode * -1521134295 + base.GetHashCode();
-
-            hashCode = hashCode * -1521134295 + EqualityComparer<EvaluationPass>.Default.GetHashCode(EvaluationPass);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EvaluationDescription);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(File?.ToLower());
-            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(Line);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementOrCondition);
-
-            return hashCode;
+            return $"{EvaluationDescription ?? string.Empty}\t{File ?? string.Empty}\t{Line?.ToString() ?? string.Empty}\t{ElementName ?? string.Empty}\tIsElement?{IsElement}\tElementOrCondition:{ElementOrCondition}\t{this.EvaluationDescription}";
         }
 
         /// <nodoc/>
-        public override string ToString()
+        public override int GetHashCode()
         {
-            return $"{EvaluationDescription ?? string.Empty}\t{File ?? string.Empty}\t{Line?.ToString() ?? string.Empty}\t{ElementName ?? string.Empty}";
+            var hashCode = -433772733;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + EvaluationPass.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EvaluationDescription);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(File);
+            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(Line);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementOrCondition);
+            hashCode = hashCode * -1521134295 + IsElement.GetHashCode();
+            hashCode = hashCode * -1521134295 + IsCondition.GetHashCode();
+            return hashCode;
         }
     }
 }

@@ -24,7 +24,9 @@ namespace Microsoft.Build.Logging
         // version 4:
         //   - new TargetSkippedEventArgs
         //   - new TargetStartedEventArgs.BuildReason
-        internal const int FileFormatVersion = 4;
+        // version 5:
+        //   - new EvaluationFinished.ProfilerResult
+        internal const int FileFormatVersion = 5;
 
         private Stream stream;
         private BinaryWriter binaryWriter;

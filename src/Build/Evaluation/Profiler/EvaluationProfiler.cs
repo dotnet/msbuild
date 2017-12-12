@@ -71,6 +71,15 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns true when the evaluation stack is empty.
+        /// </summary>
+        /// <returns></returns>
+        internal bool IsEmpty()
+        {
+            return _evaluationStack.Count == 0;
+        }
+
+        /// <summary>
         /// A frame in the evaluation tracker
         /// </summary>
         /// <remarks>
