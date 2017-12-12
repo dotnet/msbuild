@@ -347,14 +347,17 @@ namespace Microsoft.Build.UnitTests
                 ProfilerResult = new ProfilerResult(new Dictionary<EvaluationLocation, ProfiledLocation>
                 {
                     {
-                        new EvaluationLocation(EvaluationPass.InitialProperties, "desc1", "file1", 7, "element1", "elementorcondition1", true),
+                        new EvaluationLocation(EvaluationPass.InitialProperties, "desc1", "file1", 7, "element1", "description", EvaluationLocationKind.Condition),
                         new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 1)
                     },
                     {
-                        new EvaluationLocation(EvaluationPass.LazyItems, "desc2", "file1", null, "element2", "elementorcondition2", false),
+                        new EvaluationLocation(EvaluationPass.LazyItems, "desc2", "file1", null, "element2", "description2", EvaluationLocationKind.Glob),
+                        new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 2)
+                    },
+                    {
+                        new EvaluationLocation(EvaluationPass.Properties, "desc2", "file1", null, "element2", "description2", EvaluationLocationKind.Item),
                         new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 2)
                     }
-
                 })
             };
 

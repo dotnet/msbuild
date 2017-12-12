@@ -195,9 +195,7 @@ namespace Microsoft.Build.Framework.Profiler
                     string.Equals(File, other.File, StringComparison.OrdinalIgnoreCase) &&
                     Line == other.Line &&
                     ElementName == other.ElementName &&
-                    ElementOrCondition == other.ElementOrCondition &&
-                    IsElement == other.IsElement;
-					Description == other.Description &&
+                    Description == other.Description &&
 					Kind == other.Kind;
             }
             return false;
@@ -206,13 +204,13 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         public override string ToString()
         {
-            return $"{EvaluationDescription ?? string.Empty}\t{File ?? string.Empty}\t{Line?.ToString() ?? string.Empty}\t{ElementName ?? string.Empty}\tIsElement?{IsElement}\tElementOrCondition:{ElementOrCondition}\t{this.EvaluationDescription}";
+            return $"{EvaluationDescription ?? string.Empty}\t{File ?? string.Empty}\t{Line?.ToString() ?? string.Empty}\t{ElementName ?? string.Empty}\tDescription:{Description}\t{this.EvaluationDescription}";
         }
 
         /// <nodoc/>
         public override int GetHashCode()
         {
-            var hashCode = -433772733;
+            var hashCode = 1198539463;
             hashCode = hashCode * -1521134295 + base.GetHashCode();
             hashCode = hashCode * -1521134295 + EvaluationPass.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EvaluationDescription);
@@ -220,9 +218,7 @@ namespace Microsoft.Build.Framework.Profiler
             hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(Line);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementName);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Description);
-            hashCode = hashCode * -1521134295 + EqualityComparer<EvaluationLocationKind>.Default.GetHashCode(Kind);
-            hashCode = hashCode * -1521134295 + IsElement.GetHashCode();
-            hashCode = hashCode * -1521134295 + IsCondition.GetHashCode();
+            hashCode = hashCode * -1521134295 + Kind.GetHashCode();
             return hashCode;
         }
     }

@@ -668,10 +668,10 @@ namespace Microsoft.Build.Logging
         private void Write(EvaluationLocation item)
         {
             WriteOptionalString(item.ElementName);
-            WriteOptionalString(item.ElementOrCondition);
+            WriteOptionalString(item.Description);
             WriteOptionalString(item.EvaluationDescription);
             WriteOptionalString(item.File);
-            Write(item.IsElement);
+            Write((int)item.Kind);
             Write((int)item.EvaluationPass);
 
             Write(item.Line.HasValue);

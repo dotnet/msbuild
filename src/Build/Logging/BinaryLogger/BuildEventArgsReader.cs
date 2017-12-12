@@ -842,17 +842,17 @@ namespace Microsoft.Build.Logging
         private EvaluationLocation ReadEvaluationLocation()
         {
             var elementName = ReadOptionalString();
-            var elementOrCondition = ReadOptionalString();
+            var description = ReadOptionalString();
             var evaluationDescription = ReadOptionalString();
             var file = ReadOptionalString();
-            var isElement = ReadBoolean();
+            var kind = (EvaluationLocationKind)ReadInt32();
             var evaluationPass = (EvaluationPass)ReadInt32();
 
             int? line = null;
             var hasLine = ReadBoolean();
             if (hasLine) line = ReadInt32();
 
-            return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, elementName, elementOrCondition, isElement);
+            return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, elementName, description, kind);
         }
     }
 }
