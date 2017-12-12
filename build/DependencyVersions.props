@@ -35,14 +35,14 @@
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
 
-    <AspNetCoreTemplatePackageVersion>2.0.3</AspNetCoreTemplatePackageVersion>
+    <AspNetCoreTemplatePackageVersion>2.0.5</AspNetCoreTemplatePackageVersion>
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
     <!--BranchName and AspNetCoreVersion will not always be the same-->
-    <AspNetCoreBranchName>2.0.3</AspNetCoreBranchName>
+    <AspNetCoreBranchName>2.0.5</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
-    <AspNetCoreVersion>2.0.3</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>127</AspNetCoreRuntimePackageTimestamp>
+    <AspNetCoreVersion>2.0.5</AspNetCoreVersion>
+    <AspNetCoreRuntimePackageTimestamp>142</AspNetCoreRuntimePackageTimestamp>
 
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
     <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
