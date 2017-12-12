@@ -3,6 +3,6 @@
   <PropertyGroup>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
-    <MicroBuildPropsAndTargetsPath>$(NuGetPackagesDir)/microbuild.core/$(MicroBuildVersion)/build/</MicroBuildPropsAndTargetsPath>
+    <MicroBuildPropsAndTargetsPath>$(NuGetPackagesDir)/microbuild.core/$(MicroBuildCorePackageVersion)/build/</MicroBuildPropsAndTargetsPath>
   </PropertyGroup>
 </Project>
