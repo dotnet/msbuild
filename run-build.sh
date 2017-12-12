@@ -153,7 +153,7 @@ export DOTNET_MULTILEVEL_LOOKUP=0
 
 # Install a stage 0
 if [ "$STAGE0_SOURCE_DIR" == "" ]; then
-    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.1.0-preview1-007172" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.2.0-preview1-007799" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 else
     echo "Copying bootstrap cli from $BOOTSTRAP_CLI"
     cp -r $STAGE0_SOURCE_DIR/* "$DOTNET_INSTALL_DIR"
