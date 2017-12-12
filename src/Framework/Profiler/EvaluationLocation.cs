@@ -20,23 +20,23 @@ namespace Microsoft.Build.Framework.Profiler
     public enum EvaluationPass : byte
     {
         /// <nodoc/>
-        TotalEvaluation,
+        TotalEvaluation = 0,
         /// <nodoc/>
-        TotalGlobbing,
+        TotalGlobbing = 1,
         /// <nodoc/>
-        InitialProperties,
+        InitialProperties = 2,
         /// <nodoc/>
-        Properties,
+        Properties = 3,
         /// <nodoc/>
-        ItemDefinitionGroups,
+        ItemDefinitionGroups = 4,
         /// <nodoc/>
-        Items,
+        Items = 5,
         /// <nodoc/>
-        LazyItems,
+        LazyItems = 6,
         /// <nodoc/>
-        UsingTasks,
+        UsingTasks = 7,
         /// <nodoc/>
-        Targets
+        Targets = 8
     }
 
     /// <summary>
@@ -45,11 +45,11 @@ namespace Microsoft.Build.Framework.Profiler
     public enum EvaluationLocationKind : byte
     {
         /// <nodoc/>
-        Item,
+        Item = 0,
         /// <nodoc/>
-        Condition,
+        Condition = 1,
         /// <nodoc/>
-        Glob
+        Glob = 2
     }
 
     /// <summary>
