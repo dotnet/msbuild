@@ -988,7 +988,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            _evaluationProfiler.AssertEmpty();
+            ErrorUtilities.VerifyThrow(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
             _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
             {
                 BuildEventContext = _evaluationLoggingContext.BuildEventContext,
