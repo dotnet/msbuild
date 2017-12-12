@@ -2262,9 +2262,9 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         internal static ProfilerLogger ProcessProfileEvaluationSwitch(string[] parameters, ArrayList loggers, out bool enableProfiler)
         {
-            enableProfiler = false;
             if (parameters == null || parameters.Length == 0)
             {
+                enableProfiler = false;
                 return null;
             }
 

@@ -179,17 +179,17 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = (int) EvaluationPass;
-                hashCode = (hashCode * 397) ^ (EvaluationDescription != null ? EvaluationDescription.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (File != null ? File.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ Line.GetHashCode();
-                hashCode = (hashCode * 397) ^ (ElementName != null ? ElementName.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (ElementOrCondition != null ? ElementOrCondition.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ IsElement.GetHashCode();
-                return hashCode;
-            }
+            var hashCode = -433772733;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + EvaluationPass.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EvaluationDescription);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(File);
+            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(Line);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementOrCondition);
+            hashCode = hashCode * -1521134295 + IsElement.GetHashCode();
+            hashCode = hashCode * -1521134295 + IsCondition.GetHashCode();
+            return hashCode;
         }
     }
 }
