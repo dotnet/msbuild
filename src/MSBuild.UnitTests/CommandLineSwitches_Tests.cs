@@ -12,6 +12,7 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -1340,7 +1341,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
-            Assert.Equal("no-file", commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0]);
+            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 
         /// <summary>
@@ -1350,14 +1351,10 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         public void ProcessProfileEvaluationInvalidFilename(string filename)
         {
-            try
-            {
-                bool enableProfiler = false;
-                MSBuildApp.ProcessProfileEvaluationSwitch(new string[] {filename}, new ArrayList(), out enableProfiler);
-                Assert.True(false, $"Processing the profile evaluation parameter '{filename}' should have failed");
-            }
-            catch (CommandLineSwitchException)
-            {}
+            bool enableProfiler = false;
+            Should.Throw(
+                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new ArrayList(), out enableProfiler),
+                typeof(CommandLineSwitchException));
         }
 
         private static IEnumerable<object[]> GetInvalidFilenames()
