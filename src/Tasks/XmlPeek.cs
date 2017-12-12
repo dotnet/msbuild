@@ -129,10 +129,10 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Set to true to disallow loading XML with embedded DTD.
-        /// Use if XML comes from an untrusted source.
+        /// Set to true to prohibit loading XML with embedded DTD and produce error MSB3733
+        /// if DTD is present. This was a pre-v15 behavior. By default, a DTD clause if any is ignored.
         /// </summary>
-        public bool DisallowDtd
+        public bool ProhibitDtd
         {
             get;
             set;
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Load the XPath Document
-                using (XmlReader xr = xmlinput.CreateReader(DisallowDtd))
+                using (XmlReader xr = xmlinput.CreateReader(ProhibitDtd))
                 {
                     xpathdoc = new XPathDocument(xr);
                     xr.Dispose();
@@ -391,10 +391,11 @@ namespace Microsoft.Build.Tasks
             /// Creates correct reader based on the input type.
             /// </summary>
             /// <returns>The XmlReader object</returns>
-            public XmlReader CreateReader(bool disallowDtd)
+            public XmlReader CreateReader(bool prohibitDtd)
             {
                 var settings = new XmlReaderSettings() {
-                    DtdProcessing = disallowDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
+                    DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore
+                };
                 if (_xmlMode == XmlModes.XmlFile)
                 {
                     _fs = new FileStream(_data, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

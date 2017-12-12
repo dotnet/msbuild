@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests
             XmlPeek p = new XmlPeek();
             p.BuildEngine = engine;
 
-            p.DisallowDtd = true;
+            p.ProhibitDtd = true;
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
 
