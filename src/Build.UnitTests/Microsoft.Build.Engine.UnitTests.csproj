@@ -20,6 +20,9 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
 
+    <ProjectReference Include="..\Samples\TaskWithDependency\TaskWithDependency.csproj" />
+    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" />
+
     <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

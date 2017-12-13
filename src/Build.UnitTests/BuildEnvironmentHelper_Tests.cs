@@ -537,7 +537,7 @@ namespace Microsoft.Build.Engine.UnitTests
             public void Dispose()
             {
                 FileUtilities.DeleteDirectoryNoThrow(TempFolderRoot, true);
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(runningTests: true);
             }
         }
     }

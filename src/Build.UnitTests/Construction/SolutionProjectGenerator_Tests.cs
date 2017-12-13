@@ -1637,6 +1637,9 @@ EndGlobal
         {
             string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
 
+            //  Clean up projects loaded by other tests
+            ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+
             string solutionFileContents =
                 @"
                 Microsoft Visual Studio Solution File, Format Version 9.00
@@ -2197,35 +2200,6 @@ EndGlobal
         }
 
         #region Helper Functions
-
-        /// <summary>
-        /// Convert passed in solution file to an MSBuild project. This method is used by Sln2Proj
-        /// </summary>
-        public bool ConvertSLN2Proj(string nameSolutionFile)
-        {
-            // Set the environment variable to cause the SolutionProjectGenerator to emit the project to disk
-            string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
-            Environment.SetEnvironmentVariable("MSBuildEmitSolution", "1");
-
-            if (nameSolutionFile == null || !File.Exists(nameSolutionFile))
-            {
-                return false;
-            }
-
-            // Parse the solution
-            SolutionFile solution = new SolutionFile();
-            solution.FullPath = nameSolutionFile;
-            solution.ParseSolutionFile();
-
-            // Generate the in-memory MSBuild project and output it to disk
-            ProjectInstance[] instance = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null);
-
-
-            //Reset the environment variable
-            Environment.SetEnvironmentVariable("MSBuildEmitSolution", oldValueForMSBuildEmitSolution);
-
-            return true;
-        }
 
         /// <summary>
         /// Create a Project derived from a Venus solution
