@@ -27,6 +27,11 @@ public class MSBuildTestAssemblyFixture : IDisposable
         var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
         runningTestsField.SetValue(null, true);
 
+        //  Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
+        //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion
+        //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
+        Environment.SetEnvironmentVariable("VisualStudioVersion", string.Empty);
+
         //  Find correct version of "dotnet", and set DOTNET_HOST_PATH so that the Roslyn tasks will use the right host
         var currentFolder = System.AppContext.BaseDirectory;
 
