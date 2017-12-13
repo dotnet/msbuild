@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         string PackageId { get; }
         string DisplayName { get; }
 
-        // NOTE: Technically this should be NuGetVersion because System.Version doesn't work with symver.
+        // NOTE: Technically this should be NuGetVersion because System.Version doesn't work with semver.
         // However, the only scenarios we need to support this property for in conflict resolution is stable versions
         // of System packages. PackageVersion will be null if System.Version can't parse the version (i.e. if is pre-release)
         Version PackageVersion { get; }

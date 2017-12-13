@@ -102,33 +102,39 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
 
         public List<(string value, Dictionary<string, string> metadata)> GetValuesWithMetadata()
         {
-            var ret = new List<(string value, Dictionary<string, string> metadata)>();
-
             string outputFilename = $"{_valueName}Values.txt";
             var outputDirectory = GetOutputDirectory(_targetFramework, Configuration ?? "Debug");
+            string fullFileName = Path.Combine(outputDirectory.FullName, outputFilename);
 
-            return File.ReadAllLines(Path.Combine(outputDirectory.FullName, outputFilename))
-               .Where(line => !string.IsNullOrWhiteSpace(line))
-               .Select(line =>
-               {
-                   if (!MetadataNames.Any())
+            if (File.Exists(fullFileName))
+            {
+                return File.ReadAllLines(fullFileName)
+                   .Where(line => !string.IsNullOrWhiteSpace(line))
+                   .Select(line =>
                    {
-                       return (value: line, metadata: new Dictionary<string, string>());
-                   }
-                   else
-                   {
-                       var fields = line.Split('\t');
-
-                       var dict = new Dictionary<string, string>();
-                       for (int i=0; i<MetadataNames.Count;i++)
+                       if (!MetadataNames.Any())
                        {
-                           dict[MetadataNames[i]] = fields[i + 1];
+                           return (value: line, metadata: new Dictionary<string, string>());
                        }
+                       else
+                       {
+                           var fields = line.Split('\t');
 
-                       return (value: fields[0], metadata: dict);
-                   }
-               })
-               .ToList();
+                           var dict = new Dictionary<string, string>();
+                           for (int i = 0; i < MetadataNames.Count; i++)
+                           {
+                               dict[MetadataNames[i]] = fields[i + 1];
+                           }
+
+                           return (value: fields[0], metadata: dict);
+                       }
+                   })
+                   .ToList();
+            }
+            else
+            {
+                return new List<(string value, Dictionary<string, string> metadata)>();
+            }
         }
     }
 }
