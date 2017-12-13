@@ -6,7 +6,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.props</MSBuildAllProjects>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props" />
+  <Import Project="..\Directory.Build.props" />
   <Import Project="$(RepoToolsetDir)Settings.props" />
 
   <PropertyGroup>
