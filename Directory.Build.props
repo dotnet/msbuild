@@ -6,8 +6,8 @@
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)build\NuGet.props"/>
-  <Import Project="$(MSBuildThisFileDirectory)build\Versions.props"/>
+  <Import Project="build\NuGet.props"/>
+  <Import Project="build\Versions.props"/>
 
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
@@ -19,8 +19,6 @@
       https://dotnet.myget.org/F/msbuild/api/v3/index.json;
       https://dotnet.myget.org/F/nuget-build/api/v3/index.json
     </RestoreSources>
-    <SignToolDataPath>$(RepoRoot)build\SignToolData.json</SignToolDataPath>
-    <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
   </PropertyGroup>
 
   <PropertyGroup>
