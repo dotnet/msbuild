@@ -116,7 +116,9 @@
     <Compile Include="OutputAttribute.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Profiler\EvaluationIdProvider.cs" />
     <Compile Include="Profiler\EvaluationLocation.cs" />
+    <Compile Include="Profiler\EvaluationLocationIdAgnosticComparer.cs" />
     <Compile Include="Profiler\ProfilerResult.cs" />
     <Compile Include="ProjectEvaluationFinishedEventArgs.cs" />
     <Compile Include="ProjectEvaluationStartedEventArgs.cs" />

@@ -841,6 +841,10 @@ namespace Microsoft.Build.Logging
 
         private EvaluationLocation ReadEvaluationLocation()
         {
+            var id = ReadInt32();
+            int? parentId = null;
+            var hasParent = ReadBoolean();
+            if (hasParent) parentId = ReadInt32();
             var elementName = ReadOptionalString();
             var description = ReadOptionalString();
             var evaluationDescription = ReadOptionalString();
@@ -852,7 +856,7 @@ namespace Microsoft.Build.Logging
             var hasLine = ReadBoolean();
             if (hasLine) line = ReadInt32();
 
-            return new EvaluationLocation(evaluationPass, evaluationDescription, file, line, elementName, description, kind);
+            return new EvaluationLocation(id, parentId, evaluationPass, evaluationDescription, file, line, elementName, description, kind);
         }
     }
 }

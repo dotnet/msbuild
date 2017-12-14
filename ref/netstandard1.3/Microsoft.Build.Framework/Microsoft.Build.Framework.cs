@@ -544,22 +544,31 @@ namespace Microsoft.Build.Framework
 }
 namespace Microsoft.Build.Framework.Profiler
 {
+    public static partial class EvaluationIdProvider
+    {
+        public static int GetNextId() { throw null; }
+    }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct EvaluationLocation
     {
-        public EvaluationLocation(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string elementName, string description, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
-        public string Description { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public EvaluationLocation(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
+        public EvaluationLocation(int id, System.Nullable<int> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
+        public EvaluationLocation(System.Nullable<int> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
+        public string ElementDescription { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string ElementName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public static Microsoft.Build.Framework.Profiler.EvaluationLocation EmptyLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string EvaluationDescription { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Framework.Profiler.EvaluationPass EvaluationPass { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string EvaluationPassDescription { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string File { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public int Id { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsEvaluationPass { get { throw null; } }
         public Microsoft.Build.Framework.Profiler.EvaluationLocationKind Kind { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public System.Nullable<int> Line { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Nullable<int> ParentId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForAggregatedGlob() { throw null; }
-        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForCondition(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string condition) { throw null; }
-        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForGlob(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string globDescription) { throw null; }
-        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForProject(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, Microsoft.Build.Framework.IProjectElement element) { throw null; }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForCondition(System.Nullable<int> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string condition) { throw null; }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForGlob(System.Nullable<int> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string globDescription) { throw null; }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForProject(System.Nullable<int> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, Microsoft.Build.Framework.IProjectElement element) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
@@ -568,12 +577,20 @@ namespace Microsoft.Build.Framework.Profiler
         public Microsoft.Build.Framework.Profiler.EvaluationLocation WithFileLineAndCondition(string file, System.Nullable<int> line, string condition) { throw null; }
         public Microsoft.Build.Framework.Profiler.EvaluationLocation WithFileLineAndElement(string file, System.Nullable<int> line, Microsoft.Build.Framework.IProjectElement element) { throw null; }
         public Microsoft.Build.Framework.Profiler.EvaluationLocation WithGlob(string globDescription) { throw null; }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocation WithParentId(System.Nullable<int> parentId) { throw null; }
+    }
+    public partial class EvaluationLocationIdAgnosticComparer : System.Collections.Generic.IEqualityComparer<Microsoft.Build.Framework.Profiler.EvaluationLocation>
+    {
+        internal EvaluationLocationIdAgnosticComparer() { }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocationIdAgnosticComparer Singleton;
+        public bool Equals(Microsoft.Build.Framework.Profiler.EvaluationLocation x, Microsoft.Build.Framework.Profiler.EvaluationLocation y) { throw null; }
+        public int GetHashCode(Microsoft.Build.Framework.Profiler.EvaluationLocation obj) { throw null; }
     }
     public enum EvaluationLocationKind : byte
     {
         Condition = (byte)1,
+        Element = (byte)0,
         Glob = (byte)2,
-        Item = (byte)0,
     }
     public enum EvaluationPass : byte
     {

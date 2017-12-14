@@ -1507,6 +1507,8 @@ namespace Microsoft.Build.BackEnd
             private static void TranslatorForEvaluationLocation(ref EvaluationLocation evaluationLocation,
                 INodePacketTranslator translator)
             {
+                int id = 0;
+                int? parentId = null;
                 EvaluationPass evaluationPass = default(EvaluationPass);
                 string evaluationPassDescription = null;
                 string file = null;
@@ -1517,13 +1519,30 @@ namespace Microsoft.Build.BackEnd
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
+                    id = evaluationLocation.Id;
+                    parentId = evaluationLocation.ParentId;
                     evaluationPass = evaluationLocation.EvaluationPass;
-                    evaluationPassDescription = evaluationLocation.EvaluationDescription;
+                    evaluationPassDescription = evaluationLocation.EvaluationPassDescription;
                     file = evaluationLocation.File;
                     line = evaluationLocation.Line;
                     elementName = evaluationLocation.ElementName;
-                    description = evaluationLocation.Description;
+                    description = evaluationLocation.ElementDescription;
                     kind = evaluationLocation.Kind;
+                }
+
+                translator.Translate(ref id);
+                if (translator.TranslateNullable(parentId))
+                {
+                    var parentIdValue = 0;
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        parentIdValue = parentId.Value;
+                    }
+                    translator.Translate(ref parentIdValue);
+                    if (translator.Mode == TranslationDirection.ReadFromStream)
+                    {
+                        parentId = parentIdValue;
+                    }
                 }
 
                 translator.TranslateEnum(ref evaluationPass, (int)evaluationPass);
@@ -1550,7 +1569,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
-                    evaluationLocation = new EvaluationLocation(evaluationPass, evaluationPassDescription, file, line, elementName, description, kind);
+                    evaluationLocation = new EvaluationLocation(id, parentId, evaluationPass, evaluationPassDescription, file, line, elementName, description, kind);
                 }
             }
 
