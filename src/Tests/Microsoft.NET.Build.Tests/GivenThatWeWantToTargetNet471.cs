@@ -121,6 +121,7 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{netStandardProject.Name}.dll",
                 $"{netStandardProject.Name}.pdb",
+                $"{testProject.Name}.exe.config", // We have now added binding redirects so we should expect a config flag to be dropped to the output directory.
             }.Concat(net471Shims));
         }
 
@@ -213,6 +214,7 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{netStandardProject.Name}.dll",
                 $"{netStandardProject.Name}.pdb",
+                $"{testProject.Name}.exe.config", // We have now added binding redirects so we should expect a config flag to be dropped to the output directory.
                 "System.Diagnostics.DiagnosticSource.dll" //  This is an implementation dependency of the System.Net.Http package, which won't get conflict resolved out
             }.Concat(net471Shims));
         }
@@ -309,6 +311,7 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{testProject.Name}.exe",
                 $"{testProject.Name}.pdb",
+                $"{testProject.Name}.exe.config", // We have now added binding redirects so we should expect a config flag to be dropped to the output directory.
             }.Concat(net471Shims));
         }
 
