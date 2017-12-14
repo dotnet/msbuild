@@ -1830,7 +1830,7 @@ namespace Microsoft.Build.UnitTests
                                        "<File AssemblyName='System' Version='4.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='false' />" +
                                     "</FileList >";
 
-            string tempDirectory = Path.Combine(Path.GetTempPath(), "GetPathToReferenceAssembliesWithRootGoodWithChain");
+            string tempDirectory = Path.Combine(Path.GetTempPath(), "GetPathToReferenceAssembliesWithRootCircularReference");
 
             string framework41Directory = Path.Combine(tempDirectory, "MyFramework", "v4.1")
                                           + Path.DirectorySeparatorChar;
