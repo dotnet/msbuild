@@ -26,6 +26,7 @@
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime200)" />
+      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime203)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
 
       <!-- Create layout: Binaries -->
@@ -89,6 +90,7 @@
       <!-- Remove Shared Framework and Debian Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName203)" />
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName200)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
@@ -110,6 +112,7 @@
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime200)" />
+      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime203)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
 
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
@@ -125,6 +128,7 @@
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName203)" />
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName200)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
