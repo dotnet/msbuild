@@ -128,6 +128,26 @@ namespace Microsoft.Build.Evaluation
         internal const NewProjectFileOptions DefaultNewProjectTemplateOptions = NewProjectFileOptions.IncludeAllOptions;
 
         /// <summary>
+        /// Certain item operations split the item element in multiple elements if the include
+        /// contains globs, references to items or properties, or multiple item values.
+        ///
+        /// The items operations that may expand item elements are:
+        /// - <see cref="RemoveItem"/>
+        /// - <see cref="RemoveItems"/>
+        /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
+        /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
+        /// - <see cref="ProjectItem.ChangeItemType"/>
+        /// - <see cref="ProjectItem.Rename"/>
+        /// - <see cref="ProjectItem.RemoveMetadata"/>
+        /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
+        /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
+        /// 
+        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
+        /// instead of expanding the item element. 
+        /// </summary>
+        public bool ThrowInsteadOfSplittingItemElement { get; set; }
+
+        /// <summary>
         /// Construct an empty project, evaluating with the global project collection's
         /// global properties and default tools version.
         /// Project will be added to the global project collection when it is named.
@@ -156,26 +176,6 @@ namespace Microsoft.Build.Evaluation
             : this(ProjectRootElement.Create(projectCollection), null, null, projectCollection)
         {
         }
-
-        /// <summary>
-        /// Certain item operations split the item element in multiple elements if the include
-        /// contains globs, references to items or properties, or multiple item values.
-        ///
-        /// The items operations that may expand item elements are:
-        /// - <see cref="RemoveItem"/>
-        /// - <see cref="RemoveItems"/>
-        /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
-        /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
-        /// - <see cref="ProjectItem.ChangeItemType"/>
-        /// - <see cref="ProjectItem.Rename"/>
-        /// - <see cref="ProjectItem.RemoveMetadata"/>
-        /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
-        /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
-        /// 
-        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
-        /// instead of expanding the item element. 
-        /// </summary>
-        public bool ThrowInsteadOfSplittingItemElement { get; set; }
 
         /// <summary>
         /// Construct an empty project, evaluating with the specified project collection's
@@ -512,6 +512,57 @@ namespace Microsoft.Build.Evaluation
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Create a file based project.
+        /// </summary>
+        /// <param name="file">The file to evaluate the project from.</param>
+        /// <param name="info">The <see cref="ProjectConstructionInfo"/> to use.</param>
+        /// <returns></returns>
+        public static Project FromFile(string file, ProjectConstructionInfo info)
+        {
+            return new Project(
+                file,
+                info.GlobalProperties,
+                info.ToolsVersion,
+                info.SubToolsetVersion,
+                info.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                info.LoadSettings);
+        }
+
+        /// <summary>
+        /// Create a <see cref="ProjectRootElement"/> based project.
+        /// </summary>
+        /// <param name="rootElement">The <see cref="ProjectRootElement"/> to evaluate the project from.</param>
+        /// <param name="info">The <see cref="ProjectConstructionInfo"/> to use.</param>
+        /// <returns></returns>
+        public static Project FromProjectRootElement(ProjectRootElement rootElement, ProjectConstructionInfo info)
+        {
+            return new Project(
+                rootElement,
+                info.GlobalProperties,
+                info.ToolsVersion,
+                info.SubToolsetVersion,
+                info.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                info.LoadSettings);
+        }
+
+        /// <summary>
+        /// Create a <see cref="XmlReader"/> based project.
+        /// </summary>
+        /// <param name="rootElement">The <see cref="XmlReader"/> to evaluate the project from.</param>
+        /// <param name="info">The <see cref="ProjectConstructionInfo"/> to use.</param>
+        /// <returns></returns>
+        public static Project FromXmlReader(XmlReader reader, ProjectConstructionInfo info)
+        {
+            return new Project(
+                reader,
+                info.GlobalProperties,
+                info.ToolsVersion,
+                info.SubToolsetVersion,
+                info.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                info.LoadSettings);
         }
 
         /// <summary>
