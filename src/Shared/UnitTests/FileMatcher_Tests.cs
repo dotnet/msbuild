@@ -57,7 +57,8 @@ namespace Microsoft.Build.UnitTests
                     { "???.*", 1},
                     { "????.*", 3},
                     { "*.???", 4},
-                    { "f??e1.txt", 2}
+                    { "f??e1.txt", 2},
+                    { "file.*.txt", 0 }
                 };
                 foreach (var pattern in patterns)
                 {
@@ -82,6 +83,22 @@ namespace Microsoft.Build.UnitTests
         [InlineData(
             @"src\**\inner\**\*.cs", // Include
             new string[] { }, // Excludes
+            new[] // Expected matchings
+            {
+                @"src\foo\inner\foo.cs",
+                @"src\foo\inner\foo\foo.cs",
+                @"src\foo\inner\bar\bar.cs",
+                @"src\bar\inner\baz.cs",
+                @"src\bar\inner\baz\baz.cs",
+                @"src\bar\inner\foo\foo.cs"
+            }
+        )]
+        [InlineData(
+            @"src\**\inner\**\*.cs", // Include
+            new[] // Excludes
+            {
+                @"src\foo\inner\foo.*.cs"
+            },
             new[] // Expected matchings
             {
                 @"src\foo\inner\foo.cs",
@@ -343,6 +360,7 @@ namespace Microsoft.Build.UnitTests
                 new Tuple<string, string, bool>("ab", "*ab", true),
                 new Tuple<string, string, bool>("ab", "a*b", true),
                 new Tuple<string, string, bool>("ab", "ab*", true),
+                new Tuple<string, string, bool>("aba", "ab*ba", false),
                 new Tuple<string, string, bool>("", "*", true),
 
                 // ? wildcard
