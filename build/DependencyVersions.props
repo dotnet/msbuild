@@ -42,7 +42,7 @@
     <AspNetCoreBranchName>2.0.5</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
     <AspNetCoreVersion>2.0.5</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>146</AspNetCoreRuntimePackageTimestamp>
+    <AspNetCoreRuntimePackageTimestamp>147</AspNetCoreRuntimePackageTimestamp>
 
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
     <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
