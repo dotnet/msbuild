@@ -1112,6 +1112,7 @@ namespace Microsoft.Build.UnitTests
                                         null,
                                         "ScoobyDoo",
                                         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                                        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                                         new ILogger[] { },
                                         LoggerVerbosity.Normal,
                                         new DistributedLoggerRecord[] { },

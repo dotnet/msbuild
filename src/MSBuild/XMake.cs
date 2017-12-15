@@ -535,6 +535,7 @@ namespace Microsoft.Build.CommandLine
                 string[] targets = { };
                 string toolsVersion = null;
                 Dictionary<string, string> globalProperties = null;
+                Dictionary<string, string> restoreProperties = null;
                 ILogger[] loggers = { };
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
@@ -585,6 +586,7 @@ namespace Microsoft.Build.CommandLine
                         ref enableRestore,
                         ref profilerLogger,
                         ref enableProfiler,
+                        ref restoreProperties,
                         recursing: false
                         ))
                 {
@@ -617,7 +619,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                         {
                             // if everything checks out, and sufficient information is available to start building
-                            if (!BuildProject(projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, distributedLoggerRecords.ToArray(),
+                            if (!BuildProject(projectFile, targets, toolsVersion, globalProperties, restoreProperties, loggers, verbosity, distributedLoggerRecords.ToArray(),
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
@@ -904,6 +906,7 @@ namespace Microsoft.Build.CommandLine
             string[] targets,
             string toolsVersion,
             Dictionary<string, string> globalProperties,
+            Dictionary<string, string> restoreProperties,
             ILogger[] loggers,
             LoggerVerbosity verbosity,
             DistributedLoggerRecord[] distributedLoggerRecords,
@@ -1127,7 +1130,7 @@ namespace Microsoft.Build.CommandLine
                         {
                             if (enableRestore)
                             {
-                                results = ExecuteRestore(projectFile, toolsVersion, buildManager, globalProperties);
+                                results = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
 
                                 if (results.OverallResult != BuildResultCode.Success)
                                 {
@@ -1905,6 +1908,7 @@ namespace Microsoft.Build.CommandLine
             ref bool enableRestore,
             ref ProfilerLogger profilerLogger,
             ref bool enableProfiler,
+            ref Dictionary<string, string> restoreProperties,
             bool recursing
         )
         {
@@ -2015,6 +2019,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref enableRestore,
                                                                ref profilerLogger,
                                                                ref enableProfiler,
+                                                               ref restoreProperties,
                                                                recursing: true
                                                              );
                         }
@@ -2028,6 +2033,9 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out which properties have been set on the command line
                     globalProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property]);
+
+                    // figure out restore properties have been set on the command line
+                    restoreProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.RestoreProperty]);
 
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
@@ -2743,7 +2751,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>BuildProperty bag.</returns>
         internal static Dictionary<string, string> ProcessPropertySwitch(string[] parameters)
         {
-            Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string parameter in parameters)
             {
@@ -2759,10 +2767,10 @@ namespace Microsoft.Build.CommandLine
 
                 // Validation of whether the property has a reserved name will occur when
                 // we start to build: and it will be logged then, too.
-                globalProperties[parameterSections[0]] = parameterSections[1];
+                properties[parameterSections[0]] = parameterSections[1];
             }
 
-            return globalProperties;
+            return properties;
         }
 
         /// <summary>
@@ -3521,6 +3529,7 @@ namespace Microsoft.Build.CommandLine
             }
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_RestorePropertySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
