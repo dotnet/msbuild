@@ -78,10 +78,10 @@ namespace Microsoft.Build.Framework.Profiler
             };
 
         /// <nodoc/>
-        public int Id { get; }
+        public long Id { get; }
 
         /// <nodoc/>
-        public int? ParentId { get; }
+        public long? ParentId { get; }
 
         /// <nodoc/>
         public EvaluationPass EvaluationPass { get; }
@@ -108,14 +108,14 @@ namespace Microsoft.Build.Framework.Profiler
         public bool IsEvaluationPass => File == null;
 
         /// <nodoc/>
-        public static EvaluationLocation CreateLocationForCondition(int? parentId, EvaluationPass evaluationPass, string evaluationDescription, string file,
+        public static EvaluationLocation CreateLocationForCondition(long? parentId, EvaluationPass evaluationPass, string evaluationDescription, string file,
             int? line, string condition)
         {
             return new EvaluationLocation(parentId, evaluationPass, evaluationDescription, file, line, "Condition", condition, kind: EvaluationLocationKind.Condition);
         }
 
         /// <nodoc/>
-        public static EvaluationLocation CreateLocationForProject(int? parentId, EvaluationPass evaluationPass, string evaluationDescription, string file,
+        public static EvaluationLocation CreateLocationForProject(long? parentId, EvaluationPass evaluationPass, string evaluationDescription, string file,
             int? line, IProjectElement element)
         {
             return new EvaluationLocation(parentId, evaluationPass, evaluationDescription, file, line, element?.ElementName,
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Framework.Profiler
         }
 
         /// <nodoc/>
-        public static EvaluationLocation CreateLocationForGlob(int? parentId, EvaluationPass evaluationPass,
+        public static EvaluationLocation CreateLocationForGlob(long? parentId, EvaluationPass evaluationPass,
             string evaluationDescription, string file, int? line, string globDescription)
         {
             return new EvaluationLocation(parentId, evaluationPass, evaluationDescription, file, line, "Glob", globDescription, kind: EvaluationLocationKind.Glob);
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Framework.Profiler
         /// <remarks>
         /// Used by serialization/deserialization purposes
         /// </remarks>
-        public EvaluationLocation(int id, int? parentId, EvaluationPass evaluationPass, string evaluationPassDescription, string file,
+        public EvaluationLocation(long id, long? parentId, EvaluationPass evaluationPass, string evaluationPassDescription, string file,
             int? line, string elementName, string elementDescription, EvaluationLocationKind kind)
         {
             Id = id;
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Framework.Profiler
         /// A unique Id gets assigned automatically
         /// Used by serialization/deserialization purposes
         /// </remarks>
-        public EvaluationLocation(int? parentId, EvaluationPass evaluationPass, string evaluationPassDescription, string file, int? line, string elementName, string elementDescription, EvaluationLocationKind kind)
+        public EvaluationLocation(long? parentId, EvaluationPass evaluationPass, string evaluationPassDescription, string file, int? line, string elementName, string elementDescription, EvaluationLocationKind kind)
             : this(EvaluationIdProvider.GetNextId(), parentId, evaluationPass, evaluationPassDescription, file, line, elementName, elementDescription, kind)
         {
         }
@@ -194,7 +194,7 @@ namespace Microsoft.Build.Framework.Profiler
         }
 
         /// <nodoc/>
-        public EvaluationLocation WithParentId(int? parentId)
+        public EvaluationLocation WithParentId(long? parentId)
         {
             // Simple optimization. If the new parent id is the same as the current one, then we just return this
             if (parentId == this.ParentId)
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Framework.Profiler
             var hashCode = 1198539463;
             hashCode = hashCode * -1521134295 + base.GetHashCode();
             hashCode = hashCode * -1521134295 + Id.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(ParentId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<long?>.Default.GetHashCode(ParentId);
             hashCode = hashCode * -1521134295 + EvaluationPass.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EvaluationPassDescription);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(File);

@@ -606,6 +606,11 @@ namespace Microsoft.Build.Logging
             Write7BitEncodedInt(binaryWriter, value);
         }
 
+        private void Write(long value)
+        {
+            binaryWriter.Write(value);
+        }
+
         private void Write7BitEncodedInt(BinaryWriter writer, int value)
         {
             // Write out an int 7 bits at a time.  The high bit of the byte,

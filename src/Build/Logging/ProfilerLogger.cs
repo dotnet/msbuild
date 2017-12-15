@@ -123,7 +123,7 @@ namespace Microsoft.Build.Logging
 
             // Map from evaluation locations that got merged into the evaluation locations they got merged into
             // This is used to remap the parent id of an incoming item if that parent got merged
-            var mergeMap = new Dictionary<int, int>();
+            var mergeMap = new Dictionary<long, long>();
             // Unfortunately there is no way to retrieve the original key of a dictionary given a key that is considered Equals
             // So keeping that map here
             var originalLocations = new Dictionary<EvaluationLocation, EvaluationLocation>(EvaluationLocationIdAgnosticComparer.Singleton);
@@ -135,10 +135,14 @@ namespace Microsoft.Build.Logging
                 Debug.Assert(result,
                     "Expected a non empty queue, this method is not supposed to be called in a multithreaded way");
 
-                // Appropriately merge all items
-                foreach (var pair in profiledResult.ProfiledLocations)
+                // Merge all items into the global table.
+                // It is important to traverse the profiler locations in ascending order of Ids, so
+                // parents are always visited before its children. This guarantees that newly added
+                // children always get properly updated regarding merges
+                foreach (var pair in profiledResult.ProfiledLocations.OrderBy(p => p.Key.Id))
                 {
                     MergeItem(originalLocations, mergeMap, _aggregatedLocations, pair);
+
                 }
             }
 
@@ -163,7 +167,7 @@ namespace Microsoft.Build.Logging
 
         private static void MergeItem(
             IDictionary<EvaluationLocation, EvaluationLocation> originalLocations,
-            IDictionary<int, int> mergeMap,
+            IDictionary<long, long> mergeMap,
             IDictionary<EvaluationLocation, ProfiledLocation> aggregatedLocations,
             KeyValuePair<EvaluationLocation, ProfiledLocation> pairToMerge)
         {
@@ -183,8 +187,8 @@ namespace Microsoft.Build.Logging
             {
                 // The item is new, so the profiled times are legit, nothing to aggregate
                 // But we have to check if this item points to a parent that got merged
-                int mergedParent;
-                if (mergeMap.TryGetValue(pairToMerge.Key.Id, out mergedParent))
+                long mergedParent;
+                if (pairToMerge.Key.ParentId.HasValue && mergeMap.TryGetValue(pairToMerge.Key.ParentId.Value, out mergedParent))
                 {
                     // The parent Id got merged, so update it to the merged parent before storing
                     aggregatedLocations[pairToMerge.Key.WithParentId(mergedParent)] = pairToMerge.Value;
@@ -196,7 +200,10 @@ namespace Microsoft.Build.Logging
                 }
                 // Update the original location with the new key, so next time
                 // a structurally equivalent key arrives, we can retrieve the original one
-                originalLocations[pairToMerge.Key] = pairToMerge.Key;
+                if (!originalLocations.ContainsKey(pairToMerge.Key))
+                {
+                    originalLocations[pairToMerge.Key] = pairToMerge.Key;
+                }
             }
         }
 
@@ -225,8 +232,8 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Finds the first ancestor of parentId (which could be itself) that is either an evaluation pass location or a big enough profiled data
         /// </summary>
-        private static int? FindBigEnoughParentId(IDictionary<int, Pair<EvaluationLocation, ProfiledLocation>> idTable,
-            int? parentId)
+        private static long? FindBigEnoughParentId(IDictionary<long, Pair<EvaluationLocation, ProfiledLocation>> idTable,
+            long? parentId)
         {
             // The parent id is null, which means the item was pointing to an evaluation pass item. So we keep it as is.
             if (!parentId.HasValue)

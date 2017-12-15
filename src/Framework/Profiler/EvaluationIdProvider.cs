@@ -4,6 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System;
 using System.Diagnostics;
 using System.Threading;
 
@@ -14,21 +15,25 @@ namespace Microsoft.Build.Framework.Profiler
     /// </summary>
     public static class EvaluationIdProvider
     {
-        private static int _sAssignedId = -1;
-        private static readonly int ProcessId = Process.GetCurrentProcess().Id;
+        private static long _sAssignedId = -1;
+        private static readonly long ProcessId = Process.GetCurrentProcess().Id;
 
         /// <summary>
         /// Returns a unique evaluation id
         /// </summary>
         /// <remarks>
-        /// The id is guaranteed to be unique across all running processes
+        /// The id is guaranteed to be unique across all running processes.
+        /// Additionally, it is monotonically increasing for callers on the same process id
         /// </remarks>
-        public static int GetNextId()
+        public static long GetNextId()
         {
-            var nextId = Interlocked.Increment(ref _sAssignedId);
-            // Returns a unique number based on nextId (a unique number for this process) and the current process Id
-            // Uses the Cantor pairing function (https://en.wikipedia.org/wiki/Pairing_function) to guarantee uniqueness
-            return (((nextId + ProcessId) * (nextId + ProcessId + 1)) / 2) + ProcessId;
+            checked
+            {
+                var nextId = Interlocked.Increment(ref _sAssignedId);
+                // Returns a unique number based on nextId (a unique number for this process) and the current process Id
+                // Uses the Cantor pairing function (https://en.wikipedia.org/wiki/Pairing_function) to guarantee uniqueness
+                return (((nextId + ProcessId) * (nextId + ProcessId + 1)) / 2) + ProcessId;
+            }
         }
     }
 }

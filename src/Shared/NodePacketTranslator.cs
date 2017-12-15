@@ -1507,8 +1507,8 @@ namespace Microsoft.Build.BackEnd
             private static void TranslatorForEvaluationLocation(ref EvaluationLocation evaluationLocation,
                 INodePacketTranslator translator)
             {
-                int id = 0;
-                int? parentId = null;
+                long id = 0;
+                long? parentId = null;
                 EvaluationPass evaluationPass = default(EvaluationPass);
                 string evaluationPassDescription = null;
                 string file = null;
@@ -1533,7 +1533,7 @@ namespace Microsoft.Build.BackEnd
                 translator.Translate(ref id);
                 if (translator.TranslateNullable(parentId))
                 {
-                    var parentIdValue = 0;
+                    long parentIdValue = 0;
                     if (translator.Mode == TranslationDirection.WriteToStream)
                     {
                         parentIdValue = parentId.Value;

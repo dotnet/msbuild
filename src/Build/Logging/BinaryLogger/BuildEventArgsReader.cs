@@ -791,6 +791,11 @@ namespace Microsoft.Build.Logging
             return Read7BitEncodedInt(binaryReader);
         }
 
+        private long ReadInt64()
+        {
+            return binaryReader.ReadInt64();
+        }
+
         private bool ReadBoolean()
         {
             return binaryReader.ReadBoolean();
@@ -841,10 +846,10 @@ namespace Microsoft.Build.Logging
 
         private EvaluationLocation ReadEvaluationLocation()
         {
-            var id = ReadInt32();
-            int? parentId = null;
+            var id = ReadInt64();
+            long? parentId = null;
             var hasParent = ReadBoolean();
-            if (hasParent) parentId = ReadInt32();
+            if (hasParent) parentId = ReadInt64();
             var elementName = ReadOptionalString();
             var description = ReadOptionalString();
             var evaluationDescription = ReadOptionalString();
