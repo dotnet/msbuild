@@ -11,18 +11,14 @@ namespace Microsoft.DotNet.ShellShim
     internal class WindowsEnvironmentPath : IEnvironmentPath
     {
         private readonly IReporter _reporter;
-        private readonly IEnvironmentProvider _environmentProvider;
         private const string PathName = "PATH";
         private readonly string _packageExecutablePath;
 
         public WindowsEnvironmentPath(
-            string packageExecutablePath, IReporter reporter,
-            IEnvironmentProvider environmentProvider)
+            string packageExecutablePath, IReporter reporter)
         {
             _packageExecutablePath
                 = packageExecutablePath ?? throw new ArgumentNullException(nameof(packageExecutablePath));
-            _environmentProvider
-                = environmentProvider ?? throw new ArgumentNullException(nameof(environmentProvider));
             _reporter
                 = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }
@@ -44,7 +40,9 @@ namespace Microsoft.DotNet.ShellShim
 
         private bool PackageExecutablePathExists()
         {
-            return _environmentProvider.GetEnvironmentVariable(PathName).Split(';').Contains(_packageExecutablePath);
+            return Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User).Split(';').Contains(_packageExecutablePath)
+             || Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine).Split(';').Contains(_packageExecutablePath)
+             || Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process).Split(';').Contains(_packageExecutablePath);
         }
 
         public void PrintAddPathInstructionIfPathDoesNotExist()

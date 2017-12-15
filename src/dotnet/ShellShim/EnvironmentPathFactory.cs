@@ -33,8 +33,7 @@ namespace Microsoft.DotNet.ShellShim
             {
                 environmentPath = new WindowsEnvironmentPath(
                     cliFolderPathCalculator.ExecutablePackagesPath,
-                    Reporter.Output,
-                    environmentProvider);
+                    Reporter.Output);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && hasSuperUserAccess)
             {
