@@ -36,7 +36,8 @@ namespace Microsoft.Build.UnitTests
                 "file1.txt",
                 "file1.txtother",
                 "fie1.txt",
-                "fire1.txt"
+                "fire1.txt",
+                "file.bak.txt"
             };
 
             try
@@ -49,16 +50,16 @@ namespace Microsoft.Build.UnitTests
 
                 var patterns = new Dictionary<string, int>
                 {
-                    {"*.txt", 4},
-                    { "???.cs", 1},
-                    { "????.cs", 1},
+                    {"*.txt", 5},
+                    {"???.cs", 1},
+                    {"????.cs", 1},
                     {"file?.txt", 1},
                     {"fi?e?.txt", 2},
-                    { "???.*", 1},
-                    { "????.*", 3},
-                    { "*.???", 4},
-                    { "f??e1.txt", 2},
-                    { "file.*.txt", 0 }
+                    {"???.*", 1},
+                    {"????.*", 4},
+                    {"*.???", 5},
+                    {"f??e1.txt", 2},
+                    {"file.*.txt", 1}
                 };
                 foreach (var pattern in patterns)
                 {
