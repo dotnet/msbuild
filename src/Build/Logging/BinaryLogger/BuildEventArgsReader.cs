@@ -846,10 +846,6 @@ namespace Microsoft.Build.Logging
 
         private EvaluationLocation ReadEvaluationLocation()
         {
-            var id = ReadInt64();
-            long? parentId = null;
-            var hasParent = ReadBoolean();
-            if (hasParent) parentId = ReadInt64();
             var elementName = ReadOptionalString();
             var description = ReadOptionalString();
             var evaluationDescription = ReadOptionalString();
@@ -859,9 +855,26 @@ namespace Microsoft.Build.Logging
 
             int? line = null;
             var hasLine = ReadBoolean();
-            if (hasLine) line = ReadInt32();
+            if (hasLine)
+            {
+                line = ReadInt32(); 
+            }
 
-            return new EvaluationLocation(id, parentId, evaluationPass, evaluationDescription, file, line, elementName, description, kind);
+            // Id and parent Id were introduced in version 6
+            if (fileFormatVersion > 5)
+            {
+                var id = ReadInt64();
+                long? parentId = null;
+                var hasParent = ReadBoolean();
+                if (hasParent)
+                {
+                    parentId = ReadInt64();
+
+                }
+                return new EvaluationLocation(id, parentId, evaluationPass, evaluationDescription, file, line, elementName, description, kind);
+            }
+
+            return new EvaluationLocation(0, null, evaluationPass, evaluationDescription, file, line, elementName, description, kind);
         }
     }
 }

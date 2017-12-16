@@ -672,14 +672,6 @@ namespace Microsoft.Build.Logging
 
         private void Write(EvaluationLocation item)
         {
-            Write(item.Id);
-
-            Write(item.ParentId.HasValue);
-            if (item.ParentId.HasValue)
-            {
-                Write(item.ParentId.Value);
-            }
-
             WriteOptionalString(item.ElementName);
             WriteOptionalString(item.ElementDescription);
             WriteOptionalString(item.EvaluationPassDescription);
@@ -691,6 +683,13 @@ namespace Microsoft.Build.Logging
             if (item.Line.HasValue)
             {
                 Write(item.Line.Value);
+            }
+
+            Write(item.Id);
+            Write(item.ParentId.HasValue);
+            if (item.ParentId.HasValue)
+            {
+                Write(item.ParentId.Value);
             }
         }
 

@@ -265,6 +265,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
+    <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />
     <Compile Include="Logging\ProfilerLogger.cs" />
     <Compile Include="Evaluation\Profiler\ProfilerResultPrettyPrinter.cs" />
     <Compile Include="Evaluation\ProjectChangedEventArgs.cs" />

@@ -6,14 +6,15 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Framework.Profiler;
 
-namespace Microsoft.Build.Framework.Profiler
+namespace Microsoft.Build.Logging
 {
     /// <summary>
     /// Comparer for <see cref="EvaluationLocation"/> that ignores 
     /// both <see cref="EvaluationLocation.Id"/> and <see cref="EvaluationLocation.ParentId"/>
     /// </summary>
-    public class EvaluationLocationIdAgnosticComparer : IEqualityComparer<EvaluationLocation>
+    internal class EvaluationLocationIdAgnosticComparer : IEqualityComparer<EvaluationLocation>
     {
         /// <nodoc/>
         public static EvaluationLocationIdAgnosticComparer Singleton = new EvaluationLocationIdAgnosticComparer();

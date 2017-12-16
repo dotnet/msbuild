@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework.Profiler
     /// <summary>
     /// Assigns unique evaluation ids. Thread safe.
     /// </summary>
-    public static class EvaluationIdProvider
+    internal static class EvaluationIdProvider
     {
         private static long _sAssignedId = -1;
         private static readonly long ProcessId = Process.GetCurrentProcess().Id;

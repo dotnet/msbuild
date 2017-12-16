@@ -547,10 +547,6 @@ namespace Microsoft.Build.Framework
 }
 namespace Microsoft.Build.Framework.Profiler
 {
-    public static partial class EvaluationIdProvider
-    {
-        public static long GetNextId() { throw null; }
-    }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct EvaluationLocation
     {
@@ -581,13 +577,6 @@ namespace Microsoft.Build.Framework.Profiler
         public Microsoft.Build.Framework.Profiler.EvaluationLocation WithFileLineAndElement(string file, System.Nullable<int> line, Microsoft.Build.Framework.IProjectElement element) { throw null; }
         public Microsoft.Build.Framework.Profiler.EvaluationLocation WithGlob(string globDescription) { throw null; }
         public Microsoft.Build.Framework.Profiler.EvaluationLocation WithParentId(System.Nullable<long> parentId) { throw null; }
-    }
-    public partial class EvaluationLocationIdAgnosticComparer : System.Collections.Generic.IEqualityComparer<Microsoft.Build.Framework.Profiler.EvaluationLocation>
-    {
-        internal EvaluationLocationIdAgnosticComparer() { }
-        public static Microsoft.Build.Framework.Profiler.EvaluationLocationIdAgnosticComparer Singleton;
-        public bool Equals(Microsoft.Build.Framework.Profiler.EvaluationLocation x, Microsoft.Build.Framework.Profiler.EvaluationLocation y) { throw null; }
-        public int GetHashCode(Microsoft.Build.Framework.Profiler.EvaluationLocation obj) { throw null; }
     }
     public enum EvaluationLocationKind : byte
     {
