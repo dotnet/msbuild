@@ -59,7 +59,16 @@ namespace Microsoft.DotNet.Tools.Common
                     FilePath = relativeProjectPath
                 };
 
-                slnFile.AddDefaultBuildConfigurations(slnProject);
+                // NOTE: The order you create the sections determines the order they are written to the sln
+                // file. In the case of an empty sln file, in order to make sure the solution configurations
+                // section comes first we need to add it first. This doesn't affect correctness but does
+                // stop VS from re-ordering things later on. Since we are keeping the SlnFile class low-level
+                // it shouldn't care about the VS implementation details. That's why we handle this here.
+                slnFile.AddDefaultBuildConfigurations();
+
+                slnFile.MapSolutionConfigurationsToProject(
+                    projectInstance,
+                    slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
 
                 slnFile.AddSolutionFolders(slnProject);
 
@@ -70,11 +79,13 @@ namespace Microsoft.DotNet.Tools.Common
             }
         }
 
-        public static void AddDefaultBuildConfigurations(this SlnFile slnFile, SlnProject slnProject)
+        private static void AddDefaultBuildConfigurations(this SlnFile slnFile)
         {
-            if (slnProject == null)
+            var configurationsSection = slnFile.SolutionConfigurationsSection;
+
+            if (!configurationsSection.IsEmpty)
             {
-                throw new ArgumentException();
+                return;
             }
 
             var defaultConfigurations = new List<string>()
@@ -87,57 +98,108 @@ namespace Microsoft.DotNet.Tools.Common
                 "Release|x86",
             };
 
-            // NOTE: The order you create the sections determines the order they are written to the sln
-            // file. In the case of an empty sln file, in order to make sure the solution configurations
-            // section comes first we need to add it first. This doesn't affect correctness but does 
-            // stop VS from re-ordering things later on. Since we are keeping the SlnFile class low-level
-            // it shouldn't care about the VS implementation details. That's why we handle this here.
-            AddDefaultSolutionConfigurations(defaultConfigurations, slnFile.SolutionConfigurationsSection);
-            AddDefaultProjectConfigurations(
-                defaultConfigurations,
-                slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
-        }
-
-        private static void AddDefaultSolutionConfigurations(
-            List<string> defaultConfigurations,
-            SlnPropertySet solutionConfigs)
-        {
             foreach (var config in defaultConfigurations)
             {
-                if (!solutionConfigs.ContainsKey(config))
+                configurationsSection[config] = config;
+            }
+        }
+
+        private static void MapSolutionConfigurationsToProject(
+            this SlnFile slnFile,
+            ProjectInstance projectInstance,
+            SlnPropertySet solutionProjectConfigs)
+        {
+            var (projectConfigurations, defaultProjectConfiguration) = GetKeysDictionary(projectInstance.GetConfigurations());
+            var (projectPlatforms, defaultProjectPlatform) = GetKeysDictionary(projectInstance.GetPlatforms());
+
+            foreach (var solutionConfigKey in slnFile.SolutionConfigurationsSection.Keys)
+            {
+                var projectConfigKey = MapSolutionConfigKeyToProjectConfigKey(
+                    solutionConfigKey,
+                    projectConfigurations,
+                    defaultProjectConfiguration,
+                    projectPlatforms,
+                    defaultProjectPlatform);
+                if (projectConfigKey == null)
                 {
-                    solutionConfigs[config] = config;
+                    continue;
+                }
+
+                var activeConfigKey = $"{solutionConfigKey}.ActiveCfg";
+                if (!solutionProjectConfigs.ContainsKey(activeConfigKey))
+                {
+                    solutionProjectConfigs[activeConfigKey] = projectConfigKey;
+                }
+
+                var buildKey = $"{solutionConfigKey}.Build.0";
+                if (!solutionProjectConfigs.ContainsKey(buildKey))
+                {
+                    solutionProjectConfigs[buildKey] = projectConfigKey;
                 }
             }
         }
 
-        private static void AddDefaultProjectConfigurations(
-            List<string> defaultConfigurations,
-            SlnPropertySet projectConfigs)
+        private static (Dictionary<string, string> Keys, string DefaultKey) GetKeysDictionary(IEnumerable<string> keys)
         {
-            foreach (var config in defaultConfigurations)
-            {
-                var activeCfgKey = $"{config}.ActiveCfg";
-                if (!projectConfigs.ContainsKey(activeCfgKey))
-                {
-                    projectConfigs[activeCfgKey] = config;
-                }
+            // A dictionary mapping key -> key is used instead of a HashSet so the original case of the key can be retrieved from the set
+            var dictionary = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
-                var build0Key = $"{config}.Build.0";
-                if (!projectConfigs.ContainsKey(build0Key))
-                {
-                    projectConfigs[build0Key] = config;
-                }
+            foreach (var key in keys)
+            {
+                dictionary[key] = key;
             }
+
+            return (dictionary, keys.FirstOrDefault());
         }
 
-        public static void AddSolutionFolders(this SlnFile slnFile, SlnProject slnProject)
+        private static string GetMatchingProjectKey(IDictionary<string, string> projectKeys, string solutionKey)
         {
-            if (slnProject == null)
+            string projectKey;
+            if (projectKeys.TryGetValue(solutionKey, out projectKey))
             {
-                throw new ArgumentException();
+                return projectKey;
             }
 
+            var keyWithoutWhitespace = String.Concat(solutionKey.Where(c => !Char.IsWhiteSpace(c)));
+            if (projectKeys.TryGetValue(keyWithoutWhitespace, out projectKey))
+            {
+                return projectKey;
+            }
+
+            return null;
+        }
+
+        private static string MapSolutionConfigKeyToProjectConfigKey(
+            string solutionConfigKey,
+            Dictionary<string, string> projectConfigurations,
+            string defaultProjectConfiguration,
+            Dictionary<string, string> projectPlatforms,
+            string defaultProjectPlatform)
+        {
+            var pair = solutionConfigKey.Split(new char[] {'|'}, 2);
+            if (pair.Length != 2)
+            {
+                return null;
+            }
+
+            var projectConfiguration = GetMatchingProjectKey(projectConfigurations, pair[0]) ?? defaultProjectConfiguration;
+            if (projectConfiguration == null)
+            {
+                return null;
+            }
+
+            var projectPlatform = GetMatchingProjectKey(projectPlatforms, pair[1]) ?? defaultProjectPlatform;
+            if (projectPlatform == null)
+            {
+                return null;
+            }
+
+            // VS stores "Any CPU" platform in the solution regardless of how it is named at the project level
+            return $"{projectConfiguration}|{(projectPlatform == "AnyCPU" ? "Any CPU" : projectPlatform)}";
+        }
+
+        private static void AddSolutionFolders(this SlnFile slnFile, SlnProject slnProject)
+        {
             var solutionFolders = slnProject.GetSolutionFoldersFromProject();
 
             if (solutionFolders.Any())

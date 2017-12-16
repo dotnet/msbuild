@@ -4,6 +4,7 @@
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common
@@ -44,6 +45,26 @@ namespace Microsoft.DotNet.Tools.Common
             }
 
             return projectTypeGuid;
+        }
+
+        public static IEnumerable<string> GetPlatforms(this ProjectInstance projectInstance)
+        {
+            return (projectInstance.GetPropertyValue("Platforms") ?? "")
+                .Split(
+                    new char[] { ';' },
+                    StringSplitOptions.RemoveEmptyEntries)
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .DefaultIfEmpty("AnyCPU");
+        }
+
+        public static IEnumerable<string> GetConfigurations(this ProjectInstance projectInstance)
+        {
+            return (projectInstance.GetPropertyValue("Configurations") ?? "Debug;Release")
+                .Split(
+                    new char[] { ';' },
+                    StringSplitOptions.RemoveEmptyEntries)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .DefaultIfEmpty("Debug");
         }
     }
 }
