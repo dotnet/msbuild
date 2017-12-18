@@ -2034,7 +2034,7 @@ namespace Microsoft.Build.CommandLine
                     // figure out which properties have been set on the command line
                     globalProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property]);
 
-                    // figure out restore properties have been set on the command line
+                    // figure out which restore-only properties have been set on the command line
                     restoreProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.RestoreProperty]);
 
                     // figure out if there was a max cpu count provided
