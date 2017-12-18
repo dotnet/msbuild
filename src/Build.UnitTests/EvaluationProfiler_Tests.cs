@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -25,6 +25,30 @@ namespace Microsoft.Build.Engine.UnitTests
         private readonly BuildManager _buildManager;
         private readonly TestEnvironment _env;
 
+        private const string SpecData = @"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+    <PropertyGroup>
+        <appname>HelloWorldCS</appname>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>  
+        <CSFile>  
+            <encoding>utf8</encoding>  
+        </CSFile>        
+    </ItemDefinitionGroup>
+
+    <ItemGroup>
+        <CSFile Include = 'consolehwcs1.cs'/>
+        <CSFile Include = 'consolehwcs2.cs' Condition='true'/>
+    </ItemGroup>
+
+    <UsingTask TaskName='DummyTask' AssemblyName='Microsoft.Build.Engine.UnitTests' TaskFactory='DummyTask'/>
+
+    <Target Name = 'FakeCompile'>
+        <Message Text = 'The output assembly is $(appname).exe'/>
+        <Message Text = 'The sources are @(CSFile)'/>
+    </Target>
+</Project>";
         /// <nodoc/>
         public EvaluationProfiler_Tests(ITestOutputHelper output)
         {
@@ -79,32 +103,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void VerifyProfiledData()
         {
-            string contents = @"
-<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
-    <PropertyGroup>
-        <appname>HelloWorldCS</appname>
-    </PropertyGroup>
-
-    <ItemDefinitionGroup>  
-        <CSFile>  
-            <encoding>utf8</encoding>  
-        </CSFile>        
-    </ItemDefinitionGroup>
-
-    <ItemGroup>
-        <CSFile Include = 'consolehwcs1.cs'/>
-        <CSFile Include = 'consolehwcs2.cs' Condition='true'/>
-    </ItemGroup>
-
-    <UsingTask TaskName='DummyTask' AssemblyName='Microsoft.Build.Engine.UnitTests' TaskFactory='DummyTask'/>
-
-    <Target Name = 'FakeCompile'>
-        <Message Text = 'The output assembly is $(appname).exe'/>
-        <Message Text = 'The sources are @(CSFile)'/>
-    </Target>
-</Project>";
-
-            var result = BuildAndGetProfilerResult(contents);
+            var result = BuildAndGetProfilerResult(SpecData);
             var profiledElements = result.ProfiledLocations.Keys.ToList();
 
             // Initial properties (pass 0)
@@ -164,6 +163,61 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(2, totalGlobLocation.NumberOfHits);
         }
 
+        [Fact]
+        public void VerifyParentIdData()
+        {
+            string contents = @"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+    <ItemGroup>
+        <Test Include='ClientApp\dist\**' />
+    </ItemGroup>
+    <Target Name='echo'>
+        <Message text='echo!'/>
+    </Target>
+</Project>";
+            var result = BuildAndGetProfilerResult(contents);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            // The total evaluation should be the parent of all other passes (but total globbing, which is an aggregate item)
+            var totalEvaluation = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.TotalEvaluation);
+            Assert.True(profiledElements.Where(e => e.IsEvaluationPass && e.EvaluationPass != EvaluationPass.TotalGlobbing && !e.Equals(totalEvaluation))
+                .All(e => e.ParentId == totalEvaluation.Id));
+
+            // Check the test item has the right parent
+            var itemPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.Items);
+            var itemGroup = profiledElements.Find(e => e.ElementName == "ItemGroup");
+            var testItem = profiledElements.Find(e => e.ElementName == "Test" && e.EvaluationPass == EvaluationPass.Items);
+            Assert.Equal(itemPass.Id, itemGroup.ParentId);
+            Assert.Equal(itemGroup.Id, testItem.ParentId);
+
+            // Check the lazy test item has the right parent
+            var lazyItemPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.LazyItems);
+            var lazyTestItem = profiledElements.Find(e => e.ElementName == "Test" && e.EvaluationPass == EvaluationPass.LazyItems);
+            Assert.Equal(lazyItemPass.Id, lazyTestItem.ParentId);
+
+            // Check the target item has the right parent
+            var targetPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.Targets);
+            var target = profiledElements.Find(e => e.ElementName == "Target");
+            var messageTarget = profiledElements.Find(e => e.ElementName == "Message");
+            Assert.Equal(targetPass.Id, target.ParentId);
+            Assert.Equal(target.Id, messageTarget.ParentId);
+        }
+
+        [Fact]
+        public void VerifyIdsSanity()
+        {
+            var result = BuildAndGetProfilerResult(SpecData);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            // All ids must be unique
+            var allIds = profiledElements.Select(e => e.Id).ToList();
+            var allUniqueIds = allIds.ToImmutableHashSet();
+            Assert.Equal(allIds.Count, allUniqueIds.Count);
+
+            // Every element with a parent id must point to a valid item
+            Assert.True(profiledElements.All(e => e.ParentId == null || allUniqueIds.Contains(e.ParentId.Value)));
+        }
+
         /// <summary>
         /// Runs a build for a given project content with the profiler option on and returns the result of profiling it
         /// </summary>
@@ -197,7 +251,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
             }
 
-            return profilerLogger.GetAggregatedResult();
+            return profilerLogger.GetAggregatedResult(pruneSmallItems: false);
         }
 
         /// <summary>
