@@ -5,22 +5,24 @@
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
---------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">.NET Core へようこそ!
 ---------------------
-.NET Core について詳しくは、https://aka.ms/dotnet-docs をご覧ください。dotnet --help を使って使用可能なコマンドを確認するか、https://aka.ms/dotnet-cli-docs をご覧ください。
+.NET Core についての詳細情報: https://aka.ms/dotnet-docs
+'dotnet --help' を使用して利用可能なコマンドを確認するか、次にアクセスしてください: https://aka.ms/dotnet-cli-docs
 
 テレメトリ
---------------
-.NET Core ツールは、操作性を向上させるために利用状況データを収集します。データは匿名で、コマンドライン引数が含まれません。データは Microsoft によって収集され、コミュニティと共有されます。
-テレメトリを無効にするには、お好きなシェルを使用して、DOTNET_CLI_TELEMETRY_OPTOUT 環境変数を 1 に設定します。
-.NET Core ツールのテレメトリについて詳しくは、https://aka.ms/dotnet-cli-telemetry をお読みください。</target>
+---------
+.NET Core ツールは、エクスペリエンスの向上に役立つ利用状況データを収集します。データは匿名で、コマンドライン引数が含まれません。データは Microsoft によって収集され、コミュニティと共有されます。テレメトリをオプトアウトするには、お好きなシェルを使用して、DOTNET_CLI_TELEMETRY_OPTOUT 環境変数を '1' または 'true' に設定します。
+
+.NET Core CLI ツールのテレメトリに関する詳細情報をお読みください: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -30,18 +32,18 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">構成中...
--------------------
-ローカル パッケージ キャッシュを最初に設定し、復元速度を向上させ、オフライン アクセスを可能にするため、コマンドを実行しています。このコマンドは 1 回だけ実行され、完了までに最大 1 分かかる場合があります。</target>
+--------------
+ローカル パッケージ キャッシュを設定し、復元速度を向上させ、オフライン アクセスを有効にするため、コマンドを実行しています。このコマンドは 1 回だけ実行され、完了までに最大 1 分かかります。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -49,11 +51,20 @@ Here are some options to fix this error:
         <target state="translated">'{0}' フォルダーを変更するためのアクセス許可が拒否されました。
 
 このエラーを修正するためのいくつかのオプションを次に示します。
----------------------
+----------------------------------------
 1. 昇格したアクセス権でこのコマンドを再実行します。
 2. 環境変数 DOTNET_SKIP_FIRST_TIME_EXPERIENCE を true に設定して、最初の実行エクスペリエンスを無効にします。
 3. 保護されていない場所に .NET Core SDK をコピーし、そこから使用します。
     </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AspNetCertificateInstalled">
+        <source>ASP.NET Core
+------------
+Installed ASP.NET Core HTTPS development certificate. For more information go to https://go.microsoft.com/fwlink/?linkid=84805</source>
+        <target state="new">ASP.NET Core
+------------
+Installed ASP.NET Core HTTPS development certificate. For more information go to https://go.microsoft.com/fwlink/?linkid=84805</target>
         <note />
       </trans-unit>
     </body>

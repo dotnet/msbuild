@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
@@ -17,14 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Common" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="NuGet.Configuration" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
+    <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" />
+    <PackageReference Include="NuGet.Configuration" Version="$(NuGetConfigurationPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />
   </ItemGroup>
 </Project>

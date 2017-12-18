@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
+    <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -44,7 +43,6 @@
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.InternalAbstractions/Microsoft.DotNet.InternalAbstractions.csproj" />
-    <ProjectReference Include="../Microsoft.DotNet.Archive/Microsoft.DotNet.Archive.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Sln.Internal/Microsoft.DotNet.Cli.Sln.Internal.csproj" />
   </ItemGroup>
@@ -52,23 +50,25 @@
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.0.0" />
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.TextWriterTraceListener" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Private.DataContractSerialization" Version="4.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(CLI_ASPNET_Version)" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Build" Version="$(CLI_MSBuild_Version)" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(CliCommandLineParserVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Tools.MigrateCommand" Version="$(CliMigrateVersion)" />
-    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliMigrateVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(TemplateEngineVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.Cli" Version="$(TemplateEngineVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.Cli.Localization" Version="$(TemplateEngineVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(TemplateEngineVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(TemplateEngineVersion)" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Tools.MigrateCommand" Version="$(MicrosoftDotNetToolsMigrateCommandPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(MicrosoftDotNetProjectJsonMigrationPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(MicrosoftTemplateEngineAbstractionsPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Cli" Version="$(MicrosoftTemplateEngineCliPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Cli.Localization" Version="$(MicrosoftTemplateEngineCliLocalizationPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(MicrosoftTemplateEngineUtilsPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="commands\dotnet-migrate\xlf" />

@@ -233,8 +233,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
+        <source>Path to additional deps.json file.</source>
         <target state="translated">其他 deps.json 檔案的路徑。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Stores the specified assemblies in the runtime store.</source>
+        <target state="translated">將指定組件儲存到執行階段存放區中。</target>
         <note />
       </trans-unit>
     </body>

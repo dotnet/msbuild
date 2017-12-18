@@ -19,7 +19,7 @@
   <Target Name="CompareRuntimeVersions">
     <PropertyGroup>
       <Coherent>false</Coherent>
-      <Coherent Condition=" '$(CLI_SharedFrameworkVersion)' == '@(AspNetCoreSharedRuntimeVersion)' ">true</Coherent>
+      <Coherent Condition=" '$(MicrosoftNETCoreAppPackageVersion)' == '@(AspNetCoreSharedRuntimeVersion)' ">true</Coherent>
     </PropertyGroup>
   </Target>
 </Project>

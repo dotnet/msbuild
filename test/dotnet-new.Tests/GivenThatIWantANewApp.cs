@@ -44,11 +44,17 @@ namespace Microsoft.DotNet.New.Tests
             var rootPath = TestAssets.CreateTestDirectory().FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
 
+            // For testing the 2.1 templates - some of their packages are currently only in private feeds.
+            var configFile = Path.Combine(rootPath, "NuGet.Config");
+            AspNetNuGetConfiguration.WriteNuGetConfigWithAspNetPrivateFeeds(configFile);
+			      // For "normal" builds, once the packages needed for 2.1 templates are in the public feeds
+            //var configFile = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
+
             foreach (string cSharpTemplate in cSharpTemplates)
             {
                 var projectFolder = Path.Combine(rootPath, cSharpTemplate + "1");
                 Directory.CreateDirectory(projectFolder);
-                CreateAndRestoreNewProject(cSharpTemplate, projectFolder, packagesDirectory);
+                CreateAndRestoreNewProject(cSharpTemplate, projectFolder, packagesDirectory, configFile);
             }
 
             Directory.EnumerateFiles(packagesDirectory, $"*.nupkg", SearchOption.AllDirectories)
@@ -58,30 +64,31 @@ namespace Microsoft.DotNet.New.Tests
         private void CreateAndRestoreNewProject(
             string projectType,
             string projectFolder,
-            string packagesDirectory)
+            string packagesDirectory,
+            string configFile)
         {
-            var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
-
             new NewCommand()
                 .WithWorkingDirectory(projectFolder)
                 .Execute($"{projectType} --debug:ephemeral-hive --no-restore")
                 .Should().Pass();
 
-            // https://github.com/dotnet/templating/issues/946 - remove DisableImplicitAssetTargetFallback once this is fixed.
             new RestoreCommand()
                 .WithWorkingDirectory(projectFolder)
-                .Execute($"--configfile {repoRootNuGetConfig} --packages {packagesDirectory} /p:DisableImplicitAssetTargetFallback=true")
+                .Execute($"--configfile {configFile} --packages {packagesDirectory}")
                 .Should().Pass();
         }
 
         [Theory]
-        [InlineData("console", "microsoft.netcore.app", "2.0.0")]
-        [InlineData("classlib", "netstandard.library", "2.0.1")]
-        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName, string expectedVersion)
+        [InlineData("console", "microsoft.netcore.app")]
+        // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
+        //[InlineData("classlib", "netstandard.library")]
+        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Project";
+            var expectedVersion = GetFrameworkPackageVersion();
+
             var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
             new NewCommand()
@@ -97,6 +104,32 @@ namespace Microsoft.DotNet.New.Tests
             new DirectoryInfo(Path.Combine(packagesDirectory, packageName))
                 .Should().Exist()
                 .And.HaveDirectory(expectedVersion);
+
+            string GetFrameworkPackageVersion()
+            {
+                var dotnetDir = new FileInfo(DotnetUnderTest.FullName).Directory;
+                var sharedFxDir = dotnetDir
+                    .GetDirectory("shared", "Microsoft.NETCore.App")
+                    .EnumerateDirectories()
+                    .Single(d => d.Name.StartsWith("2.1.0"));
+
+                if (packageName == "microsoft.netcore.app")
+                {
+                    return sharedFxDir.Name;
+                }
+
+                var depsFile = Path.Combine(sharedFxDir.FullName, "Microsoft.NETCore.App.deps.json");
+                using (var stream = File.OpenRead(depsFile))
+                using (var reader = new DependencyContextJsonReader())
+                {
+                    var context = reader.Read(stream);
+                    var dependency = context
+                        .RuntimeLibraries
+                        .Single(library => string.Equals(library.Name, packageName, StringComparison.OrdinalIgnoreCase));
+
+                    return dependency.Version;
+                }
+            }
         }
     }
 }

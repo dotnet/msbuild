@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Common
                 throw new ArgumentException();
             }
 
-            var relativeProjectPath = PathUtility.GetRelativePath(
+            var relativeProjectPath = Path.GetRelativePath(
                 PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
                 fullProjectPath);
 
@@ -221,7 +221,7 @@ namespace Microsoft.DotNet.Tools.Common
             if (projectsToRemove.Count == 0)
             {
                 Reporter.Output.WriteLine(string.Format(
-                    CommonLocalizableStrings.ProjectReferenceCouldNotBeFound,
+                    CommonLocalizableStrings.ProjectNotFoundInTheSolution,
                     projectPath));
             }
             else
@@ -244,7 +244,23 @@ namespace Microsoft.DotNet.Tools.Common
 
                     slnFile.Projects.Remove(slnProject);
                     Reporter.Output.WriteLine(
-                        string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, slnProject.FilePath));
+                        string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, slnProject.FilePath));
+                }
+
+                foreach (var project in slnFile.Projects)
+                {
+                    var dependencies = project.Dependencies;
+                    if (dependencies == null)
+                    {
+                        continue;
+                    }
+
+                    dependencies.SkipIfEmpty = true;
+
+                    foreach (var removed in projectsToRemove)
+                    {
+                        dependencies.Properties.Remove(removed.Id);
+                    }
                 }
 
                 projectRemoved = true;

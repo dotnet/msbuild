@@ -25,6 +25,9 @@ is_dotnet_host_installed(){
     [ -z "$out" ]
 }
 
+dotnet_tool_path_file="/etc/profile.d/dotnet-cli-tools-bin-path.sh"
+rm -f "$dotnet_tool_path_file"
+
 is_dotnet_host_installed
 [ "$?" -eq 0 ] && echo "Unable to find dotnet installation to remove." >&2 \
     && exit 0

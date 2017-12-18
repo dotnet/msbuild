@@ -62,7 +62,7 @@
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="translated">Zastosuj niestandardowe adaptery z danej ścieżki podczas uruchomienia testu.
+        <target state="translated">Zastosuj niestandardowe adaptery z danej ścieżki podczas przebiegu testu.
                                         Przykład: --test-adapter-path &lt;ŚCIEŻKA_DO_ADAPTERA&gt;</target>
         <note />
       </trans-unit>
@@ -73,11 +73,15 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results.
-                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
+                                        Examples:
+                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="translated">Określ rejestrator wyników testów.
-                                        Przykład: --logger "trx[;LogFileName=&lt;domyślnie jest to unikatowa nazwa pliku&gt;]"
-                                        Więcej informacji o obsłudze argumentów rejestratora: https://aka.ms/vstest-report</target>
+        <target state="translated">Określ rejestrator dla wyników testów.
+                                        Przykłady:
+                                        Rejestrowanie w formacie trx z użyciem unikatowej nazwy pliku: --logger trx
+                                        Rejestrowanie w formacie trx z użyciem wskazanej nazwy pliku: --logger "trx;LogFileName=&lt;WynikiTestu.trx&gt;"
+                                        Więcej informacji o obsłudze argumentów rejestratora:https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -123,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
-        <source>Do not build project before testing.</source>
-        <target state="translated">Nie kompiluj projektu przed przeprowadzeniem testów.</target>
+        <source>Do not build project before testing.  Implies --no-restore.</source>
+        <target state="needs-review-translation">Nie kompiluj projektu przed przeprowadzeniem testów.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
@@ -169,8 +173,13 @@ Argumenty RunSettings:
       <trans-unit id="cmdCollectDescription">
         <source>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</source>
-        <target state="translated">Włącza moduł zbierający dane dotyczące uruchomienia testu.
+        <target state="translated">Włącza moduł zbierający dane dotyczące przebiegu testu.
                                         Więcej informacji można znaleźć tutaj: https://aka.ms/vstest-collect</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
+        <target state="translated">Uruchamia test w trybie Blame. Ta opcja jest przydatna przy izolowaniu problematycznego testu powodującego awarię hosta testów. Tworzy w bieżącym katalogu plik wyjściowy „Sequence.xml”, który przechwytuje kolejność wykonywania testu przed awarią.</target>
         <note />
       </trans-unit>
     </body>

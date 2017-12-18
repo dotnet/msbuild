@@ -27,8 +27,8 @@ namespace Microsoft.DotNet.Configurer
 
         private Stream InProgressSentinel { get; set; }
 
-        public NuGetCacheSentinel(CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator) :
-            this(cliFallbackFolderPathCalculator.CliFallbackFolderPath,
+        public NuGetCacheSentinel(CliFolderPathCalculator cliFolderPathCalculator) :
+            this(cliFolderPathCalculator.CliFallbackFolderPath,
                  FileSystemWrapper.Default.File,
                  FileSystemWrapper.Default.Directory)
         {

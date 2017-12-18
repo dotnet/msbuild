@@ -233,8 +233,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
+        <source>Path to additional deps.json file.</source>
         <target state="translated">Ek deps.json dosyasının yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Stores the specified assemblies in the runtime store.</source>
+        <target state="translated">Belirtilen bütünleştirilmiş kodları çalışma zamanı deposunda depolar.</target>
         <note />
       </trans-unit>
     </body>

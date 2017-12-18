@@ -8,8 +8,7 @@
 
     <!-- dotnet deb-tool -->
     <PropertyGroup>
-      <DotnetDebToolConsumerProjectName>dotnet-deb-tool-consumer.csproj</DotnetDebToolConsumerProjectName>
-      <DotnetDebToolDir>$(IntermediateDirectory)/$(DotnetDebToolConsumerProjectName)</DotnetDebToolDir>
+      <DotnetDebToolDir>$(MSBuildThisFileDirectory)/dotnet-deb-tool-consumer</DotnetDebToolDir>
       <PackageTool>$(NuGetPackagesDir)/dotnet-deb-tool/$(DotnetDebToolVersion)/lib/netcoreapp2.0/tool/package_tool</PackageTool>
     </PropertyGroup>
 
@@ -28,19 +27,15 @@
     <PropertyGroup>
       <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
       <SdkDebianPackageName>dotnet-sdk-$(SdkDebianPackageVersion)</SdkDebianPackageName>
-      <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
+      <SharedFxDebianPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxDebianPackageVersion>
       <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
       <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
-      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageName200>$(AspNetCoreRuntimePackageBrandName)-2.0.0</AspNetCoreRuntimePackageName200>
-      <AspNetCoreRuntimePackageName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
-      <HostRidInAspNetCoreRuntimeDebInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeDebInstallerFileName>
-      <AspNetCoreRuntimeDebInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
-      <AspNetCoreRuntimeDebInstallerFileName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
+      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)</AspNetCoreRuntimePackageName>
+      <AspNetCoreRuntimeDebInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)-$(HostRid).deb</AspNetCoreRuntimeDebInstallerFileName>
     </PropertyGroup>
 
     <!-- Inputs -->
@@ -115,6 +110,9 @@
 
     <ItemGroup>
       <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
+      <TestSdkDebTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
+      <TestSdkDebTaskEnvironmentVariables Include="TEST_PACKAGES=$(TestPackagesDir)" />
+      <TestSdkDebTaskEnvironmentVariables Include="PreviousStageProps=$(NextStagePropsPath)" />
 
       <!-- Consumed By Publish -->
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
@@ -124,13 +122,8 @@
   <Target Name="DownloadAspNetCoreRuntimeDebInstaller"
         DependsOnTargets="SetupDebProps">
     <PropertyGroup>
-      <AspNetCoreRuntimeDebInstallerFileName200>$(AspNetCoreRuntimePackageBrandName)-2.0.0-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName200>
-      <DownloadedSharedAspNetCoreRuntime200>$(PackagesDirectory)/AspNetCoreRuntimeDebInstallerFileName200</DownloadedSharedAspNetCoreRuntime200>
       <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeDebInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
     </PropertyGroup>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName200)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime200)"/>
     <DownloadFile
                Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName)$(CoreSetupBlobAccessTokenParam)"
                DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>

@@ -1,0 +1,68 @@
+<Project ToolsVersion="15.0">
+  <Target Name="WriteNugetConfigFile">
+
+      <ItemGroup>
+        <NugetConfigPrivateFeeds Include="$(ExternalRestoreSources.Split(';'))" />
+      </ItemGroup>
+    
+    <PropertyGroup>
+      <NugetConfigHeader>
+        <![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+<packageSources>
+<!--To inherit the global NuGet package sources remove the <clear/> line below -->
+<clear />
+        ]]>
+      </NugetConfigHeader>
+
+      <NugetConfigCLIFeeds>
+        <![CDATA[
+    <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
+    <add key="templating" value="https://dotnet.myget.org/F/templating/api/v3/index.json" />
+    <add key="aspnet" value="https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json" />
+    <!-- Remove all other 2.0.0 aspnet entries when we start taking new ASP.NET packages -->
+    <add key="aspnet-next" value="https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json" />
+    <add key="websdkfeed" value="https://dotnet.myget.org/F/dotnet-web/api/v3/index.json" />
+    <add key="cli-deps" value="https://dotnet.myget.org/F/cli-deps/api/v3/index.json" />
+    <add key="roslyn" value="https://dotnet.myget.org/f/roslyn/api/v3/index.json" />
+    <add key="symreader-native" value="https://dotnet.myget.org/f/symreader-native/api/v3/index.json" />
+    <add key="xunit" value="https://www.myget.org/F/xunit/api/v3/index.json" />
+    <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="vstest" value="https://dotnet.myget.org/F/vstest/api/v3/index.json" />
+    <add key="web-api" value="https://dotnet.myget.org/F/dotnet-web/api/v3/index.json" />
+    <add key="symreader-native" value="https://dotnet.myget.org/F/symreader-native/api/v3/index.json" />
+    <add key="AspNetMaster" value="https://dotnet.myget.org/F/aspnetcore-master/api/v3/index.json" /> 
+    <add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" /> 
+        ]]>
+      </NugetConfigCLIFeeds>
+
+      <NugetConfigSuffix>
+        <![CDATA[
+</packageSources>
+</configuration>
+        ]]>
+      </NugetConfigSuffix>
+    
+  </PropertyGroup>
+
+    <WriteLinesToFile File="$(GeneratedNuGetConfig)"
+                      Lines="$(NugetConfigHeader)"
+                      Overwrite="true" />
+    
+    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != '' and '$(DotNetBuildOffline)' != 'true'"
+                      File="$(GeneratedNuGetConfig)"
+                      Lines="&lt;add key=&quot;PrivateBlobFeed&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
+                      Overwrite="false" />
+
+    <WriteLinesToFile Condition="'$(DotNetBuildOffline)' != 'true'"
+                      File="$(GeneratedNuGetConfig)"
+                      Lines="$(NugetConfigCLIFeeds)"
+                      Overwrite="false" />
+
+    <WriteLinesToFile File="$(GeneratedNuGetConfig)"
+                      Lines="$(NugetConfigSuffix)"
+                      Overwrite="false" />
+
+  </Target>
+</Project>

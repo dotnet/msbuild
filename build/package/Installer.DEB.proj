@@ -25,7 +25,6 @@
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime200)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
 
       <!-- Create layout: Binaries -->
@@ -65,7 +64,7 @@
         Mode="u+x" />
 
       <!-- Build SDK Deb package -->
-      <DotNetDebTool ToolPath="$(Stage0Directory)"
+      <DotNetDebTool ToolPath="$(PreviousStageDirectory)"
                      InputDirectory="$(LayoutDirectory)"
                      OutputDirectory="$(DotNetDebToolOutputDirectory)"
                      PackageName="$(SdkDebianPackageName)"
@@ -89,7 +88,6 @@
       <!-- Remove Shared Framework and Debian Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName200)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
 
@@ -97,7 +95,7 @@
   </Target>
 
   <Target Name="TestSdkDeb"
-      Condition=" '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' and '$(IsSharedFrameworkPreReleaseVersion)' != 'True' "
+      Condition=" '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' "
       DependsOnTargets="RestoreTests"
       Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
@@ -109,7 +107,6 @@
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime200)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
 
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
@@ -125,7 +122,6 @@
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName200)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
 
@@ -160,20 +156,10 @@
     <MakeDir Directories="$(DotNetDebToolOutputDirectory)" />
   </Target>
 
-  <Target Name="PrepareDotnetDebTool"
-          DependsOnTargets="WriteDotnetDebToolProject">
+  <Target Name="PrepareDotnetDebTool">
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    WorkingDirectory="$(DotnetDebToolDir)" />
-  </Target>
-
-  <Target Name="WriteDotnetDebToolProject"
-          Inputs="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
-          Outputs="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)">
-
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
-          DestinationFiles="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)" />
-
   </Target>
 
   <Target Name="TestDebuild">
