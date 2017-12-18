@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput("--framework netcoreapp2.1")
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+                         .And.HaveStdOut("Hello World!");
         }
 
         [Fact]
