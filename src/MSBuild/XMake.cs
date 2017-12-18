@@ -3529,7 +3529,7 @@ namespace Microsoft.Build.CommandLine
             }
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_RestorePropertySwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_33_RestorePropertySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
