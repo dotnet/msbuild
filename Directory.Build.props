@@ -14,9 +14,6 @@
     <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.repotoolset\$(RoslynToolsRepoToolsetVersion)\tools\</RepoToolsetDir>
     <RestoreSources>
       https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;
-      https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/msbuild/api/v3/index.json;
       https://dotnet.myget.org/F/nuget-build/api/v3/index.json
     </RestoreSources>
   </PropertyGroup>
