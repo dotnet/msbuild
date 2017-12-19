@@ -275,7 +275,6 @@ Copyright (c) .NET Foundation. All rights reserved.
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="RunProduceContentAssets"
-          Returns="_ContentCopyLocalItems;FileWrites"
           DependsOnTargets="_ComputeActiveTFMFileDependencies">
     <ItemGroup>
       <_ContentFileDeps Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
@@ -341,24 +340,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeActiveTFMPackageDependencies"
-          DependsOnTargets="RunResolvePackageDependencies"
-          Returns="_ActiveTFMPackageDependencies">
+          DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
       <_ActiveTFMPackageDependencies Include="@(PackageDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
     </ItemGroup>
   </Target>
 
   <Target Name="_ComputeActiveTFMFileDependencies"
-          DependsOnTargets="RunResolvePackageDependencies"
-          Returns="_ActiveTFMFileDependencies">
+          DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
       <_ActiveTFMFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
     </ItemGroup>
   </Target>
 
   <Target Name="_ComputeTFMOnlyFileDependencies"
-          DependsOnTargets="RunResolvePackageDependencies"
-          Returns="_TFMOnlyFileDependencies">
+          DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
       <_TFMOnlyFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)'))" />
     </ItemGroup>
@@ -374,8 +370,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileReferences"
-          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
-          Returns="ResolvedCompileFileDefinitions">
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies">
     <ItemGroup>
       <_CompileFileItems Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
     </ItemGroup>
@@ -397,8 +392,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_ComputeLockFileFrameworks"
           Condition="'$(DisableLockFileFrameworks)' != 'true'"
-          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
-          Returns="ResolvedFrameworkAssemblies">
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies">
     <ItemGroup>
       <_FrameworkAssemblies Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
 
@@ -467,8 +461,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_ComputeTransitiveProjectReferences"
           Condition="'$(DisableTransitiveProjectReferences)' != 'true'"
-          DependsOnTargets="_ComputeActiveTFMPackageDependencies"
-          Returns="_TransitiveProjectReferences">
+          DependsOnTargets="_ComputeActiveTFMPackageDependencies">
     <ItemGroup>
       <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
     </ItemGroup>
@@ -501,8 +494,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileAnalyzers"
-        DependsOnTargets="RunResolvePackageDependencies"
-        Returns="ResolvedAnalyzers">
+        DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
       <AnalyzerFiles Include="@(FileDefinitions->WithMetadataValue('Analyzer', 'true'))" />
       <ResolvedAnalyzers Include="%(AnalyzerFiles.ResolvedPath)" />
@@ -528,8 +520,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileCopyLocal"
-        DependsOnTargets="_ComputeActiveTFMFileDependencies;RunProduceContentAssets"
-        Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
+        DependsOnTargets="_ComputeActiveTFMFileDependencies;RunProduceContentAssets">
     <ItemGroup>
       <_NativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
       <_RuntimeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeAssembly'))" />
