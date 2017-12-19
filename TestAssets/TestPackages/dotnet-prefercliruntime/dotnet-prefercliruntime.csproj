@@ -10,7 +10,7 @@
   <ItemGroup>
     <Content Include="prefercliruntime">
       <Pack>true</Pack>
-      <PackagePath>\prefercliruntime</PackagePath>
+      <PackagePath>/</PackagePath>
     </Content>
   </ItemGroup>
 </Project>
