@@ -88,6 +88,7 @@ namespace Microsoft.DotNet.New.Tests
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Project";
             var expectedVersion = GetFrameworkPackageVersion();
+
             var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
             new NewCommand()
