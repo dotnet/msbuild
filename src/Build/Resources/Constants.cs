@@ -51,6 +51,7 @@ namespace Microsoft.Build.Internal
         internal const string programFiles32 = "MSBuildProgramFiles32";
         internal const string localAppData = "LocalAppData";
         internal const string assemblyVersion = "MSBuildAssemblyVersion";
+        internal const string version = "MSBuildVersion";
         internal const string osName = "OS";
         internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
 
@@ -101,6 +102,7 @@ namespace Microsoft.Build.Internal
                         s_reservedProperties.Add(lastTaskResult);
                         s_reservedProperties.Add(programFiles32);
                         s_reservedProperties.Add(assemblyVersion);
+                        s_reservedProperties.Add(version);
                     }
                 }
 

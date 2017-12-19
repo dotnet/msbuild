@@ -617,6 +617,7 @@
     <Compile Include="Resources\Constants.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Resources\MSBuildAssemblyFileVersion.cs" />
     <!-- ######################## -->
     <!-- ######################## -->
     <!-- ######################## -->
