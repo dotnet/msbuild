@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
@@ -79,7 +80,25 @@ namespace Microsoft.TemplateEngine.Cli
             return Run(commandName, host, telemetryLogger, onFirstRun, args, null);
         }
 
+        private static Mutex _entryMutex = new Mutex(false, "{5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2}");
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
+        {
+            if (!_entryMutex.WaitOne())
+            {
+                return -1;
+            }
+
+            try
+            {
+                return ActualRun(commandName, host, telemetryLogger, onFirstRun, args, hivePath);
+            }
+            finally
+            {
+                _entryMutex.ReleaseMutex();
+            }
+        }
+
+        private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
         {
             if (args.Any(x => string.Equals(x, "--debug:version", StringComparison.Ordinal)))
             {
