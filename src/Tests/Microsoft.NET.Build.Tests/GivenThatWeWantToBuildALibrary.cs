@@ -640,8 +640,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp2.1")]
-        [InlineData("netstandard2.1")]
+        [InlineData("netcoreapp2.2")]
+        [InlineData("netstandard2.3")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {
             var testProject = new TestProject()
@@ -730,6 +730,55 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_marks_package_references_as_externally_resolved(bool? markAsExternallyResolved)
+        {
+            var project = new TestProject
+            {
+                Name = "Library",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true
+            };
+
+            var asset = _testAssetsManager.CreateTestProject(
+                project,
+                "ExternallyResolvedPackages",
+                markAsExternallyResolved.ToString())
+                .WithProjectChanges((path, p) =>
+                {
+                    if (markAsExternallyResolved != null)
+                    {
+                        var ns = p.Root.Name.Namespace;
+                        p.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "MarkPackageReferencesAsExternallyResolved",
+                                    markAsExternallyResolved)));
+                    }
+                })
+                .Restore(Log, project.Name);
+
+            var command = new GetValuesCommand(
+                Log,
+                Path.Combine(asset.Path, project.Name),
+                project.TargetFrameworks,
+                "Reference",
+                GetValuesCommand.ValueType.Item);
+
+            command.MetadataNames.Add("ExternallyResolved");
+            command.Execute().Should().Pass();
+
+            var references = command.GetValuesWithMetadata();
+            references.Should().NotBeEmpty();
+
+            foreach (var (value, metadata) in references)
+            {
+                metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true).ToString());
+            }
         }
     }
 }

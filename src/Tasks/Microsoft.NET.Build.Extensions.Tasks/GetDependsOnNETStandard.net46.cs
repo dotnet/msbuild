@@ -3,6 +3,7 @@
 
 #if NET46
 using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -42,8 +43,9 @@ namespace Microsoft.NET.Build.Tasks
             {
                 // on Windows use CLR's unmanaged metadata API.
                 // Create the metadata dispenser and open scope on the source file.
+                var filePathAbsolute = Path.GetFullPath(filePath);
                 var metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-                var assemblyImport = (IMetaDataAssemblyImport)metadataDispenser.OpenScope(filePath, 0, s_importerGuid);
+                var assemblyImport = (IMetaDataAssemblyImport)metadataDispenser.OpenScope(filePathAbsolute, 0, s_importerGuid);
 
                 var asmRefEnum = IntPtr.Zero;
                 var asmRefTokens = new UInt32[16];

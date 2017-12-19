@@ -148,9 +148,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <Message Text="CrossgenCommandline: $(CrossgenCommandline)"/>
 
-    <!-- Workaround for https://github.com/NuGet/Home/issues/4424 -->
-    <Exec Command="chmod 755 $(CrossgenExe)" Condition="'$(OS)' != 'Windows_NT'"/>
-
     <!--Optimization skip if the assembly is already present in the final output directory-->
     <Exec
      Command="$(CrossgenCommandline)"

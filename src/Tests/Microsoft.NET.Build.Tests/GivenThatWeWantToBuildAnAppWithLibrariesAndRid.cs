@@ -48,7 +48,6 @@ namespace Microsoft.NET.Build.Tests
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .EnsureExecutable()
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()

@@ -92,7 +92,6 @@ namespace Microsoft.NET.Publish.Tests
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()

@@ -15,11 +15,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         private Dictionary<string, TConflictItem> winningItemsByKey = new Dictionary<string, TConflictItem>();
         private ILog log;
         private PackageRank packageRank;
+        private PackageOverrideResolver<TConflictItem> packageOverrideResolver;
 
-        public ConflictResolver(PackageRank packageRank, ILog log)
+        public ConflictResolver(PackageRank packageRank, PackageOverrideResolver<TConflictItem> packageOverrideResolver, ILog log)
         {
             this.log = log;
             this.packageRank = packageRank;
+            this.packageOverrideResolver = packageOverrideResolver;
         }
 
         public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey,
@@ -87,6 +89,12 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
         private TConflictItem ResolveConflict(TConflictItem item1, TConflictItem item2)
         {
+            var winner = packageOverrideResolver.Resolve(item1, item2);
+            if (winner != null)
+            {
+                return winner;
+            }
+
             string conflictMessage = string.Format(CultureInfo.CurrentCulture, Strings.EncounteredConflict,
                 item1.DisplayName,
                 item2.DisplayName);

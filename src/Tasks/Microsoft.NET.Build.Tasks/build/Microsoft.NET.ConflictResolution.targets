@@ -16,8 +16,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
+  <Import Project="Microsoft.NET.DefaultPackageConflictOverrides.targets" />
+
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  
   <Target Name="_HandlePackageFileConflicts" DependsOnTargets="_ComputeLockFileCopyLocal;GetReferenceAssemblyPaths">
     
     <ItemGroup>
@@ -53,14 +54,15 @@ Copyright (c) .NET Foundation. All rights reserved.
         <NuGetPackageId>%(PackageName)</NuGetPackageId>
         <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
       </_LockFileAssemblies>
-    </ItemGroup>    
-    
+    </ItemGroup>
+
     <ResolvePackageFileConflicts References="@(Reference)"
-                                ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
-                                OtherRuntimeItems="@(_LockFileAssemblies)"
-                                PlatformManifests="@(PackageConflictPlatformManifests)"
-                                TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
-                                PreferredPackages="$(PackageConflictPreferredPackages)">
+                                 ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+                                 OtherRuntimeItems="@(_LockFileAssemblies)"
+                                 PlatformManifests="@(PackageConflictPlatformManifests)"
+                                 TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
+                                 PackageOverrides="@(PackageConflictOverrides)"
+                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />

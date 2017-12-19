@@ -5,6 +5,10 @@
     <ProjectGuid>{BB691360-49BC-46EB-8BA9-6A69A54CD4B0}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(BuildNumber)' != ''">
+      <_Parameter1>BuildNumber</_Parameter1>
+      <_Parameter2>$(BuildNumber)</_Parameter2>
+    </AssemblyAttribute>
     <Content Include="CopyToOutputFromProjectReference.txt" CopyToOutputDirectory="Always" />
   </ItemGroup>
   <ItemGroup>

@@ -103,6 +103,16 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!--
+    This will prevent RAR from spending time locating dependencies and related files for assemblies
+    that came from packages. PackageReference should already be promoted to a closure of Reference
+    items and we are responsible for adding package relates files to CopyLocal items, not RAR. This
+    is only configurable as a compat opt-out in case skipping the slow RAR code breaks something.
+  -->
+  <PropertyGroup Condition="'$(MarkPackageReferencesAsExternallyResolved)' == ''">
+    <MarkPackageReferencesAsExternallyResolved>true</MarkPackageReferencesAsExternallyResolved>
+  </PropertyGroup>
+
+  <!--
     *************************************
     3. BUILD TARGETS
     - Override the Depends-On properties, or the individual targets
@@ -424,12 +434,22 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeLockFileReferences;_ComputeLockFileFrameworks">
 
     <ItemGroup>
+      <!--
+        Update Reference items with NuGetPackageId metadata to set ExternallyResolved appropriately.
+        NetStandard.Library adds its assets in targets this way and not in the standard way that
+        would get ExternallyResolved set in ResolvedCompileFileDefinitions below.
+       -->
+      <Reference Condition="'%(Reference.NuGetPackageId)' != ''">
+        <ExternallyResolved>$(MarkPackageReferencesAsExternallyResolved)</ExternallyResolved>
+      </Reference>
+
       <!-- Add framework references from NuGet packages here, so that if there is also a matching reference from a NuGet package,
            it will be treated the same as a reference from the project file. -->
       <Reference Include="@(ResolvedFrameworkAssemblies)" />
       
       <ResolvedCompileFileDefinitions Update="@(ResolvedCompileFileDefinitions)">
         <HintPath>%(FullPath)</HintPath>
+        <ExternallyResolved>$(MarkPackageReferencesAsExternallyResolved)</ExternallyResolved>
       </ResolvedCompileFileDefinitions>
     </ItemGroup>
     
@@ -462,6 +482,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeTransitiveProjectReferences"
+          Condition="'$(DisableTransitiveProjectReferences)' != 'true'"
           DependsOnTargets="_ComputeActiveTFMPackageDependencies"
           Returns="_TransitiveProjectReferences">
     <ItemGroup>
@@ -479,6 +500,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="IncludeTransitiveProjectReferences"
+          Condition="'$(DisableTransitiveProjectReferences)' != 'true'"
           DependsOnTargets="_ComputeTransitiveProjectReferences" >
     <ItemGroup>
       <!-- Add the references we computed -->
