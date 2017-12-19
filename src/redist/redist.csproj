@@ -78,8 +78,10 @@
     <ItemGroup>
       <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/csc.runtimeconfig.json" />
       <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/vbc.runtimeconfig.json" />
+      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/VBCSCompiler.runtimeconfig.json" />
       <RoslynDeps Include="$(RoslynDirectory)/bincore/csc.deps.json" />
       <RoslynDeps Include="$(RoslynDirectory)/bincore/vbc.deps.json" />
+      <RoslynDeps Include="$(RoslynDirectory)/bincore/VBCSCompiler.deps.json" />
       <RoslynSatelliteDeps Include="$(RoslynDirectory)/bincore/tool_roslyn_satellites.deps.json" />
     </ItemGroup>
     <PropertyGroup>

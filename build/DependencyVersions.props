@@ -9,7 +9,7 @@
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftFSharpCompilerPackageVersion>4.2.0-rtm-171122-0</MicrosoftFSharpCompilerPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>2.6.0-beta3-62309-01</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>2.7.0-beta3-62419-03</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
