@@ -8108,7 +8108,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\Regress442570",
+                s_regress442570_RootPath
             };
 
             Execute(t);
