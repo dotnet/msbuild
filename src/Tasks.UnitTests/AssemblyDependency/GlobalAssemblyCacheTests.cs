@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.Assemblies[0].SetMetadata("ExternallyResolved", "true");
-            t.Assemblies[0].SetMetadata("HintPath", @"C:\SystemRuntime\Portable.dll");
+            t.Assemblies[0].SetMetadata("HintPath", s_portableDllPath);
 
             t.SearchPaths = DefaultPaths;
 
@@ -585,7 +585,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.Assemblies[0].SetMetadata("ExternallyResolved", "true");
-            t.Assemblies[0].SetMetadata("HintPath", @"C:\NetStandard\netstandardlibrary.dll");
+            t.Assemblies[0].SetMetadata("HintPath", s_netstandardLibraryDllPath);
 
             t.SearchPaths = DefaultPaths;
 
@@ -651,9 +651,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.Assemblies[0].SetMetadata("ExternallyResolved", "true");
-            t.Assemblies[0].SetMetadata("HintPath", @"C:\NetStandard\netstandardlibrary.dll");
+            t.Assemblies[0].SetMetadata("HintPath", s_netstandardLibraryDllPath);
             t.Assemblies[1].SetMetadata("ExternallyResolved", "true");
-            t.Assemblies[1].SetMetadata("HintPath", @"C:\SystemRuntime\Portable.dll");
+            t.Assemblies[1].SetMetadata("HintPath", s_portableDllPath);
 
             t.SearchPaths = DefaultPaths;
 
