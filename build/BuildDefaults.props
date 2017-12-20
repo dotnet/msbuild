@@ -3,10 +3,10 @@
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
-    <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' AND $(Rid.StartsWith('rhel.6')) ">true</SkipBuildingInstallers>
+    <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' AND ($(Rid.StartsWith('rhel.6')) OR $(Rid.StartsWith('alpine.3.6')))">true</SkipBuildingInstallers>
     <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
-    <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' AND '$(Rid)' != 'rhel.6-x64' ">true</UsePortableLinuxSharedFramework>
-    <IncludeSharedFrameworksForBackwardsCompatibilityTests Condition=" $(IncludeSharedFrameworksForBackwardsCompatibilityTests) == '' AND '$(Rid)' != 'linux-x64' AND '$(Rid)' != 'rhel.6-x64' ">true</IncludeSharedFrameworksForBackwardsCompatibilityTests>
+    <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' AND '$(Rid)' != 'rhel.6-x64' AND '$(Rid)' != 'alpine.3.6-x64' ">true</UsePortableLinuxSharedFramework>
+    <IncludeSharedFrameworksForBackwardsCompatibilityTests Condition=" $(IncludeSharedFrameworksForBackwardsCompatibilityTests) == '' AND '$(Rid)' != 'linux-x64' AND '$(Rid)' != 'rhel.6-x64' AND '$(Rid)' != 'alpine.3.6-x64'">true</IncludeSharedFrameworksForBackwardsCompatibilityTests>
     <HighEntropyVA>true</HighEntropyVA>
 
     <!-- Only use asset target fallback that we set (not implicit one to net461). -->
