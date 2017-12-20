@@ -13,9 +13,9 @@ namespace Microsoft.Build.Internal
     {
         private static readonly Lazy<MSBuildAssemblyFileVersion> MSBuildAssemblyFileVersionLazy = new Lazy<MSBuildAssemblyFileVersion>(GetMSBuildAssemblyFileVersion, isThreadSafe: true);
 
-        private MSBuildAssemblyFileVersion(string majorMinor)
+        private MSBuildAssemblyFileVersion(string majorMinorBuild)
         {
-            MajorMinor = majorMinor;
+            MajorMinorBuild = majorMinorBuild;
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Gets the assembly file version in the format major.minor.
         /// </summary>
-        public string MajorMinor { get; set; }
+        public string MajorMinorBuild { get; set; }
 
         private static MSBuildAssemblyFileVersion GetMSBuildAssemblyFileVersion()
         {
@@ -44,10 +44,10 @@ namespace Microsoft.Build.Internal
             if (String.IsNullOrEmpty(versionString) || !Version.TryParse(versionString, out version))
             {
                 // Fall back to the constant AssemblyVersion
-                return new MSBuildAssemblyFileVersion(Constants.AssemblyVersion);
+                version = Version.Parse(Constants.AssemblyVersion);
             }
 
-            return new MSBuildAssemblyFileVersion($"{version.Major}.{version.Minor}");
+            return new MSBuildAssemblyFileVersion($"{version.Major}.{version.Minor}.{version.Build}");
         }
     }
 }
