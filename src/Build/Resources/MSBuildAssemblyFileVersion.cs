@@ -15,7 +15,7 @@ namespace Microsoft.Build.Internal
 
         private MSBuildAssemblyFileVersion(string majorMinor)
         {
-            MajorMinor = majorMinor;;
+            MajorMinor = majorMinor;
         }
 
         /// <summary>
@@ -33,7 +33,11 @@ namespace Microsoft.Build.Internal
 
         private static MSBuildAssemblyFileVersion GetMSBuildAssemblyFileVersion()
         {
-            string versionString = typeof(MSBuildAssemblyFileVersion).GetTypeInfo()?.Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+            string versionString = typeof(MSBuildAssemblyFileVersion)
+                .GetTypeInfo()
+                ?.Assembly
+                .GetCustomAttribute<AssemblyFileVersionAttribute>()
+                ?.Version;
 
             Version version;
 
