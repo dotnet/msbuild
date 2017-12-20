@@ -248,6 +248,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_portableDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "Portable.dll");
         protected static readonly string s_systemRuntimeDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "System.Runtime.dll");
 
+        protected static readonly string s_dependsOnNuGet_ADllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "A.dll");
+        protected static readonly string s_dependsOnNuGet_NDllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.dll");
+        protected static readonly string s_dependsOnNuGet_NExePath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.exe");
+        protected static readonly string s_dependsOnNuGet_NWinMdPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.winmd");
+
+        protected static readonly string s_nugetCache_N_Lib_NDllPath = Path.Combine(s_rootPathPrefix, "NugetCache", "N", "lib", "N.dll");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -585,8 +592,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             s_netstandardLibraryDllPath,
             s_netstandardDllPath,
             @"C:\SystemRuntime\Regular.dll",
-            @"C:\DependsOnNuget\A.dll",
-            @"C:\NugetCache\N\lib\N.dll"
+            s_dependsOnNuGet_ADllPath,
+            s_nugetCache_N_Lib_NDllPath
         };
 
         /// <summary>
@@ -1740,12 +1747,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
 
-            if (string.Compare(path, @"C:\DependsOnNuget\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (string.Compare(path, @"C:\NugetCache\N\lib\N.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(path, s_nugetCache_N_Lib_NDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("N, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
@@ -2463,7 +2470,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\DependsOnNuget\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {

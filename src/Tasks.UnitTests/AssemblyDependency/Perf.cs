@@ -57,8 +57,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyNames =
                 {
-                    new TaskItem(@"C:\DependsOnNuget\A.dll"), // depends on N, version 1.0.0.0
-                    new TaskItem(@"C:\NugetCache\N\lib\N.dll") // version 2.0.0.0
+                    new TaskItem(s_dependsOnNuGet_ADllPath), // depends on N, version 1.0.0.0
+                    new TaskItem(s_nugetCache_N_Lib_NDllPath) // version 2.0.0.0
                 };
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -72,9 +72,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 Assert.True(succeeded);
                 ;
-                uniqueFileExists[@"C:\DependsOnNuget\N.winmd"].ShouldBe(1);
-                uniqueFileExists[@"C:\DependsOnNuget\N.dll"].ShouldBe(1);
-                uniqueFileExists[@"C:\DependsOnNuget\N.exe"].ShouldBe(1);
+                uniqueFileExists[s_dependsOnNuGet_NWinMdPath].ShouldBe(1);
+                uniqueFileExists[s_dependsOnNuGet_NDllPath].ShouldBe(1);
+                uniqueFileExists[s_dependsOnNuGet_NExePath].ShouldBe(1);
             }
             finally
             {
