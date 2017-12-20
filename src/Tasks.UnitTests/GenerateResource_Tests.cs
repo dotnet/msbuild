@@ -14,6 +14,7 @@ using System.Text;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
@@ -3099,6 +3100,65 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             GenerateResource t = new GenerateResource();
 
             Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
+        }
+
+        //  Regression test for https://github.com/Microsoft/msbuild/issues/2206
+        [Theory]
+        [InlineData("\n")]
+        [InlineData("\r\n")]
+        [InlineData("\r")]
+        public void ResxValueNewlines(string newline)
+        {
+            string resxValue = "First line" + newline + "second line" + newline;
+            string resxDataName = "DataWithNewline";
+            string data = "<data name=\"" + resxDataName + "\">" + newline +
+                "<value>" + resxValue + "</value>" + newline + "</data>";
+
+            string resxFile = null;
+
+            GenerateResource t = Utilities.CreateTask(_output);
+            t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            try
+            {
+                resxFile = Utilities.WriteTestResX(false, null, data);
+
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                Utilities.ExecuteTask(t);
+
+                string resourcesFile = t.OutputResources[0].ItemSpec;
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+                resourcesFile = t.FilesWritten[0].ItemSpec;
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+
+                Dictionary<string, object> valuesFromResource = new Dictionary<string, object>();
+                using (var resourceReader = new System.Resources.ResourceReader(resourcesFile))
+                {
+                    IDictionaryEnumerator resEnum = resourceReader.GetEnumerator();
+                    while (resEnum.MoveNext())
+                    {
+                        string name = (string)resEnum.Key;
+                        object value = resEnum.Value;
+                        valuesFromResource[name] = value;
+                    }
+                }
+
+                Assert.True(valuesFromResource.ContainsKey(resxDataName));
+                Assert.Equal(resxValue, valuesFromResource[resxDataName]);
+            }
+            finally
+            {
+
+                File.Delete(t.Sources[0].ItemSpec);
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    if (File.Exists(item.ItemSpec))
+                    {
+                        File.Delete(item.ItemSpec);
+                    }
+                }
+            }
         }
     }
 }

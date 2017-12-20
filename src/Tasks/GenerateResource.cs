@@ -2905,12 +2905,17 @@ namespace Microsoft.Build.Tasks
                         ReadResources(reader, resXReader, filename);
                         break;
 #else
-                        XDocument doc = XDocument.Load(filename, LoadOptions.PreserveWhitespace);
-                        foreach (XElement dataElem in doc.Element("root").Elements("data"))
+
+                        using (var xmlReader = new XmlTextReader(filename))
                         {
-                            string name = dataElem.Attribute("name").Value;
-                            string value = dataElem.Element("value").Value;
-                            AddResource(reader, name, value, filename);
+                            xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                            XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
+                            foreach (XElement dataElem in doc.Element("root").Elements("data"))
+                            {
+                                string name = dataElem.Attribute("name").Value;
+                                string value = dataElem.Element("value").Value;
+                                AddResource(reader, name, value, filename);
+                            }
                         }
                         break;
 #endif
