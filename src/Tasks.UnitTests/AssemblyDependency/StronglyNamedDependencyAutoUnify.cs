@@ -34,8 +34,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
         /// dependency seen.
         /// </summary>
+        /// <param name="rarSimulationMode"></param>
         [Fact]
         public void Exists()
+        {
+            ExistsImpl();
+        }
+
+        internal void ExistsImpl(RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
             // times out the object used for remoting console writes.  Adding a write in the middle of
@@ -59,21 +65,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.SearchPaths = DefaultPaths;
             t.AutoUnify = true;
 
-            bool succeeded = Execute(t);
+            bool succeeded = Execute(t, rarSimulationMode);
 
-            Assert.True(succeeded);
-            AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
+            if (rarSimulationMode.HasFlag(RARSimulationMode.LoadAndBuildProject))
+            {
+                Assert.True(succeeded);
+                AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
                 AssertNoCase(s_unifyMeDll_V20Path, t.ResolvedDependencyFiles[0].ItemSpec);
 
-            engine.AssertLogContains
+                engine.AssertLogContains
                 (
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnifiedDependency"), "UniFYme, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
                 );
 
-            engine.AssertLogContains
+                engine.AssertLogContains
                 (
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                 );
+            }
         }
 
         /// <summary>

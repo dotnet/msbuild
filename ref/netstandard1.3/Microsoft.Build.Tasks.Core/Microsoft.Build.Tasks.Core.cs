@@ -498,6 +498,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] FilesWritten { get { throw null; } set { } }
         public bool FindDependencies { get { throw null; } set { } }
+        public bool FindDependenciesOfExternallyResolvedReferences { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool FindRelatedFiles { get { throw null; } set { } }
         public bool FindSatellites { get { throw null; } set { } }
         public bool FindSerializationAssemblies { get { throw null; } set { } }
@@ -671,6 +672,7 @@ namespace Microsoft.Build.Tasks
     {
         public XmlPeek() { }
         public string Namespaces { get { throw null; } set { } }
+        public bool ProhibitDtd { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string Query { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] Result { get { throw null; } }

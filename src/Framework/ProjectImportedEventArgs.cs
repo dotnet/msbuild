@@ -40,8 +40,18 @@ namespace Microsoft.Build.Framework
         public string UnexpandedProject { get; set; }
 
         /// <summary>
-        /// Gets or sets the full path to the project file that was imported.  If a project was not imported, the value is <code>null</code>.
+        /// Gets or sets the full path to the project file that was imported. Will be <code>null</code>
+        /// if the import statement was a glob and no files matched, or the condition (if any) evaluated
+        /// to false.
         /// </summary>
         public string ImportedProjectFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets if this import was ignored. Ignoring imports is controlled by
+        /// <code>ProjectLoadSettings</code>. This is only set when an import would have been included
+        /// but was ignored to due being invalid. This does not include when a globbed import returned
+        /// no matches, or a conditioned import that evaluated to false.
+        /// </summary>
+        public bool ImportIgnored { get; set; }
     }
 }

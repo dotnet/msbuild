@@ -89,7 +89,7 @@
     <DnuCoreRestoreCommand>$(DnuCoreRestoreCommand) --legacy-packages-directory</DnuCoreRestoreCommand>
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
-    <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages $(PackagesDir)</DnuRestoreCommand>
+    <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages &quot;$(PackagesDir)&quot;</DnuRestoreCommand>
   </PropertyGroup>
 
   <!-- Common nuget properties -->
@@ -436,6 +436,20 @@
   <ItemGroup>
     <Languages Include="cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant"/>
   </ItemGroup>
+
+  <!-- Workaround for Orchestrated .NET Core product build
+
+       The buildtools signing/microbuild targets currently used by the msbuild project are very old.
+       They do not have support for 'SignType' == 'public'.  This block of code deals with this by
+       translating the 'public' sign type into 'oss' which will be usable by the buildtools version
+       at this point.  To avoid the problem of the global command line parameter passed in being set to
+       'public' permanantly, we use 'MSSignType' instead as the input.
+       UseOpenSourceSign is used internally to denote OSS signing. -->
+  <PropertyGroup>
+    <UseOpenSourceSign Condition="'$(MSSignType)'=='public'">true</UseOpenSourceSign>
+    <SignType Condition="'$(MSSignType)'=='public'">oss</SignType>
+    <SignType Condition="'$(MSSignType)'!='public'">$(MSSignType)</SignType>
+  </PropertyGroup>
 
   <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props" Condition="'$(IsTestProject)' != 'true' And '$(DebugType)' == 'full' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props')" />
 
