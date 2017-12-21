@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -109,16 +110,46 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template)
         {
-            IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch() 
-                                                && (_hasUserInputLanguage
-                                                    || x.DispositionOfDefaults.Count == 0
-                                                    || x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact))
-                                                    )
-                                                    .ToList();
-            
-            if (invokableMatches.Count == 1)
+            IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch()).ToList();
+            IReadOnlyList<ITemplateMatchInfo> languageFilteredInvokableMatches;
+
+            if (_hasUserInputLanguage)
             {
-                template = invokableMatches[0];
+                languageFilteredInvokableMatches = invokableMatches;
+            }
+            else
+            {
+                // check for templates with the default language
+                languageFilteredInvokableMatches = invokableMatches.Where(x => x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact)).ToList();
+
+                if (languageFilteredInvokableMatches.Count == 0)
+                {
+                    // no templates with the default language.
+                    // Check if there are multiple languages among the results. If so, can't invoke.
+                    HashSet<string> languagesForMatches = new HashSet<string>();
+                    foreach (ITemplateMatchInfo templateInfo in invokableMatches)
+                    {
+                        if (templateInfo.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
+                        {
+                            languagesForMatches.Add(languageTag.DefaultValue);
+                        }
+                    }
+
+                    if (languagesForMatches.Count > 1)
+                    {
+                        // there are multiple languages in the possible templates. No way to decide which one to use.
+                        template = null;
+                        return false;
+                    }
+
+                    // all the invokableMatches are the same language, or have no language. Continue checking them.
+                    languageFilteredInvokableMatches = invokableMatches;
+                }
+            }
+
+            if (languageFilteredInvokableMatches.Count == 1)
+            {
+                template = languageFilteredInvokableMatches[0];
                 return true;
             }
 
@@ -127,7 +158,7 @@ namespace Microsoft.TemplateEngine.Cli
             //      The one with single starts with is chosen as invokable because if the template with an ambiguous match
             //      was not installed, the one with the singluar invokable would be chosen.
             HashSet<string> singleStartsWithParamNames = new HashSet<string>();
-            foreach (ITemplateMatchInfo checkTemplate in invokableMatches)
+            foreach (ITemplateMatchInfo checkTemplate in languageFilteredInvokableMatches)
             {
                 IList<string> singleStartParamNames = checkTemplate.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith).Select(x => x.ChoiceIfLocationIsOtherChoice).ToList();
                 foreach (string paramName in singleStartParamNames)
@@ -140,7 +171,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(invokableMatches);
+            ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(languageFilteredInvokableMatches);
             if (highestInGroupIfSingleGroup != null)
             {
                 template = highestInGroupIfSingleGroup;
