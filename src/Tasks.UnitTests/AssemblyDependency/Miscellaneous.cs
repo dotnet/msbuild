@@ -889,7 +889,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Construct a list of assembly files.
             ITaskItem[] assemblies = new TaskItem[]
             {
-                new TaskItem(@"c:\AssemblyFolder\SomeAssembly.dll")
+                new TaskItem(s_assemblyFolder_SomeAssemblyDllPath)
             };
 
             assemblies[0].SetMetadata("ExternallyResolved", "true");
@@ -905,7 +905,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.dll"));
+            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.dll")));
             Assert.Equal(0, t.RelatedFiles.Length);
         }
 
