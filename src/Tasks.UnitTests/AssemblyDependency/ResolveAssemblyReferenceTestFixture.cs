@@ -259,6 +259,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         protected static readonly string s_nugetCache_N_Lib_NDllPath = Path.Combine(s_rootPathPrefix, "NugetCache", "N", "lib", "N.dll");
 
+        protected static readonly string s_assemblyFolder_RootPath = Path.Combine(s_rootPathPrefix, "AssemblyFolder");
+        protected static readonly string s_assemblyFolder_SomeAssemblyDllPath = Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.dll");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -485,12 +488,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"c:\MyRedist\MyOtherAssembly.dll",
             @"c:\MyRedist\MyThirdAssembly.dll",
             // ==[Related File Extensions Testing]================================================================================================
-            @"C:\AssemblyFolder\SomeAssembly.dll",
-            @"C:\AssemblyFolder\SomeAssembly.pdb",
-            @"C:\AssemblyFolder\SomeAssembly.xml",
-            @"C:\AssemblyFolder\SomeAssembly.pri",
-            @"C:\AssemblyFolder\SomeAssembly.licenses",
-            @"C:\AssemblyFolder\SomeAssembly.config",
+            s_assemblyFolder_SomeAssemblyDllPath,
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.pdb"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.xml"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.pri"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.licenses"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.config"),
             // ==[Related File Extensions Testing]================================================================================================
 
             // ==[Unification Testing]============================================================================================================
