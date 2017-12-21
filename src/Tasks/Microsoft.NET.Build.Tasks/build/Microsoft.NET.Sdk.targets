@@ -236,7 +236,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="EmbedAppNameInHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="_ComputeActiveTFMFileDependencies"
+          DependsOnTargets="ResolvePackageAssets"
           AfterTargets="ResolveReferences"
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
@@ -248,16 +248,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     During "publish", all required assets are copied to the publish directory.
     -->
     <ItemGroup Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_IsExecutable)' == 'true'">
-      <_NETCoreNativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
-      <__NETCoreNativeItems Include="@(FileDefinitions)" Exclude="@(_NETCoreNativeFileItems)" />
-      <_NETCoreNativeItems Include="@(FileDefinitions)" Exclude="@(__NETCoreNativeItems)" />
+      <NativeNETCoreCopyLocalItems Include="@(NativeCopyLocalItems)"
+                                   Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostPolicyLibraryName)' or
+                                              '%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostFxrLibraryName)'" />
 
-      <NativeNETCoreCopyLocalItems Include="%(_NETCoreNativeItems.ResolvedPath)"
-                                   Condition="'%(_NETCoreNativeItems.FileName)%(_NETCoreNativeItems.Extension)' == '$(_DotNetHostPolicyLibraryName)' or
-                                              '%(_NETCoreNativeItems.FileName)%(_NETCoreNativeItems.Extension)' == '$(_DotNetHostFxrLibraryName)'" />
-
-      <NativeRestoredAppHostNETCore Include="%(_NETCoreNativeItems.ResolvedPath)"
-                                   Condition="'%(_NETCoreNativeItems.FileName)%(_NETCoreNativeItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
+      <NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
+                                   Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
     </ItemGroup>
 
     <PropertyGroup Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
@@ -277,8 +273,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </EmbedAppNameInHost>
     
     <ItemGroup Condition="'@(NativeAppHostNETCore)' == '' ">
-      <NativeAppHostNETCore Include="%(_NETCoreNativeItems.ResolvedPath)"
-                                   Condition="'%(_NETCoreNativeItems.FileName)%(_NETCoreNativeItems.Extension)' == '$(_DotNetHostExecutableName)'" />
+      <NativeAppHostNETCore Include="@(NativeCopyLocalItems)"
+                            Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostExecutableName)'" />
     </ItemGroup>
     
     <NETSdkError Condition="'@(NativeAppHostNETCore->Count())' &gt; 1"

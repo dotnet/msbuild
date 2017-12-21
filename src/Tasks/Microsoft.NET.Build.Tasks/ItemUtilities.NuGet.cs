@@ -16,6 +16,12 @@ namespace Microsoft.NET.Build.Tasks
 
             if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
             {
+                packageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
+                packageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
+            }
+
+            if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
+            {
                 return null;
             }
 

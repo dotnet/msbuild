@@ -149,7 +149,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     compiling the exe if no copy-local native dependencies were resolved from NuGet 
   -->
   <Target Name="AdjustDefaultPlatformTargetForNetFrameworkExeWithNoNativeCopyLocalItems"
-          AfterTargets="ResolvePackageDependenciesForBuild"
+          AfterTargets="ResolvePackageAssets"
           BeforeTargets="CoreCompile"
           Condition="'$(_UsingDefaultPlatformTarget)' == 'true' and
                      '$(_UsingDefaultRuntimeIdentifier)' == 'true' and 
