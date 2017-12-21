@@ -23,9 +23,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Windows x64 |Windows x86 |macOS |Linux x64 |Linux Native Installers |RHEL 6 Archive|
-|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|
+|Windows x64 |Windows x86 |macOS |Linux x64 |Linux Native Installers |RHEL 6 Archive|Alpine 3.6 Archive|
+|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][alpine3.6-build-badge]][alpine3.6-build]|
 
 [win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6902/badge
 [win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6902
@@ -44,6 +44,9 @@ Build Status
 
 [rhel6-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7392/badge
 [rhel6-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7392
+
+[alpine3.6-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/8168/badge
+[alpine3.6-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=8168
 
 Installers and Binaries
 -----------------------
@@ -67,6 +70,7 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **Debian 8**  | [Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
+| **Alpine 3.6** | [tar.gz][alpine-3.6-targz] - [Checksum][alpine-3.6-targz-checksum] |
 
 | Latest Coherent Build<sup>2</sup><br>*master* |
 |:------:|
@@ -114,6 +118,9 @@ Reference notes:
 
 [rhel-6-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-rhel.6-x64.tar.gz
 [rhel-6-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-rhel.6-x64.tar.gz.sha
+
+[alpine-3.6-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-alpine.3.6-x64.tar.gz
+[alpine-3.6-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-alpine.3.6-x64.tar.gz.sha
 
 # Debian daily feed
 
