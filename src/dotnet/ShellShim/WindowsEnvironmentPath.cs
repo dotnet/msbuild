@@ -40,9 +40,19 @@ namespace Microsoft.DotNet.ShellShim
 
         private bool PackageExecutablePathExists()
         {
-            return Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User).Split(';').Contains(_packageExecutablePath)
-             || Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine).Split(';').Contains(_packageExecutablePath)
-             || Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process).Split(';').Contains(_packageExecutablePath);
+            return EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User))
+                || EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine))
+                || EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process));
+        }
+
+        private bool EnvironmentVariableConatinsPackageExecutablePath(string environmentVariable)
+        {
+            if (environmentVariable == null)
+            {
+                return false;
+            }
+
+            return environmentVariable.Split(';').Contains(_packageExecutablePath);
         }
 
         public void PrintAddPathInstructionIfPathDoesNotExist()

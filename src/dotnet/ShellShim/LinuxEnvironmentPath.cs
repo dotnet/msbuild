@@ -48,8 +48,15 @@ namespace Microsoft.DotNet.ShellShim
 
         private bool PackageExecutablePathExists()
         {
-            return _environmentProvider
-                .GetEnvironmentVariable(PathName)
+            var environmentVariable = _environmentProvider
+                .GetEnvironmentVariable(PathName);
+
+            if (environmentVariable == null)
+            {
+                return false;
+            }
+
+            return environmentVariable
                 .Split(':').Contains(_packageExecutablePath.Path);
         }
 

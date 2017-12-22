@@ -49,10 +49,15 @@ namespace Microsoft.DotNet.ShellShim
 
         private bool PackageExecutablePathExists()
         {
-            return _environmentProvider.GetEnvironmentVariable(PathName).Split(':')
-                       .Contains(_packageExecutablePath.PathWithTilde) ||
-                   _environmentProvider.GetEnvironmentVariable(PathName).Split(':')
-                       .Contains(_packageExecutablePath.Path);
+            var environmentVariable = _environmentProvider.GetEnvironmentVariable(PathName);
+
+            if (environmentVariable == null)
+            {
+                return false;
+            }
+
+            return environmentVariable.Split(':').Contains(_packageExecutablePath.PathWithTilde)
+                || environmentVariable.Split(':').Contains(_packageExecutablePath.Path);
         }
 
         public void PrintAddPathInstructionIfPathDoesNotExist()
