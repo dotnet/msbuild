@@ -243,6 +243,11 @@ namespace Microsoft.Build.Framework
     {
         void Initialize(Microsoft.Build.Framework.IEventSource eventSource, int nodeCount);
     }
+    public partial interface IProjectElement
+    {
+        string ElementName { get; }
+        string OuterElement { get; }
+    }
     public partial interface ITask
     {
         Microsoft.Build.Framework.IBuildEngine BuildEngine { get; set; }
@@ -339,6 +344,7 @@ namespace Microsoft.Build.Framework
     {
         public ProjectEvaluationFinishedEventArgs() { }
         public ProjectEvaluationFinishedEventArgs(string message, params object[] messageArgs) { }
+        public System.Nullable<Microsoft.Build.Framework.Profiler.ProfilerResult> ProfilerResult { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public partial class ProjectEvaluationStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
@@ -361,6 +367,7 @@ namespace Microsoft.Build.Framework
         public ProjectImportedEventArgs() { }
         public ProjectImportedEventArgs(int lineNumber, int columnNumber, string message, params object[] messageArgs) { }
         public string ImportedProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool ImportIgnored { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string UnexpandedProject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public partial class ProjectStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
@@ -451,6 +458,13 @@ namespace Microsoft.Build.Framework
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
     }
+    public enum TargetBuiltReason
+    {
+        AfterTargets = 3,
+        BeforeTargets = 1,
+        DependsOn = 2,
+        None = 0,
+    }
     public partial class TargetFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected TargetFinishedEventArgs() { }
@@ -464,11 +478,22 @@ namespace Microsoft.Build.Framework
         public System.Collections.IEnumerable TargetOutputs { get { throw null; } set { } }
     }
     public delegate void TargetFinishedEventHandler(object sender, Microsoft.Build.Framework.TargetFinishedEventArgs e);
+    public partial class TargetSkippedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public TargetSkippedEventArgs() { }
+        public TargetSkippedEventArgs(string message, params object[] messageArgs) { }
+        public Microsoft.Build.Framework.TargetBuiltReason BuildReason { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ParentTarget { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string TargetFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string TargetName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
     public partial class TargetStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected TargetStartedEventArgs() { }
         public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile) { }
+        public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, string parentTarget, Microsoft.Build.Framework.TargetBuiltReason buildReason, System.DateTime eventTimestamp) { }
         public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, string parentTarget, System.DateTime eventTimestamp) { }
+        public Microsoft.Build.Framework.TargetBuiltReason BuildReason { get { throw null; } }
         public string ParentTarget { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public string TargetFile { get { throw null; } }
@@ -519,6 +544,77 @@ namespace Microsoft.Build.Framework
         public System.Collections.Generic.IDictionary<string, string> Properties { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public delegate void TelemetryEventHandler(object sender, Microsoft.Build.Framework.TelemetryEventArgs e);
+}
+namespace Microsoft.Build.Framework.Profiler
+{
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct EvaluationLocation
+    {
+        public EvaluationLocation(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
+        public EvaluationLocation(long id, System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
+        public EvaluationLocation(System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationPassDescription, string file, System.Nullable<int> line, string elementName, string elementDescription, Microsoft.Build.Framework.Profiler.EvaluationLocationKind kind) { throw null;}
+        public string ElementDescription { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string ElementName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation EmptyLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Framework.Profiler.EvaluationPass EvaluationPass { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string EvaluationPassDescription { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string File { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public long Id { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsEvaluationPass { get { throw null; } }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocationKind Kind { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Nullable<int> Line { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Nullable<long> ParentId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForAggregatedGlob() { throw null; }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForCondition(System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string condition) { throw null; }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForGlob(System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, string globDescription) { throw null; }
+        public static Microsoft.Build.Framework.Profiler.EvaluationLocation CreateLocationForProject(System.Nullable<long> parentId, Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string evaluationDescription, string file, System.Nullable<int> line, Microsoft.Build.Framework.IProjectElement element) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocation WithEvaluationPass(Microsoft.Build.Framework.Profiler.EvaluationPass evaluationPass, string passDescription=null) { throw null; }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocation WithFile(string file) { throw null; }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocation WithFileLineAndCondition(string file, System.Nullable<int> line, string condition) { throw null; }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocation WithFileLineAndElement(string file, System.Nullable<int> line, Microsoft.Build.Framework.IProjectElement element) { throw null; }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocation WithGlob(string globDescription) { throw null; }
+        public Microsoft.Build.Framework.Profiler.EvaluationLocation WithParentId(System.Nullable<long> parentId) { throw null; }
+    }
+    public enum EvaluationLocationKind : byte
+    {
+        Condition = (byte)1,
+        Element = (byte)0,
+        Glob = (byte)2,
+    }
+    public enum EvaluationPass : byte
+    {
+        InitialProperties = (byte)2,
+        ItemDefinitionGroups = (byte)4,
+        Items = (byte)5,
+        LazyItems = (byte)6,
+        Properties = (byte)3,
+        Targets = (byte)8,
+        TotalEvaluation = (byte)0,
+        TotalGlobbing = (byte)1,
+        UsingTasks = (byte)7,
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct ProfiledLocation
+    {
+        public ProfiledLocation(System.TimeSpan inclusiveTime, System.TimeSpan exclusiveTime, int numberOfHits) { throw null;}
+        public System.TimeSpan ExclusiveTime { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.TimeSpan InclusiveTime { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public int NumberOfHits { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct ProfilerResult
+    {
+        public ProfilerResult(System.Collections.Generic.IDictionary<Microsoft.Build.Framework.Profiler.EvaluationLocation, Microsoft.Build.Framework.Profiler.ProfiledLocation> profiledLocations) { throw null;}
+        public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Framework.Profiler.EvaluationLocation, Microsoft.Build.Framework.Profiler.ProfiledLocation> ProfiledLocations { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+    }
 }
 namespace Microsoft.Build.Framework.XamlTypes
 {

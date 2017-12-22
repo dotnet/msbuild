@@ -12,6 +12,7 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -1111,6 +1112,7 @@ namespace Microsoft.Build.UnitTests
                                         null,
                                         "ScoobyDoo",
                                         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                                        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                                         new ILogger[] { },
                                         LoggerVerbosity.Normal,
                                         new DistributedLoggerRecord[] { },
@@ -1125,7 +1127,9 @@ namespace Microsoft.Build.UnitTests
                                         false, 
                                         warningsAsErrors: null,
                                         warningsAsMessages: null,
-                                        enableRestore: false);
+                                        enableRestore: false,
+                                        profilerLogger: null,
+                                        enableProfiler: false);
                 }
                 finally
                 {
@@ -1327,6 +1331,37 @@ namespace Microsoft.Build.UnitTests
             Assert.NotNull(actualWarningsAsMessages);
 
             Assert.Equal(expectedWarningsAsMessages, actualWarningsAsMessages, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Verifies that when the /profileevaluation switch is used with no values "no-file" is specified.
+        /// </summary>
+        [Fact]
+        public void ProcessProfileEvaluationEmpty()
+        {
+            CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
+            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
+        }
+
+        /// <summary>
+        /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
+        /// </summary>
+        [MemberData(nameof(GetInvalidFilenames))]
+        [Theory]
+        public void ProcessProfileEvaluationInvalidFilename(string filename)
+        {
+            bool enableProfiler = false;
+            Should.Throw(
+                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new ArrayList(), out enableProfiler),
+                typeof(CommandLineSwitchException));
+        }
+
+        private static IEnumerable<object[]> GetInvalidFilenames()
+        {
+            yield return new object[] { $"a_file_with${Path.GetInvalidFileNameChars().First()}invalid_chars" };
+            yield return new object[] { $"C:\\a_path\\with{Path.GetInvalidPathChars().First()}invalid\\chars" };
         }
 
 #if FEATURE_RESOURCEMANAGER_GETRESOURCESET

@@ -1042,7 +1042,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogTargetStarted(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", null);
+                service.LogTargetStarted(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", null, TargetBuiltReason.None);
             }
            );
         }
@@ -1398,13 +1398,13 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, String.Empty);
+            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, String.Empty, TargetBuiltReason.None);
             VerifyTargetStartedEvent(targetName, projectFile, projectFileOfTarget, message, service);
 
             // Do not expect to have any event logged when OnlyLogCriticalEvents is true
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
-            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, null);
+            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, null, TargetBuiltReason.None);
             Assert.Null(service.ProcessedBuildEvent);
         }
 
@@ -1425,13 +1425,13 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, parentTargetName);
+            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, parentTargetName, TargetBuiltReason.AfterTargets);
             VerifyTargetStartedEvent(targetName, projectFile, projectFileOfTarget, message, service);
 
             // Do not expect to have any event logged when OnlyLogCriticalEvents is true
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
-            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, parentTargetName);
+            service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, parentTargetName, TargetBuiltReason.BeforeTargets);
             Assert.Null(service.ProcessedBuildEvent);
         }
 
@@ -1509,6 +1509,7 @@ namespace Microsoft.Build.UnitTests.Logging
                            projectFile,
                            projectFileOfTarget,
                            String.Empty,
+                           TargetBuiltReason.None,
                            service.ProcessedBuildEvent.Timestamp
                        );
             buildEvent.BuildEventContext = s_targetBuildEventContext;

@@ -11,7 +11,7 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</description>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>MSBuild</tags>
     <dependencies>
       <group targetFramework=".NETFramework4.6">

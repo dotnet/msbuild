@@ -68,6 +68,7 @@
     <Compile Include="IBuildEngine5.cs" />
     <Compile Include="IEventSource2.cs" />
     <Compile Include="IGeneratedTask.cs" />
+    <Compile Include="IProjectElement.cs" />
     <Compile Include="LazyFormattedBuildEventArgs.cs" />
     <Compile Include="IBuildEngine.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -115,6 +116,9 @@
     <Compile Include="OutputAttribute.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Profiler\EvaluationIdProvider.cs" />
+    <Compile Include="Profiler\EvaluationLocation.cs" />
+    <Compile Include="Profiler\ProfilerResult.cs" />
     <Compile Include="ProjectEvaluationFinishedEventArgs.cs" />
     <Compile Include="ProjectEvaluationStartedEventArgs.cs" />
     <Compile Include="ProjectImportedEventArgs.cs" />
@@ -138,9 +142,11 @@
     <Compile Include="Sdk\SdkResolverContext.cs" />
     <Compile Include="Sdk\SdkResult.cs" />
     <Compile Include="Sdk\SdkResultFactory.cs" />
+    <Compile Include="TargetBuiltReason.cs" />
     <Compile Include="TargetFinishedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="TargetSkippedEventArgs.cs" />
     <Compile Include="TargetStartedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

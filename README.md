@@ -65,13 +65,13 @@ You are also encouraged to start a discussion by filing an issue or creating a g
 
 * **MSBuild**. [Microsoft.Build.CommandLine](https://docs.microsoft.com/visualstudio/msbuild/msbuild)  is the entrypoint for the Microsoft Build Engine (MSBuild.exe).
 
-* **Microsoft.Build**. The [Microsoft.Build](https://msdn.microsoft.com/library/gg145008.aspx) namespaces contain types that provide programmatic access to, and control of, the MSBuild engine.
+* **Microsoft.Build**. The [Microsoft.Build](https://docs.microsoft.com/dotnet/api/?term=Microsoft.Build) namespaces contain types that provide programmatic access to, and control of, the MSBuild engine.
 
-* **Microsoft.Build.Framework**. The [Microsoft.Build.Framework](https://msdn.microsoft.com/library/microsoft.build.framework.aspx) namespace contains the types that define how tasks and loggers interact with the MSBuild engine. For additional information on this component, see our [Microsoft.Build.Framework wiki page](https://github.com/Microsoft/msbuild/wiki/Microsoft.Build.Framework).
+* **Microsoft.Build.Framework**. The [Microsoft.Build.Framework](https://docs.microsoft.com/dotnet/api/microsoft.build.framework) namespace contains the types that define how tasks and loggers interact with the MSBuild engine. For additional information on this component, see our [Microsoft.Build.Framework wiki page](https://github.com/Microsoft/msbuild/wiki/Microsoft.Build.Framework).
 
-* **Microsoft.Build.Tasks**. The [Microsoft.Build.Tasks](https://msdn.microsoft.com/library/microsoft.build.tasks.aspx) namespace contains the implementation of all tasks shipping with MSBuild.
+* **Microsoft.Build.Tasks**. The [Microsoft.Build.Tasks](https://docs.microsoft.com/dotnet/api/microsoft.build.tasks) namespace contains the implementation of all tasks shipping with MSBuild.
 
-* **Microsoft.Build.Utilities**. The [Microsoft.Build.Utilities](https://msdn.microsoft.com/library/microsoft.build.utilities.aspx) namespace provides helper classes that you can use to create your own MSBuild loggers and tasks.
+* **Microsoft.Build.Utilities**. The [Microsoft.Build.Utilities](https://docs.microsoft.com/dotnet/api/microsoft.build.utilities) namespace provides helper classes that you can use to create your own MSBuild loggers and tasks.
 
 ### License
 

@@ -2012,7 +2012,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         expensive to write the newly created cache file.
         -->
     <PropertyGroup>
-      <ResolveAssemblyReferencesStateFile Condition="'$(BuildingProject)'=='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)ResolveAssemblyReference.cache</ResolveAssemblyReferencesStateFile>
+      <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)ResolveAssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
@@ -2037,6 +2037,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Implicit>true</Implicit>
       </Reference>
     </ItemGroup>
+
+    <!--
+      Normally, as an optimization, finding dependencies of references marked with ExternallyResolved=true metadata is skipped.
+      However, skipping that step breaks binding redirect generation when there are conflicting versions within the externally
+      resolved graph.
+    -->
+    <PropertyGroup Condition="'$(FindDependenciesOfExternallyResolvedReferences)' == ''">
+       <FindDependenciesOfExternallyResolvedReferences>false</FindDependenciesOfExternallyResolvedReferences>
+       <FindDependenciesOfExternallyResolvedReferences Condition="'$(AutoGenerateBindingRedirects)' == 'true'">true</FindDependenciesOfExternallyResolvedReferences>
+    </PropertyGroup>
 
     <ResolveAssemblyReference
         Assemblies="@(Reference)"
@@ -2076,6 +2086,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ResolvedSDKReferences="@(ResolvedSDKReference)"
         WarnOrErrorOnTargetArchitectureMismatch="$(ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch)"
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
+        FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
@@ -2544,7 +2555,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-      <DesignTimeResolveAssemblyReferencesStateFile Condition="'$(BuildingProject)'=='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)DesignTimeResolveAssemblyReferences.cache</DesignTimeResolveAssemblyReferencesStateFile>
+      <DesignTimeResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)DesignTimeResolveAssemblyReferences.cache</DesignTimeResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -3550,7 +3561,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GenerateSatelliteAssemblies"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
-          Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(MSBuildRuntimeType)' != 'Core'">
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(GenerateSatelliteAssembliesForCore)' != 'true'">
 
     <MakeDir
         Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />

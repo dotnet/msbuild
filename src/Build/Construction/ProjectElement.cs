@@ -24,7 +24,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// Abstract base class for MSBuild construction object model elements. 
     /// </summary>
-    public abstract class ProjectElement
+    public abstract class ProjectElement : IProjectElement
     {
         /// <summary>
         /// Parent container object.
@@ -176,6 +176,9 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        /// <inheritdoc/>
+        public string OuterElement => XmlElement.OuterXml;
+
         /// <summary>
         /// All parent elements of this element, going up to the ProjectRootElement.
         /// None if this itself is a ProjectRootElement.
@@ -291,11 +294,8 @@ namespace Microsoft.Build.Construction
             get { return XmlElement.Location; }
         }
 
-        /// <summary>
-        /// Gets the name of the associated element. 
-        /// Useful for display in some circumstances.
-        /// </summary>
-        internal string ElementName
+        /// <inheritdoc/>
+        public string ElementName
         {
             get { return XmlElement.Name; }
         }
