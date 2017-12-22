@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Do not build project before packing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">Consente di ignorare la compilazione del progetto prima di creare il pacchetto. Per impostazione predefinita, il progetto verrà compilato.</target>
+        <source>Skip building the project prior to packing. By default, the project will be built.</source>
+        <target state="translated">Consente di ignorare la compilazione del progetto prima di creare il pacchetto. Per impostazione predefinita, il progetto verrà compilato.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">

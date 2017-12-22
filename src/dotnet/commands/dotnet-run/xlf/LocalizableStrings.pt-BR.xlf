@@ -33,8 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
-        <source>Do not build project before running.  Implies --no-restore.</source>
-        <target state="needs-review-translation">Ignorar a compilação do projeto antes da execução. Por padrão, o projeto será compilado.</target>
+        <source>Skip building the project prior to running. By default, the project will be built.</source>
+        <target state="translated">Ignorar a compilação do projeto antes da execução. Por padrão, o projeto será compilado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuild">
+        <source>Do not build the project before running.</source>
+        <target state="translated">Não compilar o projeto antes da execução.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
@@ -109,7 +114,7 @@ O {1} atual é '{2}'.</target>
       </trans-unit>
       <trans-unit id="UsableLaunchProfileCannotBeLocated">
         <source>A usable launch profile could not be located.</source>
-        <target state="translated">Um perfil de inicialização utilizável não pôde ser localizado.</target>
+        <target state="translated">Um perfil de inicialização utilizável não ôde ser localizado.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">

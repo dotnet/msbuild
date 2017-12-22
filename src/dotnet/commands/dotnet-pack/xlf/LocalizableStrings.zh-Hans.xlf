@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Do not build project before packing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">在打包之前跳过生成项目。默认情况下，将生成项目。</target>
+        <source>Skip building the project prior to packing. By default, the project will be built.</source>
+        <target state="translated">在打包之前跳过生成项目。默认情况下，将生成项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">

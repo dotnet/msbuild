@@ -97,6 +97,11 @@
         <target state="translated">Anwendung</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReferenceDoesNotExist">
+        <source>Reference {0} does not exist.</source>
+        <target state="translated">Der Verweis "{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
         <target state="translated">Der Verweis "{0}" wurde dem Projekt hinzugefügt.</target>
@@ -667,11 +672,6 @@
       <trans-unit id="NoRestoreDescription">
         <source>Does not do an implicit restore when executing the command.</source>
         <target state="translated">Führt beim Ausführen des Befehls keine implizite Wiederherstellung durch.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectRemovedFromTheSolution">
-        <source>Project `{0}` removed from the solution.</source>
-        <target state="new">Project `{0}` removed from the solution.</target>
         <note />
       </trans-unit>
     </body>
