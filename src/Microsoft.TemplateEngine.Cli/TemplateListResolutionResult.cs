@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -108,7 +107,16 @@ namespace Microsoft.TemplateEngine.Cli
             return false;
         }
 
-        public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template)
+        public enum SingularInvokableMatchCheckStatus
+        {
+            None,
+            NoMatch,
+            SingleMatch,
+            AmbiguousChoice,
+            AmbiguousPrecedence
+        }
+
+        public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template, out SingularInvokableMatchCheckStatus resultStatus)
         {
             IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch()).ToList();
             IReadOnlyList<ITemplateMatchInfo> languageFilteredInvokableMatches;
@@ -122,27 +130,9 @@ namespace Microsoft.TemplateEngine.Cli
                 // check for templates with the default language
                 languageFilteredInvokableMatches = invokableMatches.Where(x => x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact)).ToList();
 
+                // no candidate templates matched the default language, continue with the original candidates.
                 if (languageFilteredInvokableMatches.Count == 0)
                 {
-                    // no templates with the default language.
-                    // Check if there are multiple languages among the results. If so, can't invoke.
-                    HashSet<string> languagesForMatches = new HashSet<string>();
-                    foreach (ITemplateMatchInfo templateInfo in invokableMatches)
-                    {
-                        if (templateInfo.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
-                        {
-                            languagesForMatches.Add(languageTag.DefaultValue);
-                        }
-                    }
-
-                    if (languagesForMatches.Count > 1)
-                    {
-                        // there are multiple languages in the possible templates. No way to decide which one to use.
-                        template = null;
-                        return false;
-                    }
-
-                    // all the invokableMatches are the same language, or have no language. Continue checking them.
                     languageFilteredInvokableMatches = invokableMatches;
                 }
             }
@@ -150,6 +140,7 @@ namespace Microsoft.TemplateEngine.Cli
             if (languageFilteredInvokableMatches.Count == 1)
             {
                 template = languageFilteredInvokableMatches[0];
+                resultStatus = SingularInvokableMatchCheckStatus.SingleMatch;
                 return true;
             }
 
@@ -166,19 +157,29 @@ namespace Microsoft.TemplateEngine.Cli
                     if (!singleStartsWithParamNames.Add(paramName))
                     {
                         template = null;
+                        resultStatus = SingularInvokableMatchCheckStatus.AmbiguousChoice;
                         return false;
                     }
                 }
             }
 
-            ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(languageFilteredInvokableMatches);
+            ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(languageFilteredInvokableMatches, out bool ambiguousGroupIdResult);
+
             if (highestInGroupIfSingleGroup != null)
             {
                 template = highestInGroupIfSingleGroup;
+                resultStatus = SingularInvokableMatchCheckStatus.SingleMatch;
                 return true;
+            }
+            else if (ambiguousGroupIdResult)
+            {
+                template = null;
+                resultStatus = SingularInvokableMatchCheckStatus.AmbiguousPrecedence;
+                return false;
             }
 
             template = null;
+            resultStatus = SingularInvokableMatchCheckStatus.NoMatch;
             return false;
         }
 

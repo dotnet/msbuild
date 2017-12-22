@@ -102,9 +102,15 @@ namespace Microsoft.TemplateEngine.Cli
 
             return !invalidParams.Any();
         }
-
         public static ITemplateMatchInfo FindHighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<ITemplateMatchInfo> templateList)
         {
+            return FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templateList, out bool throwawayAmbiguousResult);
+        }
+
+        public static ITemplateMatchInfo FindHighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<ITemplateMatchInfo> templateList, out bool ambiguousResult)
+        {
+            ambiguousResult = false;
+
             if (!AreAllTemplatesSameGroupIdentity(templateList))
             {
                 return null;
@@ -121,6 +127,12 @@ namespace Microsoft.TemplateEngine.Cli
                 else if (template.Info.Precedence > highestPrecedenceTemplate.Info.Precedence)
                 {
                     highestPrecedenceTemplate = template;
+                }
+                else if (template.Info.Precedence == highestPrecedenceTemplate.Info.Precedence)
+                {
+                    ambiguousResult = true;
+                    highestPrecedenceTemplate = null;
+                    break;
                 }
             }
 

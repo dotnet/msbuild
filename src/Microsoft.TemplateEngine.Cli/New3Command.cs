@@ -510,8 +510,9 @@ namespace Microsoft.TemplateEngine.Cli
                 return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
             }
 
+            TemplateListResolutionResult.SingularInvokableMatchCheckStatus singleMatchStatus = TemplateListResolutionResult.SingularInvokableMatchCheckStatus.None;
             if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup)
-                && templateResolutionResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo templateToInvoke)
+                && templateResolutionResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo templateToInvoke, out singleMatchStatus)
                 && !unambiguousTemplateGroup.Any(x => x.HasParameterMismatch())
                 && !unambiguousTemplateGroup.Any(x => x.HasAmbiguousParameterValueMatch()))
             {
@@ -524,6 +525,15 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
+                if (singleMatchStatus == TemplateListResolutionResult.SingularInvokableMatchCheckStatus.AmbiguousChoice)
+                {
+                    EnvironmentSettings.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousChoiceParameterValue, "Authoring");
+                }
+                else if (singleMatchStatus == TemplateListResolutionResult.SingularInvokableMatchCheckStatus.AmbiguousPrecedence)
+                {
+                    EnvironmentSettings.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousBestPrecedence, "Authoring");
+                }
+
                 return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
             }
         }
