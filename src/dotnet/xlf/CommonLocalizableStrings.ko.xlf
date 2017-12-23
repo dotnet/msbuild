@@ -97,11 +97,6 @@
         <target state="translated">응용 프로그램</target>
         <note />
       </trans-unit>
-      <trans-unit id="ReferenceDoesNotExist">
-        <source>Reference {0} does not exist.</source>
-        <target state="translated">{0} 참조가 없습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
         <target state="translated">프로젝트에 '{0}' 참조가 추가되었습니다.</target>
@@ -672,6 +667,11 @@
       <trans-unit id="NoRestoreDescription">
         <source>Does not do an implicit restore when executing the command.</source>
         <target state="translated">명령을 실행할 때 암시적 복원을 수행하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="new">Project `{0}` removed from the solution.</target>
         <note />
       </trans-unit>
     </body>

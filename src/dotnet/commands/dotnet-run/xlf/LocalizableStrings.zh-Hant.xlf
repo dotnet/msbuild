@@ -33,13 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
-        <source>Skip building the project prior to running. By default, the project will be built.</source>
-        <target state="translated">在執行之前跳過建置該專案。根據預設，將會建置該專案。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandOptionNoBuild">
-        <source>Do not build the project before running.</source>
-        <target state="translated">請勿在執行之前建置專案。</target>
+        <source>Do not build project before running.  Implies --no-restore.</source>
+        <target state="needs-review-translation">在執行之前跳過建置該專案。根據預設，將會建置該專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
