@@ -3014,7 +3014,7 @@ namespace Microsoft.Build.Tasks
         {
             if (displayPrimaryReferenceMessage)
             {
-                _log.LogWarningWithCodeFromResources("ResolveAssemblyReference.PrimaryReferenceOutsideOfFrameworkUsingAttribute", reference.PrimarySourceItem.ItemSpec /* primary item spec*/, reference.FrameworkNameAttribute /*Version of dependent assemby*/, targetedFramework);
+                _log.LogErrorWithCodeFromResources("ResolveAssemblyReference.PrimaryReferenceOutsideOfFrameworkUsingAttribute", reference.PrimarySourceItem.ItemSpec /* primary item spec*/, reference.FrameworkNameAttribute /*Version of dependent assemby*/, targetedFramework);
             }
             else
             {
