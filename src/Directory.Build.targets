@@ -34,6 +34,8 @@
     <XunitOptions Condition="'$(OS)'=='OSX' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-osx-failing</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='Windows_NT' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
 
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
+
     <XUnitRunnerAdditionalArguments>$(XunitOptions)</XUnitRunnerAdditionalArguments>
     
   </PropertyGroup>

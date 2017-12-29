@@ -2321,9 +2321,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/coreclr/issues/15662")]
         public void PropertyStaticFunctionAllEnabled()
         {
-
             using (var env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
