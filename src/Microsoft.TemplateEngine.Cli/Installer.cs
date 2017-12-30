@@ -29,7 +29,9 @@ namespace Microsoft.TemplateEngine.Cli
             ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
         }
 
-        public void InstallPackages(IEnumerable<string> installationRequests)
+        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null);
+
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources)
         {
             List<string> localSources = new List<string>();
             List<Package> packages = new List<Package>();
@@ -63,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (packages.Count > 0)
             {
-                InstallRemotePackages(packages);
+                InstallRemotePackages(packages, nuGetSources);
             }
 
             _environmentSettings.SettingsLoader.Save();
@@ -174,7 +176,7 @@ namespace Microsoft.TemplateEngine.Cli
             return uninstallFailures;
         }
 
-        private void InstallRemotePackages(List<Package> packages)
+        private void InstallRemotePackages(List<Package> packages, IList<string> nuGetSources)
         {
             const string packageRef = @"    <PackageReference Include=""{0}"" Version=""{1}"" />";
             const string projectFile = @"<Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk"">
@@ -202,7 +204,24 @@ namespace Microsoft.TemplateEngine.Cli
 
             _paths.CreateDirectory(_paths.User.Packages);
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
-            Dotnet.Restore(proj, "--packages", restored).ForwardStdOut().ForwardStdErr().Execute();
+
+            int additionalSlots = nuGetSources?.Count * 2 ?? 0;
+
+            string[] restoreArgs = new string[3 + additionalSlots];
+            restoreArgs[0] = proj;
+            restoreArgs[1] = "--packages";
+            restoreArgs[2] = restored;
+
+            if (nuGetSources != null)
+            {
+                for (int i = 0; i < nuGetSources.Count; ++i)
+                {
+                    restoreArgs[3 + 2 * i] = "--source";
+                    restoreArgs[4 + 2 * i] = nuGetSources[i];
+                }
+            }
+
+            Dotnet.Restore(restoreArgs).ForwardStdOut().ForwardStdErr().Execute();
 
             List<string> newLocalPackages = new List<string>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))

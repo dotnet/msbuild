@@ -314,7 +314,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, _commandInput.ToInstallList.Count.ToString() } });
 
-            Installer.InstallPackages(_commandInput.ToInstallList);
+            Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList);
 
             //TODO: When an installer that directly calls into NuGet is available,
             //  return a more accurate representation of the outcome of the operation
@@ -342,7 +342,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
             {
-                Installer.InstallPackages(_commandInput.ToInstallList.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]));
+                Installer.InstallPackages(_commandInput.ToInstallList.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]), _commandInput.InstallNuGetSourceList);
             }
 
             if (_commandInput.ToUninstallList != null)

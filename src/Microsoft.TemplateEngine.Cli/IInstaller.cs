@@ -9,6 +9,8 @@ namespace Microsoft.TemplateEngine.Cli
     {
         void InstallPackages(IEnumerable<string> installationRequests);
 
+        void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources);
+
         IEnumerable<string> Uninstall(IEnumerable<string> uninstallRequests);
     }
 }

@@ -1001,6 +1001,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
+        /// </summary>
+        public static string NuGetSourceHelp {
+            get {
+                return ResourceManager.GetString("NuGetSourceHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Options:.
         /// </summary>
         public static string Options {
