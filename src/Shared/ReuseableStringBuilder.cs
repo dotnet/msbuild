@@ -31,6 +31,12 @@ namespace Microsoft.Build.Shared
         private StringBuilder _borrowedBuilder;
 
         /// <summary>
+        /// Profiling showed that the hot code path for large string builder calls first IsOrdinalEqualToStringOfSameLength followed by ExpensiveConvertToString
+        /// when IsOrdinalEqualToStringOfSameLength did return true. We can therefore reduce the costs for large strings by over a factor two. 
+        /// </summary>
+        private string _cachedString;
+
+        /// <summary>
         /// Capacity to initialize the builder with.
         /// </summary>
         private int _capacity;
@@ -75,9 +81,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         string OpportunisticIntern.IInternable.ExpensiveConvertToString()
         {
+            if( _cachedString == null)
             {
-                return ((ReuseableStringBuilder)this).ToString();
+                _cachedString = ((ReuseableStringBuilder)this).ToString();
             }
+            return _cachedString;
+
         }
 
         /// <summary>
@@ -88,6 +97,10 @@ namespace Microsoft.Build.Shared
 #if DEBUG
             ErrorUtilities.VerifyThrow(other.Length == _borrowedBuilder.Length, "should be same length");
 #endif
+            if (other.Length > 40_000)
+            {
+                return String.Equals( ((OpportunisticIntern.IInternable) this).ExpensiveConvertToString(), other, StringComparison.Ordinal);
+            }
             // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
             // For example, C:\project1, C:\project2
             for (int i = _borrowedBuilder.Length - 1; i >= 0; --i)
@@ -130,6 +143,7 @@ namespace Microsoft.Build.Shared
             if (_borrowedBuilder != null)
             {
                 ReuseableStringBuilderFactory.Release(_borrowedBuilder);
+                _cachedString = null;
                 _borrowedBuilder = null;
                 _capacity = -1;
             }
@@ -141,6 +155,7 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(char value)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Append(value);
             return this;
         }
@@ -151,6 +166,7 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(string value)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Append(value);
             return this;
         }
@@ -161,6 +177,7 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(string value, int startIndex, int count)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Append(value, startIndex, count);
             return this;
         }
@@ -171,6 +188,7 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Remove(int startIndex, int length)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Remove(startIndex, length);
             return this;
         }
