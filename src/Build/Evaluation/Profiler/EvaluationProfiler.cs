@@ -58,6 +58,17 @@ namespace Microsoft.Build.Evaluation
 
         /// <nodoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IDisposable TrackGlob(string rootDirectory, string glob, ISet<string> excludePatterns)
+        {
+            return _shouldTrackElements
+                ? new EvaluationFrame(this,
+                    CurrentLocation.WithGlob(
+                        $"root: '${rootDirectory}', pattern: '${glob}', excludes: '${string.Join(";", excludePatterns)}'"))
+                : null;
+        }
+
+        /// <nodoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable TrackElement(ProjectElement element)
         {
             return _shouldTrackElements ? new EvaluationFrame(this, CurrentLocation.WithFileLineAndElement(element.Location.File, element.Location.Line, element)) : null;
@@ -68,6 +79,15 @@ namespace Microsoft.Build.Evaluation
         public IDisposable TrackCondition(IElementLocation location, string condition)
         {
             return _shouldTrackElements ? new EvaluationFrame(this, CurrentLocation.WithFileLineAndCondition(location.File, location.Line, condition)) : null;
+        }
+
+        /// <summary>
+        /// Returns true when the evaluation stack is empty.
+        /// </summary>
+        /// <returns></returns>
+        internal bool IsEmpty()
+        {
+            return _evaluationStack.Count == 0;
         }
 
         /// <summary>

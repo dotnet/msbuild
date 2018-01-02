@@ -672,6 +672,7 @@ namespace Microsoft.Build.Tasks
     {
         public XmlPeek() { }
         public string Namespaces { get { throw null; } set { } }
+        public bool ProhibitDtd { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string Query { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] Result { get { throw null; } }

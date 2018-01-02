@@ -1516,7 +1516,7 @@ namespace Microsoft.Build.Shared
                             // and hope that there is no * wildcard in order to return earlier
                             int inputTailIndex = inputLength;
                             int patternTailIndex = patternLength;
-                            while (patternIndex < patternTailIndex && inputTailIndex > 0)
+                            while (patternIndex < patternTailIndex && inputTailIndex > inputIndex)
                             {
                                 patternTailIndex--;
                                 inputTailIndex--;

@@ -1,8 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -25,61 +25,7 @@ namespace Microsoft.Build.Engine.UnitTests
         private readonly BuildManager _buildManager;
         private readonly TestEnvironment _env;
 
-        /// <nodoc/>
-        public EvaluationProfiler_Tests(ITestOutputHelper output)
-        {
-            // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
-            BuildManager.DefaultBuildManager.Dispose();
-
-            _buildManager = new BuildManager();
-
-            _env = TestEnvironment.Create(output);
-            _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
-        }
-
-        /// <nodoc/>
-        public void Dispose()
-        {
-            _buildManager.Dispose();
-            _env.Dispose();
-        }
-
-        /// <summary>
-        /// Verifies that a given element name shows up in a profiled MSBuild project
-        /// </summary>
-        [InlineData("Target", "<Target Name='test'/>")]
-        [InlineData("Message", 
-@"<Target Name='echo'>
-    <Message text='echo!'/>
-</Target>")]
-        [InlineData("appname", 
-@"<Target Name='test'/>
-<PropertyGroup>
-    <appname>Hello</appname>
-</PropertyGroup>")]
-        [InlineData("CSFile",
-@"<Target Name='test'/>
-<ItemGroup>
-    <CSFile Include='file.cs'/>
-</ItemGroup>")]
-        [Theory]
-        public void VerifySimpleProfiledData(string elementName, string body)
-        {
-            string contents = $@"
-<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
-    {body}
-</Project>
-";
-            var result = BuildAndGetProfilerResult(contents);
-            var profiledElements = result.ProfiledLocations.Keys.ToList();
-
-            Assert.True(profiledElements.Any(location => location.ElementName == elementName));
-        }
-
-        [Fact]
-        public void VerifyProfiledData()
-        {
-            string contents = @"
+        private const string SpecData = @"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
     <PropertyGroup>
         <appname>HelloWorldCS</appname>
@@ -103,8 +49,69 @@ namespace Microsoft.Build.Engine.UnitTests
         <Message Text = 'The sources are @(CSFile)'/>
     </Target>
 </Project>";
+        /// <nodoc/>
+        public EvaluationProfiler_Tests(ITestOutputHelper output)
+        {
+            // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
+            BuildManager.DefaultBuildManager.Dispose();
 
+            _buildManager = new BuildManager();
+
+            _env = TestEnvironment.Create(output);
+            _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
+        }
+
+        /// <nodoc/>
+        public void Dispose()
+        {
+            _buildManager.Dispose();
+            _env.Dispose();
+        }
+
+        /// <summary>
+        /// Verifies that a given element name shows up in a profiled MSBuild project
+        /// </summary>
+        [InlineData("Target", "<Target Name='test'/>")]
+        [InlineData("Message",
+@"<Target Name='echo'>
+    <Message text='echo!'/>
+</Target>")]
+        [InlineData("appname",
+@"<Target Name='test'/>
+<PropertyGroup>
+    <appname>Hello</appname>
+</PropertyGroup>")]
+        [InlineData("CSFile",
+@"<Target Name='test'/>
+<ItemGroup>
+    <CSFile Include='file.cs'/>
+</ItemGroup>")]
+#if MONO
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
+        [Theory]
+#endif
+        public void VerifySimpleProfiledData(string elementName, string body)
+        {
+            string contents = $@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+    {body}
+</Project>
+";
             var result = BuildAndGetProfilerResult(contents);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            Assert.True(profiledElements.Any(location => location.ElementName == elementName));
+        }
+
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
+        [Fact]
+#endif
+        public void VerifyProfiledData()
+        {
+            var result = BuildAndGetProfilerResult(SpecData);
             var profiledElements = result.ProfiledLocations.Keys.ToList();
 
             // Initial properties (pass 0)
@@ -117,7 +124,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Item definition group (pass 2)
             Assert.Equal(1, profiledElements.Count(location => location.ElementName == "ItemDefinitionGroup"));
-            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefintionGroups));
+            Assert.Equal(1, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups));
 
             // Item groups (pass 3 and 3.1)
             Assert.Equal(1, profiledElements.Count(location => location.ElementName == "ItemGroup"));
@@ -132,6 +139,95 @@ namespace Microsoft.Build.Engine.UnitTests
             // Targets (pass 5)
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "Message"));
             Assert.Equal(1, profiledElements.Count(location => location.ElementName == "Target"));
+        }
+
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
+        [Fact]
+#endif
+        public void VerifyProfiledGlobData()
+        {
+            string contents = @"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+    <ItemGroup>
+        <TestGlob Include='wwwroot\dist\**' />
+        <TestGlob Include='ClientApp\dist\**' />
+    </ItemGroup>
+    <Target Name='echo'>
+        <Message text='echo!'/>
+    </Target>
+</Project>";
+
+            var result = BuildAndGetProfilerResult(contents);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            // Item groups (pass 3 and 3.1)
+            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.Items));
+            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.LazyItems));
+
+            // There should be one aggregated entry representing the total glob time
+            Assert.Equal(1, profiledElements.Count(location => location.EvaluationPass == EvaluationPass.TotalGlobbing));
+            var totalGlob = profiledElements.Find(evaluationLocation =>
+                evaluationLocation.EvaluationPass == EvaluationPass.TotalGlobbing);
+            // And it should aggregate the result of the 2 glob locations
+            var totalGlobLocation = result.ProfiledLocations[totalGlob];
+            Assert.Equal(2, totalGlobLocation.NumberOfHits);
+        }
+
+        [Fact]
+        public void VerifyParentIdData()
+        {
+            string contents = @"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+    <ItemGroup>
+        <Test Include='ClientApp\dist\**' />
+    </ItemGroup>
+    <Target Name='echo'>
+        <Message text='echo!'/>
+    </Target>
+</Project>";
+            var result = BuildAndGetProfilerResult(contents);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            // The total evaluation should be the parent of all other passes (but total globbing, which is an aggregate item)
+            var totalEvaluation = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.TotalEvaluation);
+            Assert.True(profiledElements.Where(e => e.IsEvaluationPass && e.EvaluationPass != EvaluationPass.TotalGlobbing && !e.Equals(totalEvaluation))
+                .All(e => e.ParentId == totalEvaluation.Id));
+
+            // Check the test item has the right parent
+            var itemPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.Items);
+            var itemGroup = profiledElements.Find(e => e.ElementName == "ItemGroup");
+            var testItem = profiledElements.Find(e => e.ElementName == "Test" && e.EvaluationPass == EvaluationPass.Items);
+            Assert.Equal(itemPass.Id, itemGroup.ParentId);
+            Assert.Equal(itemGroup.Id, testItem.ParentId);
+
+            // Check the lazy test item has the right parent
+            var lazyItemPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.LazyItems);
+            var lazyTestItem = profiledElements.Find(e => e.ElementName == "Test" && e.EvaluationPass == EvaluationPass.LazyItems);
+            Assert.Equal(lazyItemPass.Id, lazyTestItem.ParentId);
+
+            // Check the target item has the right parent
+            var targetPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.Targets);
+            var target = profiledElements.Find(e => e.ElementName == "Target");
+            var messageTarget = profiledElements.Find(e => e.ElementName == "Message");
+            Assert.Equal(targetPass.Id, target.ParentId);
+            Assert.Equal(target.Id, messageTarget.ParentId);
+        }
+
+        [Fact]
+        public void VerifyIdsSanity()
+        {
+            var result = BuildAndGetProfilerResult(SpecData);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            // All ids must be unique
+            var allIds = profiledElements.Select(e => e.Id).ToList();
+            var allUniqueIds = allIds.ToImmutableHashSet();
+            Assert.Equal(allIds.Count, allUniqueIds.Count);
+
+            // Every element with a parent id must point to a valid item
+            Assert.True(profiledElements.All(e => e.ParentId == null || allUniqueIds.Contains(e.ParentId.Value)));
         }
 
         /// <summary>
@@ -167,7 +263,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
             }
 
-            return profilerLogger.GetAggregatedResult();
+            return profilerLogger.GetAggregatedResult(pruneSmallItems: false);
         }
 
         /// <summary>

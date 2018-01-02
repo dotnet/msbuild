@@ -89,7 +89,7 @@
     <DnuCoreRestoreCommand>$(DnuCoreRestoreCommand) --legacy-packages-directory</DnuCoreRestoreCommand>
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
-    <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages $(PackagesDir)</DnuRestoreCommand>
+    <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages &quot;$(PackagesDir)&quot;</DnuRestoreCommand>
   </PropertyGroup>
 
   <!-- Common nuget properties -->

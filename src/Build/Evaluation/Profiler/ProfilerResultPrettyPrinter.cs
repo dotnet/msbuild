@@ -29,8 +29,8 @@ namespace Microsoft.Build.Evaluation
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine("Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Bug");
-            stringBuilder.AppendLine("---|---|---:|---|---:|---:|---:|---:|---:|---");
+            stringBuilder.AppendLine("Id|ParentId|Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Kind|Bug");
+            stringBuilder.AppendLine("---|---|---|---|---:|---|---:|---:|---:|---:|---:|---:|---");
 
             var profiledLocations = result.ProfiledLocations;
 
@@ -40,10 +40,10 @@ namespace Microsoft.Build.Evaluation
                 return stringBuilder.ToString();
             }
 
-            var evaluationPasses = profiledLocations.Where(l => l.Key.File == null)
+            var evaluationPasses = profiledLocations.Where(l => l.Key.IsEvaluationPass)
                                                   .OrderBy(l => l.Key.EvaluationPass);
 
-            var orderedLocations = profiledLocations.Where(l => l.Key.File != null)
+            var orderedLocations = profiledLocations.Where(l => !l.Key.IsEvaluationPass)
                                                   .OrderByDescending(l => l.Value.ExclusiveTime);
 
             TimeSpan? totalTime = null;
@@ -58,7 +58,9 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 stringBuilder.AppendLine(string.Join("|",
-                    location.EvaluationDescription,
+                    location.Id,
+                    location.ParentId?.ToString() ?? string.Empty,
+                    location.EvaluationPassDescription,
                     string.Empty,
                     string.Empty,
                     string.Empty,
@@ -66,7 +68,8 @@ namespace Microsoft.Build.Evaluation
                     GetPercentage(totalTime.Value, time.InclusiveTime) + "%",
                     GetMilliseconds(time.ExclusiveTime),
                     GetPercentage(totalTime.Value, time.ExclusiveTime) + "%",
-                    time.NumberOfHits + "|"));
+                    time.NumberOfHits,
+                    location.Kind + "|"));
             }
 
             Debug.Assert(totalTime != null, "There should be at least one evaluation pass result");
@@ -76,19 +79,19 @@ namespace Microsoft.Build.Evaluation
                 var time = pair.Value;
                 var location = pair.Key;
 
-                if (time.InclusiveTime.TotalMilliseconds < 1 || time.ExclusiveTime.TotalMilliseconds < 1)
-                    continue;
-
                 stringBuilder.AppendLine(string.Join("|",
-                    location.EvaluationDescription,
+                    location.Id,
+                    location.ParentId?.ToString() ?? string.Empty,
+                    location.EvaluationPassDescription,
                     location.File == null ? string.Empty : Path.GetFileName(location.File),
                     location.Line?.ToString() ?? string.Empty,
-                    GetExpression(location.ElementOrCondition, location.IsElement),
+                    GetExpression(location.ElementDescription, location.Kind),
                     GetMilliseconds(time.InclusiveTime),
                     GetPercentage(totalTime.Value, time.InclusiveTime) + "%",
                     GetMilliseconds(time.ExclusiveTime),
                     GetPercentage(totalTime.Value, time.ExclusiveTime) + "%",
-                    time.NumberOfHits + "|"));
+                    time.NumberOfHits,
+                    location.Kind + "|"));
             }
 
             return stringBuilder.ToString();
@@ -106,9 +109,9 @@ namespace Microsoft.Build.Evaluation
             return Math.Round(percentage, 1, MidpointRounding.AwayFromZero);
         }
 
-        private static string GetExpression(string elementOrCondition, bool isElement)
+        private static string GetExpression(string description, EvaluationLocationKind kind)
         {
-            var text = GetElementOrConditionText(elementOrCondition, isElement);
+            var text = GetElementOrConditionText(description, kind);
             if (string.IsNullOrEmpty(text))
             {
                 return null;
@@ -122,19 +125,24 @@ namespace Microsoft.Build.Evaluation
             return '`' + text + '`';
         }
 
-        private static string GetElementOrConditionText(string elementOrCondition, bool isElement)
+        private static string GetElementOrConditionText(string description, EvaluationLocationKind kind)
         {
-            if (elementOrCondition == null)
+            if (description == null)
             {
                 return null;
             }
 
-            if (!isElement)
+            if (kind == EvaluationLocationKind.Condition)
             {
-                return $"Condition=\"{elementOrCondition}\")";
+                return $"Condition=\"{description}\")";
             }
 
-            var outerXml = elementOrCondition;
+            if (kind == EvaluationLocationKind.Glob)
+            {
+                return $"Glob=\"{description}\")";
+            }
+
+            var outerXml = description;
             outerXml = outerXml.Replace(@"xmlns=""http://schemas.microsoft.com/developer/msbuild/2003""", "");
 
             var newLineIndex = outerXml.IndexOfAny(new [] { '\r', '\n' });

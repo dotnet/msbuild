@@ -1507,23 +1507,42 @@ namespace Microsoft.Build.BackEnd
             private static void TranslatorForEvaluationLocation(ref EvaluationLocation evaluationLocation,
                 INodePacketTranslator translator)
             {
+                long id = 0;
+                long? parentId = null;
                 EvaluationPass evaluationPass = default(EvaluationPass);
                 string evaluationPassDescription = null;
                 string file = null;
                 int? line = null;
                 string elementName = null;
-                string elementOrCondition = null;
-                bool isElement = false;
+                string description = null;
+                EvaluationLocationKind kind = default(EvaluationLocationKind);
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
+                    id = evaluationLocation.Id;
+                    parentId = evaluationLocation.ParentId;
                     evaluationPass = evaluationLocation.EvaluationPass;
-                    evaluationPassDescription = evaluationLocation.EvaluationDescription;
+                    evaluationPassDescription = evaluationLocation.EvaluationPassDescription;
                     file = evaluationLocation.File;
                     line = evaluationLocation.Line;
                     elementName = evaluationLocation.ElementName;
-                    elementOrCondition = evaluationLocation.ElementOrCondition;
-                    isElement = evaluationLocation.IsElement;
+                    description = evaluationLocation.ElementDescription;
+                    kind = evaluationLocation.Kind;
+                }
+
+                translator.Translate(ref id);
+                if (translator.TranslateNullable(parentId))
+                {
+                    long parentIdValue = 0;
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        parentIdValue = parentId.Value;
+                    }
+                    translator.Translate(ref parentIdValue);
+                    if (translator.Mode == TranslationDirection.ReadFromStream)
+                    {
+                        parentId = parentIdValue;
+                    }
                 }
 
                 translator.TranslateEnum(ref evaluationPass, (int)evaluationPass);
@@ -1545,12 +1564,12 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 translator.Translate(ref elementName);
-                translator.Translate(ref elementOrCondition);
-                translator.Translate(ref isElement);
+                translator.Translate(ref description);
+                translator.TranslateEnum(ref kind, (byte)kind);
 
                 if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
-                    evaluationLocation = new EvaluationLocation(evaluationPass, evaluationPassDescription, file, line, elementName, elementOrCondition, isElement);
+                    evaluationLocation = new EvaluationLocation(id, parentId, evaluationPass, evaluationPassDescription, file, line, elementName, description, kind);
                 }
             }
 
