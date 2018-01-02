@@ -86,7 +86,11 @@ namespace Microsoft.Build.Engine.UnitTests
 <ItemGroup>
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
+#if MONO
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
         [Theory]
+#endif
         public void VerifySimpleProfiledData(string elementName, string body)
         {
             string contents = $@"
@@ -100,7 +104,11 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.True(profiledElements.Any(location => location.ElementName == elementName));
         }
 
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
         [Fact]
+#endif
         public void VerifyProfiledData()
         {
             var result = BuildAndGetProfilerResult(SpecData);
@@ -133,7 +141,11 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(1, profiledElements.Count(location => location.ElementName == "Target"));
         }
 
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
         [Fact]
+#endif
         public void VerifyProfiledGlobData()
         {
             string contents = @"

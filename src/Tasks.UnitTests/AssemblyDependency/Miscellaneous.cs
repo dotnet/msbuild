@@ -813,7 +813,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// by default.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DefaultAllowedRelatedFileExtensionsAreUsed()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -827,7 +826,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Construct a list of assembly files.
             ITaskItem[] assemblies = new TaskItem[]
             {
-                new TaskItem(@"c:\AssemblyFolder\SomeAssembly.dll")
+                new TaskItem(s_assemblyFolder_SomeAssemblyDllPath)
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
@@ -840,7 +839,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.dll"));
+            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.dll")));
 
             // Process the related files.
             Assert.Equal(3, t.RelatedFiles.Length);
@@ -851,15 +850,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                if (item.ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.pdb"))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.pdb")))
                 {
                     pdbFound = true;
                 }
-                if (item.ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.xml"))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.xml")))
                 {
                     xmlFound = true;
                 }
-                if (item.ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.pri"))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.pri")))
                 {
                     priFound = true;
                 }
@@ -889,7 +888,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Construct a list of assembly files.
             ITaskItem[] assemblies = new TaskItem[]
             {
-                new TaskItem(@"c:\AssemblyFolder\SomeAssembly.dll")
+                new TaskItem(s_assemblyFolder_SomeAssemblyDllPath)
             };
 
             assemblies[0].SetMetadata("ExternallyResolved", "true");
@@ -905,7 +904,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.dll"));
+            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.dll")));
             Assert.Equal(0, t.RelatedFiles.Length);
         }
 
@@ -913,7 +912,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// RAR should use any given related file extensions.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void InputAllowedRelatedFileExtensionsAreUsed()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -927,7 +925,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Construct a list of assembly files.
             ITaskItem[] assemblies = new TaskItem[]
             {
-                new TaskItem(@"c:\AssemblyFolder\SomeAssembly.dll")
+                new TaskItem(s_assemblyFolder_SomeAssemblyDllPath)
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
@@ -941,7 +939,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.dll"));
+            Assert.True(t.ResolvedFiles[0].ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.dll")));
 
             // Process the related files.
             Assert.Equal(2, t.RelatedFiles.Length);
@@ -950,11 +948,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool xmlFound = false;
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                if (item.ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.licenses"))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.licenses")))
                 {
                     licensesFound = true;
                 }
-                if (item.ItemSpec.EndsWith(@"AssemblyFolder\SomeAssembly.xml"))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.xml")))
                 {
                     xmlFound = true;
                 }
@@ -3517,7 +3515,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If we have no framework directories passed in and an assembly is found outside of the GAC then it should be able to be copy local.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NoFrameworkDirectoriesStillCopyLocal()
         {
             // Create the engine.
@@ -3526,7 +3523,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Also construct a set of assembly names to pass in.
             ITaskItem[] assemblyNames = new TaskItem[]
             {
-                new TaskItem(@"C:\AssemblyFolder\SomeAssembly.dll"),
+                new TaskItem(s_assemblyFolder_SomeAssemblyDllPath)
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
@@ -8108,7 +8105,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\Regress442570",
+                s_regress442570_RootPath
             };
 
             Execute(t);

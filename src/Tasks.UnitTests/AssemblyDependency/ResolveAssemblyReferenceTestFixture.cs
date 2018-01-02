@@ -236,11 +236,31 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_regress444809_V2RootPath = Path.Combine(s_regress444809RootPath, "v2");
         protected static readonly string s_regress444809_V2_ADllPath = Path.Combine(s_regress444809_V2RootPath, "A.dll");
 
+        protected static readonly string s_regress442570_RootPath = Path.Combine(s_rootPathPrefix, "Regress442570");
+        protected static readonly string s_regress442570_ADllPath = Path.Combine(s_regress442570_RootPath, "A.dll");
+        protected static readonly string s_regress442570_BDllPath = Path.Combine(s_regress442570_RootPath, "B.dll");
+
         protected static readonly string s_myAppRootPath = Path.Combine(s_rootPathPrefix, "MyApp");
         protected static readonly string s_myApp_V05Path = Path.Combine(s_myAppRootPath, "v0.5");
         protected static readonly string s_myApp_V10Path = Path.Combine(s_myAppRootPath, "v1.0");
         protected static readonly string s_myApp_V20Path = Path.Combine(s_myAppRootPath, "v2.0");
         protected static readonly string s_myApp_V30Path = Path.Combine(s_myAppRootPath, "v3.0");
+
+        protected static readonly string s_netstandardLibraryDllPath = Path.Combine(s_rootPathPrefix, "NetStandard", "netstandardlibrary.dll");
+        protected static readonly string s_netstandardDllPath = Path.Combine(s_rootPathPrefix, "NetStandard", "netstandard.dll");
+
+        protected static readonly string s_portableDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "Portable.dll");
+        protected static readonly string s_systemRuntimeDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "System.Runtime.dll");
+
+        protected static readonly string s_dependsOnNuGet_ADllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "A.dll");
+        protected static readonly string s_dependsOnNuGet_NDllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.dll");
+        protected static readonly string s_dependsOnNuGet_NExePath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.exe");
+        protected static readonly string s_dependsOnNuGet_NWinMdPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.winmd");
+
+        protected static readonly string s_nugetCache_N_Lib_NDllPath = Path.Combine(s_rootPathPrefix, "NugetCache", "N", "lib", "N.dll");
+
+        protected static readonly string s_assemblyFolder_RootPath = Path.Combine(s_rootPathPrefix, "AssemblyFolder");
+        protected static readonly string s_assemblyFolder_SomeAssemblyDllPath = Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.dll");
 
         /// <summary>
         /// Search paths to use.
@@ -443,8 +463,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\Regress435487\microsoft.build.engine.dll",
             @"C:\Regress313747\Microsoft.Office.Interop.Excel.dll",
             @"C:\Regress313747\MS.Internal.Test.Automation.Office.Excel.dll",
-            @"C:\Regress442570\A.dll",
-            @"C:\Regress442570\B.dll",
+            s_regress442570_ADllPath,
+            s_regress442570_BDllPath,
             s_regress454863_ADllPath,
             s_regress454863_BDllPath,
             @"C:\Regress393931\A.metadata_dll",
@@ -468,12 +488,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"c:\MyRedist\MyOtherAssembly.dll",
             @"c:\MyRedist\MyThirdAssembly.dll",
             // ==[Related File Extensions Testing]================================================================================================
-            @"C:\AssemblyFolder\SomeAssembly.dll",
-            @"C:\AssemblyFolder\SomeAssembly.pdb",
-            @"C:\AssemblyFolder\SomeAssembly.xml",
-            @"C:\AssemblyFolder\SomeAssembly.pri",
-            @"C:\AssemblyFolder\SomeAssembly.licenses",
-            @"C:\AssemblyFolder\SomeAssembly.config",
+            s_assemblyFolder_SomeAssemblyDllPath,
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.pdb"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.xml"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.pri"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.licenses"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.config"),
             // ==[Related File Extensions Testing]================================================================================================
 
             // ==[Unification Testing]============================================================================================================
@@ -574,13 +594,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\DirectoryContainsdllAndWinmd\c.winmd",
             @"C:\DirectoryContainstwoWinmd\a.winmd",
             @"C:\DirectoryContainstwoWinmd\c.winmd",
-            @"C:\SystemRuntime\System.Runtime.dll",
-            @"C:\SystemRuntime\Portable.dll",
-            @"C:\NetStandard\netstandardlibrary.dll",
-            @"C:\NetStandard\netstandard.dll",
+            s_systemRuntimeDllPath,
+            s_portableDllPath,
+            s_netstandardLibraryDllPath,
+            s_netstandardDllPath,
             @"C:\SystemRuntime\Regular.dll",
-            @"C:\DependsOnNuget\A.dll",
-            @"C:\NugetCache\N\lib\N.dll"
+            s_dependsOnNuGet_ADllPath,
+            s_nugetCache_N_Lib_NDllPath
         };
 
         /// <summary>
@@ -1096,7 +1116,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\Regress442570\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
@@ -1107,7 +1127,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
@@ -1131,7 +1151,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("D, Version=2.0.0.0, Culture=en, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
@@ -1734,12 +1754,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
 
-            if (string.Compare(path, @"C:\DependsOnNuget\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (string.Compare(path, @"C:\NugetCache\N\lib\N.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(path, s_nugetCache_N_Lib_NDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("N, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
@@ -1858,7 +1878,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1914,7 +1934,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2439,25 +2459,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension[0];
             }
 
-            if (String.Compare(path, @"C:\SystemRuntime\Portable.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a portable assembly with a reference to System.Runtime
                 return new AssemblyNameExtension[]
                 {
-                    GetAssemblyName(@"C:\SystemRuntime\System.Runtime.dll")
+                    GetAssemblyName(s_systemRuntimeDllPath)
                 };
             }
 
-            if (String.Compare(path, @"C:\NetStandard\netstandardlibrary.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_netstandardLibraryDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a .NET Standard assembly
                 return new AssemblyNameExtension[]
                 {
-                    GetAssemblyName(@"C:\NetStandard\netstandard.dll")
+                    GetAssemblyName(s_netstandardDllPath)
                 };
             }
 
-            if (String.Compare(path, @"C:\DependsOnNuget\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
