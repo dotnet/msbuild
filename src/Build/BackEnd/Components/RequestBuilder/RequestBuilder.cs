@@ -1162,7 +1162,20 @@ namespace Microsoft.Build.BackEnd
 
             string toolsVersionOverride = _requestEntry.RequestConfiguration.ExplicitToolsVersionSpecified ? _requestEntry.RequestConfiguration.ToolsVersion : null;
 
-            return new ProjectInstance(_requestEntry.RequestConfiguration.ProjectFullPath, globalProperties, toolsVersionOverride, _componentHost.BuildParameters, _nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext);
+            return new ProjectInstance(
+                _requestEntry.RequestConfiguration.ProjectFullPath,
+                globalProperties,
+                toolsVersionOverride,
+                _componentHost.BuildParameters,
+                _nodeLoggingContext.LoggingService,
+                new BuildEventContext(
+                    _requestEntry.Request.BuildEventContext.SubmissionId,
+                    _nodeLoggingContext.BuildEventContext.NodeId,
+                    BuildEventContext.InvalidEvaluationId,
+                    BuildEventContext.InvalidProjectInstanceId,
+                    BuildEventContext.InvalidProjectContextId,
+                    BuildEventContext.InvalidTargetId,
+                    BuildEventContext.InvalidTaskId));
         }
 
         /// <summary>
