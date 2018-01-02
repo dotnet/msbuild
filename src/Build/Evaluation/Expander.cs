@@ -3288,107 +3288,115 @@ namespace Microsoft.Build.Evaluation
             /// <returns>The value returned from the function call</returns>
             private object ExecuteWellKnownFunction(object objectInstance, object[] args)
             {
-                if (objectInstance is string text)
+                if (objectInstance is string)
                 {
+                    string text = (string)objectInstance;
                     if (string.Equals(_methodMethodName, "Substring", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (args.Length == 1)
+                        int startIndex;
+                        int length;
+                        if (TryGetArg(args, out startIndex))
                         {
-                            if (args[0] is string arg0 &&
-                                int.TryParse(arg0, out int startIndex) &&
-                                startIndex >= 0 &&
-                                startIndex < text.Length)
-                            {
-                                return text.Substring(startIndex);
-                            }
+                            return text.Substring(startIndex);
                         }
-                        else if (args.Length == 2)
+                        else if (TryGetArgs(args, out startIndex, out length))
                         {
-                            if (args[0] is string arg0 &&
-                                args[1] is string arg1 &&
-                                int.TryParse(arg0, out int startIndex) &&
-                                int.TryParse(arg1, out int length) &&
-                                startIndex >= 0 &&
-                                startIndex <= text.Length &&
-                                length >= 0 &&
-                                startIndex + length <= text.Length)
-                            {
-                                return text.Substring(startIndex, length);
-                            }
+                            return text.Substring(startIndex, length);
                         }
                     }
                     else if (string.Equals(_methodMethodName, "Split", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (args.Length == 1)
+                        string separator;
+                        if (TryGetArg(args, out separator) && separator.Length == 1)
                         {
-                            if (args[0] is string arg0 &&
-                                arg0.Length == 1)
-                            {
-                                return text.Split(arg0[0]);
-                            }
+                            return text.Split(separator[0]);
                         }
                     }
                     else if (string.Equals(_methodMethodName, "PadLeft", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (args.Length == 1)
+                        int totalWidth;
+                        string paddingChar;
+                        if (TryGetArg(args, out totalWidth))
                         {
-                            if (args[0] is string arg0 &&
-                                int.TryParse(arg0, out int totalWidth))
-                            {
-                                return text.PadLeft(totalWidth);
-                            }
+                            return text.PadLeft(totalWidth);
                         }
-                        else if (args.Length == 2)
+                        else if (TryGetArgs(args, out totalWidth, out paddingChar) && paddingChar.Length == 1)
                         {
-                            if (args[0] is string arg0 &&
-                                args[1] is string arg1 &&
-                                int.TryParse(arg0, out int totalWidth) &&
-                                arg1.Length == 1)
-                            {
-                                return text.PadLeft(totalWidth, arg1[0]);
-                            }
+                            return text.PadLeft(totalWidth, paddingChar[0]);
                         }
                     }
                     else if (string.Equals(_methodMethodName, "TrimEnd", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (args.Length == 1)
+                        string trimChars;
+                        if (TryGetArg(args, out trimChars) && trimChars.Length > 0)
                         {
-                            if (args[0] is string arg0 && arg0.Length > 0)
-                            {
-                                return text.TrimEnd(arg0.ToCharArray());
-                            }
+                            return text.TrimEnd(trimChars.ToCharArray());
                         }
                     }
                     else if (string.Equals(_methodMethodName, "get_Chars", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (args.Length == 1 &&
-                            args[0] is string arg0 &&
-                            int.TryParse(arg0, out int index) &&
-                            index >= 0 &&
-                            index < text.Length)
+                        int index;
+                        if (TryGetArg(args, out index))
                         {
                             return text[index];
                         }
                     }
                 }
-                else if (objectInstance is string[] stringArray)
+                else if (objectInstance is string[])
                 {
+                    string[] stringArray = (string[])objectInstance;
                     if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (args.Length == 1)
+                        int index;
+                        if (TryGetArg(args, out index))
                         {
-                            if (args[0] is string arg0 &&
-                                int.TryParse(arg0, out int index) &&
-                                index >= 0 &&
-                                index < stringArray.Length)
-                            {
-                                return stringArray[index];
-                            }
+                            return stringArray[index];
                         }
                     }
                 }
 
                 return null;
+            }
+
+            private static bool TryGetArg<A0>(object[] args, out A0 arg0)
+            {
+                if (args.Length != 1)
+                {
+                    arg0 = default(A0);
+                    return false;
+                }
+
+                var value = args[0];
+                if (value is A0)
+                {
+                    arg0 = (A0)value;
+                    return true;
+                }
+
+                arg0 = default(A0);
+                return false;
+            }
+
+            private static bool TryGetArgs<A0, A1>(object[] args, out A0 arg0, out A1 arg1)
+            {
+                arg0 = default(A0);
+                arg1 = default(A1);
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                var value0 = args[0];
+                var value1 = args[1];
+                if (value0 is A0 && value1 is A1)
+                {
+                    arg0 = (A0)value0;
+                    arg1 = (A1)value1;
+                    return true;
+                }
+
+                return false;
             }
 
             /// <summary>
