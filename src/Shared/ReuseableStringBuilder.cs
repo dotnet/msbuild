@@ -90,6 +90,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// The number here is arbitrary. For a StringBuilder we have a chunk length of 8000 characters which corresponds to
+        /// 5 StringBuilder chunks which need to be walked before the next character can be fetched (see MaxChunkSize of StringBuilder).
+        /// That should be a good compromise to not allocate to much but still make use of the intern cache. The actual cutoff where it is cheaper
+        /// to allocate a temp string might be well below that limit but that depends on many other factors such as GC Heap size and other allocating threads. 
+        /// </summary>
+        const int MaxByCharCompareLength = 40 * 1000;
+
+        /// <summary>
         /// Compare target to string. 
         /// </summary>
         bool OpportunisticIntern.IInternable.IsOrdinalEqualToStringOfSameLength(string other)
@@ -97,7 +105,7 @@ namespace Microsoft.Build.Shared
 #if DEBUG
             ErrorUtilities.VerifyThrow(other.Length == _borrowedBuilder.Length, "should be same length");
 #endif
-            if (other.Length > 40_000)
+            if (other.Length > MaxByCharCompareLength)
             {
                 return String.Equals( ((OpportunisticIntern.IInternable) this).ExpensiveConvertToString(), other, StringComparison.Ordinal);
             }
