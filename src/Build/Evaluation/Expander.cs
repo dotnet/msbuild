@@ -3156,9 +3156,23 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        // First attempt to recognize some well-known functions to avoid binding
-                        // and potential first-chance MissingMethodExceptions
-                        functionResult = ExecuteWellKnownFunction(objectInstance, args);
+                        try
+                        {
+                            // First attempt to recognize some well-known functions to avoid binding
+                            // and potential first-chance MissingMethodExceptions
+                            functionResult = ExecuteWellKnownFunction(objectInstance, args);
+                        }
+                        // we need to preserve the same behavior on exceptions as the actual binder
+                        catch (Exception ex)
+                        {
+                            string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
+                            if (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
+                            {
+                                return partiallyEvaluated;
+                            }
+
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message.Replace("\r\n", " "));
+                        }
 
                         if (functionResult == null)
                         {

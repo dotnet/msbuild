@@ -3565,6 +3565,15 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringGetCharsError()
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                TestPropertyFunction("$(prop[5])", "prop", "461", "4");
+            });
+        }
+
+        [Fact]
         public void PropertyFunctionStringPadLeft1()
         {
             TestPropertyFunction("$(prop.PadLeft(2))", "prop", "x", " x");
