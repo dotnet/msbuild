@@ -15,7 +15,6 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-
 namespace Microsoft.Build.Tasks
 {
     /*
@@ -55,6 +54,11 @@ namespace Microsoft.Build.Tasks
         /// AssemblyName to unified assemblyName. We make this kind of call a lot and also will ask for the same name multiple times.
         /// </summary>
         private ConcurrentDictionary<string, AssemblyEntry> _assemblyNameToUnifiedAssemblyName = new ConcurrentDictionary<string, AssemblyEntry>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// AssemblyName to AssemblyNameExtension object. We make this kind of call a lot and also will ask for the same name multiple times.
+        /// </summary>
+        private ConcurrentDictionary<string, AssemblyNameExtension> _assemblyNameToAssemblyNameExtension = new ConcurrentDictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// When we check to see if an assembly is remapped we should cache the result because we may get asked the same question a number of times.
@@ -159,11 +163,15 @@ namespace Microsoft.Build.Tasks
         public bool IsFrameworkAssembly(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            AssemblyNameExtension assembly = new AssemblyNameExtension(assemblyName);
-            if (entry != null && !String.IsNullOrEmpty(entry.RedistName) &&
+            if (entry != null && !String.IsNullOrEmpty(entry.RedistName)){
+                AssemblyNameExtension assembly = GetAssemblyNameExtension(assemblyName);
+
                 // The version of the checking assembly should be lower than the one of the unified assembly
-                assembly.Version <= entry.AssemblyNameExtension.Version)
-                return entry.RedistName.StartsWith("Microsoft-Windows-CLRCoreComp", StringComparison.OrdinalIgnoreCase);
+                if(assembly.Version <= entry.AssemblyNameExtension.Version)
+                    return entry.RedistName.StartsWith("Microsoft-Windows-CLRCoreComp", StringComparison.OrdinalIgnoreCase);
+                else
+                    return false;
+            }
             else
                 return false;
         }
@@ -419,7 +427,7 @@ namespace Microsoft.Build.Tasks
                         if (!string.Equals(simpleName, entry.SimpleName, StringComparison.OrdinalIgnoreCase))
                             break;
 
-                        AssemblyNameExtension firstAssembly = new AssemblyNameExtension(assemblyName);
+                        AssemblyNameExtension firstAssembly = GetAssemblyNameExtension(assemblyName);
                         AssemblyNameExtension secondAssembly = entry.AssemblyNameExtension;
 
                         bool matchNotConsideringVersion = firstAssembly.EqualsIgnoreVersion(secondAssembly);
@@ -438,6 +446,19 @@ namespace Microsoft.Build.Tasks
             }
 
             return unifiedEntry;
+        }
+
+        private AssemblyNameExtension GetAssemblyNameExtension(string assemblyName)
+        {
+            AssemblyNameExtension assemblyNameExtension = null;
+
+            if(!_assemblyNameToAssemblyNameExtension.TryGetValue(assemblyName, out assemblyNameExtension))
+            {
+                assemblyNameExtension = new AssemblyNameExtension(assemblyName);
+                _assemblyNameToAssemblyNameExtension.TryAdd(assemblyName, assemblyNameExtension);
+            }
+
+            return assemblyNameExtension;
         }
 
         /// <summary>
