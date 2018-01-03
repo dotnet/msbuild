@@ -39,6 +39,8 @@ path-to-application:
 sdk-options:
   --version        {LocalizableStrings.SDKVersionCommandDefinition}
   --info           {LocalizableStrings.SDKInfoCommandDefinition}
+  --list-sdks      {LocalizableStrings.SDKListSdksCommandDefinition}
+  --list-runtimes  {LocalizableStrings.SDKListRuntimesCommandDefinition}
   -d|--diagnostics {LocalizableStrings.SDKDiagnosticsCommandDefinition}
 
 runtime-options:

@@ -197,6 +197,16 @@
         <target state="translated">Visualizza le informazioni su .NET Core.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="new">Display the installed SDKs.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="new">Display the installed runtimes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
         <source>Enable diagnostic output.</source>
         <target state="translated">Abilita l'output di diagnostica.</target>

@@ -50,6 +50,8 @@ Run 'dotnet COMMAND --help' for more information on a command.
 sdk-options:
   --version        Display .NET Core SDK version.
   --info           Display .NET Core information.
+  --list-sdks      Display the installed SDKs.
+  --list-runtimes  Display the installed runtimes.
   -d|--diagnostics Enable diagnostic output.
 
 runtime-options:
