@@ -13,6 +13,7 @@ Param(
   [switch] $skiptests,
   [switch] $bootstrapOnly,
   [string] $verbosity = "minimal",
+  [string] $hostType,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -38,6 +39,7 @@ function Print-Usage() {
     Write-Host "  -ci                     Set when running on CI server"
     Write-Host "  -nolog                  Disable logging"
     Write-Host "  -prepareMachine         Prepare machine for CI run"
+    Write-Host "  -hostType                   Host / MSBuild flavor to use.  Possible values: full, core"
     Write-Host ""
     Write-Host "Command line arguments not listed above are passed through to MSBuild."
     Write-Host "The above arguments can be shortened as much as to be unambiguous (e.g. -co for configuration, -t for test, etc.)."
@@ -160,9 +162,19 @@ function Build {
   InstallDotNetCli
   InstallNuget
 
-  # Uncomment this to build with the .NET CLI
-  # TODO: make this configurable via a parameter to the script
-  #$msbuildHost = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
+  if ($hostType -eq 'full')
+  {
+    $msbuildHost = $null
+  }
+  elseif ($hostType -eq 'core')
+  {
+    $msbuildHost = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
+    $env:DOTNET_HOST_PATH = $msbuildHost
+  }
+  else
+  {
+    throw "Unknown hostType parameter: $hostType"
+  }
 
   $RepoToolsetBuildProj = InstallRepoToolset
 
@@ -197,7 +209,19 @@ function Build {
 
   if (-not $bootstrapOnly)
   {
-    $msbuildToUse = Join-Path $ArtifactsConfigurationDir "bootstrap\net46\MSBuild\15.0\Bin\MSBuild.exe"
+    $bootstrapRoot = Join-Path $ArtifactsConfigurationDir "bootstrap"
+
+    if ($hostType -eq 'full')
+    {
+      $msbuildToUse = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.exe"
+    }
+    else
+    {
+      $msbuildToUse = Join-Path $bootstrapRoot "netcoreapp2.0\MSBuild\\MSBuild.dll"
+    }
+
+    # Use separate artifacts folder for stage 2
+    $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
 
     if ($ci -or $log) {
       Create-Directory $LogDir
@@ -206,14 +230,29 @@ function Build {
       $logCmd = ""
     }
 
-    # When using bootstrapped MSBuild:
-    # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-    # - Don't restore
-    # - Don't sign
-    # - Don't pack
-    # - Do run tests (if not skipped)
-    # - Don't try to create a bootstrap deployment
-    CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs /nr:false $logCmd /p:Restore=false /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+    try
+    {
+      # When using bootstrapped MSBuild:
+      # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+      # - Don't sign
+      # - Don't pack
+      # - Do run tests (if not skipped)
+      # - Don't try to create a bootstrap deployment
+      CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs /nr:false $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+    }
+    finally
+    {
+      # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
+      foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
+      {
+        if ($process.Path.StartsWith( $bootstrapRoot, [StringComparison]::InvariantCultureIgnoreCase) -or
+            $process.Path.StartsWith( $env:DOTNET_INSTALL_DIR, [StringComparison]::InvariantCultureIgnoreCase))
+        {
+          Write-Host "Killing process $($process.Id): $($process.Path)"
+          taskkill /f /pid $process.Id
+        }
+      }
+    }
   }
 
 }
@@ -260,6 +299,11 @@ $VersionsProps = Join-Path $PSScriptRoot "Versions.props"
 $log = -not $nolog
 $restore = -not $norestore
 $test = -not $skiptests
+
+if ($hostType -eq '')
+{
+  $hostType = 'full'
+}
 
 $msbuildHost = $null
 $msbuildToUse = "msbuild"
