@@ -98,6 +98,7 @@ namespace Microsoft.Build.Shared
 
                         // Apply the appdomain settings to the new appdomain before creating it
                         appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
+                        appDomainInfo.ApplicationBase = appDomainSetup.ApplicationBase;
 
                         if (BuildEnvironmentHelper.Instance.RunningTests)
                         {
