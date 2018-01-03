@@ -3156,11 +3156,13 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
+                        bool wellKnownFunctionSuccess = false;
+
                         try
                         {
                             // First attempt to recognize some well-known functions to avoid binding
                             // and potential first-chance MissingMethodExceptions
-                            functionResult = ExecuteWellKnownFunction(objectInstance, args);
+                            wellKnownFunctionSuccess = TryExecuteWellKnownFunction(out functionResult, objectInstance, args);
                         }
                         // we need to preserve the same behavior on exceptions as the actual binder
                         catch (Exception ex)
@@ -3174,7 +3176,7 @@ namespace Microsoft.Build.Evaluation
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message.Replace("\r\n", " "));
                         }
 
-                        if (functionResult == null)
+                        if (!wellKnownFunctionSuccess)
                         {
                             // Execute the function given converted arguments
                             // The only exception that we should catch to try a late bind here is missing method
@@ -3297,10 +3299,11 @@ namespace Microsoft.Build.Evaluation
             /// (rough numbers just for comparison).
             /// See https://github.com/Microsoft/msbuild/issues/2217
             /// </summary>
+            /// <param name="returnVal">The value returned from the function call</param>
             /// <param name="objectInstance">Object that the function is called on</param>
             /// <param name="args">arguments</param>
-            /// <returns>The value returned from the function call</returns>
-            private object ExecuteWellKnownFunction(object objectInstance, object[] args)
+            /// <returns>True if the well known function call binding was successful</returns>
+            private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
             {
                 if (objectInstance is string)
                 {
@@ -3311,11 +3314,13 @@ namespace Microsoft.Build.Evaluation
                         int length;
                         if (TryGetArg(args, out startIndex))
                         {
-                            return text.Substring(startIndex);
+                            returnVal = text.Substring(startIndex);
+                            return true;
                         }
                         else if (TryGetArgs(args, out startIndex, out length))
                         {
-                            return text.Substring(startIndex, length);
+                            returnVal = text.Substring(startIndex, length);
+                            return true;
                         }
                     }
                     else if (string.Equals(_methodMethodName, "Split", StringComparison.OrdinalIgnoreCase))
@@ -3323,7 +3328,8 @@ namespace Microsoft.Build.Evaluation
                         string separator;
                         if (TryGetArg(args, out separator) && separator.Length == 1)
                         {
-                            return text.Split(separator[0]);
+                            returnVal = text.Split(separator[0]);
+                            return true;
                         }
                     }
                     else if (string.Equals(_methodMethodName, "PadLeft", StringComparison.OrdinalIgnoreCase))
@@ -3332,11 +3338,13 @@ namespace Microsoft.Build.Evaluation
                         string paddingChar;
                         if (TryGetArg(args, out totalWidth))
                         {
-                            return text.PadLeft(totalWidth);
+                            returnVal = text.PadLeft(totalWidth);
+                            return true;
                         }
                         else if (TryGetArgs(args, out totalWidth, out paddingChar) && paddingChar.Length == 1)
                         {
-                            return text.PadLeft(totalWidth, paddingChar[0]);
+                            returnVal = text.PadLeft(totalWidth, paddingChar[0]);
+                            return true;
                         }
                     }
                     else if (string.Equals(_methodMethodName, "TrimEnd", StringComparison.OrdinalIgnoreCase))
@@ -3344,7 +3352,8 @@ namespace Microsoft.Build.Evaluation
                         string trimChars;
                         if (TryGetArg(args, out trimChars) && trimChars.Length > 0)
                         {
-                            return text.TrimEnd(trimChars.ToCharArray());
+                            returnVal = text.TrimEnd(trimChars.ToCharArray());
+                            return true;
                         }
                     }
                     else if (string.Equals(_methodMethodName, "get_Chars", StringComparison.OrdinalIgnoreCase))
@@ -3352,7 +3361,8 @@ namespace Microsoft.Build.Evaluation
                         int index;
                         if (TryGetArg(args, out index))
                         {
-                            return text[index];
+                            returnVal = text[index];
+                            return true;
                         }
                     }
                 }
@@ -3364,12 +3374,14 @@ namespace Microsoft.Build.Evaluation
                         int index;
                         if (TryGetArg(args, out index))
                         {
-                            return stringArray[index];
+                            returnVal = stringArray[index];
+                            return true;
                         }
                     }
                 }
 
-                return null;
+                returnVal = null;
+                return false;
             }
 
             private static bool TryGetArg(object[] args, out int arg0)
