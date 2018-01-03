@@ -245,8 +245,7 @@ function Build {
       # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
       foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
       {
-        if ($process.Path.StartsWith( $bootstrapRoot, [StringComparison]::InvariantCultureIgnoreCase) -or
-            $process.Path.StartsWith( $env:DOTNET_INSTALL_DIR, [StringComparison]::InvariantCultureIgnoreCase))
+        if ($process.Path.StartsWith( $RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
         {
           Write-Host "Killing process $($process.Id): $($process.Path)"
           taskkill /f /pid $process.Id
@@ -305,8 +304,11 @@ if ($hostType -eq '')
   $hostType = 'full'
 }
 
+# TODO: If host type is full, either make sure we're running in a developer command prompt, or attempt to locate VS, or fail
+
 $msbuildHost = $null
 $msbuildToUse = "msbuild"
+
 
 
 try {
