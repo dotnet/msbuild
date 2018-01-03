@@ -13,9 +13,9 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Pretty prints an evaluation location in tab separated value (TSV) format
     /// </summary>
-    internal sealed class EvaluationLocationTsvPrettyPrinter : EvaluationLocationPrettyPrinterBase
+    internal sealed class EvaluationLocationTabSeparatedPrettyPrinter : EvaluationLocationPrettyPrinterBase
     {
-        /// <inheritdoc/>
+        /// <inheritdoc/> 
         internal override void AppendHeader(StringBuilder stringBuilder)
         {
             stringBuilder.AppendLine("Id\tParentId\tPass\tFile\tLine #\tExpression\tInc (ms)\tInc (%)\tExc (ms)\tExc (%)\t#\tKind\tBug");

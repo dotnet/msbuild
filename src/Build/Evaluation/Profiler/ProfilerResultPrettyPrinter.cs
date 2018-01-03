@@ -31,7 +31,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public static string GetTsvContent(ProfilerResult result)
         {
-            return GetContent(result, new EvaluationLocationTsvPrettyPrinter());
+            return GetContent(result, new EvaluationLocationTabSeparatedPrettyPrinter());
         }
 
         private static string GetContent(ProfilerResult result, EvaluationLocationPrettyPrinterBase evaluationLocationPrinter)
