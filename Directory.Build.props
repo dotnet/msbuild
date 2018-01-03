@@ -11,7 +11,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.microsoft.repotoolset\$(RoslynToolsMicrosoftRepoToolsetVersion)\tools\</RepoToolsetDir>
+    <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.repotoolset\$(RoslynToolsRepoToolsetVersion)\tools\</RepoToolsetDir>
     <SignToolDataPath>$(RepoRoot)build\SignToolData.json</SignToolDataPath>
     <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
 
