@@ -3358,41 +3358,75 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            private static bool TryGetArg<A0>(object[] args, out A0 arg0)
+            private static bool TryGetArg(object[] args, out int arg0)
             {
                 if (args.Length != 1)
                 {
-                    arg0 = default(A0);
+                    arg0 = 0;
                     return false;
                 }
 
                 var value = args[0];
-                if (value is A0)
+                if (value is string && int.TryParse((string)value, out arg0))
                 {
-                    arg0 = (A0)value;
                     return true;
                 }
 
-                arg0 = default(A0);
+                arg0 = 0;
                 return false;
             }
 
-            private static bool TryGetArgs<A0, A1>(object[] args, out A0 arg0, out A1 arg1)
+            private static bool TryGetArg(object[] args, out string arg0)
             {
-                arg0 = default(A0);
-                arg1 = default(A1);
+                if (args.Length != 1)
+                {
+                    arg0 = null;
+                    return false;
+                }
+
+                arg0 = args[0] as string;
+                return arg0 != null;
+            }
+
+            private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
+            {
+                arg0 = 0;
+                arg1 = 0;
 
                 if (args.Length != 2)
                 {
                     return false;
                 }
 
-                var value0 = args[0];
-                var value1 = args[1];
-                if (value0 is A0 && value1 is A1)
+                var value0 = args[0] as string;
+                var value1 = args[1] as string;
+                if (value0 != null &&
+                    value1 != null &&
+                    int.TryParse(value0, out arg0) &&
+                    int.TryParse(value1, out arg1))
                 {
-                    arg0 = (A0)value0;
-                    arg1 = (A1)value1;
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryGetArgs(object[] args, out int arg0, out string arg1)
+            {
+                arg0 = 0;
+                arg1 = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                var value0 = args[0] as string;
+                arg1 = args[1] as string;
+                if (value0 != null &&
+                    arg1 != null &&
+                    int.TryParse(value0, out arg0))
+                {
                     return true;
                 }
 

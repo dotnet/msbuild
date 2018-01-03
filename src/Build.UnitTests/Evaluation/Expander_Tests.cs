@@ -3547,6 +3547,18 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionSubstring1()
+        {
+            TestPropertyFunction("$(prop.Substring(2))", "prop", "abcdef", "cdef");
+        }
+
+        [Fact]
+        public void PropertyFunctionSubstring2()
+        {
+            TestPropertyFunction("$(prop.Substring(2, 3))", "prop", "abcdef", "cde");
+        }
+
+        [Fact]
         public void PropertyFunctionStringGetChars()
         {
             TestPropertyFunction("$(prop[0])", "prop", "461", "4");
@@ -3555,19 +3567,34 @@ $(
         [Fact]
         public void PropertyFunctionStringPadLeft1()
         {
-            TestPropertyFunction("$(prop.PadLeft(2, '0'))", "prop", "x", "0x");
+            TestPropertyFunction("$(prop.PadLeft(2))", "prop", "x", " x");
         }
 
         [Fact]
         public void PropertyFunctionStringPadLeft2()
         {
-            TestPropertyFunction("$(prop.PadLeft(2))", "prop", "x", " x");
+            TestPropertyFunction("$(prop.PadLeft(2, '0'))", "prop", "x", "0x");
         }
 
         [Fact]
         public void PropertyFunctionStringTrimEndCharArray()
         {
             TestPropertyFunction("$(prop.TrimEnd('.0123456789'))", "prop", "net461", "net");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimEnd1()
+        {
+            TestPropertyFunction("$(prop.TrimEnd('a'))", "prop", "netaa", "net");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimEnd2()
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                TestPropertyFunction("$(prop.TrimEnd('a', 'b'))", "prop", "stringab", "string");
+            });
         }
 
         private void TestPropertyFunction(string expression, string propertyName, string propertyValue, string expected)
