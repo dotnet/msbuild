@@ -17,7 +17,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         {
             // this is just checking if there is an unambiguous group.
             // the called methods decide whether to get the default language filtered lists, based on what they're doing.
-            if (templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup)
+            //
+            // The empty TemplateName check is for when only 1 template (or group) is installed.
+            // When that occurs, the group is considered partial matches. But the output should be the ambiguous case - list the templates, not help on the singular group.
+            if (!string.IsNullOrEmpty(commandInput.TemplateName)
+                    && templateResolutionResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup)
                     && TemplateListResolver.AreAllTemplatesSameLanguage(unambiguousTemplateGroup))
             {
                 // This will often show detailed help on the template group, which only makes sense if they're all the same language.

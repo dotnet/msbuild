@@ -107,18 +107,40 @@ namespace Microsoft.TemplateEngine.Cli
             return false;
         }
 
-        public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template)
+        public enum SingularInvokableMatchCheckStatus
         {
-            IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch() 
-                                                && (_hasUserInputLanguage
-                                                    || x.DispositionOfDefaults.Count == 0
-                                                    || x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact))
-                                                    )
-                                                    .ToList();
-            
-            if (invokableMatches.Count == 1)
+            None,
+            NoMatch,
+            SingleMatch,
+            AmbiguousChoice,
+            AmbiguousPrecedence
+        }
+
+        public bool TryGetSingularInvokableMatch(out ITemplateMatchInfo template, out SingularInvokableMatchCheckStatus resultStatus)
+        {
+            IReadOnlyList<ITemplateMatchInfo> invokableMatches = _coreMatchedTemplates.Where(x => x.IsInvokableMatch()).ToList();
+            IReadOnlyList<ITemplateMatchInfo> languageFilteredInvokableMatches;
+
+            if (_hasUserInputLanguage)
             {
-                template = invokableMatches[0];
+                languageFilteredInvokableMatches = invokableMatches;
+            }
+            else
+            {
+                // check for templates with the default language
+                languageFilteredInvokableMatches = invokableMatches.Where(x => x.DispositionOfDefaults.Any(y => y.Location == MatchLocation.DefaultLanguage && y.Kind == MatchKind.Exact)).ToList();
+
+                // no candidate templates matched the default language, continue with the original candidates.
+                if (languageFilteredInvokableMatches.Count == 0)
+                {
+                    languageFilteredInvokableMatches = invokableMatches;
+                }
+            }
+
+            if (languageFilteredInvokableMatches.Count == 1)
+            {
+                template = languageFilteredInvokableMatches[0];
+                resultStatus = SingularInvokableMatchCheckStatus.SingleMatch;
                 return true;
             }
 
@@ -127,7 +149,7 @@ namespace Microsoft.TemplateEngine.Cli
             //      The one with single starts with is chosen as invokable because if the template with an ambiguous match
             //      was not installed, the one with the singluar invokable would be chosen.
             HashSet<string> singleStartsWithParamNames = new HashSet<string>();
-            foreach (ITemplateMatchInfo checkTemplate in invokableMatches)
+            foreach (ITemplateMatchInfo checkTemplate in languageFilteredInvokableMatches)
             {
                 IList<string> singleStartParamNames = checkTemplate.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith).Select(x => x.ChoiceIfLocationIsOtherChoice).ToList();
                 foreach (string paramName in singleStartParamNames)
@@ -135,19 +157,29 @@ namespace Microsoft.TemplateEngine.Cli
                     if (!singleStartsWithParamNames.Add(paramName))
                     {
                         template = null;
+                        resultStatus = SingularInvokableMatchCheckStatus.AmbiguousChoice;
                         return false;
                     }
                 }
             }
 
-            ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(invokableMatches);
+            ITemplateMatchInfo highestInGroupIfSingleGroup = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(languageFilteredInvokableMatches, out bool ambiguousGroupIdResult);
+
             if (highestInGroupIfSingleGroup != null)
             {
                 template = highestInGroupIfSingleGroup;
+                resultStatus = SingularInvokableMatchCheckStatus.SingleMatch;
                 return true;
+            }
+            else if (ambiguousGroupIdResult)
+            {
+                template = null;
+                resultStatus = SingularInvokableMatchCheckStatus.AmbiguousPrecedence;
+                return false;
             }
 
             template = null;
+            resultStatus = SingularInvokableMatchCheckStatus.NoMatch;
             return false;
         }
 

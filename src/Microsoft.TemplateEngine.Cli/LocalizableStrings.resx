@@ -592,4 +592,13 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches" xml:space="preserve">
     <value>The following parameter(s) or their value(s) are not valid in combination with other supplied parameters or their values:</value>
   </data>
+  <data name="Authoring_AmbiguousBestPrecedence" xml:space="preserve">
+    <value>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</value>
+  </data>
+  <data name="Authoring_AmbiguousChoiceParameterValue" xml:space="preserve">
+    <value>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</value>
+  </data>
+  <data name="NuGetSourceHelp" xml:space="preserve">
+    <value>Specifies a NuGet source to use during install.</value>
+  </data>
 </root>

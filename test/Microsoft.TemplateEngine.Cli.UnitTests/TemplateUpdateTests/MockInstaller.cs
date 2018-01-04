@@ -20,8 +20,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 
         public HashSet<string> Installed { get; private set; }
 
+        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null);
+
         // unconditionally adds the installation requests to the _installed list.
-        public void InstallPackages(IEnumerable<string> installationRequests)
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources)
         {
             Installed.UnionWith(installationRequests);
         }

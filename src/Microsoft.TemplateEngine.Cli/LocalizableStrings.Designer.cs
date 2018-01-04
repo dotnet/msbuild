@@ -464,6 +464,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke..
+        /// </summary>
+        public static string Authoring_AmbiguousBestPrecedence {
+            get {
+                return ResourceManager.GetString("Authoring_AmbiguousBestPrecedence", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An ambiguous choice parameter value prevented unambiguously choosing a template to invoke..
+        /// </summary>
+        public static string Authoring_AmbiguousChoiceParameterValue {
+            get {
+                return ResourceManager.GetString("Authoring_AmbiguousChoiceParameterValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid format for input locale: &quot;{0}&quot;. Example valid formats: [en] [en-US]..
         /// </summary>
         public static string BadLocaleError {
@@ -979,6 +997,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string NoUpdatesFound {
             get {
                 return ResourceManager.GetString("NoUpdatesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
+        /// </summary>
+        public static string NuGetSourceHelp {
+            get {
+                return ResourceManager.GetString("NuGetSourceHelp", resourceCulture);
             }
         }
         

@@ -136,6 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("-o|--output", LocalizableStrings.OutputPath, Accept.ExactlyOneArgument()),
                     Create.Option("-i|--install", LocalizableStrings.InstallHelp, Accept.OneOrMoreArguments()),
                     Create.Option("-u|--uninstall", LocalizableStrings.UninstallHelp, Accept.ZeroOrMoreArguments()),
+                    Create.Option("--nuget-source", LocalizableStrings.NuGetSourceHelp, Accept.OneOrMoreArguments()),
                     Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
                     Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
                     Create.Option("-lang|--language", LocalizableStrings.LanguageParameter,

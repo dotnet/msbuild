@@ -26,6 +26,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         IList<string> ToInstallList { get; }
 
+        IList<string> InstallNuGetSourceList { get; }
+
         IList<string> ToUninstallList { get; }
 
         bool IsForceFlagSpecified { get; }

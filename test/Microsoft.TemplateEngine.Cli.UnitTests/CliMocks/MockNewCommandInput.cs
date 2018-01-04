@@ -48,6 +48,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public IList<string> ToInstallList { get; set; }
 
+        public IList<string> InstallNuGetSourceList { get; set; }
+
         public IList<string> ToUninstallList { get; set; }
 
         public bool IsForceFlagSpecified { get; set; }
