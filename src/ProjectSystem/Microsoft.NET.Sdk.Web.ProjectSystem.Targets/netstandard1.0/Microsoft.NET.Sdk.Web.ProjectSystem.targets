@@ -20,36 +20,48 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
     <RunWorkingDirectory Condition=" '$(RunWorkingDirectory)' == '' and '$(EnableDefaultRunWorkingDirectory)' != 'false' ">$(MSBuildProjectDirectory)</RunWorkingDirectory>
+    <MSBuildWebTargetsPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebTargetsPath>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <MSBuildWebPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebPath>
-    <ActualLangName Condition="Exists('$(MSBuildWebPath)$(LangName)')">$(LangName)</ActualLangName>
-    <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
-  </PropertyGroup>
+  <!--
+    Newer versions of Visual Studio ship the designtime related properties in a targets file. If
+    present that file is used, otherwise for compatibility, it falls back to explicitly defining the properties and items
+    in this targets file.
+  -->
+    <Import Project="$(MSBuildWebTargetsPath)Microsoft.Web.Designtime.targets" Condition="Exists('$(MSBuildWebTargetsPath)Microsoft.Web.Designtime.targets')" />
 
-  <!-- Web project capabilities that enables web features for .NET Core projects -->
-  <ItemGroup>
-    <ProjectCapability Include="DotNetCoreWeb" />
-    <ProjectCapability Include="AspNetCore" />
-    <ProjectCapability Include="Web" />
-    <ProjectCapability Include="SupportHierarchyContextSvc" />
-    <ProjectCapability Include="DynamicDependentFile" />
-    <ProjectCapability Include="DynamicFileNesting" />
+    <Choose>
+      <When Condition="!Exists('$(MSBuildWebTargetsPath)Microsoft.Web.Designtime.targets')" >
+        <PropertyGroup>
+          <ActualLangName Condition="Exists('$(MSBuildWebTargetsPath)$(LangName)')">$(LangName)</ActualLangName>
+          <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
+        </PropertyGroup>
 
-    <!-- 
-      Enables UI for managing secret values when Microsoft.Extensions.Configuration.UserSecrets 1.x is referenced. 
-      Newer versions of this package include a MSBuild file to set this ProjectCapability, but older versions did not include this.
-      See https://github.com/aspnet/Configuration/blob/9135af4b4e95c080ca4a9f0e91ba5a0b8a561c96/src/Microsoft.Extensions.Configuration.UserSecrets/build/netstandard1.0/Microsoft.Extensions.Configuration.UserSecrets.targets#L10
-    -->
-    <ProjectCapability Include="LocalUserSecrets" Condition=" '$(GenerateUserSecretsAttribute)' == 'true' " />
-  </ItemGroup>
+        <!-- Web project capabilities that enables web features for .NET Core projects -->
+        <ItemGroup >
+          <ProjectCapability Include="DotNetCoreWeb" />
+          <ProjectCapability Include="AspNetCore" />
+          <ProjectCapability Include="Web" />
+          <ProjectCapability Include="SupportHierarchyContextSvc" />
+          <ProjectCapability Include="DynamicDependentFile" />
+          <ProjectCapability Include="DynamicFileNesting" />
 
-  <!-- Web specific properties -->
-  <ItemGroup>
-    <PropertyPageSchema Include="$(MSBuildWebPath)$(ActualLangName)\GeneralBrowseObject.xaml"
-                        Condition="Exists('$(MSBuildWebPath)$(ActualLangName)\GeneralBrowseObject.xaml')">
-      <Context>BrowseObject</Context>
-    </PropertyPageSchema>
-  </ItemGroup>
+          <!-- 
+            Enables UI for managing secret values when Microsoft.Extensions.Configuration.UserSecrets 1.x is referenced. 
+            Newer versions of this package include a MSBuild file to set this ProjectCapability, but older versions did not include this.
+            See https://github.com/aspnet/Configuration/blob/9135af4b4e95c080ca4a9f0e91ba5a0b8a561c96/src/Microsoft.Extensions.Configuration.UserSecrets/build/netstandard1.0/Microsoft.Extensions.Configuration.UserSecrets.targets#L10
+          -->
+          <ProjectCapability Include="LocalUserSecrets" Condition=" '$(GenerateUserSecretsAttribute)' == 'true' " />
+
+        </ItemGroup>
+
+        <!-- Web specific properties -->
+        <ItemGroup>
+          <PropertyPageSchema Include="$(MSBuildWebTargetsPath)$(ActualLangName)\GeneralBrowseObject.xaml"
+                              Condition="Exists('$(MSBuildWebTargetsPath)$(ActualLangName)\GeneralBrowseObject.xaml')">
+            <Context>BrowseObject</Context>
+          </PropertyPageSchema>
+        </ItemGroup>
+    </When>
+  </Choose>
 </Project>
