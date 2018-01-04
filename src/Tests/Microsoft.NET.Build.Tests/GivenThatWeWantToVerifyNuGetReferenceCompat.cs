@@ -133,8 +133,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        // https://github.com/dotnet/sdk/issues/1327
-        [CoreMSBuildAndWindowsOnlyTheory]
+        [WindowsOnlyTheory]
         [InlineData("netstandard2.0")]
         [InlineData("netcoreapp2.0")]
         public void Net461_is_implicit_for_Netstandard_and_Netcore_20(string targetFramework)
