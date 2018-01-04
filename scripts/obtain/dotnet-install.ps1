@@ -49,10 +49,13 @@
 .PARAMETER AzureFeed
     Default: https://dotnetcli.azureedge.net/dotnet
     This parameter typically is not changed by the user.
-    It allows to change URL for the Azure feed used by this installer.
+    It allows changing the URL for the Azure feed used by this installer.
 .PARAMETER UncachedFeed
     This parameter typically is not changed by the user.
-    It allows to change URL for the Uncached feed used by this installer.
+    It allows changing the URL for the Uncached feed used by this installer.
+.PARAMETER FeedCredential
+    Used as a query string to append to the Azure feed.
+    It allows changing the URL to use non-public blob storage accounts.
 .PARAMETER ProxyAddress
     If set, the installer will use the proxy when making web requests
 .PARAMETER ProxyUseDefaultCredentials
@@ -73,6 +76,7 @@ param(
    [switch]$NoPath,
    [string]$AzureFeed="https://dotnetcli.azureedge.net/dotnet",
    [string]$UncachedFeed="https://dotnetcli.blob.core.windows.net/dotnet",
+   [string]$FeedCredential,
    [string]$ProxyAddress,
    [switch]$ProxyUseDefaultCredentials,
    [switch]$SkipNonVersionedFiles
@@ -199,8 +203,9 @@ function GetHTTPResponse([Uri] $Uri)
             # Default timeout for HttpClient is 100s.  For a 50 MB download this assumes 500 KB/s average, any less will time out
             # 10 minutes allows it to work over much slower connections.
             $HttpClient.Timeout = New-TimeSpan -Minutes 10
-            $Response = $HttpClient.GetAsync($Uri).Result
+            $Response = $HttpClient.GetAsync("${Uri}${FeedCredential}").Result
             if (($Response -eq $null) -or (-not ($Response.IsSuccessStatusCode))) {
+                 # The feed credential is potentially sensitive info. Do not log FeedCredential to console output.
                 $ErrorMsg = "Failed to download $Uri."
                 if ($Response -ne $null) {
                     $ErrorMsg += "  $Response"
@@ -467,10 +472,15 @@ if ($DryRun) {
 $InstallRoot = Resolve-Installation-Path $InstallDir
 Say-Verbose "InstallRoot: $InstallRoot"
 
-$IsSdkInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -RelativePathToPackage "sdk" -SpecificVersion $SpecificVersion
-Say-Verbose ".NET SDK installed? $IsSdkInstalled"
-if ($IsSdkInstalled) {
-    Say ".NET SDK version $SpecificVersion is already installed."
+$dotnetPackageRelativePath = if ($SharedRuntime) { "shared\Microsoft.NETCore.App" } else { "sdk" }
+
+$isAssetInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -RelativePathToPackage $dotnetPackageRelativePath -SpecificVersion $SpecificVersion
+if ($isAssetInstalled) {
+    if ($SharedRuntime) {
+        Say ".NET Core Runtime version $SpecificVersion is already installed."
+    } else {
+        Say ".NET Core SDK version $SpecificVersion is already installed."
+    }
     Prepend-Sdk-InstallRoot-To-Path -InstallRoot $InstallRoot -BinFolderRelativePath $BinFolderRelativePath
     exit 0
 }

@@ -24,6 +24,6 @@
     <PackageReference Include="System.Collections.Specialized" Version="4.0.1" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.1.0" />
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 </Project>

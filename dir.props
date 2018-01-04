@@ -20,7 +20,7 @@
   <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(BuildInfoProps)" />
 
   <Import Project="build/BranchInfo.props" />
-
+  <Import Project="build/AzureInfo.props" />
   <Import Project="build/BundledTools.props" />
   <Import Project="build/BundledSdks.props" />
   <Import Project="build/BundledTemplates.props" />
@@ -40,7 +40,6 @@
   <Import Project="build/CrossGen.props" />
   <Import Project="build/BackwardsCompatibilityRuntimes.props" />
 
-  <Import Project="build/AzureInfo.props" />
   <Import Project="build/InstallerInfo.props" />
   <Import Project="build/GenerateResxSource.targets" />
 </Project>
