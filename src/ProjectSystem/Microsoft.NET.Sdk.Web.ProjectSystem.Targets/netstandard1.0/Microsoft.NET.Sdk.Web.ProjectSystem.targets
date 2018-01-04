@@ -25,7 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     Newer versions of Visual Studio ship the designtime related properties in a targets file and all future design time only elements should be added there. If that file does not
-    exist, if falls back to the default set of values defined here.
+    exist, it falls back to the default set of values defined here.
   -->
     <Import Project="$(MSBuildWebTargetsPath)Microsoft.Web.Designtime.targets" Condition="Exists('$(MSBuildWebTargetsPath)Microsoft.Web.Designtime.targets')" />
 
