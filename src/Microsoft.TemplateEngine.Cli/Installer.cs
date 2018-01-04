@@ -31,10 +31,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false);
 
-        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources)
-        {
-            InstallPackages(installationRequests, nuGetSources, false);
-        }
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources) => InstallPackages(installationRequests, nuGetSources, false);
 
         public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall)
         {
