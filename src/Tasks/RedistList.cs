@@ -450,15 +450,7 @@ namespace Microsoft.Build.Tasks
 
         private AssemblyNameExtension GetAssemblyNameExtension(string assemblyName)
         {
-            AssemblyNameExtension assemblyNameExtension = null;
-
-            if(!_assemblyNameToAssemblyNameExtension.TryGetValue(assemblyName, out assemblyNameExtension))
-            {
-                assemblyNameExtension = new AssemblyNameExtension(assemblyName);
-                _assemblyNameToAssemblyNameExtension.TryAdd(assemblyName, assemblyNameExtension);
-            }
-
-            return assemblyNameExtension;
+            return _assemblyNameToAssemblyNameExtension.GetOrAdd(assemblyName, (key) => new AssemblyNameExtension(key));
         }
 
         /// <summary>
