@@ -21,9 +21,11 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup>
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-    
-    <!-- Temporarily disable Xliff -->
-    <UsingToolXliff>false</UsingToolXliff>
+
+    <!-- Use later version of XliffTasks which has a fix for .resx files consumed by multiple projects.
+         See https://github.com/dotnet/xliff-tasks/pull/34 -->
+    <XliffTasksVersion>0.2.0-beta-000081</XliffTasksVersion>
+
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->

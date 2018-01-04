@@ -47,6 +47,9 @@
     <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
     <PackageReference Include="xunit.assert" Version="$(XUnitVersion)" />
 
+    <!-- Don't localize unit test projects -->
+    <PackageReference Remove="XliffTasks" />
+
     <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" />
     <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestProgram.cs" />
 
