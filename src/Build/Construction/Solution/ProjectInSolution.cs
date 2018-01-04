@@ -14,6 +14,7 @@ using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtiliti
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Microsoft.Build.Construction
 {
@@ -329,13 +330,20 @@ namespace Microsoft.Build.Construction
                     bool defaultNamespace = String.Compare(mainProjectElement.NamespaceURI,
                                                 XMakeAttributes.defaultXmlNamespace,
                                                 StringComparison.OrdinalIgnoreCase) == 0;
+                    bool projectElementInvalid = ElementContainsInvalidNamespaceDefitions(mainProjectElement);
+
+                    // If the MSBuild namespace is declared, it is very likely an MSBuild project that should be built.
+                    if (defaultNamespace)
+                    {
+                        _canBeMSBuildProjectFile = true;
+                        return _canBeMSBuildProjectFile;
+                    }
 
                     // This is a bit of a special case, but an rptproj file will contain a Project with no schema that is
                     // not an MSBuild file. It will however have ToolsVersion="2.0" which is not supported with an empty
                     // schema. This is not a great solution, but it should cover the customer reported issue. See:
                     // https://github.com/Microsoft/msbuild/issues/2064
-                    if (defaultNamespace ||
-                        emptyNamespace && mainProjectElement.GetAttribute("ToolsVersion") != "2.0")
+                    if (emptyNamespace && !projectElementInvalid && mainProjectElement.GetAttribute("ToolsVersion") != "2.0")
                     {
                         _canBeMSBuildProjectFile = true;
                         return _canBeMSBuildProjectFile;
@@ -476,6 +484,25 @@ namespace Microsoft.Build.Construction
             }
 
             return uniqueProjectName;
+        }
+
+        /// <summary>
+        /// Check a Project element for known invalid namespace definitions.
+        /// </summary>
+        /// <param name="mainProjectElement">Project XML Element</param>
+        /// <returns>True if the element contains known invalid namespace definitions</returns>
+        private static bool ElementContainsInvalidNamespaceDefitions(XmlElement mainProjectElement)
+        {
+            if (mainProjectElement.HasAttributes)
+            {
+                // Data warehouse projects (.dwproj) will contain a Project element but are invalid MSBuild. Check attributes
+                // on Project for signs that this is a .dwproj file. If there are, it's not a valid MSBuild file.
+                return mainProjectElement.Attributes.OfType<XmlAttribute>().Any(a =>
+                    a.Name.Equals("xmlns:dwd", StringComparison.OrdinalIgnoreCase) ||
+                    a.Name.StartsWith("xmlns:dd", StringComparison.OrdinalIgnoreCase));
+            }
+
+            return false;
         }
 
         #endregion

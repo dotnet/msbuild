@@ -304,8 +304,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ProjectInSolution project2 = solution.ProjectsByGuid["{DEA89696-F42B-4B58-B7EE-017FF40817D1}"];
 
                 project1.CanBeMSBuildProjectFile(out error).ShouldBe(false);
-                // TODO: https://github.com/Microsoft/msbuild/issues/2064
-                //project2.CanBeMSBuildProjectFile(out error).ShouldBe(false);
+                project2.CanBeMSBuildProjectFile(out error).ShouldBe(false);
             }
         }
 
