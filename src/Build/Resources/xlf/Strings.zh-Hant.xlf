@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
-      <group id="MICROSOFT.BUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: "{0}" 工作有多個名稱為 "{1}" 的參數。</target>
@@ -2055,6 +2054,16 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
         <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
         <target state="translated">因為 ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition 已在載入此專案時設定，所以指定的 API "{0}" 無法使用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedInvalidFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
+        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedMissingFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
+        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</target>
         <note />
       </trans-unit>
     </body>

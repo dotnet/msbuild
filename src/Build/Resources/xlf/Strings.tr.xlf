@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../Strings.resx">
     <body>
-      <group id="MICROSOFT.BUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: "{0}" görevinin "{1}" adında birden fazla parametresi var.</target>
@@ -2055,6 +2054,16 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       <trans-unit id="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
         <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
         <target state="translated">Bu proje yüklenirken ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition ayarlandığından, belirtilen "{0}" API ‘si kullanılamıyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedInvalidFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
+        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedMissingFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
+        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</target>
         <note />
       </trans-unit>
     </body>
