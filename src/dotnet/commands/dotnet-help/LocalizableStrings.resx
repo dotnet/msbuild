@@ -237,6 +237,12 @@
   <data name="SDKInfoCommandDefinition" xml:space="preserve">
     <value>Display .NET Core information.</value>
   </data>
+  <data name="SDKListSdksCommandDefinition" xml:space="preserve">
+    <value>Display the installed SDKs.</value>
+  </data>
+  <data name="SDKListRuntimesCommandDefinition" xml:space="preserve">
+    <value>Display the installed runtimes.</value>
+  </data>
   <data name="SDKDiagnosticsCommandDefinition" xml:space="preserve">
     <value>Enable diagnostic output.</value>
   </data>
