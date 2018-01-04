@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
         <source>Do not build project before running.  Implies --no-restore.</source>
-        <target state="needs-review-translation">在執行之前跳過建置該專案。根據預設，將會建置該專案。</target>
+        <target state="translated">請勿在執行前建置專案。  這意味著 --沒有還原。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">

@@ -62,9 +62,9 @@ Aqui estão algumas opções para corrigir este erro:
         <source>ASP.NET Core
 ------------
 Installed ASP.NET Core HTTPS development certificate. For more information go to https://go.microsoft.com/fwlink/?linkid=84805</source>
-        <target state="new">ASP.NET Core
+        <target state="translated">ASP.NET Core
 ------------
-Installed ASP.NET Core HTTPS development certificate. For more information go to https://go.microsoft.com/fwlink/?linkid=84805</target>
+Certificado de desenvolvimento de HTTPS do ASP.NET Core instalado. Para obter mais informações, vá para https://go.microsoft.com/fwlink/?linkid=84805</target>
         <note />
       </trans-unit>
     </body>

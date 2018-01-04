@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
         <source>Do not build project before running.  Implies --no-restore.</source>
-        <target state="needs-review-translation">Před spuštěním vynechá sestavení projektu. Standardně se projekt sestaví.</target>
+        <target state="translated">Nesestavujte projekt, dokud ho nespustíte. Implikuje možnost --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">

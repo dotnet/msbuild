@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
         <source>Do not build project before testing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">测试之前不要生成项目。</target>
+        <target state="translated">测试之前不要生成项目。Implies --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">

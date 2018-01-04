@@ -671,7 +671,7 @@
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
         <source>Project `{0}` removed from the solution.</source>
-        <target state="new">Project `{0}` removed from the solution.</target>
+        <target state="translated">專案 `{0}` 已從解決方案移除。</target>
         <note />
       </trans-unit>
     </body>

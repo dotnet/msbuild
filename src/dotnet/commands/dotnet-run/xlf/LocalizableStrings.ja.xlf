@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
         <source>Do not build project before running.  Implies --no-restore.</source>
-        <target state="needs-review-translation">実行の前に、プロジェクトのビルドをスキップします。既定では、プロジェクトはビルドされます。</target>
+        <target state="translated">実行する前にプロジェクトをビルドしないでください。  暗示 --復元なし。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Do not build project before packing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">압축하기 전에 프로젝트를 빌드하지 않습니다. 기본적으로 프로젝트가 빌드됩니다.</target>
+        <target state="translated">압축하기 전에 프로젝트를 빌드하지 않습니다. 복원 없음을 의미합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
