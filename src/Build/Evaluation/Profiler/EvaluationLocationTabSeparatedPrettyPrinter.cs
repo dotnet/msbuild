@@ -15,28 +15,18 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal sealed class EvaluationLocationTabSeparatedPrettyPrinter : EvaluationLocationPrettyPrinterBase
     {
+        private const string Separator = "\t";
+
         /// <inheritdoc/> 
         internal override void AppendHeader(StringBuilder stringBuilder)
         {
-            stringBuilder.AppendLine("Id\tParentId\tPass\tFile\tLine #\tExpression\tInc (ms)\tInc (%)\tExc (ms)\tExc (%)\t#\tKind\tBug");
+            AppendDefaultHeaderWithSeparator(stringBuilder, Separator);
         }
 
         /// <inheritdoc/>
         internal override void AppendLocation(StringBuilder stringBuilder, TimeSpan totalTime, EvaluationLocation evaluationLocation, ProfiledLocation profiledLocation)
         {
-            stringBuilder.AppendLine(string.Join("\t",
-                evaluationLocation.Id,
-                evaluationLocation.ParentId?.ToString() ?? string.Empty,
-                evaluationLocation.EvaluationPassDescription,
-                evaluationLocation.File == null ? string.Empty : System.IO.Path.GetFileName(evaluationLocation.File), // file names shouldn't have tabs on any reasonable file system
-                evaluationLocation.Line?.ToString() ?? string.Empty,
-                NormalizeExpression(evaluationLocation.ElementDescription, evaluationLocation.Kind) ?? string.Empty,
-                GetMilliseconds(profiledLocation.InclusiveTime),
-                GetPercentage(totalTime, profiledLocation.InclusiveTime) + "%",
-                GetMilliseconds(profiledLocation.ExclusiveTime),
-                GetPercentage(totalTime, profiledLocation.ExclusiveTime) + "%",
-                profiledLocation.NumberOfHits,
-                evaluationLocation.Kind + "\t"));
+            AppendDefaultLocationWithSeparator(stringBuilder, totalTime, evaluationLocation, profiledLocation, Separator);
         }
 
         /// <inheritdoc/>
@@ -49,9 +39,9 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Swap tabs for spaces, so we don't mess up the TSV format
-            text = text.Replace('\t', ' ');
+            text = text.Replace(Separator, " ");
 
-            return '`' + text + '`';
+            return text;
         }
     }
 }

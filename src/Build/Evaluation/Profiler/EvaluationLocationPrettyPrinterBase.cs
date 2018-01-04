@@ -69,5 +69,39 @@ namespace Microsoft.Build.Evaluation
             var newLineIndex = outerXml.IndexOfAny(new[] { '\r', '\n' });
             return newLineIndex == -1 ? outerXml : outerXml.Remove(newLineIndex);
         }
+
+        /// <summary>
+        /// Appends a default header with a given separator
+        /// </summary>
+        protected void AppendDefaultHeaderWithSeparator(StringBuilder stringBuilder, string separator)
+        {
+            stringBuilder.AppendLine(
+                string.Join(separator,
+                    new[]
+                    {
+                        "Id", "ParentId", "Pass", "File", "Line #", "Expression", "Inc (ms)", "Inc (%)", "Exc (ms)",
+                        "Exc (%)", "#", "Kind", "Bug"
+                    }));
+        }
+
+        /// <summary>
+        /// Appends a default representation of an evaluation location with a given separator
+        /// </summary>
+        protected void AppendDefaultLocationWithSeparator(StringBuilder stringBuilder, TimeSpan totalTime, EvaluationLocation evaluationLocation, ProfiledLocation profiledLocation, string separator)
+        {
+            stringBuilder.AppendLine(string.Join(separator,
+                evaluationLocation.Id,
+                evaluationLocation.ParentId?.ToString() ?? string.Empty,
+                evaluationLocation.EvaluationPassDescription,
+                evaluationLocation.File == null ? string.Empty : System.IO.Path.GetFileName(evaluationLocation.File),
+                evaluationLocation.Line?.ToString() ?? string.Empty,
+                NormalizeExpression(evaluationLocation.ElementDescription, evaluationLocation.Kind) ?? string.Empty,
+                GetMilliseconds(profiledLocation.InclusiveTime),
+                GetPercentage(totalTime, profiledLocation.InclusiveTime) + "%",
+                GetMilliseconds(profiledLocation.ExclusiveTime),
+                GetPercentage(totalTime, profiledLocation.ExclusiveTime) + "%",
+                profiledLocation.NumberOfHits,
+                evaluationLocation.Kind + separator));
+        }
     }
 }

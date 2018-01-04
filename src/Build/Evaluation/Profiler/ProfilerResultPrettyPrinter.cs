@@ -16,7 +16,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Pretty prints a profiled result to a variety of formats
     /// </summary>
-    public sealed class ProfilerResultPrettyPrinter
+    internal sealed class ProfilerResultPrettyPrinter
     {
         /// <summary>
         /// Gets a profiled result in a markdown-like form.

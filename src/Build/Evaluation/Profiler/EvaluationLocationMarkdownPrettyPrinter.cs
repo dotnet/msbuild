@@ -15,29 +15,19 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal sealed class EvaluationLocationMarkdownPrettyPrinter : EvaluationLocationPrettyPrinterBase
     {
+        private const string Separator = "|";
+
         /// <inheritdoc/>
         internal override void AppendHeader(StringBuilder stringBuilder)
         {
-            stringBuilder.AppendLine("Id|ParentId|Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Kind|Bug");
+            AppendDefaultHeaderWithSeparator(stringBuilder, Separator);
             stringBuilder.AppendLine("---|---|---|---|---:|---|---:|---:|---:|---:|---:|---:|---");
         }
 
         /// <inheritdoc/>
         internal override void AppendLocation(StringBuilder stringBuilder, TimeSpan totalTime, EvaluationLocation evaluationLocation, ProfiledLocation profiledLocation)
         {
-            stringBuilder.AppendLine(string.Join("|",
-                evaluationLocation.Id,
-                evaluationLocation.ParentId?.ToString() ?? string.Empty,
-                evaluationLocation.EvaluationPassDescription,
-                evaluationLocation.File == null ? string.Empty : System.IO.Path.GetFileName(evaluationLocation.File),
-                evaluationLocation.Line?.ToString() ?? string.Empty,
-                NormalizeExpression(evaluationLocation.ElementDescription, evaluationLocation.Kind) ?? string.Empty,
-                GetMilliseconds(profiledLocation.InclusiveTime),
-                GetPercentage(totalTime, profiledLocation.InclusiveTime) + "%",
-                GetMilliseconds(profiledLocation.ExclusiveTime),
-                GetPercentage(totalTime, profiledLocation.ExclusiveTime) + "%",
-                profiledLocation.NumberOfHits,
-                evaluationLocation.Kind + "|"));
+            AppendDefaultLocationWithSeparator(stringBuilder, totalTime, evaluationLocation, profiledLocation, Separator);
         }
 
         /// <inheritdoc/>
@@ -49,7 +39,7 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            text = text.Replace("|", "\\|");
+            text = text.Replace(Separator, "\\" + Separator);
 
             if (text.Length > 100)
                 text = text.Remove(100) + "...";
