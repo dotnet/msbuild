@@ -255,6 +255,9 @@
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Definition\ProjectLoadSettings.cs" />
     <Compile Include="Definition\ToolsetLocalReader.cs" />
+    <Compile Include="Evaluation\Profiler\EvaluationLocationMarkdownPrettyPrinter.cs" />
+    <Compile Include="Evaluation\Profiler\EvaluationLocationPrettyPrinterBase.cs" />
+    <Compile Include="Evaluation\Profiler\EvaluationLocationTabSeparatedPrettyPrinter.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationProfiler.cs" />
     <Compile Include="Evaluation\ItemSpec.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />

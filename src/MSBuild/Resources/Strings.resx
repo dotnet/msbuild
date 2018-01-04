@@ -690,7 +690,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <data name="HelpMessage_32_ProfilerSwitch" xml:space="preserve">
     <value>  /profileevaluation:&lt;file&gt;    
                      Profiles MSBuild evaluation and writes the result 
-                     to the specified file.
+                     to the specified file. If the extension of the specified
+                     file is '.md', the result is generated in markdown
+                     format. Otherwise, a tab separated file is produced.
     </value>
   </data>
   <data name="HelpMessage_33_RestorePropertySwitch" UESanitized="false" Visibility="Public">

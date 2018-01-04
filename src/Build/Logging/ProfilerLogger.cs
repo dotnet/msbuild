@@ -271,17 +271,25 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Gets the markdown content of the aggregated results and saves it to disk
+        /// Pretty prints the aggregated results and saves it to disk
         /// </summary>
+        /// <remarks>
+        /// If the extension of the file to log is 'md', markdown content is generated. Otherwise, it falls 
+        /// back to a tab separated format
+        /// </remarks>
         private void GenerateProfilerReport()
         {
             try
             {
-                var profilerFile = FileToLog;
-                Console.WriteLine(ResourceUtilities.FormatResourceString("WritingProfilerReport", profilerFile));
+                Console.WriteLine(ResourceUtilities.FormatResourceString("WritingProfilerReport", FileToLog));
 
-                var content = ProfilerResultPrettyPrinter.GetMarkdownContent(GetAggregatedResult());
-                File.WriteAllText(profilerFile, content);
+                // If the extension of the file is 'md', markdown content is produced. For any other case,
+                // a tab separated format is generated
+                var content = System.IO.Path.GetExtension(FileToLog) == ".md"
+                    ? ProfilerResultPrettyPrinter.GetMarkdownContent(GetAggregatedResult())
+                    : ProfilerResultPrettyPrinter.GetTsvContent(GetAggregatedResult());
+
+                File.WriteAllText(FileToLog, content);
 
                 Console.WriteLine(ResourceUtilities.GetResourceString("WritingProfilerReportDone"));
             }
