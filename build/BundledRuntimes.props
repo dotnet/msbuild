@@ -7,6 +7,9 @@
     <InstallerStartSuffix Condition="'$(HostOSName)' == 'osx'">-internal</InstallerStartSuffix>
     
     <!-- Downloaded Installers + Archives -->
+    <DownloadedSharedHostDepsInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime-deps-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedSharedHostDepsInstallerFileName>
+    <DownloadedSharedHostDepsInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostDepsInstallerFileName)</DownloadedSharedHostDepsInstallerFile>
+
     <!-- Use the "x64" Rid when downloading Linux shared framework 'DEB' installer files. -->
     <SharedFrameworkInstallerFileRid>$(CoreSetupRid)</SharedFrameworkInstallerFileRid>
     <SharedFrameworkInstallerFileRid Condition=" '$(IsDebianBaseDistro)' == 'true' ">x64</SharedFrameworkInstallerFileRid>
@@ -56,6 +59,13 @@
       <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
     </_DownloadAndExtractItem>
 
+    <_DownloadAndExtractItem Include="DownloadedSharedHostDepsInstallerFile"
+                         Condition="'$(IsDebianBaseDistro)' == 'true' And $(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedHostDepsInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedSharedHostDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <DownloadFileName>$(DownloadedSharedHostDepsInstallerFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
+    
     <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
