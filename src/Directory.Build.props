@@ -41,7 +41,8 @@
   <ItemGroup>
     <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
          tests from picking up these files from the repo root. -->
-    <Content Include="$(RepoRoot)src\Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RepoRoot)src\Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest"
+             Visible="false"/>
   </ItemGroup>
 
   
