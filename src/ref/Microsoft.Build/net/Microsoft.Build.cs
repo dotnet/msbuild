@@ -325,9 +325,9 @@ namespace Microsoft.Build.Construction
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
-        public void Reload(bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
-        public void ReloadFrom(string path, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
-        public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
+        public void Reload(bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
+        public void ReloadFrom(string path, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
+        public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
         public void Save() { }
         public void Save(System.IO.TextWriter writer) { }
         public void Save(string path) { }
@@ -493,18 +493,6 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectUsingTaskParameterElement AddParameter(string name) { throw null; }
         public Microsoft.Build.Construction.ProjectUsingTaskParameterElement AddParameter(string name, string output, string required, string parameterType) { throw null; }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
-    }
-}
-namespace Microsoft.Build.Debugging
-{
-    public static partial class DebuggerManager
-    {
-        public sealed partial class IslandThread : System.IDisposable
-        {
-            internal IslandThread() { }
-            public static void IslandWorker(Microsoft.Build.Debugging.DebuggerManager.IslandThread controller) { }
-            void System.IDisposable.Dispose() { }
-        }
     }
 }
 namespace Microsoft.Build.Evaluation
@@ -1533,70 +1521,4 @@ namespace Microsoft.Build.Logging
         public Microsoft.Build.Framework.ILogger CreateLogger() { throw null; }
     }
     public delegate void WriteHandler(string message);
-}
-namespace Microsoft.VisualStudio.Setup.Configuration
-{
-    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [System.Runtime.InteropServices.GuidAttribute("6380BCFF-41D3-4B2E-8B2E-BF8A6810C848")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    [System.Runtime.InteropServices.TypeIdentifierAttribute]
-    public partial interface IEnumSetupInstances
-    {
-        void Next(int celt, Microsoft.VisualStudio.Setup.Configuration.ISetupInstance[] rgelt, out int pceltFetched);
-    }
-    [System.FlagsAttribute]
-    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [System.Runtime.InteropServices.TypeIdentifierAttribute("310100ba-5f84-4103-abe0-e8132ae862d9", "Microsoft.VisualStudio.Setup.Configuration.InstanceState")]
-    public enum InstanceState : uint
-    {
-        Complete = (uint)4294967295,
-        Local = (uint)1,
-        NoErrors = (uint)8,
-        None = (uint)0,
-        NoRebootRequired = (uint)4,
-        Registered = (uint)2,
-    }
-    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [System.Runtime.InteropServices.GuidAttribute("42843719-DB4C-46C2-8E7C-64F1816EFD5B")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    [System.Runtime.InteropServices.TypeIdentifierAttribute]
-    public partial interface ISetupConfiguration
-    {
-    }
-    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [System.Runtime.InteropServices.GuidAttribute("26AAB78C-4A60-49D6-AF3B-3C35BC93365D")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    [System.Runtime.InteropServices.TypeIdentifierAttribute]
-    public partial interface ISetupConfiguration2 : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration
-    {
-        void _VtblGap1_3() { }
-        Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances EnumAllInstances();
-    }
-    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [System.Runtime.InteropServices.GuidAttribute("B41463C3-8866-43B5-BC33-2B0676F7F42E")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    [System.Runtime.InteropServices.TypeIdentifierAttribute]
-    public partial interface ISetupInstance
-    {
-        void _VtblGap1_3() { }
-        string GetDisplayName(int lcid=0);
-        string GetInstallationPath();
-        string GetInstallationVersion();
-    }
-    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [System.Runtime.InteropServices.GuidAttribute("89143C9A-05AF-49B0-B717-72E218A2185C")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    [System.Runtime.InteropServices.TypeIdentifierAttribute]
-    public partial interface ISetupInstance2 : Microsoft.VisualStudio.Setup.Configuration.ISetupInstance
-    {
-        void _VtblGap1_8() { }
-        Microsoft.VisualStudio.Setup.Configuration.InstanceState GetState();
-    }
-    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [System.Runtime.InteropServices.CoClassAttribute(typeof(object))]
-    [System.Runtime.InteropServices.GuidAttribute("42843719-DB4C-46C2-8E7C-64F1816EFD5B")]
-    [System.Runtime.InteropServices.TypeIdentifierAttribute]
-    public partial interface SetupConfiguration : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration, Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration2
-    {
-    }
 }

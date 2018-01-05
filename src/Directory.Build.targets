@@ -55,6 +55,19 @@
 
   </ItemGroup>
 
+  <!-- GenAPI settings -->
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OS)'=='Windows_NT'">
+    <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
+    <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
+    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPITargetPath>$(RepoRoot)src\ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
+  </PropertyGroup>
+  
+  <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OS)'=='Windows_NT'">
+    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" Version="$(GenApiVersion)" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
     <PackageReference Include="xunit.console" Version="$(XUnitVersion)" />
   </ItemGroup>

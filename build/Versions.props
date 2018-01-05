@@ -6,6 +6,7 @@
     <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn/api/v3/index.json</RestoreSources>
     <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/nuget-build/api/v3/index.json</RestoreSources>
     <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json</RestoreSources>
+    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json</RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
@@ -33,6 +34,8 @@
     <DotNetCliVersion>2.1.1-preview-007216</DotNetCliVersion>
     <RoslynToolsRepoToolsetVersion>1.0.0-beta-62503-02</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
+
+    <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->

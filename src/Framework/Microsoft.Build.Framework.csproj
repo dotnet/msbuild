@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
   </PropertyGroup>
 
   <ItemGroup>

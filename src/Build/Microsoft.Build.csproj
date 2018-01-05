@@ -9,6 +9,8 @@
 
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
   </PropertyGroup>
 
   <ItemGroup>
