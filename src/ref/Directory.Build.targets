@@ -1,9 +1,6 @@
 ﻿<Project>
   
-  <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
-    <EnableDefaultItems>false</EnableDefaultItems>
-  </PropertyGroup>
+
 
   <ItemGroup>
     <Compile Include="netstandard\$(AssemblyName).cs" />

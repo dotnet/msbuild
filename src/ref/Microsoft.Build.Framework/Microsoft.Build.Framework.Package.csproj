@@ -1,6 +1,7 @@
 ﻿
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>Microsoft.Build.Framework</AssemblyName>
   </PropertyGroup>
 </Project>
