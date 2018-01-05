@@ -23,6 +23,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildWebTargetsPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebTargetsPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectCapability Include="DotNetCoreWeb" />
+    <ProjectCapability Include="AspNetCore" />
+    <ProjectCapability Include="Web" />
+  </ItemGroup>
+
   <!--
     Newer versions of Visual Studio ship the designtime related properties in a targets file and all future design time only elements should be added there. If that file does not
     exist, it falls back to the default set of values defined here.
@@ -36,11 +42,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
         </PropertyGroup>
 
-        <!-- Web project capabilities that enables web features for .NET Core projects -->
-        <ItemGroup >
-          <ProjectCapability Include="DotNetCoreWeb" />
-          <ProjectCapability Include="AspNetCore" />
-          <ProjectCapability Include="Web" />
+        <!-- Web project capabilities that enables web features in VS for .NET Core projects -->
+        <ItemGroup>
           <ProjectCapability Include="SupportHierarchyContextSvc" />
           <ProjectCapability Include="DynamicDependentFile" />
           <ProjectCapability Include="DynamicFileNesting" />
