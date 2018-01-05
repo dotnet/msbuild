@@ -1,0 +1,14 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <!-- Use ref subdirectory for samples in output folder -->
+    <OutDirName>ref\$(MSBuildProjectName)</OutDirName>
+
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+    <!-- Import parent props -->
+  <Import Project="..\Directory.Build.props"/>
+
+</Project>

@@ -1,0 +1,12 @@
+﻿
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj" />
+    
+    <!-- Only needed for .NET Standard 1.x reference assemblies -->
+    <PackageReference Include="System.Diagnostics.Process" Version="4.1.0"/>
+  </ItemGroup>
+</Project>
