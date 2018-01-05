@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Do not build project before packing.  Implies --no-restore.</source>
-        <target state="needs-review-translation">Přeskočí sestavení projektu, dokud ho nezabalíte. Projekt se sestaví automaticky.</target>
+        <target state="translated">Nesestavujte projekt, dokud ho nezabalíte. Implikuje možnost --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
