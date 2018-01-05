@@ -11,7 +11,7 @@
     <MicrosoftFSharpCompilerPackageVersion>4.2.0-rtm-171104-0</MicrosoftFSharpCompilerPackageVersion>
     <MicrosoftCodeAnalysisCSharpPackageVersion>2.6.0-beta3-62309-01</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
-    <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
+    <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftNETSdkPackageVersion>15.5.0-preview-20171116-1</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>2.0.0-rel-20171110-671</MicrosoftNETSdkWebPackageVersion>

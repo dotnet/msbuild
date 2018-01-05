@@ -22,10 +22,9 @@
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
-    <!-- The project json migration commands depend on an older version of Roslyn.
-         Lift the version here to match what tool_roslyn depends on (otherwise an older version will
-         be added to the TPA when we crossgen and we won't be able to crossgen tool_roslyn -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
+    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNETCoreCompilersPackageVersion)">
+      <ExcludeAssets>All</ExcludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -75,7 +74,7 @@
           BeforeTargets="Publish">
           
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(CLI_Roslyn_Version)/tools/**/*" />
+      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(RoslynSatelliteBits)" DestinationFiles="@(RoslynSatelliteBits->'$(RoslynDirectory)/bincore/%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -88,7 +87,7 @@
     </ItemGroup>
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
       InputFile="%(RoslynRuntimeConfigs.Identity)"
