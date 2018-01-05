@@ -22,7 +22,7 @@
       Outputs="$(SdkInstallerFile)" >
 
       <!-- Install Shared Framework Packages -->
-      <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkDepsInstallerFile)" />
+      <Exec Command="sudo dpkg -i $(DownloadedRuntimeDepsInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
