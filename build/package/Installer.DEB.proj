@@ -91,7 +91,7 @@
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
   </Target>
 
@@ -105,6 +105,7 @@
       Outputs="$(DebianTestResultsXmlFile)" >
 
       <!-- Install Dependencies and SDK Packages -->
+      <Exec Command="sudo dpkg -i $(DownloadedRuntimeDepsInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
@@ -125,7 +126,7 @@
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
   </Target>
 
