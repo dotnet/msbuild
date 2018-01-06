@@ -249,7 +249,7 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$Channel, [bool]$Co
     if ($Runtime -eq "dotnet") {
         $VersionFileUrl = "$UncachedFeed/Runtime/$Channel/latest.version"
     }
-    elseif ($Runtime -eq "aspnetcore") {
+    elseif ($Runtime) {
         $VersionFileUrl = "$UncachedFeed/Runtime/$Channel/latest.$Runtime.version"
     }
     else {
