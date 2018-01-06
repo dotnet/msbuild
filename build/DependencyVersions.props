@@ -62,8 +62,7 @@
     <HostFxrVersion>$(MicrosoftNETCoreAppPackageVersion)</HostFxrVersion>
     <AspNetCoreVersion>2.1.0-preview1-27617</AspNetCoreVersion>
 
-    
-    <AspNetCoreTemplatePackageVersion>2.0.3</AspNetCoreTemplatePackageVersion>
+
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
     <AspNetCoreRuntimePackageFolderName>dev-26623</AspNetCoreRuntimePackageFolderName>
     <AspNetCoreRuntimePackageVersion>2.1.0-preview1-26623</AspNetCoreRuntimePackageVersion>
