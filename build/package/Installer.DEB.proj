@@ -91,8 +91,8 @@
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="TestSdkDeb"
@@ -126,8 +126,8 @@
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
