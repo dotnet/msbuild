@@ -3,16 +3,16 @@
 
     <PropertyGroup>
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
-      <NugetPackagesArchiveName>nuGetPackagesArchive-$(AspNetCoreRuntimePackageVersion).lzma</NugetPackagesArchiveName>
+      <NugetPackagesArchiveName>nuGetPackagesArchive-$(AspNetCoreVersion).lzma</NugetPackagesArchiveName>
       <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
-      <NugetPackagesArchiveBlobUrl>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
+      <NugetPackagesArchiveBlobUrl>$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(NugetPackagesArchiveName)$(CoreSetupBlobAccessTokenParam)</NugetPackagesArchiveBlobUrl>
     </PropertyGroup>
 
     <Target Name="GetNuGetPackagesArchive"
             Inputs="$(IntermediateArchive)"
             Outputs="$(FinalArchive)"
             Condition=" '$(IncludeNuGetPackageArchive)' == 'true' ">
-      <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)$(CoreSetupBlobAccessTokenParam)"
+      <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)"
                     DestinationPath="$(IntermediateArchive)"
                     ContinueOnError="WarnAndContinue" />
 

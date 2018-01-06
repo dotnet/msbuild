@@ -16,8 +16,7 @@
   <Target Name="BuildSdkDeb"
       Condition=" '$(IsDebianBaseDistro)' == 'True' AND '$(DebuildPresent)'  == 'true' "
       DependsOnTargets="PrepareDotnetDebDirectories;
-                        PrepareDotnetDebTool;
-                        DownloadAspNetCoreRuntimeDebInstaller;"
+                        PrepareDotnetDebTool;"
       Inputs="@(CLISdkFiles)"
       Outputs="$(SdkInstallerFile)" >
 
@@ -26,7 +25,7 @@
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
+      <Exec Command="sudo dpkg -i $(DownloadedAspNetCoreSharedFxInstallerFile)" />
 
       <!-- Create layout: Binaries -->
       <Copy
@@ -109,7 +108,7 @@
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
+      <Exec Command="sudo dpkg -i $(DownloadedAspNetCoreSharedFxInstallerFile)" />
 
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
