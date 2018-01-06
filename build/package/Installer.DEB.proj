@@ -22,6 +22,7 @@
       Outputs="$(SdkInstallerFile)" >
 
       <!-- Install Shared Framework Packages -->
+      <Exec Command="sudo dpkg -i $(DownloadedRuntimeDepsInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
@@ -90,8 +91,8 @@
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="TestSdkDeb"
@@ -104,6 +105,7 @@
       Outputs="$(DebianTestResultsXmlFile)" >
 
       <!-- Install Dependencies and SDK Packages -->
+      <Exec Command="sudo dpkg -i $(DownloadedRuntimeDepsInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
@@ -124,8 +126,8 @@
       <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">

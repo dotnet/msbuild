@@ -25,6 +25,8 @@
 
     <!-- Package Identities -->
     <PropertyGroup>
+      <RuntimeDepsPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeDepsPackageVersion>
+      <RuntimeDepsPackageName>dotnet-runtime-deps-$(RuntimeDepsPackageVersion)</RuntimeDepsPackageName>
       <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
       <SdkDebianPackageName>dotnet-sdk-$(SdkDebianPackageVersion)</SdkDebianPackageName>
       <SharedFxDebianPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxDebianPackageVersion>
