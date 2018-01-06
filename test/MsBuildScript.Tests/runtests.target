@@ -8,9 +8,8 @@
   <Target Name="RunMsBuildScriptTests" DependsOnTargets="EnsureAllDependencyFilesExist"></Target>
 
   <Target Name="EnsureAllDependencyFilesExist">
-    <EnsureFileExistsOnAzureBlobStorage Condition="$(HostRid.StartsWith('win'))" FileUrl="$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(DownloadedAspNetCoreSharedFxInstallerFileName)" />
-    <EnsureFileExistsOnAzureBlobStorage FileUrl="$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(DownloadedAspNetCoreSharedFxInstallerFileName)" />
-    <EnsureFileExistsOnAzureBlobStorage FileUrl="$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)" />
-    <EnsureFileExistsOnAzureBlobStorage FileUrl="$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(NugetPackagesArchiveName)" />
+    <EnsureFileExistsOnAzureBlobStorage Condition="'$(DownloadedAspNetCoreSharedFxInstallerFileName)' != ''" FileUrl="$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(DownloadedAspNetCoreSharedFxInstallerFileName)" />
+    <EnsureFileExistsOnAzureBlobStorage Condition="'$(AspNetCoreSharedFxArchiveFileName)' != ''" FileUrl="$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)" />
+    <EnsureFileExistsOnAzureBlobStorage Condition="'$(NugetPackagesArchiveName)' != ''" FileUrl="$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(NugetPackagesArchiveName)" />
   </Target>
 </Project>
