@@ -31,7 +31,7 @@
     <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' != '' AND '$(HostOSName)' != 'osx' ">aspnetcore-runtime-$(AspNetCoreVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedAspNetCoreSharedFxInstallerFileName>
     <!-- Note: we use the "-internal" archives and installers that contain only the aspnetcore shared framework, and shouldn't overlap with Microsoft.NETCore.App. -->
     <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' == '.msi' ">aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(CoreSetupRid).wixlib</DownloadedAspNetCoreSharedFxInstallerFileName>
-    <DownloadedAspNetCoreSharedFxInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedAspNetCoreSharedFxInstallerFileName)</DownloadedAspNetCoreSharedFxInstallerFile>
+    <DownloadedAspNetCoreSharedFxInstallerFile Condition=" '$(InstallerExtension)' != '' AND '$(DownloadedAspNetCoreSharedFxInstallerFileName)' != '' ">$(PackagesDirectory)/$(DownloadedAspNetCoreSharedFxInstallerFileName)</DownloadedAspNetCoreSharedFxInstallerFile>
 
     <AspNetCoreSharedFxArchiveFileName>aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</AspNetCoreSharedFxArchiveFileName>
     <AspNetCoreSharedFxArchiveFile>$(PackagesDirectory)/$(AspNetCoreSharedFxArchiveFileName)</AspNetCoreSharedFxArchiveFile>
@@ -91,7 +91,7 @@
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedAspNetCoreSharedFxInstallerFile"
-                            Condition="'$(SkipBuildingInstallers)' != 'true' AND !Exists($(DownloadedAspNetCoreSharedFxInstallerFile)) And '$(InstallerExtension)' != ''">
+                            Condition="'$(SkipBuildingInstallers)' != 'true' AND '$(DownloadedAspNetCoreSharedFxInstallerFile)' != '' AND !Exists($(DownloadedAspNetCoreSharedFxInstallerFile)) And '$(InstallerExtension)' != ''">
       <Url>$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(DownloadedAspNetCoreSharedFxInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedAspNetCoreSharedFxInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
