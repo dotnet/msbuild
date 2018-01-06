@@ -7,21 +7,28 @@
     <InstallerStartSuffix Condition="'$(HostOSName)' == 'osx'">-internal</InstallerStartSuffix>
     
     <!-- Downloaded Installers + Archives -->
-    <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
+    <DownloadedRuntimeDepsInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime-deps-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedRuntimeDepsInstallerFileName>
+    <DownloadedRuntimeDepsInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedRuntimeDepsInstallerFileName)</DownloadedRuntimeDepsInstallerFile>
+
+    <!-- Use the "x64" Rid when downloading Linux shared framework 'DEB' installer files. -->
+    <SharedFrameworkInstallerFileRid>$(CoreSetupRid)</SharedFrameworkInstallerFileRid>
+    <SharedFrameworkInstallerFileRid Condition=" '$(IsDebianBaseDistro)' == 'true' ">x64</SharedFrameworkInstallerFileRid>
+    
+    <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
     <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
 
-    <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr$(InstallerStartSuffix)-$(HostFxrVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
+    <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr$(InstallerStartSuffix)-$(HostFxrVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
     <DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedHostFxrInstallerFileName)</DownloadedHostFxrInstallerFile>
 
-    <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime$(InstallerStartSuffix)-$(MicrosoftNETCoreAppPackageVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
+    <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime$(InstallerStartSuffix)-$(MicrosoftNETCoreAppPackageVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
     <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
 
-    <!-- Use the portable linux-x64 Rid when downloading the shared framework compressed file.
-         NOTE: There isn't a 'linux-x64' version of the installers or the additional shared framweork. -->
+    <!-- Use the portable "linux-x64" Rid when downloading Linux shared framework compressed file. -->
     <SharedFrameworkRid>$(CoreSetupRid)</SharedFrameworkRid>
     <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
     <CombinedFrameworkHostCompressedFileName>dotnet-runtime-$(MicrosoftNETCoreAppPackageVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
-  </PropertyGroup>
+  
+</PropertyGroup>
 
   <PropertyGroup>
     <CoreSetupRootUrl>$(CoreSetupBlobRootUrl)Runtime/</CoreSetupRootUrl>
@@ -52,6 +59,13 @@
       <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
     </_DownloadAndExtractItem>
 
+    <_DownloadAndExtractItem Include="DownloadedRuntimeDepsInstallerFile"
+                         Condition="'$(IsDebianBaseDistro)' == 'true' And '$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedRuntimeDepsInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <DownloadFileName>$(DownloadedRuntimeDepsInstallerFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
+    
     <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
