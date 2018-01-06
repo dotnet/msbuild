@@ -3,11 +3,15 @@
   <PropertyGroup>
     <!-- Use ref subdirectory for samples in output folder -->
     <OutDirName>ref\$(MSBuildProjectName)</OutDirName>
-
-    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
     <!-- Import parent props -->
   <Import Project="..\Directory.Build.props"/>
+
+  <PropertyGroup>
+      <EnableDefaultItems>false</EnableDefaultItems>
+      <IsPackable>true</IsPackable>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
 
 </Project>
