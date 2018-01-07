@@ -198,7 +198,13 @@ function Build {
 
   $solution = Join-Path $RepoRoot "MSBuild.sln"
 
-  $commonMSBuildArgs = GetArgs /m /nologo /clp:Summary /warnaserror /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$solution /p:CIBuild=$ci
+  $commonMSBuildArgs = "/m", "/nologo", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:SolutionPath=$solution", "/p:CIBuild=$ci"
+  if ($ci)
+  {
+    # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
+    # the C++ tools aren't installed, and we don't want this to fail the build
+    $commonMSBuildArgs = $commonMSBuildArgs + "/warnaserror" 
+  }
   
   # Only test using stage 0 MSBuild if -bootstrapOnly is specified
   $testStage0 = $false
@@ -257,12 +263,6 @@ function Build {
   }
 
 }
-
-function GetArgs
-{
-  return $args
-}
-
 function CallMSBuild
 {
   if ($msbuildHost)
