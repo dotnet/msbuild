@@ -258,6 +258,11 @@ namespace Microsoft.Build.Execution
         private bool _logInitialPropertiesAndItems = false;
 
         /// <summary>
+        /// The settings used to load the project under build
+        /// </summary>
+        private ProjectLoadSettings _projectLoadSettings = ProjectLoadSettings.Default;
+
+        /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
         public BuildParameters()
@@ -332,6 +337,7 @@ namespace Microsoft.Build.Execution
             _logInitialPropertiesAndItems = other._logInitialPropertiesAndItems;
             _warningsAsErrors = other._warningsAsErrors == null ? null : new HashSet<string>(other._warningsAsErrors, StringComparer.OrdinalIgnoreCase);
             _warningsAsMessages = other._warningsAsMessages == null ? null : new HashSet<string>(other._warningsAsMessages, StringComparer.OrdinalIgnoreCase);
+            _projectLoadSettings = other._projectLoadSettings;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -871,6 +877,14 @@ namespace Microsoft.Build.Execution
             set;
         }
 
+        /// <nodoc/>
+        public ProjectLoadSettings ProjectLoadSettings
+        {
+            get { return _projectLoadSettings; }
+            set { _projectLoadSettings = value; }
+        }
+
+
         /// <summary>
         /// Retrieves a toolset.
         /// </summary>
@@ -918,6 +932,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _shutdownInProcNodeOnBuildFinish);
             translator.Translate(ref _logTaskInputs);
             translator.Translate(ref _logInitialPropertiesAndItems);
+            translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

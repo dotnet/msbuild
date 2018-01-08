@@ -83,6 +83,7 @@
     <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
       <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\AssemblyTaskFactory_Tests.cs" />
     <Compile Include="BackEnd\BatchingEngine_Tests.cs" />
     <Compile Include="BackEnd\BuildEventArgTransportSink_Tests.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="BackEnd\TaskHostTaskComplete_Tests.cs" />
     <Compile Include="BackEnd\TaskHost_Tests.cs" />
     <Compile Include="Construction\ProjectRootElement_Tests.cs" />
+    <Compile Include="EvaluationProfiler_Tests.cs" />
     <Compile Include="Evaluation\EvaluationLogging_Tests.cs" />
     <Compile Include="MockLoggingContext.cs" />
     <Compile Include="TestComparers\TaskRegistryComparers.cs" />

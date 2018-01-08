@@ -21,6 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 using Microsoft.Build.Utilities;
@@ -553,6 +554,8 @@ namespace Microsoft.Build.CommandLine
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsAsMessages = null;
                 bool enableRestore = Traits.Instance.EnableRestoreFirst;
+                ProfilerLogger profilerLogger = null;
+                bool enableProfiler = false;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -580,6 +583,8 @@ namespace Microsoft.Build.CommandLine
                         ref warningsAsErrors,
                         ref warningsAsMessages,
                         ref enableRestore,
+                        ref profilerLogger,
+                        ref enableProfiler,
                         recursing: false
                         ))
                 {
@@ -617,7 +622,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore))
+                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -767,6 +772,7 @@ namespace Microsoft.Build.CommandLine
 
             return exitType;
         }
+
 #if (!STANDALONEBUILD)
         /// <summary>
         /// Use the Orcas Engine to build the project
@@ -913,7 +919,9 @@ namespace Microsoft.Build.CommandLine
             bool detailedSummary,
             ISet<string> warningsAsErrors,
             ISet<string> warningsAsMessages,
-            bool enableRestore
+            bool enableRestore,
+            ProfilerLogger profilerLogger,
+            bool enableProfiler
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1088,6 +1096,13 @@ namespace Microsoft.Build.CommandLine
                     parameters.LogTaskInputs = logTaskInputs;
                     parameters.WarningsAsErrors = warningsAsErrors;
                     parameters.WarningsAsMessages = warningsAsMessages;
+
+                    // Propagate the profiler flag into the project load settings so the evaluator
+                    // can pick it up
+                    if (profilerLogger != null || enableProfiler)
+                    {
+                        parameters.ProjectLoadSettings |= ProjectLoadSettings.ProfileEvaluation;
+                    }
 
                     if (!String.IsNullOrEmpty(toolsVersion))
                     {
@@ -1530,6 +1545,11 @@ namespace Microsoft.Build.CommandLine
                                 // where /bl is not specified at all vs. where /bl is specified without the file name.
                                 switchParameters = ":msbuild.binlog";
                             }
+                            else if (String.Equals(switchName, "prof", StringComparison.OrdinalIgnoreCase) ||
+                                     String.Equals(switchName, "profileevaluation", StringComparison.OrdinalIgnoreCase))
+                            {
+                                switchParameters = ":no-file";
+                            }
                         }
 
                         if (CommandLineSwitches.IsParameterlessSwitch(switchName, out parameterlessSwitch, out duplicateSwitchErrorMessage))
@@ -1893,6 +1913,8 @@ namespace Microsoft.Build.CommandLine
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
             ref bool enableRestore,
+            ref ProfilerLogger profilerLogger,
+            ref bool enableProfiler,
             bool recursing
         )
         {
@@ -1963,18 +1985,13 @@ namespace Microsoft.Build.CommandLine
                         // gather any switches from the first Directory.Build.rsp found in the project directory or above
                         string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
 
-                        if (!String.IsNullOrWhiteSpace(directoryResponseFile))
-                        {
-                            GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
-                        }
-
-                        bool found = false;
+                        bool found = !String.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
 
                         // Don't look for more response files if it's only in the same place we already looked (next to the exe)
                         if (!String.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
                         {
                             // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                            found = GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
+                            found = found | GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
                         }
 
                         if (found)
@@ -2006,6 +2023,8 @@ namespace Microsoft.Build.CommandLine
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
                                                                ref enableRestore,
+                                                               ref profilerLogger,
+                                                               ref enableProfiler,
                                                                recursing: true
                                                              );
                         }
@@ -2060,11 +2079,14 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
                         out distributedLoggerRecords,
                         out verbosity,
                         ref detailedSummary,
-                        cpuCount
+                        cpuCount,
+                        out profilerLogger,
+                        out enableProfiler
                         );
 
                     // If we picked up switches from the autoreponse file, let the user know. This could be a useful
@@ -2251,6 +2273,59 @@ namespace Microsoft.Build.CommandLine
             }
 
             return enableRestore;
+        }
+
+        /// <summary>
+        /// Processes the profiler evaluation switch
+        /// </summary>
+        /// <remarks>
+        /// If the switch is provided, it adds a <see cref="ProfilerLogger"/> to the collection of loggers
+        /// and also returns the created logger. Otherwise, the collection of loggers is not affected and null
+        /// is returned
+        /// </remarks>
+        internal static ProfilerLogger ProcessProfileEvaluationSwitch(string[] parameters, ArrayList loggers, out bool enableProfiler)
+        {
+            if (parameters == null || parameters.Length == 0)
+            {
+                enableProfiler = false;
+                return null;
+            }
+
+            enableProfiler = true;
+            var profilerFile = parameters[parameters.Length - 1];
+
+            // /prof was specified, but don't attach a logger to write a file
+            if (profilerFile == "no-file")
+            {
+                return null;
+            }
+
+            // Check if the file name is valid
+            try
+            {
+                new FileInfo(profilerFile);
+            }
+            catch (ArgumentException ex)
+            {
+                CommandLineSwitchException.Throw("InvalidProfilerValue", parameters[parameters.Length - 1],
+                    ex.Message);
+            }
+            catch (PathTooLongException ex)
+            {
+                CommandLineSwitchException.Throw("InvalidProfilerValue", parameters[parameters.Length - 1],
+                    ex.Message);
+            }
+            catch (NotSupportedException ex)
+            {
+                CommandLineSwitchException.Throw("InvalidProfilerValue", parameters[parameters.Length - 1],
+                    ex.Message);
+            }
+
+
+            var logger = new ProfilerLogger(profilerFile);
+            loggers.Add(logger);
+
+            return logger;
         }
 
         /// <summary>
@@ -2727,11 +2802,14 @@ namespace Microsoft.Build.CommandLine
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
+            string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
             ref bool detailedSummary,
-            int cpuCount
+            int cpuCount,
+            out ProfilerLogger profilerLogger,
+            out bool enableProfiler
         )
         {
             // if verbosity level is not specified, use the default
@@ -2755,6 +2833,8 @@ namespace Microsoft.Build.CommandLine
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
+
+            profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 
             if (verbosity == LoggerVerbosity.Diagnostic)
             {
@@ -3467,6 +3547,7 @@ namespace Microsoft.Build.CommandLine
             }
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

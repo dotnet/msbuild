@@ -24,19 +24,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal static Microsoft.Build.Tasks.GetDirectories getDirectories = new Microsoft.Build.Tasks.GetDirectories(GetDirectories);
         internal static Microsoft.Build.Tasks.GetAssemblyName getAssemblyName = new Microsoft.Build.Tasks.GetAssemblyName(GetAssemblyName);
         internal static Microsoft.Build.Tasks.GetAssemblyMetadata getAssemblyMetadata = new Microsoft.Build.Tasks.GetAssemblyMetadata(GetAssemblyMetadata);
+#if FEATURE_WIN32_REGISTRY
         internal static Microsoft.Build.Shared.GetRegistrySubKeyNames getRegistrySubKeyNames = new Microsoft.Build.Shared.GetRegistrySubKeyNames(GetRegistrySubKeyNames);
         internal static Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
+#endif
         internal static Microsoft.Build.Tasks.GetLastWriteTime getLastWriteTime = new Microsoft.Build.Tasks.GetLastWriteTime(GetLastWriteTime);
         internal static Microsoft.Build.Tasks.GetAssemblyRuntimeVersion getRuntimeVersion = new Microsoft.Build.Tasks.GetAssemblyRuntimeVersion(GetRuntimeVersion);
         internal static Microsoft.Build.Tasks.GetAssemblyPathInGac checkIfAssemblyIsInGac = new Microsoft.Build.Tasks.GetAssemblyPathInGac(GetPathForAssemblyInGac);
+#if FEATURE_WIN32_REGISTRY
         internal static Microsoft.Build.Shared.OpenBaseKey openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
+#endif
         internal Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
         internal static Microsoft.Build.Tasks.IsWinMDFile isWinMDFile = new Microsoft.Build.Tasks.IsWinMDFile(IsWinMDFile);
         internal static Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader = new Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader(ReadMachineTypeFromPEHeader);
 
         // Performance checks.
-        internal static Hashtable uniqueFileExists = null;
-        internal static Hashtable uniqueGetAssemblyName = null;
+        internal static Dictionary<string, int> uniqueFileExists = null;
+        internal static Dictionary<string, int> uniqueGetAssemblyName = null;
+
         internal static bool useFrameworkFileExists = false;
         internal const string REDISTLIST = @"<FileList  Redist=""Microsoft-Windows-CLRCoreComp.4.0"" Name="".NET Framework 4"" RuntimeVersion=""4.0"" ToolsVersion=""12.0"">
   <File AssemblyName=""Accessibility"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
@@ -231,6 +236,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_regress444809_V2RootPath = Path.Combine(s_regress444809RootPath, "v2");
         protected static readonly string s_regress444809_V2_ADllPath = Path.Combine(s_regress444809_V2RootPath, "A.dll");
 
+        protected static readonly string s_regress442570_RootPath = Path.Combine(s_rootPathPrefix, "Regress442570");
+        protected static readonly string s_regress442570_ADllPath = Path.Combine(s_regress442570_RootPath, "A.dll");
+        protected static readonly string s_regress442570_BDllPath = Path.Combine(s_regress442570_RootPath, "B.dll");
+
         protected static readonly string s_myAppRootPath = Path.Combine(s_rootPathPrefix, "MyApp");
         protected static readonly string s_myApp_V05Path = Path.Combine(s_myAppRootPath, "v0.5");
         protected static readonly string s_myApp_V10Path = Path.Combine(s_myAppRootPath, "v1.0");
@@ -242,6 +251,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         protected static readonly string s_portableDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "Portable.dll");
         protected static readonly string s_systemRuntimeDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "System.Runtime.dll");
+
+        protected static readonly string s_dependsOnNuGet_ADllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "A.dll");
+        protected static readonly string s_dependsOnNuGet_NDllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.dll");
+        protected static readonly string s_dependsOnNuGet_NExePath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.exe");
+        protected static readonly string s_dependsOnNuGet_NWinMdPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.winmd");
+
+        protected static readonly string s_nugetCache_N_Lib_NDllPath = Path.Combine(s_rootPathPrefix, "NugetCache", "N", "lib", "N.dll");
+
+        protected static readonly string s_assemblyFolder_RootPath = Path.Combine(s_rootPathPrefix, "AssemblyFolder");
+        protected static readonly string s_assemblyFolder_SomeAssemblyDllPath = Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.dll");
 
         /// <summary>
         /// Search paths to use.
@@ -275,21 +294,22 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal void StartIOMonitoring()
         {
             // If tables are present then the corresponding IO function will do some monitoring.
-            uniqueFileExists = new Hashtable();
-            uniqueGetAssemblyName = new Hashtable();
+            uniqueFileExists = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            uniqueGetAssemblyName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
         /// Stop monitoring IO calls and assert if any unnecessary IO was used.
         /// </summary>
-        internal void StopIOMonitoringAndAssert_Minimal_IOUse()
+        /// <param name="ioThreshold">Maximum number of file existence checks per file</param>
+        internal void StopIOMonitoringAndAssert_Minimal_IOUse(int ioThreshold = 1)
         {
             // Check for minimal IO in File.Exists.
-            foreach (DictionaryEntry entry in uniqueFileExists)
+            foreach (var entry in uniqueFileExists)
             {
                 string path = (string)entry.Key;
                 int count = (int)entry.Value;
-                if (count > 1)
+                if (count > ioThreshold)
                 {
                     string message = String.Format("File.Exists() was called {0} times with path {1}.", count, path);
                     Assert.True(false, message);
@@ -307,7 +327,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal void StopIOMonitoringAndAssert_Zero_IOUse()
         {
             // Check for minimal IO in File.Exists.
-            foreach (DictionaryEntry entry in uniqueFileExists)
+            foreach (var entry in uniqueFileExists)
             {
                 string path = (string)entry.Key;
                 int count = (int)entry.Value;
@@ -320,7 +340,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             // Check for zero IO in GetAssemblyName.
-            foreach (DictionaryEntry entry in uniqueGetAssemblyName)
+            foreach (var entry in uniqueGetAssemblyName)
             {
                 string path = (string)entry.Key;
                 int count = (int)entry.Value;
@@ -331,6 +351,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
+            uniqueFileExists = null;
+            uniqueGetAssemblyName = null;
+        }
+
+        internal void StopIOMonitoring()
+        {
             uniqueFileExists = null;
             uniqueGetAssemblyName = null;
         }
@@ -437,8 +463,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\Regress435487\microsoft.build.engine.dll",
             @"C:\Regress313747\Microsoft.Office.Interop.Excel.dll",
             @"C:\Regress313747\MS.Internal.Test.Automation.Office.Excel.dll",
-            @"C:\Regress442570\A.dll",
-            @"C:\Regress442570\B.dll",
+            s_regress442570_ADllPath,
+            s_regress442570_BDllPath,
             s_regress454863_ADllPath,
             s_regress454863_BDllPath,
             @"C:\Regress393931\A.metadata_dll",
@@ -462,12 +488,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"c:\MyRedist\MyOtherAssembly.dll",
             @"c:\MyRedist\MyThirdAssembly.dll",
             // ==[Related File Extensions Testing]================================================================================================
-            @"C:\AssemblyFolder\SomeAssembly.dll",
-            @"C:\AssemblyFolder\SomeAssembly.pdb",
-            @"C:\AssemblyFolder\SomeAssembly.xml",
-            @"C:\AssemblyFolder\SomeAssembly.pri",
-            @"C:\AssemblyFolder\SomeAssembly.licenses",
-            @"C:\AssemblyFolder\SomeAssembly.config",
+            s_assemblyFolder_SomeAssemblyDllPath,
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.pdb"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.xml"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.pri"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.licenses"),
+            Path.Combine(s_assemblyFolder_RootPath, "SomeAssembly.config"),
             // ==[Related File Extensions Testing]================================================================================================
 
             // ==[Unification Testing]============================================================================================================
@@ -573,6 +599,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             s_netstandardLibraryDllPath,
             s_netstandardDllPath,
             @"C:\SystemRuntime\Regular.dll",
+            s_dependsOnNuGet_ADllPath,
+            s_nugetCache_N_Lib_NDllPath
         };
 
         /// <summary>
@@ -790,14 +818,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (uniqueFileExists != null)
             {
                 string lowerPath = path.ToLower();
-                if (uniqueFileExists[lowerPath] == null)
+
+                if (!uniqueFileExists.ContainsKey(lowerPath))
                 {
                     uniqueFileExists[lowerPath] = 0;
                 }
-                else
-                {
-                    uniqueFileExists[lowerPath] = (int)uniqueFileExists[lowerPath] + 1;
-                }
+                
+                uniqueFileExists[lowerPath] = uniqueFileExists[lowerPath] + 1;
             }
 
 
@@ -988,7 +1015,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (uniqueGetAssemblyName != null)
             {
                 string lowerPath = path.ToLower();
-                if (uniqueGetAssemblyName[lowerPath] == null)
+                if (!uniqueGetAssemblyName.ContainsKey(lowerPath))
                 {
                     uniqueGetAssemblyName[lowerPath] = 0;
                 }
@@ -1089,7 +1116,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\Regress442570\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
@@ -1100,7 +1127,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
@@ -1124,7 +1151,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("D, Version=2.0.0.0, Culture=en, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
@@ -1727,6 +1754,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
 
+            if (string.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
+            }
+
+            if (string.Compare(path, s_nugetCache_N_Lib_NDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("N, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
+            }
+
             string defaultName = String.Format("{0}, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral", Path.GetFileNameWithoutExtension(path));
             return new AssemblyNameExtension(defaultName);
         }
@@ -1841,7 +1878,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1897,7 +1934,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress442570\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2440,6 +2477,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
+            if (String.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension[]
+                {
+                    new AssemblyNameExtension("N, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")
+                };
+            }
+
             // Use a default list.
             return new AssemblyNameExtension[]
             {
@@ -2942,16 +2987,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <remarks>
         /// NOTE! This test is not in fact completely isolated from its environment: it is reading the real redist lists.
         /// </remarks>
-        protected static bool Execute(ResolveAssemblyReference t)
+        protected static bool Execute(ResolveAssemblyReference t, RARSimulationMode RARSimulationMode = RARSimulationMode.LoadAndBuildProject)
         {
-            return Execute(t, true);
+            return Execute(t, true, RARSimulationMode);
+        }
+
+        [Flags]
+        public enum RARSimulationMode
+        {
+            LoadProject = 1,
+            BuildProject = 2,
+            LoadAndBuildProject = LoadProject | BuildProject
         }
 
         /// <summary>
         /// Execute the task. Without confirming that the number of files resolved with and without find dependencies is identical.
         /// This is because profiles could cause the number of primary references to be different.
         /// </summary>
-        protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck)
+        protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck, RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject)
         {
             string tempPath = Path.GetTempPath();
             string redistListPath = Path.Combine(tempPath, Guid.NewGuid() + ".xml");
@@ -2970,67 +3023,113 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
 
                 // First, run it in loading-a-project mode.
-                t.Silent = true;
-                t.FindDependencies = false;
-                t.FindSatellites = false;
-                t.FindSerializationAssemblies = false;
-                t.FindRelatedFiles = false;
-                t.StateFile = null;
-                t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader);
 
-                // A few checks. These should always be true or it may be a perf issue for project load.
-                ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
-                if (t.ResolvedFiles != null)
+                if (rarSimulationMode.HasFlag(RARSimulationMode.LoadProject))
                 {
-                    loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();
-                }
-                Assert.Equal(0, t.ResolvedDependencyFiles.Length);
-                Assert.Equal(0, t.SatelliteFiles.Length);
-                Assert.Equal(0, t.RelatedFiles.Length);
-                Assert.Equal(0, t.SuggestedRedirects.Length);
-                Assert.Equal(0, t.FilesWritten.Length);
+                    t.Silent = true;
+                    t.FindDependencies = false;
+                    t.FindSatellites = false;
+                    t.FindSerializationAssemblies = false;
+                    t.FindRelatedFiles = false;
+                    t.StateFile = null;
+	                t.Execute
+	                (
+	                    fileExists,
+	                    directoryExists,
+	                    getDirectories,
+	                    getAssemblyName,
+	                    getAssemblyMetadata,
+	#if FEATURE_WIN32_REGISTRY
+	                    getRegistrySubKeyNames,
+	                    getRegistrySubKeyDefaultValue,
+	#endif
+	                    getLastWriteTime,
+	                    getRuntimeVersion,
+	#if FEATURE_WIN32_REGISTRY
+	                    openBaseKey,
+	#endif
+	                    checkIfAssemblyIsInGac,
+	                    isWinMDFile,
+	                    readMachineTypeFromPEHeader
+	                );
 
-                // Now, run it in building-a-project mode.
-                MockEngine e = (MockEngine)t.BuildEngine;
-                e.Warnings = 0;
-                e.Errors = 0;
-                e.Log = "";
-                t.Silent = false;
-                t.FindDependencies = true;
-                t.FindSatellites = true;
-                t.FindSerializationAssemblies = true;
-                t.FindRelatedFiles = true;
-                string cache = rarCacheFile;
-                t.StateFile = cache;
-                File.Delete(t.StateFile);
-                succeeded = t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader);
-                if (FileUtilities.FileExistsNoThrow(t.StateFile))
-                {
-                    Assert.Equal(1, t.FilesWritten.Length);
-                    Assert.True(t.FilesWritten[0].ItemSpec.Equals(cache, StringComparison.OrdinalIgnoreCase));
-                }
-
-                File.Delete(t.StateFile);
-
-                if (buildConsistencyCheck)
-                {
-                    // Some consistency checks between load mode and build mode.
-                    Assert.Equal(loadModeResolvedFiles.Length, t.ResolvedFiles.Length);
-                    for (int i = 0; i < loadModeResolvedFiles.Length; i++)
+                    // A few checks. These should always be true or it may be a perf issue for project load.
+                    ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
+                    if (t.ResolvedFiles != null)
                     {
-                        Assert.Equal(loadModeResolvedFiles[i].ItemSpec, t.ResolvedFiles[i].ItemSpec);
-                        Assert.Equal(loadModeResolvedFiles[i].GetMetadata("CopyLocal"), t.ResolvedFiles[i].GetMetadata("CopyLocal"));
-                        Assert.Equal(loadModeResolvedFiles[i].GetMetadata("ResolvedFrom"), t.ResolvedFiles[i].GetMetadata("ResolvedFrom"));
+                        loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();
+                    }
+                    Assert.Equal(0, t.ResolvedDependencyFiles.Length);
+                    Assert.Equal(0, t.SatelliteFiles.Length);
+                    Assert.Equal(0, t.RelatedFiles.Length);
+                    Assert.Equal(0, t.SuggestedRedirects.Length);
+                    Assert.Equal(0, t.FilesWritten.Length);
+
+                    if (buildConsistencyCheck)
+                    {
+                        // Some consistency checks between load mode and build mode.
+                        Assert.Equal(loadModeResolvedFiles.Length, t.ResolvedFiles.Length);
+                        for (int i = 0; i < loadModeResolvedFiles.Length; i++)
+                        {
+                            Assert.Equal(loadModeResolvedFiles[i].ItemSpec, t.ResolvedFiles[i].ItemSpec);
+                            Assert.Equal(loadModeResolvedFiles[i].GetMetadata("CopyLocal"), t.ResolvedFiles[i].GetMetadata("CopyLocal"));
+                            Assert.Equal(loadModeResolvedFiles[i].GetMetadata("ResolvedFrom"), t.ResolvedFiles[i].GetMetadata("ResolvedFrom"));
+                        }
                     }
                 }
 
-                // Check attributes on resolve files.
-                for (int i = 0; i < t.ResolvedFiles.Length; i++)
+                // Now, run it in building-a-project mode.
+                if (rarSimulationMode.HasFlag(RARSimulationMode.BuildProject))
                 {
-                    // OriginalItemSpec attribute on resolved items is to support VS in figuring out which
-                    // project file reference caused a particular resolved file.
-                    string originalItemSpec = t.ResolvedFiles[i].GetMetadata("OriginalItemSpec");
-                    Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); //                         "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
+                    MockEngine e = (MockEngine)t.BuildEngine;
+                    e.Warnings = 0;
+                    e.Errors = 0;
+                    e.Log = "";
+                    t.Silent = false;
+                    t.FindDependencies = true;
+                    t.FindSatellites = true;
+                    t.FindSerializationAssemblies = true;
+                    t.FindRelatedFiles = true;
+                    string cache = rarCacheFile;
+                    t.StateFile = cache;
+                    File.Delete(t.StateFile);
+	                succeeded =
+	                    t.Execute
+	                    (
+	                        fileExists,
+	                        directoryExists,
+	                        getDirectories,
+	                        getAssemblyName,
+	                        getAssemblyMetadata,
+	#if FEATURE_WIN32_REGISTRY
+	                        getRegistrySubKeyNames,
+	                        getRegistrySubKeyDefaultValue,
+	#endif
+	                        getLastWriteTime,
+	                        getRuntimeVersion,
+	#if FEATURE_WIN32_REGISTRY
+	                        openBaseKey,
+	#endif
+	                        checkIfAssemblyIsInGac,
+	                        isWinMDFile,
+	                        readMachineTypeFromPEHeader
+	                    );
+                    if (FileUtilities.FileExistsNoThrow(t.StateFile))
+                    {
+                        Assert.Equal(1, t.FilesWritten.Length);
+                        Assert.True(t.FilesWritten[0].ItemSpec.Equals(cache, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    File.Delete(t.StateFile);
+
+                    // Check attributes on resolve files.
+                    for (int i = 0; i < t.ResolvedFiles.Length; i++)
+                    {
+                        // OriginalItemSpec attribute on resolved items is to support VS in figuring out which
+                        // project file reference caused a particular resolved file.
+                        string originalItemSpec = t.ResolvedFiles[i].GetMetadata("OriginalItemSpec");
+                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); //                         "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
+                    }
                 }
             }
             finally

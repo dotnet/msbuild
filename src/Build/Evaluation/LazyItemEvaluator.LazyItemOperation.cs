@@ -16,8 +16,8 @@ namespace Microsoft.Build.Evaluation
         {
             private readonly string _itemType;
             private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-            private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
 
+            protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
             protected readonly ProjectItemElement _itemElement;
             protected readonly ItemSpec<P, I> _itemSpec;
             protected readonly EvaluatorData _evaluatorData;
@@ -52,9 +52,12 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                ImmutableList<I> items = SelectItems(listBuilder, globsToIgnore);
-                MutateItems(items);
-                SaveItems(items, listBuilder);
+                using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
+                {
+                    var items = SelectItems(listBuilder, globsToIgnore);
+                    MutateItems(items);
+                    SaveItems(items, listBuilder);
+                }
             }
 
             /// <summary>

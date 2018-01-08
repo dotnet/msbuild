@@ -397,8 +397,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFile">The project file which is being built</param>
         /// <param name="projectFileOfTargetElement">The file in which the target is defined - typically a .targets file</param>
         /// <param name="parentTargetName">The name of the parent target.</param>
+        /// <param name="buildReason">The reason the parent target built the target.</param>
         /// <returns>The target build event context</returns>
-        BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName);
+        BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason);
 
         /// <summary>
         /// Log that a target has finished

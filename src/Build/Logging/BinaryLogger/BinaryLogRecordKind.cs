@@ -19,6 +19,7 @@
         ProjectEvaluationStarted,
         ProjectEvaluationFinished,
         ProjectImported,
-        ProjectImportArchive
+        ProjectImportArchive,
+        TargetSkipped
     }
 }

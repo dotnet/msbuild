@@ -12,7 +12,7 @@
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which is a common assembly used by other MSBuild assemblies.</description>
     <tags>MSBuild</tags>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
       <group targetFramework="netstandard1.3">
         <dependency id="System.Collections" version="4.0.11" />

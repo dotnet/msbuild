@@ -49,7 +49,7 @@ namespace Microsoft.Build.Framework
             string projectFile,
             string targetFile
         )
-            : this(message, helpKeyword, targetName, projectFile, targetFile, String.Empty, DateTime.UtcNow)
+            : this(message, helpKeyword, targetName, projectFile, targetFile, String.Empty, TargetBuiltReason.None, DateTime.UtcNow)
         {
         }
 
@@ -81,10 +81,42 @@ namespace Microsoft.Build.Framework
             this.parentTarget = parentTarget;
         }
 
+        /// <summary>
+        /// This constructor allows event data to be initialized.
+        /// </summary>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="targetName">target name</param>
+        /// <param name="projectFile">project file</param>
+        /// <param name="targetFile">file in which the target is defined</param>
+        /// <param name="parentTarget">The part of the target.</param>
+        /// <param name="buildReason">The reason the parent built this target.</param>
+        /// <param name="eventTimestamp">Timestamp when the event was created</param>
+        public TargetStartedEventArgs
+        (
+            string message,
+            string helpKeyword,
+            string targetName,
+            string projectFile,
+            string targetFile,
+            string parentTarget,
+            TargetBuiltReason buildReason,
+            DateTime eventTimestamp
+        )
+            : base(message, helpKeyword, "MSBuild", eventTimestamp)
+        {
+            this.targetName = targetName;
+            this.projectFile = projectFile;
+            this.targetFile = targetFile;
+            this.parentTarget = parentTarget;
+            this.buildReason = buildReason;
+        }
+
         private string targetName;
         private string projectFile;
         private string targetFile;
         private string parentTarget;
+        private TargetBuiltReason buildReason;
 
 #if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
@@ -139,6 +171,9 @@ namespace Microsoft.Build.Framework
                 writer.Write(parentTarget);
             }
             #endregion
+            #region BuildReason
+            writer.Write((int)buildReason);
+            #endregion
         }
 
         /// <summary>
@@ -192,6 +227,12 @@ namespace Microsoft.Build.Framework
                 }
             }
             #endregion
+            #region BuildReason
+            if (version > 20)
+            {
+                buildReason = (TargetBuiltReason) reader.ReadInt32();
+            }
+            #endregion 
         }
         #endregion
 #endif
@@ -237,6 +278,17 @@ namespace Microsoft.Build.Framework
             get
             {
                 return targetFile;
+            }
+        }
+
+        /// <summary>
+        /// Why this target was built by its parent.
+        /// </summary>
+        public TargetBuiltReason BuildReason
+        {
+            get
+            {
+                return buildReason;
             }
         }
     }

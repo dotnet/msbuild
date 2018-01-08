@@ -14,7 +14,7 @@
     <description>
       This package includes APIs that support writing MSBuild tasks. NOTE: this package is deprecated.
     </description>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
       <group targetFramework="net46">
         <dependency id="Microsoft.Build.Framework" version="$version$" />

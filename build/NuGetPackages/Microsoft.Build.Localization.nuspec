@@ -11,7 +11,7 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the localized satellite assemblies for MSBuild. Reference this package only if you want msbuild output to be localized in cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant.</description>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>MSBuild</tags>
   </metadata>
   <files>
