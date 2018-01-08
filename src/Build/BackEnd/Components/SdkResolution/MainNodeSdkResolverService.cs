@@ -88,7 +88,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <summary>
-        /// Resolves the specified SDK.
+        /// Resolves the specified SDK.  This method uses concurrent dictionaries for locking per build submission and SDK name.  This allows a build to be resolving multiple
+        /// SDKs at once where the first request does the heavy lifting and blocked requests use the cached result.
         /// </summary>
         /// <param name="submissionId">The current build submission ID that is resolving an SDK.</param>
         /// <param name="sdk">The <see cref="SdkReference"/> containing information about the SDK to resolve.</param>
@@ -106,7 +107,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Get the dictionary for the specified submission if one is already added otherwise create a new dictionary for the submission.
             ConcurrentDictionary<string, SdkResult> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default));
 
-            // Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance
+            /*
+             * Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
+             * the same SDK, they will all block while the first one resolves.  Blocked requests will then get the cached result.  This ensures that a single
+             * build submission resolves each unique SDK only one time.
+             */
             SdkResult result = cached.GetOrAdd(
                 sdk.Name,
                 key =>
@@ -142,19 +147,22 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// adds requests to a queue which are processed by a background thread.</remarks>
         private void HandleRequest(int node, SdkResolverRequest request)
         {
-            // Start the background thread which will process queued requests if it has not already been started.
-            lock (_lockObject)
+            if (_requestHandler == null)
             {
-                if (_requestHandler == null)
+                // Start the background thread which will process queued requests if it has not already been started.
+                lock (_lockObject)
                 {
-                    // Create the event used to signal that a request was received
-                    _requestReceivedEvent = new ManualResetEvent(initialState: false);
+                    if (_requestHandler == null)
+                    {
+                        // Create the event used to signal that a request was received
+                        _requestReceivedEvent = new ManualResetEvent(initialState: false);
 
-                    // Create the queue used to store requests that need to be processed
-                    _requests = new ConcurrentQueue<SdkResolverRequest>();
+                        // Create the queue used to store requests that need to be processed
+                        _requests = new ConcurrentQueue<SdkResolverRequest>();
 
-                    // Create the thread which processes requests
-                    _requestHandler = Task.Run((Action)RequestHandlerPumpProc);
+                        // Create the thread which processes requests
+                        _requestHandler = Task.Run((Action) RequestHandlerPumpProc);
+                    }
                 }
             }
 

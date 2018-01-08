@@ -1180,8 +1180,8 @@ namespace Microsoft.Build.BackEnd
                     BuildEventContext.InvalidProjectContextId,
                     BuildEventContext.InvalidTargetId,
                     BuildEventContext.InvalidTaskId),
-                sdkResolverService,
-                _requestEntry.Request.SubmissionId);
+                    sdkResolverService,
+                    _requestEntry.Request.SubmissionId);
         }
 
         /// <summary>
