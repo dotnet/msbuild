@@ -5,18 +5,14 @@
 // <summary>Tests for preprocessor</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Xml;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
-using System.IO;
 using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
+using System;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Preprocessor
@@ -849,12 +845,15 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         [Fact]
         public void SdkImportsAreInPreprocessedOutput()
         {
-            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
-            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
-
-            try
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                Directory.CreateDirectory(testSdkDirectory);
+                string testSdkDirectory = env.CreateFolder().FolderPath;
+
+                env.WithTransientTestState(new TransientSdkResolution(new Dictionary<string, string>
+                {
+                    {"MSBuildUnitTestSdk", testSdkDirectory}
+                }));
+
 
                 string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
                 string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
@@ -870,23 +869,21 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     </PropertyGroup>
 </Project>");
 
-                using (var env = TestEnvironment.Create())
-                {
-                    env.SetEnvironmentVariable("MSBuildSDKsPath", testSdkRoot);
-                    string content = @"<Project Sdk='MSBuildUnitTestSdk'>
+
+                string content = @"<Project Sdk='MSBuildUnitTestSdk'>
   <PropertyGroup>
     <p>v1</p>
   </PropertyGroup>
 </Project>";
 
-                    var project = new  Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+                Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
 
-                    StringWriter writer = new StringWriter();
+                StringWriter writer = new StringWriter();
 
-                    project.SaveLogicalProject(writer);
+                project.SaveLogicalProject(writer);
 
-                    string expected = ObjectModelHelpers.CleanupFileContents(
-                        $@"<?xml version=""1.0"" encoding=""utf-16""?>
+                string expected = ObjectModelHelpers.CleanupFileContents(
+                    $@"<?xml version=""1.0"" encoding=""utf-16""?>
 <Project>
   <!--
 ============================================================================================================================================
@@ -928,15 +925,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
 -->
 </Project>");
-                    Helpers.VerifyAssertLineByLine(expected, writer.ToString());
-                }
-            }
-            finally
-            {
-                if (Directory.Exists(testSdkDirectory))
-                {
-                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
-                }
+                Helpers.VerifyAssertLineByLine(expected, writer.ToString());
             }
         }
 
