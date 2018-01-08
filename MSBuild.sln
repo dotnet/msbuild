@@ -58,13 +58,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XmlFileLogger", "src\Sample
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Package", "Package", "{9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework.Package", "src\Package\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj", "{8422E1CF-E26A-406B-A4D2-A95D7A7E692A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework.Package", "src\Package\NuGet\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj", "{8422E1CF-E26A-406B-A4D2-A95D7A7E692A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Package", "src\Package\Microsoft.Build\Microsoft.Build.Package.csproj", "{D1CC61A8-4738-4B09-A875-E118D0B95EEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Package", "src\Package\NuGet\Microsoft.Build\Microsoft.Build.Package.csproj", "{D1CC61A8-4738-4B09-A875-E118D0B95EEF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities.Core.Package", "src\Package\Microsoft.Build.Utilities.Core\Microsoft.Build.Utilities.Core.Package.csproj", "{5C4149D7-F9ED-45F0-814E-D2A7FD9AF32A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities.Core.Package", "src\Package\NuGet\Microsoft.Build.Utilities.Core\Microsoft.Build.Utilities.Core.Package.csproj", "{5C4149D7-F9ED-45F0-814E-D2A7FD9AF32A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks.Core.Package", "src\Package\Microsoft.Build.Tasks.Core\Microsoft.Build.Tasks.Core.Package.csproj", "{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks.Core.Package", "src\Package\NuGet\Microsoft.Build.Tasks.Core\Microsoft.Build.Tasks.Core.Package.csproj", "{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{39DC5BEB-1F63-45C6-96AD-89868ACDFE3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -596,10 +598,11 @@ Global
 		{2D515229-D44B-4625-A1B2-ED88153D0ECF} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
 		{F45DBA88-C833-434A-8F68-087124540303} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
 		{523E1555-DB60-4FD4-8CDF-3C159710CAED} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
-		{8422E1CF-E26A-406B-A4D2-A95D7A7E692A} = {9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}
-		{D1CC61A8-4738-4B09-A875-E118D0B95EEF} = {9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}
-		{5C4149D7-F9ED-45F0-814E-D2A7FD9AF32A} = {9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}
-		{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623} = {9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}
+		{8422E1CF-E26A-406B-A4D2-A95D7A7E692A} = {39DC5BEB-1F63-45C6-96AD-89868ACDFE3F}
+		{D1CC61A8-4738-4B09-A875-E118D0B95EEF} = {39DC5BEB-1F63-45C6-96AD-89868ACDFE3F}
+		{5C4149D7-F9ED-45F0-814E-D2A7FD9AF32A} = {39DC5BEB-1F63-45C6-96AD-89868ACDFE3F}
+		{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623} = {39DC5BEB-1F63-45C6-96AD-89868ACDFE3F}
+		{39DC5BEB-1F63-45C6-96AD-89868ACDFE3F} = {9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F948D667-14E3-4F98-BA50-3F3C948BF4C2}
