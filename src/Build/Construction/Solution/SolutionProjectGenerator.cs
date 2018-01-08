@@ -16,6 +16,8 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -131,6 +133,16 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private string _selectedSolutionConfiguration;
 
+        /// <summary>
+        /// The <see cref="ISdkResolverService"/> to use.
+        /// </summary>
+        private ISdkResolverService _sdkResolverService;
+
+        /// <summary>
+        /// The current build submission ID.
+        /// </summary>
+        private int _submissionId;
+
         #endregion // Private Fields
 
         #region Constructors
@@ -139,20 +151,22 @@ namespace Microsoft.Build.Construction
         /// Constructor.
         /// </summary>
         private SolutionProjectGenerator
-            (
-            SolutionFile solution,
+        (SolutionFile solution,
             IDictionary<string, string> globalProperties,
             string toolsVersionOverride,
             BuildEventContext projectBuildEventContext,
             ILoggingService loggingService,
-            IReadOnlyCollection<string> targetNames
-            )
+            IReadOnlyCollection<string> targetNames,
+            ISdkResolverService sdkResolverService,
+            int submissionId)
         {
             _solutionFile = solution;
             _globalProperties = globalProperties ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             _toolsVersionOverride = toolsVersionOverride;
             _projectBuildEventContext = projectBuildEventContext;
             _loggingService = loggingService;
+            _sdkResolverService = sdkResolverService ?? SdkResolverService.Instance;
+            _submissionId = submissionId;
 
             if (targetNames != null)
             {
@@ -174,6 +188,8 @@ namespace Microsoft.Build.Construction
         /// <param name="projectBuildEventContext">The logging context for this project.</param>
         /// <param name="loggingService">The logging service.</param>
         /// <param name="targetNames">A collection of target names the user requested to be built.</param>
+        /// <param name="sdkResolverService">An <see cref="ISdkResolverService"/> to use.</param>
+        /// <param name="submissionId">The current build submission ID.</param>
         /// <returns>An array of ProjectInstances.  The first instance is the traversal project, the remaining are the metaprojects for each project referenced in the solution.</returns>
         internal static ProjectInstance[] Generate
             (
@@ -182,8 +198,9 @@ namespace Microsoft.Build.Construction
             string toolsVersionOverride,
             BuildEventContext projectBuildEventContext,
             ILoggingService loggingService,
-            IReadOnlyCollection<string> targetNames = default(IReadOnlyCollection<string>)
-            )
+            IReadOnlyCollection<string> targetNames = default(IReadOnlyCollection<string>),
+            ISdkResolverService sdkResolverService = null,
+            int submissionId = BuildEventContext.InvalidSubmissionId)
         {
             SolutionProjectGenerator projectGenerator = new SolutionProjectGenerator
                 (
@@ -192,7 +209,9 @@ namespace Microsoft.Build.Construction
                 toolsVersionOverride,
                 projectBuildEventContext,
                 loggingService,
-                targetNames
+                targetNames,
+                sdkResolverService,
+                submissionId
                 );
 
             return projectGenerator.Generate();
@@ -898,7 +917,9 @@ namespace Microsoft.Build.Construction
                 _globalProperties,
                 explicitToolsVersionSpecified ? wrapperProjectToolsVersion : null,
                 _solutionFile.VisualStudioVersion,
-                new ProjectCollection()
+                new ProjectCollection(),
+                _sdkResolverService,
+                _submissionId
                 );
 
             // Make way for the real ones                

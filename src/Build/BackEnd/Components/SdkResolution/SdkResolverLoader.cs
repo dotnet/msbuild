@@ -11,7 +11,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.BackEnd.SdkResolution
 {
     internal class SdkResolverLoader
     {

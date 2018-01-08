@@ -25,6 +25,7 @@ using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
@@ -168,7 +169,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectInstance _projectInstanceIfAnyForDebuggerOnly;
 
-        private readonly SdkResolution _sdkResolution;
+        /// <summary>
+        /// The <see cref="ISdkResolverService"/> to use.
+        /// </summary>
+        private readonly ISdkResolverService _sdkResolverService;
+
+        /// <summary>
+        /// The current build submission ID.
+        /// </summary>
+        private readonly int _submissionId;
 
         /// <summary>
         /// The environment properties with which evaluation should take place.
@@ -249,7 +258,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
-        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
+        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -276,7 +285,8 @@ namespace Microsoft.Build.Evaluation
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
             _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
-            _sdkResolution = sdkResolution;
+            _sdkResolverService = sdkResolverService;
+            _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler((loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0);
         }
 
@@ -374,7 +384,7 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService,
             IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider,
             ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext,
-            ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
+            ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
@@ -387,7 +397,7 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
-                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, itemFactory, toolsetProvider, projectRootElementCache, projectInstanceIfAnyForDebuggerOnly, sdkResolution);
+                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, itemFactory, toolsetProvider, projectRootElementCache, projectInstanceIfAnyForDebuggerOnly, sdkResolverService, submissionId);
                 return evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
             }
@@ -2482,7 +2492,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                var sdkRootPath = _sdkResolution.GetSdkPath(importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
+                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
 
                 if (string.IsNullOrEmpty(sdkRootPath))
                 {
