@@ -11,7 +11,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ref\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj" Private="false" />
-    <ProjectReference Include="..\..\ref\Microsoft.Build.Utilities.Core\Microsoft.Build.Utilities.Core.Package.csproj" Private="false" />
+    <ProjectReference Include="..\..\Package\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj" Private="false" />
+    <ProjectReference Include="..\..\Package\Microsoft.Build.Utilities.Core\Microsoft.Build.Utilities.Core.Package.csproj" Private="false" />
   </ItemGroup>
 </Project>

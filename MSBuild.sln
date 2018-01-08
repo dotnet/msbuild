@@ -56,15 +56,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskWithDependency", "src\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XmlFileLogger", "src\Samples\XmlFileLogger\XmlFileLogger.csproj", "{523E1555-DB60-4FD4-8CDF-3C159710CAED}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Packages", "Packages", "{9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Package", "Package", "{9BAD9352-DEFB-45E5-B8A4-4816B9B22A33}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework.Package", "src\ref\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj", "{8422E1CF-E26A-406B-A4D2-A95D7A7E692A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Framework.Package", "src\Package\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj", "{8422E1CF-E26A-406B-A4D2-A95D7A7E692A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Package", "src\ref\Microsoft.Build\Microsoft.Build.Package.csproj", "{D1CC61A8-4738-4B09-A875-E118D0B95EEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Package", "src\Package\Microsoft.Build\Microsoft.Build.Package.csproj", "{D1CC61A8-4738-4B09-A875-E118D0B95EEF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities.Core.Package", "src\ref\Microsoft.Build.Utilities.Core\Microsoft.Build.Utilities.Core.Package.csproj", "{5C4149D7-F9ED-45F0-814E-D2A7FD9AF32A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Utilities.Core.Package", "src\Package\Microsoft.Build.Utilities.Core\Microsoft.Build.Utilities.Core.Package.csproj", "{5C4149D7-F9ED-45F0-814E-D2A7FD9AF32A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks.Core.Package", "src\ref\Microsoft.Build.Tasks.Core\Microsoft.Build.Tasks.Core.Package.csproj", "{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks.Core.Package", "src\Package\Microsoft.Build.Tasks.Core\Microsoft.Build.Tasks.Core.Package.csproj", "{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
