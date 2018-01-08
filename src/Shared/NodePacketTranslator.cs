@@ -347,6 +347,7 @@ namespace Microsoft.Build.BackEnd
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
+                    _reader.ReadInt32(),
                     _reader.ReadInt32()
                     );
             }
@@ -968,6 +969,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _writer.Write(value.SubmissionId);
                 _writer.Write(value.NodeId);
+                _writer.Write(value.EvaluationId);
                 _writer.Write(value.ProjectInstanceId);
                 _writer.Write(value.ProjectContextId);
                 _writer.Write(value.TargetId);

@@ -12,6 +12,7 @@ using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
+    /*
     public class SdkResolution_Tests
     {
         private readonly StringBuilder _log;
@@ -182,4 +183,5 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory) => null;
         }
     }
+    */
 }
