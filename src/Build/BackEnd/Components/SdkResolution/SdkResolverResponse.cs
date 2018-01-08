@@ -24,6 +24,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="ElementLocation"/> of the reference that created this response.
+        /// </summary>
+        public Construction.ElementLocation ElementLocation { get; set; }
+
+        /// <summary>
         /// Gets the full path to the resolved SDK.
         /// </summary>
         public string FullPath => _fullPath;

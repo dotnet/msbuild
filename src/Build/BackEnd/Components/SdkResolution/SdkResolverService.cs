@@ -172,5 +172,28 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             _resolvers = resolvers;
         }
+
+        /// <summary>
+        /// Determines if the <see cref="SdkReference"/> is the same as the specified version.  If the <paramref name="sdk"/> object has <code>null</code> for the version,
+        /// this method will always return true since <code>null</code> can match any version.
+        /// </summary>
+        /// <param name="sdk">An <see cref="SdkReference"/> object.</param>
+        /// <param name="version">The version to compare.</param>
+        /// <returns><code>true</code> if the specified SDK reference has the same version as the specified result, otherwise <code>false</code>.</returns>
+        public static bool IsReferenceSameVersion(SdkReference sdk, string version)
+        {
+            // If the reference has a null version, it matches any result
+            if (String.IsNullOrEmpty(sdk.Version))
+            {
+                return true;
+            }
+
+            Version version1, version2;
+
+            // Try parsing the two versions and compare
+            return    Version.TryParse(sdk.Version, out version1)
+                   && Version.TryParse(version, out version2)
+                   && version1.Equals(version2);
+        }
     }
 }

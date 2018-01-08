@@ -109,9 +109,21 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance
             SdkResult result = cached.GetOrAdd(
                 sdk.Name,
-                key => SdkResolverService.Instance.GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
+                key =>
+                {
+                    SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
 
-            // TODO: make sure the version of the cached result matches what we expected, otherwise log a warning that two version of the same SDK are specified
+                    // Associate the element location of the resolved SDK reference
+                    sdkResult.ElementLocation = sdkReferenceLocation;
+
+                    return sdkResult;
+                });
+
+            if (!SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
+            {
+                // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version already specified at "{1}" will be used and the version will be "{2}" ignored.
+                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.ElementLocation, sdk.Version);
+            }
 
             return result;
         }

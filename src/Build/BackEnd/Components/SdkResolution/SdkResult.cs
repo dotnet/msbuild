@@ -30,9 +30,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             Warnings = warnings;
         }
 
+        public Construction.ElementLocation ElementLocation { get; set; }
+
         public IEnumerable<string> Errors { get; }
 
         public string Path { get; }
+
         public SdkReference Sdk { get; }
 
         public string Version { get; }

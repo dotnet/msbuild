@@ -68,7 +68,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 sdk.Name,
                 key => RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
 
-            // TODO: make sure the version of the cached result matches what we expected, otherwise log a warning that two version of the same SDK are specified
+            if (!SdkResolverService.IsReferenceSameVersion(sdk, response.Version))
+            {
+                // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version already specified at "{1}" will be used and the version will be "{2}" ignored.
+                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, response.ElementLocation, sdk.Version);
+            }
 
             return response.FullPath;
         }
@@ -107,6 +111,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
             WaitHandle.WaitAny(new WaitHandle[] {_responseReceivedEvent, ShutdownEvent});
+
+            // Keep track of the element location of the reference
+            _lastResponse.ElementLocation = sdkReferenceLocation;
 
             // Return the response which was set by another thread.  In the case of shutdown, it should be null.
             return _lastResponse;
