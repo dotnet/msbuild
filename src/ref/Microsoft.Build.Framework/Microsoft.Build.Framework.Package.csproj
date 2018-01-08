@@ -1,7 +1,11 @@
 ﻿
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>Microsoft.Build.Framework</AssemblyName>
+    <TargetFrameworks>netstandard1.3;net46;netstandard2.0</TargetFrameworks>
+    <ImplementationProject>$(RepoRoot)src\Framework\Microsoft.Build.Framework.csproj</ImplementationProject>
   </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Xaml" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
 </Project>

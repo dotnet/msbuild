@@ -9,9 +9,12 @@
   <Import Project="..\Directory.Build.props"/>
 
   <PropertyGroup>
-      <EnableDefaultItems>false</EnableDefaultItems>
-      <IsPackable>true</IsPackable>
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <TargetsForTfmSpecificContentInPackage>Build</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
 </Project>
