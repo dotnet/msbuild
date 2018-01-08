@@ -7,6 +7,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -104,30 +105,26 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             ErrorUtilities.VerifyThrowInternalNull(loggingContext, nameof(loggingContext));
             ErrorUtilities.VerifyThrowInternalNull(sdkReferenceLocation, nameof(sdkReferenceLocation));
 
-            // Get the dictionary for the specified submission if one is already added otherwise create a new dictionary for the submission.
-            ConcurrentDictionary<string, SdkResult> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default));
+            SdkResult result;
 
-            /*
-             * Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
-             * the same SDK, they will all block while the first one resolves.  Blocked requests will then get the cached result.  This ensures that a single
-             * build submission resolves each unique SDK only one time.
-             */
-            SdkResult result = cached.GetOrAdd(
-                sdk.Name,
-                key =>
-                {
-                    SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+            if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
+            {
+                result = GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+            }
+            else
+            {
+                // Get the dictionary for the specified submission if one is already added otherwise create a new dictionary for the submission.
+                ConcurrentDictionary<string, SdkResult> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default));
 
-                    if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
-                    {
-                        // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
-                        loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, sdkResult.Version);
-                    }
-                    // Associate the element location of the resolved SDK reference
-                    sdkResult.ElementLocation = sdkReferenceLocation;
-
-                    return sdkResult;
-                });
+                /*
+                 * Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
+                 * the same SDK, they will all block while the first one resolves.  Blocked requests will then get the cached result.  This ensures that a single
+                 * build submission resolves each unique SDK only one time.
+                 */
+                result = cached.GetOrAdd(
+                    sdk.Name,
+                    key => GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
+            }
 
             if (!SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
             {
@@ -136,6 +133,31 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Resolves the specified SDK without caching the result.
+        /// </summary>
+        /// <param name="sdk">The <see cref="SdkReference"/> containing information about the SDK to resolve.</param>
+        /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
+        /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element that referenced the SDK.</param>
+        /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
+        /// <param name="projectPath">The full path to the project that referenced the SDK.</param>
+        /// <returns>An <see cref="SdkResult"/> containing information about the SDK if one was resolved, otherwise <code>null</code>.</returns>
+        private SdkResult GetSdkResult(SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        {
+            SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+
+            if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
+            {
+                // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
+                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, sdkResult.Version);
+            }
+
+            // Associate the element location of the resolved SDK reference
+            sdkResult.ElementLocation = sdkReferenceLocation;
+
+            return sdkResult;
         }
 
         /// <summary>
