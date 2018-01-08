@@ -22,7 +22,9 @@
                                 '$(HostRid)' == 'alpine.3.6-x64' OR
                                 '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
     <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
-
+    <HostMonikerRidForFileName>$(HostMonikerRid)</HostMonikerRidForFileName>
+    <HostMonikerRidForFileName Condition=" '$(IsDebianBaseDistro)' == 'true' ">$(Architecture)</HostMonikerRidForFileName>
+    
     <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
     <ArtifactNameSdkSymbols>dotnet-sdk-symbols</ArtifactNameSdkSymbols>
     <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-sdk</ArtifactNameCombinedHostHostFxrFrameworkSdk>
@@ -35,6 +37,6 @@
     <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
     <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkLanguagePack>
     <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>
-    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid)$(HostMonikerRid)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
+    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid)$(HostMonikerRidForFileName)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
   </PropertyGroup>
 </Project>
