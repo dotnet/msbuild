@@ -6,7 +6,7 @@
   
   <UsingTask TaskName="ShowItems" AssemblyFile="$(AssemblyPath)"/>
   <ItemGroup>
-    <TestItems Include="**\Microsoft.Build.*.dll"/>
+    <TestItems Include="$(MSBuildBinPath)\**\Microsoft.Build.*.dll"/>
   </ItemGroup>
   <Target Name="Build">
     <Message Text="Loading task from: $(AssemblyPath)"/>
