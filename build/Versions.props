@@ -29,7 +29,7 @@
     <MicrosoftBuildFrameworkVersion>15.4.8</MicrosoftBuildFrameworkVersion>
     <MicrosoftBuildUtilitiesCoreVersion>15.4.8</MicrosoftBuildUtilitiesCoreVersion>
     <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
-    <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-25908-02</NETStandardLibraryNETFrameworkVersion>
+    <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <NuGetBuildTasksPackVersion>4.6.0-rtm-4782</NuGetBuildTasksPackVersion>
     <NuGetPackagingVersion>$(NuGetBuildTasksPackVersion)</NuGetPackagingVersion>
