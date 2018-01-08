@@ -477,7 +477,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             MethodInfo initializeForTestsMethodInfo = sdkResolverServiceType.GetMethod("InitializeForTests", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            initializeForTestsMethodInfo.Invoke(sdkResolverService, new object[] { resolvers });
+            initializeForTestsMethodInfo.Invoke(sdkResolverService, new object[] { null, resolvers });
         }
 
         private class TestSdkResolver : SdkResolver

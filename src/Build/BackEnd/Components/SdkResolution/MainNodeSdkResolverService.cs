@@ -113,6 +113,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
 
+                    if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
+                    {
+                        // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
+                        loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, sdkResult.Version);
+                    }
                     // Associate the element location of the resolved SDK reference
                     sdkResult.ElementLocation = sdkReferenceLocation;
 
@@ -121,8 +126,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (!SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
             {
-                // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version already specified at "{1}" will be used and the version will be "{2}" ignored.
-                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.ElementLocation, sdk.Version);
+                // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.
+                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
             }
 
             return result;

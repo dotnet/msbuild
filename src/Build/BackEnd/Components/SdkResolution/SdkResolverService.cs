@@ -8,13 +8,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
     /// The main implementation of <see cref="ISdkResolverService"/> which resolves SDKs.  This class is the central location for all SDK resolution and is used
     /// directly by the main node and non-build evaluations and is used indirectly by the out-of-proc node when it sends requests to the main node.
-    /// 
+    ///
     /// All access to this class must go through the singleton <see cref="SdkResolverService.Instance"/>.
     /// </summary>
     internal sealed class SdkResolverService : ISdkResolverService
@@ -30,14 +31,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private readonly object _lockObject = new object();
 
         /// <summary>
-        /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
-        /// </summary>
-        private readonly SdkResolverLoader _sdkResolverLoader = new SdkResolverLoader();
-
-        /// <summary>
         /// Stores the list of SDK resolvers which were loaded.
         /// </summary>
         private IList<SdkResolver> _resolvers;
+
+        /// <summary>
+        /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
+        /// </summary>
+        private SdkResolverLoader _sdkResolverLoader = new SdkResolverLoader();
 
         private SdkResolverService()
         {
@@ -50,6 +51,24 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         /// <inheritdoc cref="ISdkResolverService.SendPacket"/>
         public Action<INodePacket> SendPacket { get; }
+
+        /// <summary>
+        /// Determines if the <see cref="SdkReference"/> is the same as the specified version.  If the <paramref name="sdk"/> object has <code>null</code> for the version,
+        /// this method will always return true since <code>null</code> can match any version.
+        /// </summary>
+        /// <param name="sdk">An <see cref="SdkReference"/> object.</param>
+        /// <param name="version">The version to compare.</param>
+        /// <returns><code>true</code> if the specified SDK reference has the same version as the specified result, otherwise <code>false</code>.</returns>
+        public static bool IsReferenceSameVersion(SdkReference sdk, string version)
+        {
+            // If the reference has a null version, it matches any result
+            if (String.IsNullOrEmpty(sdk.Version))
+            {
+                return true;
+            }
+
+            return String.Equals(sdk.Version, version, StringComparison.OrdinalIgnoreCase);
+        }
 
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
         public void ClearCache(int submissionId)
@@ -137,6 +156,21 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return result?.Path;
         }
 
+        /// <summary>
+        /// Used for unit tests only.  This is currently only called through reflection in Microsoft.Build.Engine.UnitTests.TransientSdkResolution.CallResetForTests
+        /// </summary>
+        /// <param name="resolverLoader">An <see cref="SdkResolverLoader"/> to use for loading SDK resolvers.</param>
+        /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
+        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
+        {
+            if (resolverLoader != null)
+            {
+                _sdkResolverLoader = resolverLoader;
+            }
+
+            _resolvers = resolvers;
+        }
+
         private static void LogWarnings(LoggingContext loggingContext, ElementLocation location, SdkResult result)
         {
             if (result.Warnings == null)
@@ -161,39 +195,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
             }
-        }
-
-        /// <summary>
-        /// Used for unit tests only.  This is currently only called through reflection in Microsoft.Build.Engine.UnitTests.TransientSdkResolution.CallResetForTests
-        /// </summary>
-        /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
-        // ReSharper disable once UnusedMember.Local
-        private void InitializeForTests(IList<SdkResolver> resolvers)
-        {
-            _resolvers = resolvers;
-        }
-
-        /// <summary>
-        /// Determines if the <see cref="SdkReference"/> is the same as the specified version.  If the <paramref name="sdk"/> object has <code>null</code> for the version,
-        /// this method will always return true since <code>null</code> can match any version.
-        /// </summary>
-        /// <param name="sdk">An <see cref="SdkReference"/> object.</param>
-        /// <param name="version">The version to compare.</param>
-        /// <returns><code>true</code> if the specified SDK reference has the same version as the specified result, otherwise <code>false</code>.</returns>
-        public static bool IsReferenceSameVersion(SdkReference sdk, string version)
-        {
-            // If the reference has a null version, it matches any result
-            if (String.IsNullOrEmpty(sdk.Version))
-            {
-                return true;
-            }
-
-            Version version1, version2;
-
-            // Try parsing the two versions and compare
-            return    Version.TryParse(sdk.Version, out version1)
-                   && Version.TryParse(version, out version2)
-                   && version1.Equals(version2);
         }
     }
 }
