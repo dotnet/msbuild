@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework.EvaluationContext;
 
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Definition
 {
     /// <summary>
     ///     Common <see cref="Project" /> constructor arguments.
@@ -31,5 +33,13 @@ namespace Microsoft.Build.Evaluation
         /// The <see cref="ProjectLoadSettings"/> to use for evaluation.
         /// </summary>
         public ProjectLoadSettings LoadSettings { get; set; } = ProjectLoadSettings.Default;
+
+        /// <summary>
+        /// The <see cref="EvaluationContext"/> to use for evaluation. Must be created via <see cref="Project.EvaluationContextFactory"/>.
+        /// The <see cref="Project"/> will keep the reference to the context because
+        /// some of its methods trigger hidden reevaluations, and those hidden reevaluations need the initial context.
+        /// The stored context can be overidden via <see cref="Project.ReevaluateIfNecessary(EvaluationContext)"/>
+        /// </summary>
+        public EvaluationContext EvaluationContext { get; set; }
     }
 }
