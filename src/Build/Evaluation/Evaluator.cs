@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -23,6 +23,7 @@ using System.Threading;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Evaluation.Context;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
@@ -175,6 +176,8 @@ namespace Microsoft.Build.Evaluation
         /// The current build submission ID.
         /// </summary>
         private readonly int _submissionId;
+        
+        private readonly EvaluationContextBase _evaluationContext;
 
         /// <summary>
         /// The environment properties with which evaluation should take place.
@@ -203,7 +206,19 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
-        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
+        private Evaluator(
+            IEvaluatorData<P, I, M, D> data,
+            ProjectRootElement projectRootElement,
+            ProjectLoadSettings loadSettings,
+            int maxNodeCount,
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            IItemFactory<I, I> itemFactory,
+            IToolsetProvider toolsetProvider,
+            ProjectRootElementCache projectRootElementCache,
+            ProjectInstance projectInstanceIfAnyForDebuggerOnly,
+            ISdkResolverService sdkResolverService,
+            int submissionId,
+            EvaluationContextBase evaluationContext)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -232,6 +247,7 @@ namespace Microsoft.Build.Evaluation
             _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
+            _evaluationContext = evaluationContext;
             _evaluationProfiler = new EvaluationProfiler((loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0);
         }
 
@@ -324,12 +340,21 @@ namespace Microsoft.Build.Evaluation
         /// newing one up, yet the whole class need not be static.
         /// The optional ProjectInstance is only exposed when doing debugging. It is not used by the evaluator.
         /// </remarks>
-        internal static IDictionary<string, object> Evaluate(IEvaluatorData<P, I, M, D> data, ProjectRootElement root,
-            ProjectLoadSettings loadSettings, int maxNodeCount,
-            PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService,
-            IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider,
-            ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext,
-            ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
+        internal static IDictionary<string, object> Evaluate(
+            IEvaluatorData<P, I, M, D> data,
+            ProjectRootElement root,
+            ProjectLoadSettings loadSettings,
+            int maxNodeCount,
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            ILoggingService loggingService,
+            IItemFactory<I, I> itemFactory,
+            IToolsetProvider toolsetProvider,
+            ProjectRootElementCache projectRootElementCache,
+            BuildEventContext buildEventContext,
+            ProjectInstance projectInstanceIfAnyForDebuggerOnly,
+            ISdkResolverService sdkResolverService,
+            int submissionId,
+            EvaluationContextBase evaluationContext = null)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
@@ -342,7 +367,20 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
-                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, itemFactory, toolsetProvider, projectRootElementCache, projectInstanceIfAnyForDebuggerOnly, sdkResolverService, submissionId);
+                var evaluator = new Evaluator<P, I, M, D>(
+                    data,
+                    root,
+                    loadSettings,
+                    maxNodeCount,
+                    environmentProperties,
+                    itemFactory,
+                    toolsetProvider,
+                    projectRootElementCache,
+                    projectInstanceIfAnyForDebuggerOnly,
+                    sdkResolverService,
+                    submissionId,
+                    evaluationContext);
+
                 return evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
             }
