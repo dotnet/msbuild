@@ -3,15 +3,14 @@
 
   <Import Project="$(MSBuildThisFileDirectory)/LinuxDistrosNativeInstaller.props" />
 
-  <Target Name="RunInSandBoxAndPackage" >
-      <MSBuild Projects="$(MSBuildThisFileDirectory)/SandBoxAndPackage.proj"
-      Targets="SandBoxAndPackage"
-            Properties="RepoRoot=$(RepoRoot);
-            LinuxDistrosNeedNativeInstaller=%(LinuxDistrosNeedNativeInstaller.Identity);
-            DockerFolder=%(LinuxDistrosNeedNativeInstaller.DockerFolder);
-            BuildConfiguration=$(BuildConfiguration);
-            InstallerOutputDirectory=$(InstallerOutputDirectory);
-            BuildInParallel='true'
-            " />
+  <Target Name="RunInSandBoxAndPackage">
+    <MSBuild Projects="$(MSBuildThisFileDirectory)/SandBoxAndPackage.proj"
+             Targets="SandBoxAndPackage"
+             Properties="RepoRoot=$(RepoRoot);
+             LinuxDistrosNeedNativeInstaller=%(LinuxDistrosNeedNativeInstaller.Identity);
+             DockerFolder=%(LinuxDistrosNeedNativeInstaller.DockerFolder);
+             BuildConfiguration=$(BuildConfiguration);
+             InstallerOutputDirectory=$(InstallerOutputDirectory);
+             BuildInParallel='true'" />
   </Target >
 </Project>

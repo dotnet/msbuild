@@ -23,7 +23,7 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Windows x64 |Windows x86 |macOS |Linux x64 |Linux Native Installers |RHEL 6 Archive|Alpine 3.6 Archive|
+|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux Native Installers|RHEL 6 Archive|Alpine 3.6 Archive|
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 |[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][alpine3.6-build-badge]][alpine3.6-build]|
 
@@ -64,11 +64,8 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
 | **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
 | **macOS** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
-| **Linux x64** | [tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
-| **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
-| **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
-| **Debian 8**  | [Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
-| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
+| **Linux x64** | [DEB Installer][linux-DEB-installer] - [Checksum][linux-DEB-installer-checksum]<br>_see installer note below_<sup>1</sup><br>[tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
+| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>[tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
 | **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
 | **Alpine 3.6** | [tar.gz][alpine-3.6-targz] - [Checksum][alpine-3.6-targz-checksum] |
 
@@ -104,14 +101,8 @@ Reference notes:
 [linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-x64.tar.gz
 [linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-x64.tar.gz.sha
 
-[ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu-x64.deb
-[ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu-x64.deb.sha
-
-[ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.04-x64.deb
-[ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.04-x64.deb.sha
-
-[debian-8-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-debian-x64.deb
-[debian-8-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-debian-x64.deb.sha
+[linux-DEB-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-x64.deb
+[linux-DEB-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-x64.deb.sha
 
 [rhel-7-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-rhel-x64.rpm
 [rhel-7-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-rhel-x64.rpm.sha
