@@ -42,9 +42,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
+  <Import Project="build/DerivedHostMachineInfo.props" />
   <Import Project="build/Branding.props" />
 
-  <Import Project="build/DerivedHostMachineInfo.props" />
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
   <Import Project="build/MSBuildExtensions.props" />
