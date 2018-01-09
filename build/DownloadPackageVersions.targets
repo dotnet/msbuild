@@ -1,0 +1,9 @@
+<Project ToolsVersion="15.0">
+  <Target Name="DownloadPackageVersionsProps"
+    DependsOnTargets="BuildDotnetCliBuildFramework">
+
+    <DownloadFile Uri="$(PB_PackageVersionPropsUrl)$(CoreSetupBlobAccessTokenParam)"
+                  DestinationPath="$(OrchestratedPackageVersionsProps)"
+                  Condition=" '$(PB_PackageVersionPropsUrl)' != '' " />
+  </Target>
+</Project>
