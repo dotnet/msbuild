@@ -4,8 +4,7 @@
   <Import Project="$(MSBuildThisFileDirectory)/LinuxDistrosNativeInstaller.props" />
 
   <Target Name="RunInSandBoxAndPackage">
-    <MSBuild Condition=" '%(LinuxDistrosNeedNativeInstaller.DockerFolder)' != '' "
-             Projects="$(MSBuildThisFileDirectory)/SandBoxAndPackage.proj"
+    <MSBuild Projects="$(MSBuildThisFileDirectory)/SandBoxAndPackage.proj"
              Targets="SandBoxAndPackage"
              Properties="RepoRoot=$(RepoRoot);
              LinuxDistrosNeedNativeInstaller=%(LinuxDistrosNeedNativeInstaller.Identity);
