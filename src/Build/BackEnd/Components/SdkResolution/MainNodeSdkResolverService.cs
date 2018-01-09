@@ -66,7 +66,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             ConcurrentDictionary<string, SdkResult> entry;
 
+            // Clear our cache of resolved SDKs
             _cache.TryRemove(submissionId, out entry);
+
+            // Also clear any cache for the SdkResolverService singleton which is the central place where resolution happens
+            SdkResolverService.Instance.ClearCache(submissionId);
         }
 
         /// <inheritdoc cref="INodePacketHandler.PacketReceived"/>

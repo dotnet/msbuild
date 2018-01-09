@@ -1664,9 +1664,6 @@ namespace Microsoft.Build.Execution
 
                     // Clear all cached SDKs for the submission
                     SdkResolverService.ClearCache(submission.SubmissionId);
-
-                    // Clear SDK resolver cache for the submission
-                    BackEnd.SdkResolution.SdkResolverService.Instance.ClearCache(submission.SubmissionId);
                 }
 
                 if (_buildSubmissions.Count == 0)
