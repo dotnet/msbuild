@@ -95,7 +95,7 @@
 
       <!-- Remove Shared Framework and Debian Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
@@ -130,7 +130,7 @@
 
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
