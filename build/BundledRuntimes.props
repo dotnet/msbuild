@@ -32,7 +32,7 @@
     <AspNetCoreSharedFxInstallerRid Condition="'$(SharedFrameworkRid)' == 'alpine.3.6-x64'">linux-x64</AspNetCoreSharedFxInstallerRid>
     <AspNetCoreSharedFxInstallerRid Condition="'$(SharedFrameworkRid)' == 'rhel.6-x64'">linux-x64</AspNetCoreSharedFxInstallerRid>
     <AspNetCoreSharedFxArchiveRid>$(AspNetCoreSharedFxInstallerRid)</AspNetCoreSharedFxArchiveRid>
-    <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.deb'">$(CoreSetupRid)</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.deb'">x64</AspNetCoreSharedFxInstallerRid>
     <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.rpm'">$(CoreSetupRid)</AspNetCoreSharedFxInstallerRid>
 
     <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' != '' AND '$(HostOSName)' != 'osx' ">aspnetcore-runtime-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid)$(InstallerExtension)</DownloadedAspNetCoreSharedFxInstallerFileName>

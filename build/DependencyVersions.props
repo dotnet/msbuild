@@ -59,7 +59,7 @@
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-25908-02</CLI_NETStandardLibraryNETFrameworkVersion>
 
     <!-- When ready to pull aspnetcore directly from orchestrated build, move this above the import to OrchestratedPackageVersionsProps. -->
-    <MicrosoftAspNetCoreAppPackageVersion>2.1.0-preview1-28006</MicrosoftAspNetCoreAppPackageVersion>
+    <MicrosoftAspNetCoreAppPackageVersion>2.1.0-preview1-28031</MicrosoftAspNetCoreAppPackageVersion>
 
     <SharedHostVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedHostVersion>
     <HostFxrVersion>$(MicrosoftNETCoreAppPackageVersion)</HostFxrVersion>
