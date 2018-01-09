@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishDebian.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToBlobFeed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
@@ -35,7 +34,6 @@
                              UploadArtifactsToAzure;
                              UploadChecksumsToAzure;
                              PublishNupkgToBlobFeed;
-                             PublishDebFilesToDebianRepo;
                              PublishCliVersionBadge" />
 
   <Target Name="GatherItemsForPattern">

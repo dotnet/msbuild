@@ -3,13 +3,11 @@
     <LinuxDistrosNeedNativeInstaller Include="debian.8-x64">
       <DockerFolder>debian</DockerFolder>
       <InstallerExtension>deb</InstallerExtension>
-      <RepositoryId>$(debian8x64RepositoryId)</RepositoryId>
       <DistroNameInInstaller>x64</DistroNameInInstaller>
     </LinuxDistrosNeedNativeInstaller>
     <LinuxDistrosNeedNativeInstaller Include="rhel.7-x64">
       <DockerFolder>rhel</DockerFolder>
       <InstallerExtension>rpm</InstallerExtension>
-      <RepositoryId>$(rhel7x64RepositoryId)</RepositoryId>
       <DistroNameInInstaller>rhel-x64</DistroNameInInstaller>
     </LinuxDistrosNeedNativeInstaller>
   </ItemGroup>
