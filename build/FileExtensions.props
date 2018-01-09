@@ -3,6 +3,8 @@
       <ArchiveExtension Condition=" '$(HostOSName)' == 'win' ">.zip</ArchiveExtension>
       <ArchiveExtension Condition=" '$(HostOSName)' != 'win' ">.tar.gz</ArchiveExtension>
 
+      <InternalArchiveExtension>.zip</InternalArchiveExtension>
+
       <InstallerExtension Condition=" '$(HostOSName)' == 'win' ">.msi</InstallerExtension>
       <InstallerExtension Condition=" '$(HostOSName)' == 'osx' ">.pkg</InstallerExtension>
       <InstallerExtension Condition=" '$(IsDebianBaseDistro)' == 'true' ">.deb</InstallerExtension>
