@@ -65,7 +65,7 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
 | **macOS** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
 | **Linux x64** | [DEB Installer][linux-DEB-installer] - [Checksum][linux-DEB-installer-checksum]<br>_see installer note below_<sup>1</sup><br>[tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
-| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>tar.gz - See **Linux x64** |
+| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>[tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
 | **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
 | **Alpine 3.6** | [tar.gz][alpine-3.6-targz] - [Checksum][alpine-3.6-targz-checksum] |
 
