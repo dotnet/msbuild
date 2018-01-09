@@ -28,18 +28,19 @@
     <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
     <CombinedFrameworkHostCompressedFileName>dotnet-runtime-$(MicrosoftNETCoreAppPackageVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
 
-    <AspNetCoreSharedFrameworkRid>$(SharedFrameworkRid)</AspNetCoreSharedFrameworkRid>
-    <AspNetCoreSharedFrameworkRid Condition="'$(SharedFrameworkRid)' == 'alpine.3.6-x64'">linux-x64</AspNetCoreSharedFrameworkRid>
-    <AspNetCoreSharedFrameworkRid Condition="'$(SharedFrameworkRid)' == 'rhel.6-x64'">linux-x64</AspNetCoreSharedFrameworkRid>
-    <AspNetCoreSharedFrameworkRid Condition="'$(InstallerExtension)' == '.deb'">$(CoreSetupRid)</AspNetCoreSharedFrameworkRid>
-    <AspNetCoreSharedFrameworkRid Condition="'$(InstallerExtension)' == '.rpm'">$(CoreSetupRid)</AspNetCoreSharedFrameworkRid>
+    <AspNetCoreSharedFxInstallerRid>$(SharedFrameworkRid)</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(SharedFrameworkRid)' == 'alpine.3.6-x64'">linux-x64</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(SharedFrameworkRid)' == 'rhel.6-x64'">linux-x64</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxArchiveRid>$(AspNetCoreSharedFxInstallerRid)</AspNetCoreSharedFxArchiveRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.deb'">$(CoreSetupRid)</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.rpm'">$(CoreSetupRid)</AspNetCoreSharedFxInstallerRid>
 
-    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' != '' AND '$(HostOSName)' != 'osx' ">aspnetcore-runtime-$(AspNetCoreVersion)-$(AspNetCoreSharedFrameworkRid)$(InstallerExtension)</DownloadedAspNetCoreSharedFxInstallerFileName>
+    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' != '' AND '$(HostOSName)' != 'osx' ">aspnetcore-runtime-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid)$(InstallerExtension)</DownloadedAspNetCoreSharedFxInstallerFileName>
     <!-- Note: we use the "-internal" archives and installers that contain only the aspnetcore shared framework, and shouldn't overlap with Microsoft.NETCore.App. -->
-    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' == '.msi' ">aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(AspNetCoreSharedFrameworkRid).wixlib</DownloadedAspNetCoreSharedFxInstallerFileName>
+    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' == '.msi' ">aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid).wixlib</DownloadedAspNetCoreSharedFxInstallerFileName>
     <DownloadedAspNetCoreSharedFxInstallerFile Condition=" '$(InstallerExtension)' != '' AND '$(DownloadedAspNetCoreSharedFxInstallerFileName)' != '' ">$(PackagesDirectory)/$(DownloadedAspNetCoreSharedFxInstallerFileName)</DownloadedAspNetCoreSharedFxInstallerFile>
 
-    <AspNetCoreSharedFxArchiveFileName>aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</AspNetCoreSharedFxArchiveFileName>
+    <AspNetCoreSharedFxArchiveFileName>aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(AspNetCoreSharedFxArchiveRid)$(ArchiveExtension)</AspNetCoreSharedFxArchiveFileName>
     <AspNetCoreSharedFxArchiveFile>$(PackagesDirectory)/$(AspNetCoreSharedFxArchiveFileName)</AspNetCoreSharedFxArchiveFile>
 
     <!-- Used to detect if ASP.NET Core is built against the same version of Microsoft.NETCore.App. -->

@@ -59,6 +59,8 @@ namespace Microsoft.DotNet.New.Tests
                 // Not all CI machines have Node installed, so the build would fail if we tried
                 // to run Webpack. Bypass this by making it appear that Webpack already ran.
                 Directory.CreateDirectory(Path.Combine(rootPath, "wwwroot", "dist"));
+                Directory.CreateDirectory(Path.Combine(rootPath, "ClientApp", "node_modules"));
+                Directory.CreateDirectory(Path.Combine(rootPath, "node_modules"));
             }
 
             new TestCommand("dotnet")
