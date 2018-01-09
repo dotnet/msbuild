@@ -66,7 +66,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             ConcurrentDictionary<string, SdkResult> entry;
 
+            // Clear our cache of resolved SDKs
             _cache.TryRemove(submissionId, out entry);
+
+            // Also clear any cache for the SdkResolverService singleton which is the central place where resolution happens
+            SdkResolverService.Instance.ClearCache(submissionId);
         }
 
         /// <inheritdoc cref="INodePacketHandler.PacketReceived"/>
@@ -83,7 +87,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
-            SdkResult result = GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+            SdkResult result = GetSdkResultAndCache(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
 
             return result?.Path;
         }
@@ -99,7 +103,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
         /// <param name="projectPath">The full path to the project that referenced the SDK.</param>
         /// <returns>An <see cref="SdkResult"/> containing information about the SDK if one was resolved, otherwise <code>null</code>.</returns>
-        private SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        private SdkResult GetSdkResultAndCache(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             ErrorUtilities.VerifyThrowInternalNull(sdk, nameof(sdk));
             ErrorUtilities.VerifyThrowInternalNull(loggingContext, nameof(loggingContext));
@@ -109,7 +113,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
             {
-                result = GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+                result = GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
             }
             else
             {
@@ -123,7 +127,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                  */
                 result = cached.GetOrAdd(
                     sdk.Name,
-                    key => GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
+                    key => GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
             }
 
             if (!SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
@@ -138,15 +142,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Resolves the specified SDK without caching the result.
         /// </summary>
+        /// <param name="submissionId">The current build submission ID that is resolving an SDK.</param>
         /// <param name="sdk">The <see cref="SdkReference"/> containing information about the SDK to resolve.</param>
         /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
         /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element that referenced the SDK.</param>
         /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
         /// <param name="projectPath">The full path to the project that referenced the SDK.</param>
         /// <returns>An <see cref="SdkResult"/> containing information about the SDK if one was resolved, otherwise <code>null</code>.</returns>
-        private SdkResult GetSdkResult(SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        private SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
-            SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+            SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
 
             if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
             {
@@ -220,7 +225,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
 
                     // This call is usually cached so is very fast but can take longer for a new SDK that is downloaded.  Other queued threads for different SDKs will complete sooner and continue on which unblocks evaluations
-                    SdkResult result = GetSdkResult(request.SubmissionId, sdkReference, new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath), request.ElementLocation, request.SolutionPath, request.ProjectPath);
+                    SdkResult result = GetSdkResultAndCache(request.SubmissionId, sdkReference, new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath), request.ElementLocation, request.SolutionPath, request.ProjectPath);
 
                     // Create a response
                     SdkResolverResponse response = new SdkResolverResponse(result.Path, result.Version);

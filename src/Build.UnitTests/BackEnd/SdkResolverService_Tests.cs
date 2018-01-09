@@ -98,6 +98,38 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             Assert.DoesNotContain("ERROR", logResult);
         }
 
+        [Fact]
+        public void AssertResolverHasStatePreserved()
+        {
+            const int submissionId = 5;
+
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+
+            SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
+
+            // First call should not know state
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe("resolverpath");
+
+            // Second call should have received state
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe(MockSdkResolverWithState.Expected);
+        }
+
+        [Fact]
+        public void AssertResolverStateNotPreserved()
+        {
+            const int submissionId = BuildEventContext.InvalidSubmissionId;
+
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+
+            SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
+
+            // First call should not know state
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe("resolverpath");
+
+            // Second call should have received state
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe("resolverpath");
+        }
+
         [Theory]
         [InlineData(null, "1.0", true)]
         [InlineData("1.0", "1.0", true)]
@@ -130,7 +162,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 {
                     new MockSdkResolver1(),
                     new MockSdkResolver2(),
-                    new MockResolverReturnsNull()
+                    new MockResolverReturnsNull(),
+                    new MockSdkResolverWithState()
                 };
 
                 if (_includeErrorResolver)
@@ -182,6 +215,31 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     return factory.IndicateSuccess("resolverpath2", "version2", new[] {"WARNING2"});
 
                 return factory.IndicateFailure(new[] {"ERROR2"}, new[] {"WARNING2"});
+            }
+        }
+
+        private class MockSdkResolverWithState : SdkResolver
+        {
+            public const string Expected = "01713226A202458F97D9074168DF2618";
+
+            public override string Name => nameof(MockSdkResolverWithState);
+
+            public override int Priority => 3;
+
+            public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory)
+            {
+                if (sdkReference.Name.Equals("notfound"))
+                {
+                    return null;
+                }
+                if (resolverContext.State != null)
+                {
+                    return factory.IndicateSuccess((string) resolverContext.State, "1.0");
+                }
+
+                resolverContext.State = Expected;
+
+                return factory.IndicateSuccess("resolverpath", "1.0");
             }
         }
 
