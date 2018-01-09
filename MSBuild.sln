@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4900B3B8-4310-4D5B-B1F7-2FDF9199765F}"
 	ProjectSection(SolutionItems) = preProject
@@ -67,6 +67,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Tasks.Core.Package", "src\Package\NuGet\Microsoft.Build.Tasks.Core\Microsoft.Build.Tasks.Core.Package.csproj", "{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{39DC5BEB-1F63-45C6-96AD-89868ACDFE3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBuildTaskHost", "src\MSBuildTaskHost\MSBuildTaskHost.csproj", "{475DDCAC-12F6-4562-A74B-FB64F11100EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -588,6 +590,30 @@ Global
 		{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}.Release-MONO|x64.Build.0 = Release|x64
 		{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}.Release-MONO|x86.ActiveCfg = Release|Any CPU
 		{1D3AC43C-9CC7-4191-83A5-EDC6A30BA623}.Release-MONO|x86.Build.0 = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug|x64.ActiveCfg = Debug|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug|x64.Build.0 = Debug|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug|x86.Build.0 = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug-MONO|Any CPU.ActiveCfg = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug-MONO|Any CPU.Build.0 = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug-MONO|x64.ActiveCfg = Debug|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug-MONO|x64.Build.0 = Debug|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug-MONO|x86.ActiveCfg = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Debug-MONO|x86.Build.0 = Debug|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release|x64.ActiveCfg = Release|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release|x64.Build.0 = Release|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release|x86.ActiveCfg = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release|x86.Build.0 = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release-MONO|Any CPU.ActiveCfg = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release-MONO|Any CPU.Build.0 = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release-MONO|x64.ActiveCfg = Release|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release-MONO|x64.Build.0 = Release|x64
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release-MONO|x86.ActiveCfg = Release|Any CPU
+		{475DDCAC-12F6-4562-A74B-FB64F11100EE}.Release-MONO|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

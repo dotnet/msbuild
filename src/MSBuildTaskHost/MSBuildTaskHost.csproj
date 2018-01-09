@@ -1,37 +1,22 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
+       a .props file that prevents building the project from doing much of anything. -->
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
+
   <PropertyGroup>
-    <PlatformSpecificBuild>true</PlatformSpecificBuild>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>..\MSBuild\MSBuild.ico</ApplicationIcon>
-  </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <PropertyGroup>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <NuGetTargetMoniker>.NETFramework,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
+    <TargetFramework>net3.5</TargetFramework>    
     <OutputType>Exe</OutputType>
-    <AssemblyName>MSBuildTaskHost</AssemblyName>
+    <EnableDefaultItems>false</EnableDefaultItems>
     <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY</DefineConstants>
     <!-- Need pointers for getting environment block -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- It is vital that msbuildtaskhost.exe is allowed to use the full 4GB on 64 bit machines in order to help avoid 
          out of memory problems on large trees -->
     <LargeAddressAware>true</LargeAddressAware>
-    <ProjectGuid>{53733ECF-0D81-43DA-B602-2AE9417F614F}</ProjectGuid>
+    <ApplicationIcon>..\MSBuild\MSBuild.ico</ApplicationIcon>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
-    <!-- Assemblies Files we depend on -->
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
     <Reference Include="Microsoft.Build.Framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>true</SpecificVersion>
     </Reference>
@@ -195,7 +180,6 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
@@ -206,5 +190,9 @@
   <ItemGroup>
     <Content Include="..\MSBuild.ico" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.14.114" />
+    <PackageReference Include="PdbGit" Version="3.0.41" />
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.1.2" />
+  </ItemGroup>
 </Project>

@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+    <MSBuildTargetsFilePath>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildTargetsFilePath>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildTargetsFilePath)" />
+
+  <!-- Remove Reference and EmbeddedResource items to prevent warnings / errors from built-in-logic -->
+  <ItemGroup>
+    <EmbeddedResource Remove="@(EmbeddedResource)" />
+    <Reference Remove="@(Reference)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetPath></TargetPath>    <!-- Prevent projects referencing this from trying to pass us to the compiler -->
+  </PropertyGroup>
+
+  <Target Name="CoreCompile" />                               <!-- Prevent Csc from being called -->
+  <Target Name="GenerateTargetFrameworkMonikerAttribute" />   <!-- Don't generate TFM attribute -->
+  <Target Name="RuntimeImplementationProjectOutputGroup" />   <!-- Group always attempts resolve runtime, regardless of <CopyNuGetImplementations>-->
+  <Target Name="GetReferenceAssemblyPaths" />                 <!-- Don't go looking for framewoek reference assemblies-->
+  <Target Name="GetFrameworkPaths"  />                        <!-- ^ -->
+
+</Project>
