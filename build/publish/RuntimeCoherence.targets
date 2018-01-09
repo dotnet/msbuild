@@ -12,14 +12,14 @@
     <ReadLinesFromFile File="@(File)">
       <Output
           TaskParameter="Lines"
-          ItemName="AspNetCoreSharedFxBaseRuntimeVersion"/>
+          PropertyName="AspNetCoreSharedFxBaseRuntimeVersion"/>
     </ReadLinesFromFile>
   </Target>
-  
+
   <Target Name="CompareRuntimeVersions">
     <PropertyGroup>
       <Coherent>false</Coherent>
-      <Coherent Condition=" '$(MicrosoftNETCoreAppPackageVersion)' == '@(AspNetCoreSharedFxBaseRuntimeVersion)' ">true</Coherent>
+      <Coherent Condition=" '$(MicrosoftNETCoreAppPackageVersion)' == '$(AspNetCoreSharedFxBaseRuntimeVersion)' ">true</Coherent>
     </PropertyGroup>
   </Target>
 </Project>

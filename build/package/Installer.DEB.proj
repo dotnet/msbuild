@@ -16,16 +16,24 @@
   <Target Name="BuildSdkDeb"
       Condition=" '$(IsDebianBaseDistro)' == 'True' AND '$(DebuildPresent)'  == 'true' "
       DependsOnTargets="PrepareDotnetDebDirectories;
-                        PrepareDotnetDebTool;"
+                        PrepareDotnetDebTool;
+                        EvaluateRuntimeCoherence;"
       Inputs="@(CLISdkFiles)"
       Outputs="$(SdkInstallerFile)" >
+
+      <PropertyGroup>
+        <!-- Ignored for now while the "trampoline" host feature is in progress -->
+        <AspNetCoreSharedFxArgs> --ignore-depends=aspnetcore-store-2.0.3</AspNetCoreSharedFxArgs>
+        <!-- Ignored because versions of aspnetcore-runtime may be in incoherent with the version of dotnet-runtime we want to use. -->
+        <AspNetCoreSharedFxArgs>$(AspNetCoreSharedFxArgs) --ignore-depends=dotnet-runtime-$(AspNetCoreSharedFxBaseRuntimeVersion)</AspNetCoreSharedFxArgs>
+      </PropertyGroup>
 
       <!-- Install Shared Framework Packages -->
       <Exec Command="sudo dpkg -i $(DownloadedRuntimeDepsInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedAspNetCoreSharedFxInstallerFile)" />
+      <Exec Command="sudo dpkg -i $(DownloadedAspNetCoreSharedFxInstallerFile) $(AspNetCoreSharedFxArgs)" />
 
       <!-- Create layout: Binaries -->
       <Copy
