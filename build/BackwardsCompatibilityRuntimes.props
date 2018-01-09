@@ -21,7 +21,6 @@
     <BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>$(BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel)/Installers</BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>
     <BackwardsCompatibility110CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(BackwardsCompatibility110SharedFrameworkVersion)</BackwardsCompatibility110CoreSetupDownloadDirectory>
     <BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>$(BackwardsCompatibility110CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive$(ArchiveExtension)</BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>
-    <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(IncludeSharedFrameworksForBackwardsCompatibilityTests)' == 'true' ">

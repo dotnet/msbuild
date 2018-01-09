@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishDebian.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToTransportFeed.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToBlobFeed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/RuntimeCoherence.targets" />
@@ -25,7 +25,7 @@
                              GenerateChecksums;
                              UploadArtifactsToAzure;
                              UploadChecksumsToAzure;
-                             PublishNupkgToTransportFeed;
+                             PublishNupkgToBlobFeed;
                              PublishDebFilesToDebianRepo;
                              PublishCliVersionBadge" />
 
