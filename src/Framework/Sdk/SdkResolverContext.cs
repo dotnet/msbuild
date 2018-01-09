@@ -33,5 +33,11 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         /// </summary>
         public virtual Version MSBuildVersion { get; protected set; }
+
+        /// <summary>
+        ///     Gets or sets any custom state for current build.  This allows resolvers to maintain state between resolutions.
+        ///     This property is not thread-safe.
+        /// </summary>
+        public virtual object State { get; set; }
     }
 }

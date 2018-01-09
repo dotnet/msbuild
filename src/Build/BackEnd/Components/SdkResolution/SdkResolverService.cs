@@ -7,8 +7,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
@@ -29,6 +29,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// A lock object used for this class.
         /// </summary>
         private readonly object _lockObject = new object();
+
+        /// <summary>
+        /// Stores resolver state by build submission ID.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, ConcurrentDictionary<SdkResolver, object>> _resolverStateBySubmission = new ConcurrentDictionary<int, ConcurrentDictionary<SdkResolver, object>>();
 
         /// <summary>
         /// Stores the list of SDK resolvers which were loaded.
@@ -73,18 +78,22 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
         public void ClearCache(int submissionId)
         {
+            ConcurrentDictionary<SdkResolver, object> notused;
+
+            _resolverStateBySubmission.TryRemove(submissionId, out notused);
         }
 
         /// <summary>
         /// Resolves and SDK and gets a result.
         /// </summary>
+        /// <param name="submissionId">The build submission ID that the resolution request is for.</param>
         /// <param name="sdk">The <see cref="SdkReference"/> containing information about the referenced SDK.</param>
         /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
         /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element which referenced the SDK.</param>
         /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
         /// <param name="projectPath">The full path to that referenced the SDK.</param>
         /// <returns>An <see cref="SdkResult"/> containing information of the SDK if it could be resolved, otherwise <code>null</code>.</returns>
-        public SdkResult GetSdkResult(SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             // Lazy initialize the SDK resolvers
             if (_resolvers == null)
@@ -101,12 +110,18 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 foreach (SdkResolver sdkResolver in _resolvers)
                 {
-                    SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version);
+                    SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version)
+                    {
+                        State = GetResolverState(submissionId, sdkResolver)
+                    };
 
                     SdkResultFactory resultFactory = new SdkResultFactory(sdk);
                     try
                     {
                         SdkResult result = (SdkResult) sdkResolver.Resolve(sdk, context, resultFactory);
+
+                        SetResolverState(submissionId, sdkResolver, context.State);
+
                         if (result == null)
                         {
                             continue;
@@ -151,7 +166,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
-            SdkResult result = GetSdkResult(sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+            SdkResult result = GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
 
             return result?.Path;
         }
@@ -184,6 +199,27 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
         }
 
+        private object GetResolverState(int submissionId, SdkResolver resolver)
+        {
+            // Do not fetch state for resolution requests that are not associated with a valid build submission ID
+            if (submissionId != BuildEventContext.InvalidSubmissionId)
+            {
+                ConcurrentDictionary<SdkResolver, object> resolverState;
+
+                if (_resolverStateBySubmission.TryGetValue(submissionId, out resolverState))
+                {
+                    object state;
+
+                    if (resolverState.TryGetValue(resolver, out state))
+                    {
+                        return state;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private void Initialize(LoggingContext loggingContext, ElementLocation location)
         {
             lock (_lockObject)
@@ -194,6 +230,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
 
                 _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
+            }
+        }
+
+        private void SetResolverState(int submissionId, SdkResolver resolver, object state)
+        {
+            // Do not set state for resolution requests that are not associated with a valid build submission ID
+            if (submissionId != BuildEventContext.InvalidSubmissionId)
+            {
+                ConcurrentDictionary<SdkResolver, object> resolverState = _resolverStateBySubmission.GetOrAdd(submissionId, new ConcurrentDictionary<SdkResolver, object>(Environment.ProcessorCount, _resolvers.Count));
+
+                resolverState.AddOrUpdate(resolver, state, (sdkResolver, obj) => state);
             }
         }
     }
