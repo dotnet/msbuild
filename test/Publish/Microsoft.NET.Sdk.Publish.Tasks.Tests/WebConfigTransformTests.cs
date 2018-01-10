@@ -56,27 +56,27 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         public void WebConfigTransform_creates_new_config_if_one_does_not_exist()
         {
             Assert.True(XNode.DeepEquals(WebConfigTemplate,
-                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")));
+                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel:null)));
 
             Assert.True(XNode.DeepEquals(WebConfigTemplatePortable,
-                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: true, extension: null)));
+                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: true, extension: null, aspNetCoreHostingModel: null)));
         }
 
         [Fact]
         public void WebConfigTransform_creates_ProcessPath_WithCorrectExtension()
         {
             Assert.True(XNode.DeepEquals(WebConfigTemplate,
-                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")));
+                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)));
 
             Assert.True(XNode.DeepEquals(WebConfigTemplateWithOutExe,
-                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: null)));
+                    WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: null, aspNetCoreHostingModel: null)));
         }
 
         [Fact]
         public void WebConfigTransform_creates_new_config_if_one_has_unexpected_format()
         {
             Assert.True(XNode.DeepEquals(WebConfigTemplate,
-                WebConfigTransform.Transform(XDocument.Parse("<unexpected />"), "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")));
+                WebConfigTransform.Transform(XDocument.Parse("<unexpected />"), "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)));
         }
 
         [Theory]
@@ -96,7 +96,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             }
 
             Assert.True(XNode.DeepEquals(WebConfigTemplate,
-                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")));
+                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)));
         }
 
         [Theory]
@@ -113,15 +113,62 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             var input = WebConfigTemplate;
             input.Descendants(elementName).Single().SetAttributeValue(attributeName, attributeValue);
 
-            var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe");
+            var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null);
             Assert.Equal(attributeValue, (string)output.Descendants(elementName).Single().Attribute(attributeName));
+        }
+
+
+        [Theory]
+        [InlineData("aspNetCore", "hostingModel", "inprocess")]
+        [InlineData("aspNetCore", "hostingModel", "InProcess")]
+        [InlineData("aspNetCore", "hostingModel", "outofprocess")]
+        [InlineData("aspNetCore", "hostingModel", "OutOfProcess")]
+        public void WebConfigTransform_will_UseHostingModel_FromWebConfigIfPresent(string elementName, string attributeName, string attributeValue)
+        {
+            var input = WebConfigTemplate;
+            input.Descendants(elementName).Single().SetAttributeValue(attributeName, attributeValue);
+
+            var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: "foo");
+            Assert.Equal(attributeValue, (string)output.Descendants(elementName).Single().Attribute(attributeName));
+        }
+
+        [Theory]
+        [InlineData("aspNetCore", "hostingModel", "inprocess")]
+        [InlineData("aspNetCore", "hostingModel", "InProcess")]
+        [InlineData("aspNetCore", "hostingModel", "outofprocess")]
+        [InlineData("aspNetCore", "hostingModel", "OutOfProcess")]
+        public void WebConfigTransform_UsesAspNetCoreHostingModelValue_ForHostingModel(string elementName, string attributeName, string attributeValue)
+        {
+            var input = WebConfigTemplate;
+
+            var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: attributeValue);
+            Assert.Equal(attributeValue, (string)output.Descendants(elementName).Single().Attribute(attributeName));
+        }
+
+        [Theory]
+        [InlineData("aspNetCore", "hostingModel", "foo")]
+        public void WebConfigTransform_Throws_IfHostingModelValueIsUndefined(string elementName, string attributeName, string attributeValue)
+        {
+            var input = WebConfigTemplate;
+
+            Assert.Throws<Exception>(() => WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: attributeValue));
+        }
+
+        [Theory]
+        [InlineData("aspNetCore", "hostingModel", "")]
+        public void WebConfigTransform_DoesNotSet_HostingModelIfEmpty(string elementName, string attributeName, string attributeValue)
+        {
+            var input = WebConfigTemplate;
+
+            var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: attributeValue);
+            Assert.Equal(null, (string)output.Descendants(elementName).Single().Attribute(attributeName));
         }
 
         [Fact]
         public void WebConfigTransform_overwrites_processPath()
         {
             var newProcessPath =
-                (string)WebConfigTransform.Transform(WebConfigTemplate, "app.exe", configureForAzure: false, isPortable: false, extension: ".exe")
+                (string)WebConfigTransform.Transform(WebConfigTemplate, "app.exe", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants("aspNetCore").Single().Attribute("processPath");
 
             Assert.Equal(@".\app.exe", newProcessPath);
@@ -134,7 +181,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             input.Descendants("add").Single().SetAttributeValue("name", "aspnetcore");
 
             Assert.True(XNode.DeepEquals(WebConfigTemplate,
-                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")));
+                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)));
         }
 
         [Fact]
@@ -147,7 +194,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             input.Descendants("aspNetCore").Single().Add(envVarElement);
 
             Assert.True(XNode.DeepEquals(envVarElement,
-                WebConfigTransform.Transform(input, "app.exe", configureForAzure: false, isPortable: false, extension: ".exe")
+                WebConfigTransform.Transform(input, "app.exe", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants("environmentVariable").SingleOrDefault(e => (string)e.Attribute("name") == "ENVVAR")));
         }
 
@@ -159,7 +206,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
 
             Assert.Equal(
                 "false",
-                (string)WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")
+                (string)WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants().Attributes("stdoutLogEnabled").Single());
         }
 
@@ -180,7 +227,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
 
             Assert.Equal(
                 @".\logs\stdout",
-                (string)WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")
+                (string)WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants().Attributes("stdoutLogFile").Single());
         }
 
@@ -202,7 +249,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
 
             Assert.Equal(
                 "mylog.txt",
-                (string)WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")
+                (string)WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants().Attributes("stdoutLogFile").Single());
         }
 
@@ -212,7 +259,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             var input = WebConfigTemplate;
             input.Descendants("aspNetCore").Attributes().Remove();
 
-            var aspNetCoreElement = WebConfigTransform.Transform(input, "test.dll", configureForAzure: true, isPortable: false, extension: ".exe")
+            var aspNetCoreElement = WebConfigTransform.Transform(input, "test.dll", configureForAzure: true, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)
                 .Descendants("aspNetCore").Single();
             aspNetCoreElement.Elements().Remove();
 
@@ -226,7 +273,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         public void WebConfigTransform_overwrites_stdoutLogPath_for_Azure()
         {
             var input = WebConfigTemplate;
-            var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: true, isPortable: false, extension: ".exe");
+            var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: true, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null);
 
             Assert.Equal(
                 @"\\?\%home%\LogFiles\stdout",
@@ -237,7 +284,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         public void WebConfigTransform_configures_portable_apps_correctly()
         {
             var aspNetCoreElement =
-                WebConfigTransform.Transform(WebConfigTemplate, "test.dll", configureForAzure: false, isPortable: true, extension: ".exe")
+                WebConfigTransform.Transform(WebConfigTemplate, "test.dll", configureForAzure: false, isPortable: true, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants("aspNetCore").Single();
 
             Assert.True(XNode.DeepEquals(
@@ -262,7 +309,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             input.Descendants("aspNetCore").Single().SetAttributeValue("arguments", inputArguments);
 
             var aspNetCoreElement =
-                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe")
+                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants("aspNetCore").Single();
 
             Assert.Equal(outputArguments, (string)aspNetCoreElement.Attribute("arguments"));
@@ -284,7 +331,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             input.Descendants("aspNetCore").Single().SetAttributeValue("arguments", inputArguments);
 
             var aspNetCoreElement =
-                WebConfigTransform.Transform(input, "myapp.dll", configureForAzure: false, isPortable: true, extension: ".exe")
+                WebConfigTransform.Transform(input, "myapp.dll", configureForAzure: false, isPortable: true, extension: ".exe", aspNetCoreHostingModel: null)
                     .Descendants("aspNetCore").Single();
 
             Assert.Equal(outputArguments, (string)aspNetCoreElement.Attribute("arguments"));
@@ -300,7 +347,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             }
 
             return XNode.DeepEquals(WebConfigTemplate,
-                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe"));
+                WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null));
         }
 
         [Theory]
@@ -314,7 +361,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         public void WebConfigTransform_Adds_ProjectGuid_IfNotPresent(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe");
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
 
             // Act
@@ -335,7 +382,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         public void WebConfigTransform_Removes_ProjectGuid_IfIgnorePropertyIsSet(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe");
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
             XDocument transformedWebConfigWithGuid = WebConfigTransform.AddProjectGuidToWebConfig(transformedWebConfig, projectGuid, false);
             Assert.True(XNode.DeepEquals(WebConfigTemplateWithProjectGuid, transformedWebConfigWithGuid));
@@ -352,7 +399,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         public void WebConfigTransform_DoesNothingWithProjectGuid_IfAbsent()
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe");
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
 
             // Act

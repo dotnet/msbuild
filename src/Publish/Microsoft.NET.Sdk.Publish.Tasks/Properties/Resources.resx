@@ -1149,4 +1149,7 @@ Environment-Specific Settings:
 ===========================
 For more information on this deploy script visit:	https://go.microsoft.com/fwlink/?LinkID=183544</value>
   </data>
+  <data name="WebConfigTransform_HostingModel_Error" xml:space="preserve">
+    <value>The acceptable value for AspNetCoreModuleHostingModel property is either "InProcess" or "OutOfProcess".</value>
+  </data>
 </root>

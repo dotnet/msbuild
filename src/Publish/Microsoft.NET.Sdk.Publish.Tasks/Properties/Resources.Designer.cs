@@ -11,8 +11,8 @@
 namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     using System;
     using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -1768,6 +1768,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         public static string VSMSDEPLOY_WebPackageHelpLinkMessage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebPackageHelpLinkMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The acceptable value for AspNetCoreModuleHostingModel property is either &quot;InProcess&quot; or &quot;OutOfProcess&quot;..
+        /// </summary>
+        public static string WebConfigTransform_HostingModel_Error {
+            get {
+                return ResourceManager.GetString("WebConfigTransform_HostingModel_Error", resourceCulture);
             }
         }
         
