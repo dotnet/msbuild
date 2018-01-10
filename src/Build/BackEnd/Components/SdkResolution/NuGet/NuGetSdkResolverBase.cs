@@ -84,7 +84,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                 if (File.Exists(assemblyPath))
                 {
 #if !FEATURE_APPDOMAIN
-                    assemblyLoadContext.LoadFromAssemblyPath(assemblyPath);
+                    return assemblyLoadContext.LoadFromAssemblyPath(assemblyPath);
 #elif !CLR2COMPATIBILITY
                     return Assembly.UnsafeLoadFrom(assemblyPath);
 #else
