@@ -1200,8 +1200,28 @@
     <comment>{StrBegin="MSB4236: "}</comment>
   </data>
   <data name="CouldNotLoadSdkResolver" UESanitized="false" Visibility="Public">
-    <value>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</value>
+    <value>MSB4237: An SDK resolver was found but could not be loaded. {0}</value>
     <comment>{StrBegin="MSB4237: "}</comment>
+  </data>
+  <data name="CouldNotRunSdkResolver" UESanitized="false" Visibility="Public">
+    <value>MSB4242: The SDK resolver "{0}" failed to run. {1}</value>
+    <comment>{StrBegin="MSB4242: "}</comment>
+  </data>
+  <data name="CouldNotRunNuGetSdkResolver" UESanitized="false" Visibility="Public">
+    <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
+    <comment>{StrBegin="MSB4243: "}</comment>
+  </data>
+  <data name="FailedToParseGlobalJson" UESanitized="false" Visibility="Public">
+    <value>Failed to parse "{0}". {1}</value>
+    <comment></comment>
+  </data>
+  <data name="NuGetSdkResolverCouldNotFindInstalledPackage" UESanitized="false" Visibility="Public">
+    <value>MSB4244: Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</value>
+    <comment>{StrBegin="MSB4244: "}</comment>
+  </data>
+  <data name="NuGetSdkResolverPackageWasNotInstalled" UESanitized="false" Visibility="Public">
+    <value>MSB4245: Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</value>
+    <comment>{StrBegin="MSB4245: "}</comment>
   </data>
   <data name="InvalidSdkElementName" UESanitized="false" Visibility="Public">
     <value>MSB4238: The name "{0}" is not a valid SDK name.</value>
@@ -1656,13 +1676,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
+  <data name="SdkResolving" UESanitized="false" Visibility="Public">
+    <value>Resolving SDK '{0}'...</value>
+    <comment>
+      LOCALIZATION:  Do not localize the word SDK.
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
         
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4242.
+        Next message code should be MSB4246.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
