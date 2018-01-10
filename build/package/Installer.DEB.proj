@@ -15,10 +15,8 @@
 
   <Target Name="GetAspNetSharedFxInstallArgs" DependsOnTargets="EvaluateRuntimeCoherence">
     <PropertyGroup>
-      <!-- Ignored for now while the "trampoline" host feature is in progress -->
-      <InstallAspNetCoreSharedFxArgs> --ignore-depends=aspnetcore-store-2.0.3</InstallAspNetCoreSharedFxArgs>
       <!-- Ignored because versions of aspnetcore-runtime may be in incoherent with the version of dotnet-runtime we want to use. -->
-      <InstallAspNetCoreSharedFxArgs>$(InstallAspNetCoreSharedFxArgs) --ignore-depends=dotnet-runtime-$(AspNetCoreSharedFxBaseRuntimeVersion)</InstallAspNetCoreSharedFxArgs>
+      <InstallAspNetCoreSharedFxArgs>--ignore-depends=dotnet-runtime-$(AspNetCoreSharedFxBaseRuntimeVersion)</InstallAspNetCoreSharedFxArgs>
     </PropertyGroup>
   </Target>
 
