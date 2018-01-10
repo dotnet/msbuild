@@ -184,7 +184,7 @@ namespace Microsoft.Build.Globbing
                 bool needsRecursion;
                 bool isLegalFileSpec;
 
-                FileMatcher.GetFileSpecInfo(
+                FileMatcher.Default.GetFileSpecInfo(
                     fileSpec,
                     out fixedDirectoryPart,
                     out wildcardDirectoryPart,
@@ -192,7 +192,6 @@ namespace Microsoft.Build.Globbing
                     out matchFileExpression,
                     out needsRecursion,
                     out isLegalFileSpec,
-                    FileMatcher.s_defaultGetFileSystemEntries,
                     (fixedDirPart, wildcardDirPart, filePart) =>
                     {
                         var normalizedFixedPart = NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(fixedDirPart, globRoot);
