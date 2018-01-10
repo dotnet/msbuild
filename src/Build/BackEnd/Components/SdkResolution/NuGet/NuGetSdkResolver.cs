@@ -35,7 +35,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
         {
             object parsedSdkVersion;
 
-            // This resolver only works if the user specifies a version in a project or a global.json.  Ignore invalid versions, there may be another resolver that can handle the version specified
+            // This resolver only works if the user specifies a version in a project or a global.json.
+            // Ignore invalid versions, there may be another resolver that can handle the version specified
             if (!TryGetNuGetVersionForSdk(sdk.Name, sdk.Version, context, out parsedSdkVersion))
             {
                 return null;
@@ -68,10 +69,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
             else
             {
                 msbuildSdkVersions = GlobalJsonReader.GetMSBuildSdkVersions(context);
-            }
 
-            // Save the SDK versions in case this resolver is called again for another SDK in the same build
-            context.State = msbuildSdkVersions;
+                // Save the SDK versions in case this resolver is called again for another SDK in the same build
+                context.State = msbuildSdkVersions;
+            }
 
             string globalJsonVersion;
 
@@ -122,7 +123,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                                 parsedSdkVersion.ToFullString(),
                                 settings,
                                 new NuGetSdkLogger(context.Logger, warnings, errors))
-                            .Result;
+                            .ConfigureAwait(continueOnCapturedContext: false)
+                            .GetAwaiter()
+                            .GetResult();
 
                         // Look for a successful result, any errors are logged by NuGet
                         foreach (RestoreResult result in results.Select(i => i.Result).Where(i => i.Success))
@@ -134,13 +137,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                             {
                                 if (!TryGetMSBuildSdkPackageInfo(fallbackPackagePathResolver, installedPackage.Name, installedPackage.Version, out installedPath, out installedVersion))
                                 {
-                                    // This should never happen because we were told the package was successfully installed.  If we can't find it, we probably did something wrong with the NuGet API
+                                    // This should never happen because we were told the package was successfully installed.
+                                    // If we can't find it, we probably did something wrong with the NuGet API
                                     errors.Add(ResourceUtilities.FormatResourceString("NuGetSdkResolverCouldNotFindInstalledPackage", sdk));
                                 }
                             }
                             else
                             {
-                                // This should never happen because we were told the restore succeeded.  If we can't find the package from GetAllInstalled(), we probably did something wrong with the NuGet API
+                                // This should never happen because we were told the restore succeeded.
+                                // If we can't find the package from GetAllInstalled(), we probably did something wrong with the NuGet API
                                 errors.Add(ResourceUtilities.FormatResourceString("NuGetSdkResolverPackageWasNotInstalled", sdk, sdk.Name));
                             }
                         }

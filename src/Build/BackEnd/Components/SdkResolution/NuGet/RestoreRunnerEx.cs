@@ -20,9 +20,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
 {
     /// <summary>
     /// An extension of the NuGet.Commands.RestoreRunner class that contains APIs we do not yet have.
+    /// https://github.com/NuGet/Home/issues/5919
     /// </summary>
     internal static class RestoreRunnerEx
     {
+        // NuGet requires at least one framework, we use .NET Standard here just to get the API to do work.  The framework is not actually used.
+        private static readonly List<NuGetFramework> TargetFrameworks = new List<NuGetFramework>
+        {
+            FrameworkConstants.CommonFrameworks.NetStandard
+        };
+
         /// <summary>
         /// Restores a package by querying, downloading, and unzipping it without generating any other files (like project.assets.json).
         /// </summary>
@@ -34,19 +41,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
         /// <returns></returns>
         public static Task<IReadOnlyList<RestoreResultPair>> RunWithoutCommit(string projectPath, string id, string version, ISettings settings, ILogger logger)
         {
-            // NuGet requires at least one framework, we use .NET Standard here just to get the API to do work.  The framework is not actually used.
-            List<NuGetFramework> targetFrameworks = new List<NuGetFramework>
-            {
-                FrameworkConstants.CommonFrameworks.NetStandard
-            };
-
             using (SourceCacheContext sourceCacheContext = new SourceCacheContext
             {
                 IgnoreFailedSources = true,
             })
             {
                 // The package spec details what packages to restore
-                PackageSpec packageSpec = new PackageSpec(targetFrameworks.Select(i => new TargetFrameworkInformation
+                PackageSpec packageSpec = new PackageSpec(TargetFrameworks.Select(i => new TargetFrameworkInformation
                 {
                     FrameworkName = i,
                 }).ToList())
@@ -69,7 +70,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                         ProjectStyle = ProjectStyle.PackageReference,
                         ProjectUniqueName = projectPath,
                         OutputPath = Path.GetTempPath(),
-                        OriginalTargetFrameworks = targetFrameworks.Select(i => i.ToString()).ToList(),
+                        OriginalTargetFrameworks = TargetFrameworks.Select(i => i.ToString()).ToList(),
                         ConfigFilePaths = SettingsUtility.GetConfigFilePaths(settings).ToList(),
                         PackagesPath = SettingsUtility.GetGlobalPackagesFolder(settings),
                         Sources = SettingsUtility.GetEnabledSources(settings).ToList(),

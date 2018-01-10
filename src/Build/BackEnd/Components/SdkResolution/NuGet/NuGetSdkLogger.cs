@@ -74,9 +74,19 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
 
         public void Log(ILogMessage message) => Log(message.Level, message.Message);
 
-        public Task LogAsync(LogLevel level, string data) => Task.Run(() => Log(level, data));
+        public Task LogAsync(LogLevel level, string data)
+        {
+            Log(level, data);
 
-        public Task LogAsync(ILogMessage message) => Task.Run(() => Log(message));
+            return Task.CompletedTask;
+        }
+
+        public Task LogAsync(ILogMessage message)
+        {
+            Log(message);
+
+            return Task.CompletedTask;
+        }
 
         public void LogDebug(string data) => Log(LogLevel.Debug, data);
 

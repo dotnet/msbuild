@@ -128,6 +128,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         }
                         catch (Exception e) when (sdkResolver is NuGetSdkResolver && e is FileNotFoundException)
                         {
+                            // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
+                            // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather
+                            // than give them a generic error, we want to give a more specific message.  This exception cannot be caught by
+                            // the resolver itself because it is usually thrown before the class is loaded
                             // MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}
                             loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunNuGetSdkResolver", NuGetSdkResolverBase.NuGetAssemblyPathEnvironmentVariableName, e.Message);
                             continue;
