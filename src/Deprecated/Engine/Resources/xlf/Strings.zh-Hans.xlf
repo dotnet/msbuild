@@ -20,7 +20,6 @@
       </count-group>
     </header>
     <body>
-      <group id="ORCASENGINE/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: “{0}”任务包含多个名为“{1}”的参数。</target>
