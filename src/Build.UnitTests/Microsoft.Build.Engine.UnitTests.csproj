@@ -106,7 +106,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="CopyTestprojects" AfterTargets="ResolveProjectReferences">
+  <Target Name="CopyTestProjects" AfterTargets="ResolveProjectReferences">
     <!-- In TypeLoader, the following logic is used for loading assemblies on .NET Core:
             - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded, indifferent of the user specified path
             - otherwise, the assembly from the user specified path is loaded, if it exists.
