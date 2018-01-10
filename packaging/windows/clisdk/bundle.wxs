@@ -40,9 +40,9 @@
         <MsiProperty Name="EXEFULLPATH" Value="[WixBundleOriginalSource]" />
       </MsiPackage>
       <?if $(var.Platform)=x86?>
-        <PackageGroupRef Id="PG_AspNetCorePackageStore_x86"/>
+        <PackageGroupRef Id="PG_AspNetCoreSharedFramework_x86"/>
       <?elseif $(var.Platform)=x64?>
-        <PackageGroupRef Id="PG_AspNetCorePackageStore_x64"/>
+        <PackageGroupRef Id="PG_AspNetCoreSharedFramework_x64"/>
       <?endif?>
     </Chain>
   </Bundle>

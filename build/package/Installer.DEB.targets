@@ -36,8 +36,8 @@
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
-      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimeDebInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)-$(HostRid).deb</AspNetCoreRuntimeDebInstallerFileName>
+      <AspNetCoreSharedFxDebianPackageName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxDebianPackageName>
+      <AspNetCoreSharedFxDebianPackageName>$(AspNetCoreSharedFxDebianPackageName.ToLower())</AspNetCoreSharedFxDebianPackageName>
     </PropertyGroup>
 
     <!-- Inputs -->
@@ -86,8 +86,8 @@
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
         <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
-      <DebianConfigTokenValues Include="%ASPNETCOREPACKAGESTORE_DEBIAN_PACKAGE_NAME%">
-        <ReplacementString>$(AspNetCoreRuntimePackageName)</ReplacementString>
+      <DebianConfigTokenValues Include="%ASPNETCORE_SHAREDFX_DEBIAN_PACKAGE_NAME%">
+        <ReplacementString>$(AspNetCoreSharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_ADDITIONAL_DEPENDENCY%"
                                Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'">
@@ -121,13 +121,4 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="DownloadAspNetCoreRuntimeDebInstaller"
-        DependsOnTargets="SetupDebProps">
-    <PropertyGroup>
-      <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeDebInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
-    </PropertyGroup>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
-  </Target>
 </Project>

@@ -5,7 +5,7 @@
 
     <!-- only the runtime OSX .pkgs have a `-internal` suffix -->
     <InstallerStartSuffix Condition="'$(HostOSName)' == 'osx'">-internal</InstallerStartSuffix>
-    
+
     <!-- Downloaded Installers + Archives -->
     <DownloadedRuntimeDepsInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime-deps-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedRuntimeDepsInstallerFileName>
     <DownloadedRuntimeDepsInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedRuntimeDepsInstallerFileName)</DownloadedRuntimeDepsInstallerFile>
@@ -13,7 +13,7 @@
     <!-- Use the "x64" Rid when downloading Linux shared framework 'DEB' installer files. -->
     <SharedFrameworkInstallerFileRid>$(CoreSetupRid)</SharedFrameworkInstallerFileRid>
     <SharedFrameworkInstallerFileRid Condition=" '$(IsDebianBaseDistro)' == 'true' ">x64</SharedFrameworkInstallerFileRid>
-    
+
     <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
     <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
 
@@ -27,8 +27,26 @@
     <SharedFrameworkRid>$(CoreSetupRid)</SharedFrameworkRid>
     <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
     <CombinedFrameworkHostCompressedFileName>dotnet-runtime-$(MicrosoftNETCoreAppPackageVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
-  
-</PropertyGroup>
+
+    <AspNetCoreSharedFxInstallerRid>$(SharedFrameworkRid)</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(SharedFrameworkRid)' == 'alpine.3.6-x64'">linux-x64</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(SharedFrameworkRid)' == 'rhel.6-x64'">linux-x64</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxArchiveRid>$(AspNetCoreSharedFxInstallerRid)</AspNetCoreSharedFxArchiveRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.deb'">x64</AspNetCoreSharedFxInstallerRid>
+    <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.rpm'">$(CoreSetupRid)</AspNetCoreSharedFxInstallerRid>
+
+    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' != '' AND '$(HostOSName)' != 'osx' ">aspnetcore-runtime-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid)$(InstallerExtension)</DownloadedAspNetCoreSharedFxInstallerFileName>
+    <!-- Note: we use the "-internal" archives and installers that contain only the aspnetcore shared framework, and shouldn't overlap with Microsoft.NETCore.App. -->
+    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' == '.msi' ">aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid).wixlib</DownloadedAspNetCoreSharedFxInstallerFileName>
+    <DownloadedAspNetCoreSharedFxInstallerFile Condition=" '$(InstallerExtension)' != '' AND '$(DownloadedAspNetCoreSharedFxInstallerFileName)' != '' ">$(PackagesDirectory)/$(DownloadedAspNetCoreSharedFxInstallerFileName)</DownloadedAspNetCoreSharedFxInstallerFile>
+
+    <AspNetCoreSharedFxArchiveFileName>aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(AspNetCoreSharedFxArchiveRid)$(ArchiveExtension)</AspNetCoreSharedFxArchiveFileName>
+    <AspNetCoreSharedFxArchiveFile>$(PackagesDirectory)/$(AspNetCoreSharedFxArchiveFileName)</AspNetCoreSharedFxArchiveFile>
+
+    <!-- Used to detect if ASP.NET Core is built against the same version of Microsoft.NETCore.App. -->
+    <AspNetCoreSharedFxBaseRuntimeVersionFileName>aspnetcore_base_runtime.version</AspNetCoreSharedFxBaseRuntimeVersionFileName>
+    <AspNetCoreSharedFxBaseRuntimeVersionFile Condition=" '$(AspNetCoreSharedFxBaseRuntimeVersionFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreSharedFxBaseRuntimeVersionFileName)</AspNetCoreSharedFxBaseRuntimeVersionFile>
+  </PropertyGroup>
 
   <PropertyGroup>
     <CoreSetupRootUrl>$(CoreSetupBlobRootUrl)Runtime/</CoreSetupRootUrl>
@@ -36,22 +54,14 @@
     <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive$(ArchiveExtension)</CombinedSharedHostAndFrameworkArchive>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimePackageFolderName)</AspNetCoreRuntimeInstallerBlobRootUrl>
-    <AspNetCoreSharedRuntimeVersionFileName>runtime.version</AspNetCoreSharedRuntimeVersionFileName>
-    <AspNetCoreSharedRuntimeVersionFile Condition=" '$(AspNetCoreSharedRuntimeVersionFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreSharedRuntimeVersionFileName)</AspNetCoreSharedRuntimeVersionFile>
-    
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'win' ">win7-$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)-$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux-$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
-    <AspNetCoreRuntimeInstallerArchiveFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)-$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
-    <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
-
-    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(HostOSName)' == 'win' ">AspNetCorePackageStoreLib_$(Architecture)-$(AspNetCoreRuntimePackageVersion).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
-    <AspNetCoreRuntimeInstallerWixLibFile Condition=" '$(AspNetCoreRuntimeInstallerWixLibFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerWixLibFileName)</AspNetCoreRuntimeInstallerWixLibFile>
-  </PropertyGroup>
-
   <ItemGroup>
+    <_DownloadAndExtractItem Include="AspNetCoreSharedFxArchiveFile"
+                             Condition="!Exists('$(AspNetCoreSharedFxArchiveFile)')">
+      <Url>$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <DownloadFileName>$(AspNetCoreSharedFxArchiveFile)</DownloadFileName>
+      <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
+    </_DownloadAndExtractItem>
+
     <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
                              Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(CombinedFrameworkHostCompressedFileName)$(CoreSetupBlobAccessTokenParam)</Url>
@@ -65,7 +75,7 @@
       <DownloadFileName>$(DownloadedRuntimeDepsInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
-    
+
     <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
@@ -87,24 +97,17 @@
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
-  <_DownloadAndExtractItem Include="AspNetCoreRuntimeInstallerWixLibFile"
-                           Condition=" '$(AspNetCoreRuntimeInstallerWixLibFile)' != '' And !Exists('$(AspNetCoreRuntimeInstallerWixLibFile)')">
-      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerWixLibFileName)$(CoreSetupBlobAccessTokenParam)</Url>
-      <DownloadFileName>$(AspNetCoreRuntimeInstallerWixLibFile)</DownloadFileName>
+    <_DownloadAndExtractItem Include="DownloadedAspNetCoreSharedFxInstallerFile"
+                            Condition="'$(SkipBuildingInstallers)' != 'true' AND '$(DownloadedAspNetCoreSharedFxInstallerFile)' != '' AND !Exists($(DownloadedAspNetCoreSharedFxInstallerFile)) And '$(InstallerExtension)' != ''">
+      <Url>$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(DownloadedAspNetCoreSharedFxInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <DownloadFileName>$(DownloadedAspNetCoreSharedFxInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
-  </_DownloadAndExtractItem>
+    </_DownloadAndExtractItem>
 
-  <_DownloadAndExtractItem Include="AspNetCoreRuntimeInstallerArchiveFile"
-                           Condition="!Exists('$(AspNetCoreRuntimeInstallerArchiveFile)')">
-      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerArchiveFileName)$(CoreSetupBlobAccessTokenParam)</Url>
-      <DownloadFileName>$(AspNetCoreRuntimeInstallerArchiveFile)</DownloadFileName>
-      <ExtractDestination>$(AspNetRuntimePackageStorePublishDirectory)</ExtractDestination>
-  </_DownloadAndExtractItem>
-
-  <_DownloadAndExtractItem Include="AspNetCoreSharedRuntimeVersionFile"
-                           Condition="!Exists('$(AspNetCoreSharedRuntimeVersionFile)')">
-      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreSharedRuntimeVersionFileName)$(CoreSetupBlobAccessTokenParam)</Url>
-      <DownloadFileName>$(AspNetCoreSharedRuntimeVersionFile)</DownloadFileName>
+    <_DownloadAndExtractItem Include="AspNetCoreSharedFxBaseRuntimeVersionFile"
+                           Condition="!Exists('$(AspNetCoreSharedFxBaseRuntimeVersionFile)')">
+      <Url>$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxBaseRuntimeVersionFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <DownloadFileName>$(AspNetCoreSharedFxBaseRuntimeVersionFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
