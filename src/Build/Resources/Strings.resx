@@ -1668,6 +1668,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
+  <data name="SdkResolving" UESanitized="false" Visibility="Public">
+    <value>Resolving SDK '{0}'...</value>
+    <comment>
+      LOCALIZATION:  Do not localize the word SDK.
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
         

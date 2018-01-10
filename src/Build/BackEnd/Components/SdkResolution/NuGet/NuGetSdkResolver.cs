@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using NuGet.Commands;
 using NuGet.Configuration;
 using NuGet.LibraryModel;
@@ -112,7 +113,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                 {
                     try
                     {
-                        context.Logger.LogMessage($"Resolving SDK '{sdk}'...");
+                        context.Logger.LogMessage(ResourceUtilities.FormatResourceString("SdkResolving", sdk));
 
                         // Asynchronously run the restore without a commit which find the package on configured feeds, download, and unzip it without generating any other files
                         IReadOnlyList<RestoreResultPair> results = RestoreRunnerEx.RunWithoutCommit(
