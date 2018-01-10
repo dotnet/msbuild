@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Microsoft.Build.Shared;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Framework;
+
+using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 
 namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
 {
@@ -22,10 +23,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
         /// <summary>
         /// Walks up the directory tree to find the first global.json and reads the msbuild-sdks section.
         /// </summary>
-        /// <param name="projectPath">The full path to the project as a starting directory.</param>
-        /// <param name="logger">An <see cref="Framework.SdkLogger"/> to use when logging.</param>
         /// <returns>A <see cref="Dictionary{String,String}"/> of MSBuild SDK versions from a global.json if found, otherwise <code>null</code>.</returns>
-        public static Dictionary<string, string> GetMSBuildSdkVersions(Framework.SdkResolverContext context)
+        public static Dictionary<string, string> GetMSBuildSdkVersions(SdkResolverContextBase context)
         {
             DirectoryInfo projectDirectory = Directory.GetParent(context.ProjectFilePath);
 
