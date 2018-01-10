@@ -39,7 +39,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             var potentialResolvers = FindPotentialSdkResolvers(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"));
 
-            if (potentialResolvers.Count == 0) return resolvers;
+            if (potentialResolvers.Count == 0)
+            {
+                return resolvers.Count == 1 ? resolvers : resolvers.OrderBy(t => t.Priority).ToList();
+            }
 
 #if !FEATURE_ASSEMBLY_LOADFROM
             var loader = new CoreClrAssemblyLoader();
