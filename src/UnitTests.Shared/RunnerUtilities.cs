@@ -39,7 +39,8 @@ namespace Microsoft.Build.UnitTests.Shared
             {
                 var comSpec = Environment.GetEnvironmentVariable("ComSpec");
 
-                arguments = $"/C \"{pathToExecutable} {arguments}\"";
+                // /D: Do not load AutoRun configuration from the registry (perf)
+                arguments = $"/D /C \"{pathToExecutable} {arguments}\"";
                 pathToExecutable = comSpec;
             }
             else
