@@ -14,11 +14,9 @@ fi
 
 host_package_name="dotnet-host"
 aspnetcore_runtime_package_name="^aspnetcore-runtime.*"
-aspnetcore_package_store_package_name="^aspnetcore-store.*"
 
 remove_all(){
     apt-get purge -y $aspnetcore_runtime_package_name
-    apt-get purge -y $aspnetcore_package_store_package_name
     apt-get purge -y $host_package_name
 }
 

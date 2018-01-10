@@ -13,12 +13,10 @@ if [ $current_userid -ne 0 ]; then
 fi
 
 host_package_name="dotnet-host"
-aspnetcore_package_store_package_name="aspnetcore-store*"
 aspnetcore_runtime_package_name="aspnetcore-runtime*"
 
 remove_all(){
     yum remove -y $host_package_name
-    yum remove -y $aspnetcore_package_store_package_name
     yum remove -y $aspnetcore_runtime_package_name
 }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <MicrosoftAspNetCoreAllPackageVersion>2.1.0-preview1-28042</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-26109-02</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.6.0-preview-000022-1216653</MicrosoftBuildPackageVersion>
@@ -58,12 +59,9 @@
   <PropertyGroup>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-25908-02</CLI_NETStandardLibraryNETFrameworkVersion>
 
-    <!-- When ready to pull aspnetcore directly from orchestrated build, move this above the import to OrchestratedPackageVersionsProps. -->
-    <MicrosoftAspNetCoreAppPackageVersion>2.1.0-preview1-28031</MicrosoftAspNetCoreAppPackageVersion>
-
     <SharedHostVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedHostVersion>
     <HostFxrVersion>$(MicrosoftNETCoreAppPackageVersion)</HostFxrVersion>
-    <AspNetCoreVersion>$(MicrosoftAspNetCoreAppPackageVersion)</AspNetCoreVersion>
+    <AspNetCoreVersion>$(MicrosoftAspNetCoreAllPackageVersion)</AspNetCoreVersion>
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->
