@@ -92,11 +92,11 @@ namespace Microsoft.TemplateEngine.Cli
                 // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
                 if (!string.IsNullOrEmpty(hivePath))
                 {
-                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_");
+                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_").Replace("/", "_");
                 }
                 else
                 {
-                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_");
+                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_").Replace("/", "_");
                 }
 
                 _entryMutex = new Mutex(false, _entryMutexIdentity);
