@@ -16,7 +16,11 @@
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDocumentationFile>true</EnableDocumentationFile>
-    <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
+    <!--
+        Have to set this to false because NuSpecGenerator will include NuGet dependencies.
+        We can turn this back on when we've moved to the new SDK and can set PrivateAssets="All"
+    -->
+    <UpdateNuGetPackageDependencies>false</UpdateNuGetPackageDependencies>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -231,6 +235,11 @@
     <Compile Include="BackEnd\Components\Scheduler\SchedulingPlan.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\DefaultSdkResolver.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\ISdkResolverService.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\NuGet\GlobalJsonReader.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\NuGet\NuGetSdkLogger.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\NuGet\NuGetSdkResolver.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\NuGet\NuGetSdkResolverBase.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\NuGet\RestoreRunnerEx.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverServiceFactory.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkLogger.cs" />
@@ -810,6 +819,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
     <None Include="project.json" />
   </ItemGroup>
+  <ItemGroup />
   <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->

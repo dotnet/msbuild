@@ -1,6 +1,6 @@
-﻿using System.IO;
+﻿using Shouldly;
+using System.IO;
 using System.Text;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -32,8 +32,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
 
-            Assert.Equal(1, resolvers.Count);
-            Assert.Equal(typeof(DefaultSdkResolver), resolvers[0].GetType());
+            resolvers.Count.ShouldBe(2);
+            resolvers[1].GetType().ShouldBe(typeof(DefaultSdkResolver));
         }
 
         [Fact]
@@ -62,8 +62,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 var strategy = new SdkResolverLoader();
                 var files = strategy.FindPotentialSdkResolvers(root);
 
-                Assert.Equal(1, files.Count);
-                Assert.Equal(f1, files[0]);
+                files.Count.ShouldBe(1);
+                files[0].ShouldBe(f1);
             }
             finally
             {
