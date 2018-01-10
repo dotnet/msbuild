@@ -11,9 +11,9 @@ folder InstallDir:\MSBuild\15.0
   file source=$(ThirdPartyNotice)
 
 folder InstallDir:\MSBuild\15.0\Bin
-  file source=$(X86BinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenArchitecture=all
+  file source=$(MSBuildConversionBinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all
+  file source=$(MSBuildConversionBinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
@@ -144,9 +144,9 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X64BinPath)MSBuild.exe.config
   file source=$(TaskHostX64BinPath)MSBuildTaskHost.exe.config
 
-  file source=$(X86BinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenArchitecture=all
+  file source=$(MSBuildConversionBinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all
+  file source=$(MSBuildConversionBinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
