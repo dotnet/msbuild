@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+
+    <!-- Not sure what the right ID is here -->
+    <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
+  </PropertyGroup>
+  <ItemGroup>
+    <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
+    <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
+    
+  </ItemGroup>
+  <ItemGroup>
+     <SwrFile Include="*.swr" /> 
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Reference projects whose outputs are used in the package.  Use OutputItemType to get the path to the output assembly,
+         from which we will later derive the path to the output folder, which is passed as a variable to the .swr file. -->
+    <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildResolvedProjectReferencePath" />
+    <ProjectReference Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
+    
+    <!-- Also add an additional reference to each project where the Platform is set to x64, as we also use those files in the package. -->
+    <ProjectReference SetPlatform="Platform=x64" SetTargetFramework="TargetFramework=net46" Include="..\..\MSBuild\MSBuild.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildX64ResolvedProjectReferencePath" />
+    <ProjectReference SetPlatform="Platform=x64" Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath" />
+
+  </ItemGroup>
+
+  <Target Name="SetVsixProperties" BeforeTargets="Build" DependsOnTargets="GetBuildVersion;ResolveProjectReferences">
+    <PropertyGroup>
+      <X86BinPath>@(MSBuildResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X86BinPath>
+      <X64BinPath>@(MSBuildX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X64BinPath>
+      <MSBuildTaskHostBinPath>@(MSBuildTaskHostResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostBinPath>
+      <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <SwrProperty Include="Version=$(BuildVersion)" />
+      <SwrProperty Include="X86BinPath=$(X86BinPath)" />
+      <SwrProperty Include="X64BinPath=$(X64BinPath)" />
+      <SwrProperty Include="TaskHostBinPath=$(MSBuildTaskHostBinPath)" />
+      <SwrProperty Include="TaskHostX64BinPath=$(MSBuildTaskHostX64BinPath)" />
+    </ItemGroup>
+  </Target>
+</Project>
