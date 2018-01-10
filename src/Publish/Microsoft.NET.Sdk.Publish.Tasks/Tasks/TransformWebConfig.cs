@@ -56,6 +56,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         /// Native executable extension
         /// </summary>
         public string ExecutableExtension { get; set; }
+        /// <summary>
+        /// AspNetCoreModuleHostingModel defines whether the hosting will be InProcess or OutOfProcess.
+        /// </summary>
+        /// <returns></returns>
+        public string AspNetCoreModuleHostingModel { get; set; }
 
         public override bool Execute()
         {
@@ -84,7 +89,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             string outputFile = Path.GetFileName(TargetPath);
-            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, IsPortable, ExecutableExtension);
+            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, IsPortable, ExecutableExtension, AspNetCoreModuleHostingModel);
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);

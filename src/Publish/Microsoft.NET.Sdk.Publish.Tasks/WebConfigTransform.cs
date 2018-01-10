@@ -4,12 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public static class WebConfigTransform
     {
-        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool isPortable, string extension)
+        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool isPortable, string extension, string aspNetCoreHostingModel)
         {
             const string HandlersElementName = "handlers";
             const string aspNetCoreElementName = "aspNetCore";
@@ -21,7 +22,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             var webServerSection = GetOrCreateChild(webConfig.Root, "system.webServer");
 
             TransformHandlers(GetOrCreateChild(webServerSection, HandlersElementName));
-            TransformAspNetCore(GetOrCreateChild(webServerSection, aspNetCoreElementName), appName, configureForAzure, isPortable, extension);
+            TransformAspNetCore(GetOrCreateChild(webServerSection, aspNetCoreElementName), appName, configureForAzure, isPortable, extension, aspNetCoreHostingModel);
 
             // make sure that the aspNetCore element is after handlers element
             var aspNetCoreElement = webServerSection.Element(HandlersElementName)
@@ -54,7 +55,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             SetAttributeValueIfEmpty(aspNetCoreElement, "resourceType", "Unspecified");
         }
 
-        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool isPortable, string extension)
+        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool isPortable, string extension, string aspNetCoreHostingModel)
         {
             // Forward slashes currently work neither in AspNetCoreModule nor in dotnet so they need to be
             // replaced with backwards slashes when the application is published on a non-Windows machine
@@ -105,6 +106,20 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             else
             {
                 SetAttributeValueIfEmpty(aspNetCoreElement, "stdoutLogFile", logPath);
+            }
+
+            var hostingModelAttributeValue = aspNetCoreElement.Attribute("hostingModel");
+            // Set the hostingmodel attribute only if it is not already set in the web.config and AspNetCoreHostingModel property is set.
+            if (hostingModelAttributeValue == null && !string.IsNullOrEmpty(aspNetCoreHostingModel))
+            {
+                if (string.Equals(aspNetCoreHostingModel, "inprocess", StringComparison.OrdinalIgnoreCase) || string.Equals(aspNetCoreHostingModel, "outofprocess", StringComparison.OrdinalIgnoreCase))
+                {
+                    aspNetCoreElement.SetAttributeValue("hostingModel", aspNetCoreHostingModel);
+                }
+                else
+                {
+                    throw new Exception(Resources.WebConfigTransform_HostingModel_Error);
+                }
             }
         }
 
