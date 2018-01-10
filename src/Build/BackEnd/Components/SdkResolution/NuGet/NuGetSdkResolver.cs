@@ -134,14 +134,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                             {
                                 if (!TryGetMSBuildSdkPackageInfo(fallbackPackagePathResolver, installedPackage.Name, installedPackage.Version, out installedPath, out installedVersion))
                                 {
-                                    // This should never happen
-                                    errors.Add("Package was installed but could not be found");
+                                    // This should never happen because we were told the package was successfully installed.  If we can't find it, we probably did something wrong with the NuGet API
+                                    errors.Add(ResourceUtilities.FormatResourceString("NuGetSdkResolverCouldNotFindInstalledPackage", sdk));
                                 }
                             }
                             else
                             {
-                                // This should never happen
-                                errors.Add("Package was supposed to be installed but wasn't");
+                                // This should never happen because we were told the restore succeeded.  If we can't find the package from GetAllInstalled(), we probably did something wrong with the NuGet API
+                                errors.Add(ResourceUtilities.FormatResourceString("NuGetSdkResolverPackageWasNotInstalled", sdk, sdk.Name));
                             }
                         }
                     }

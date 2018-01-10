@@ -1215,6 +1215,14 @@
     <value>Failed to parse "{0}". {1}</value>
     <comment></comment>
   </data>
+  <data name="NuGetSdkResolverCouldNotFindInstalledPackage" UESanitized="false" Visibility="Public">
+    <value>MSB4244: Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</value>
+    <comment>{StrBegin="MSB4244: "}</comment>
+  </data>
+  <data name="NuGetSdkResolverPackageWasNotInstalled" UESanitized="false" Visibility="Public">
+    <value>MSB4245: Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</value>
+    <comment>{StrBegin="MSB4245: "}</comment>
+  </data>
   <data name="InvalidSdkElementName" UESanitized="false" Visibility="Public">
     <value>MSB4238: The name "{0}" is not a valid SDK name.</value>
     <comment>{StrBegin="MSB4238: "}</comment>
@@ -1680,7 +1688,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4244.
+        Next message code should be MSB4246.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
