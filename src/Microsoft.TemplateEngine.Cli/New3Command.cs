@@ -92,11 +92,11 @@ namespace Microsoft.TemplateEngine.Cli
                 // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
                 if (!string.IsNullOrEmpty(hivePath))
                 {
-                    _entryMutexIdentity = hivePath;
+                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_");
                 }
                 else
                 {
-                    _entryMutexIdentity = $"{host.HostIdentifier}-{host.Version}-{_entryMutexGuid.ToString()}";
+                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_");
                 }
 
                 _entryMutex = new Mutex(false, _entryMutexIdentity);
@@ -107,11 +107,14 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
         {
-            EnsureEntryMutex(hivePath, host);
-
-            if (!_entryMutex.WaitOne())
+            if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
-                return -1;
+                EnsureEntryMutex(hivePath, host);
+
+                if (!_entryMutex.WaitOne())
+                {
+                    return -1;
+                }
             }
 
             try
@@ -120,7 +123,10 @@ namespace Microsoft.TemplateEngine.Cli
             }
             finally
             {
-                _entryMutex.ReleaseMutex();
+                if (_entryMutex != null)
+                {
+                    _entryMutex.ReleaseMutex();
+                }
             }
         }
 
