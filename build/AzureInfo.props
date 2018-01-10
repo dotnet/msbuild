@@ -1,8 +1,10 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Product>Sdk</Product>
+    <DefaultCoreSetupBlobRootUrl>https://dotnetcli.azureedge.net/dotnet/</DefaultCoreSetupBlobRootUrl>
     <CoreSetupBlobRootUrl Condition="'$(PB_AssetRootUrl)' != ''">$(PB_AssetRootUrl)</CoreSetupBlobRootUrl>
-    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
+    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">$(DefaultCoreSetupBlobRootUrl)</CoreSetupBlobRootUrl>
+    <BackwardsCompatibilityCoreSetupBlobRootUrl>$(DefaultCoreSetupBlobRootUrl)</BackwardsCompatibilityCoreSetupBlobRootUrl>
     <CoreSetupBlobAccessToken Condition="'$(PB_AssetRootAccessTokenSuffix)' != ''">$(PB_AssetRootAccessTokenSuffix)</CoreSetupBlobAccessToken>
     <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
     <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
