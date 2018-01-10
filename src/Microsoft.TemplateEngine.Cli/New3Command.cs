@@ -80,9 +80,35 @@ namespace Microsoft.TemplateEngine.Cli
             return Run(commandName, host, telemetryLogger, onFirstRun, args, null);
         }
 
-        private static Mutex _entryMutex = new Mutex(false, "{5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2}");
+        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
+        private static Mutex _entryMutex;
+
+        private static Mutex EnsureEntryMutex(string hivePath, ITemplateEngineHost host)
+        {
+            if (_entryMutex == null)
+            {
+                string _entryMutexIdentity;
+
+                // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
+                if (!string.IsNullOrEmpty(hivePath))
+                {
+                    _entryMutexIdentity = hivePath;
+                }
+                else
+                {
+                    _entryMutexIdentity = $"{host.HostIdentifier}-{host.Version}-{_entryMutexGuid.ToString()}";
+                }
+
+                _entryMutex = new Mutex(false, _entryMutexIdentity);
+            }
+
+            return _entryMutex;
+        }
+
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
         {
+            EnsureEntryMutex(hivePath, host);
+
             if (!_entryMutex.WaitOne())
             {
                 return -1;
