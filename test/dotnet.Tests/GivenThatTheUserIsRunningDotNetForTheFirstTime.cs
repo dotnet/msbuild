@@ -77,6 +77,15 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
+        public void ItShowsTheAspNetCertificateGenerationMessageToTheUser()
+        {
+            _firstDotnetVerbUseCommandResult.StdOut
+                .Should()
+                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled)
+                .And.NotContain("Restore completed in");
+        }
+
+        [Fact]
         public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
         {
             _nugetFallbackFolder
@@ -93,7 +102,15 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void ItDoesNotCreateAFirstUseSentinelFileUnderTheDotDotNetFolderWhenInternalReportInstallSuccessIsInvoked()
+        public void ItCreatesAnAspNetCertificateSentinelFileUnderTheDotDotNetFolder()
+        {
+            _dotDotnetFolder
+                .Should()
+                .HaveFile($"{GetDotnetVersion()}.aspNetCertificateSentinel");
+        }
+
+        [Fact]
+        public void ItDoesNotCreateAFirstUseSentinelFileNorAnAspNetCertificateSentinelFileUnderTheDotDotNetFolderWhenInternalReportInstallSuccessIsInvoked()
         {
             var emptyHome = Path.Combine(_testDirectory, "empty_home");
             var profiled = Path.Combine(_testDirectory, "profile.d");
@@ -117,6 +134,7 @@ namespace Microsoft.DotNet.Tests
             var homeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
             string[] fileEntries = Directory.GetFiles(homeFolder.ToString());
             fileEntries.Should().OnlyContain(x => !x.Contains(".dotnetFirstUseSentinel"));
+            fileEntries.Should().OnlyContain(x => !x.Contains(".aspNetCertificateSentinel"));
         }
 
         [Fact]
@@ -145,6 +163,34 @@ namespace Microsoft.DotNet.Tests
             result.StdOut
                 .Should()
                 .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage);
+        }
+
+        [Fact]
+        public void ItShowsTheAspNetCertificateGenerationMessageWhenInvokingACommandAfterInternalReportInstallSuccessHasBeenInvoked()
+        {
+            var newHome = Path.Combine(_testDirectory, "aspnet_home");
+            var newHomeFolder = new DirectoryInfo(Path.Combine(newHome, ".dotnet"));
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
+
+            var command = new DotnetCommand()
+                .WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = newHome;
+            command.Environment["USERPROFILE"] = newHome;
+            command.Environment["APPDATA"] = newHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            var result = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
+
+            result.StdOut
+                .Should()
+                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled);
         }
 
         [Fact]

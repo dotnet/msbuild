@@ -92,6 +92,7 @@ namespace Microsoft.DotNet.Cli
                 new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
             {
                 IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = disposableFirstTimeUseNoticeSentinel;
+                IAspNetCertificateSentinel aspNetCertificateSentinel = new AspNetCertificateSentinel(cliFallbackFolderPathCalculator);
                 for (; lastArg < args.Length; lastArg++)
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
@@ -134,6 +135,7 @@ namespace Microsoft.DotNet.Cli
                         var hasSuperUserAccess = false;
                         if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
                         {
+                            aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                             hasSuperUserAccess = true;
                         }
@@ -141,7 +143,7 @@ namespace Microsoft.DotNet.Cli
                         ConfigureDotNetForFirstTimeUse(
                             nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
-                            new AspNetCertificateSentinel(cliFallbackFolderPathCalculator),
+                            aspNetCertificateSentinel,
                             cliFallbackFolderPathCalculator,
                             hasSuperUserAccess);
 
