@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -15,7 +16,8 @@ namespace Microsoft.DotNet.Tools.Install.Tool
         public void Restore(
             FilePath projectPath,
             DirectoryPath assetJsonOutput,
-            FilePath? nugetconfig)
+            FilePath? nugetconfig,
+            string source = null)
         {
             var argsToPassToRestore = new List<string>();
 
@@ -26,6 +28,12 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                 argsToPassToRestore.Add(nugetconfig.Value.Value);
             }
 
+            if (source != null)
+            {
+                argsToPassToRestore.Add("--source");
+                argsToPassToRestore.Add(source);
+            }
+
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
@@ -34,9 +42,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             });
 
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
-                .Create(
-                    "restore",
-                    argsToPassToRestore)
+                .Create("restore", argsToPassToRestore)
                 .CaptureStdOut()
                 .CaptureStdErr();
 
