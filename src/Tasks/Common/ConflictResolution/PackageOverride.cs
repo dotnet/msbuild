@@ -19,42 +19,42 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     internal class PackageOverride
     {
         public string PackageName { get; }
-        public Dictionary<string, Version> OverridenPackages { get; }
+        public Dictionary<string, Version> OverriddenPackages { get; }
 
-        private PackageOverride(string packageName, IEnumerable<Tuple<string, Version>> overridenPackages)
+        private PackageOverride(string packageName, IEnumerable<Tuple<string, Version>> overriddenPackages)
         {
             PackageName = packageName;
 
-            OverridenPackages = new Dictionary<string, Version>(StringComparer.OrdinalIgnoreCase);
-            foreach (Tuple<string, Version> package in overridenPackages)
+            OverriddenPackages = new Dictionary<string, Version>(StringComparer.OrdinalIgnoreCase);
+            foreach (Tuple<string, Version> package in overriddenPackages)
             {
-                OverridenPackages[package.Item1] = package.Item2;
+                OverriddenPackages[package.Item1] = package.Item2;
             }
         }
 
         public static PackageOverride Create(ITaskItem packageOverrideItem)
         {
             string packageName = packageOverrideItem.ItemSpec;
-            string overridenPackagesString = packageOverrideItem.GetMetadata(MetadataKeys.OverridenPackages);
+            string overriddenPackagesString = packageOverrideItem.GetMetadata(MetadataKeys.OverriddenPackages);
 
-            return new PackageOverride(packageName, CreateOverridenPackages(overridenPackagesString));
+            return new PackageOverride(packageName, CreateOverriddenPackages(overriddenPackagesString));
         }
 
-        private static IEnumerable<Tuple<string, Version>> CreateOverridenPackages(string overridenPackagesString)
+        private static IEnumerable<Tuple<string, Version>> CreateOverriddenPackages(string overriddenPackagesString)
         {
-            if (!string.IsNullOrEmpty(overridenPackagesString))
+            if (!string.IsNullOrEmpty(overriddenPackagesString))
             {
-                overridenPackagesString = overridenPackagesString.Trim();
-                string[] overridenPackagesAndVersions = overridenPackagesString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string overridenPackagesAndVersion in overridenPackagesAndVersions)
+                overriddenPackagesString = overriddenPackagesString.Trim();
+                string[] overriddenPackagesAndVersions = overriddenPackagesString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string overriddenPackagesAndVersion in overriddenPackagesAndVersions)
                 {
-                    string trimmedOverridenPackagesAndVersion = overridenPackagesAndVersion.Trim();
-                    int separatorIndex = trimmedOverridenPackagesAndVersion.IndexOf('|');
+                    string trimmedOverriddenPackagesAndVersion = overriddenPackagesAndVersion.Trim();
+                    int separatorIndex = trimmedOverriddenPackagesAndVersion.IndexOf('|');
                     if (separatorIndex != -1)
                     {
-                        if (Version.TryParse(trimmedOverridenPackagesAndVersion.Substring(separatorIndex + 1), out Version version))
+                        if (Version.TryParse(trimmedOverriddenPackagesAndVersion.Substring(separatorIndex + 1), out Version version))
                         {
-                            yield return Tuple.Create(trimmedOverridenPackagesAndVersion.Substring(0, separatorIndex), version);
+                            yield return Tuple.Create(trimmedOverriddenPackagesAndVersion.Substring(0, separatorIndex), version);
                         }
                     }
                 }

@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         public string[] PreferredPackages { get; set; }
 
         /// <summary>
-        /// A collection of items that contain information of which packages get overriden
+        /// A collection of items that contain information of which packages get overridden
         /// by which packages before doing any other conflict resolution.
         /// </summary>
         /// <remarks>

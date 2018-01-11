@@ -331,7 +331,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 new[] {
                     new MockTaskItem("Platform", new Dictionary<string, string>
                     {
-                        { MetadataKeys.OverridenPackages, "System.Ben|4.3.0;System.Immo|4.3.0;System.Dave|4.3.0" },
+                        { MetadataKeys.OverriddenPackages, "System.Ben|4.3.0;System.Immo|4.3.0;System.Dave|4.3.0" },
                     })
                 });
 
@@ -362,7 +362,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 new[] {
                     new MockTaskItem("Platform", new Dictionary<string, string>
                     {
-                        { MetadataKeys.OverridenPackages, "System.Ben|4.3.0;System.Immo|4.3.0;System.Dave|4.3.0" },
+                        { MetadataKeys.OverriddenPackages, "System.Ben|4.3.0;System.Immo|4.3.0;System.Dave|4.3.0" },
                     })
                 });
 

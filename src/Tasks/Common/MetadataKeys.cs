@@ -52,6 +52,6 @@ namespace Microsoft.NET.Build.Tasks
         public const string RuntimeStoreManifestNames = "RuntimeStoreManifestNames";
 
         // Conflict Resolution
-        public const string OverridenPackages = "OverridenPackages";
+        public const string OverriddenPackages = "OverriddenPackages";
     }
 }

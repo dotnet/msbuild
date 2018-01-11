@@ -55,23 +55,23 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         }
 
         /// <summary>
-        /// Merges newPackageOverride into existingPackageOverride by adding all the new overriden packages
-        /// and taking the highest version when they both contain the same overriden package.
+        /// Merges newPackageOverride into existingPackageOverride by adding all the new overridden packages
+        /// and taking the highest version when they both contain the same overridden package.
         /// </summary>
         private static void MergePackageOverrides(PackageOverride newPackageOverride, PackageOverride existingPackageOverride)
         {
-            foreach (KeyValuePair<string, Version> newOverride in newPackageOverride.OverridenPackages)
+            foreach (KeyValuePair<string, Version> newOverride in newPackageOverride.OverriddenPackages)
             {
-                if (existingPackageOverride.OverridenPackages.TryGetValue(newOverride.Key, out Version existingOverrideVersion))
+                if (existingPackageOverride.OverriddenPackages.TryGetValue(newOverride.Key, out Version existingOverrideVersion))
                 {
                     if (existingOverrideVersion < newOverride.Value)
                     {
-                        existingPackageOverride.OverridenPackages[newOverride.Key] = newOverride.Value;
+                        existingPackageOverride.OverriddenPackages[newOverride.Key] = newOverride.Value;
                     }
                 }
                 else
                 {
-                    existingPackageOverride.OverridenPackages[newOverride.Key] = newOverride.Value;
+                    existingPackageOverride.OverriddenPackages[newOverride.Key] = newOverride.Value;
                 }
             }
         }
@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 Version version;
                 if (item1.PackageId != null
                     && PackageOverrides.TryGetValue(item1.PackageId, out packageOverride)
-                    && packageOverride.OverridenPackages.TryGetValue(item2.PackageId, out version)
+                    && packageOverride.OverriddenPackages.TryGetValue(item2.PackageId, out version)
                     && item2.PackageVersion != null
                     && item2.PackageVersion <= version)
                 {
@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 }
                 else if (item2.PackageId != null
                     && PackageOverrides.TryGetValue(item2.PackageId, out packageOverride)
-                    && packageOverride.OverridenPackages.TryGetValue(item1.PackageId, out version)
+                    && packageOverride.OverriddenPackages.TryGetValue(item1.PackageId, out version)
                     && item1.PackageVersion != null
                     && item1.PackageVersion <= version)
                 {

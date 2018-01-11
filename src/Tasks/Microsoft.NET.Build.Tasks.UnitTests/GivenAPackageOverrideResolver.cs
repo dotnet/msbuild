@@ -19,11 +19,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 new MockTaskItem("Platform", new Dictionary<string, string>
                 {
-                    { MetadataKeys.OverridenPackages, "System.Ben|4.2.0;System.Immo|4.2.0;System.Livar|4.3.0;System.Dave|4.2.0" }
+                    { MetadataKeys.OverriddenPackages, "System.Ben|4.2.0;System.Immo|4.2.0;System.Livar|4.3.0;System.Dave|4.2.0" }
                 }),
                 new MockTaskItem("Platform", new Dictionary<string, string>
                 {
-                    { MetadataKeys.OverridenPackages, "System.Ben|4.2.0;System.Immo|4.3.0;System.Livar|4.2.0;System.Nick|4.2.0" }
+                    { MetadataKeys.OverriddenPackages, "System.Ben|4.2.0;System.Immo|4.3.0;System.Livar|4.2.0;System.Nick|4.2.0" }
                 })
             };
 
@@ -32,12 +32,12 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Assert.Single(resolver.PackageOverrides);
 
             PackageOverride packageOverride = resolver.PackageOverrides["Platform"];
-            Assert.Equal(5, packageOverride.OverridenPackages.Count);
-            Assert.Equal(new Version(4, 2, 0), packageOverride.OverridenPackages["System.Ben"]);
-            Assert.Equal(new Version(4, 3, 0), packageOverride.OverridenPackages["System.Immo"]);
-            Assert.Equal(new Version(4, 3, 0), packageOverride.OverridenPackages["System.Livar"]);
-            Assert.Equal(new Version(4, 2, 0), packageOverride.OverridenPackages["System.Dave"]);
-            Assert.Equal(new Version(4, 2, 0), packageOverride.OverridenPackages["System.Nick"]);
+            Assert.Equal(5, packageOverride.OverriddenPackages.Count);
+            Assert.Equal(new Version(4, 2, 0), packageOverride.OverriddenPackages["System.Ben"]);
+            Assert.Equal(new Version(4, 3, 0), packageOverride.OverriddenPackages["System.Immo"]);
+            Assert.Equal(new Version(4, 3, 0), packageOverride.OverriddenPackages["System.Livar"]);
+            Assert.Equal(new Version(4, 2, 0), packageOverride.OverriddenPackages["System.Dave"]);
+            Assert.Equal(new Version(4, 2, 0), packageOverride.OverriddenPackages["System.Nick"]);
         }
 
         [Fact]
