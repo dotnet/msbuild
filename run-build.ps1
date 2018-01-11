@@ -32,7 +32,7 @@ if($Help)
 $ExtraParametersNoTargets = ""
 foreach ($param in $ExtraParameters.split())
 {
-    if(-Not ($param.StartsWith("/t:")))
+    if((-not $param.StartsWith("/t")) -and (-not $param.StartsWith("/T")))
     {
         $ExtraParametersNoTargets += " {0}" -f $param
     }
