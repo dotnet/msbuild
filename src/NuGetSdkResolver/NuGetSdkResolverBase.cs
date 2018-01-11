@@ -3,20 +3,22 @@
 
 using Microsoft.Build.Shared;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.Utilities;
 #if !FEATURE_APPDOMAIN
 using System.Runtime.Loader;
 #endif
 
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
 
-namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
+namespace NuGet.MSBuildSdkResolver
 {
     /// <summary>
     /// Acts as a base class for the NuGet-based SDK resolver and handles assembly resolution to dynamically locate NuGet assemblies.
     /// </summary>
-    internal abstract class NuGetSdkResolverBase : SdkResolverBase
+    public abstract class NuGetSdkResolverBase : SdkResolverBase
     {
         /// <summary>
         /// The sub-folder under the Visual Studio installation where the NuGet assemblies are located.
@@ -51,13 +53,34 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
         });
 
+        /// <summary>
+        /// A list of NuGet assemblies that we have a dependency on but should load at runtime.
+        /// </summary>
+        private static readonly HashSet<string> NuGetAssemblies = new HashSet<string>
+        {
+            "Newtonsoft.Json",
+            "NuGet.Commands",
+            "NuGet.Common",
+            "NuGet.Configuration",
+            "NuGet.Frameworks",
+            "NuGet.LibraryModel",
+            "NuGet.Packaging",
+            "NuGet.ProjectModel",
+            "NuGet.ProjectModel",
+            "NuGet.Protocol",
+            "NuGet.Versioning",
+        };
+
         static NuGetSdkResolverBase()
         {
+            if (!Traits.Instance.EscapeHatches.DisableNuGetSdkResolver)
+            {
 #if FEATURE_APPDOMAIN
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
+                AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
 #else
             AssemblyLoadContext.Default.Resolving += AssemblyResolve;
 #endif
+            }
         }
 
         /// <summary>
@@ -76,8 +99,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
             AssemblyName assemblyName)
         {
 #endif
-            // Only load NuGet.* and Newtonsoft.Json assemblies if found
-            if (assemblyName.Name.StartsWith("NuGet.", StringComparison.OrdinalIgnoreCase) || assemblyName.Name.Equals("Newtonsoft.Json", StringComparison.OrdinalIgnoreCase))
+            if (NuGetAssemblies.Contains(assemblyName.Name))
             {
                 string assemblyPath = Path.Combine(NuGetAssemblyPathLazy.Value, $"{assemblyName.Name}.dll");
 
@@ -92,6 +114,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
 #endif
                 }
             }
+
             return null;
         }
     }

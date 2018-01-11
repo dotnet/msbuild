@@ -64,7 +64,11 @@
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuspec.referencegenerator\$(NuGetVersion)\lib\net45\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\Newtonsoft.Json\9.0.1\lib\net45\**\*.*" />
 
-      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.dll" />
+      <FreshlyBuiltBinariesSdkResolvers Include="$(DeploymentDir)\NuGet.MSBuildSdkResolver.dll">
+        <DestinationSubDirectory>NuGet.MSBuildSdkResolver</DestinationSubDirectory>
+      </FreshlyBuiltBinariesSdkResolvers>
+
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.dll" Exclude="@(FreshlyBuiltBinariesSdkResolvers)" />
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe" />
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.pdb" />
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe.config" />
@@ -102,11 +106,20 @@
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- Copy our freshly-built SDK resolvers -->
+    <Copy SourceFiles="@(FreshlyBuiltBinariesSdkResolvers)"
+          DestinationFiles="@(FreshlyBuiltBinariesSdkResolvers -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\%(DestinationSubDirectory)\%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="BootstrapNetCore">
     <ItemGroup>
-      <DeployedItems Include="$(DeploymentDir)\**\*.*"/>
+      
+      <FreshlyBuiltBinariesSdkResolvers Include="$(DeploymentDir)\NuGet.MSBuildSdkResolver.dll">
+        <DestinationSubDirectory>NuGet.MSBuildSdkResolver</DestinationSubDirectory>
+      </FreshlyBuiltBinariesSdkResolvers>
+
+      <DeployedItems Include="$(DeploymentDir)\**\*.*" Exclude="@(FreshlyBuiltBinariesSdkResolvers)"/>
 
       <!-- TODO: Automate getting NuGet.Build.Tasks.dll + all dependencies. -->
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.build.tasks\$(NuGetVersion)\lib\netstandard1.3\**\*.*" />
@@ -143,5 +156,9 @@
     <!-- Microsoft.Portable.CSharp.targets imports this file with a capital T -->
     <Copy SourceFiles="$(DeploymentDir)\Microsoft.CSharp.targets"
           DestinationFiles="$(BootstrapDestination)\Microsoft.CSharp.Targets" />
+    
+    <!-- Copy our freshly-built SDK resolvers -->
+    <Copy SourceFiles="@(FreshlyBuiltBinariesSdkResolvers)"
+          DestinationFiles="@(FreshlyBuiltBinariesSdkResolvers -> '$(BootstrapDestination)\SdkResolvers\%(DestinationSubDirectory)\%(Filename)%(Extension)')" />
   </Target>
 </Project>

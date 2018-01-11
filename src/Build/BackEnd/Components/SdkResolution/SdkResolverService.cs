@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd.SdkResolution.NuGet;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -11,6 +10,7 @@ using System;
 using System.IO;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
@@ -108,6 +108,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
             SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
 
+            loggingContext.LogComment(MessageImportance.Low, "SdkResolving", sdk.ToString());
+
             foreach (SdkResolver sdkResolver in _resolvers)
             {
                 SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version)
@@ -123,14 +125,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     result = (SdkResult) sdkResolver.Resolve(sdk, context, resultFactory);
                 }
-                catch (FileNotFoundException e) when (sdkResolver is NuGetSdkResolver)
+                catch (FileNotFoundException e) when (sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
                     // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
                     // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather
                     // than give them a generic error, we want to give a more specific message.  This exception cannot be caught by
                     // the resolver itself because it is usually thrown before the class is loaded
                     // MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunNuGetSdkResolver", NuGetSdkResolverBase.NuGetAssemblyPathEnvironmentVariableName, e.Message);
+                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunNuGetSdkResolver", e.Message);
                     continue;
                 }
                 catch (Exception e)
