@@ -65,6 +65,7 @@
     <file src="$outputPath$Microsoft.Xaml.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPath$Workflow.Targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPath$Workflow.VisualBasic.Targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$NuGet.MSBuildSdkResolver.dll" target="contentFiles\any\net46\SdkResolvers\NuGet.MSBuildSdkResolver\" buildAction="None" copyToOutput="true"/>
 
     <!--
       contentFiles\any\netcoreapp1.0
@@ -90,5 +91,6 @@
     <file src="$outputPathNetCore$Microsoft.VisualStudioVersion.v11.Common.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPathNetCore$Microsoft.VisualStudioVersion.v12.Common.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPathNetCore$Microsoft.VisualStudioVersion.v14.Common.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPathNetCore$NuGet.MSBuildSdkResolver.dll" target="contentFiles\any\netcoreapp1.0\SdkResolvers\NuGet.MSBuildSdkResolver\" buildAction="None" copyToOutput="true"/>
   </files>
 </package>
