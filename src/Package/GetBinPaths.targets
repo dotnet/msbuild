@@ -1,0 +1,27 @@
+﻿<Project>
+
+  <ItemGroup>
+    <!-- Reference projects whose outputs are used in the package.  Use OutputItemType to get the path to the output assembly,
+         from which we will later derive the path to the output folder, which is passed as a variable to the .swr file. -->
+    <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildResolvedProjectReferencePath" />
+    <ProjectReference Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
+    <ProjectReference Include="..\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildConversionResolvedProjectReferencePath" />
+
+    <!-- Also add an additional reference to projects where the Platform is set to x64, when we need the x64 versions of the files -->
+    <ProjectReference SetPlatform="Platform=x64" SetTargetFramework="TargetFramework=net46" Include="..\..\MSBuild\MSBuild.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildX64ResolvedProjectReferencePath" />
+    <ProjectReference SetPlatform="Platform=x64" Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath" />
+
+  </ItemGroup>
+
+  <Target Name="SetBinPaths" DependsOnTargets="GetBuildVersion;ResolveProjectReferences">
+    <PropertyGroup>
+      <X86BinPath>@(MSBuildResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X86BinPath>
+      <X64BinPath>@(MSBuildX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X64BinPath>
+      <MSBuildTaskHostBinPath>@(MSBuildTaskHostResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostBinPath>
+      <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
+      <MSBuildConversionBinPath>@(MSBuildConversionResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildConversionBinPath>
+    </PropertyGroup>
+  </Target>
+
+
+</Project>

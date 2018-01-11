@@ -10,28 +10,26 @@
   </metadata>
 
   <files>
-    <file src="$repoRoot$/setup/MsBuild.Engine.Corext/MsBuild.Engine.Corext.cxspec" target=""/>
-    <file src="$repoRoot$/setup/MsBuild.Engine.Corext/.readme.txt" target=""/>
-    <file src="$repoRoot$/THIRDPARTYNOTICES" target="v15.0/bin/THIRDPARTYNOTICES" />
+    <file src="$repoRoot$\src\Package\MsBuild.Engine.Corext\MsBuild.Engine.Corext.cxspec" target=""/>
+    <file src="$repoRoot$/src/Package/MsBuild.Engine.Corext/.readme.txt" target=""/>
+    <file src="$repoRoot$/THIRDPARTYNOTICES.txt" target="v15.0/bin/THIRDPARTYNOTICES.txt" />
     <file src="$X86BinPath$/Microsoft.Common.props" target="\Extensions\15.0" />
     <file src="$X86BinPath$/Microsoft.VisualStudioVersion.v15.Common.props" target="\Extensions\15.0" />
 
     <!-- x86 -->
 
     <file src="$X86BinPath$/MSBuild.exe" target="v15.0/bin" />
-    <file src="$X86BinPath$/MSBuildTaskHost.exe" target="v15.0/bin" />
-    <file src="$X86BinPath$/MSBuildTaskHost.exe.config" target="v15.0/bin" />
-    <file src="$X86BinPath$/Microsoft.Build.Conversion.Core.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/Microsoft.Build.Engine.dll" target="v15.0/bin" />
+    <file src="$TaskHostBinPath$/MSBuildTaskHost.exe" target="v15.0/bin" />
+    <file src="$TaskHostBinPath$/MSBuildTaskHost.exe.config" target="v15.0/bin" />
+    <file src="$MSBuildConversionBinPath$/Microsoft.Build.Conversion.Core.dll" target="v15.0/bin" />
+    <file src="$MSBuildConversionBinPath$/Microsoft.Build.Engine.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Build.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Build.Framework.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Build.Tasks.Core.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Build.Utilities.Core.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Collections.Immutable.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/System.Diagnostics.Process.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.IO.Compression.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/System.Security.Cryptography.Algorithms.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin" />
 
     <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
@@ -63,19 +61,17 @@
     <!-- x64 -->
 
     <file src="$X64BinPath$/MSBuild.exe" target="v15.0/bin/amd64" />
-    <file src="$X64BinPath$/MSBuildTaskHost.exe" target="v15.0/bin/amd64" />
-    <file src="$X64BinPath$/MSBuildTaskHost.exe.config" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/Microsoft.Build.Conversion.Core.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/Microsoft.Build.Engine.dll" target="v15.0/bin/amd64" />
+    <file src="$TaskHostX64BinPath$/MSBuildTaskHost.exe" target="v15.0/bin/amd64" />
+    <file src="$TaskHostX64BinPath$/MSBuildTaskHost.exe.config" target="v15.0/bin/amd64" />
+    <file src="$MSBuildConversionBinPath$/Microsoft.Build.Conversion.Core.dll" target="v15.0/bin/amd64" />
+    <file src="$MSBuildConversionBinPath$/Microsoft.Build.Engine.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Build.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Build.Framework.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Build.Tasks.Core.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Build.Utilities.Core.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Collections.Immutable.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/System.Diagnostics.Process.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.IO.Compression.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Runtime.InteropServices.RuntimeInformation.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/System.Security.Cryptography.Algorithms.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin/amd64" />
 
     <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
@@ -105,7 +101,7 @@
     <file src="$X86BinPath$/Microsoft.NetFramework.targets" target="v15.0/bin/amd64" />
 
     <!-- Nuget. Todo: remove this after VS 15.5 is released -->
-
+<!-- 
     <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.dll" />
     <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.xml" />
     <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Build.Tasks.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Build.Tasks.dll" />
@@ -133,7 +129,7 @@
     <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets" />
     <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.dll" />
     <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.xml" />
-
+ -->
 
   </files>
 </package>

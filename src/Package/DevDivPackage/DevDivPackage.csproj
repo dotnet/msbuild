@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <NuspecFile>Microsoft.Build.Localization.nuspec</NuspecFile>
+    <TargetFramework>net46</TargetFramework>
+    <NuspecFile>VS.ExternalAPIs.MSBuild.nuspec</NuspecFile>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
