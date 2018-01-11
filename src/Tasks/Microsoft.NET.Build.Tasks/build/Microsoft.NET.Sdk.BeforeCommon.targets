@@ -165,7 +165,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateDocumentationFile)' == 'true' and '$(DocumentationFile)' == ''">
-    <DocumentationFile>$(IntermediateOutputPath)$(AssemblyName).xml</DocumentationFile>
+    <DocumentationFile Condition="'$(MSBuildProjectExtension)' == '.vbproj'">$(AssemblyName).xml</DocumentationFile>
+    <DocumentationFile Condition="'$(MSBuildProjectExtension)' != '.vbproj'">$(IntermediateOutputPath)$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateDocumentationFile)' != 'true'">

@@ -51,11 +51,11 @@ namespace Microsoft.NET.TestFramework.Commands
                 }
             }
 
-            var buildProjectFiles = Directory.GetFiles(projectRootPath, "*.csproj");
+            var buildProjectFiles = Directory.GetFiles(projectRootPath, "*.*proj");
 
             if (buildProjectFiles.Length != 1)
             {
-                var errorMsg = $"Found {buildProjectFiles.Length} .csproj files under {projectRootPath} instead of just 1.";
+                var errorMsg = $"Found {buildProjectFiles.Length} project files under {projectRootPath} instead of just 1.";
                 throw new ArgumentException(errorMsg);
             }
 

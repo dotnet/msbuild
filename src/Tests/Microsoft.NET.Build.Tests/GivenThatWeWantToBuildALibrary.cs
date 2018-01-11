@@ -203,14 +203,20 @@ namespace Microsoft.NET.Build.Tests
             return itemValues;
         }
 
-        private TestAsset CreateDocumentationFileLibraryAsset(bool? generateDocumentationFile, string documentationFile, [CallerMemberName] string callingMethod = "")
+        private TestAsset CreateDocumentationFileLibraryAsset(bool? generateDocumentationFile, string documentationFile, string language, [CallerMemberName] string callingMethod = "")
         {
             string genDocFileIdentifier = generateDocumentationFile == null ? "null" : generateDocumentationFile.Value.ToString();
             string docFileIdentifier = documentationFile == null ? "null" : Path.GetFileName(documentationFile);
             string identifier = $"-genDoc={genDocFileIdentifier}, docFile={Path.GetFileName(docFileIdentifier)}";
 
+            var testAssetName = "AppWithLibrary";
+            if (language != "cs")
+            {
+                testAssetName += language.ToUpperInvariant();
+            }
+
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", callingMethod, identifier)
+                .CopyTestAsset(testAssetName, callingMethod, identifier)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -232,10 +238,12 @@ namespace Microsoft.NET.Build.Tests
             return testAsset;
         }
 
-        [Fact]
-        public void It_creates_a_documentation_file()
+        [Theory]
+        [InlineData("cs")]
+        [InlineData("vb")]
+        public void It_creates_a_documentation_file(string language)
         {
-            var testAsset = CreateDocumentationFileLibraryAsset(true, null);
+            var testAsset = CreateDocumentationFileLibraryAsset(true, null, language);
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -257,17 +265,19 @@ namespace Microsoft.NET.Build.Tests
 
             new DirectoryInfo(libraryProjectDirectory).Should().OnlyHaveFiles(new[]
             {
-                "Helper.cs",
-                "TestLibrary.csproj"
+                $"Helper.{language}",
+                $"TestLibrary.{language}proj"
             }, SearchOption.TopDirectoryOnly);
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_allows_us_to_override_the_documentation_file_name(bool setGenerateDocumentationFileProperty)
+        [InlineData("cs", true)]
+        [InlineData("cs", false)]
+        [InlineData("vb", true)]
+        [InlineData("vb", false)]
+        public void It_allows_us_to_override_the_documentation_file_name(string language, bool setGenerateDocumentationFileProperty)
         {
-            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibDoc.xml", "OverrideDocFileName");
+            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibDoc.xml", language,  "OverrideDocFileName");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -289,20 +299,28 @@ namespace Microsoft.NET.Build.Tests
 
             //  Due to the way the DocumentationFile works, if you specify an unrooted filename, then the documentation file will be generated in that
             //  location relative to the project folder, and then copied to the output folder.
-            new DirectoryInfo(libraryProjectDirectory).Should().OnlyHaveFiles(new[]
+            var expectedProjectDirectoryFiles = new List<string>()
             {
-                "Helper.cs",
-                "TestLibrary.csproj",
-                "TestLibDoc.xml"
-            }, SearchOption.TopDirectoryOnly);
+                $"Helper.{language}",
+                $"TestLibrary.{language}proj"
+            };
+
+            // vb uses DocumentationFile relative to the IntermediateOutputPath
+            if (language != "vb") {
+                expectedProjectDirectoryFiles.Add("TestLibDoc.xml");
+            }
+
+            new DirectoryInfo(libraryProjectDirectory).Should().OnlyHaveFiles(expectedProjectDirectoryFiles, SearchOption.TopDirectoryOnly);
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_does_not_create_a_documentation_file_if_GenerateDocumentationFile_property_is_false(bool setDocumentationFileProperty)
+        [InlineData("cs", true)]
+        [InlineData("cs", false)]
+        [InlineData("vb", true)]
+        [InlineData("vb", false)]
+        public void It_does_not_create_a_documentation_file_if_GenerateDocumentationFile_property_is_false(string language, bool setDocumentationFileProperty)
         {
-            var testAsset = CreateDocumentationFileLibraryAsset(false, setDocumentationFileProperty ? "TestLibDoc.xml" : null, "DoesntCreateDocFile");
+            var testAsset = CreateDocumentationFileLibraryAsset(false, setDocumentationFileProperty ? "TestLibDoc.xml" : null, language, "DoesntCreateDocFile");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -324,8 +342,8 @@ namespace Microsoft.NET.Build.Tests
             //  Make sure documentation file isn't generated in project folder either
             new DirectoryInfo(libraryProjectDirectory).Should().OnlyHaveFiles(new[]
             {
-                "Helper.cs",
-                "TestLibrary.csproj"
+                $"Helper.{language}",
+                $"TestLibrary.{language}proj"
             }, SearchOption.TopDirectoryOnly);
         }
 
