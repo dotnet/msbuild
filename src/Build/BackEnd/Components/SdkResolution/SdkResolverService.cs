@@ -105,69 +105,55 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             List<SdkResult> results = new List<SdkResult>();
 
-            try
-            {
-                // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
-                SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
+            // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
+            SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
 
-                foreach (SdkResolver sdkResolver in _resolvers)
+            foreach (SdkResolver sdkResolver in _resolvers)
+            {
+                SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version)
                 {
-                    SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version)
-                    {
-                        State = GetResolverState(submissionId, sdkResolver)
-                    };
+                    State = GetResolverState(submissionId, sdkResolver)
+                };
 
-                    SdkResultFactory resultFactory = new SdkResultFactory(sdk);
-                    try
-                    {
-                        SdkResult result;
+                SdkResultFactory resultFactory = new SdkResultFactory(sdk);
 
-                        try
-                        {
-                            result = (SdkResult) sdkResolver.Resolve(sdk, context, resultFactory);
-                        }
-                        catch (Exception e) when (sdkResolver is NuGetSdkResolver && e is FileNotFoundException)
-                        {
-                            // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
-                            // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather
-                            // than give them a generic error, we want to give a more specific message.  This exception cannot be caught by
-                            // the resolver itself because it is usually thrown before the class is loaded
-                            // MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}
-                            loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunNuGetSdkResolver", NuGetSdkResolverBase.NuGetAssemblyPathEnvironmentVariableName, e.Message);
-                            continue;
-                        }
-                        catch(Exception e)
-                        {
-                            // MSB4242: The SDK resolver "{0}" failed to run. {1}
-                            loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunSdkResolver", sdkResolver.Name, e.Message);
-                            continue;
-                        }
+                SdkResult result;
 
-                        SetResolverState(submissionId, sdkResolver, context.State);
-
-                        if (result == null)
-                        {
-                            continue;
-                        }
-
-                        if (result.Success)
-                        {
-                            LogWarnings(loggingContext, sdkReferenceLocation, result);
-                            return result;
-                        }
-
-                        results.Add(result);
-                    }
-                    catch (Exception e)
-                    {
-                        loggingContext.LogFatalBuildError(e, new BuildEventFileInfo(sdkReferenceLocation));
-                    }
+                try
+                {
+                    result = (SdkResult) sdkResolver.Resolve(sdk, context, resultFactory);
                 }
-            }
-            catch (Exception e)
-            {
-                loggingContext.LogFatalBuildError(e, new BuildEventFileInfo(sdkReferenceLocation));
-                throw;
+                catch (FileNotFoundException e) when (sdkResolver is NuGetSdkResolver)
+                {
+                    // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
+                    // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather
+                    // than give them a generic error, we want to give a more specific message.  This exception cannot be caught by
+                    // the resolver itself because it is usually thrown before the class is loaded
+                    // MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}
+                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunNuGetSdkResolver", NuGetSdkResolverBase.NuGetAssemblyPathEnvironmentVariableName, e.Message);
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    // MSB4242: The SDK resolver "{0}" failed to run. {1}
+                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunSdkResolver", sdkResolver.Name, e.Message);
+                    continue;
+                }
+
+                SetResolverState(submissionId, sdkResolver, context.State);
+
+                if (result == null)
+                {
+                    continue;
+                }
+
+                if (result.Success)
+                {
+                    LogWarnings(loggingContext, sdkReferenceLocation, result);
+                    return result;
+                }
+
+                results.Add(result);
             }
 
             foreach (SdkResult result in results)
