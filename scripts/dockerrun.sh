@@ -120,9 +120,6 @@ docker run $INTERACTIVE -t --rm --sig-proxy=true \
     --name $DOTNET_BUILD_CONTAINER_NAME \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
     -e CHANNEL \
-    -e REPO_ID \
-    -e REPO_USER \
-    -e REPO_SERVER \
     -e DOTNET_BUILD_SKIP_CROSSGEN \
     -e PUBLISH_TO_AZURE_BLOB \
     -e NUGET_FEED_URL \
