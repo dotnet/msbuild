@@ -94,20 +94,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
-    <None Include="Resources\Strings\Strings.cs.xlf" />
-    <None Include="Resources\Strings\Strings.de.xlf" />
-    <None Include="Resources\Strings\Strings.es.xlf" />
-    <None Include="Resources\Strings\Strings.fr.xlf" />
-    <None Include="Resources\Strings\Strings.it.xlf" />
-    <None Include="Resources\Strings\Strings.ja.xlf" />
-    <None Include="Resources\Strings\Strings.ko.xlf" />
-    <None Include="Resources\Strings\Strings.pl.xlf" />
-    <None Include="Resources\Strings\Strings.pt-BR.xlf" />
-    <None Include="Resources\Strings\Strings.ru.xlf" />
-    <None Include="Resources\Strings\Strings.tr.xlf" />
-    <None Include="Resources\Strings\Strings.xlf" />
-    <None Include="Resources\Strings\Strings.zh-Hans.xlf" />
-    <None Include="Resources\Strings\Strings.zh-Hant.xlf" />
+    <None Include="Resources\xlf\Strings.cs.xlf" />
+    <None Include="Resources\xlf\Strings.de.xlf" />
+    <None Include="Resources\xlf\Strings.es.xlf" />
+    <None Include="Resources\xlf\Strings.fr.xlf" />
+    <None Include="Resources\xlf\Strings.it.xlf" />
+    <None Include="Resources\xlf\Strings.ja.xlf" />
+    <None Include="Resources\xlf\Strings.ko.xlf" />
+    <None Include="Resources\xlf\Strings.pl.xlf" />
+    <None Include="Resources\xlf\Strings.pt-BR.xlf" />
+    <None Include="Resources\xlf\Strings.ru.xlf" />
+    <None Include="Resources\xlf\Strings.tr.xlf" />
+    <None Include="Resources\xlf\Strings.xlf" />
+    <None Include="Resources\xlf\Strings.zh-Hans.xlf" />
+    <None Include="Resources\xlf\Strings.zh-Hant.xlf" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Strings.resx">
