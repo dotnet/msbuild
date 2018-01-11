@@ -14,6 +14,19 @@ param(
     [Parameter(Position=0, ValueFromRemainingArguments=$true)]
     $ExtraParameters)
 
+function GetVersionsPropsVersion([string[]] $Name) {
+  $VersionsProps = Join-Path $PSScriptRoot "build\DependencyVersions.props"
+  [xml]$Xml = Get-Content $VersionsProps
+
+  foreach ($PropertyGroup in $Xml.Project.PropertyGroup) {
+    if (Get-Member -InputObject $PropertyGroup -name $Name) {
+        return $PropertyGroup.$Name
+    }
+  }
+
+  throw "Failed to locate the $Name property"
+}
+
 if($Help)
 {
     Write-Output "Usage: .\run-build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-Help]"
@@ -69,9 +82,10 @@ $env:VSTEST_TRACE_BUILD=1
 if (!$env:DOTNET_TOOL_DIR)
 {
     $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
+    $dotnetCliVersion = GetVersionsPropsVersion -Name "DotNetCoreSdkLKGVersion"
 
-    Write-Output "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
-    Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
+    Write-Output "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Version ""$dotnetCliVersion"""
+    Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Version ""$dotnetCliVersion"""
     if ($LastExitCode -ne 0)
     {
         Write-Output "The .NET CLI installation failed with exit code $LastExitCode"

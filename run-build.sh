@@ -19,6 +19,11 @@ check_min_reqs() {
     return 0
 }
 
+function GetVersionsPropsVersion {
+  VersionsProps="$REPOROOT/build/DependencyVersions.props"
+  echo "$( awk -F'[<>]' "/<$1>/{print \$3}" "$VersionsProps" )"
+}
+
 # args:
 # remote_path - $1
 # [out_path] - $2 - stdout if not provided
@@ -151,7 +156,8 @@ export DOTNET_MULTILEVEL_LOOKUP=0
 
 # Install a stage 0
 if [ -z "$DOTNET_TOOL_DIR" ]; then
-    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "release/2.0.0" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+    DotNetCliVersion="$( GetVersionsPropsVersion DotNetCoreSdkLKGVersion )"
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "$DotNetCliVersion" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 
     EXIT_CODE=$?
     if [ $EXIT_CODE != 0 ]; then
