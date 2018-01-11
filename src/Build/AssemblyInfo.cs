@@ -39,7 +39,6 @@ using System.Security.Permissions;
 // so that we don't run into known security issues with loading libraries from unsafe locations 
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
 
-#if (LOCALIZED_BUILD)
 // Needed for the "hub-and-spoke model to locate and retrieve localized resources": https://msdn.microsoft.com/en-us/library/21a15yht(v=vs.110).aspx
 // We want "en" to require a satellite assembly for debug builds in order to flush out localization
 // issues, but we want release builds to work without it. Also, .net core does not have resource fallbacks
@@ -47,7 +46,6 @@ using System.Security.Permissions;
 [assembly: NeutralResourcesLanguage("en", UltimateResourceFallbackLocation.Satellite)]
 #else
 [assembly: NeutralResourcesLanguage("en")]
-#endif
 #endif
 
 [assembly: CLSCompliant(true)]
