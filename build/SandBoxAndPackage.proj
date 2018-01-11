@@ -51,7 +51,7 @@
       <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) --configuration $(BuildConfiguration)</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
       <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) --docker $(DockerFolder)</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
       <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) --skip-prereqs</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
-      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) --generate-installers</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
+      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) /t:GenerateInstallersAndCopyOutOfSandBox</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
       <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) /p:RelativeSandBoxPackageOutputFolder=$(RelativeSandBoxPackageOutputFolder)</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
       <CommandExitCodeFirstTime>0</CommandExitCodeFirstTime>
       <PipeStderrToStdoutToCatchFirstFailure>2&gt;&amp;1</PipeStderrToStdoutToCatchFirstFailure>
