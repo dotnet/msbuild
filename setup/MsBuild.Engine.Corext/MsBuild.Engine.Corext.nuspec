@@ -16,6 +16,8 @@
     <file src="$X86BinPath$/Microsoft.Common.props" target="\Extensions\15.0" />
     <file src="$X86BinPath$/Microsoft.VisualStudioVersion.v15.Common.props" target="\Extensions\15.0" />
 
+    <file src="$X86BinPath$/NuGet.MSBuildSdkResolver.dll" target="v15.0/bin/SdkResolvers/NuGet.MSBuildSdkResolver" />
+
     <!-- x86 -->
 
     <file src="$X86BinPath$/MSBuild.exe" target="v15.0/bin" />
