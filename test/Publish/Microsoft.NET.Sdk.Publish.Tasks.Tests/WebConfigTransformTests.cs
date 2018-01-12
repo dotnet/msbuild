@@ -303,6 +303,15 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         [InlineData("-my-switch %LaUnChEr_ArGs%", "-my-switch")]
         [InlineData("-switch-1 %LAUNCHER_ARGS% -switch-2", "-switch-1  -switch-2")]
         [InlineData("%LAUNCHER_ARGS% -switch %launcher_args%", "-switch")]
+        [InlineData("-argFile IISExeLauncherArgs.txt", "")]
+        [InlineData(" -argFile IISExeLauncherArgs.txt", "")]
+        [InlineData("-argFile IISExeLauncherArgs.txt ", "")]
+        [InlineData("-argFile IISExeLauncherArgs.txt -argFile IISExeLauncherArgs.txt", "")]
+        [InlineData(" -argFile IISExeLauncherArgs.txt %launcher_args% ", "")]
+        [InlineData(" -argFile IISExeLauncherArgs.txt -my-switch", "-my-switch")]
+        [InlineData("-my-switch -argFile IISExeLauncherArgs.txt", "-my-switch")]
+        [InlineData("%launcher_args% -switch-1 -argFile IISExeLauncherArgs.txt -switch-2", "-switch-1  -switch-2")]
+        [InlineData("-argFile IISExeLauncherArgs.txt -switch -argFile IISExeLauncherArgs.txt %launcher_args%", "-switch")]
         public void WebConfigTransform_removes_LAUNCHER_ARGS_from_arguments_for_standalone_apps(string inputArguments, string outputArguments)
         {
             var input = WebConfigTemplate;
@@ -325,6 +334,10 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         [InlineData("-switch-1 -switch-2", ".\\myapp.dll -switch-1 -switch-2")]
         [InlineData("-switch-1 %LAUNCHER_ARGS% -switch-2", ".\\myapp.dll -switch-1  -switch-2")]
         [InlineData("%LAUNCHER_ARGS% -switch %launcher_args%", ".\\myapp.dll -switch")]
+        [InlineData("%LAUNCHER_ARGS% -argFile IISExeLauncherArgs.txt", ".\\myapp.dll")]
+        [InlineData("-my-switch %LaUnChEr_ArGs% -argFile iisexelauncherargs.txt", ".\\myapp.dll -my-switch")]
+        [InlineData("-argFile iisexelauncherargs.txt", ".\\myapp.dll")]
+        [InlineData("-argFile iisexelauncherargs.txt -argFile iisexelauncherargs.txt", ".\\myapp.dll")]
         public void WebConfigTransform_wont_override_existing_args_for_portable_apps(string inputArguments, string outputArguments)
         {
             var input = WebConfigTemplate;

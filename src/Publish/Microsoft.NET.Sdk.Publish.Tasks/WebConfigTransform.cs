@@ -145,11 +145,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             if (arguments != null)
             {
-                const string launcherArgs = "%LAUNCHER_ARGS%";
-                var position = 0;
-                while ((position = arguments.IndexOf(launcherArgs, position, StringComparison.OrdinalIgnoreCase)) >= 0)
+                string[] templatizedLauncherArgs = new string[] { "%LAUNCHER_ARGS%", "-argFile IISExeLauncherArgs.txt" };
+                foreach (var templateLauncherArg in templatizedLauncherArgs)
                 {
-                    arguments = arguments.Remove(position, launcherArgs.Length);
+                    var position = 0;
+                    while ((position = arguments.IndexOf(templateLauncherArg, position, StringComparison.OrdinalIgnoreCase)) >= 0)
+                    {
+                        arguments = arguments.Remove(position, templateLauncherArg.Length);
+                    }
                 }
 
                 aspNetCoreElement.SetAttributeValue("arguments", arguments.Trim());
