@@ -342,6 +342,11 @@
         <target state="translated">'{0}' çerçeve listesi dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

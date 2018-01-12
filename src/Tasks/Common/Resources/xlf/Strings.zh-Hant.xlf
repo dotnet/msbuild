@@ -342,6 +342,11 @@
         <target state="translated">架構清單路徑 '{0}' 不是根目錄。僅支援完整路徑。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

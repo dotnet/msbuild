@@ -342,6 +342,11 @@
         <target state="translated">Путь к файлу списка платформ "{0}" должен содержать корневой каталог. Поддерживаются только полные пути.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -342,6 +342,11 @@
         <target state="translated">Il percorso '{0}' del file dell'elenco di framework non contiene una radice. Sono supportati solo percorsi completi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

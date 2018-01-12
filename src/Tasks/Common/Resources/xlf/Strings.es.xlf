@@ -342,6 +342,11 @@
         <target state="translated">Falta la raíz en la ruta de acceso del archivo de lista de plataformas “{0}”. Solo se admiten rutas de acceso completas.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

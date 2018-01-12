@@ -342,6 +342,11 @@
         <target state="translated">O caminho de arquivo de lista de estrutura '{0}' não tem raiz. Apenas caminhos completos têm suporte.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

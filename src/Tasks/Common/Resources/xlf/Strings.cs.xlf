@@ -342,6 +342,11 @@
         <target state="translated">Cesta k souboru seznamu architektur {0} není uvedena od kořene. Podporují se jen celé cesty.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

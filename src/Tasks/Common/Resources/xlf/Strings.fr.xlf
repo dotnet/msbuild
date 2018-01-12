@@ -342,6 +342,11 @@
         <target state="translated">Le chemin du fichier de liste de frameworks '{0}' n'est pas associé à une racine. Seuls les chemins complets sont pris en charge.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

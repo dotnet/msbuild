@@ -342,6 +342,11 @@
         <target state="translated">フレームワーク リスト ファイル パス '{0}' にルートが指定されていません。完全パスのみがサポートされています。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -321,4 +321,7 @@
   <data name="FrameworkListPathNotRooted" xml:space="preserve">
     <value>Framework list file path '{0}' is not rooted. Only full paths are supported.</value>
   </data>
+  <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
+    <value>Pack as tool does not support self contained.</value>
+  </data>
 </root>

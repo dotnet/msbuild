@@ -8,33 +8,19 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <EnableDefaultItems>false</EnableDefaultItems>
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
-  <PropertyGroup>
-    <!-- Strip the '-parallel none' flag here -->
-    <XUnitRunnerAdditionalArguments></XUnitRunnerAdditionalArguments>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
-    <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.LibraryModel" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Versioning" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Configuration" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Common" Version="$(NuGetProjectModelVersion)" />
+    <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetPackagingVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 

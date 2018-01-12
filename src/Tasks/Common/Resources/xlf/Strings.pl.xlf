@@ -342,6 +342,11 @@
         <target state="translated">Ścieżka pliku z listą struktur „{0}” nie zaczyna się od katalogu głównego. Obsługiwane są tylko pełne ścieżki.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
