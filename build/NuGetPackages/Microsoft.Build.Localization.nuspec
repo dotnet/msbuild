@@ -13,6 +13,9 @@
     <description>This package contains the localized satellite assemblies for MSBuild. Reference this package only if you want msbuild output to be localized in cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant.</description>
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>MSBuild</tags>
+    <contentFiles>
+      <files include="**" buildAction="None" copyToOutput="true" flatten="false" />
+    </contentFiles>
   </metadata>
   <files>
 

@@ -62,6 +62,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGetPackages", "NuGetPacka
 		..\build\NuGetPackages\Microsoft.Build.Conversion.Core.nuspec = ..\build\NuGetPackages\Microsoft.Build.Conversion.Core.nuspec
 		..\build\NuGetPackages\Microsoft.Build.Engine.nuspec = ..\build\NuGetPackages\Microsoft.Build.Engine.nuspec
 		..\build\NuGetPackages\Microsoft.Build.Framework.nuspec = ..\build\NuGetPackages\Microsoft.Build.Framework.nuspec
+		..\build\NuGetPackages\Microsoft.Build.Localization.nuspec = ..\build\NuGetPackages\Microsoft.Build.Localization.nuspec
 		..\build\NuGetPackages\Microsoft.Build.nuspec = ..\build\NuGetPackages\Microsoft.Build.nuspec
 		..\build\NuGetPackages\Microsoft.Build.Runtime.nuspec = ..\build\NuGetPackages\Microsoft.Build.Runtime.nuspec
 		..\build\NuGetPackages\Microsoft.Build.Tasks.Core.nuspec = ..\build\NuGetPackages\Microsoft.Build.Tasks.Core.nuspec
