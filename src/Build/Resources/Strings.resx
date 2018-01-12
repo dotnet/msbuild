@@ -1208,7 +1208,7 @@
     <comment>{StrBegin="MSB4242: "}</comment>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" UESanitized="false" Visibility="Public">
-    <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "MSBUILD_NUGET_PATH" to the folder that contains the required NuGet assemblies. {1}</value>
+    <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "MSBUILD_NUGET_PATH" to the folder that contains the required NuGet assemblies. {0}</value>
     <comment>{StrBegin="MSB4243: "}</comment>
   </data>
   <data name="InvalidSdkElementName" UESanitized="false" Visibility="Public">
