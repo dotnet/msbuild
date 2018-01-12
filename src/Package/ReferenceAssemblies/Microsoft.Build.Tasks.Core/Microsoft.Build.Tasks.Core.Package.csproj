@@ -4,6 +4,8 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <TargetFrameworks>netstandard1.3;net46;netstandard2.0</TargetFrameworks>
     <ImplementationProject>$(RepoRoot)src\Tasks\Microsoft.Build.Tasks.csproj</ImplementationProject>
+
+    <PackageDescription>This package contains the Microsoft.Build.Tasks.Core assembly which implements the commonly used tasks of MSBuild.</PackageDescription>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj" />

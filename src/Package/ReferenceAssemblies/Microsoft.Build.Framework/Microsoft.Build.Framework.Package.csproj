@@ -4,6 +4,8 @@
     <AssemblyName>Microsoft.Build.Framework</AssemblyName>
     <TargetFrameworks>netstandard1.3;net46;netstandard2.0</TargetFrameworks>
     <ImplementationProject>$(RepoRoot)src\Framework\Microsoft.Build.Framework.csproj</ImplementationProject>
+
+    <PackageDescription>This package contains the Microsoft.Build.Framework assembly which is a common assembly used by other MSBuild assemblies.</PackageDescription>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Xaml" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />

@@ -16,6 +16,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <TargetsForTfmSpecificContentInPackage>Build</TargetsForTfmSpecificContentInPackage>
 
+    <PackageTags>MSBuild</PackageTags>
   </PropertyGroup>
 
 </Project>

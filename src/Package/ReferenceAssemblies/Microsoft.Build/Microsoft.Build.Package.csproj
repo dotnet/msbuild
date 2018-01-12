@@ -4,7 +4,10 @@
     <AssemblyName>Microsoft.Build</AssemblyName>
     <TargetFrameworks>netstandard1.3;net46;netstandard2.0</TargetFrameworks>
     <ImplementationProject>$(RepoRoot)src\Build\Microsoft.Build.csproj</ImplementationProject>
+
+    <PackageDescription>This package contains the Microsoft.Build assembly which is used to create, edit, and evaluation MSBuild projects.</PackageDescription>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Build.Framework\Microsoft.Build.Framework.Package.csproj" />
   </ItemGroup>
