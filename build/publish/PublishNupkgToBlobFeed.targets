@@ -7,7 +7,7 @@
     <NupkgsForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.MSBuildSdkResolver.*.nupkg" />
   </ItemGroup>
 
-  <Target Name="PublishNupkgToBlobFeed" Condition=" '$(PUBLISH_NUPKG_TO_BLOB_FEED)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
+  <Target Name="PublishNupkgToBlobFeed" Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
     <Error Condition="'$(BlobFeedCloudDropAccessToken)' == ''" Text="Missing property BlobFeedCloudDropAccessToken." />
     <Error Condition="'$(BlobFeedExpectedURL)' == ''" Text="Missing property BlobFeedExpectedURL." />
     

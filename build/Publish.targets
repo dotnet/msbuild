@@ -4,6 +4,7 @@
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToBlobFeed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/publish/AzureInfo.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/RuntimeCoherence.targets" />
 
@@ -12,6 +13,7 @@
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
                             SetBadgeProps;
+                            SetAzureProps;
                             Package;
                             EvaluateRuntimeCoherence;
                             PublishArtifacts;
@@ -21,6 +23,7 @@
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
                             SetBadgeProps;
+                            SetAzureProps;
                             EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
@@ -52,7 +55,7 @@
 
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </ForPublishing>
     </ItemGroup>
   </Target>
@@ -66,7 +69,7 @@
 
     <ItemGroup>
       <CliVersionBadgeToUpload>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </CliVersionBadgeToUpload>
     </ItemGroup>
 
