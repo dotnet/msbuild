@@ -255,10 +255,20 @@ function Build {
       {
         if ($process.Path.StartsWith( $RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
         {
-          Write-Host "Killing process $($process.Id): $($process.Path)"
           taskkill /f /pid $process.Id
         }
       }
+    }
+  }
+
+  if ($ci)
+  {
+#    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd | Out-Null
+    git status | Out-Null
+    git --no-pager diff HEAD --word-diff=plain --exit-code | Out-Null
+
+    if($LASTEXITCODE -ne 0) {
+      throw "[ERROR] After building, there are changed files.  Please build locally and include these changes in your pull request."
     }
   }
 
