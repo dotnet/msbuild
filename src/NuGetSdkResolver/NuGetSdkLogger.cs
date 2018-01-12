@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using INuGetLogger = NuGet.Common.ILogger;
 using SdkLoggerBase = Microsoft.Build.Framework.SdkLogger;
 
-namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
+namespace NuGet.MSBuildSdkResolver
 {
     /// <summary>
     /// An implementation of <see cref="T:NuGet.Common.ILogger" /> that logs messages to an <see cref="T:Microsoft.Build.Framework.SdkLogger" />.

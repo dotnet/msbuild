@@ -1,8 +1,4 @@
 ﻿{
-  "dependencies": {
-    "NuGet.Commands": "4.5.0",
-    "NuGet.Protocol": "4.5.0"
-  },
   "frameworks": {
     "net46": {
       "dependencies": {

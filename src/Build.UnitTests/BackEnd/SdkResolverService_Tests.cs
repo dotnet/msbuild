@@ -72,7 +72,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
             Assert.Equal("resolverpath1", result);
-            Assert.Equal("MockSdkResolver1 running", _log.ToString().Trim());
+            Assert.Contains("MockSdkResolver1 running", _log.ToString().Trim());
         }
 
         [Fact]

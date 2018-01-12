@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd.SdkResolution.NuGet;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -23,25 +22,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Always add the default resolver
             var resolvers = new List<SdkResolver> {new DefaultSdkResolver()};
 
-            // Add the NuGet-based SDK resolver unless its is disabled
-            if (!Traits.Instance.EscapeHatches.DisableNuGetSdkResolver)
-            {
-                try
-                {
-                    resolvers.Add(new NuGetSdkResolver());
-                }
-                catch (Exception e)
-                {
-                    loggingContext.LogWarning(string.Empty, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
-                }
-            }
-
             var potentialResolvers = FindPotentialSdkResolvers(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"));
 
             if (potentialResolvers.Count == 0)
             {
-                return resolvers.Count == 1 ? resolvers : resolvers.OrderBy(t => t.Priority).ToList();
+                return resolvers;
             }
 
 #if !FEATURE_ASSEMBLY_LOADFROM
@@ -60,7 +46,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                     resolvers.AddRange(assembly.ExportedTypes
                         .Select(type => new {type, info = type.GetTypeInfo()})
-                        .Where(t => t.info.IsClass && t.info.IsPublic && typeof(SdkResolver).IsAssignableFrom(t.type))
+                        .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
                         .Select(t => (SdkResolver) Activator.CreateInstance(t.type)));
                 }
                 catch (Exception e)

@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.BackEnd.SdkResolution.NuGet;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -34,22 +33,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
 
-            resolvers.Select(i => i.GetType()).ShouldBe(new [] { typeof(NuGetSdkResolver) , typeof(DefaultSdkResolver) });
-        }
-
-        [Fact]
-        public void AssertDefaultLoaderDoesNotReturnsNuGetSdkResolverWhenDisabled()
-        {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER", "1");
-
-                var loader = new SdkResolverLoader();
-
-                var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
-
-                resolvers.Select(i => i.GetType()).ShouldBe(new[] { typeof(DefaultSdkResolver) });
-            }
+            resolvers.Select(i => i.GetType()).ShouldBe(new [] { typeof(DefaultSdkResolver) });
         }
 
         [Fact]

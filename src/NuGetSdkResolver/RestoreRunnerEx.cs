@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using NuGet.Commands;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
@@ -16,7 +15,7 @@ using System.Threading.Tasks;
 
 using ILogger = NuGet.Common.ILogger;
 
-namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
+namespace NuGet.Commands
 {
     /// <summary>
     /// An extension of the NuGet.Commands.RestoreRunner class that contains APIs we do not yet have.
