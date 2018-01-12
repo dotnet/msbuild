@@ -44,7 +44,6 @@ namespace Microsoft.Build.BackEnd
 
         #region Constructors and Factories
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
@@ -55,26 +54,12 @@ namespace Microsoft.Build.BackEnd
             string pipeName, 
             IBuildComponentHost host,
             bool enableReuse)
-#else
-        /// <summary>
-        /// Instantiates an endpoint to act as a client
-        /// </summary>
-        internal NodeEndpointOutOfProc(
-            string clientToServerPipeHandle,
-            string serverToClientPipeHandle,
-            IBuildComponentHost host,
-            bool enableReuse)
-#endif
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
             _componentHost = host;
             _enableReuse = enableReuse;
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             InternalConstruct(pipeName);
-#else
-            InternalConstruct(clientToServerPipeHandle, serverToClientPipeHandle);
-#endif
         }
 
         #endregion
