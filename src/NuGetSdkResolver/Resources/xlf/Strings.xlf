@@ -14,8 +14,8 @@
         <note/>
       </trans-unit>
       <trans-unit id="PackageWasNotInstalled">
-        <source>Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</source>
-        <target state="new">Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</target>
+        <source>Failed to resolve SDK '{0}'. Package restore was successful but a package with the ID of "{1}" was not installed.</source>
+        <target state="new">Failed to resolve SDK '{0}'. Package restore was successful but a package with the ID of "{1}" was not installed.</target>
         <note/>
       </trans-unit>
     </body>
