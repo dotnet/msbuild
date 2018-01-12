@@ -103,7 +103,7 @@
   </Target>
 
   <Target Name="TestSdkDeb"
-      Condition=" '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' "
+      Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' and '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' "
       DependsOnTargets="RestoreTests;GetAspNetSharedFxInstallArgs"
       Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
