@@ -36,7 +36,7 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>2.1.1-preview-007216</DotNetCliVersion>
-    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62510-01</RoslynToolsRepoToolsetVersion>
+    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62512-02</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
     <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
