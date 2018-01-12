@@ -46,11 +46,11 @@
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
                      Condition=" '$(PublishArchives)' == 'true' "/>
       <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
     </ItemGroup>
 
     <ItemGroup>
