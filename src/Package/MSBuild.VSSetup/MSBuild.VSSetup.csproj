@@ -1,4 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+   <!-- AssemblyName must be set before importing Sdk.props to set the vsix file name. -->
+   <PropertyGroup>
+       <AssemblyName>Microsoft.Build</AssemblyName>
+   </PropertyGroup>
+
+   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
    <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
 
@@ -8,7 +15,7 @@
   <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
     <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
-    
+
   </ItemGroup>
   <ItemGroup>
      <SwrFile Include="*.swr" /> 
@@ -26,4 +33,5 @@
       <SwrProperty Include="MSBuildConversionBinPath=$(MSBuildConversionBinPath)" />
     </ItemGroup>
   </Target>
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 </Project>
