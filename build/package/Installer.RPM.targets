@@ -207,7 +207,7 @@
 
   <Target Name="TestSdkRpm"
           DependsOnTargets="RestoreTests"
-          Condition=" '$(IsRPMBasedDistro)' == 'True' and '$(FPMPresent)' == 'True' "
+          Condition="  '$(CLIBUILD_SKIP_TESTS)' != 'true' and '$(IsRPMBasedDistro)' == 'True' and '$(FPMPresent)' == 'True' "
           Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);
