@@ -50,13 +50,13 @@ namespace NuGet.MSBuildSdkResolver
             }
 
             // Expect the NuGet assemblies to be next to MSBuild.exe, which is the case when running .NET CLI
-            return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+            return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
         });
 
         /// <summary>
         /// A list of NuGet assemblies that we have a dependency on but should load at runtime.
         /// </summary>
-        private static readonly HashSet<string> NuGetAssemblies = new HashSet<string>
+        private static readonly HashSet<string> NuGetAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "Newtonsoft.Json",
             "NuGet.Commands",
@@ -78,7 +78,7 @@ namespace NuGet.MSBuildSdkResolver
 #if FEATURE_APPDOMAIN
                 AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
 #else
-            AssemblyLoadContext.Default.Resolving += AssemblyResolve;
+                AssemblyLoadContext.Default.Resolving += AssemblyResolve;
 #endif
             }
         }
