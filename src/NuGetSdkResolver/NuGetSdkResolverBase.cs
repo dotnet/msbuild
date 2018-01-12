@@ -26,17 +26,12 @@ namespace NuGet.MSBuildSdkResolver
         public const string PathToNuGetUnderVisualStudioRoot = @"Common7\IDE\CommonExtensions\Microsoft\NuGet";
 
         /// <summary>
-        /// The name of an environment variable a user can use to specify a custom path containing NuGet assemblies.
-        /// </summary>
-        public const string NuGetAssemblyPathEnvironmentVariableName = "MSBUILD_NUGET_PATH";
-
-        /// <summary>
         /// Attempts to locate the NuGet assemblies based on the current <see cref="BuildEnvironmentMode"/>.
         /// </summary>
         private static readonly Lazy<string> NuGetAssemblyPathLazy = new Lazy<string>(() =>
         {
             // The environment variable overrides everything
-            string basePath = Environment.GetEnvironmentVariable(NuGetAssemblyPathEnvironmentVariableName);
+            string basePath = Environment.GetEnvironmentVariable(MSBuildConstants.NuGetAssemblyPathEnvironmentVariableName);
 
             if (!String.IsNullOrWhiteSpace(basePath) && Directory.Exists(basePath))
             {
@@ -54,7 +49,8 @@ namespace NuGet.MSBuildSdkResolver
         });
 
         /// <summary>
-        /// A list of NuGet assemblies that we have a dependency on but should load at runtime.
+        /// A list of NuGet assemblies that we have a dependency on but should load at runtime.  This list is from dependencies of the
+        /// NuGet.Commands and NuGet.Protocol packages in project.json.  This list should be updated if those dependencies change.
         /// </summary>
         private static readonly HashSet<string> NuGetAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
