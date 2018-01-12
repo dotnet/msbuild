@@ -7,6 +7,9 @@
 
 using System;
 using System.Reflection;
+#if (LOCALIZED_BUILD)
+using System.Resources;
+#endif
 
 #if STATIC_VERSION_NUMBER
 [assembly: AssemblyVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]
@@ -14,7 +17,6 @@ using System.Reflection;
 #endif
 
 #if (LOCALIZED_BUILD)
-using System.Resources;
 // Needed for the "hub-and-spoke model to locate and retrieve localized resources": https://msdn.microsoft.com/en-us/library/21a15yht(v=vs.110).aspx
 // We want "en" to require a satellite assembly for debug builds in order to flush out localization
 // issues, but we want release builds to work without it. Also, .net core does not have resource fallbacks
