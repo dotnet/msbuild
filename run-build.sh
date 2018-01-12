@@ -126,10 +126,10 @@ done
 # The first 'pass' call to "dotnet msbuild build.proj" has a hard-coded "WriteDynamicPropsToStaticPropsFiles" target
 #    therefore, this call should not have other targets defined. Remove all targets passed in as 'extra parameters'.
 argsnotargets=( )
-for element in ${args[@]} 
+for arg in ${args[@]} 
 do  
-  if [[ $element != '/t'* ]] && [[ $element != '/T'* ]]; then    
-    argsnotargets+=($element)  
+  if [[ $arg != '/t'* ]] && [[ $arg != '/T'* ]]; then    
+    argsnotargets+=($arg)  
   fi
 done
 
