@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -207,6 +208,32 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
         }
 
+        [Fact]
+        public void GivenASourceItCanObtainThePackageFromThatSource()
+        {
+            var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
+
+            var packageObtainer = ConstructDefaultPackageObtainer(toolsPath);
+            var toolConfigurationAndExecutableDirectory = packageObtainer.ObtainAndReturnExecutablePath(
+                packageId: TestPackageId,
+                packageVersion: TestPackageVersion,
+                targetframework: _testTargetframework,
+                source: Path.Combine(
+                            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                            "TestAssetLocalNugetFeed"));
+
+            var executable = toolConfigurationAndExecutableDirectory
+                .ExecutableDirectory
+                .WithFile(
+                    toolConfigurationAndExecutableDirectory
+                        .Configuration
+                        .ToolAssemblyEntryPoint);
+
+            File.Exists(executable.Value)
+                .Should()
+                .BeTrue(executable + " should have the executable");
+        }
+
         private static readonly Func<FilePath> GetUniqueTempProjectPathEachTest = () =>
         {
             var tempProjectDirectory =
@@ -229,12 +256,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         private static FilePath WriteNugetConfigFileToPointToTheFeed()
         {
             var nugetConfigName = "nuget.config";
-            var executeDirectory =
-                Path.GetDirectoryName(
-                    System.Reflection
-                        .Assembly
-                        .GetExecutingAssembly()
-                        .Location);
+            var executeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             var tempPathForNugetConfigWithWhiteSpace =
                 Path.Combine(Path.GetTempPath(),

@@ -48,5 +48,16 @@ namespace Microsoft.DotNet.Tests.ParserTests
             parseResult.ValueOrDefault<string>("configfile").Should().Be(@"C:\TestAssetLocalNugetFeed");
             parseResult.ValueOrDefault<string>("framework").Should().Be("netcoreapp2.0");
         }
+
+        [Fact]
+        public void InstallToolParserCanParseSourceOption()
+        {
+            const string expectedSourceValue = "TestSourceValue";
+
+            var result = Parser.Instance.Parse($"dotnet install tool --source {expectedSourceValue} console.test.app");
+
+            var appliedOptions = result["dotnet"]["install"]["tool"];
+            appliedOptions.ValueOrDefault<string>("source").Should().Be(expectedSourceValue);
+        }
     }
 }

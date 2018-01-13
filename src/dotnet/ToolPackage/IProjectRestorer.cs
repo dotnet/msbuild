@@ -10,6 +10,7 @@ namespace Microsoft.DotNet.ToolPackage
         void Restore(
             FilePath projectPath,
             DirectoryPath assetJsonOutput, 
-            FilePath? nugetconfig);
+            FilePath? nugetconfig,
+            string source);
     }
 }

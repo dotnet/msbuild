@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
         private static string _packageVersion;
         private static string _configFilePath;
         private static string _framework;
+        private static string _source;
 
         public InstallToolCommand(
             AppliedOption appliedCommand,
@@ -35,25 +36,14 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             _packageVersion = appliedCommand.ValueOrDefault<string>("version");
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
+            _source = appliedCommand.ValueOrDefault<string>("source");
         }
 
         public override int Execute()
         {
-            FilePath? configFile = null;
-
-            if (_configFilePath != null)
-            {
-                configFile = new FilePath(_configFilePath);
-            }
-
             var executablePackagePath = new DirectoryPath(new CliFolderPathCalculator().ExecutablePackagesPath);
 
-            var toolConfigurationAndExecutableDirectory = ObtainPackage(
-                _packageId,
-                _packageVersion,
-                configFile,
-                _framework,
-                executablePackagePath);
+            var toolConfigurationAndExecutableDirectory = ObtainPackage(executablePackagePath);
 
             DirectoryPath executable = toolConfigurationAndExecutableDirectory
                 .ExecutableDirectory
@@ -80,15 +70,16 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             return 0;
         }
 
-        private static ToolConfigurationAndExecutableDirectory ObtainPackage(
-            string packageId,
-            string packageVersion,
-            FilePath? configFile,
-            string framework,
-            DirectoryPath executablePackagePath)
+        private static ToolConfigurationAndExecutableDirectory ObtainPackage(DirectoryPath executablePackagePath)
         {
             try
             {
+                FilePath? configFile = null;
+                if (_configFilePath != null)
+                {
+                    configFile = new FilePath(_configFilePath);
+                }
+
                 var toolPackageObtainer =
                     new ToolPackageObtainer(
                         executablePackagePath,
@@ -100,10 +91,10 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                         new ProjectRestorer());
 
                 return toolPackageObtainer.ObtainAndReturnExecutablePath(
-                    packageId: packageId,
-                    packageVersion: packageVersion,
+                    packageId: _packageId,
+                    packageVersion: _packageVersion,
                     nugetconfig: configFile,
-                    targetframework: framework);
+                    targetframework: _framework);
             }
             catch (PackageObtainException ex)
             {
