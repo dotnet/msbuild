@@ -9,19 +9,12 @@
     </ParseBlobUrl>
 
     <PropertyGroup>
-      <PublishBlobFeedUrlBlobPath>%(BlobElements.BlobPath)</PublishBlobFeedUrlBlobPath>
-    </PropertyGroup>
-
-    <RegexReplace Input="$(PublishBlobFeedUrlBlobPath)" Expression="index.json" Replacement="" Count="1">
-      <Output TaskParameter="Output" ItemName="BlobPath" />
-    </RegexReplace>
-
-    <PropertyGroup>
       <ArtifactContainerName>%(BlobElements.ContainerName)</ArtifactContainerName>
       <ChecksumContainerName>%(BlobElements.ContainerName)</ChecksumContainerName>
       <ArtifactCloudDropAccountName>%(BlobElements.AccountName)</ArtifactCloudDropAccountName>
       <ChecksumCloudDropAccountName>%(BlobElements.AccountName)</ChecksumCloudDropAccountName>
-      <BlobStoragePartialRelativePath>%(BlobPath)assets</BlobStoragePartialRelativePath>
+      <PublishBlobFeedUrlBlobPath>%(BlobElements.BlobPath)</PublishBlobFeedUrlBlobPath>
+      <BlobStoragePartialRelativePath>$(PublishBlobFeedUrlBlobPath.Replace('/index.json', ''))/assets</BlobStoragePartialRelativePath>
     </PropertyGroup>
   </Target>
     
