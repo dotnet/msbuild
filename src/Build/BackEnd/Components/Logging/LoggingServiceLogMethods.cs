@@ -396,7 +396,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 string subcategory = null;
 
-                if (subcategoryResourceName != null)
+                if (!string.IsNullOrWhiteSpace(subcategoryResourceName))
                 {
                     subcategory = AssemblyResources.GetString(subcategoryResourceName);
                 }
