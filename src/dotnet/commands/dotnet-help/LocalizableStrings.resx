@@ -267,4 +267,7 @@
   <data name="AdditionalDeps" xml:space="preserve">
     <value>Path to additional deps.json file.</value>
   </data>
+  <data name="InstallDefinition" xml:space="preserve">
+    <value>Add item to development environment.</value>
+  </data>
 </root>

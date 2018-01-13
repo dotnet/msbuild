@@ -8,13 +8,14 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Install.Tool;
+using LocalizableStrings = Microsoft.DotNet.Tools.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Install
 {
     public class InstallCommand : DotNetTopLevelCommandBase
     {
         protected override string CommandName => "install";
-        protected override string FullCommandNameLocalized => "NetInstallCommand";
+        protected override string FullCommandNameLocalized => LocalizableStrings.InstallFullCommandNameLocalized;
         protected override string ArgumentName => Constants.ProjectArgumentName;
         protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
 

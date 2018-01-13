@@ -252,6 +252,11 @@
         <target state="translated">Almacena los ensamblados especificados en el almacén del tiempo de ejecución.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InstallDefinition">
+        <source>Add item to development environment.</source>
+        <target state="new">Add item to development environment.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -252,6 +252,11 @@
         <target state="translated">지정된 어셈블리를 런타임 저장소에 저장합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InstallDefinition">
+        <source>Add item to development environment.</source>
+        <target state="new">Add item to development environment.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

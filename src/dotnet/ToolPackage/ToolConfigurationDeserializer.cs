@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization;
+using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -28,21 +29,20 @@ namespace Microsoft.DotNet.ToolPackage
                 catch (InvalidOperationException e) when (e.InnerException is XmlException)
                 {
                     throw new ToolConfigurationException(
-                        $"The tool's settings file is invalid xml. {Environment.NewLine}" +
-                        e.InnerException.Message);
+                        string.Format(CommonLocalizableStrings.ToolSettingsInvalidXml, e.InnerException.Message));
                 }
             }
 
             if (dotNetCliTool.Commands.Length != 1)
             {
                 throw new ToolConfigurationException(
-                    "The tool's settings file has more than one command defined.");
+                    CommonLocalizableStrings.ToolSettingMoreThanOneCommand);
             }
 
             if (dotNetCliTool.Commands[0].Runner != "dotnet")
             {
                 throw new ToolConfigurationException(
-                    "The tool's settings file has non \"dotnet\" as runner.");
+                    CommonLocalizableStrings.ToolSettingInvalidRunner);
             }
 
             var commandName = dotNetCliTool.Commands[0].Name;
@@ -54,7 +54,9 @@ namespace Microsoft.DotNet.ToolPackage
             }
             catch (ArgumentException e)
             {
-                throw new ToolConfigurationException($"The tool's settings file contains error {Environment.NewLine}" + e.Message);
+                throw new ToolConfigurationException(
+                    string.Format(CommonLocalizableStrings.ToolSettingsContainError,
+                    e.Message));
             }
         }
     }

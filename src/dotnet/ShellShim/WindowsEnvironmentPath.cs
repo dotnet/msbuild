@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ShellShim
@@ -63,14 +64,14 @@ namespace Microsoft.DotNet.ShellShim
                     .Contains(_packageExecutablePath))
                 {
                     _reporter.WriteLine(
-                        "Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.");
+                        CommonLocalizableStrings.EnvironmentPathWindowsNeedReopen);
                 }
                 else
                 {
                     _reporter.WriteLine(
-                        $"Cannot find the tools executable path. Please ensure {_packageExecutablePath} is added to your PATH.{Environment.NewLine}" +
-                        $"You can do this by running the following command:{Environment.NewLine}{Environment.NewLine}" +
-                        $"setx PATH \"%PATH%;{_packageExecutablePath}\"{Environment.NewLine}");
+                        string.Format(
+                            CommonLocalizableStrings.EnvironmentPathWindowsManualInstruction,
+                            _packageExecutablePath, _packageExecutablePath));
                 }
             }
         }

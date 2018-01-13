@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                 .PrintAddPathInstructionIfPathDoesNotExist();
 
             Reporter.Output.WriteLine(
-                $"{Environment.NewLine}The installation succeeded. If there is no other instruction. You can type the following command in shell directly to invoke: {commandName}");
+                string.Format(LocalizableStrings.InstallationSucceeded, commandName));
 
             return 0;
         }
@@ -100,20 +100,17 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             {
                 throw new GracefulException(
                     message:
-                    $"Install failed. Failed to download package:{Environment.NewLine}" +
-                    $"NuGet returned:{Environment.NewLine}" +
-                    $"{Environment.NewLine}" +
-                    $"{ex.Message}",
+                    string.Format(LocalizableStrings.InstallFailedNuget,
+                        ex.Message),
                     innerException: ex);
             }
             catch (ToolConfigurationException ex)
             {
                 throw new GracefulException(
                     message:
-                    $"Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.{Environment.NewLine}" +
-                    $"The error was:{Environment.NewLine}" +
-                    $"{Environment.NewLine}" +
-                    $"{ex.Message}",
+                    string.Format(
+                        LocalizableStrings.InstallFailedPackage,
+                        ex.Message),
                     innerException: ex);
             }
         }

@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ShellShim
@@ -67,18 +68,15 @@ namespace Microsoft.DotNet.ShellShim
                 if (_fileSystem.Exists(_profiledDotnetCliToolsPath))
                 {
                     _reporter.WriteLine(
-                        "Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.");
+                        CommonLocalizableStrings.EnvironmentPathLinuxNeedLogout);
                 }
                 else
                 {
                     // similar to https://code.visualstudio.com/docs/setup/mac
                     _reporter.WriteLine(
-                        $"Cannot find the tools executable path. Please ensure {_packageExecutablePath.Path} is added to your PATH.{Environment.NewLine}" +
-                        $"If you are using bash. You can do this by running the following command:{Environment.NewLine}{Environment.NewLine}" +
-                        $"cat << EOF >> ~/.bash_profile{Environment.NewLine}" +
-                        $"# Add .NET Core SDK tools{Environment.NewLine}" +
-                        $"export PATH=\"$PATH:{_packageExecutablePath.Path}\"{Environment.NewLine}" +
-                        $"EOF");
+                        string.Format(
+                            CommonLocalizableStrings.EnvironmentPathLinuxManualInstruction,
+                            _packageExecutablePath.Path, _packageExecutablePath.Path));
                 }
             }
         }

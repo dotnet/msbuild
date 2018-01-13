@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -14,14 +15,14 @@ namespace Microsoft.DotNet.ToolPackage
         {
             if (string.IsNullOrWhiteSpace(commandName))
             {
-                throw new ArgumentNullException(nameof(commandName), "Cannot be null or whitespace");
+                throw new ArgumentNullException(nameof(commandName), CommonLocalizableStrings.CannotBeNullOrWhitespace);
             }
 
             EnsureNoInvalidFilenameCharacters(commandName, nameof(toolAssemblyEntryPoint));
 
             if (string.IsNullOrWhiteSpace(toolAssemblyEntryPoint))
             {
-                throw new ArgumentNullException(nameof(toolAssemblyEntryPoint), "Cannot be null or whitespace");
+                throw new ArgumentNullException(nameof(toolAssemblyEntryPoint), CommonLocalizableStrings.CannotBeNullOrWhitespace);
             }
 
             CommandName = commandName;
@@ -35,7 +36,8 @@ namespace Microsoft.DotNet.ToolPackage
             {
                 throw new ArgumentException(
                     paramName: nameof(nameOfParam),
-                    message: "Contains one or more invalid characters: " + new string(invalidCharactors));
+                    message: string.Format(CommonLocalizableStrings.ContainInvalidCharacters,
+                        new string(invalidCharactors)));
             }
         }
 

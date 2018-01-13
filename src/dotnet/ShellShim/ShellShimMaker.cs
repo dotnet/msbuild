@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ShellShim
@@ -47,7 +48,8 @@ namespace Microsoft.DotNet.ShellShim
             if (File.Exists(Path.Combine(_pathToPlaceShim, shellCommandName)))
             {
                 throw new GracefulException(
-                    $"Failed to install tool {shellCommandName}. A command with the same name already exists.");
+                    string.Format(CommonLocalizableStrings.FailInstallToolSameName,
+                        shellCommandName));
             }
         }
 
@@ -80,9 +82,8 @@ namespace Microsoft.DotNet.ShellShim
             if (result.ExitCode != 0)
             {
                 throw new GracefulException(
-                    "Failed to change permission:" +
-                    $"{Environment.NewLine}Error: " + result.StdErr +
-                    $"{Environment.NewLine}Output: " + result.StdOut);
+                    string.Format(CommonLocalizableStrings.FailInstallToolPermission, result.StdErr,
+                        result.StdOut));
             }
         }
     }

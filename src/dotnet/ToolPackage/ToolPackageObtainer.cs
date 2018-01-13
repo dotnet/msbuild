@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ToolPackage
@@ -47,7 +48,9 @@ namespace Microsoft.DotNet.ToolPackage
             {
                 if (!File.Exists(nugetconfig.Value.Value))
                 {
-                    throw new PackageObtainException($"NuGet configuration file {Path.GetFullPath(nugetconfig.Value.Value)} does not exist.");
+                    throw new PackageObtainException(
+                        string.Format(CommonLocalizableStrings.NuGetConfigurationFileDoesNotExist,
+                        Path.GetFullPath(nugetconfig.Value.Value)));
                 }
             }
 

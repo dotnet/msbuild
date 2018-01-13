@@ -520,4 +520,68 @@
   <data name="NoRestoreDescription" xml:space="preserve">
     <value>Does not do an implicit restore when executing the command.</value>
   </data>
+  <data name="CannotBeNullOrWhitespace" xml:space="preserve">
+    <value>Cannot be null or whitespace.</value>
+  </data>
+  <data name="ContainInvalidCharacters" xml:space="preserve">
+    <value>Contains one or more invalid characters: {0}</value>
+  </data>
+  <data name="NuGetConfigurationFileDoesNotExist" xml:space="preserve">
+    <value>NuGet configuration file {0} does not exist.</value>
+  </data>
+  <data name="ToolSettingInvalidRunner" xml:space="preserve">
+    <value>The tool's settings file has non "dotnet" as runner.</value>
+  </data>
+  <data name="ToolSettingMoreThanOneCommand" xml:space="preserve">
+    <value>The tool's settings file has more than one command defined.</value>
+  </data>
+  <data name="ToolSettingsContainError" xml:space="preserve">
+    <value>The tool's settings file contains error.
+{0}</value>
+  </data>
+  <data name="ToolSettingsInvalidXml" xml:space="preserve">
+    <value>The tool's settings file is invalid xml.
+{0}</value>
+  </data>
+  <data name="EnvironmentPathLinuxManualInstruction" xml:space="preserve">
+    <value>Cannot find the tools executable path. Please ensure {0} is added to your PATH.
+If you are using bash. You can do this by running the following command:
+
+cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{1}"
+EOF</value>
+  </data>
+  <data name="EnvironmentPathLinuxNeedLogout" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</value>
+  </data>
+  <data name="EnvironmentPathOSXManualInstruction" xml:space="preserve">
+    <value>Cannot find the tools executable path. Please ensure {0} is added to your PATH.
+If you are using bash, You can do this by running the following command:
+
+cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{1}"
+EOF</value>
+  </data>
+  <data name="EnvironmentPathOSXNeedReopen" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</value>
+  </data>
+  <data name="EnvironmentPathWindowsManualInstruction" xml:space="preserve">
+    <value>Cannot find the tools executable path. Please ensure {0} is added to your PATH.
+You can do this by running the following command:
+
+setx PATH "%PATH%;{1}"</value>
+  </data>
+  <data name="EnvironmentPathWindowsNeedReopen" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</value>
+  </data>
+  <data name="FailInstallToolPermission" xml:space="preserve">
+    <value>Failed to change permission:
+Error: {0}
+Output: {1}</value>
+  </data>
+  <data name="FailInstallToolSameName" xml:space="preserve">
+    <value>Failed to install tool {0}. A command with the same name already exists.</value>
+  </data>
 </root>

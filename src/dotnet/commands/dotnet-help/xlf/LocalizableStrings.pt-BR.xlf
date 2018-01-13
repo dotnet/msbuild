@@ -252,6 +252,11 @@
         <target state="translated">Armazena os assemblies especificados no repositório de tempo de execução.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InstallDefinition">
+        <source>Add item to development environment.</source>
+        <target state="new">Add item to development environment.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

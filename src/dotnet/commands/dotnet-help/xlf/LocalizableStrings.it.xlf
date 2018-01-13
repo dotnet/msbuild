@@ -252,6 +252,11 @@
         <target state="translated">Memorizza gli assembly specificati nell'archivio di runtime.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InstallDefinition">
+        <source>Add item to development environment.</source>
+        <target state="new">Add item to development environment.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

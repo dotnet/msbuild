@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Xunit;
@@ -33,12 +34,9 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             // similar to https://code.visualstudio.com/docs/setup/mac
             fakeReporter.Message.Should().Be(
-                $"Cannot find the tools executable path. Please ensure /myhome/executable/path is added to your PATH.{Environment.NewLine}" +
-                $"If you are using bash. You can do this by running the following command:{Environment.NewLine}{Environment.NewLine}" +
-                $"cat << EOF >> ~/.bash_profile{Environment.NewLine}" +
-                $"# Add .NET Core SDK tools{Environment.NewLine}" +
-                $"export PATH=\"$PATH:/myhome/executable/path\"{Environment.NewLine}" +
-                $"EOF");
+                string.Format(
+                    CommonLocalizableStrings.EnvironmentPathLinuxManualInstruction,
+                    "/myhome/executable/path", "/myhome/executable/path"));
         }
 
         [Fact]
@@ -78,8 +76,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             linuxEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
             fakeReporter.Message.Should()
-                .Be(
-                    "Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.");
+                .Be(CommonLocalizableStrings.EnvironmentPathLinuxNeedLogout);
         }
     }
 }

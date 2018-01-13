@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using LocalizableStrings = Microsoft.DotNet.Tools.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Install.Tool
 {
@@ -49,13 +51,10 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             var result = command.Execute();
             if (result.ExitCode != 0)
             {
-                throw new PackageObtainException("Failed to restore package. " +
-                                                 $"{Environment.NewLine}WorkingDirectory: " +
-                                                 result.StartInfo.WorkingDirectory +
-                                                 $"{Environment.NewLine}Arguments: " +
-                                                 result.StartInfo.Arguments +
-                                                 $"{Environment.NewLine}Output: " +
-                                                 result.StdErr + result.StdOut);
+                throw new PackageObtainException(
+                    string.Format(
+                        LocalizableStrings.FailedToRestorePackage,
+                        result.StartInfo.WorkingDirectory, result.StartInfo.Arguments, result.StdErr, result.StdOut));
             }
         }
     }

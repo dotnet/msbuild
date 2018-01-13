@@ -1,9 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Tools.Install.Tool;
 using LocalizableStrings = Microsoft.DotNet.Tools.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -13,17 +11,17 @@ namespace Microsoft.DotNet.Cli
         public static Command InstallTool()
         {
             return Create.Command("tool",
-                "Install tool",
+                LocalizableStrings.InstallToolCommandDefinition,
                 Accept.ExactlyOneArgument(o => "packageId")
                     .With(name: "packageId",
-                        description: "Package Id in NuGet"),
+                        description: LocalizableStrings.InstallToolPackageIdDefinition),
                 Create.Option(
                     "--version",
-                    "Version of the package in NuGet",
+                    LocalizableStrings.InstallToolVersionDefinition,
                     Accept.ExactlyOneArgument()),
                 Create.Option(
                     "--configfile",
-                    "NuGet configuration file",
+                    LocalizableStrings.InstallToolConfigfileDefinition,
                     Accept.ExactlyOneArgument()),
                 Create.Option(
                     "--source",
@@ -32,7 +30,7 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.SourceOptionName)),
                 Create.Option(
                     "-f|--framework",
-                    "Target framework to publish for. The target framework has to be specified in the project file.",
+                    LocalizableStrings.InstallToolFrameworkDefinition,
                     Accept.ExactlyOneArgument()),
                 CommonOptions.HelpOption());
         }

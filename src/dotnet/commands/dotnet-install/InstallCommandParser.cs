@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli.CommandLine;
+using LocalizableStrings = Microsoft.DotNet.Tools.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -10,7 +11,7 @@ namespace Microsoft.DotNet.Cli
         public static Command Install()
         {
             return Create.Command(
-                "install", "",
+                "install", LocalizableStrings.InstallCommandDefinition,
                 Accept.NoArguments(),
                 CommonOptions.HelpOption(),
                 InstallToolCommandParser.InstallTool());

@@ -28,6 +28,7 @@ path-to-application:
   msbuild          {LocalizableStrings.MsBuildDefinition}
   vstest           {LocalizableStrings.VsTestDefinition}
   store            {LocalizableStrings.StoreDefinition}
+  install          {LocalizableStrings.InstallDefinition}
   help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:

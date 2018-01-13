@@ -252,6 +252,11 @@
         <target state="translated">Speichert die angegebenen Assemblys im Laufzeitspeicher.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InstallDefinition">
+        <source>Add item to development environment.</source>
+        <target state="new">Add item to development environment.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
