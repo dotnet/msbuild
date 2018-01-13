@@ -62,7 +62,7 @@
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.protocol\$(NuGetVersion)\lib\net46\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuget.versioning\$(NuGetVersion)\lib\net46\**\*.*" />
       <NuGetCommonExtensions Include="$(ProjectDir)packages\nuspec.referencegenerator\$(NuGetVersion)\lib\net46\**\*.*" />
-      <NuGetCommonExtensions Include="$(ProjectDir)packages\Newtonsoft.Json\9.0.1\lib\net46\**\*.*" />
+      <NuGetCommonExtensions Include="$(ProjectDir)packages\Newtonsoft.Json\9.0.1\lib\net45\**\*.*" />
 
       <FreshlyBuiltBinariesSdkResolvers Include="$(DeploymentDir)\NuGet.MSBuildSdkResolver.dll">
         <DestinationSubDirectory>NuGet.MSBuildSdkResolver</DestinationSubDirectory>
