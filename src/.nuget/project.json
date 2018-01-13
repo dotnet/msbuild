@@ -6,7 +6,7 @@
     "Microsoft.Net.Compilers": "2.3.1",
     "MicroBuild.Core": "0.2.0",
     "Microsoft.DotNet.BuildTools.GenAPI": "1.0.0-beta2-00731-01",
-    "NuGet.Build.Tasks": "4.5.0-preview2-4529",
+    "NuGet.Build.Tasks": "4.6.0-rtm-4822",
     "Microsoft.DotNet.Build.Tasks.Feed":"2.1.0-prerelease-02221-02"
   },
   "frameworks": {

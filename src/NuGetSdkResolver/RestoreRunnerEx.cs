@@ -76,7 +76,7 @@ namespace NuGet.Commands
                         FallbackFolders = SettingsUtility.GetFallbackPackageFolders(settings).ToList()
                     },
                     FilePath = projectPath,
-                    Name = projectPath,
+                    Name = Path.GetFileNameWithoutExtension(projectPath),
                 };
 
                 DependencyGraphSpec dependencyGraphSpec = new DependencyGraphSpec();
