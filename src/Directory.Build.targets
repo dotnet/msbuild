@@ -56,6 +56,11 @@
   </ItemGroup>
 
   <!-- GenAPI settings -->
+  <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
+    <!-- Disable reference assembly source when building for Mono, as some APIs are excluded when compiling for Mono -->
+    <GenerateReferenceAssemblySources>false</GenerateReferenceAssemblySources>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OS)'=='Windows_NT'">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>

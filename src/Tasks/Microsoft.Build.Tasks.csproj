@@ -959,4 +959,7 @@
     <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNetCoreCompilersVersion)" ExcludeAssets="All" />
     <Content Include="$(NuGetPackageRoot)microsoft.netcore.compilers\$(MicrosoftNetCoreCompilersVersion)\tools\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
+  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
+    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
+  </ItemGroup>
 </Project>

@@ -12,6 +12,10 @@
     <!-- Not sure what the right ID is here -->
     <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
   </PropertyGroup>
+
+  <!-- Don't try to build this package if building for Mono -->
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(MonoBuild)' == 'true'" />
+  
   <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
     <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />

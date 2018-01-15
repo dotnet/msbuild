@@ -8,6 +8,10 @@
     <NuspecProperties>$(NuspecProperties);repoRoot=$(RepoRoot.TrimEnd('\\/'))</NuspecProperties>
   </PropertyGroup>
 
+  <!-- Don't try to build this package if building for Mono -->
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(MonoBuild)' == 'true'" />
+
+
   <Import Project="..\NuspecProject.targets" />
   <Import Project="..\GetBinPaths.targets" />
 

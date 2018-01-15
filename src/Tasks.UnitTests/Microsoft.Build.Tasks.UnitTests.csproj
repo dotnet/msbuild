@@ -74,6 +74,10 @@
     <Compile Remove="XamlTestHelpers.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
+    <Compile Remove="LC_Tests.cs" />
+  </ItemGroup>
+  
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
     <Compile Remove="Al_Tests.cs" />
     <Compile Remove="AppConfig_Tests.cs" />
@@ -94,7 +98,7 @@
     <Compile Remove="GenerateResourceOutOfProc_Tests.cs" />
     <Compile Remove="GetInstalledSDKLocations_Tests.cs" />
     <Compile Remove="GetSDKReference_Tests.cs" />
-    <Compile Remove="LC_Tests.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Remove="LC_Tests.cs" />
     <Compile Remove="MockTypeInfo.cs" />
     <Compile Remove="MockTypeLib.cs" />
     <Compile Remove="ResGen_Tests.cs" />

@@ -1,14 +1,17 @@
 <Project>
   <PropertyGroup>
     <MSBuildTargetsFilePath>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildTargetsFilePath>
+
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <Import Project="$(MSBuildTargetsFilePath)" />
 
-  <!-- Remove Reference and EmbeddedResource items to prevent warnings / errors from built-in-logic -->
+  <!-- Remove items which light up build logic which could generate warnings / errors -->
   <ItemGroup>
     <EmbeddedResource Remove="@(EmbeddedResource)" />
     <Reference Remove="@(Reference)" />
+    <SwrFile Remove="@(SwrFile)" />
   </ItemGroup>
 
   <PropertyGroup>

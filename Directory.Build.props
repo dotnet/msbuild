@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Configurations>Debug;Release;Debug-MONO;Release-MONO</Configurations>
   </PropertyGroup>
   
   <Import Project="build\NuGet.props"/>
@@ -49,9 +50,17 @@
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
   </PropertyGroup>
 
-  <!--<ItemGroup>
-    <PackageReference Include="NerdBank.GitVersioning" Version="1.6.35" />
-  </ItemGroup>-->
-
-
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+    <MonoBuild>true</MonoBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
+    <MonoBuild>true</MonoBuild>
+  </PropertyGroup>
 </Project>
