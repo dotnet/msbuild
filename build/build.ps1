@@ -120,12 +120,7 @@ function InstallRepoToolset {
   $RepoToolsetDir = Join-Path $NuGetPackageRoot "roslyntools.repotoolset\$RepoToolsetVersion\tools"
   $RepoToolsetBuildProj = Join-Path $RepoToolsetDir "Build.proj"
 
-  if ($ci -or $log) {
-    Create-Directory $LogDir
-    $logCmd = "/bl:" + (Join-Path $LogDir "Toolset.binlog")
-  } else {
-    $logCmd = ""
-  }
+  $logCmd = GetLogCmd("Toolset")
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
@@ -189,12 +184,7 @@ function Build {
     }
   }
 
-  if ($ci -or $log) {
-    Create-Directory $LogDir
-    $logCmd = "/bl:" + (Join-Path $LogDir "Build.binlog")
-  } else {
-    $logCmd = ""
-  }
+  $logCmd = GetLogCmd("Build")
 
   $solution = Join-Path $RepoRoot "MSBuild.sln"
 
@@ -238,12 +228,7 @@ function Build {
     # Use separate artifacts folder for stage 2
     $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
 
-    if ($ci -or $log) {
-      Create-Directory $LogDir
-      $logCmd = "/bl:" + (Join-Path $LogDir "BuildWithBootstrap.binlog")
-    } else {
-      $logCmd = ""
-    }
+    $logCmd = GetLogCmd("BuildWithBootstrap")
 
     try
     {
@@ -294,6 +279,23 @@ function CallMSBuild
     if($LASTEXITCODE -ne 0) {
       throw "Failed to build $args"
   }
+}
+
+function GetLogCmd([string] $logName)
+{
+  if ($ci -or $log) {
+    Create-Directory $LogDir
+    $logCmd = "/bl:" + (Join-Path $LogDir "$logName.binlog")
+
+    # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
+    if ($ci) {
+      $logCmd += " /flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "logName.log") + '"'
+    }
+  } else {
+    $logCmd = ""
+  }
+
+  return $logCmd;
 }
 
 function Stop-Processes() {

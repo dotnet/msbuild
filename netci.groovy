@@ -44,12 +44,13 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-3',
                             // all windows builds do a full framework localized build to produce satellite assemblies
                             def script = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\""
 
+                            //  Should the build be Release?  The default is Debug
                             if (runtime == "Full") {
-                                script += " && cibuild.cmd --target Full --scope Test"
+                                script += " && build.cmd -ci"
                             }
                             // .net core builds are localized (they need the satellites from the full framework build), run tests, and also build the nuget packages
                             else if (runtime == "CoreCLR") {
-                                script += " && cibuild.cmd --windows-core-localized-job"
+                                script += " && build.cmd -ci -hostType Core"
                             }
 
                             batchFile(script)
@@ -110,13 +111,13 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-3',
             }
 
             // Add xunit result archiving. Skip if no results found.
-            Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
+            Utilities.addXUnitDotNETResults(newJob, 'artifacts/**/TestResults/*.xml', skipTestsWhenResultsNotFound)
             def imageVersion = imageVersionMap[osName];
             Utilities.setMachineAffinity(newJob, osName, imageVersion)
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add archiving of logs (even if the build failed)
             Utilities.addArchival(newJob,
-                                  'init-tools.log,msbuild*.log,msbuild*.binlog,**/Microsoft.*.UnitTests.dll_*', /* filesToArchive */
+                                  'artifacts/**/log/*.binlog,artifacts/**/log/*.log,**/Microsoft.*.UnitTests.dll_*', /* filesToArchive */
                                   '', /* filesToExclude */
                                   false, /* doNotFailIfNothingArchived */
                                   false, /* archiveOnlyIfSuccessful */)
