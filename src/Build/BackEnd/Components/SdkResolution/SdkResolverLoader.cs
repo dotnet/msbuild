@@ -30,29 +30,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 return resolvers;
             }
 
-#if !FEATURE_ASSEMBLY_LOADFROM
-            var loader = new CoreClrAssemblyLoader();
-#endif
-
             foreach (var potentialResolver in potentialResolvers)
-                try
-                {
-#if FEATURE_ASSEMBLY_LOADFROM
-                    var assembly = Assembly.LoadFrom(potentialResolver);
-#else
-                    loader.AddDependencyLocation(Path.GetDirectoryName(potentialResolver));
-                    Assembly assembly = loader.LoadFromPath(potentialResolver);
-#endif
-
-                    resolvers.AddRange(assembly.ExportedTypes
-                        .Select(type => new {type, info = type.GetTypeInfo()})
-                        .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
-                        .Select(t => (SdkResolver) Activator.CreateInstance(t.type)));
-                }
-                catch (Exception e)
-                {
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
-                }
+            {
+                LoadResolvers(potentialResolver, loggingContext, location, resolvers);
+            }
 
             return resolvers.OrderBy(t => t.Priority).ToList();
         }
@@ -72,6 +53,59 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 .Select(subfolder => Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll"))
                 .Where(FileUtilities.FileExistsNoThrow)
                 .ToList();
+        }
+
+        protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)
+        {
+            return assembly.ExportedTypes
+                .Select(type => new {type, info = type.GetTypeInfo()})
+                .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
+                .Select(t => t.type);
+        }
+
+        protected virtual Assembly LoadResolverAssembly(
+            string resolverPath,
+            LoggingContext loggingContext,
+            ElementLocation location
+#if !FEATURE_ASSEMBLY_LOADFROM
+            , CoreClrAssemblyLoader loader
+#endif
+        )
+        {
+#if FEATURE_ASSEMBLY_LOADFROM
+                return Assembly.LoadFrom(resolverPath);
+#else
+                loader.AddDependencyLocation(Path.GetDirectoryName(potentialResolver));
+                return loader.LoadFromPath(potentialResolver);
+#endif
+        }
+
+        protected virtual void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
+        {
+#if !FEATURE_ASSEMBLY_LOADFROM
+            var loader = new CoreClrAssemblyLoader();
+#endif
+
+            try
+            {
+                Assembly assembly = LoadResolverAssembly(
+                    resolverPath,
+                    loggingContext,
+                    location
+#if !FEATURE_ASSEMBLY_LOADFROM
+                    , loader
+#endif
+                );
+
+                if (assembly != null)
+                {
+                    resolvers.AddRange(GetResolverTypes(assembly).Select(t => (SdkResolver)Activator.CreateInstance(t)));
+                }
+            }
+            catch (Exception e)
+            {
+                loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
+            }
         }
     }
 }
