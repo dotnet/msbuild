@@ -26,6 +26,8 @@ using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingCont
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -1533,6 +1535,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             private LegacyThreadingData _legacyThreadingData;
 
+            private ISdkResolverService _sdkResolverService;
+
             /// <summary>
             /// Constructor
             /// </summary>
@@ -1557,6 +1561,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _targetBuilder = new TargetBuilder();
                 ((IBuildComponent)_targetBuilder).InitializeComponent(this);
+
+                _sdkResolverService = new MockSdkResolverService();
+                ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
             }
 
             /// <summary>
@@ -1630,6 +1637,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     case BuildComponentType.TargetBuilder:
                         return (IBuildComponent)_targetBuilder;
+
+                    case BuildComponentType.SdkResolverService:
+                        return (IBuildComponent)_sdkResolverService;
 
                     default:
                         throw new ArgumentException("Unexpected type " + type);

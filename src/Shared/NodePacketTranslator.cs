@@ -347,6 +347,7 @@ namespace Microsoft.Build.BackEnd
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
+                    _reader.ReadInt32(),
                     _reader.ReadInt32()
                     );
             }
@@ -968,6 +969,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _writer.Write(value.SubmissionId);
                 _writer.Write(value.NodeId);
+                _writer.Write(value.EvaluationId);
                 _writer.Write(value.ProjectInstanceId);
                 _writer.Write(value.ProjectContextId);
                 _writer.Write(value.TargetId);
@@ -1651,6 +1653,7 @@ namespace Microsoft.Build.BackEnd
                 if (translator.TranslateNullable(context))
                 {
                     int nodeId = 0;
+                    int evaluationId = 0;
                     int targetId = 0;
                     int projectContextId = 0;
                     int taskId = 0;
@@ -1660,6 +1663,7 @@ namespace Microsoft.Build.BackEnd
                     if (translator.Mode == TranslationDirection.WriteToStream)
                     {
                         nodeId = context.NodeId;
+                        evaluationId = context.EvaluationId;
                         targetId = context.TargetId;
                         projectContextId = context.ProjectContextId;
                         taskId = context.TaskId;
@@ -1668,6 +1672,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     translator.Translate(ref nodeId);
+                    translator.Translate(ref evaluationId);
                     translator.Translate(ref targetId);
                     translator.Translate(ref projectContextId);
                     translator.Translate(ref taskId);
@@ -1676,7 +1681,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (translator.Mode == TranslationDirection.ReadFromStream)
                     {
-                        context = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
+                        context = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
                     }
                 }
             }

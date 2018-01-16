@@ -7,11 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution.NuGet;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.BackEnd.SdkResolution
 {
     internal class SdkResolverLoader
     {
@@ -20,10 +22,27 @@ namespace Microsoft.Build.BackEnd
         {
             // Always add the default resolver
             var resolvers = new List<SdkResolver> {new DefaultSdkResolver()};
+
+            // Add the NuGet-based SDK resolver unless its is disabled
+            if (!Traits.Instance.EscapeHatches.DisableNuGetSdkResolver)
+            {
+                try
+                {
+                    resolvers.Add(new NuGetSdkResolver());
+                }
+                catch (Exception e)
+                {
+                    loggingContext.LogWarning(string.Empty, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
+                }
+            }
+
             var potentialResolvers = FindPotentialSdkResolvers(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"));
 
-            if (potentialResolvers.Count == 0) return resolvers;
+            if (potentialResolvers.Count == 0)
+            {
+                return resolvers.Count == 1 ? resolvers : resolvers.OrderBy(t => t.Priority).ToList();
+            }
 
 #if !FEATURE_ASSEMBLY_LOADFROM
             var loader = new CoreClrAssemblyLoader();
