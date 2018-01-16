@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli.CommandLine;
-using LocalizableStrings = Microsoft.DotNet.Tools.Install.LocalizableStrings;
+using LocalizableStrings = Microsoft.DotNet.Tools.Install.Tool.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -11,17 +11,17 @@ namespace Microsoft.DotNet.Cli
         public static Command InstallTool()
         {
             return Create.Command("tool",
-                LocalizableStrings.InstallToolCommandDefinition,
+                LocalizableStrings.CommandDescription,
                 Accept.ExactlyOneArgument(o => "packageId")
-                    .With(name: "packageId",
-                        description: LocalizableStrings.InstallToolPackageIdDefinition),
+                    .With(name: LocalizableStrings.PackageIdArgumentName,
+                          description: LocalizableStrings.PackageIdArgumentDescription),
                 Create.Option(
                     "--version",
-                    LocalizableStrings.InstallToolVersionDefinition,
+                    LocalizableStrings.VersionOptionDescription,
                     Accept.ExactlyOneArgument()),
                 Create.Option(
                     "--configfile",
-                    LocalizableStrings.InstallToolConfigfileDefinition,
+                    LocalizableStrings.ConfigFileOptionDescription,
                     Accept.ExactlyOneArgument()),
                 Create.Option(
                     "--source",
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.SourceOptionName)),
                 Create.Option(
                     "-f|--framework",
-                    LocalizableStrings.InstallToolFrameworkDefinition,
+                    LocalizableStrings.FrameworkOptionDescription,
                     Accept.ExactlyOneArgument()),
                 CommonOptions.HelpOption());
         }
