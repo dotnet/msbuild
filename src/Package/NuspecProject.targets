@@ -6,7 +6,6 @@
     <BeforePack>$(BeforePack);SetNuspecProperties</BeforePack>
 
     <IsPackable>true</IsPackable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>
 
   </PropertyGroup>
