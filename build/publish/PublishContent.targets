@@ -21,40 +21,26 @@
 
   <!-- publishes artifacts to blob storage in Azure -->
   <Target Name="UploadArtifactsToAzure" DependsOnTargets="GatherItemsForPattern">
-    <Error Condition="'$(ArtifactContainerName)' == ''" Text="Missing property ArtifactContainerName." />
-    <Error Condition="'$(ArtifactCloudDropAccountName)' == ''" Text="Missing property ArtifactCloudDropAccountName." />
     <Error Condition="'$(ArtifactCloudDropAccessToken)' == ''" Text="Missing property ArtifactCloudDropAccessToken." />
-    <!-- create the container if it doesn't exist -->
-    <CreateAzureContainer
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)" />
-    <!-- now upload the items -->
-    <UploadToAzure
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(ForPublishing)"
-      Overwrite="$(OverwriteOnPublish)" />
+    <Error Condition="'$(ArtifactCloudDropURL)' == ''" Text="Missing property ArtifactCloudDropURL." />
+
+    <Message Text="Publish assets to blob storage started: $(ArtifactCloudDropURL)" />
+    <PushToBlobFeed AccountKey="$(ArtifactCloudDropAccessToken)"
+                    ExpectedFeedUrl="$(ArtifactCloudDropURL)"
+                    ItemsToPush="@(ForPublishing)"
+                    Overwrite="$(OverwriteOnPublish)" />
   </Target>
 
   <!-- publishes checksums for the artifacts to blob storage in Azure -->
   <Target Name="UploadChecksumsToAzure" DependsOnTargets="GenerateChecksums">
-    <Error Condition="'$(ChecksumContainerName)' == ''" Text="Missing property ChecksumContainerName." />
-    <Error Condition="'$(ChecksumCloudDropAccountName)' == ''" Text="Missing property ChecksumCloudDropAccountName." />
     <Error Condition="'$(ChecksumCloudDropAccessToken)' == ''" Text="Missing property ChecksumCloudDropAccessToken." />
-    <!-- create the container if it doesn't exist -->
-    <CreateAzureContainer
-      AccountKey="$(ChecksumCloudDropAccessToken)"
-      AccountName="$(ChecksumCloudDropAccountName)"
-      ContainerName="$(ChecksumContainerName)" />
-    <!-- now upload the items -->
-    <UploadToAzure
-      AccountKey="$(ChecksumCloudDropAccessToken)"
-      AccountName="$(ChecksumCloudDropAccountName)"
-      ContainerName="$(ChecksumContainerName)"
-      Items="@(ArtifactsForGeneratingChecksums->'%(DestinationPath)')"
-      Overwrite="$(OverwriteOnPublish)" />
+    <Error Condition="'$(ChecksumCloudDropURL)' == ''" Text="Missing property ChecksumCloudDropURL." />
+
+    <Message Text="Publish checksums to blob storage started: $(ChecksumCloudDropURL)" />
+    <PushToBlobFeed AccountKey="$(ChecksumCloudDropAccessToken)"
+                    ExpectedFeedUrl="$(ChecksumCloudDropURL)"
+                    ItemsToPush="@(ArtifactsForGeneratingChecksums->'%(DestinationPath)')"
+                    Overwrite="$(OverwriteOnPublish)" />
   </Target>
 
 </Project>

@@ -1,33 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="FinishBuild"
-          Condition="'$(IsOrchestratedPublish)' != 'True'"
-          DependsOnTargets="CheckIfAllBuildsHavePublished;
+          Condition="'$(IsOrchestratedPublish)' != 'true'"
+          DependsOnTargets="SetArtifactBlobProps;
+                            SetChecksumBlobProps;
+                            CheckIfAllBuildsHavePublished;
                             FinalizeBuild" />
+
+  <Target Name="SetArtifactBlobProps">
+    <Error Condition="'$(ArtifactCloudDropURL)' == ''" Text="Missing property ArtifactCloudDropURL." />
+
+    <ParseBlobUrl FeedUrl="$(ArtifactCloudDropURL)">
+      <Output TaskParameter="BlobElements" ItemName="BlobElements" />
+    </ParseBlobUrl>
+
+    <PropertyGroup>
+      <ArtifactBlobContainerName>%(BlobElements.ContainerName)</ArtifactBlobContainerName>
+      <ArtifactBlobAccountName>%(BlobElements.AccountName)</ArtifactBlobAccountName>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="SetChecksumBlobProps">
+    <Error Condition="'$(ChecksumCloudDropURL)' == ''" Text="Missing property ChecksumCloudDropURL." />
+
+    <ParseBlobUrl FeedUrl="$(ChecksumCloudDropURL)">
+      <Output TaskParameter="BlobElements" ItemName="BlobElements" />
+    </ParseBlobUrl>
+
+    <PropertyGroup>
+      <ChecksumBlobContainerName>%(BlobElements.ContainerName)</ChecksumBlobContainerName>
+      <ChecksumBlobAccountName>%(BlobElements.AccountName)</ChecksumBlobAccountName>
+    </PropertyGroup>
+  </Target>
+
 
   <Target Name="CheckIfAllBuildsHavePublished">
     <CheckIfAllBuildsHavePublished AccountKey="$(ArtifactCloudDropAccessToken)"
-                                   AccountName="$(ArtifactCloudDropAccountName)"
-                                   ContainerName="$(ArtifactContainerName)"
+                                   AccountName="$(ArtifactBlobAccountName)"
+                                   ContainerName="$(ArtifactBlobContainerName)"
                                    NugetVersion="$(FullNugetVersion)"
                                    VersionBadgeMoniker="$(VersionBadgeMoniker)">
       <Output TaskParameter="HaveAllBuildsPublished" PropertyName="HaveAllBuildsPublished" />
     </CheckIfAllBuildsHavePublished>
   </Target>
-  
-  <Target Name="FinalizeBuild"
-          Condition=" '$(HaveAllBuildsPublished)' == 'True' ">
-    <CopyBlobsToLatest AccountName="$(ArtifactCloudDropAccountName)"
+
+  <Target Name="FinalizeBuild" Condition=" '$(HaveAllBuildsPublished)' == 'True' ">
+    <CopyBlobsToLatest AccountName="$(ArtifactBlobAccountName)"
                        AccountKey="$(ArtifactCloudDropAccessToken)"
-                       ContainerName="$(ArtifactContainerName)"
+                       ContainerName="$(ArtifactBlobContainerName)"
                        NugetVersion="$(FullNugetVersion)"
                        Channel="$(Channel)"
                        CommitHash="$(CommitHash)"
                        Coherent="$(Coherent)" />
 
-    <CopyBlobsToLatest AccountName="$(ChecksumCloudDropAccountName)"
+    <CopyBlobsToLatest AccountName="$(ChecksumBlobAccountName)"
                        AccountKey="$(ChecksumCloudDropAccessToken)"
-                       ContainerName="$(ChecksumContainerName)"
+                       ContainerName="$(ChecksumBlobContainerName)"
                        NugetVersion="$(FullNugetVersion)"
                        Channel="$(Channel)"
                        CommitHash="$(CommitHash)"

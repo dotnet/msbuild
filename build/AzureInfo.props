@@ -1,8 +1,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Product>Sdk</Product>
-    <IsOrchestratedPublish Condition="'$(PB_PublishBlobFeedUrl)' != ''">True</IsOrchestratedPublish>
-    <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
+    <IsOrchestratedPublish Condition="'$(PB_PublishBlobFeedUrl)' != ''">true</IsOrchestratedPublish>
 
     <!-- Values related to the download of assets from blob storage -->
     <DefaultCoreSetupBlobRootUrl>https://dotnetcli.azureedge.net/dotnet/</DefaultCoreSetupBlobRootUrl>
@@ -19,6 +18,8 @@
     <ArtifactContainerName Condition="'$(ArtifactContainerName)' == ''">dotnet</ArtifactContainerName>
     <ArtifactCloudDropAccessToken>$(PB_PublishBlobFeedKey)</ArtifactCloudDropAccessToken>
     <ArtifactCloudDropAccessToken Condition="'$(ArtifactCloudDropAccessToken)' == ''">$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>
+    <ArtifactCloudDropURL>$(PB_PublishBlobFeedUrl)</ArtifactCloudDropURL>
+    <ArtifactCloudDropURL Condition="'$(PB_PublishBlobFeedUrl)' == ''">"https://$(ArtifactCloudDropAccountName).blob.core.windows.net/$(ArtifactContainerName)/"</ArtifactCloudDropURL>
 
     <!-- Values related to the upload of checksums to blob storage -->
     <ChecksumCloudDropAccountName>$(CHECKSUM_STORAGE_ACCOUNT)</ChecksumCloudDropAccountName>
@@ -27,11 +28,13 @@
     <ChecksumContainerName Condition="'$(ChecksumContainerName)' == ''">dotnet</ChecksumContainerName>
     <ChecksumCloudDropAccessToken>$(PB_PublishBlobFeedKey)</ChecksumCloudDropAccessToken>
     <ChecksumCloudDropAccessToken Condition="'$(ChecksumCloudDropAccessToken)' == ''">$(CHECKSUM_STORAGE_KEY)</ChecksumCloudDropAccessToken>
-
+    <ChecksumCloudDropURL>$(PB_PublishBlobFeedUrl)</ChecksumCloudDropURL>
+    <ChecksumCloudDropURL Condition="'$(PB_PublishBlobFeedUrl)' == ''">"https://$(ChecksumCloudDropAccountName).blob.core.windows.net/$(ChecksumContainerName)/"</ChecksumCloudDropURL>
+    
     <!-- Values related to the upload of NuPkgs to the blob feed -->
     <BlobFeedExpectedURL>$(PB_PublishBlobFeedUrl)</BlobFeedExpectedURL>
     <BlobFeedExpectedURL Condition="'$(BlobFeedExpectedURL)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</BlobFeedExpectedURL>
     <BlobFeedCloudDropAccessToken>$(PB_PublishBlobFeedKey)</BlobFeedCloudDropAccessToken>
     <BlobFeedCloudDropAccessToken Condition="'$(BlobFeedCloudDropAccessToken)' == ''">$(BLOBFEED_STORAGE_KEY)</BlobFeedCloudDropAccessToken>
-  </PropertyGroup>
+</PropertyGroup>
 </Project>

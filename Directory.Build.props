@@ -36,7 +36,8 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
   <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
   <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(HostInfoProps)" />
   <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(BuildInfoProps)" />
-
+  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(NuGetPackagesDir)/microsoft.dotnet.build.tasks.feed/$(BuildTasksFeedToolVersion)/build/Microsoft.DotNet.Build.Tasks.Feed.targets" />
+  
   <Import Project="build/BranchInfo.props" />
   <Import Project="build/AzureInfo.props" />
 
