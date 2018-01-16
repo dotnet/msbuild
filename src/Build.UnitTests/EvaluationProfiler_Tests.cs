@@ -175,7 +175,11 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(2, totalGlobLocation.NumberOfHits);
         }
 
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
         [Fact]
+#endif
         public void VerifyParentIdData()
         {
             string contents = @"
@@ -215,7 +219,11 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(target.Id, messageTarget.ParentId);
         }
 
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
         [Fact]
+#endif
         public void VerifyIdsSanity()
         {
             var result = BuildAndGetProfilerResult(SpecData);
