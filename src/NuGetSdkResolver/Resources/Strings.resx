@@ -63,7 +63,7 @@
     <comment></comment>
   </data>
   <data name="CouldNotFindInstalledPackage" UESanitized="false" Visibility="Public">
-    <value>Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</value>
+    <value>Failed to resolve SDK '{0}'. A package was successfully restored but the package could not be located.</value>
     <comment></comment>
   </data>
   <data name="PackageWasNotInstalled" UESanitized="false" Visibility="Public">

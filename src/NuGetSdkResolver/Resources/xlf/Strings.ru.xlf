@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindInstalledPackage">
-        <source>Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</source>
-        <target state="new">Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</target>
+        <source>Failed to resolve SDK '{0}'. A package was successfully restored but the package could not be located.</source>
+        <target state="new">Failed to resolve SDK '{0}'. A package was successfully restored but the package could not be located.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageWasNotInstalled">

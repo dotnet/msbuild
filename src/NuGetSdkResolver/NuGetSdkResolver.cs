@@ -131,6 +131,8 @@ namespace NuGet.MSBuildSdkResolver
                             .GetAwaiter()
                             .GetResult();
 
+                        fallbackPackagePathResolver = new FallbackPackagePathResolver(NuGetPathContext.Create(settings));
+
                         // Look for a successful result, any errors are logged by NuGet
                         foreach (RestoreResult result in results.Select(i => i.Result).Where(i => i.Success))
                         {
