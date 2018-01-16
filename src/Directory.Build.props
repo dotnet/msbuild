@@ -34,7 +34,11 @@
 
     <!-- Create English satellite assemblies (which shouldn't be required, but preserves previous build behavior) -->
     <XlfLanguages>en;cs;de;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant</XlfLanguages>
-    
+
+    <!-- Work around issue where bootstrapped TaskHostTask seems to be loading the wrong assemblies.
+         https://github.com/Microsoft/msbuild/issues/2865-->
+    <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
+    <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
   </PropertyGroup>
 
   <ItemGroup>
