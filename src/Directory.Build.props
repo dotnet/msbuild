@@ -44,14 +44,6 @@
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="2.1.7" PrivateAssets="All" />
   </ItemGroup>
-
-  <ItemGroup>
-    <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
-         tests from picking up these files from the repo root. -->
-    <Content Include="$(RepoRoot)src\Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest"
-             Visible="false" Pack="false"/>
-  </ItemGroup>
-
   
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <!-- When targeting .NET Framework, Exe and unit test projects build with x86 architecture if Platform is AnyCPU,

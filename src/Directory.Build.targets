@@ -77,6 +77,13 @@
     <PackageReference Include="xunit.console" Version="$(XUnitVersion)" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(OutputType)' == 'Exe'">
+    <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
+         tests from picking up these files from the repo root. -->
+    <Content Include="$(RepoRoot)src\Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest"
+             Visible="false" Pack="false"/>
+  </ItemGroup>
+  
   <PropertyGroup>
     <!-- Native equivalent is /LARGEADDRESSAWARE on the linker -->
     <EditBinFlags Condition="'$(LargeAddressAware)'=='true'">$(EditBinFlags) /LARGEADDRESSAWARE</EditBinFlags>    
