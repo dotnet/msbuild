@@ -1,29 +1,29 @@
 ﻿using Shouldly;
 using System.IO;
 using System.Linq;
-using System.Text;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolverLoader_Tests
     {
-        private readonly StringBuilder _log;
-        private readonly MockLoggingContext _loggingContext;
+        private readonly MockLogger _logger;
+        private readonly LoggingContext _loggingContext;
 
         public SdkResolverLoader_Tests()
         {
-            _log = new StringBuilder();
+            _logger = new MockLogger();
+            ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            loggingService.RegisterLogger(_logger);
 
-            var logger = new MockLoggingService(message => _log.AppendLine(message));
-            var bec = new BuildEventContext(0, 0, 0, 0, 0);
-
-            _loggingContext = new MockLoggingContext(logger, bec);
+            _loggingContext = new MockLoggingContext(
+                loggingService,
+                new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
         }
 
         [Fact]
@@ -34,6 +34,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
 
             resolvers.Select(i => i.GetType()).ShouldBe(new [] { typeof(DefaultSdkResolver) });
+
+            _logger.ErrorCount.ShouldBe(0);
+            _logger.WarningCount.ShouldBe(0);
         }
 
         [Fact]
