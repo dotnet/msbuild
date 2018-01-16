@@ -1,5 +1,59 @@
 {
     "sign": [
-        
-    ]
+        {
+            "certificate": "Microsoft",
+            "strongName": "StrongName",
+            "values": [
+                "bin/MSBuild/net46/MSBuild.exe",
+                "bin/MSBuild/net46/Microsoft.Build.dll",
+                "bin/MSBuild/net46/Microsoft.Build.Framework.dll",
+                "bin/MSBuild/net46/Microsoft.Build.Tasks.Core.dll",
+                "bin/MSBuild/net46/Microsoft.Build.Utilities.Core.dll",
+
+                "bin/MSBuild/net46/*/*.resources.dll",
+
+                "bin/MSBuildTaskHost/net35/MSBuildTaskHost.exe",
+                "bin/MSBuildTaskHost/net35/*/MSBuildTaskHost.resources.dll",
+
+                "bin/MSBuild/x64/net46/MSBuild.exe",
+
+                "bin/MSBuildTaskHost/x64/net35/MSBuildTaskHost.exe",
+                "bin/Microsoft.Build.Conversion/net46/Microsoft.Build.Engine.dll",
+                "bin/Microsoft.Build.Conversion/net46/Microsoft.Build.Conversion.Core.dll",
+
+                "bin/MSBuild/netcoreapp2.0/MSBuild.dll",
+                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.dll",
+                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Framework.dll",
+                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Tasks.Core.dll",
+                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Utilities.Core.dll",
+
+                "bin/MSBuild/netcoreapp2.0/*/*.resources.dll",
+
+                "bin/ref/Microsoft.Build.Framework.Package/*/Microsoft.Build.Framework.dll",
+                "bin/ref/Microsoft.Build.Package/*/Microsoft.Build.dll",
+                "bin/ref/Microsoft.Build.Tasks.Core.Package/*/Microsoft.Build.Tasks.Core.dll",
+                "bin/ref/Microsoft.Build.Utilities.Core.Package/*/Microsoft.Build.Utilities.Core.dll"
+            ]
+        },
+        {
+            "certificate": "VsixSHA2",
+            "strongName": null,
+            "values": [
+                "VSSetup/Insertion/Microsoft.Build.vsix"
+            ]
+          },
+        {
+            "certificate": null,
+            "strongName": null,
+            "values": [
+                "packages/*.nupkg"
+            ]
+        }
+    ],
+    "exclude": [
+        "System.IO.Compression.dll",
+        "System.Runtime.InteropServices.RuntimeInformation.dll",
+        "System.Threading.Tasks.Dataflow.dll",
+        "System.Collections.Immutable.dll"
+      ]
 }
