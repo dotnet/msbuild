@@ -46,11 +46,10 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-3',
 
                             //  Should the build be Release?  The default is Debug
                             if (runtime == "Full") {
-                                script += " && build.cmd -ci"
+                                script += " && build\\cibuild.cmd"
                             }
-                            // .net core builds are localized (they need the satellites from the full framework build), run tests, and also build the nuget packages
                             else if (runtime == "CoreCLR") {
-                                script += " && build.cmd -ci -hostType Core"
+                                script += " && build\\cibuild.cmd -hostType Core"
                             }
 
                             batchFile(script)
