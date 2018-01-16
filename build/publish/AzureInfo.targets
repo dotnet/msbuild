@@ -14,7 +14,7 @@
       <ArtifactCloudDropAccountName>%(BlobElements.AccountName)</ArtifactCloudDropAccountName>
       <ChecksumCloudDropAccountName>%(BlobElements.AccountName)</ChecksumCloudDropAccountName>
       <PublishBlobFeedUrlBlobPath>%(BlobElements.BaseBlobPath)</PublishBlobFeedUrlBlobPath>
-      <BlobStoragePartialRelativePath>$(PublishBlobFeedUrlBlobPath.Replace('/index.json', ''))/assets</BlobStoragePartialRelativePath>
+      <BlobStoragePartialRelativePath>$(PublishBlobFeedUrlBlobPath.Replace('/index.json', ''))/assets/$(Product)</BlobStoragePartialRelativePath>
     </PropertyGroup>
   </Target>
 
