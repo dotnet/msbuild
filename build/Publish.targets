@@ -40,7 +40,7 @@
                              PublishCliVersionBadge" />
 
   <Target Name="GatherItemsForPattern"
-          DependsOnTargets="SetAzureProps">>
+          DependsOnTargets="SetAzureProps">
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)"
                      Condition=" '$(PublishNativeInstallers)' == 'true' "/>
