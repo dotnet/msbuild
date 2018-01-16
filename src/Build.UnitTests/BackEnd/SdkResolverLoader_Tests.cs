@@ -145,7 +145,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
-                LoadResolverAssemblyFunc = (resolverPath, loggingContext, location) => throw new Exception(expectedMessage),
+                LoadResolverAssemblyFunc = (resolverPath, loggingContext, location) =>
+                {
+                    throw new Exception(expectedMessage);
+                },
                 FindPotentialSdkResolversFunc = rootFolder => new List<string>
                 {
                     assemblyPath,
