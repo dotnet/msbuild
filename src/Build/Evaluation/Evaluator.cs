@@ -90,11 +90,6 @@ namespace Microsoft.Build.Evaluation
         };
 
         /// <summary>
-        /// Each evaluation has a unique ID.
-        /// </summary>
-        private static int s_evaluationId = BuildEventContext.InvalidEvaluationId;
-
-        /// <summary>
         /// Expander for evaluating conditions
         /// </summary>
         private readonly Expander<P, I> _expander;
@@ -734,9 +729,6 @@ namespace Microsoft.Build.Evaluation
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
 
-                _data.EvaluationId = NextEvaluationId();
-                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationId);
-
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -799,11 +791,9 @@ namespace Microsoft.Build.Evaluation
 #endif
                 projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-                _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"), projectFile)
-                {
-                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                    ProjectFile = projectFile
-                });
+                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
+                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
+                ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
 #if MSBUILDENABLEVSPROFILING
         string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
@@ -1477,7 +1467,7 @@ namespace Microsoft.Build.Evaluation
         {
             string startupDirectory = BuildParameters.StartupDirectory;
 
-            List<P> builtInProperties = new List<P>(12);
+            List<P> builtInProperties = new List<P>(19);
 
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath));
@@ -1486,6 +1476,8 @@ namespace Microsoft.Build.Evaluation
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture)));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild));
+
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)
             {
@@ -3059,8 +3051,6 @@ namespace Microsoft.Build.Evaluation
 
             return sb.ToString();
         }
-
-        private static int NextEvaluationId() => Interlocked.Increment(ref s_evaluationId);
     }
 
     /// <summary>

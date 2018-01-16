@@ -368,6 +368,23 @@ namespace Microsoft.Build.BackEnd.Logging
         void LogBuildFinished(bool success);
 
         /// <summary>
+        /// Logs that a project evaluation has started
+        /// </summary>
+        /// <param name="nodeId">The id of the node which is evaluating this project.</param>
+        /// <param name="submissionId">The id of the submission.</param>
+        /// <param name="projectFile">Project file to build</param>
+        /// <returns>The evaluation event context for the project.</returns>
+        BuildEventContext LogProjectEvaluationStarted(int nodeId, int submissionId, string projectFile);
+
+        /// <summary>
+        /// Logs that a project evaluation has finished
+        /// </summary>
+        /// <param name="projectEvaluationEventContext">Event context for the project.</param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
+        void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile);
+
+        /// <summary>
         /// Log that a project has started
         /// </summary>
         /// <param name="nodeBuildEventContext">The logging context of the node which is building this project.</param>

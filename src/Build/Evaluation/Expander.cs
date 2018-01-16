@@ -3156,57 +3156,80 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        // Execute the function given converted arguments
-                        // The only exception that we should catch to try a late bind here is missing method
-                        // otherwise there is the potential of running a function twice!
+                        bool wellKnownFunctionSuccess = false;
+
                         try
                         {
-#if FEATURE_TYPE_INVOKEMEMBER
-                            // First use InvokeMember using the standard binder - this will match and coerce as needed
-                            functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
-#else
-                            if (_invokeType == InvokeType.InvokeMethod)
+                            // First attempt to recognize some well-known functions to avoid binding
+                            // and potential first-chance MissingMethodExceptions
+                            wellKnownFunctionSuccess = TryExecuteWellKnownFunction(out functionResult, objectInstance, args);
+                        }
+                        // we need to preserve the same behavior on exceptions as the actual binder
+                        catch (Exception ex)
+                        {
+                            string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
+                            if (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
                             {
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, objectInstance, args, null, CultureInfo.InvariantCulture, null);
+                                return partiallyEvaluated;
                             }
-                            else if (_invokeType == InvokeType.GetPropertyOrField)
+
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message.Replace("\r\n", " "));
+                        }
+
+                        if (!wellKnownFunctionSuccess)
+                        {
+                            // Execute the function given converted arguments
+                            // The only exception that we should catch to try a late bind here is missing method
+                            // otherwise there is the potential of running a function twice!
+                            try
                             {
-                                MemberInfo memberInfo = BindFieldOrProperty();
-                                if (memberInfo is FieldInfo)
+#if FEATURE_TYPE_INVOKEMEMBER
+                                // First use InvokeMember using the standard binder - this will match and coerce as needed
+                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+#else
+                                if (_invokeType == InvokeType.InvokeMethod)
                                 {
-                                    functionResult = ((FieldInfo)memberInfo).GetValue(objectInstance);
+                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, objectInstance, args, null, CultureInfo.InvariantCulture, null);
+                                }
+                                else if (_invokeType == InvokeType.GetPropertyOrField)
+                                {
+                                    MemberInfo memberInfo = BindFieldOrProperty();
+                                    if (memberInfo is FieldInfo)
+                                    {
+                                        functionResult = ((FieldInfo)memberInfo).GetValue(objectInstance);
+                                    }
+                                    else
+                                    {
+                                        functionResult = ((PropertyInfo)memberInfo).GetValue(objectInstance);
+                                    }
                                 }
                                 else
                                 {
-                                    functionResult = ((PropertyInfo)memberInfo).GetValue(objectInstance);
+                                    throw new InvalidOperationException(_invokeType.ToString());
                                 }
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException(_invokeType.ToString());
-                            }
 #endif
-                        }
-                        catch (MissingMethodException ex) // Don't catch and retry on any other exception
-                        {
-                            // If we're invoking a method, then there are deeper attempts that
-                            // can be made to invoke the method
+                            }
+                            catch (MissingMethodException ex) // Don't catch and retry on any other exception
+                            {
+                                // If we're invoking a method, then there are deeper attempts that
+                                // can be made to invoke the method
 #if FEATURE_TYPE_INVOKEMEMBER
-                            if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
+                                if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
 #else
-                            if (_invokeType == InvokeType.InvokeMethod)
+                                if (_invokeType == InvokeType.InvokeMethod)
 #endif
-                            {
-                                // The standard binder failed, so do our best to coerce types into the arguments for the function
-                                // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true. 
-                                functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
-                            }
-                            else
-                            {
-                                // We were asked to get a property or field, and we found that we cannot
-                                // locate it. Since there is no further argument coersion possible
-                                // we'll throw right now.
-                                throw;
+                                {
+                                    // The standard binder failed, so do our best to coerce types into the arguments for the function
+                                    // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true. 
+                                    functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
+                                }
+                                else
+                                {
+                                    // We were asked to get a property or field, and we found that we cannot
+                                    // locate it. Since there is no further argument coersion possible
+                                    // we'll throw right now.
+                                    throw;
+                                }
                             }
                         }
                     }
@@ -3266,6 +3289,174 @@ namespace Microsoft.Build.Evaluation
 
                     return null;
                 }
+            }
+
+            /// <summary>
+            /// Shortcut to avoid calling into binding if we recognize some most common functions.
+            /// Binding is expensive and throws first-chance MissingMethodExceptions, which is
+            /// bad for debugging experience and has a performance cost.
+            /// A typical binding operation with exception can take ~1.500 ms; this call is ~0.050 ms
+            /// (rough numbers just for comparison).
+            /// See https://github.com/Microsoft/msbuild/issues/2217
+            /// </summary>
+            /// <param name="returnVal">The value returned from the function call</param>
+            /// <param name="objectInstance">Object that the function is called on</param>
+            /// <param name="args">arguments</param>
+            /// <returns>True if the well known function call binding was successful</returns>
+            private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
+            {
+                if (objectInstance is string)
+                {
+                    string text = (string)objectInstance;
+                    if (string.Equals(_methodMethodName, "Substring", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int startIndex;
+                        int length;
+                        if (TryGetArg(args, out startIndex))
+                        {
+                            returnVal = text.Substring(startIndex);
+                            return true;
+                        }
+                        else if (TryGetArgs(args, out startIndex, out length))
+                        {
+                            returnVal = text.Substring(startIndex, length);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, "Split", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string separator;
+                        if (TryGetArg(args, out separator) && separator.Length == 1)
+                        {
+                            returnVal = text.Split(separator[0]);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, "PadLeft", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int totalWidth;
+                        string paddingChar;
+                        if (TryGetArg(args, out totalWidth))
+                        {
+                            returnVal = text.PadLeft(totalWidth);
+                            return true;
+                        }
+                        else if (TryGetArgs(args, out totalWidth, out paddingChar) && paddingChar.Length == 1)
+                        {
+                            returnVal = text.PadLeft(totalWidth, paddingChar[0]);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, "TrimEnd", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string trimChars;
+                        if (TryGetArg(args, out trimChars) && trimChars.Length > 0)
+                        {
+                            returnVal = text.TrimEnd(trimChars.ToCharArray());
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, "get_Chars", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int index;
+                        if (TryGetArg(args, out index))
+                        {
+                            returnVal = text[index];
+                            return true;
+                        }
+                    }
+                }
+                else if (objectInstance is string[])
+                {
+                    string[] stringArray = (string[])objectInstance;
+                    if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int index;
+                        if (TryGetArg(args, out index))
+                        {
+                            returnVal = stringArray[index];
+                            return true;
+                        }
+                    }
+                }
+
+                returnVal = null;
+                return false;
+            }
+
+            private static bool TryGetArg(object[] args, out int arg0)
+            {
+                if (args.Length != 1)
+                {
+                    arg0 = 0;
+                    return false;
+                }
+
+                var value = args[0];
+                if (value is string && int.TryParse((string)value, out arg0))
+                {
+                    return true;
+                }
+
+                arg0 = 0;
+                return false;
+            }
+
+            private static bool TryGetArg(object[] args, out string arg0)
+            {
+                if (args.Length != 1)
+                {
+                    arg0 = null;
+                    return false;
+                }
+
+                arg0 = args[0] as string;
+                return arg0 != null;
+            }
+
+            private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
+            {
+                arg0 = 0;
+                arg1 = 0;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                var value0 = args[0] as string;
+                var value1 = args[1] as string;
+                if (value0 != null &&
+                    value1 != null &&
+                    int.TryParse(value0, out arg0) &&
+                    int.TryParse(value1, out arg1))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryGetArgs(object[] args, out int arg0, out string arg1)
+            {
+                arg0 = 0;
+                arg1 = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                var value0 = args[0] as string;
+                arg1 = args[1] as string;
+                if (value0 != null &&
+                    arg1 != null &&
+                    int.TryParse(value0, out arg0))
+                {
+                    return true;
+                }
+
+                return false;
             }
 
             /// <summary>
