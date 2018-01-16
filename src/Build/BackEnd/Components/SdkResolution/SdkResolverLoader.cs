@@ -10,12 +10,15 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     internal class SdkResolverLoader
     {
+#if !FEATURE_ASSEMBLY_LOADFROM
+        private readonly CoreClrAssemblyLoader _loader = new CoreClrAssemblyLoader();
+#endif
+
         internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
@@ -63,48 +66,48 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 .Select(t => t.type);
         }
 
-        protected virtual Assembly LoadResolverAssembly(
-            string resolverPath,
-            LoggingContext loggingContext,
-            ElementLocation location
-#if !FEATURE_ASSEMBLY_LOADFROM
-            , CoreClrAssemblyLoader loader
-#endif
-        )
+        protected virtual Assembly LoadResolverAssembly(string resolverPath, LoggingContext loggingContext, ElementLocation location)
         {
 #if FEATURE_ASSEMBLY_LOADFROM
-                return Assembly.LoadFrom(resolverPath);
+            return Assembly.LoadFrom(resolverPath);
 #else
-                loader.AddDependencyLocation(Path.GetDirectoryName(potentialResolver));
-                return loader.LoadFromPath(potentialResolver);
+            _loader.AddDependencyLocation(Path.GetDirectoryName(resolverPath));
+            return _loader.LoadFromPath(resolverPath);
 #endif
         }
 
         protected virtual void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
         {
-#if !FEATURE_ASSEMBLY_LOADFROM
-            var loader = new CoreClrAssemblyLoader();
-#endif
-
+            Assembly assembly;
             try
             {
-                Assembly assembly = LoadResolverAssembly(
-                    resolverPath,
-                    loggingContext,
-                    location
-#if !FEATURE_ASSEMBLY_LOADFROM
-                    , loader
-#endif
-                );
-
-                if (assembly != null)
-                {
-                    resolvers.AddRange(GetResolverTypes(assembly).Select(t => (SdkResolver)Activator.CreateInstance(t)));
-                }
+                assembly = LoadResolverAssembly(resolverPath, loggingContext, location);
             }
             catch (Exception e)
             {
-                loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
+                loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolverAssembly", resolverPath, e.Message);
+
+                return;
+            }
+
+            foreach (Type type in GetResolverTypes(assembly))
+            {
+                try
+                {
+                    resolvers.Add((SdkResolver)Activator.CreateInstance(type));
+                }
+                catch (TargetInvocationException e)
+                {
+                    // .NET wraps the original exception inside of a TargetInvocationException which masks the original message
+                    // Attempt to get the inner exception in this case, but fall back to the top exception message
+                    string message = e.InnerException?.Message ?? e.Message;
+
+                    loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", type.Name, message);
+                }
+                catch (Exception e)
+                {
+                    loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", type.Name, e.Message);
+                }
             }
         }
     }
