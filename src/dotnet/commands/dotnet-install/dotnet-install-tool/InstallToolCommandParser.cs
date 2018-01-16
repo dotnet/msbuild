@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
         {
             return Create.Command("tool",
                 LocalizableStrings.CommandDescription,
-                Accept.ExactlyOneArgument(o => "packageId")
+                Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageId)
                     .With(name: LocalizableStrings.PackageIdArgumentName,
                           description: LocalizableStrings.PackageIdArgumentDescription),
                 Create.Option(

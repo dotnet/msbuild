@@ -93,6 +93,11 @@ The error was:
         <target state="new">PACKAGE_ID</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Please specify one tool Package Id to install.</source>
+        <target state="new">Please specify one tool Package Id to install.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

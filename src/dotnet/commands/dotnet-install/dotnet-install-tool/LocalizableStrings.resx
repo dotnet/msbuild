@@ -123,6 +123,9 @@
   <data name="PackageIdArgumentDescription" xml:space="preserve">
     <value>NuGet Package Id of the tool to install.</value>
   </data>
+  <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
+    <value>Please specify one tool Package Id to install.</value>
+  </data>
   <data name="VersionOptionDescription" xml:space="preserve">
     <value>Version of the tool package in NuGet.</value>
   </data>
