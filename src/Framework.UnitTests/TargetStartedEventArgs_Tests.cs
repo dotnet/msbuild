@@ -31,8 +31,10 @@ namespace Microsoft.Build.UnitTests
             TargetStartedEventArgs targetStartedEvent = new TargetStartedEventArgs2();
             targetStartedEvent = new TargetStartedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile");
             targetStartedEvent = new TargetStartedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile", "ParentTarget", DateTime.Now);
+            targetStartedEvent = new TargetStartedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile", "ParentTarget", TargetBuiltReason.AfterTargets, DateTime.Now);
             targetStartedEvent = new TargetStartedEventArgs(null, null, null, null, null);
             targetStartedEvent = new TargetStartedEventArgs(null, null, null, null, null, null, DateTime.Now);
+            targetStartedEvent = new TargetStartedEventArgs(null, null, null, null, null, null, TargetBuiltReason.AfterTargets, DateTime.Now);
         }
 
         /// <summary>

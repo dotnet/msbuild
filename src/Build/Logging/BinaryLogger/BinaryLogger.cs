@@ -21,7 +21,14 @@ namespace Microsoft.Build.Logging
         //   - new record kinds: ProjectEvaluationStarted, ProjectEvaluationFinished
         // version 3:
         //   - new ProjectImportedEventArgs.ImportIgnored
-        internal const int FileFormatVersion = 3;
+        // version 4:
+        //   - new TargetSkippedEventArgs
+        //   - new TargetStartedEventArgs.BuildReason
+        // version 5:
+        //   - new EvaluationFinished.ProfilerResult
+        // version 6:
+        //   -  Ids and parent ids for the evaluation locations
+        internal const int FileFormatVersion = 6;
 
         private Stream stream;
         private BinaryWriter binaryWriter;

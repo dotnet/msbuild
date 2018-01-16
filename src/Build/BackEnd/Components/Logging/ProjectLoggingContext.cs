@@ -163,10 +163,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log that a target has started
         /// </summary>
-        internal TargetLoggingContext LogTargetBatchStarted(string projectFullPath, ProjectTargetInstance target, string parentTargetName)
+        internal TargetLoggingContext LogTargetBatchStarted(string projectFullPath, ProjectTargetInstance target, string parentTargetName, TargetBuiltReason buildReason)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
-            return new TargetLoggingContext(this, projectFullPath, target, parentTargetName);
+            return new TargetLoggingContext(this, projectFullPath, target, parentTargetName, buildReason);
         }
 
         /// <summary>

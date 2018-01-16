@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
 using Xunit;
 
@@ -108,6 +110,7 @@ namespace Microsoft.Build.UnitTests
                 "C:\\projectfile.proj",
                 "C:\\Common.targets",
                 "ParentTarget",
+                TargetBuiltReason.AfterTargets,
                 DateTime.Parse("12/12/2015 06:11:56 PM"));
 
             Roundtrip(args,
@@ -115,6 +118,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.ProjectFile,
                 e => e.TargetFile,
                 e => e.TargetName,
+                e => e.BuildReason.ToString(),
                 e => e.Timestamp.ToString());
         }
 
@@ -334,6 +338,36 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripProjectEvaluationFinishedEventArgsWithProfileData()
+        {
+            var args = new ProjectEvaluationFinishedEventArgs("Message")
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+                ProjectFile = @"C:\foo\bar.proj",
+                ProfilerResult = new ProfilerResult(new Dictionary<EvaluationLocation, ProfiledLocation>
+                {
+                    {
+                        new EvaluationLocation(1, 0, EvaluationPass.InitialProperties, "desc1", "file1", 7, "element1", "description", EvaluationLocationKind.Condition),
+                        new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 1)
+                    },
+                    {
+                        new EvaluationLocation(0, null, EvaluationPass.LazyItems, "desc2", "file1", null, "element2", "description2", EvaluationLocationKind.Glob),
+                        new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 2)
+                    },
+                    {
+                        new EvaluationLocation(2, 0, EvaluationPass.Properties, "desc2", "file1", null, "element2", "description2", EvaluationLocationKind.Element),
+                        new ProfiledLocation(TimeSpan.FromSeconds(1), TimeSpan.FromHours(2), 2)
+                    }
+                })
+            };
+
+            Roundtrip(args,
+                e => e.Message,
+                e => e.ProjectFile,
+                e => ToString(e.ProfilerResult.Value.ProfiledLocations));
+        }
+
+        [Fact]
         public void RoundtripProjectImportedEventArgs()
         {
             var args = new ProjectImportedEventArgs(
@@ -356,6 +390,32 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile);
+        }
+
+        [Fact]
+        public void RoundtripTargetSkippedEventArgs()
+        {
+            var args = new TargetSkippedEventArgs(
+                "Message")
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+                ProjectFile = "foo.csproj",
+                TargetName = "target",
+                ParentTarget = "bar",
+                BuildReason = TargetBuiltReason.DependsOn
+            };
+
+            Roundtrip(args,
+                e => e.ParentTarget,
+                e => e.Importance.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.TargetFile,
+                e => e.TargetName,
+                e => e.BuildReason.ToString());
         }
 
         [Fact]
@@ -409,6 +469,18 @@ namespace Microsoft.Build.UnitTests
         private string ToString(ITaskItem i)
         {
             return i.ItemSpec + string.Join(";", i.CloneCustomMetadata().Keys.OfType<string>().Select(k => i.GetMetadata(k)));
+        }
+
+        private string ToString(IReadOnlyDictionary<EvaluationLocation, ProfiledLocation> items)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in items)
+            {
+                sb.AppendLine(item.Key.ToString());
+                sb.AppendLine(item.Value.ToString());
+            }
+
+            return sb.ToString();
         }
 
         private void Roundtrip<T>(T args, params Func<T, string>[] fieldsToCompare)

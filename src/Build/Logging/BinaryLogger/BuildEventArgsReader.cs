@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 
 namespace Microsoft.Build.Logging
 {
@@ -108,6 +109,9 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.ProjectImported:
                     result = ReadProjectImportedEventArgs();
                     break;
+                case BinaryLogRecordKind.TargetSkipped:
+                    result = ReadTargetSkippedEventArgs();
+                    break;
                 default:
                     break;
             }
@@ -162,6 +166,30 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
+        private BuildEventArgs ReadTargetSkippedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            // Read unused Importance, it defaults to Low
+            ReadInt32();
+            var targetFile = ReadOptionalString();
+            var targetName = ReadOptionalString();
+            var parentTarget = ReadOptionalString();
+            var buildReason = (TargetBuiltReason)ReadInt32();
+
+            var e = new TargetSkippedEventArgs(
+                fields.Message);
+
+            SetCommonFields(e, fields);
+
+            e.ProjectFile = fields.ProjectFile;
+            e.TargetFile = targetFile;
+            e.TargetName = targetName;
+            e.ParentTarget = parentTarget;
+            e.BuildReason = buildReason;
+
+            return e;
+        }
+
         private BuildEventArgs ReadBuildStartedEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
@@ -212,6 +240,24 @@ namespace Microsoft.Build.Logging
                 ProjectFile = projectFile
             };
             SetCommonFields(e, fields);
+
+            // ProfilerResult was introduced in version 5
+            if (fileFormatVersion > 4)
+            {
+                var hasProfileData = ReadBoolean();
+                if (hasProfileData)
+                {
+                    var count = ReadInt32();
+
+                    var d = new Dictionary<EvaluationLocation, ProfiledLocation>(count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        d.Add(ReadEvaluationLocation(), ReadProfiledLocation());
+                    }
+                    e.ProfilerResult = new ProfilerResult(d);
+                }
+            }
+
             return e;
         }
 
@@ -269,6 +315,8 @@ namespace Microsoft.Build.Logging
             var projectFile = ReadOptionalString();
             var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
+            // BuildReason was introduced in version 4
+            var buildReason = fileFormatVersion > 3 ? (TargetBuiltReason) ReadInt32() : TargetBuiltReason.None;
 
             var e = new TargetStartedEventArgs(
                 fields.Message,
@@ -277,6 +325,7 @@ namespace Microsoft.Build.Logging
                 projectFile,
                 targetFile,
                 parentTarget,
+                buildReason,
                 fields.Timestamp);
             SetCommonFields(e, fields);
             return e;
@@ -742,6 +791,11 @@ namespace Microsoft.Build.Logging
             return Read7BitEncodedInt(binaryReader);
         }
 
+        private long ReadInt64()
+        {
+            return binaryReader.ReadInt64();
+        }
+
         private bool ReadBoolean()
         {
             return binaryReader.ReadBoolean();
@@ -750,6 +804,11 @@ namespace Microsoft.Build.Logging
         private DateTime ReadDateTime()
         {
             return new DateTime(binaryReader.ReadInt64(), (DateTimeKind)ReadInt32());
+        }
+
+        private TimeSpan ReadTimeSpan()
+        {
+            return new TimeSpan(binaryReader.ReadInt64());
         }
 
         private int Read7BitEncodedInt(BinaryReader reader)
@@ -774,6 +833,48 @@ namespace Microsoft.Build.Logging
                 shift += 7;
             } while ((b & 0x80) != 0);
             return count;
+        }
+
+        private ProfiledLocation ReadProfiledLocation()
+        {
+            var numberOfHits = ReadInt32();
+            var exclusiveTime = ReadTimeSpan();
+            var inclusiveTime = ReadTimeSpan();
+
+            return new ProfiledLocation(inclusiveTime, exclusiveTime, numberOfHits);
+        }
+
+        private EvaluationLocation ReadEvaluationLocation()
+        {
+            var elementName = ReadOptionalString();
+            var description = ReadOptionalString();
+            var evaluationDescription = ReadOptionalString();
+            var file = ReadOptionalString();
+            var kind = (EvaluationLocationKind)ReadInt32();
+            var evaluationPass = (EvaluationPass)ReadInt32();
+
+            int? line = null;
+            var hasLine = ReadBoolean();
+            if (hasLine)
+            {
+                line = ReadInt32(); 
+            }
+
+            // Id and parent Id were introduced in version 6
+            if (fileFormatVersion > 5)
+            {
+                var id = ReadInt64();
+                long? parentId = null;
+                var hasParent = ReadBoolean();
+                if (hasParent)
+                {
+                    parentId = ReadInt64();
+
+                }
+                return new EvaluationLocation(id, parentId, evaluationPass, evaluationDescription, file, line, elementName, description, kind);
+            }
+
+            return new EvaluationLocation(0, null, evaluationPass, evaluationDescription, file, line, elementName, description, kind);
         }
     }
 }

@@ -36,7 +36,8 @@ namespace Microsoft.Build.UnitTests
                 "file1.txt",
                 "file1.txtother",
                 "fie1.txt",
-                "fire1.txt"
+                "fire1.txt",
+                "file.bak.txt"
             };
 
             try
@@ -49,15 +50,16 @@ namespace Microsoft.Build.UnitTests
 
                 var patterns = new Dictionary<string, int>
                 {
-                    {"*.txt", 4},
-                    { "???.cs", 1},
-                    { "????.cs", 1},
+                    {"*.txt", 5},
+                    {"???.cs", 1},
+                    {"????.cs", 1},
                     {"file?.txt", 1},
                     {"fi?e?.txt", 2},
-                    { "???.*", 1},
-                    { "????.*", 3},
-                    { "*.???", 4},
-                    { "f??e1.txt", 2}
+                    {"???.*", 1},
+                    {"????.*", 4},
+                    {"*.???", 5},
+                    {"f??e1.txt", 2},
+                    {"file.*.txt", 1}
                 };
                 foreach (var pattern in patterns)
                 {
@@ -82,6 +84,22 @@ namespace Microsoft.Build.UnitTests
         [InlineData(
             @"src\**\inner\**\*.cs", // Include
             new string[] { }, // Excludes
+            new[] // Expected matchings
+            {
+                @"src\foo\inner\foo.cs",
+                @"src\foo\inner\foo\foo.cs",
+                @"src\foo\inner\bar\bar.cs",
+                @"src\bar\inner\baz.cs",
+                @"src\bar\inner\baz\baz.cs",
+                @"src\bar\inner\foo\foo.cs"
+            }
+        )]
+        [InlineData(
+            @"src\**\inner\**\*.cs", // Include
+            new[] // Excludes
+            {
+                @"src\foo\inner\foo.*.cs"
+            },
             new[] // Expected matchings
             {
                 @"src\foo\inner\foo.cs",
@@ -343,6 +361,7 @@ namespace Microsoft.Build.UnitTests
                 new Tuple<string, string, bool>("ab", "*ab", true),
                 new Tuple<string, string, bool>("ab", "a*b", true),
                 new Tuple<string, string, bool>("ab", "ab*", true),
+                new Tuple<string, string, bool>("aba", "ab*ba", false),
                 new Tuple<string, string, bool>("", "*", true),
 
                 // ? wildcard

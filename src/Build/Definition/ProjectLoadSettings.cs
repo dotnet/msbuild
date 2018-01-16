@@ -54,5 +54,10 @@ namespace Microsoft.Build.Evaluation
         /// Ignore invalid target files when evaluating the project
         /// </summary>
         IgnoreInvalidImports = 64,
+
+        /// <summary>
+        /// Whether to profile the evaluation
+        /// </summary>
+        ProfileEvaluation = 128,
     }
 }
