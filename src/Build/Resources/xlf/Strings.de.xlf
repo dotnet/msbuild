@@ -2002,8 +2002,8 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
-        <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="translated">MSB4237: Ein SDK-Resolver wurde gefunden, konnte aber nicht geladen werden. Fehler: {0}.</target>
+        <source>MSB4237: An SDK resolver was found but could not be loaded. {0}</source>
+        <target state="needs-review-translation">MSB4237: Ein SDK-Resolver wurde gefunden, konnte aber nicht geladen werden. Fehler: {0}.</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2080,6 +2080,52 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <source>Done writing report.</source>
         <target state="new">Done writing report.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CouldNotRunSdkResolver">
+        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
+        <target state="new">MSB4242: The SDK resolver "{0}" failed to run. {1}</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotRunNuGetSdkResolver">
+        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
+        <note>{StrBegin="MSB4243: "}</note>
+      </trans-unit>
+      <trans-unit id="FailedToParseGlobalJson">
+        <source>Failed to parse "{0}". {1}</source>
+        <target state="new">Failed to parse "{0}". {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetSdkResolverCouldNotFindInstalledPackage">
+        <source>MSB4244: Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</source>
+        <target state="new">MSB4244: Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</target>
+        <note>{StrBegin="MSB4244: "}</note>
+      </trans-unit>
+      <trans-unit id="NuGetSdkResolverPackageWasNotInstalled">
+        <source>MSB4245: Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</source>
+        <target state="new">MSB4245: Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</target>
+        <note>{StrBegin="MSB4245: "}</note>
+      </trans-unit>
+      <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="new">MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</target>
+        <note>{StrBegin="MSB4240: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResultVersionDifferentThanReference">
+        <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
+        <target state="new">MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</target>
+        <note>{StrBegin="MSB4241: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResolving">
+        <source>Resolving SDK '{0}'...</source>
+        <target state="new">Resolving SDK '{0}'...</target>
+        <note>
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
       </trans-unit>
     </body>
   </file>
