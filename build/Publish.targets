@@ -39,7 +39,8 @@
                              PublishNupkgToBlobFeed;
                              PublishCliVersionBadge" />
 
-  <Target Name="GatherItemsForPattern">
+  <Target Name="GatherItemsForPattern"
+          DependsOnTargets="SetAzureProps">>
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)"
                      Condition=" '$(PublishNativeInstallers)' == 'true' "/>
@@ -60,7 +61,8 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PublishCliVersionBadge">
+  <Target Name="PublishCliVersionBadge"
+          DependsOnTargets="SetAzureProps">
     <ItemGroup>
       <CliVersionBadgeToUpload Include="$(VersionBadge)" />
       <CliVersionBadgeToUpload Include="$(CoherentBadge)"
