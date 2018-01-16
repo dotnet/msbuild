@@ -293,6 +293,7 @@ namespace Microsoft.Build.Tasks
                     item.SetMetadata("ReferenceOutputAssembly", "false");
                     item.SetMetadata("LinkLibraryDependencies", "false");
                     item.SetMetadata("CopyLocal", "false");
+                    item.SetMetadata("SkipGetTargetFrameworkProperties", "true");
 
                     updatedProjectReferenceList.Add(item);
                 }
