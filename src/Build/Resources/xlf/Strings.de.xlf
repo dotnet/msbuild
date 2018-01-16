@@ -2066,6 +2066,21 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorWritingProfilerReport">
+        <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
+        <target state="new">MSBUILD : error MSB4239: Error writing profiling report. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReport">
+        <source>Writing profiler report to '{0}'...</source>
+        <target state="new">Writing profiler report to '{0}'...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReportDone">
+        <source>Done writing report.</source>
+        <target state="new">Done writing report.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
