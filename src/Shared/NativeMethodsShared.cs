@@ -547,13 +547,24 @@ namespace Microsoft.Build.Shared
 #endif
         }
 
+#if MONO
+	static bool platform_probbed;
+	static bool is_mac;
+#endif
+
         /// <summary>
         /// Gets a flag indicating if we are running under Mac OSX
         /// </summary>
         internal static bool IsOSX
         {
 #if MONO
-            get { return File.Exists("/usr/lib/libc.dylib"); }
+            get {
+		    if (!platform_probbed){
+			    is_mac = File.Exists("/usr/lib/libc.dylib");
+		            platform_probbed = true;
+		    }
+		    return is_mac;
+	    }
 #elif CLR2COMPATIBILITY
             get { return false; }
 #else
