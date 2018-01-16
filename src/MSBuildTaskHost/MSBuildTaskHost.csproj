@@ -5,8 +5,15 @@
   <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
 
   <PropertyGroup>
-    <TargetFramework>net3.5</TargetFramework>    
+    <TargetFramework>net35</TargetFramework>    
     <OutputType>Exe</OutputType>
+    <PlatformTarget Condition="'$(Platform)' == 'x64'">x64</PlatformTarget>
+
+    <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
+         This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
+         versions of this project -->
+    <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
+    
     <EnableDefaultItems>false</EnableDefaultItems>
     <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY</DefineConstants>
     <!-- Need pointers for getting environment block -->
