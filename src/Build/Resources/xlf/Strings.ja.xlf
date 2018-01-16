@@ -2091,21 +2091,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
-      <trans-unit id="FailedToParseGlobalJson">
-        <source>Failed to parse "{0}". {1}</source>
-        <target state="new">Failed to parse "{0}". {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NuGetSdkResolverCouldNotFindInstalledPackage">
-        <source>MSB4244: Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</source>
-        <target state="new">MSB4244: Failed to resolve SDK '{0}'. A package was successfully restored but the could not located.</target>
-        <note>{StrBegin="MSB4244: "}</note>
-      </trans-unit>
-      <trans-unit id="NuGetSdkResolverPackageWasNotInstalled">
-        <source>MSB4245: Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</source>
-        <target state="new">MSB4245: Failed to resolve SDK '{0}'. Package restore was successfully but a package with the ID of "{1}" was not installed.</target>
-        <note>{StrBegin="MSB4245: "}</note>
-      </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
         <target state="new">MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</target>

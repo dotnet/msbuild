@@ -257,5 +257,28 @@
     </ItemGroup>
   </Target>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="NuGetSdkResolverResolvedProjectReferencePath" />
+  </ItemGroup>
+
+  <Target Name="CopyNuGetSdkResolver" AfterTargets="ResolveProjectReferences">
+    <!-- This target adds content items which will cause the NuGet SDK resolver to be copied to the
+         SdkResolvers/NuGet.MSBuildSdkResolver subdirectory of the output folder.
+    -->
+
+    <Error Condition="'@(NuGetSdkResolverResolvedProjectReferencePath)' == ''" Text="Couldn't find NuGetSdkResolverResolvedProjectReferencePath item" />
+
+    <PropertyGroup>
+      <NuGetSdkResolverOutputPath>@(NuGetSdkResolverResolvedProjectReferencePath->'%(RootDir)%(Directory)')</NuGetSdkResolverOutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <!--<NuGetSdkResolverContent Include="$(NuGetSdkResolverOutputPath)**\*.*" />-->
+      <NuGetSdkResolverContent Include="$(NuGetSdkResolverOutputPath)NuGet.MSBuildSdkResolver.dll" />
+      <NuGetSdkResolverContent Include="$(NuGetSdkResolverOutputPath)**\NuGet.MSBuildSdkResolver.resources.dll" />
+      <Content Include="@(NuGetSdkResolverContent)" Link="SdkResolvers\NuGet.MSBuildSdkResolver\%(RecursiveDir)%(NuGetSdkResolverContent.Filename)%(NuGetSdkResolverContent.Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+  </Target>
+
   <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" />
 </Project>

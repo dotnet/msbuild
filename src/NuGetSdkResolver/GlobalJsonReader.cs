@@ -9,7 +9,7 @@ using System.IO;
 
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 
-namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
+namespace NuGet.MSBuildSdkResolver
 {
     /// <summary>
     /// Reads MSBuild related sections from a global.json.

@@ -130,7 +130,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     key => GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
             }
 
-            if (!SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
+            if (result != null && !SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
             {
                 // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.
                 loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
@@ -153,14 +153,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
 
-            if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
+            if (sdkResult != null)
             {
-                // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
-                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, sdkResult.Version);
-            }
+                if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
+                {
+                    // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
+                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, sdkResult.Version);
+                }
 
-            // Associate the element location of the resolved SDK reference
-            sdkResult.ElementLocation = sdkReferenceLocation;
+                // Associate the element location of the resolved SDK reference
+                sdkResult.ElementLocation = sdkReferenceLocation;
+            }
 
             return sdkResult;
         }

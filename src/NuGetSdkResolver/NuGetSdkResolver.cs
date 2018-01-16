@@ -12,12 +12,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using Microsoft.Build.Utilities;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 
-namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
+namespace NuGet.MSBuildSdkResolver
 {
     /// <summary>
     /// Represents a NuGet-based SDK resolver.  It is very important that this class does not reference any NuGet assemblies
@@ -25,7 +25,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
     /// Newtonsoft.Json if a global.json is found and it contains the msbuild-sdks section and a few NuGet assemblies to parse
     /// a version.  The remaining NuGet assemblies are then loaded to do a restore.
     /// </summary>
-    internal sealed class NuGetSdkResolver : NuGetSdkResolverBase
+    public sealed class NuGetSdkResolver : NuGetSdkResolverBase
     {
         public override string Name => nameof(NuGetSdkResolver);
 
@@ -33,6 +33,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
 
         public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
         {
+            // Escape hatch to disable this resolver
+            if (Traits.Instance.EscapeHatches.DisableNuGetSdkResolver)
+            {
+                return null;
+            }
+
             object parsedSdkVersion;
 
             // This resolver only works if the user specifies a version in a project or a global.json.
@@ -114,8 +120,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                 {
                     try
                     {
-                        context.Logger.LogMessage(ResourceUtilities.FormatResourceString("SdkResolving", sdk));
-
                         // Asynchronously run the restore without a commit which find the package on configured feeds, download, and unzip it without generating any other files
                         IReadOnlyList<RestoreResultPair> results = RestoreRunnerEx.RunWithoutCommit(
                                 context.ProjectFilePath,
@@ -139,14 +143,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution.NuGet
                                 {
                                     // This should never happen because we were told the package was successfully installed.
                                     // If we can't find it, we probably did something wrong with the NuGet API
-                                    errors.Add(ResourceUtilities.FormatResourceString("NuGetSdkResolverCouldNotFindInstalledPackage", sdk));
+                                    errors.Add(ResourceUtilities.FormatResourceString("CouldNotFindInstalledPackage", sdk));
                                 }
                             }
                             else
                             {
                                 // This should never happen because we were told the restore succeeded.
                                 // If we can't find the package from GetAllInstalled(), we probably did something wrong with the NuGet API
-                                errors.Add(ResourceUtilities.FormatResourceString("NuGetSdkResolverPackageWasNotInstalled", sdk, sdk.Name));
+                                errors.Add(ResourceUtilities.FormatResourceString("PackageWasNotInstalled", sdk, sdk.Name));
                             }
                         }
                     }
