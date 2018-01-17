@@ -16,7 +16,7 @@ param(
 
 if($Help)
 {
-    Write-Output "Usage: .\run-build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-Help]"
+    Write-Output "Usage: .\run-build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-NoBuild] [-Help]"
     Write-Output ""
     Write-Output "Options:"
     Write-Output "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
@@ -25,6 +25,17 @@ if($Help)
     Write-Output "  -NoBuild                           Skip building the product"
     Write-Output "  -Help                              Display this help message"
     exit 0
+}
+
+# The first 'pass' call to "dotnet msbuild build.proj" has a hard-coded "WriteDynamicPropsToStaticPropsFiles" target
+#    therefore, this call should not have other targets defined. Remove all targets passed in as 'extra parameters'.
+$ExtraParametersNoTargets = ""
+foreach ($param in $ExtraParameters.split())
+{
+    if((-not $param.StartsWith("/t")) -and (-not $param.StartsWith("/T")))
+    {
+        $ExtraParametersNoTargets += " {0}" -f $param
+    }
 }
 
 $env:CONFIGURATION = $Configuration;
@@ -86,7 +97,7 @@ if ($NoBuild)
 }
 else
 {
-    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParameters
+    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParametersNoTargets
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }
