@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>dotnet-migrate.Tests</AssemblyName>
     <AssetTargetFallback>$(AssetTargetFallback);netstandardapp1.5;dotnet5.4;portable-net451+win8</AssetTargetFallback>
@@ -28,6 +28,6 @@
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="FluentAssertions" Version="4.18.0" />
     <PackageReference Include="Moq" Version="4.7.25" />
-    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliMigrateVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(MicrosoftDotNetProjectJsonMigrationPackageVersion)" />
   </ItemGroup>
 </Project>
