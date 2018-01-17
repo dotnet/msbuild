@@ -556,11 +556,13 @@ namespace Microsoft.Build.Shared
         internal static bool IsOSX
         {
 #if MONO
-            get {
+            get
+            {
                 if (!_isOSX.HasValue)
                 {
                     _isOSX = File.Exists("/usr/lib/libc.dylib");
                 }
+
                 return _isOSX.Value;
             }
 #elif CLR2COMPATIBILITY
