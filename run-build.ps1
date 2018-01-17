@@ -34,7 +34,7 @@ foreach ($param in $ExtraParameters.split())
 {
     if((-not $param.StartsWith("/t")) -and (-not $param.StartsWith("/T")))
     {
-        $ExtraParametersNoTargets += " {0}" -f $param
+        $ExtraParametersNoTargets += "{0} " -f $param
     }
 }
 
