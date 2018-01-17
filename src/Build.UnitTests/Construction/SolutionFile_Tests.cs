@@ -7,10 +7,9 @@ using System.Collections.Generic;
 using System.IO;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Shared;
-
-
-
+using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
@@ -256,6 +255,56 @@ namespace Microsoft.Build.UnitTests.Construction
             {
                 File.Delete(proj1Path);
                 File.Delete(proj2Path);
+            }
+        }
+
+        /// <summary>
+        /// Test CanBeMSBuildFile
+        /// </summary>
+        [Fact]
+        public void CanBeMSBuildFileRejectsMSBuildLikeFiles()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                string rptprojProjContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+                    <Project xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" ToolsVersion=""2.0"">
+                      <DataSources />
+                      <Reports />
+                    </Project>";
+                string dwprojProjContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+                    <Project xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:ddl2=""http://schemas.microsoft.com/analysisservices/2003/engine/2"" xmlns:ddl2_2=""http://schemas.microsoft.com/analysisservices/2003/engine/2/2"" xmlns:ddl100_100=""http://schemas.microsoft.com/analysisservices/2008/engine/100/100"" xmlns:ddl200=""http://schemas.microsoft.com/analysisservices/2010/engine/200"" xmlns:ddl200_200=""http://schemas.microsoft.com/analysisservices/2010/engine/200/200"" xmlns:dwd=""http://schemas.microsoft.com/DataWarehouse/Designer/1.0"">
+                      <ProductVersion />
+                      <SchemaVersion />
+                      <State />
+                      <Database />
+                      <Cubes />
+                    </Project>";
+
+                string rptprojPath = env.CreateFile(".rptproj").Path;
+                File.WriteAllText(rptprojPath, rptprojProjContent);
+                string dqprojPath = env.CreateFile(".dwproj").Path;
+                File.WriteAllText(dqprojPath, dwprojProjContent);
+
+                // Create the SolutionFile object
+                string solutionFileContents =
+                    @"
+                    Microsoft Visual Studio Solution File, Format Version 8.00
+                        Project('{F14B399A-7131-4C87-9E4B-1186C45EF12D}') = 'PrtProj', '" + Path.GetFileName(rptprojPath) + @"', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
+                        EndProject
+                        Project('{D2ABAB84-BF74-430A-B69E-9DC6D40DDA17}') = 'DwProj', '" + Path.GetFileName(dqprojPath) + @"', '{DEA89696-F42B-4B58-B7EE-017FF40817D1}'
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
+                        EndProject";
+
+                string error = null;
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ProjectInSolution project1 = solution.ProjectsByGuid["{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}"];
+                ProjectInSolution project2 = solution.ProjectsByGuid["{DEA89696-F42B-4B58-B7EE-017FF40817D1}"];
+
+                project1.CanBeMSBuildProjectFile(out error).ShouldBe(false);
+                project2.CanBeMSBuildProjectFile(out error).ShouldBe(false);
             }
         }
 

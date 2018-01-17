@@ -14,7 +14,9 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -1224,6 +1226,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             private LegacyThreadingData _legacyThreadingData;
 
+            private ISdkResolverService _sdkResolverService;
+
             /// <summary>
             /// Constructor
             /// </summary>
@@ -1245,6 +1249,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _taskBuilder = new MockTaskBuilder();
                 ((IBuildComponent)_taskBuilder).InitializeComponent(this);
+
+                _sdkResolverService = new MockSdkResolverService();
+                ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
             }
 
             /// <summary>
@@ -1315,6 +1322,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     case BuildComponentType.TaskBuilder:
                         return (IBuildComponent)_taskBuilder;
+
+                    case BuildComponentType.SdkResolverService:
+                        return (IBuildComponent)_sdkResolverService;
 
                     default:
                         throw new ArgumentException("Unexpected type " + type);

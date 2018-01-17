@@ -16,7 +16,6 @@
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDocumentationFile>true</EnableDocumentationFile>
-    <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -230,8 +229,19 @@
     <Compile Include="BackEnd\Components\Scheduler\ScheduleTimeRecord.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulingPlan.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\DefaultSdkResolver.cs" />
-    <Compile Include="BackEnd\Components\SdkResolution\SdkResolution.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\ISdkResolverService.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverServiceFactory.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkLogger.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverContext.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverLoader.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverRequest.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverResponse.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\MainNodeSdkResolverService.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverService.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\HostedSdkResolverServiceBase.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResult.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResultFactory.cs" />
     <Compile Include="BackEnd\Shared\ConfigurationMetadata.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
@@ -255,6 +265,9 @@
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Definition\ProjectLoadSettings.cs" />
     <Compile Include="Definition\ToolsetLocalReader.cs" />
+    <Compile Include="Evaluation\Profiler\EvaluationLocationMarkdownPrettyPrinter.cs" />
+    <Compile Include="Evaluation\Profiler\EvaluationLocationPrettyPrinterBase.cs" />
+    <Compile Include="Evaluation\Profiler\EvaluationLocationTabSeparatedPrettyPrinter.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationProfiler.cs" />
     <Compile Include="Evaluation\ItemSpec.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />

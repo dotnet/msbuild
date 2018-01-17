@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v1.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <Import Project="..\dir.props" />
+  <PropertyGroup>
+    <ProjectGuid>{C7988833-3EF2-43F4-A170-34E8CCCB1320}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuGet.MSBuildSdkResolver</RootNamespace>
+    <AssemblyName>NuGet.MSBuildSdkResolver</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
+      <Project>{571f09db-a81a-4444-945c-6f7b530054cd}</Project>
+      <Name>Microsoft.Build.Framework</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GlobalJsonReader.cs" />
+    <Compile Include="NuGetSdkLogger.cs" />
+    <Compile Include="NuGetSdkResolver.cs" />
+    <Compile Include="NuGetSdkResolverBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\AssemblyResources.cs" />
+    <Compile Include="RestoreRunnerEx.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\AssemblyUtilities.cs">
+      <Link>Shared\AssemblyUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>Shared\BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>Shared\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <Link>Shared\ErrorUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EscapingUtilities.cs">
+      <Link>Shared\EscapingUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ExceptionHandling.cs">
+      <Link>Shared\ExceptionHandling.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.cs">
+      <Link>Shared\FileUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
+      <Link>Shared\FileUtilitiesRegex.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\InternalErrorException.cs">
+      <Link>Shared\InternalErrorException.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\NativeMethodsShared.cs">
+      <Link>Shared\NativeMethodsShared.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\OpportunisticIntern.cs">
+      <Link>Shared\OpportunisticIntern.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ResourceUtilities.cs">
+      <Link>Shared\ResourceUtilities.cs</Link>
+    </Compile>
+    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+      <Link>Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\StringBuilderCache.cs">
+      <Link>Shared\StringBuilderCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>Shared\Traits.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>Shared\VisualStudioLocationHelper.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+    <None Include="Resources\xlf\Strings.cs.xlf" />
+    <None Include="Resources\xlf\Strings.de.xlf" />
+    <None Include="Resources\xlf\Strings.es.xlf" />
+    <None Include="Resources\xlf\Strings.fr.xlf" />
+    <None Include="Resources\xlf\Strings.it.xlf" />
+    <None Include="Resources\xlf\Strings.ja.xlf" />
+    <None Include="Resources\xlf\Strings.ko.xlf" />
+    <None Include="Resources\xlf\Strings.pl.xlf" />
+    <None Include="Resources\xlf\Strings.pt-BR.xlf" />
+    <None Include="Resources\xlf\Strings.ru.xlf" />
+    <None Include="Resources\xlf\Strings.tr.xlf" />
+    <None Include="Resources\xlf\Strings.xlf" />
+    <None Include="Resources\xlf\Strings.zh-Hans.xlf" />
+    <None Include="Resources\xlf\Strings.zh-Hant.xlf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="..\dir.targets" />
+</Project>

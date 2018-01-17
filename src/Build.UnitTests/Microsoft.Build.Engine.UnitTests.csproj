@@ -97,6 +97,7 @@
     <Compile Include="BackEnd\CentralForwardingLogger_Tests.cs " />
     <Compile Include="BackEnd\ConfigurationMetadata_Tests.cs" />
     <Compile Include="BackEnd\CustomTaskHelper.cs" />
+    <Compile Include="BackEnd\MockSdkResolverService.cs" />
     <Compile Include="BackEnd\Scheduler_Tests.cs" />
     <Compile Include="BackEnd\ITestTaskHost.cs" />
     <Compile Include="BackEnd\Lookup_Tests.cs" />
@@ -104,7 +105,7 @@
     <Compile Include="BackEnd\MockLoggingService.cs" />
     <Compile Include="BackEnd\MockTaskBuilder.cs" />
     <Compile Include="BackEnd\MSBuild_Tests.cs" />
-    <Compile Include="BackEnd\SdkResolution_Tests.cs" />
+    <Compile Include="BackEnd\SdkResolverService_Tests.cs" />
     <Compile Include="BackEnd\SdkResolverLoader_Tests.cs" />
     <Compile Include="BackEnd\TargetBuilder_Tests.cs" />
     <Compile Include="BackEnd\EventRedirectorToSink_Tests.cs " />

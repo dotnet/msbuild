@@ -25,6 +25,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.BackEnd.SdkResolution;
 
 namespace Microsoft.Build.Execution
 {
@@ -135,6 +136,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private LegacyThreadingData _legacyThreadingData;
 
+        /// <summary>
+        /// The current <see cref="ISdkResolverService"/> instance.
+        /// </summary>
+        private ISdkResolverService _sdkResolverService;
+
 #if !FEATURE_NAMED_PIPES_FULL_DUPLEX
         private string _clientToServerPipeHandle;
         private string _serverToClientPipeHandle;
@@ -176,6 +182,13 @@ namespace Microsoft.Build.Execution
             _globalConfigCache = (this as IBuildComponentHost).GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
             _taskHostNodeManager = (this as IBuildComponentHost).GetComponent(BuildComponentType.TaskHostNodeManager) as INodeManager;
 
+            // Create a factory for the out-of-proc SDK resolver service which can pass our SendPacket delegate to be used for sending packets to the main node
+            OutOfProcNodeSdkResolverServiceFactory sdkResolverServiceFactory = new OutOfProcNodeSdkResolverServiceFactory(SendPacket);
+
+            ((IBuildComponentHost) this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
+
+            _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+            
             if (s_projectRootElementCache == null)
             {
                 s_projectRootElementCache = new ProjectRootElementCache(true /* automatically reload any changes from disk */);
@@ -192,6 +205,8 @@ namespace Microsoft.Build.Execution
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.BuildRequestUnblocker, BuildRequestUnblocker.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeConfiguration, NodeConfiguration.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ResolveSdkResponse, SdkResolverResponse.FactoryForDeserialization, _sdkResolverService as INodePacketHandler);
         }
 
         /// <summary>
@@ -472,6 +487,9 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            // Signal the SDK resolver service to shutdown
+            ((IBuildComponent)_sdkResolverService).ShutdownComponent();
+
             // Dispose of any build registered objects
             IRegisteredTaskObjectCache objectCache = (IRegisteredTaskObjectCache)(_componentFactories.GetComponent(BuildComponentType.RegisteredTaskObjectCache));
             objectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
@@ -598,7 +616,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Callback for logging packets to be sent.
         /// </summary>
-        private void SendLoggingPacket(INodePacket packet)
+        private void SendPacket(INodePacket packet)
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
@@ -751,7 +769,7 @@ namespace Microsoft.Build.Execution
 
             _loggingService = _componentFactories.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
 
-            BuildEventArgTransportSink sink = new BuildEventArgTransportSink(SendLoggingPacket);
+            BuildEventArgTransportSink sink = new BuildEventArgTransportSink(SendPacket);
 
             _shutdownException = null;
 

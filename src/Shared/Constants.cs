@@ -46,6 +46,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
 
+        /// <summary>
+        /// The name of the environment variable that users can specify to override where NuGet assemblies are loaded from in the NuGetSdkResolver.
+        /// </summary>
+        internal const string NuGetAssemblyPathEnvironmentVariableName = "MSBUILD_NUGET_PATH";
 
         /// <summary>
         /// The name of the target to run when a user specifies the /restore command-line argument.

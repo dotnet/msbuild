@@ -1166,7 +1166,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
-        <target state="translated">如果 MSBuild 偵錯無法正確運作，請確認是否已在 Visual Studio 中啟用 [Just My Code] 功能、以及是否已選取 Managed 偵錯工具。</target>
+        <target state="translated">如果 MSBuild 偵錯無法正確運作，請確認是否已在 Visual Studio 中啟用 [Just My Code] 功能、以及是否已選取受控偵錯工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="DebuggingSolutionFiles">

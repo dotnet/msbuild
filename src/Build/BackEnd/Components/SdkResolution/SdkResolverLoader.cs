@@ -10,8 +10,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.BackEnd.SdkResolution
 {
     internal class SdkResolverLoader
     {
@@ -20,10 +21,14 @@ namespace Microsoft.Build.BackEnd
         {
             // Always add the default resolver
             var resolvers = new List<SdkResolver> {new DefaultSdkResolver()};
+
             var potentialResolvers = FindPotentialSdkResolvers(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"));
 
-            if (potentialResolvers.Count == 0) return resolvers;
+            if (potentialResolvers.Count == 0)
+            {
+                return resolvers;
+            }
 
 #if !FEATURE_ASSEMBLY_LOADFROM
             var loader = new CoreClrAssemblyLoader();
@@ -41,12 +46,12 @@ namespace Microsoft.Build.BackEnd
 
                     resolvers.AddRange(assembly.ExportedTypes
                         .Select(type => new {type, info = type.GetTypeInfo()})
-                        .Where(t => t.info.IsClass && t.info.IsPublic && typeof(SdkResolver).IsAssignableFrom(t.type))
+                        .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
                         .Select(t => (SdkResolver) Activator.CreateInstance(t.type)));
                 }
                 catch (Exception e)
                 {
-                    loggingContext.LogWarning(string.Empty, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
+                    loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
                 }
 
             return resolvers.OrderBy(t => t.Priority).ToList();

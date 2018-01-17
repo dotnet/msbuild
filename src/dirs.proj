@@ -22,6 +22,7 @@
     <Project Include="Build.UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />
     <Project Include="Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.csproj" />
     <Project Include="UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
+    <Project Include="NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj" />
   </ItemGroup>
 
   <Import Project="dir.targets" />

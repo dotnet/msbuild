@@ -81,7 +81,7 @@ namespace Microsoft.Build.Shared
 
             assemblyName.Version = _currentAssemblyVersion;
 
-            return AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+            return context.LoadFromAssemblyName(assemblyName);
         }
 
         private Assembly TryResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -452,6 +453,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public TransientSdkResolution(Dictionary<string, string> mapping)
         {
             _mapping = mapping;
+            
             CallResetForTests(new List<SdkResolver> { new TestSdkResolver(_mapping) });
         }
 
@@ -467,12 +469,15 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <param name="resolvers"></param>
         private static void CallResetForTests(IList<SdkResolver> resolvers)
         {
-            // Get the Singleton and call InitializeForTests
-            var t = typeof(Evaluation.ProjectCollection).GetTypeInfo().Assembly.GetType("Microsoft.Build.BackEnd.SdkResolution");
-            var method = t.GetMethod("InitializeForTests", BindingFlags.NonPublic | BindingFlags.Instance);
-            var instanceMethod = t.GetProperty("Instance", BindingFlags.Static | BindingFlags.NonPublic);
-            var instance = instanceMethod.GetValue(null);
-            method.Invoke(instance, new[] { resolvers });
+            Type sdkResolverServiceType = typeof(ProjectCollection).GetTypeInfo().Assembly.GetType("Microsoft.Build.BackEnd.SdkResolution.SdkResolverService");
+
+            PropertyInfo instancePropertyInfo = sdkResolverServiceType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+
+            object sdkResolverService = instancePropertyInfo.GetValue(null);
+
+            MethodInfo initializeForTestsMethodInfo = sdkResolverServiceType.GetMethod("InitializeForTests", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            initializeForTestsMethodInfo.Invoke(sdkResolverService, new object[] { null, resolvers });
         }
 
         private class TestSdkResolver : SdkResolver

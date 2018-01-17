@@ -13,6 +13,9 @@
     <description>This package contains the localized satellite assemblies for MSBuild. Reference this package only if you want msbuild output to be localized in cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant.</description>
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>MSBuild</tags>
+    <contentFiles>
+      <files include="**" buildAction="None" copyToOutput="true" flatten="false" />
+    </contentFiles>
   </metadata>
   <files>
 
@@ -79,5 +82,21 @@
     <file src="$outputPath$tr\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\tr\Microsoft.Build.Utilities.Core.resources.dll" />
     <file src="$outputPath$zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" />
     <file src="$outputPath$zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" />
+
+    <!-- NuGet.MSBuildSdkResolver.dll -->
+    <file src="$outputPath$cs\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\cs\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$de\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\de\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$en\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\en\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$es\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\es\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$fr\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\fr\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$it\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\it\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$ja\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\ja\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$ko\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\ko\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$pl\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\pl\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$pt-BR\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\pt-BR\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$ru\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\ru\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$tr\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\tr\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$zh-Hans\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hans\NuGet.MSBuildSdkResolver.resources.dll"/>
+    <file src="$outputPath$zh-Hant\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hant\NuGet.MSBuildSdkResolver.resources.dll"/>
   </files>
 </package>

@@ -112,6 +112,16 @@ namespace Microsoft.Build.Utilities
         // it's unneeded (at least by the 16.0 timeframe).
         public readonly bool UseCaseSensitiveItemNames = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1";
 
+        /// <summary>
+        /// Disable the use of any caching when resolving SDKs.
+        /// </summary>
+        public readonly bool DisableSdkResolutionCache = Environment.GetEnvironmentVariable("MSBUILDDISABLESDKCACHE") == "1";
+
+        /// <summary>
+        /// Disable the NuGet-based SDK resolver.
+        /// </summary>
+        public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
+
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
