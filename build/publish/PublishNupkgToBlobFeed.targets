@@ -9,7 +9,7 @@
     <Error Condition="'$(BlobFeedCloudDropAccessToken)' == ''" Text="Missing property BlobFeedCloudDropAccessToken." />
     <Error Condition="'$(BlobFeedExpectedURL)' == ''" Text="Missing property BlobFeedExpectedURL." />
     
-    <Message Text="Publish NuPkgs to Blob feed started" />
+    <Message Text="Publish NuPkgs to Blob feed started: $(BlobFeedExpectedURL)" />
     <PushToBlobFeed ExpectedFeedUrl="$(BlobFeedExpectedURL)"
                     AccountKey="$(BlobFeedCloudDropAccessToken)"
                     ItemsToPush="@(NupkgsForPublishing)"
