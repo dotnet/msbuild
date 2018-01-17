@@ -557,7 +557,8 @@ namespace Microsoft.Build.Shared
         {
 #if MONO
             get {
-                if (!_isOSX.HasValue) {
+                if (!_isOSX.HasValue)
+                {
                     _isOSX = File.Exists("/usr/lib/libc.dylib");
                 }
                 return _isOSX.Value;
