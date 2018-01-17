@@ -23,7 +23,7 @@
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
   </ItemGroup>
 
-  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFramework)' == 'net46'" DependsOnTargets="ResolvePackageDependenciesForBuild" BeforeTargets="AssignTargetPaths">
+  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFramework)' == 'net46'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
       <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-x86/native/hostfxr.dll'">
         <Link>x86/hostfxr.dll</Link>

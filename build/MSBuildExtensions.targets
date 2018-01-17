@@ -86,7 +86,7 @@
     </MSBuild>
   </Target>
 
-  <Target Name="GenerateBundledVersionsProps">
+  <Target Name="GenerateBundledVersionsProps" DependsOnTargets="RunResolvePackageDependencies">
     <PropertyGroup>
       <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
     </PropertyGroup>
