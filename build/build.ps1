@@ -289,7 +289,7 @@ function GetLogCmd([string] $logName)
 
     # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
     if ($ci) {
-      $logCmd += " /flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "logName.log") + '"'
+      $logCmd += " /flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"'
     }
   } else {
     $logCmd = ""
