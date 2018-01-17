@@ -67,7 +67,6 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 // All we know about is path to msbuild.exe as the command-line arg[0]
-                // FIXME: we have added a func for command line arg now.. does this need to be changed?
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
@@ -395,7 +394,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 var msBuildAssembly = Path.Combine(env.BuildDirectory, "Microsoft.Build.dll");
 
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => msBuildAssembly, ReturnNull, ReturnNull,
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => msBuildAssembly, ReturnNull,
                     env.VsInstanceMock, env.EnvironmentMock);
 
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
@@ -414,8 +413,8 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 var msBuildAssembly = Path.Combine(env.BuildDirectory64, "Microsoft.Build.dll");
 
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => msBuildAssembly, ReturnNull,
-                    ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => msBuildAssembly, ReturnNull,
+                    env.VsInstanceMock, env.EnvironmentMock);
 
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(env.BuildDirectory64);

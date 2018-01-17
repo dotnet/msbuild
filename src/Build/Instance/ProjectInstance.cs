@@ -32,6 +32,7 @@ using System.IO;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Execution
@@ -262,7 +263,7 @@ namespace Microsoft.Build.Execution
             BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext, projectCollection.SdkResolution);
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext);
         }
 
         /// <summary>
@@ -312,7 +313,7 @@ namespace Microsoft.Build.Execution
         public ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, projectCollection.SdkResolution);
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext);
         }
 
         /// <summary>
@@ -369,11 +370,13 @@ namespace Microsoft.Build.Execution
         /// <param name="toolsVersion">The tools version.</param>
         /// <param name="visualStudioVersionFromSolution">The version of the solution, used to help determine which sub-toolset to use.</param>
         /// <param name="projectCollection">Project collection</param>
+        /// <param name="sdkResolverService">An <see cref="ISdkResolverService"/> instance to use when resolving SDKs.</param>
+        /// <param name="submissionId">The current build submission ID.</param>
         /// <returns>A new project instance</returns>
-        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, int visualStudioVersionFromSolution, ProjectCollection projectCollection)
+        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, projectCollection.SdkResolution);
+            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
         /// <summary>
@@ -381,7 +384,7 @@ namespace Microsoft.Build.Execution
         /// Assumes the project path is already normalized.
         /// Used by the RequestBuilder.
         /// </summary>
-        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext)
+        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
@@ -389,7 +392,7 @@ namespace Microsoft.Build.Execution
 
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
 
-            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, ProjectCollection.GlobalProjectCollection.SdkResolution);
+            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
         /// <summary>
@@ -397,12 +400,12 @@ namespace Microsoft.Build.Execution
         /// Assumes the project path is already normalized.
         /// Used by this class when generating legacy solution wrappers.
         /// </summary>
-        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext)
+        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
             ErrorUtilities.VerifyThrowArgumentNull(buildParameters, "buildParameters");
-            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, ProjectCollection.GlobalProjectCollection.SdkResolution);
+            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
         /// <summary>
@@ -418,7 +421,7 @@ namespace Microsoft.Build.Execution
             _directory = directory;
             _projectFileLocation = ElementLocation.Create(fullPath);
             _hostServices = hostServices;
-
+            
             EvaluationId = data.EvaluationId;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
@@ -1897,7 +1900,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a set of project instances which represent the project dependency graph for a solution build.
         /// </summary>
-        internal static ProjectInstance[] LoadSolutionForBuild(string projectFile, PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext projectBuildEventContext, bool isExplicitlyLoaded, IReadOnlyCollection<string> targetNames)
+        internal static ProjectInstance[] LoadSolutionForBuild(string projectFile, PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext projectBuildEventContext, bool isExplicitlyLoaded, IReadOnlyCollection<string> targetNames, ISdkResolverService sdkResolverService, int submissionId)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
             ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances, "globalPropertiesInstances");
@@ -1925,11 +1928,11 @@ namespace Microsoft.Build.Execution
                 {
                     // Spawn the Orcas SolutionWrapperProject generator.  
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedExplicitToolsVersion", toolsVersion);
-                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded);
+                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
                 }
                 else
                 {
-                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersion, loggingService, projectBuildEventContext, targetNames);
+                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersion, loggingService, projectBuildEventContext, targetNames, sdkResolverService, submissionId);
                 }
             }
 
@@ -1947,12 +1950,12 @@ namespace Microsoft.Build.Execution
                 if (solutionVersion <= 9) /* Whidbey or before */
                 {
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "2.0", solutionVersion);
-                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "2.0", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded);
+                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "2.0", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
                 }
                 else if (solutionVersion == 10) /* Orcas */
                 {
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "3.5", solutionVersion);
-                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "3.5", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded);
+                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "3.5", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
                 }
                 else
                 {
@@ -1966,7 +1969,7 @@ namespace Microsoft.Build.Execution
                     }
 
                     string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(explicitToolsVersion: null, toolsVersionFromProject: toolsVersion, getToolset: buildParameters.GetToolset, defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion);
-                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersionToUse, loggingService, projectBuildEventContext, targetNames);
+                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersionToUse, loggingService, projectBuildEventContext, targetNames, sdkResolverService, submissionId);
                 }
             }
 
@@ -2192,15 +2195,20 @@ namespace Microsoft.Build.Execution
         /// <param name="loggingService">The logging service used to log messages etc. from the solution wrapper generator.</param>
         /// <param name="projectBuildEventContext">The build event context in which this project is being constructed.</param>
         /// <param name="targetNames">A collection of target names that the user requested be built.</param>
+        /// <param name="sdkResolverService"></param>
+        /// <param name="submissionId"></param>
         /// <returns>The ProjectRootElement for the root traversal and each of the metaprojects.</returns>
         private static ProjectInstance[] GenerateSolutionWrapper
+
             (
                 string projectFile,
                 IDictionary<string, string> globalProperties,
                 string toolsVersion,
                 ILoggingService loggingService,
                 BuildEventContext projectBuildEventContext,
-                IReadOnlyCollection<string> targetNames
+                IReadOnlyCollection<string> targetNames,
+                ISdkResolverService sdkResolverService,
+                int submissionId
             )
         {
             SolutionFile sp = SolutionFile.Parse(projectFile);
@@ -2218,7 +2226,7 @@ namespace Microsoft.Build.Execution
             // It's needed to determine which <UsingTask> tags to put in, whether to put a ToolsVersion parameter
             // on the <MSBuild> task tags, and what MSBuildToolsPath to use when scanning child projects
             // for dependency information.
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, globalProperties, toolsVersion, projectBuildEventContext, loggingService, targetNames);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, globalProperties, toolsVersion, projectBuildEventContext, loggingService, targetNames, sdkResolverService, submissionId);
             return instances;
         }
 
@@ -2241,19 +2249,21 @@ namespace Microsoft.Build.Execution
         /// <param name="loggingService">The logging service used to log messages etc. from the solution wrapper generator.</param>
         /// <param name="projectBuildEventContext">The build event context in which this project is being constructed.</param>
         /// <param name="isExplicitlyLoaded"><code>true</code> if the project is explicitly loaded, otherwise <code>false</code>.</param>
+        /// <param name="sdkResolverService">An <see cref="ISdkResolverService"/> to use when resolving SDKs.</param>
+        /// <param name="submissionId"></param>
         /// <returns>An appropriate ProjectRootElement</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM
-            (
-            string projectFile,
+        (string projectFile,
             IDictionary<string, string> globalProperties,
             string toolsVersion,
             ProjectRootElementCache projectRootElementCache,
             BuildParameters buildParameters,
             ILoggingService loggingService,
             BuildEventContext projectBuildEventContext,
-            bool isExplicitlyLoaded
-            )
+            bool isExplicitlyLoaded,
+            ISdkResolverService sdkResolverService,
+            int submissionId)
         {
             // Pass the toolsVersion of this project through, which will never be null -- either we passed the /tv:nn
             // switch straight through, or we fabricated a ToolsVersion based on the solution version.  
@@ -2319,7 +2329,7 @@ namespace Microsoft.Build.Execution
             ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded,
                 preserveFormatting: false);
             projectRootElement.DirectoryPath = Path.GetDirectoryName(projectFile);
-            ProjectInstance instance = new ProjectInstance(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext);
+            ProjectInstance instance = new ProjectInstance(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext, sdkResolverService, submissionId);
             return new ProjectInstance[] { instance };
         }
 
@@ -2367,7 +2377,7 @@ namespace Microsoft.Build.Execution
         /// Tools version may be null.
         /// Does not set mutability.
         /// </summary>
-        private void Initialize(ProjectRootElement xml, IDictionary<string, string> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, SdkResolution sdkResolution)
+        private void Initialize(ProjectRootElement xml, IDictionary<string, string> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService = null, int submissionId = BuildEventContext.InvalidSubmissionId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
@@ -2458,7 +2468,7 @@ namespace Microsoft.Build.Execution
 
             ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
-            _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(this, xml, buildParameters.ProjectLoadSettings, buildParameters.MaxNodeCount, buildParameters.EnvironmentPropertiesInternal, loggingService, new ProjectItemInstanceFactory(this), buildParameters.ToolsetProvider, ProjectRootElementCache, buildEventContext, this /* for debugging only */, sdkResolution);
+            _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(this, xml, buildParameters.ProjectLoadSettings, buildParameters.MaxNodeCount, buildParameters.EnvironmentPropertiesInternal, loggingService, new ProjectItemInstanceFactory(this), buildParameters.ToolsetProvider, ProjectRootElementCache, buildEventContext, this /* for debugging only */, sdkResolverService ?? SdkResolverService.Instance, submissionId);
 
             ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }

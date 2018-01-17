@@ -536,11 +536,6 @@ namespace Microsoft.Build.Evaluation
         Remove = 3,
         Update = 2,
     }
-    public sealed partial class ProfilerResultPrettyPrinter
-    {
-        public ProfilerResultPrettyPrinter() { }
-        public static string GetMarkdownContent(Microsoft.Build.Framework.Profiler.ProfilerResult result) { throw null; }
-    }
     [System.Diagnostics.DebuggerDisplayAttribute("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={_data._globalProperties.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
     public partial class Project
     {

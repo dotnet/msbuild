@@ -294,7 +294,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="translated">MSB3071: 從 A: 到 Z: 的所有磁碟機代號目前都在使用中。由於工作目錄 "{0}" 是 UNC 路徑，因此 "Exec" 工作需要有可用的磁碟機代號以便對應 UNC 路徑。請先中斷連接一或多個共用資源以釋放磁碟機代號，或指定本機工作目錄，再嘗試重新執行這個命令。</target>
+        <target state="translated">MSB3071: 從 A: 到 Z: 的所有磁碟機代號目前都在使用中。由於工作目錄 "{0}" 是 UNC 路徑，因此 "Exec" 工作需要有可用的磁碟機代號以便對應 UNC 路徑。請先中斷一或多個共用資源的連線以釋放磁碟機代號，或指定本機工作目錄，再嘗試重新執行這個命令。</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandFailed">
@@ -1109,7 +1109,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.BadImageFormat">
         <source>MSB3574: Did not recognize "{0}" as a managed assembly.</source>
-        <target state="translated">MSB3574: 無法辨識 "{0}" 為 Managed 組件。</target>
+        <target state="translated">MSB3574: 無法辨識 "{0}" 為受控組件。</target>
         <note>{StrBegin="MSB3574: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteAssembly">
@@ -1184,7 +1184,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MissingFile">
         <source>MSB3819: Cannot find assembly "{0}", which may contain managed resources that need to be included in this app package.  Please ensure that this assembly exists.</source>
-        <target state="translated">MSB3819: 找不到組件 "{0}"，該組件可能包含必須包括在這個應用程式封裝中的 Managed 資源。請確定這個組件存在。</target>
+        <target state="translated">MSB3819: 找不到組件 "{0}"，該組件可能包含必須包括在這個應用程式封裝中的受控資源。請確定這個組件存在。</target>
         <note>{StrBegin="MSB3819: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PathTooLong">

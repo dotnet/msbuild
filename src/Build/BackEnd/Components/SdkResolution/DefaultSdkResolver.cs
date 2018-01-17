@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.IO;
 
-namespace Microsoft.Build.BackEnd
+using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
+using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
+using SdkResultBase = Microsoft.Build.Framework.SdkResult;
+using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
+
+namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
     ///     Default SDK resolver for compatibility with VS2017 RTM.
@@ -16,13 +21,13 @@ namespace Microsoft.Build.BackEnd
     ///         3) Outside of Visual Studio (MSBuild Root)\Sdks\
     /// </remarks>
     /// </summary>
-    internal class DefaultSdkResolver : SdkResolver
+    internal class DefaultSdkResolver : SdkResolverBase
     {
         public override string Name => "DefaultSdkResolver";
 
         public override int Priority => 10000;
 
-        public override SdkResult Resolve(SdkReference sdk, SdkResolverContext context, SdkResultFactory factory)
+        public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
         {
             var sdkPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, sdk.Name, "Sdk");
 

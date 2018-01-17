@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -81,6 +82,9 @@ namespace Microsoft.Build.BackEnd
             _componentEntriesByType[BuildComponentType.TargetBuilder] = new BuildComponentEntry(BuildComponentType.TargetBuilder, TargetBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.TaskBuilder] = new BuildComponentEntry(BuildComponentType.TaskBuilder, TaskBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.RegisteredTaskObjectCache] = new BuildComponentEntry(BuildComponentType.RegisteredTaskObjectCache, RegisteredTaskObjectCache.CreateComponent, CreationPattern.Singleton);
+
+            // SDK resolution
+            _componentEntriesByType[BuildComponentType.SdkResolverService] = new BuildComponentEntry(BuildComponentType.SdkResolverService, MainNodeSdkResolverService.CreateComponent, CreationPattern.Singleton);
         }
 
         /// <summary>

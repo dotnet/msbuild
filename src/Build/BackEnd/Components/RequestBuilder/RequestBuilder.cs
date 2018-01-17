@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
@@ -1162,7 +1163,25 @@ namespace Microsoft.Build.BackEnd
 
             string toolsVersionOverride = _requestEntry.RequestConfiguration.ExplicitToolsVersionSpecified ? _requestEntry.RequestConfiguration.ToolsVersion : null;
 
-            return new ProjectInstance(_requestEntry.RequestConfiguration.ProjectFullPath, globalProperties, toolsVersionOverride, _componentHost.BuildParameters, _nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext);
+            // Get the hosted ISdkResolverService.  This returns either the MainNodeSdkResolverService or the OutOfProcNodeSdkResolverService depending on who created the current RequestBuilder
+            ISdkResolverService sdkResolverService = _componentHost.GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+
+            return new ProjectInstance(
+                _requestEntry.RequestConfiguration.ProjectFullPath,
+                globalProperties,
+                toolsVersionOverride,
+                _componentHost.BuildParameters,
+                _nodeLoggingContext.LoggingService,
+                new BuildEventContext(
+                    _requestEntry.Request.BuildEventContext.SubmissionId,
+                    _nodeLoggingContext.BuildEventContext.NodeId,
+                    BuildEventContext.InvalidEvaluationId,
+                    BuildEventContext.InvalidProjectInstanceId,
+                    BuildEventContext.InvalidProjectContextId,
+                    BuildEventContext.InvalidTargetId,
+                    BuildEventContext.InvalidTaskId),
+                    sdkResolverService,
+                    _requestEntry.Request.SubmissionId);
         }
 
         /// <summary>

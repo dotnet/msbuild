@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -309,6 +310,17 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Retrieves a hosted<see cref="ISdkResolverService"/> instance for resolving SDKs.
+        /// </summary>
+        private ISdkResolverService SdkResolverService
+        {
+            get
+            {
+                return (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+            }
+        }
+
+        /// <summary>
         /// Retrieves the logging service associated with a particular build
         /// </summary>
         /// <returns>The logging service.</returns>
@@ -444,6 +456,9 @@ namespace Microsoft.Build.Execution
                     // Unfortunately this will reset the callstack
                     throw _threadException;
                 }
+
+                // Register the ResolveSdkRequest packet for the SdkResolverService
+                _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
 
                 if (_workQueue == null)
                 {
@@ -902,16 +917,16 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates the traversal and metaproject instances necessary to represent the solution and populates new configurations with them.
         /// </summary>
-        internal void LoadSolutionIntoConfiguration(BuildRequestConfiguration config, BuildEventContext buildEventContext)
+        internal void LoadSolutionIntoConfiguration(BuildRequestConfiguration config, BuildRequest request)
         {
             if (config.IsLoaded)
             {
                 // We've already processed it, nothing to do.
                 return;
             }
-
+            
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
-            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.GlobalProperties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, buildEventContext, false /* loaded by solution parser*/, config.TargetNames);
+            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.GlobalProperties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, request.BuildEventContext, false /* loaded by solution parser*/, config.TargetNames, SdkResolverService, request.SubmissionId);
 
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
@@ -1357,7 +1372,7 @@ namespace Microsoft.Build.Execution
                     {
                         try
                         {
-                            LoadSolutionIntoConfiguration(config, request.BuildEventContext);
+                            LoadSolutionIntoConfiguration(config, request);
                         }
                         catch (InvalidProjectFileException e)
                         {
@@ -1646,6 +1661,9 @@ namespace Microsoft.Build.Execution
                     SetOverallResultIfWarningsAsErrors(submission.BuildResult);
 
                     _buildSubmissions.Remove(submission.SubmissionId);
+
+                    // Clear all cached SDKs for the submission
+                    SdkResolverService.ClearCache(submission.SubmissionId);
                 }
 
                 if (_buildSubmissions.Count == 0)

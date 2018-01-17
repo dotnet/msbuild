@@ -43,20 +43,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Recurse by default -->
     <RestoreRecursive Condition=" '$(RestoreRecursive)' == '' ">true</RestoreRecursive>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <RestoreUseSkipNonexistentTargets Condition=" '$(RestoreUseSkipNonexistentTargets)' == '' ">true</RestoreUseSkipNonexistentTargets>
     <!-- RuntimeIdentifier compatibility check -->
     <ValidateRuntimeIdentifierCompatibility Condition=" '$(ValidateRuntimeIdentifierCompatibility)' == '' ">false</ValidateRuntimeIdentifierCompatibility>
     <!-- Error handling while walking projects -->
     <RestoreContinueOnError Condition=" '$(RestoreContinueOnError)' == '' ">WarnAndContinue</RestoreContinueOnError>
+    <!-- Build in parallel -->
+    <RestoreBuildInParallel Condition=" '$(BuildInParallel)' != '' ">$(BuildInParallel)</RestoreBuildInParallel>
+    <RestoreBuildInParallel Condition=" '$(RestoreBuildInParallel)' == '' ">true</RestoreBuildInParallel>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Generate a restore graph for each entry point project. -->
-    <_GenerateRestoreGraphProjectEntryInputProperties>
-      RestoreUseCustomAfterTargets=$(RestoreUseCustomAfterTargets);
-      NuGetRestoreTargets=$(MSBuildThisFileFullPath);
-      BuildProjectReferences=false;
-      ExcludeRestorePackageImports=true;
-    </_GenerateRestoreGraphProjectEntryInputProperties>
+    <!-- Exclude packages from changing restore inputs.  -->
+    <_GenerateRestoreGraphProjectEntryInputProperties>ExcludeRestorePackageImports=true</_GenerateRestoreGraphProjectEntryInputProperties>
 
     <!-- Standalone mode
          This is used by NuGet.exe to inject targets into the project that will be
@@ -65,6 +64,8 @@ Copyright (c) .NET Foundation. All rights reserved.
          skipped. -->
     <_GenerateRestoreGraphProjectEntryInputProperties Condition=" '$(RestoreUseCustomAfterTargets)' == 'true' ">
       $(_GenerateRestoreGraphProjectEntryInputProperties);
+      NuGetRestoreTargets=$(MSBuildThisFileFullPath);
+      RestoreUseCustomAfterTargets=$(RestoreUseCustomAfterTargets);
       CustomAfterMicrosoftCommonCrossTargetingTargets=$(MSBuildThisFileFullPath);
       CustomAfterMicrosoftCommonTargets=$(MSBuildThisFileFullPath);
     </_GenerateRestoreGraphProjectEntryInputProperties>
@@ -176,7 +177,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-    _FilterRestoreGraphProjectInputItems"
+    _FilterRestoreGraphProjectInputItems
     Filter out unsupported project entry points.
     ============================================================
   -->
@@ -224,14 +225,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     </RemoveDuplicates>
 
     <!-- Remove projects that do not support restore. -->
-    <MsBuild
+    <!-- With SkipNonexistentTargets support -->
+    <MsBuild Condition=" '$(RestoreUseSkipNonexistentTargets)' == 'true' "
+        BuildInParallel="$(RestoreBuildInParallel)"
         Projects="@(FilteredRestoreGraphProjectInputItemsWithoutDuplicates)"
         Targets="_IsProjectRestoreSupported"
-        ContinueOnError="$(RestoreContinueOnError)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);
-                    $(_GenerateRestoreGraphProjectEntryInputProperties)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        SkipNonexistentTargets="true"
+        Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="FilteredRestoreGraphProjectInputItems" />
+    </MsBuild>
+
+    <!-- Without SkipNonexistentTargets support -->
+    <MsBuild Condition=" '$(RestoreUseSkipNonexistentTargets)' != 'true' "
+      Projects="@(FilteredRestoreGraphProjectInputItemsWithoutDuplicates)"
+      Targets="_IsProjectRestoreSupported"
+      ContinueOnError="$(RestoreContinueOnError)"
+      Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -263,14 +275,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_GenerateRestoreGraphProjectEntryInput Include="@(_RestoreProjectPathItems)" Condition=" '$(RestoreRecursive)' == 'true' " />
     </ItemGroup>
 
-    <!-- Process top level projects. -->
+    <!-- Add top level entries to the direct restore list. These projects will also restore tools. -->
     <MsBuild
+        BuildInParallel="$(RestoreBuildInParallel)"
         Projects="@(_GenerateRestoreGraphProjectEntryInput)"
         Targets="_GenerateRestoreGraphProjectEntry"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);
-                    $(_GenerateRestoreGraphProjectEntryInputProperties)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -279,12 +289,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Generate a spec for every project including dependencies. -->
     <MsBuild
+        BuildInParallel="$(RestoreBuildInParallel)"
         Projects="@(_RestoreProjectPathItems)"
         Targets="_GenerateProjectRestoreGraph"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);
-                    $(_GenerateRestoreGraphProjectEntryInputProperties)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -397,6 +405,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     _GetRestoreTargetFrameworksOutput
     Read target frameworks from the project.
+    Non-NETCore project frameworks will be returned.
     ============================================================
   -->
   <Target Name="_GetRestoreTargetFrameworksOutput"
@@ -430,21 +439,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
     _GetRestoreTargetFrameworksAsItems
-    Get the set of $(TargetFramework) and $(TargetFrameworks)
-    values that should be used for inner builds.
+    Read $(TargetFrameworks) from the project as items.
+    Projects that do not have $(TargetFrameworks) will noop.
     ============================================================
   -->
   <Target Name="_GetRestoreTargetFrameworksAsItems"
-    DependsOnTargets="_GetRestoreProjectStyle;_GetRestoreTargetFrameworksOutput"
+    DependsOnTargets="_GetRestoreProjectStyle"
     Returns="@(_RestoreTargetFrameworkItems)">
-
-    <PropertyGroup>
-      <_RestoreTargetFrameworkItemsHasValues Condition=" '$(TargetFramework)' != '' OR '$(TargetFrameworks)' != '' ">true</_RestoreTargetFrameworkItemsHasValues>
-    </PropertyGroup>
-
-    <!-- Only return values for NETCore PackageReference projects -->
-    <ItemGroup Condition=" '$(RestoreProjectStyle)' == 'PackageReference' AND '$(_RestoreTargetFrameworkItemsHasValues)' == 'true' ">
-      <_RestoreTargetFrameworkItems Include="@(_RestoreTargetFrameworksOutputFiltered)" />
+    <ItemGroup Condition=" '$(TargetFrameworks)' != '' ">
+      <_RestoreTargetFrameworkItems Include="$(TargetFrameworks.Split(';'))" />
     </ItemGroup>
   </Target>
 
@@ -454,27 +457,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="_GetRestoreSettings"
-          DependsOnTargets="_GetRestoreProjectStyle;_GetRestoreSettingsOverrides;_GetRestoreTargetFrameworksAsItems"
+          Condition=" '$(RestoreProjectStyle)' == 'PackageReference' OR '$(RestoreProjectStyle)' == 'ProjectJson' "
+          DependsOnTargets="_GetRestoreSettingsOverrides;_GetRestoreSettingsCurrentProject;_GetRestoreSettingsAllFrameworks"
           Returns="$(_OutputSources);$(_OutputPackagesPath);$(_OutputFallbackFolders);$(_OutputConfigFilePaths)">
 
-    <!-- Read additional sources and fallback folders for each framework  -->
-    <MSBuild
-      Condition=" '$(RestoreProjectStyle)' == 'PackageReference' "
-      Projects="$(MSBuildProjectFullPath)"
-      Targets="_GetRestoreSettingsPerFramework"
-      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
-                  %(_MSBuildProjectReferenceExistent.SetConfiguration);
-                  %(_MSBuildProjectReferenceExistent.SetPlatform);
-                  $(_GenerateRestoreGraphProjectEntryInputProperties)"
-      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
-
-      <Output
-          TaskParameter="TargetOutputs"
-          ItemName="_RestoreSettingsPerFramework" />
-    </MSBuild>
-
     <!-- For transitive project styles, we rely on evaluating all the settings and including them in the dg spec to faciliate no-op restore-->
-    <GetRestoreSettingsTask Condition=" '$(RestoreProjectStyle)' == 'PackageReference' OR '$(RestoreProjectStyle)' == 'ProjectJson' "
+    <GetRestoreSettingsTask
      ProjectUniqueName="$(MSBuildProjectFullPath)"
      RestoreSources="$(RestoreSources)"
      RestorePackagesPath="$(RestorePackagesPath)"
@@ -499,6 +487,43 @@ Copyright (c) .NET Foundation. All rights reserved.
         TaskParameter="OutputConfigFilePaths"
         PropertyName="_OutputConfigFilePaths" />
     </GetRestoreSettingsTask>
+  </Target>
+
+  <!--
+    ============================================================
+    _GetRestoreSettingsCurrentProject
+    Generate items for a single framework.
+    ============================================================
+  -->
+  <Target Name="_GetRestoreSettingsCurrentProject"
+    Condition=" '$(TargetFrameworks)' == '' AND '$(RestoreProjectStyle)' == 'PackageReference' "
+    DependsOnTargets="_GetRestoreSettingsPerFramework"
+    Returns="@(_RestoreSettingsPerFramework)">
+  </Target>
+
+  <!--
+    ============================================================
+    _GetRestoreSettingsCurrentProject
+    Generate items for a single framework.
+    ============================================================
+  -->
+  <Target Name="_GetRestoreSettingsAllFrameworks"
+    Condition=" '$(TargetFrameworks)' != '' AND '$(RestoreProjectStyle)' == 'PackageReference' "
+    DependsOnTargets="_GetRestoreTargetFrameworksAsItems;_GetRestoreProjectStyle"
+    Returns="@(_RestoreSettingsPerFramework)">
+
+    <!-- Read additional sources and fallback folders for each framework  -->
+    <MSBuild
+      BuildInParallel="$(RestoreBuildInParallel)"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GetRestoreSettingsPerFramework"
+      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
+                  $(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_RestoreSettingsPerFramework" />
+    </MSBuild>
   </Target>
 
   <!--
@@ -633,33 +658,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-    _GenerateRestoreDependencies
-    Generate items for package and project references.
-    ============================================================
-  -->
-  <Target Name="_GenerateRestoreDependencies"
-    DependsOnTargets="_GetRestoreProjectStyle;_GetRestoreTargetFrameworksAsItems"
-    Returns="@(_RestoreGraphEntry)">
-
-    <!-- Get project and package references  -->
-    <!-- Evaluate for each framework -->
-    <MSBuild
-      Projects="$(MSBuildProjectFullPath)"
-      Targets="_GenerateProjectRestoreGraphPerFramework"
-      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
-                  %(_MSBuildProjectReferenceExistent.SetConfiguration);
-                  %(_MSBuildProjectReferenceExistent.SetPlatform);
-                  $(_GenerateRestoreGraphProjectEntryInputProperties)"
-      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
-
-      <Output
-          TaskParameter="TargetOutputs"
-          ItemName="_RestoreGraphEntry" />
-    </MSBuild>
-  </Target>
-
-  <!--
-    ============================================================
     _GenerateProjectRestoreGraph
     Recursively walk project to project references.
     ============================================================
@@ -673,6 +671,55 @@ Copyright (c) .NET Foundation. All rights reserved.
       Returns="@(_RestoreGraphEntry)">
 
     <!-- Output from dependency targets -->
+  </Target>
+
+  <!--
+    ============================================================
+    _GenerateRestoreDependencies
+    Generate items for package and project references.
+    ============================================================
+  -->
+  <Target Name="_GenerateRestoreDependencies"
+    DependsOnTargets="_GenerateProjectRestoreGraphAllFrameworks;_GenerateProjectRestoreGraphCurrentProject"
+    Returns="@(_RestoreGraphEntry)">
+  </Target>
+
+  <!--
+    ============================================================
+    _GenerateProjectRestoreGraphAllFrameworks
+    Walk dependencies for all frameworks.
+    ============================================================
+  -->
+  <Target Name="_GenerateProjectRestoreGraphAllFrameworks"
+    Condition=" '$(TargetFrameworks)' != '' "
+    DependsOnTargets="_GetRestoreTargetFrameworksAsItems"
+    Returns="@(_RestoreGraphEntry)">
+
+    <!-- Get project and package references  -->
+    <!-- Evaluate for each framework -->
+    <MSBuild
+      BuildInParallel="$(RestoreBuildInParallel)"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GenerateProjectRestoreGraphPerFramework"
+      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
+                  $(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_RestoreGraphEntry" />
+    </MSBuild>
+  </Target>
+
+  <!--
+    ============================================================
+    _GenerateProjectRestoreGraphCurrentProject
+    Walk dependencies with the current framework.
+    ============================================================
+  -->
+  <Target Name="_GenerateProjectRestoreGraphCurrentProject"
+    Condition=" '$(TargetFrameworks)' == '' "
+    DependsOnTargets="_GenerateProjectRestoreGraphPerFramework"
+    Returns="@(_RestoreGraphEntry)">
   </Target>
 
   <!--
@@ -727,6 +774,18 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+    _GenerateRestoreProjectPathItemsCurrentProject
+    Get absolute paths for all project references.
+    ============================================================
+  -->
+  <Target Name="_GenerateRestoreProjectPathItemsCurrentProject"
+    Condition=" '$(TargetFrameworks)' == '' "
+    DependsOnTargets="_GenerateRestoreProjectPathItemsPerFramework"
+    Returns="@(_RestoreProjectPathItems)">
+  </Target>
+
+  <!--
+    ============================================================
     _GenerateRestoreProjectPathItemsPerFramework
     Get absolute paths for all project references.
     ============================================================
@@ -751,32 +810,59 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="_GenerateRestoreProjectPathItems"
-    DependsOnTargets="_GetRestoreTargetFrameworksOutput;_GetRestoreTargetFrameworksAsItems"
+    DependsOnTargets="_GenerateRestoreProjectPathItemsAllFrameworks;_GenerateRestoreProjectPathItemsCurrentProject"
     Returns="@(_CurrentRestoreProjectPathItems)">
-
-    <!-- Get all project references for the current project  -->
-    <MSBuild
-      Projects="$(MSBuildProjectFullPath)"
-      Targets="_GenerateRestoreProjectPathItemsPerFramework"
-      ContinueOnError="$(RestoreContinueOnError)"
-      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
-                  %(_MSBuildProjectReferenceExistent.SetConfiguration);
-                  %(_MSBuildProjectReferenceExistent.SetPlatform);
-                  $(_GenerateRestoreGraphProjectEntryInputProperties)"
-      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
-
-      <Output
-          TaskParameter="TargetOutputs"
-          ItemName="_CurrentRestoreProjectPathItemsOutputs" />
-    </MSBuild>
 
     <!-- Drop any duplicate items -->
     <RemoveDuplicates
-      Inputs="@(_CurrentRestoreProjectPathItemsOutputs)">
+      Inputs="@(_RestoreProjectPathItems)">
       <Output
           TaskParameter="Filtered"
           ItemName="_CurrentRestoreProjectPathItems" />
     </RemoveDuplicates>
+  </Target>
+
+  <!--
+    ============================================================
+    _GenerateRestoreProjectPathItemsAllFrameworks
+    Get all project references regardless of framework
+    ============================================================
+  -->
+  <Target Name="_GenerateRestoreProjectPathItemsAllFrameworks"
+    Condition=" '$(TargetFrameworks)' != '' "
+    DependsOnTargets="_GetRestoreTargetFrameworksAsItems"
+    Returns="@(_RestoreProjectPathItems)">
+
+    <!-- Get all project references for the current project  -->
+    <!-- With SkipNonexistentTargets support -->
+    <MSBuild
+      Condition=" '$(RestoreUseSkipNonexistentTargets)' == 'true' "
+      BuildInParallel="$(RestoreBuildInParallel)"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GenerateRestoreProjectPathItemsPerFramework"
+      SkipNonexistentTargets="true"
+      SkipNonexistentProjects="true"
+      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
+                  $(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_RestoreProjectPathItems" />
+    </MSBuild>
+
+    <!-- Without SkipNonexistentTargets support -->
+    <MSBuild
+      Condition=" '$(RestoreUseSkipNonexistentTargets)' != 'true' "
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GenerateRestoreProjectPathItemsPerFramework"
+      ContinueOnError="$(RestoreContinueOnError)"
+      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
+                  $(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_RestoreProjectPathItems" />
+    </MSBuild>
   </Target>
 
   <!--
@@ -786,19 +872,32 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="_GenerateRestoreProjectPathWalk"
-    DependsOnTargets="_GenerateRestoreProjectPathItems;_GetRestoreTargetFrameworksAsItems"
+    DependsOnTargets="_GenerateRestoreProjectPathItems"
     Returns="@(_RestoreProjectPathItems)">
 
     <!-- Walk project references  -->
+    <!-- With SkipNonexistentTargets -->
     <MSBuild
+      Condition=" '$(RestoreUseSkipNonexistentTargets)' == 'true' "
+      BuildInParallel="$(RestoreBuildInParallel)"
+      Projects="@(_CurrentRestoreProjectPathItems)"
+      Targets="_GenerateRestoreProjectPathWalk"
+      SkipNonexistentTargets="true"
+      SkipNonexistentProjects="true"
+      Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_GenerateRestoreProjectPathWalkOutputs" />
+    </MSBuild>
+
+    <!-- Without SkipNonexistentTargets -->
+    <MSBuild
+      Condition=" '$(RestoreUseSkipNonexistentTargets)' != 'true' "
       Projects="@(_CurrentRestoreProjectPathItems)"
       Targets="_GenerateRestoreProjectPathWalk"
       ContinueOnError="$(RestoreContinueOnError)"
-      Properties="TargetFramework=%(_RestoreTargetFrameworkItems.Identity);
-                  %(_MSBuildProjectReferenceExistent.SetConfiguration);
-                  %(_MSBuildProjectReferenceExistent.SetPlatform);
-                  $(_GenerateRestoreGraphProjectEntryInputProperties)"
-      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+      Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -831,14 +930,28 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="@(_RestoreProjectPathItems)">
 
     <!-- Walk projects -->
+    <!-- With SkipNonexistentTargets -->
     <MsBuild
+        Condition=" '$(RestoreUseSkipNonexistentTargets)' == 'true' "
+        BuildInParallel="$(RestoreBuildInParallel)"
         Projects="@(FilteredRestoreGraphProjectInputItems)"
         Targets="_GenerateRestoreProjectPathWalk"
-        ContinueOnError="$(RestoreContinueOnError)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);
-                    $(_GenerateRestoreGraphProjectEntryInputProperties)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        SkipNonexistentTargets="true"
+        SkipNonexistentProjects="true"
+        Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_RestoreProjectPathItemsOutputs" />
+    </MsBuild>
+
+    <!-- Without SkipNonexistentTargets -->
+    <MsBuild
+      Condition=" '$(RestoreUseSkipNonexistentTargets)' != 'true' "
+      Projects="@(FilteredRestoreGraphProjectInputItems)"
+      Targets="_GenerateRestoreProjectPathWalk"
+      ContinueOnError="$(RestoreContinueOnError)"
+      Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -854,14 +967,28 @@ Copyright (c) .NET Foundation. All rights reserved.
     </RemoveDuplicates>
 
     <!-- Remove projects that do not support restore. -->
+    <!-- With SkipNonexistentTargets -->
     <MsBuild
+        Condition=" '$(RestoreUseSkipNonexistentTargets)' == 'true' "
+        BuildInParallel="$(RestoreBuildInParallel)"
         Projects="@(_RestoreProjectPathItemsWithoutDupes)"
         Targets="_IsProjectRestoreSupported"
-        ContinueOnError="$(RestoreContinueOnError)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);
-                    $(_GenerateRestoreGraphProjectEntryInputProperties)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        SkipNonexistentTargets="true"
+        SkipNonexistentProjects="true"
+        Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_RestoreProjectPathItems" />
+    </MsBuild>
+
+    <!-- Without SkipNonexistentTargets -->
+    <MsBuild
+      Condition=" '$(RestoreUseSkipNonexistentTargets)' != 'true' "
+      Projects="@(_RestoreProjectPathItemsWithoutDupes)"
+      Targets="_IsProjectRestoreSupported"
+      ContinueOnError="$(RestoreContinueOnError)"
+      Properties="$(_GenerateRestoreGraphProjectEntryInputProperties)">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -883,12 +1010,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- RestorePackagesPathOverride -->
     <MsBuild
+        BuildInParallel="$(RestoreBuildInParallel)"
         Condition=" '$(RestorePackagesPath)' != '' "
         Projects="$(MSBuildThisFileFullPath)"
-        Targets="_GetRestorePackagesPathOverride"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        Targets="_GetRestorePackagesPathOverride">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -897,12 +1022,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- RestoreSourcesOverride -->
     <MsBuild
+        BuildInParallel="$(RestoreBuildInParallel)"
         Condition=" '$(RestoreSources)' != '' "
         Projects="$(MSBuildThisFileFullPath)"
-        Targets="_GetRestoreSourcesOverride"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        Targets="_GetRestoreSourcesOverride">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -911,12 +1034,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- RestoreFallbackFoldersOverride -->
     <MsBuild
+        BuildInParallel="$(RestoreBuildInParallel)"
         Condition=" '$(RestoreFallbackFolders)' != '' "
         Projects="$(MSBuildThisFileFullPath)"
-        Targets="_GetRestoreFallbackFoldersOverride"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration);
-                    %(_MSBuildProjectReferenceExistent.SetPlatform);"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        Targets="_GetRestoreFallbackFoldersOverride">
 
       <Output
           TaskParameter="TargetOutputs"

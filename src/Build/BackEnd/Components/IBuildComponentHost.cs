@@ -130,6 +130,11 @@ namespace Microsoft.Build.BackEnd
         /// The cache of registered disposable objects.
         /// </summary>
         RegisteredTaskObjectCache,
+
+        /// <summary>
+        /// The SDK resolution service.
+        /// </summary>
+        SdkResolverService,
     }
 
     /// <summary>

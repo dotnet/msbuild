@@ -54,9 +54,9 @@ namespace Microsoft.Build.Framework.UnitTests
 
             yield return new object[] { new ProfilerResult(new Dictionary<EvaluationLocation, ProfiledLocation>
             {
-                {new EvaluationLocation(EvaluationPass.TotalEvaluation, "1", "myFile", 42, "elementName", "description", EvaluationLocationKind.Condition), new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)},
-                {new EvaluationLocation(EvaluationPass.Targets, "1", null, null, null, null, EvaluationLocationKind.Glob), new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)},
-                {new EvaluationLocation(EvaluationPass.LazyItems, "2", null, null, null, null, EvaluationLocationKind.Item), new ProfiledLocation(TimeSpan.Zero, TimeSpan.Zero, 0)}
+                {new EvaluationLocation(0, null, EvaluationPass.TotalEvaluation, "1", "myFile", 42, "elementName", "description", EvaluationLocationKind.Condition), new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)},
+                {new EvaluationLocation(1, 0, EvaluationPass.Targets, "1", null, null, null, null, EvaluationLocationKind.Glob), new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)},
+                {new EvaluationLocation(2, 0, EvaluationPass.LazyItems, "2", null, null, null, null, EvaluationLocationKind.Element), new ProfiledLocation(TimeSpan.Zero, TimeSpan.Zero, 0)}
             }) };
 
             var element = new ProjectRootElement(
@@ -66,10 +66,10 @@ namespace Microsoft.Build.Framework.UnitTests
 
             yield return new object[] { new ProfilerResult(new Dictionary<EvaluationLocation, ProfiledLocation>
             {
-                {EvaluationLocation.CreateLocationForCondition(EvaluationPass.UsingTasks, "1", "myFile", 42, "conditionCase"), new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)},
-                {EvaluationLocation.CreateLocationForProject(EvaluationPass.InitialProperties, "1", "myFile", 42, element),
+                {EvaluationLocation.CreateLocationForCondition(null, EvaluationPass.UsingTasks, "1", "myFile", 42, "conditionCase"), new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)},
+                {EvaluationLocation.CreateLocationForProject(null, EvaluationPass.InitialProperties, "1", "myFile", 42, element),
                     new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)},
-                {EvaluationLocation.CreateLocationForGlob(EvaluationPass.InitialProperties, "1", "myFile", 42, "glob description"),
+                {EvaluationLocation.CreateLocationForGlob(null, EvaluationPass.InitialProperties, "1", "myFile", 42, "glob description"),
                 new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)}
             }) };
 

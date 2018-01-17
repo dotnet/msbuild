@@ -2,35 +2,43 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
-// <summary>Transforms a profiled result to markdown form.</summary>
+// <summary>Pretty prints a profiled result to a variety of formats.</summary>
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Framework.Profiler;
 
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Transforms a profiled result to markdown form
+    /// Pretty prints a profiled result to a variety of formats
     /// </summary>
-    public sealed class ProfilerResultPrettyPrinter
+    internal sealed class ProfilerResultPrettyPrinter
     {
         /// <summary>
         /// Gets a profiled result in a markdown-like form.
         /// </summary>
         public static string GetMarkdownContent(ProfilerResult result)
         {
+            return GetContent(result, new EvaluationLocationMarkdownPrettyPrinter());
+        }
+
+        /// <summary>
+        /// Gets a profiled result in a tab separated value form.
+        /// </summary>
+        public static string GetTsvContent(ProfilerResult result)
+        {
+            return GetContent(result, new EvaluationLocationTabSeparatedPrettyPrinter());
+        }
+
+        private static string GetContent(ProfilerResult result, EvaluationLocationPrettyPrinterBase evaluationLocationPrinter)
+        {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine("Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Kind|Bug");
-            stringBuilder.AppendLine("---|---|---:|---|---:|---:|---:|---:|---:|---:|---");
+            evaluationLocationPrinter.AppendHeader(stringBuilder);
 
             var profiledLocations = result.ProfiledLocations;
 
@@ -40,12 +48,13 @@ namespace Microsoft.Build.Evaluation
                 return stringBuilder.ToString();
             }
 
-            var evaluationPasses = profiledLocations.Where(l => l.Key.File == null)
+            var evaluationPasses = profiledLocations.Where(l => l.Key.IsEvaluationPass)
                                                   .OrderBy(l => l.Key.EvaluationPass);
 
-            var orderedLocations = profiledLocations.Where(l => l.Key.File != null)
+            var orderedLocations = profiledLocations.Where(l => !l.Key.IsEvaluationPass)
                                                   .OrderByDescending(l => l.Value.ExclusiveTime);
 
+            // All evaluation passes go first
             TimeSpan? totalTime = null;
             foreach (var pair in evaluationPasses)
             {
@@ -57,95 +66,21 @@ namespace Microsoft.Build.Evaluation
                     totalTime = time.InclusiveTime;
                 }
 
-                stringBuilder.AppendLine(string.Join("|",
-                    location.EvaluationDescription,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    GetMilliseconds(time.InclusiveTime),
-                    GetPercentage(totalTime.Value, time.InclusiveTime) + "%",
-                    GetMilliseconds(time.ExclusiveTime),
-                    GetPercentage(totalTime.Value, time.ExclusiveTime) + "%",
-                    time.NumberOfHits,
-                    location.Kind + "|"));
+                evaluationLocationPrinter.AppendLocation(stringBuilder, totalTime.Value, location, time);
             }
 
             Debug.Assert(totalTime != null, "There should be at least one evaluation pass result");
 
+            // All non-evaluation passes go later
             foreach (var pair in orderedLocations)
             {
                 var time = pair.Value;
                 var location = pair.Key;
 
-                if (time.InclusiveTime.TotalMilliseconds < 1 || time.ExclusiveTime.TotalMilliseconds < 1)
-                    continue;
-
-                stringBuilder.AppendLine(string.Join("|",
-                    location.EvaluationDescription,
-                    location.File == null ? string.Empty : Path.GetFileName(location.File),
-                    location.Line?.ToString() ?? string.Empty,
-                    GetExpression(location.Description, location.Kind),
-                    GetMilliseconds(time.InclusiveTime),
-                    GetPercentage(totalTime.Value, time.InclusiveTime) + "%",
-                    GetMilliseconds(time.ExclusiveTime),
-                    GetPercentage(totalTime.Value, time.ExclusiveTime) + "%",
-                    time.NumberOfHits,
-                    location.Kind + "|"));
+                evaluationLocationPrinter.AppendLocation(stringBuilder, totalTime.Value, location, time);
             }
 
             return stringBuilder.ToString();
-        }
-
-        private static double GetMilliseconds(TimeSpan timeSpan)
-        {
-            return Math.Round(timeSpan.TotalMilliseconds, 0, MidpointRounding.AwayFromZero);
-        }
-
-        private static double GetPercentage(TimeSpan total, TimeSpan time)
-        {
-            var percentage = (time.TotalMilliseconds / total.TotalMilliseconds) * 100;
-
-            return Math.Round(percentage, 1, MidpointRounding.AwayFromZero);
-        }
-
-        private static string GetExpression(string description, EvaluationLocationKind kind)
-        {
-            var text = GetElementOrConditionText(description, kind);
-            if (string.IsNullOrEmpty(text))
-            {
-                return null;
-            }
-
-            text = text.Replace("|", "\\|");
-
-            if (text.Length > 100)
-                text = text.Remove(100) + "...";
-
-            return '`' + text + '`';
-        }
-
-        private static string GetElementOrConditionText(string description, EvaluationLocationKind kind)
-        {
-            if (description == null)
-            {
-                return null;
-            }
-
-            if (kind == EvaluationLocationKind.Condition)
-            {
-                return $"Condition=\"{description}\")";
-            }
-
-            if (kind == EvaluationLocationKind.Glob)
-            {
-                return $"Glob=\"{description}\")";
-            }
-
-            var outerXml = description;
-            outerXml = outerXml.Replace(@"xmlns=""http://schemas.microsoft.com/developer/msbuild/2003""", "");
-
-            var newLineIndex = outerXml.IndexOfAny(new [] { '\r', '\n' });
-            return newLineIndex == -1 ? outerXml : outerXml.Remove(newLineIndex);
         }
     }
 }

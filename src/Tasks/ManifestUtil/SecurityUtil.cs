@@ -666,48 +666,47 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                if (cert.PrivateKey == null)
-                    throw new InvalidOperationException(resources.GetString("SignFile.CertMissingPrivateKey"));
+                using(RSA rsa = CngLightup.GetRSAPrivateKey(cert))
+                {                    
+                    if (rsa == null)
+                        throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
+                    try
+                    {
+                        XmlDocument doc = new XmlDocument();
+                        doc.PreserveWhitespace = true;
+                        XmlReaderSettings xrSettings = new XmlReaderSettings();
+                        xrSettings.DtdProcessing = DtdProcessing.Ignore;
+                        using (XmlReader xr = XmlReader.Create(path, xrSettings))
+                        {
+                            doc.Load(xr);
+                        }
+                        SignedCmiManifest2 manifest = new SignedCmiManifest2(doc, useSha256);
+                        CmiManifestSigner2 signer;
+                        if (useSha256 && rsa is RSACryptoServiceProvider)
+                        {
+                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsa as RSACryptoServiceProvider, useSha256);
+                            signer = new CmiManifestSigner2(csp, cert, useSha256);
+                        }
+                        else
+                        {
+                            signer = new CmiManifestSigner2(rsa, cert, useSha256);
+                        }
 
-                if (cert.PrivateKey.GetType() != typeof(RSACryptoServiceProvider))
-                    throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
-                try
-                {
-                    XmlDocument doc = new XmlDocument();
-                    doc.PreserveWhitespace = true;
-                    XmlReaderSettings xrSettings = new XmlReaderSettings();
-                    xrSettings.DtdProcessing = DtdProcessing.Ignore;
-                    using (XmlReader xr = XmlReader.Create(path, xrSettings))
-                    {
-                        doc.Load(xr);
+                        if (timestampUrl == null)
+                            manifest.Sign(signer);
+                        else
+                            manifest.Sign(signer, timestampUrl.ToString());
+                        doc.Save(path);
                     }
-                    SignedCmiManifest2 manifest = new SignedCmiManifest2(doc, useSha256);
-                    RSACryptoServiceProvider csp;
-
-                    if (useSha256)
+                    catch (Exception ex)
                     {
-                        csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(cert.PrivateKey as RSACryptoServiceProvider, useSha256);
+                        int exceptionHR = System.Runtime.InteropServices.Marshal.GetHRForException(ex);
+                        if (exceptionHR == -2147012889 || exceptionHR == -2147012867)
+                        {
+                            throw new ApplicationException(resources.GetString("SecurityUtil.TimestampUrlNotFound"), ex);
+                        }
+                        throw new ApplicationException(ex.Message, ex);
                     }
-                    else
-                    {
-                        csp = cert.PrivateKey as RSACryptoServiceProvider;
-                    }
-
-                    CmiManifestSigner2 signer = new CmiManifestSigner2(csp, cert, useSha256);
-                    if (timestampUrl == null)
-                        manifest.Sign(signer);
-                    else
-                        manifest.Sign(signer, timestampUrl.ToString());
-                    doc.Save(path);
-                }
-                catch (Exception ex)
-                {
-                    int exceptionHR = System.Runtime.InteropServices.Marshal.GetHRForException(ex);
-                    if (exceptionHR == -2147012889 || exceptionHR == -2147012867)
-                    {
-                        throw new ApplicationException(resources.GetString("SecurityUtil.TimestampUrlNotFound"), ex);
-                    }
-                    throw new ApplicationException(ex.Message, ex);
                 }
             }
         }

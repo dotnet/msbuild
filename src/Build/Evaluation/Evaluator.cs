@@ -25,6 +25,7 @@ using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
@@ -88,11 +89,6 @@ namespace Microsoft.Build.Evaluation
                 "ItemDefinitions",
                 "Items"
         };
-
-        /// <summary>
-        /// Each evaluation has a unique ID.
-        /// </summary>
-        private static int s_evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
         /// Expander for evaluating conditions
@@ -173,7 +169,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectInstance _projectInstanceIfAnyForDebuggerOnly;
 
-        private readonly SdkResolution _sdkResolution;
+        /// <summary>
+        /// The <see cref="ISdkResolverService"/> to use.
+        /// </summary>
+        private readonly ISdkResolverService _sdkResolverService;
+
+        /// <summary>
+        /// The current build submission ID.
+        /// </summary>
+        private readonly int _submissionId;
 
         /// <summary>
         /// The environment properties with which evaluation should take place.
@@ -254,7 +258,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
-        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
+        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -281,7 +285,8 @@ namespace Microsoft.Build.Evaluation
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
             _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
-            _sdkResolution = sdkResolution;
+            _sdkResolverService = sdkResolverService;
+            _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler((loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0);
         }
 
@@ -379,7 +384,7 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService,
             IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider,
             ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext,
-            ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
+            ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
@@ -392,7 +397,7 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
-                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, itemFactory, toolsetProvider, projectRootElementCache, projectInstanceIfAnyForDebuggerOnly, sdkResolution);
+                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, itemFactory, toolsetProvider, projectRootElementCache, projectInstanceIfAnyForDebuggerOnly, sdkResolverService, submissionId);
                 return evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
             }
@@ -734,9 +739,6 @@ namespace Microsoft.Build.Evaluation
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
 
-                _data.EvaluationId = NextEvaluationId();
-                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationId);
-
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -799,11 +801,9 @@ namespace Microsoft.Build.Evaluation
 #endif
                 projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-                _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"), projectFile)
-                {
-                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                    ProjectFile = projectFile
-                });
+                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
+                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
+                ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
 #if MSBUILDENABLEVSPROFILING
         string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
@@ -1477,7 +1477,7 @@ namespace Microsoft.Build.Evaluation
         {
             string startupDirectory = BuildParameters.StartupDirectory;
 
-            List<P> builtInProperties = new List<P>(12);
+            List<P> builtInProperties = new List<P>(19);
 
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath));
@@ -1486,6 +1486,8 @@ namespace Microsoft.Build.Evaluation
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture)));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild));
+
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)
             {
@@ -2490,7 +2492,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                var sdkRootPath = _sdkResolution.GetSdkPath(importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
+                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
 
                 if (string.IsNullOrEmpty(sdkRootPath))
                 {
@@ -3059,8 +3061,6 @@ namespace Microsoft.Build.Evaluation
 
             return sb.ToString();
         }
-
-        private static int NextEvaluationId() => Interlocked.Increment(ref s_evaluationId);
     }
 
     /// <summary>
