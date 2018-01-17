@@ -103,7 +103,7 @@ while [[ $# > 0 ]]; do
             shift
             ;;
         --help)
-            echo "Usage: $0 [--configuration <CONFIGURATION>] [--architecture <ARCHITECTURE>] [--skip-prereqs] [--nopackage] [--nobuild ] [--help]"
+            echo "Usage: $0 [--configuration <CONFIGURATION>] [--architecture <ARCHITECTURE>] [--skip-prereqs] [--nopackage] [--nobuild ] [--docker <IMAGENAME>] [--stage0 <DIRECTORY>] [--help]"
             echo ""
             echo "Options:"
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
@@ -111,6 +111,8 @@ while [[ $# > 0 ]]; do
             echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --nopackage                         Skip packaging targets"
             echo "  --nobuild                           Skip building, showing the command that would be used to build"
+            echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
+            echo "  --stage0 <DIRECTORY>                Set the stage0 source directory. The default is to download it from Azure."
             echo "  --help                              Display this help message"
             exit 0
             ;;
