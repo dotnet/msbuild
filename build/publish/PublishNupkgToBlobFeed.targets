@@ -10,9 +10,15 @@
     <Error Condition="'$(BlobFeedExpectedURL)' == ''" Text="Missing property BlobFeedExpectedURL." />
     
     <Message Text="Publish NuPkgs to Blob feed started" />
-    <PushToBlobFeed AccountKey="$(BlobFeedCloudDropAccessToken)"
-                    ExpectedFeedUrl="$(BlobFeedExpectedURL)"
+    <PushToBlobFeed ExpectedFeedUrl="$(BlobFeedExpectedURL)"
+                    AccountKey="$(BlobFeedCloudDropAccessToken)"
                     ItemsToPush="@(NupkgsForPublishing)"
-                    Overwrite="false" />
+                    ManifestBranch="$(BranchName)"
+                    ManifestBuildId="$(FullNugetVersion)"
+                    ManifestCommit="$(CommitHash)"
+                    ManifestName="$(BuildName)"
+                    Overwrite="true"
+                    PublishFlatContainer="false"
+                    SkipCreateManifest="$(IsNotOrchestratedPublish)" />
   </Target>
 </Project>

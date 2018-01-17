@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(NuGetPackagesDir)/microsoft.dotnet.build.tasks.feed/$(BuildTasksFeedToolVersion)/build/Microsoft.DotNet.Build.Tasks.Feed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToBlobFeed.targets" />
@@ -73,11 +74,17 @@
       </CliVersionBadgeToUpload>
     </ItemGroup>
 
-    <Message Text="Publish badges to blob feed started: " />
-    <PushToBlobFeed AccountKey="$(ArtifactCloudDropAccessToken)"
-                    ExpectedFeedUrl="$(ArtifactCloudDropURL)"
+    <Message Text="Publish badges to blob feed started: $(ArtifactCloudDropURL)" />
+    <PushToBlobFeed ExpectedFeedUrl="$(ArtifactCloudDropURL)"
+                    AccountKey="$(ArtifactCloudDropAccessToken)"
                     ItemsToPush="@(CliVersionBadgeToUpload)"
-                    Overwrite="false" />
-
+                    ManifestBranch="$(BranchName)"
+                    ManifestBuildId="$(FullNugetVersion)"
+                    ManifestCommit="$(CommitHash)"
+                    ManifestName="$(BuildName)"
+                    Overwrite="false" 
+                    PublishFlatContainer="true" 
+                    SkipCreateManifest="$(IsNotOrchestratedPublish)" />
   </Target>
+
 </Project>

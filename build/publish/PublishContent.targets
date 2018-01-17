@@ -23,24 +23,36 @@
   <Target Name="UploadArtifactsToAzure" DependsOnTargets="GatherItemsForPattern">
     <Error Condition="'$(ArtifactCloudDropAccessToken)' == ''" Text="Missing property ArtifactCloudDropAccessToken." />
     <Error Condition="'$(ArtifactCloudDropURL)' == ''" Text="Missing property ArtifactCloudDropURL." />
-
+                    
     <Message Text="Publish assets to blob storage started: $(ArtifactCloudDropURL)" />
-    <PushToBlobFeed AccountKey="$(ArtifactCloudDropAccessToken)"
-                    ExpectedFeedUrl="$(ArtifactCloudDropURL)"
+    <PushToBlobFeed ExpectedFeedUrl="$(ArtifactCloudDropURL)"
+                    AccountKey="$(ArtifactCloudDropAccessToken)"
                     ItemsToPush="@(ForPublishing)"
-                    Overwrite="$(OverwriteOnPublish)" />
+                    ManifestBranch="$(BranchName)"
+                    ManifestBuildId="$(FullNugetVersion)"
+                    ManifestCommit="$(CommitHash)"
+                    ManifestName="$(BuildName)"
+                    Overwrite="$(OverwriteOnPublish)" 
+                    PublishFlatContainer="true" 
+                    SkipCreateManifest="$(IsNotOrchestratedPublish)" />
   </Target>
 
   <!-- publishes checksums for the artifacts to blob storage in Azure -->
   <Target Name="UploadChecksumsToAzure" DependsOnTargets="GenerateChecksums">
     <Error Condition="'$(ChecksumCloudDropAccessToken)' == ''" Text="Missing property ChecksumCloudDropAccessToken." />
     <Error Condition="'$(ChecksumCloudDropURL)' == ''" Text="Missing property ChecksumCloudDropURL." />
-
+                    
     <Message Text="Publish checksums to blob storage started: $(ChecksumCloudDropURL)" />
-    <PushToBlobFeed AccountKey="$(ChecksumCloudDropAccessToken)"
-                    ExpectedFeedUrl="$(ChecksumCloudDropURL)"
+    <PushToBlobFeed ExpectedFeedUrl="$(ChecksumCloudDropURL)"
+                    AccountKey="$(ChecksumCloudDropAccessToken)"
                     ItemsToPush="@(ArtifactsForGeneratingChecksums->'%(DestinationPath)')"
-                    Overwrite="$(OverwriteOnPublish)" />
+                    ManifestBranch="$(BranchName)"
+                    ManifestBuildId="$(FullNugetVersion)"
+                    ManifestCommit="$(CommitHash)"
+                    ManifestName="$(BuildName)"
+                    Overwrite="$(OverwriteOnPublish)" 
+                    PublishFlatContainer="true" 
+                    SkipCreateManifest="$(IsNotOrchestratedPublish)" />
   </Target>
 
 </Project>
