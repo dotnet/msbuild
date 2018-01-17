@@ -1,7 +1,8 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Product>Sdk</Product>
-    <IsNotOrchestratedPublish Condition="'$(PB_PublishBlobFeedUrl)' == ''">true</IsNotOrchestratedPublish>
+    <IsNotOrchestratedPublish>true</IsNotOrchestratedPublish>
+    <IsNotOrchestratedPublish Condition="'$(PB_PublishBlobFeedUrl)' != ''">false</IsNotOrchestratedPublish>
 
     <!-- Values related to the download of assets from blob storage -->
     <DefaultCoreSetupBlobRootUrl>https://dotnetcli.azureedge.net/dotnet/</DefaultCoreSetupBlobRootUrl>
@@ -19,7 +20,7 @@
     <ArtifactCloudDropAccessToken>$(PB_PublishBlobFeedKey)</ArtifactCloudDropAccessToken>
     <ArtifactCloudDropAccessToken Condition="'$(ArtifactCloudDropAccessToken)' == ''">$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>
     <ArtifactCloudDropURL>$(PB_PublishBlobFeedUrl)</ArtifactCloudDropURL>
-    <ArtifactCloudDropURL Condition="'$(PB_PublishBlobFeedUrl)' == ''">https://$(ArtifactCloudDropAccountName).blob.core.windows.net/$(ArtifactContainerName)/index.json</ArtifactCloudDropURL>
+    <ArtifactCloudDropURL Condition="'$(ArtifactCloudDropURL)' == ''">https://$(ArtifactCloudDropAccountName).blob.core.windows.net/$(ArtifactContainerName)/index.json</ArtifactCloudDropURL>
 
     <!-- Values related to the upload of checksums to blob storage -->
     <ChecksumCloudDropAccountName>$(CHECKSUM_STORAGE_ACCOUNT)</ChecksumCloudDropAccountName>
@@ -29,7 +30,7 @@
     <ChecksumCloudDropAccessToken>$(PB_PublishBlobFeedKey)</ChecksumCloudDropAccessToken>
     <ChecksumCloudDropAccessToken Condition="'$(ChecksumCloudDropAccessToken)' == ''">$(CHECKSUM_STORAGE_KEY)</ChecksumCloudDropAccessToken>
     <ChecksumCloudDropURL>$(PB_PublishBlobFeedUrl)</ChecksumCloudDropURL>
-    <ChecksumCloudDropURL Condition="'$(PB_PublishBlobFeedUrl)' == ''">https://$(ChecksumCloudDropAccountName).blob.core.windows.net/$(ChecksumContainerName)/index.json</ChecksumCloudDropURL>
+    <ChecksumCloudDropURL Condition="'$(ChecksumCloudDropURL)' == ''">https://$(ChecksumCloudDropAccountName).blob.core.windows.net/$(ChecksumContainerName)/index.json</ChecksumCloudDropURL>
 
     <!-- Values related to the upload of NuPkgs to the blob feed -->
     <BlobFeedExpectedURL>$(PB_PublishBlobFeedUrl)</BlobFeedExpectedURL>
