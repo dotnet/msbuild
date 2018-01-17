@@ -9,7 +9,6 @@ using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using LocalizableStrings = Microsoft.DotNet.Tools.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Install.Tool
 {

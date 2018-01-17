@@ -11,7 +11,8 @@ namespace Microsoft.DotNet.Cli
         public static Command Install()
         {
             return Create.Command(
-                "install", LocalizableStrings.InstallCommandDefinition,
+                "install",
+                LocalizableStrings.CommandDescription,
                 Accept.NoArguments(),
                 CommonOptions.HelpOption(),
                 InstallToolCommandParser.InstallTool());

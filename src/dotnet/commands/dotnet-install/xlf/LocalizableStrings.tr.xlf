@@ -2,100 +2,14 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
-      <trans-unit id="SourceOptionDescription">
-        <source>Specifies a NuGet package source to use during installation.</source>
-        <target state="new">Specifies a NuGet package source to use during installation.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceOptionName">
-        <source>SOURCE</source>
-        <target state="new">SOURCE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallationSucceeded">
-        <source>
-The installation succeeded. If there is no other instruction. You can type the following command in shell directly to invoke: {0}</source>
-        <target state="new">
-The installation succeeded. If there is no other instruction. You can type the following command in shell directly to invoke: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallCommandDefinition">
-        <source>Add item to development environment.</source>
-        <target state="new">Add item to development environment.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedNuget">
-        <source>Install failed. Failed to download package:
-NuGet returned:
-
-{0}</source>
-        <target state="new">Install failed. Failed to download package:
-NuGet returned:
-
-{0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedPackage">
-        <source>Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
-
-{0}</source>
-        <target state="new">Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
-
-{0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
-        <source>NetInstallCommand</source>
-        <target state="new">NetInstallCommand</target>
+        <source>.NET Install Command</source>
+        <target state="new">.NET Install Command</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallToolCommandDefinition">
-        <source>Install tool for use on the command line.</source>
-        <target state="new">Install tool for use on the command line.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolConfigfileDefinition">
-        <source>NuGet configuration file</source>
-        <target state="new">NuGet configuration file</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolFrameworkDefinition">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="new">Target framework to publish for. The target framework has to be specified in the project file.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolPackageIdDefinition">
-        <source>Package Id in NuGet</source>
-        <target state="new">Package Id in NuGet</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolVersionDefinition">
-        <source>Version of the package in NuGet</source>
-        <target state="new">Version of the package in NuGet</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToAddPackage">
-        <source>Failed to add package.
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</source>
-        <target state="new">Failed to add package.
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToRestorePackage">
-        <source>Failed to restore package. 
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</source>
-        <target state="new">Failed to restore package. 
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</target>
+      <trans-unit id="CommandDescription">
+        <source>Installs an item into the development environment.</source>
+        <target state="new">Installs an item into the development environment.</target>
         <note />
       </trans-unit>
     </body>

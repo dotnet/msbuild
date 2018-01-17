@@ -268,6 +268,6 @@
     <value>Path to additional deps.json file.</value>
   </data>
   <data name="InstallDefinition" xml:space="preserve">
-    <value>Add item to development environment.</value>
+    <value>Installs an item into the development environment.</value>
   </data>
 </root>
