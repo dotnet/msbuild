@@ -136,8 +136,8 @@ docker run $INTERACTIVE -t --rm --sig-proxy=true \
     -e AZUREACCOUNTNAME \
     -e RELEASETOOLSGITURL \
     -e CORESETUPBLOBROOTURL \
-    -e PB_AssetRootUrl \
-    -e PB_PackageVersionPropsUrl \
-    -e PB_PublishBlobFeedUrl \
+    -e PB_ASSETROOTURL \
+    -e PB_PACKAGEVERSIONPROPSURL \
+    -e PB_PUBLISHBLOBFEEDURL \
     $DOTNET_BUILD_CONTAINER_TAG \
     $BUILD_COMMAND "$@"
