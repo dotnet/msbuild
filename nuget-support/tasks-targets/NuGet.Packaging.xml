@@ -1,0 +1,3670 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.Packaging</name>
+    </assembly>
+    <members>
+        <member name="T:NuGet.Client.AnyFramework">
+            <summary>
+            An internal NuGetFramework marker for ManagedCodeConventions.
+            Most conventions disallow the string 'any' as a txm, so to allow
+            it for conventions with no txm in the path we use this special type.
+            </summary>
+        </member>
+        <member name="T:NuGet.Client.ManagedCodeConventions">
+            <summary>
+            Defines all the package conventions used by Managed Code packages
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.AnyTargettedFile">
+            <summary>
+            Pattern used to locate all files targetted at a specific runtime and/or framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.RuntimeAssemblies">
+            <summary>
+            Pattern used to locate all files designed for loading as managed code assemblies at run-time
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.CompileRefAssemblies">
+            <summary>
+            Pattern used to locate ref assemblies for compile.
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.CompileLibAssemblies">
+            <summary>
+            Pattern used to locate lib assemblies for compile.
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.NativeLibraries">
+            <summary>
+            Pattern used to locate all files designed for loading as native code libraries at run-time
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.ResourceAssemblies">
+            <summary>
+            Pattern used to locate all files designed for loading as managed code resource assemblies at run-time
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.MSBuildFiles">
+            <summary>
+            Pattern used to identify MSBuild targets and props files
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.MSBuildMultiTargetingFiles">
+            <summary>
+            Pattern used to identify MSBuild global targets and props files
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.ContentFiles">
+            <summary>
+            Pattern used to identify content files
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.ContentItemCollection.HasContract">
+            <summary>
+            True if lib/contract exists
+            </summary>
+        </member>
+        <member name="M:NuGet.ContentModel.ContentItemCollection.IsValidAsset(System.String)">
+            <summary>
+            False if the path would not match any patterns.
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.ContentPropertyDefinition">
+            <summary>
+            Defines a property that can be used in Content Model query patterns
+            <seealso cref="T:NuGet.ContentModel.PatternSet" />
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.ContentPropertyDefinition.CompareTest">
+            <summary>
+            Find the nearest compatible candidate.
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.PatternSet">
+            <summary>
+            A set of patterns that can be used to query a set of file paths for items matching a provided criteria.
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.GroupPatterns">
+            <summary>
+            Patterns used to select a group of items that matches the criteria
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.GroupExpressions">
+            <summary>
+            Pattern expressions.
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.PathPatterns">
+            <summary>
+            Patterns used to select individual items that match the criteria
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.PathExpressions">
+            <summary>
+            Path expressions.
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternSet.PropertyDefinitions">
+            <summary>
+            Property definitions used for matching patterns
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.PatternDefinition">
+            <summary>
+            A pattern that can be used to match file paths given a provided criteria.
+            </summary>
+            <remarks>
+            The pattern is defined as a sequence of literal path strings that must match exactly and property
+            references,
+            wrapped in {} characters, which are tested for compatibility with the consumer-provided criteria.
+            <seealso cref="T:NuGet.ContentModel.ContentPropertyDefinition" />
+            </remarks>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternDefinition.Table">
+            <summary>
+            Replacement token table.
+            </summary>
+        </member>
+        <member name="T:NuGet.ContentModel.PatternTable">
+            <summary>
+            Replacement token table organized by property.
+            </summary>
+        </member>
+        <member name="M:NuGet.ContentModel.PatternTable.TryLookup(System.String,System.String,System.Object@)">
+            <summary>
+            Lookup a token and get the replacement if it exists.
+            </summary>
+            <param name="propertyName">Property moniker</param>
+            <param name="name">Token name</param>
+            <param name="value">Replacement value</param>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternTableEntry.PropertyName">
+            <summary>
+            PropertyName moniker
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternTableEntry.Name">
+            <summary>
+            Item name
+            </summary>
+        </member>
+        <member name="P:NuGet.ContentModel.PatternTableEntry.Value">
+            <summary>
+            Item replacement value
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.IAsyncPackageContentReader">
+            <summary>
+            An asynchronous package content reader.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetFrameworkItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all framework references found in the nuspec.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetBuildItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all items under the build folder.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetToolItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all items under the tools folder.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetContentItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all items found in the content folder.
+            </summary>
+            <remarks>
+            Some legacy behavior has been dropped here due to the mix of content folders and target framework
+            folders here.
+            </remarks>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetLibItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns all lib items without any filtering.
+            </summary>
+            <remarks>Use GetReferenceItemsAsync(...) for the filtered list.</remarks>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetReferenceItemsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns lib items + filtering based on the nuspec and other NuGet rules.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IAsyncPackageContentReader.GetPackageDependenciesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns package dependencies.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="T:NuGet.Packaging.INuspecReader">
+            <summary>
+            A development package nuspec reader
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.INuspecReader.GetLanguage">
+            <summary>
+            The locale ID for the package, such as en-us.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetFrameworkItems">
+            <summary>
+            Returns all framework references found in the nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetBuildItems">
+            <summary>
+            Returns all items under the build folder.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetToolItems">
+            <summary>
+            Returns all items under the tools folder.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetContentItems">
+            <summary>
+            Returns all items found in the content folder.
+            </summary>
+            <remarks>
+            Some legacy behavior has been dropped here due to the mix of content folders and target framework
+            folders here.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetLibItems">
+            <summary>
+            Returns all lib items without any filtering. Use GetReferenceItems for the filtered list.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetReferenceItems">
+            <summary>
+            Returns lib items + filtering based on the nuspec and other NuGet rules.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageContentReader.GetPackageDependencies">
+            <summary>
+            Returns package dependencies.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.IPackageDownloader">
+            <summary>
+            A package downloader.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageDownloader.ContentReader">
+            <summary>
+            Gets an asynchronous package content reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageDownloader.CoreReader">
+            <summary>
+            Gets an asynchronous package core reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.CopyNupkgFileToAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously copies a .nupkg to a target file path.
+            </summary>
+            <param name="destinationFilePath">The destination file path.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the copy was successful.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="destinationFilePath" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.GetPackageHashAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a package hash.
+            </summary>
+            <param name="hashAlgorithm">The hash algorithm.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.String" />
+            representing the package hash.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="hashAlgorithm" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+            <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+            <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+            <param name="handleExceptionAsync">An exception handler.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+            <summary>
+            Sets a throttle for package downloads.
+            </summary>
+            <param name="throttle">A throttle.  Can be <c>null</c>.</param>
+        </member>
+        <member name="T:NuGet.Packaging.IPackageResolver">
+            <summary>
+            Core package resolver
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageIdentity},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">All relevant packages. This list must include the target packages.</param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageIdentity},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Collections.Generic.IEnumerable{NuGet.Packaging.PackageReference},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">
+            All relevant packages. This list must include the target packages and
+            installed packages.
+            </param>
+            <param name="installedPackages">
+            Packages already installed into the project. These will be favored as
+            dependency options.
+            </param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">All relevant packages. This list must include the target packages.</param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="M:NuGet.Packaging.IPackageResolver.Resolve(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo},System.Collections.Generic.IEnumerable{NuGet.Packaging.PackageReference},System.Threading.CancellationToken)">
+            <summary>
+            Resolve a set of packages
+            </summary>
+            <param name="targets">Package or packages to install</param>
+            <param name="availablePackages">
+            All relevant packages. This list must include the target packages and
+            installed packages.
+            </param>
+            <param name="installedPackages">
+            Packages already installed into the project. These will be favored as
+            dependency options.
+            </param>
+            <returns>A set of packages meeting the package dependency requirements</returns>
+        </member>
+        <member name="T:NuGet.Packaging.MinClientVersionException">
+            <summary>
+            Custom exception type for a package that has a higher minClientVersion than the current client.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.FallbackPackagePathInfo.PathResolver">
+            <summary>
+            Path resolver for the root package folder containing this package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.FallbackPackagePathInfo.Id">
+            <summary>
+            Package id.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.FallbackPackagePathInfo.Version">
+            <summary>
+            Package version.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.FallbackPackagePathResolver.#ctor(NuGet.Common.INuGetPathContext)">
+            <summary>
+            Creates a package folder path resolver that scans multiple folders to find a package.
+            </summary>
+            <param name="pathContext">NuGet paths loaded from NuGet.Config settings.</param>
+        </member>
+        <member name="M:NuGet.Packaging.FallbackPackagePathResolver.GetPackageDirectory(System.String,System.String)">
+            <summary>
+            Returns the root directory of an installed package.
+            </summary>
+            <param name="packageId">Package id.</param>
+            <param name="version">Package version.</param>
+            <returns>Returns the path if the package exists in any of the folders. Null if the package does not exist.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.FallbackPackagePathResolver.GetPackageDirectory(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Returns the root directory of an installed package.
+            </summary>
+            <param name="packageId">Package id.</param>
+            <param name="version">Package version.</param>
+            <returns>Returns the path if the package exists in any of the folders. Null if the package does not exist.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.FallbackPackagePathResolver.GetPackageInfo(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Returns the package info along with a path resolver specific to the folder where the package exists.
+            </summary>
+            <param name="packageId">Package id.</param>
+            <param name="version">Package version.</param>
+            <returns>Returns the package info if the package exists in any of the folders. Null if the package does not exist.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.LocalPackageArchiveDownloader">
+            <summary>
+            A package downloader for local archive packages.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.LocalPackageArchiveDownloader.ContentReader">
+            <summary>
+            Gets an asynchronous package content reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="P:NuGet.Packaging.LocalPackageArchiveDownloader.CoreReader">
+            <summary>
+            Gets an asynchronous package core reader.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.#ctor(System.String,NuGet.Packaging.Core.PackageIdentity,NuGet.Common.ILogger)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.Packaging.LocalPackageArchiveDownloader" /> class.
+            </summary>
+            <param name="packageFilePath">A source package archive file path.</param>
+            <param name="packageIdentity">A package identity.</param>
+            <param name="logger">A logger.</param>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="packageFilePath" />
+            is either <c>null</c> or an empty string.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="packageIdentity" />
+            is either <c>null</c> or an empty string.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or an empty string.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.Dispose">
+            <summary>
+            Disposes of this instance.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.CopyNupkgFileToAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously copies a .nupkg to a target file path.
+            </summary>
+            <param name="destinationFilePath">The destination file path.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the copy was successful.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="destinationFilePath" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.GetPackageHashAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a package hash.
+            </summary>
+            <param name="hashAlgorithm">The hash algorithm.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.String" />
+            representing the package hash.</returns>
+            <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="hashAlgorithm" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.SetExceptionHandler(System.Func{System.Exception,System.Threading.Tasks.Task{System.Boolean}})">
+            <summary>
+            Sets an exception handler for package downloads.
+            </summary>
+            <remarks>The exception handler returns a task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether or not the exception was handled.  To handle an exception and stop its
+            propagation, the task should return <c>true</c>.  Otherwise, the exception will be rethrown.</remarks>
+            <param name="handleExceptionAsync">An exception handler.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="handleExceptionAsync" />
+            is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.SetThrottle(System.Threading.SemaphoreSlim)">
+            <summary>
+            Sets a throttle for package downloads.
+            </summary>
+            <param name="throttle">A throttle.  Can be <c>null</c>.</param>
+        </member>
+        <member name="T:NuGet.Packaging.MinClientVersionUtility">
+            <summary>
+            Helpers for dealing with the NuGet client version and package minClientVersions.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.MinClientVersionUtility.VerifyMinClientVersion(NuGet.Packaging.Core.NuspecCoreReaderBase)">
+            <summary>
+            Check the package minClientVersion and throw if it is greater than the current client version.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.MinClientVersionUtility.IsMinClientVersionCompatible(NuGet.Packaging.Core.NuspecCoreReaderBase)">
+            <summary>
+            Verify minClientVersion.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.MinClientVersionUtility.IsMinClientVersionCompatible(NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Verify minClientVersion.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.MinClientVersionUtility.GetNuGetClientVersion">
+            <summary>
+            Read the NuGet client version from the assembly info as a NuGetVersion.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.NuspecReader">
+            <summary>
+            Reads .nuspec files
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.#ctor(System.String)">
+            <summary>
+            Nuspec file reader.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.#ctor(System.String,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Nuspec file reader.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.#ctor(System.IO.Stream)">
+            <summary>
+            Nuspec file reader
+            </summary>
+            <param name="stream">Nuspec file stream.</param>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Nuspec file reader
+            </summary>
+            <param name="xml">Nuspec file xml data.</param>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.#ctor(System.IO.Stream,NuGet.Frameworks.IFrameworkNameProvider,System.Boolean)">
+            <summary>
+            Nuspec file reader
+            </summary>
+            <param name="stream">Nuspec file stream.</param>
+            <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.#ctor(System.Xml.Linq.XDocument,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Nuspec file reader
+            </summary>
+            <param name="xml">Nuspec file xml data.</param>
+            <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetDependencyGroups">
+            <summary>
+            Read package dependencies for all frameworks
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetDependencyGroups(System.Boolean)">
+            <summary>
+            Read package dependencies for all frameworks
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetReferenceGroups">
+            <summary>
+            Reference item groups
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetFrameworkReferenceGroups">
+            <summary>
+            Framework reference groups
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetLanguage">
+            <summary>
+            Package language
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetLicenseUrl">
+            <summary>
+            Package License Url
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetContentFiles">
+            <summary>
+            Build action groups
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetTitle">
+            <summary>
+            Package title.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetAuthors">
+            <summary>
+            Package authors.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetTags">
+            <summary>
+            Package tags.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetOwners">
+            <summary>
+            Package owners.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetDescription">
+            <summary>
+            Package description.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetReleaseNotes">
+            <summary>
+            Package release notes.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetSummary">
+            <summary>
+            Package summary.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetProjectUrl">
+            <summary>
+            Package project url.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetIconUrl">
+            <summary>
+            Package icon url.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetCopyright">
+            <summary>
+            Copyright information.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetRequireLicenseAcceptance">
+            <summary>
+            Require license acceptance when installing the package.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageArchiveReader">
+            <summary>
+            Reads a development nupkg
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageArchiveReader.SigningSpecifications">
+            <summary>
+            Signature specifications.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageArchiveReader.ZipReadStream">
+            <summary>
+            Stream underlying the ZipArchive. Used to do signature verification on a SignedPackageArchive.
+            If this is null then we cannot perform signature verification.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageArchiveReader.#ctor(System.IO.Stream)">
+            <summary>
+            Nupkg package reader
+            </summary>
+            <param name="stream">Nupkg data stream.</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageArchiveReader.#ctor(System.IO.Stream,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Nupkg package reader
+            </summary>
+            <param name="stream">Nupkg data stream.</param>
+            <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
+            <param name="compatibilityProvider">Framework compatibility provider.</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageArchiveReader.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Nupkg package reader
+            </summary>
+            <param name="stream">Nupkg data stream.</param>
+            <param name="leaveStreamOpen">If true the nupkg stream will not be closed by the zip reader.</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageArchiveReader.#ctor(System.IO.Stream,System.Boolean,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Nupkg package reader
+            </summary>
+            <param name="stream">Nupkg data stream.</param>
+            <param name="leaveStreamOpen">leave nupkg stream open</param>
+            <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
+            <param name="compatibilityProvider">Framework compatibility provider.</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageArchiveReader.#ctor(System.IO.Compression.ZipArchive)">
+            <summary>
+            Nupkg package reader
+            </summary>
+            <param name="zipArchive">ZipArchive containing the nupkg data.</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageArchiveReader.#ctor(System.IO.Compression.ZipArchive,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Nupkg package reader
+            </summary>
+            <param name="zipArchive">ZipArchive containing the nupkg data.</param>
+            <param name="frameworkProvider">Framework mapping provider for NuGetFramework parsing.</param>
+            <param name="compatibilityProvider">Framework compatibility provider.</param>
+        </member>
+        <member name="T:NuGet.Packaging.EmptyFrameworkFolderFile">
+            <summary>
+            Represents an empty framework folder in NuGet 2.0+ packages. 
+            An empty framework folder is represented by a file named "_._".
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageFile.Path">
+            <summary>
+            Gets the full path of the file inside the package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageFile.EffectivePath">
+            <summary>
+            Gets the path that excludes the root folder (content/lib/tools) and framework folder (if present).
+            </summary>
+            <example>
+            If a package has the Path as 'content\[net40]\scripts\jQuery.js', the EffectivePath 
+            will be 'scripts\jQuery.js'.
+            
+            If it is 'tools\init.ps1', the EffectivePath will be 'init.ps1'.
+            </example>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageMetadata.FrameworkReferences">
+            <summary>
+            Specifies assemblies from GAC that the package depends on.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageMetadata.PackageAssemblyReferences">
+            <summary>
+            Returns sets of References specified in the manifest.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageMetadata.DependencyGroups">
+            <summary>
+            Specifies sets other packages that the package depends on.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.IPackageMetadata.ContentFiles">
+            <summary>
+            Returns sets of Content Files specified in the manifest.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Manifest.Save(System.IO.Stream)">
+            <summary>
+            Saves the current manifest to the specified stream.
+            </summary>
+            <param name="stream">The target stream.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Manifest.Save(System.IO.Stream,System.Int32)">
+            <summary>
+            Saves the current manifest to the specified stream.
+            </summary>
+            <param name="stream">The target stream.</param>
+            <param name="minimumManifestVersion">The minimum manifest version that this class must use when saving.</param>
+        </member>
+        <member name="M:NuGet.Packaging.ManifestMetadata.#ctor(NuGet.Packaging.IPackageMetadata)">
+            <summary>
+            Constructs a ManifestMetadata instance from an IPackageMetadata instance
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.ManifestSchemaUtility.SchemaVersionV1">
+            <summary>
+            Baseline schema 
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.ManifestSchemaUtility.SchemaVersionV2">
+            <summary>
+            Added copyrights, references and release notes
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.ManifestSchemaUtility.SchemaVersionV3">
+            <summary>
+            Used if the version is a semantic version.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.ManifestSchemaUtility.SchemaVersionV4">
+            <summary>
+            Added 'targetFramework' attribute for 'dependency' elements.
+            Allow framework folders under 'content' and 'tools' folders. 
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.ManifestSchemaUtility.SchemaVersionV5">
+            <summary>
+            Added 'targetFramework' attribute for 'references' elements.
+            Added 'minClientVersion' attribute
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.ManifestSchemaUtility.SchemaVersionV6">
+            <summary>
+            Allows XDT transformation
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageBuilder.Properties">
+            <summary>
+            Exposes the additional properties extracted by the metadata 
+            extractor or received from the command line.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageBuilder.ContentFiles">
+            <summary>
+            ContentFiles section from the manifest for content v2
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageBuilder.ResolvePackagePath(System.String,System.String,System.String,System.String)">
+            <summary>
+            Determins the path of the file inside a package.
+            For recursive wildcard paths, we preserve the path portion beginning with the wildcard.
+            For non-recursive wildcard paths, we use the file name from the actual file path on disk.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageBuilder.IsKnownFolder(System.String)">
+            <summary>
+            Returns true if the path uses a known folder root.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageBuilder.ParseTags(System.String)">
+            <summary>
+            Tags come in this format. tag1 tag2 tag3 etc..
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReferenceSet.#ctor(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Creates a new Package Reference Set
+            </summary>
+            <param name="references">IEnumerable set of string references</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReferenceSet.#ctor(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Creates a new Package Reference Set
+            </summary>
+            <param name="targetFramework">The target framework to use, pass Any for AnyFramework. Does not allow null.</param>
+            <param name="references">IEnumerable set of string references</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReferenceSet.#ctor(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Creates a new Package Reference Set
+            </summary>
+            <param name="targetFramework">The target framework to use.</param>
+            <param name="references">IEnumerable set of string references</param>
+        </member>
+        <member name="P:NuGet.Packaging.PhysicalPackageFile.SourcePath">
+            <summary>
+            Path on disk
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PhysicalPackageFile.TargetPath">
+            <summary>
+            Path in package
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageCreation.Resources.NuGetResources">
+            <summary>
+               A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.ResourceManager">
+            <summary>
+               Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Culture">
+            <summary>
+               Overrides the current thread's CurrentUICulture property for all
+               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.CannotCreateEmptyPackage">
+            <summary>
+               Looks up a localized string similar to Cannot create a package that has no dependencies nor content..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.DependencyHasInvalidVersion">
+            <summary>
+               Looks up a localized string similar to Dependency &apos;{0}&apos; has an invalid version..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.DuplicateDependenciesDefined">
+            <summary>
+               Looks up a localized string similar to &apos;{0}&apos; already has a dependency defined for &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.IncompatibleSchema">
+            <summary>
+               Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.InvalidPackageId">
+            <summary>
+               Looks up a localized string similar to The package ID &apos;{0}&apos; contains invalid characters. Examples of valid package IDs include &apos;MyPackage&apos; and &apos;MyPackage.Sample&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_DependenciesHasMixedElements">
+            <summary>
+               Looks up a localized string similar to &lt;dependencies&gt; element must not contain both &lt;group&gt; and &lt;dependency&gt; child elements..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ExcludeContainsInvalidCharacters">
+            <summary>
+               Looks up a localized string similar to Exclude path &apos;{0}&apos; contains invalid characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_IdMaxLengthExceeded">
+            <summary>
+               Looks up a localized string similar to Id must not exceed 100 characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidMinClientVersion">
+            <summary>
+               Looks up a localized string similar to The &apos;minClientVersion&apos; attribute in the package manifest has invalid value. It must be a valid version string..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidReference">
+            <summary>
+               Looks up a localized string similar to Invalid assembly reference &apos;{0}&apos;. Ensure that a file named &apos;{0}&apos; exists in the lib directory..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidReferenceFile">
+            <summary>
+               Looks up a localized string similar to Assembly reference &apos;{0}&apos; contains invalid characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ReferencesHasMixedElements">
+            <summary>
+               Looks up a localized string similar to &lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ReferencesIsEmpty">
+            <summary>
+               Looks up a localized string similar to The element package\metadata\references\group must contain at least one &lt;reference&gt; child element..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequiredElementMissing">
+            <summary>
+               Looks up a localized string similar to The required element &apos;{0}&apos; is missing from the manifest..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequiredMetadataMissing">
+            <summary>
+               Looks up a localized string similar to {0} is required..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl">
+            <summary>
+               Looks up a localized string similar to Enabling license acceptance requires a license url..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_SourceContainsInvalidCharacters">
+            <summary>
+               Looks up a localized string similar to Source path &apos;{0}&apos; contains invalid characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_TargetContainsInvalidCharacters">
+            <summary>
+               Looks up a localized string similar to Target path &apos;{0}&apos; contains invalid characters..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_UriCannotBeEmpty">
+            <summary>
+               Looks up a localized string similar to {0} cannot be empty..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.PackageAuthoring_FileNotFound">
+            <summary>
+               Looks up a localized string similar to File not found: &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.UnknownSchemaVersion">
+            <summary>
+               Looks up a localized string similar to Unknown schema version &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.FrameworkNameUtility.ParseFrameworkFolderName(System.String,System.Boolean,System.String@)">
+            <summary>
+            Parses the specified string into FrameworkName object.
+            </summary>
+            <param name="path">The string to be parse.</param>
+            <param name="strictParsing">if set to <c>true</c>, parse the first folder of path even if it is unrecognized framework.</param>
+            <param name="effectivePath">returns the path after the parsed target framework</param>
+            <returns></returns>
+        </member>
+        <member name="P:NuGet.Packaging.PackageExtraction.PackageExtractionBehavior.XmlDocFileSaveMode">
+            <summary>
+            Gets or sets the <see cref="!:PackageExtraction.XmlDocFileSaveMode"/>.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageHelper.GetSatellitePackageInfoAsync(NuGet.Packaging.Core.IAsyncPackageCoreReader,System.Threading.CancellationToken)">
+            <summary>
+            A package is deemed to be a satellite package if it has a language property set, the id of the package is
+            of the format [.*].[Language]
+            and it has at least one dependency with an id that maps to the runtime package .
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageHelper.GetInstalledPackageFilesAsync(NuGet.Packaging.PackageArchiveReader,NuGet.Packaging.Core.PackageIdentity,NuGet.Packaging.PackagePathResolver,NuGet.Packaging.PackageSaveMode,System.Threading.CancellationToken)">
+            <summary>
+            This returns all the installed package files (does not include satellite files)
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.PackageSaveMode.Defaultv2">
+            <summary>
+            Default package save mode for v2 (packages.config)-style restore.
+            This includes <see cref="F:NuGet.Packaging.PackageSaveMode.Files"/> and <see cref="F:NuGet.Packaging.PackageSaveMode.Nupkg"/>.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.PackageSaveMode.Defaultv3">
+            <summary>
+            Default package save mode for v3 (project.json)-style restore.
+            This includes <see cref="F:NuGet.Packaging.PackageSaveMode.Files"/>, <see cref="F:NuGet.Packaging.PackageSaveMode.Nuspec"/>, and <see cref="F:NuGet.Packaging.PackageSaveMode.Nupkg"/>.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.XmlDocFileSaveMode.None">
+            <summary>
+            Treat XML doc files as regular files (legacy behavior).
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.XmlDocFileSaveMode.Skip">
+            <summary>
+            Do not extract XML documentation files
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.XmlDocFileSaveMode.Compress">
+            <summary>
+            Compress XML doc files in a zip archive.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.ZipArchiveExtensions">
+            <summary>
+            Nupkg reading helper methods
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageExtractor.InstallFromSourceAsync(NuGet.Packaging.Core.PackageIdentity,System.Func{System.IO.Stream,System.Threading.Tasks.Task},NuGet.Packaging.VersionFolderPathResolver,NuGet.Packaging.PackageExtractionContext,System.Threading.CancellationToken)">
+            <summary>
+            Uses a copy function to install a package to a global packages directory.
+            </summary>
+            <param name="copyToAsync">
+            A function which should copy the package to the provided destination stream.
+            </param>
+            <param name="packageExtractionContext">
+            The version folder path context, which encapsulates all of the parameters to observe
+            while installing the package.
+            </param>
+            <param name="token">The cancellation token.</param>
+            <returns>
+            True if the package was installed. False if the package already exists and therefore
+            resulted in no copy operation.
+            </returns>
+        </member>
+        <member name="T:NuGet.Packaging.PackageFolderReader">
+            <summary>
+            Reads an unzipped nupkg folder.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.String)">
+            <summary>
+            Package folder reader
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.IO.DirectoryInfo)">
+            <summary>
+            Package folder reader
+            </summary>
+            <param name="folder">root directory of an extracted nupkg</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.String,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Package folder reader
+            </summary>
+            <param name="folderPath">root directory of an extracted nupkg</param>
+            <param name="frameworkProvider">framework mappings</param>
+            <param name="compatibilityProvider">framework compatibility provider</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.#ctor(System.IO.DirectoryInfo,NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Package folder reader
+            </summary>
+            <param name="folder">root directory of an extracted nupkg</param>
+            <param name="frameworkProvider">framework mappings</param>
+            <param name="compatibilityProvider">framework compatibility provider</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.GetStream(System.String)">
+            <summary>
+            Opens a local file in read only mode.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.IsFileInRoot(System.String)">
+            <summary>
+            True if the path does not contain /
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.IsNupkg(System.String)">
+            <summary>
+            True if the path ends with .nupkg
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageFolderReader.GetRelativePath(System.IO.DirectoryInfo,System.IO.FileInfo)">
+            <summary>
+            Build the relative path in the same format that ZipArchive uses
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackagePathResolver">
+            <summary>
+            A V2 path resolver.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageReaderBase">
+            <summary>
+            Abstract class that both the zip and folder package readers extend
+            This class contains the path conventions for both zip and folder readers
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.#ctor(NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Instantiates a new <see cref="T:NuGet.Packaging.PackageReaderBase" /> class.
+            </summary>
+            <param name="frameworkProvider">A framework mapping provider.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="frameworkProvider" /> is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.#ctor(NuGet.Frameworks.IFrameworkNameProvider,NuGet.Frameworks.IFrameworkCompatibilityProvider)">
+            <summary>
+            Instantiates a new <see cref="T:NuGet.Packaging.PackageReaderBase" /> class.
+            </summary>
+            <param name="frameworkProvider">A framework mapping provider.</param>
+            <param name="compatibilityProvider">A framework compatibility provider.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="frameworkProvider" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="compatibilityProvider" /> is <c>null</c>.</exception>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReaderBase.NuspecReader">
+            <summary>
+            Nuspec reader
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.GetSupportedFrameworks">
+            <summary>
+            Frameworks mentioned in the package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.IsAllowedBuildFile(System.String,System.String)">
+            <summary>
+            only packageId.targets and packageId.props should be used from the build folder
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReaderBase.IsReferenceAssembly(System.String)">
+            <summary>
+            True only for assemblies that should be added as references to msbuild projects
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageReference">
+            <summary>
+            Represents a package element in the packages.config file
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.#ctor(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework,System.Boolean,System.Boolean,System.Boolean,NuGet.Versioning.VersionRange)">
+            <summary>
+            Creates a new packages config entry
+            </summary>
+            <param name="identity">Package id and version</param>
+            <param name="targetFramework">Package target framework installed to the project</param>
+            <param name="userInstalled">True if the user installed this package directly</param>
+            <param name="developmentDependency">True if the package is a development dependency</param>
+            <param name="requireReinstallation">True if this package needs to be reinstalled</param>
+            <param name="allowedVersions">Restrict package versions to the allowedVersions range</param>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.PackageIdentity">
+            <summary>
+            Id and Version of the package
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.AllowedVersions">
+            <summary>
+            The allowed range of versions that this package can be upgraded/downgraded to.
+            </summary>
+            <remarks>This is null if unbounded</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.HasAllowedVersions">
+            <summary>
+            True if allowedVersions exists.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.TargetFramework">
+            <summary>
+            Installed target framework version of the package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.IsDevelopmentDependency">
+            <summary>
+            Development dependency
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.IsUserInstalled">
+            <summary>
+            True if the user installed or updated this package directly.
+            False if this package was installed as a dependency by another package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageReference.RequireReinstallation">
+            <summary>
+            Require reinstallation
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageReference.ToString">
+            <summary>
+            Displays the identity and target framework of the reference.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfig.HasAttributeValue(System.Xml.Linq.XElement,System.String,System.String,System.Xml.Linq.XElement@)">
+            <summary>
+            Determine if the package node has the attribute value as the targetValue.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfig.BoolAttribute(System.Xml.Linq.XElement,System.String,System.Boolean)">
+            <summary>
+            Get a boolean attribute value, or false if it does not exist
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackagesConfigReader">
+            <summary>
+            Reads packages.config
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="xml">Packages.config XML</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(NuGet.Frameworks.IFrameworkNameProvider,System.Xml.Linq.XDocument)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="frameworkMappings">Additional target framework mappings for parsing target frameworks</param>
+            <param name="xml">Packages.config XML</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.IO.Stream)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="stream">Stream containing packages.config</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="stream">Stream containing packages.config</param>
+            <param name="leaveStreamOpen">True will leave the stream open</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.#ctor(NuGet.Frameworks.IFrameworkNameProvider,System.IO.Stream,System.Boolean)">
+            <summary>
+            Packages.config reader
+            </summary>
+            <param name="stream">Stream containing packages.config</param>
+            <param name="leaveStreamOpen">True will leave the stream open</param>
+            <param name="frameworkMappings">Additional target framework mappings for parsing target frameworks</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.GetMinClientVersion">
+            <summary>
+            Reads the minimum client version from packages.config
+            </summary>
+            <returns>Minimum client version or the default of 2.5.0</returns>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.GetPackages">
+            <summary>
+            Reads all package node entries in the config.
+            If duplicate package ids exist an exception will be thrown.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigReader.GetPackages(System.Boolean)">
+            <summary>
+            Reads all package node entries in the config.
+            </summary>
+            <param name="allowDuplicatePackageIds">If True validation will be performed to ensure that 
+            only one entry exists for each unique package id.</param>
+        </member>
+        <member name="T:NuGet.Packaging.PackagesConfigWriter">
+            <summary>
+            Writes the packages.config XML file to a stream
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.String,System.Boolean)">
+            <summary>
+            Create a packages.config writer using file path
+            </summary>
+            <param name="fullPath">The full path to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.String,System.Boolean,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Create a packages.config writer using file path
+            </summary>
+            <param name="fullPath">The full path to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+            <param name="frameworkMappings">Framework mappings</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Create a packages.config writer using stream
+            </summary>
+            <param name="stream">Stream to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.#ctor(System.IO.Stream,System.Boolean,NuGet.Frameworks.IFrameworkNameProvider)">
+            <summary>
+            Create a packages.config writer using stream
+            </summary>
+            <param name="stream">Stream to write the XML packages.config file into, or load existing packages.config from</param>
+            <param name="createNew">Whether to create a new packages.config file, or load an existing one</param>
+            <param name="frameworkMappings">Framework mappings</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.WriteMinClientVersion(NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Write a minimum client version to packages.config
+            </summary>
+            <param name="version">Minumum version of the client required to parse and use this file.</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(System.String,NuGet.Versioning.NuGetVersion,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Add a package entry
+            </summary>
+            <param name="packageId">Package Id</param>
+            <param name="version">Package Version</param>
+            <param name="targetFramework">Package targetFramework that's compatible with current project</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Adds a basic package entry to the file
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.AddPackageEntry(NuGet.Packaging.PackageReference)">
+            <summary>
+            Adds a package entry to the file
+            </summary>
+            <param name="entry">Package reference entry</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.UpdatePackageEntry(NuGet.Packaging.PackageReference,NuGet.Packaging.PackageReference)">
+            <summary>
+            Update a package entry to the file
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.UpdateOrAddPackageEntry(System.Xml.Linq.XDocument,NuGet.Packaging.PackageReference)">
+            <summary>
+            Update a package entry using the original entry as a base if it exists.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(System.String,NuGet.Versioning.NuGetVersion,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Remove a package entry
+            </summary>
+            <param name="packageId">Package Id</param>
+            <param name="version">Package version</param>
+            <param name="targetFramework">Package targetFramework</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(NuGet.Packaging.Core.PackageIdentity,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Remove a package identity from the file
+            </summary>
+            <param name="identity">Package identity</param>
+            <param name="targetFramework">Package targetFramework</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.RemovePackageEntry(NuGet.Packaging.PackageReference)">
+            <summary>
+            Removes a package entry from the file
+            </summary>
+            <param name="entry">Package reference entry</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.WriteFile(System.String)">
+            <summary>
+            Write the XDocument to the packages.config and disallow further changes.
+            </summary>
+            <param name="fullPath">the full path to packages.config file</param>
+        </member>
+        <member name="M:NuGet.Packaging.PackagesConfigWriter.Dispose">
+            <summary>
+            Write the XDocument to the stream and close it to disallow further changes.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.PackagingConstants.ManifestExtension">
+            <summary>
+            Represents the ".nuspec" extension.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata">
+            <summary>
+            This class is used to hold metadata about the central directory archive structure
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.Position">
+            <summary>
+            Position in bytes of the corresponding central directory header relative to the start of the archive
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.OffsetToFileHeader">
+            <summary>
+            Offset in bytes to the corresponding file header relative to the start of the archive
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.FileEntryTotalSize">
+            <summary>
+            Total size of corresponding file entry in bytes
+            This should include size of local file header + encryption header + file data + data descriptor
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.Filename">
+            <summary>
+            Filename for the central directory header
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.HeaderSize">
+            <summary>
+            Size of central directory header, in bytes.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.ChangeInOffset">
+            <summary>
+            Value used to identify how much the position of the OffsetToFileHeader property will change by
+            the presence of a signature file in bytes
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.IndexInHeaders">
+            <summary>
+            Index in which the central directory record was read from the archive.
+            This index represents the order of the central directory record as it is in the file.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Crc32">
+            <summary>
+            Helper to calculate CRC-32 for data.
+            Derivative of a .NET core implementation - https://source.dot.net/#System.IO.Compression.Tests/Common/System/IO/Compression/CRC.cs
+            This is public to allow testing.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Crc32.CalculateCrc(System.Byte[])">
+            <summary>
+            Calculates a 32 bit cyclic redundancy code for the input data.
+            </summary>
+            <param name="data">Byte[] of the data.</param>
+            <returns>32 bit cyclic redundancy code for the input data in uint.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.SeekReaderForwardToMatchByteSignature(System.IO.BinaryReader,System.Byte[])">
+            <summary>
+            Takes a binary reader and moves forwards the current position of its base stream until it finds the specified signature.
+            </summary>
+            <param name="reader">Binary reader to update current position</param>
+            <param name="byteSignature">byte signature to be matched</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.SeekReaderBackwardToMatchByteSignature(System.IO.BinaryReader,System.Byte[])">
+            <summary>
+            Takes a binary reader and moves backwards the current position of it's base stream until it finds the specified signature.
+            </summary>
+            <param name="reader">Binary reader to update current position</param>
+            <param name="byteSignature">byte signature to be matched</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndWriteUntilPosition(System.IO.BinaryReader,System.IO.BinaryWriter,System.Int64)">
+            <summary>
+            Read bytes from a BinaryReader and write them to the BinaryWriter and stop when the provided position
+            is the current position of the BinaryReader's base stream. It does not read the byte in the provided position.
+            </summary>
+            <param name="reader">Read bytes from this stream.</param>
+            <param name="writer">Write bytes to this stream.</param>
+            <param name="position">Position to stop copying data.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndHashUntilPosition(System.IO.BinaryReader,System.Security.Cryptography.HashAlgorithm,System.Int64)">
+            <summary>
+            Read bytes from a BinaryReader and hash them with a given HashAlgorithm and stop when the provided position
+            is the current position of the BinaryReader's base stream. It does not hash the byte in the provided position.
+            </summary>
+            <param name="reader">Read bytes from this stream</param>
+            <param name="hashAlgorithm">HashAlgorithm used to hash contents</param>
+            <param name="position">Position to stop copying data</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.HashBytes(System.Security.Cryptography.HashAlgorithm,System.Byte[])">
+            <summary>
+            Hashes given byte array with a specified HashAlgorithm
+            </summary>
+            <param name="hashAlgorithm">HashAlgorithm used to hash contents</param>
+            <param name="bytes">Content to hash</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadSignedArchiveMetadata(System.IO.BinaryReader)">
+            <summary>
+            Read ZIP's offsets and positions of offsets.
+            </summary>
+            <param name="reader">binary reader to zip archive</param>
+            <returns>metadata with offsets and positions for entries</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.UpdateSignedPackageArchiveMetadata(System.IO.BinaryReader,NuGet.Packaging.Signing.SignedPackageArchiveMetadata)">
+            <summary>
+            Updates the SignedPackageArchiveMetadata.CentralDirectoryHeaders by updating IndexInHeaders and FileEntryTotalSize.
+            Updates the SignedPackageArchiveMetadata.EndOfFileHeaders.
+            </summary>
+            <param name="reader">Binary reader to zip archive.</param>
+            <param name="metadata">SignedPackageArchiveMetadata to be updated.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.AssertExactlyOnePrimarySignatureAndUpdateMetadata(NuGet.Packaging.Signing.SignedPackageArchiveMetadata)">
+            <summary>
+            Asserts that the SignedPackageArchiveMetadata contains only one Signature file entry.
+            Updates SignedPackageArchiveMetadata.SignatureCentralDirectoryHeaderIndex with the index of the signature central directory header.
+            Throws SignatureException if less or more entries are found.
+            </summary>
+            <param name="metadata">SignedPackageArchiveMetadata to be checked for signature entry.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.AssertSignatureEntryMetadata(System.IO.BinaryReader,NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata)">
+            <summary>
+            Asserts the validity of local file header and central directory file header for the signature file in the package.
+            Throws Signature Exception if the headers are invalid.
+            </summary>
+            <param name="reader">BinaryReader on the package.</param>
+            <param name="signatureCentralDirectoryHeader">Metadata of the the package.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.WriteSignatureIntoZip(System.IO.MemoryStream,System.IO.BinaryReader,System.IO.BinaryWriter)">
+            <summary>
+            Writes the signature data into the zip using the writer.
+            The reader is used to read the exisiting zip. 
+            </summary>
+            <param name="signatureStream">MemoryStream of the signature to be inserted into the zip.</param>
+            <param name="reader">BinaryReader to be used to read the existing zip data.</param>
+            <param name="writer">BinaryWriter to be used to write the signature into the zip.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.WriteLocalFileHeaderIntoZip(System.IO.BinaryWriter,System.Byte[],System.UInt32,System.UInt32)">
+            <summary>
+            Writes a local file header into a zip using the writer starting at the writer.BaseStream.Position.
+            </summary>
+            <param name="writer">BinaryWriter to be used to write file.</param>
+            <param name="fileData">Byte[] of the corresponding file to be written into the zip.</param>
+            <param name="crc32">CRC-32 for the file.</param>
+            <param name="dosDateTime">Last modified DateTime for the file data.</param>
+            <returns>Number of total bytes written into the zip.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.WriteFileIntoZip(System.IO.BinaryWriter,System.Byte[])">
+            <summary>
+            Writes a file into a zip using the writer starting at the writer.BaseStream.Position.
+            </summary>
+            <param name="writer">BinaryWriter to be used to write file.</param>
+            <param name="fileData">Byte[] of the file to be written into the zip.</param>
+            <returns>Number of total bytes written into the zip.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.WriteCentralDirectoryHeaderIntoZip(System.IO.BinaryWriter,System.Byte[],System.UInt32,System.UInt32,System.Int64)">
+            <summary>
+            Writes a central directory header into a zip using the writer starting at the writer.BaseStream.Position.
+            </summary>
+            <param name="writer">BinaryWriter to be used to write file.</param>
+            <param name="fileData">Byte[] of the file to be written into the zip.</param>
+            <param name="crc32">CRC-32 checksum for the file.</param>
+            <param name="dosDateTime">Last modified DateTime for the file data.</param>
+            <param name="fileOffset">Offset, in bytes, for the local file header of the corresponding file from the start of the archive.</param>
+            <returns>Number of total bytes written into the zip.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndWriteUpdatedEndOfCentralDirectoryRecordIntoZip(System.IO.BinaryReader,System.IO.BinaryWriter,System.Int64,System.Int64)">
+            <summary>
+            Writes the end of central directory header into a zip using the writer starting at the writer.BaseStream.Position.
+            The new end of central directory record will be based on the one at reader.BaseStream.Position.
+            </summary>
+            <param name="reader">BinaryWriter to be used to read exisitng end of central directory record.</param>
+            <param name="writer">BinaryWriter to be used to write file.</param>
+            <param name="sizeOfSignatureCentralDirectoryRecord">Size of the central directory header for the signature file.</param>
+            <param name="sizeOfSignatureFileHeaderAndData">Size of the signature file and the corresponding local file header.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.DateTimeToDosTime(System.DateTime)">
+            <summary>
+            Converts a DateTime value into a unit in the MS-DOS date time format.
+            Reference - https://docs.microsoft.com/en-us/cpp/c-runtime-library/32-bit-windows-time-date-formats
+            Reference - https://source.dot.net/#System.IO.Compression/System/IO/Compression/ZipHelper.cs,91
+            </summary>
+            <param name="dateTime">DateTime value to be converted.</param>
+            <returns>uint representing the MS-DOS equivalent date time.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignedPackageArchiveMetadata">
+            <summary>
+            This class is used to hold metadata about the signed package archive being verified.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.CentralDirectoryHeaders">
+            <summary>
+            List of central directory metadata ordered by the same order the central directory headers are in the archive
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.StartOfFileHeaders">
+            <summary>
+            Offset, in bytes, to the first file header relative to the start of the archive. Should typically be 0.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.EndOfFileHeaders">
+            <summary>
+            Offset, in bytes, to the end of last file header relative to the start of the archive.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.EndOfCentralDirectory">
+            <summary>
+            Offset, in bytes, to the end of central directory headers relative to the start of the archive.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.SignatureCentralDirectoryHeaderIndex">
+            <summary>
+            Index of the signature central directory header in CentralDirectoryHeaders.
+            If the CentralDirectoryHeaders list is ordered by IndexInHeaders this index indicates the position on the list for the signature.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.EndOfCentralDirectoryRecordPosition">
+            <summary>
+            Offset, in bytes, to the start of "End of Central Directory Record" relative to the start of the archive.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignedPackageArchiveUtility">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.IsSigned(System.IO.BinaryReader)">
+            <summary>
+            Utility method to know if a zip archive is signed.
+            </summary>
+            <param name="reader">Binary reader pointing to a zip archive.</param>
+            <returns>true if the given archive is signed</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.SignZip(System.IO.MemoryStream,System.IO.BinaryReader,System.IO.BinaryWriter)">
+            <summary>
+            Signs a Zip with the contents in the SignatureStream using the writer.
+            The reader is used to read the exisiting contents for the Zip.
+            </summary>
+            <param name="signatureStream">MemoryStream of the signature to be inserted into the zip.</param>
+            <param name="reader">BinaryReader to be used to read the existing zip data.</param>
+            <param name="writer">BinaryWriter to be used to write the signature into the zip.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.VerifySignedPackageIntegrity(System.IO.BinaryReader,System.Security.Cryptography.HashAlgorithm,System.Byte[])">
+            <summary>
+            Verifies that a signed package archive's signature is valid and it has not been tampered with.
+            </summary>
+            <param name="reader">Signed package to verify</param>
+            <param name="hashAlgorithm">Hash algorithm to be used to hash data.</param>
+            <param name="expectedHash">Hash value of the original data.</param>
+            <returns>True if package archive's hash matches the expected hash</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndication(NuGet.Packaging.Signing.SignatureType)">
+            <summary>
+            Create a CommitmentTypeIndication attribute.
+            https://tools.ietf.org/html/rfc5126.html#section-5.11.1
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndication(System.Security.Cryptography.CryptographicAttributeObject)">
+            <summary>
+            Oid -> SignatureType
+            </summary>
+            <remarks>Unknown Oids are ignored. Throws for empty values and invalid combinations.</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidCommitmentTypeIndication(System.Security.Cryptography.CryptographicAttributeObject)">
+            <summary>
+            True if the commitment-type-indication value does not
+            contain an invalid combination of values. Unknown
+            values are ignored.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureType(System.String)">
+            <summary>
+            Oid -> SignatureType
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureTypeOid(NuGet.Packaging.Signing.SignatureType)">
+            <summary>
+            SignatureType -> Oid
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSigningCertificateV2(System.Collections.Generic.IEnumerable{System.Security.Cryptography.X509Certificates.X509Certificate2},NuGet.Common.HashAlgorithmName)">
+            <summary>
+            Create a signing-certificate-v2 from a certificate.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidSigningCertificateV2(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Security.Cryptography.X509Certificates.X509Chain,System.Security.Cryptography.CryptographicAttributeObject,NuGet.Packaging.Signing.SigningSpecifications)">
+            <summary>
+            Verify a signing-certificate-v2 attribute.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidSigningCertificateV2(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Collections.Generic.IReadOnlyList{System.Security.Cryptography.X509Certificates.X509Certificate2},System.Security.Cryptography.CryptographicAttributeObject,NuGet.Packaging.Signing.SigningSpecifications)">
+            <summary>
+            Verify a signing-certificate-v2 attribute.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidSigningCertificateV2(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Collections.Generic.IReadOnlyList{System.Security.Cryptography.X509Certificates.X509Certificate2},System.Collections.Generic.IReadOnlyList{System.Collections.Generic.KeyValuePair{NuGet.Common.HashAlgorithmName,System.Byte[]}},NuGet.Packaging.Signing.SigningSpecifications)">
+            <summary>
+            Verify components of a signing-certificate-v2 attribute.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetAttributeOrDefault(System.Security.Cryptography.CryptographicAttributeObjectCollection,System.String)">
+            <summary>
+            Returns the first attribute if the Oid is found.
+            Returns null if the attribute is not found.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.VerifyHash(System.Collections.Generic.KeyValuePair{NuGet.Common.HashAlgorithmName,System.Byte[]},System.Collections.Generic.KeyValuePair{NuGet.Common.HashAlgorithmName,System.Byte[]})">
+            <summary>
+            Compare hash values.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.VerifyHash(System.Byte[],System.Byte[])">
+            <summary>
+            Compare hash values.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ToDerSequenceReader(System.Security.Cryptography.CryptographicAttributeObject)">
+            <summary>
+            CryptographicAttributeObject -> DerSequenceReader
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ThrowInvalidAttributeException(System.Security.Cryptography.CryptographicAttributeObject)">
+            <summary>
+            Throw a signature exception due to an invalid attribute. This is used for unusual situations
+            where the format is corrupt.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ToList(System.Security.Cryptography.AsnEncodedDataCollection)">
+            <summary>
+            Enumerate AsnEncodedDataCollection
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndicationRawValues(System.Security.Cryptography.CryptographicAttributeObject)">
+            <summary>
+            Attribute -> SignatureType values with no validation.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.ISignatureProvider">
+            <summary>
+            Creates Signatures that can be added to packages.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignatureProvider.CreateSignatureAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Packaging.Signing.SignatureContent,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Create a signature.
+            </summary>
+            <param name="certificate">Certificate to be used while signing the package.</param>
+            <param name="signatureContent">SignatureContent containing the Hash of the package and the signature version.</param>
+            <param name="logger">Logger</param>
+            <param name="token">Cancellation token.</param>
+            <returns>A signature for the package.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Signer">
+            <summary>
+            Remove or add signature package metadata.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signer.#ctor(NuGet.Packaging.Signing.ISignedPackage,NuGet.Packaging.Signing.ISignatureProvider)">
+            <summary>
+            Creates a signer for a specific package.
+            </summary>
+            <param name="package">Package to sign or modify.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signer.SignAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Add a signature to a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signer.RemoveSignaturesAsync(NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Remove all signatures from a package.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignPackageRequest">
+            <summary>
+            Contains a request for generating package signature.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.SignatureHashAlgorithm">
+            <summary>
+            Hash algorithm used to create the package signature.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.TimestampHashAlgorithm">
+            <summary>
+            Hash algorithm used to timestamping the signed package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.Certificate">
+            <summary>
+            X509Certificate2 to be used while signing the package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.PrivateKey">
+            <summary>
+            PrivateKey is only used in mssign command.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.SignatureType">
+            <summary>
+            Author or Repository signature type.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.X509SignatureProvider">
+            <summary>
+            Sign a manifest hash with an X509Certificate2.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.X509SignatureProvider.CreateSignatureAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Packaging.Signing.SignatureContent,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Sign the package stream hash with an X509Certificate2.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.X509Certificate2ToString(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Converts a X509Certificate2 to a human friendly string of the following format -
+            Subject Name: CN=name
+            SHA1 hash: hash
+            Issued by: CN=issuer
+            Valid from: issue date time to expiry date time in local time
+            </summary>
+            <param name="cert">X509Certificate2 to be converted to string.</param>
+            <returns>string representation of the X509Certificate2.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.X509Certificate2CollectionToString(System.Security.Cryptography.X509Certificates.X509Certificate2Collection)">
+             <summary>
+             Converts a X509Certificate2Collection to a human friendly string of the following format -
+             Subject Name: CN=name
+             SHA1 hash: hash
+             Issued by: CN=issuer
+             Valid from: issue date time to expiry date time in local time
+            
+             Subject Name: CN=name
+             SHA1 hash: hash
+             Issued by: CN=issuer
+             Valid from: issue date time to expiry date time in local time
+            
+             ... N more.
+             </summary>
+             <param name="certCollection">X509Certificate2Collection to be converted to string.</param>
+             <returns>string representation of the X509Certificate2Collection.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.KeyPairFileReader.ReadSection">
+            <summary>
+            Read a section of key value pairs from the file.
+            Throw for invalid formats.
+            </summary>
+            <remarks>Returns an empty set if the file has reached the end.</remarks>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.KeyPairFileUtility.Encoding">
+            <summary>
+            File encoding.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.KeyPairFileUtility.GetValueOrThrow(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Throw if the expected value does not exist.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.KeyPairFileWriter.WritePair(System.String,System.String)">
+            <summary>
+            Write key:value with EOL to the manifest stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.KeyPairFileWriter.WriteSectionBreak">
+            <summary>
+            Write an empty line.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.KeyPairFileWriter.WriteEOL">
+            <summary>
+            Write an end of line to the manifest writer.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.KeyPairFileWriter.FormatItem(System.String,System.String)">
+            <summary>
+            key:value
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignatureContent">
+            <summary>
+            SignedCms.ContentInfo.Content for the primary signature.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureContent.HashAlgorithm">
+            <summary>
+            Hashing algorithm used.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureContent.HashValue">
+            <summary>
+            Base64 package stream hash.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureContent.Save(System.IO.Stream)">
+            <summary>
+            Write the content to a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureContent.GetBytes">
+            <summary>
+            Write the content to byte array.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureContent.Load(System.Byte[],NuGet.Packaging.Signing.SigningSpecifications)">
+            <summary>
+            Load from a byte array.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureContent.Load(System.IO.Stream,NuGet.Packaging.Signing.SigningSpecifications)">
+            <summary>
+            Load content from a stream.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.DerEncoding.DerEncoder">
+            <summary>
+            Writes data encoded via the Distinguished Encoding Rules for Abstract
+            Syntax Notation 1 (ASN.1) data.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeBoolean(System.Boolean)">
+            <summary>
+            Encode the segments { tag, length, value } of a boolean.
+            </summary>
+            <param name="value">The boolean to encode</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeUnsignedInteger(System.UInt32)">
+            <summary>
+            Encode the segments { tag, length, value } of an unsigned integer.
+            </summary>
+            <param name="value">The value to encode.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeUnsignedInteger(System.Byte[])">
+            <summary>
+            Encode the segments { tag, length, value } of an unsigned integer.
+            </summary>
+            <param name="bigEndianBytes">The value to encode, in big integer representation.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeUnsignedInteger(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Encode the segments { tag, length, value } of an unsigned integer represented within a bounded array.
+            </summary>
+            <param name="bigEndianBytes">The value to encode, in big integer representation.</param>
+            <param name="offset">The offset into bigEndianBytes to read</param>
+            <param name="count">The count of bytes to read, must be greater than 0</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeBitString(System.Byte[][][])">
+            <summary>
+            Encode the segments { tag, length, value } of a BIT STRING which is wrapped over
+            other DER-encoded data.
+            </summary>
+            <param name="childSegments"></param>
+            <remarks>
+            Despite containing other DER-encoded data this does not get the constructed bit,
+            because it doesn't when encoding public keys in SubjectPublicKeyInfo</remarks>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeBitString(System.Byte[])">
+            <summary>
+            Encode the segments { tag, length, value } of a bit string where all bits are significant.
+            </summary>
+            <param name="data">The data to encode</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeBitString(System.Int32,System.Byte[])">
+            <summary>
+            Encode the segments { tag, length, value } of a bit string where the least significant
+            <paramref name="unusedBits"/> of the last byte are padding.
+            </summary>
+            <param name="unusedBits">The number of padding bits (0-7) in the last byte</param>
+            <param name="data">The data to encode</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeNamedBitList(System.Byte[],System.Int32)">
+            <summary>
+            Encode the segments { tag, length, value } of a bit string value based upon a NamedBitList.
+            ((<paramref name="bigEndianBytes"/>[0] >> 7) &amp; 1) is considered the "leading" bit, proceeding
+            through the array for up to <paramref name="namedBitsCount"/>.
+            </summary>
+            <param name="bigEndianBytes">
+            The data in big endian order, the most significant bit of byte 0 is the leading bit
+            (corresponds to the named value for "bit 0"). Any bits beyond <paramref name="namedBitsCount"/>
+            are ignored, and any missing bits are assumed to be unset.
+            </param>
+            <param name="namedBitsCount">
+            The total number of named bits.  Since the bits are numbered with a zero index, this should be
+            one higher than the largest defined bit. (namedBitsCount=10 covers bits 0-9)
+            </param>
+            <returns>
+            A triplet of { tag }, { length }, { data }.  All trailing unset named bits are removed. 
+            </returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeOctetString(System.Byte[])">
+            <summary>
+            Encode the segments { tag, length, value } of an octet string (byte array).
+            </summary>
+            <param name="data">The data to encode</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.EncodeOid(System.String)">
+            <summary>
+            Encode an object identifier (Oid).
+            </summary>
+            <returns>The encoded OID</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeOid(System.Security.Cryptography.Oid)">
+            <summary>
+            Encode the segments { tag, length, value } of an object identifier (Oid).
+            </summary>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeOid(System.String)">
+            <summary>
+            Encode the segments { tag, length, value } of an object identifier (Oid).
+            </summary>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeUtf8String(System.Char[])">
+            <summary>
+            Encode a character string as a UTF8String value.
+            </summary>
+            <param name="chars">The characters to be encoded.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeUtf8String(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            Encode a substring as a UTF8String value.
+            </summary>
+            <param name="chars">The characters whose substring is to be encoded.</param>
+            <param name="offset">The character offset into <paramref name="chars"/> at which to start.</param>
+            <param name="count">The total number of characters from <paramref name="chars"/> to read.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSegmentedSequence(System.Byte[][][])">
+            <summary>
+            Make a constructed SEQUENCE of the byte-triplets of the contents, but leave
+            the value in a segmented form (to be included in a larger SEQUENCE).
+            </summary>
+            <param name="items">Series of Tag-Length-Value triplets to build into one sequence.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSegmentedContextSpecificValue(System.Int32,System.Byte[][][])">
+            <summary>
+            Make a context-specific tagged value which is constructed of other DER encoded values.
+            Logically the same as a SEQUENCE, but providing context as to data interpretation (and usually
+            indicates an optional element adjacent to another SEQUENCE).
+            </summary>
+            <param name="contextId">The value's context ID</param>
+            <param name="items">Series of Tag-Length-Value triplets to build into one sequence.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSegmentedSet(System.Byte[][][])">
+            <summary>
+            Make a constructed SET of the byte-triplets of the contents, but leave
+            the value in a segmented form (to be included in a larger SEQUENCE).
+            </summary>
+            <param name="items">Series of Tag-Length-Value triplets to build into one set.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSegmentedPresortedSet(System.Byte[][][])">
+            <summary>
+            Make a constructed SET of the byte-triplets of the contents, but leave
+            the value in a segmented form (to be included in a larger SEQUENCE).
+            
+            This method assumes that the data is presorted, and writes it as-is.
+            </summary>
+            <param name="items">Series of Tag-Length-Value triplets to build into one set.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.IsValidPrintableString(System.Char[])">
+            <summary>
+            Test to see if the input characters contains only characters permitted by the ASN.1
+            PrintableString restricted character set.
+            </summary>
+            <param name="chars">The characters to test.</param>
+            <returns>
+            <c>true</c> if all of the characters in <paramref name="chars"/> are valid PrintableString characters,
+            <c>false</c> otherwise.
+            </returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.IsValidPrintableString(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            Test to see if the input substring contains only characters permitted by the ASN.1
+            PrintableString restricted character set.
+            </summary>
+            <param name="chars">The character string to test.</param>
+            <param name="offset">The starting character position within <paramref name="chars"/>.</param>
+            <param name="count">The number of characters from <paramref name="chars"/> to read.</param>
+            <returns>
+            <c>true</c> if all of the indexed characters in <paramref name="chars"/> are valid PrintableString
+            characters, <c>false</c> otherwise.
+            </returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodePrintableString(System.Char[])">
+            <summary>
+            Encode a character string as a PrintableString value.
+            </summary>
+            <param name="chars">The characters to be encoded.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodePrintableString(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            Encode a substring as a PrintableString value.
+            </summary>
+            <param name="chars">The character string whose substring is to be encoded.</param>
+            <param name="offset">The character offset into <paramref name="chars"/> at which to start.</param>
+            <param name="count">The total number of characters from <paramref name="chars"/> to read.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeIA5String(System.Char[])">
+            <summary>
+            Encode a string of characters as a IA5String value.
+            </summary>
+            <param name="chars">The characters to be encoded.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeIA5String(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            Encode a substring as a IA5String value.
+            </summary>
+            <param name="chars">The characters whose substring is to be encoded.</param>
+            <param name="offset">The character offset into <paramref name="chars"/> at which to start.</param>
+            <param name="count">The total number of characters from <paramref name="chars"/> to read.</param>
+            <returns>The encoded segments { tag, length, value }</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSequence(System.Byte[][][])">
+            <summary>
+            Make a constructed SEQUENCE of the byte-triplets of the contents.
+            Each byte[][] should be a byte[][3] of {tag (1 byte), length (1-5 bytes), payload (variable)}.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSequence(System.Collections.Generic.IEnumerable{System.Byte[][]})">
+            <summary>
+            Make a constructed SEQUENCE of the byte-triplets of the contents.
+            Each byte[][] should be a byte[][3] of {tag (1 byte), length (1-5 bytes), payload (variable)}.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.DerEncoding.DerSequenceReader">
+            <summary>
+            Reads data encoded via the Distinguished Encoding Rules for Abstract
+            Syntax Notation 1 (ASN.1) data.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.DerEncoding.DerSequenceReader.ReadNextEncodedValue">
+            <summary>
+            Returns the next value encoded (this includes tag and length)
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.DerEncoding.SR">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.DerEncoding.SR.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.DerEncoding.SR.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.DerEncoding.SR.Argument_InvalidOidValue">
+            <summary>
+              Looks up a localized string similar to The OID value was invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.DerEncoding.SR.Cryptography_Der_Invalid_Encoding">
+            <summary>
+              Looks up a localized string similar to ASN1 corrupted data..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.DerEncoding.SR.Cryptography_Invalid_IA5String">
+            <summary>
+              Looks up a localized string similar to The string contains a character not in the 7 bit ASCII character set..
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.ISignedPackage">
+            <summary>
+            A package that can read and write signatures.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.ISignedPackageReader">
+            <summary>
+            A readonly package that can provide signatures and a sign manifest from a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.GetSignaturesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Get all signatures used to sign a package.
+            </summary>
+            <remarks>Returns an empty list if the package is unsigned.</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.IsSignedAsync(System.Threading.CancellationToken)">
+            <summary>
+            Check if a package contains signing information.
+            </summary>
+            <returns>True if the package is signed.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.GetArchiveHashAsync(NuGet.Common.HashAlgorithmName,System.Threading.CancellationToken)">
+            <summary>
+            Gets the hash of an archive to be embedded in the package signature.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.ValidateIntegrityAsync(NuGet.Packaging.Signing.SignatureContent,System.Threading.CancellationToken)">
+            <summary>
+            Checks for the integrity of a package
+            </summary>
+            <param name="signatureContent">SignatureContent with expected hash value and hash algorithm used</param>
+            <returns></returns>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.ISignedPackageWriter">
+            <summary>
+            A writer that only allows editing for the package signature.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageWriter.RemoveSignatureAsync(System.Threading.CancellationToken)">
+            <summary>
+            Removes a signature if it exists.
+            </summary>
+            <param name="token">CancellationToken</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageWriter.AddSignatureAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Adds a signature in the package.
+            Throws exception if the package is already signed.
+            </summary>
+            <param name="packageSignatureProvider">A stream of the signature to be added to the package.</param>
+            <param name="token">Cancellation token.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageWriter.IsZip64Async(System.Threading.CancellationToken)">
+            <summary>
+            Check if a package is Zip64.
+            </summary>
+            <param name="token">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.Boolean" />
+            indicating whether the package is signed.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="token" />
+            is cancelled.</exception>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignedPackageArchive">
+            <summary>
+            A nupkg that supports both reading and writing signatures.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchive.ZipWriteStream">
+            <summary>
+            Stream underlying the ZipArchive. Used to do signature verification on a SignedPackageArchive.
+            If this is null then we cannot perform signature verification.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchive.AddSignatureAsync(System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Adds a signature to a package if it is not already signed.
+            </summary>
+            <param name="signatureStream">Stream of the signature SignedCms object to be added to the package.</param>
+            <param name="token">Cancellation Token.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchive.RemoveSignatureAsync(System.Threading.CancellationToken)">
+            <summary>
+            Remove a signature from the package, if it exists.
+            </summary>
+            <param name="token">Cancellation token.</param>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureException.Results">
+            <summary>
+            Individual trust results.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Signature">
+            <summary>
+            Package signature information.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Signature.SignedCms">
+            <summary>
+            A SignedCms object holding the signature and SignerInfo.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Signature.Type">
+            <summary>
+            Indicates if this is an author or repository signature.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Signature.SignatureContent">
+            <summary>
+            Signature content.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Signature.Timestamps">
+            <summary>
+            Signature timestamps.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Signature.SignerInfo">
+            <summary>
+            SignerInfo for this signature.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signature.Save(System.IO.Stream)">
+            <summary>
+            Save the signed cms signature to a stream.
+            </summary>
+            <param name="stream"></param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signature.GetBytes">
+            <summary>
+            Retrieve the bytes of the signed cms signature.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signature.Load(System.Security.Cryptography.Pkcs.SignedCms)">
+            <summary>
+            Create a signature based on a valid signed cms
+            </summary>
+            <param name="cms">signature data</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signature.Load(System.Byte[])">
+            <summary>
+            Create a signature based on a valid byte array to be decoded as a signed cms
+            </summary>
+            <param name="data">signature data</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signature.Load(System.IO.Stream)">
+            <summary>
+            Create a signature based on a valid byte stream to be decoded as a signed cms
+            </summary>
+            <param name="stream">signature data</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signature.GetSignatureType(System.Security.Cryptography.Pkcs.SignerInfo)">
+            <summary>
+            Get Signature type depending on signature metadata
+            </summary>
+            <param name="signer">SignerInfo containing signature metadata</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Signature.GetTimestamps(System.Security.Cryptography.Pkcs.SignerInfo)">
+            <summary>
+            Get timestamps from the signer info
+            </summary>
+            <param name="signer"></param>
+            <returns></returns>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignatureType">
+            <summary>
+            Indicates author or repository signing.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureType.Unknown">
+            <summary>
+            Default unknown value.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureType.Author">
+            <summary>
+            Signed by the author.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureType.Repository">
+            <summary>
+            Signed by the repository.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SigningUtility">
+            <summary>
+            Utility methods for signing.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.IsSignatureAlgorithmSupported(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Determines if a certificate's signature algorithm is supported.
+            </summary>
+            <param name="certificate">Certificate to validate</param>
+            <returns>True if the certificate's signature algorithm is supported.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.IsCertificatePublicKeyValid(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary> 
+            Validates the public key requirements for a certificate 
+            </summary> 
+            <param name="certificate">Certificate to validate</param> 
+            <returns>True if the certificate's public key is valid within NuGet signature requirements</returns> 
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.HasLifetimeSigningEku(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Validates if the certificate contains the lifetime signing EKU
+            </summary>
+            <param name="certificate">Certificate to validate</param>
+            <returns>True if the certificate has the lifetime signing EKU</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.GetCertificateChain(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Security.Cryptography.X509Certificates.X509Certificate2Collection)">
+            <summary>
+            Create a list of certificates in chain order with the leaf first and root last.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.GetCertificateChain(System.Security.Cryptography.X509Certificates.X509Chain)">
+            <summary>
+            Create an ordered list of certificates. The leaf node is returned first.
+            </summary>
+            <remarks>This does not check validity or trust. It returns the chain as-is.</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.HasExtendedKeyUsage(System.Security.Cryptography.X509Certificates.X509Certificate2,System.String)">
+            <summary>
+            Checks if an X509Certificate2 contains a particular Extended Key Usage (EKU).
+            </summary>
+            <param name="certificate">X509Certificate2 to be checked.</param>
+            <param name="ekuOid">String OID of the Extended Key Usage</param>
+            <returns>A bool indicating if the X509Certificate2 contains specified OID in its Extended Key Usage.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.IsValidForPurposeFast(System.Security.Cryptography.X509Certificates.X509Certificate2,System.String)">
+            <summary>
+            Checks if an X509Certificate2 is valid for a particular purpose.
+            </summary>
+            <remarks>
+            This must not be used in evaluation of a signed package.
+            A more accurate test is building a chain with the specified EKU asserted in the application policy.
+            </remarks>
+            <param name="certificate">X509Certificate2 to be checked.</param>
+            <param name="ekuOid">String OID of the Extended Key Usage</param>
+            <returns>A bool indicating if the X509Certificate2 contains specified OID string in its Extended Key Usage.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SigningSpecifications">
+            <summary>
+            Abstract class representing which paths may be used for signing in a package.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SigningSpecifications.V1">
+            <summary>
+            v1.0.0 signing settings.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.Version">
+            <summary>
+            Gets the signature format version.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.SignaturePath">
+            <summary>
+            Returns the path for the signature file.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.AllowedHashAlgorithms">
+            <summary>
+            Returns the set of allowed hash algorithms.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.AllowedHashAlgorithmOids">
+            <summary>
+            Returns the set of allowed hash algorithm Oids.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.RSAPublicKeyMinLength">
+            <summary>
+            Returns minumum length required for RSA public keys.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.Encoding">
+            <summary>
+            Encoding used to generate the signature.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningSpecifications.#ctor">
+            <summary>
+            Initialize a signing specification with a root folder.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedHashAlgorithms">
+            <summary>
+            Allowed digest algorithms for signature and timestamp hashing.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedHashAlgorithmOids">
+            <summary>
+            Allowed digest algorithm Oids for signature and timestamp hashing.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecificationsV1.Version">
+            <summary>
+            Gets the signature format version.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampProvider">
+            <summary>
+            A provider for RFC 3161 timestamps
+            https://tools.ietf.org/html/rfc3161
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.TimestampSignatureAsync(NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Timestamps data present in the TimestampRequest.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.TimestampData(NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Timestamps data present in the TimestampRequest.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampRequest">
+            <summary>
+            Class representing a Rfc3161TimestampRequest.
+            This class should be removed once we can reference it throught the .NET Core framework.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampToken">
+            <summary>
+            Class representing a Rfc3161TimestampToken.
+            This class should be removed once we can reference it throught the .NET Core framework.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampTokenInfo">
+            <summary>
+            Represents an RFC3161 TSTInfo.
+            This class should be removed once we can reference it throught the .NET Core framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampTokenInfo.GetSerialNumber">
+            <summary>
+            Gets the serial number for the request in the big-endian byte order.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampUtils">
+            <summary>
+            Internally used by Rfc3161TimestampProvider.
+            This class should be removed once we can reference it throught the .NET Core framework.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampVerificationUtility">
+            <summary>
+            Provides convinience method for verification of a RFC 3161 Timestamp.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampWin32">
+            <summary>
+            Internally used by Rfc3161TimestampProvider.
+            This class should be removed once we can reference it throught the .NET Core framework.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Timestamp.UpperLimit">
+            <summary>
+            Upper limit of Timestamp.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Timestamp.LowerLimit">
+            <summary>
+            Lower limit of Timestamp.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Timestamp.GeneralizedTime">
+            <summary>
+            Time timestamp was created by the Time Stamp Authority.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Timestamp.SignedCms">
+            <summary>
+            A SignedCms object holding the timestamp and SignerInfo.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Timestamp.SignerInfo">
+            <summary>
+            SignerInfo for this timestamp.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.Timestamp.TstInfo">
+            <summary>
+            Timestamp token info for this timestamp.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Timestamp.#ctor">
+            <summary>
+            Default constructor. Limits are set to current time.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Timestamp.#ctor(System.Security.Cryptography.Pkcs.SignedCms)">
+            <summary>
+            SignedCms containing a time stamp authority token reponse
+            </summary>
+            <param name="timestampCms">SignedCms from Time Stamp Authority</param>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.TimestampException">
+            <summary>
+            Exceptions that are generated while creating a package timestamp.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.TimestampRequest">
+            <summary>
+            Request for timestamping a signature
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.SignatureValue">
+            <summary>
+            Signature that needs to be timestamped.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.Certificate">
+            <summary>
+            X509Certificate2 used to generate the Signature.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.TimestampHashAlgorithm">
+            <summary>
+            Hash algorithm to be used for timestamping.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.SigningSpec">
+            <summary>
+            Signing Specification for this timestamp request.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.ISignatureVerificationProvider">
+            <summary>
+            Providers signature trust information.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.ISignatureVerificationProvider.GetTrustResultAsync(NuGet.Packaging.Signing.ISignedPackageReader,NuGet.Packaging.Signing.Signature,NuGet.Packaging.Signing.SignedPackageVerifierSettings,System.Threading.CancellationToken)">
+            <summary>
+            Check if <paramref name="signature" /> is trusted by the provider.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.PackageSignatureVerifier">
+            <summary>
+            Loads trust providers and verifies package signatures.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.PackageSignatureVerifier.IsValid(System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.PackageVerificationResult},System.Boolean)">
+            <summary>
+            True if a provider trusts the package signature.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.PackageVerificationResult">
+            <summary>
+            Represents a signature check result and any additional information
+            needed to display to the user.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.PackageVerificationResult.Trust">
+            <summary>
+            Trust result
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.PackageVerificationResult.Issues">
+            <summary>
+            List of issues found in the verification process
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.PackageVerificationResult.#ctor(NuGet.Packaging.Signing.SignatureVerificationStatus,System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.SignatureLog})">
+            <summary>
+            SignatureVerificationResult
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureTrustAndValidityVerificationProvider.IsTimestampValid(NuGet.Packaging.Signing.Timestamp,System.Byte[],System.Boolean,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+            <summary>
+            Validates a SignedCms object containing a timestamp response.
+            </summary>
+            <param name="timestampCms">SignedCms response from the timestamp authority.</param>
+            <param name="data">byte[] data that was signed and timestamped.</param>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignatureVerificationStatus">
+            <summary>
+            Represents the trust result of a signature.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Unknown">
+            <summary>
+            Default unknown value.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Invalid">
+            <summary>
+            Invalid signature.
+            </summary>
+            <remarks>This could happen for many reasons such as a tampered with package, invalid hash algorithm, or invalid signing data.</remarks>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Untrusted">
+            <summary>
+            Signature is NOT trusted.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Trusted">
+            <summary>
+            Signature is trusted.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerificationResult.Signature">
+            <summary>
+            Signature
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignedPackageVerifierSettings">
+            <summary>
+            Feed settings used to verify packages.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUnsigned">
+            <summary>
+            Allow packages that do not contain signatures.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUntrusted">
+            <summary>
+            Allow packages that are not trusted.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowAll">
+            <summary>
+            Allow unsigned.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.Default">
+            <summary>
+            Default settings.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.VerifySignaturesResult">
+            <summary>
+            Collection of signature verification results.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Valid">
+            <summary>
+            True if signature is valid.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.VerifySignaturesResult.Results">
+            <summary>
+            Individual trust results.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Strings">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ArgumentCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to The argument cannot be null or empty..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertUtilityCertificateHash">
+            <summary>
+              Looks up a localized string similar to SHA1 hash: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertUtilityCertificateIssuer">
+            <summary>
+              Looks up a localized string similar to Issued by: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertUtilityCertificateSubjectName">
+            <summary>
+              Looks up a localized string similar to Subject Name: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertUtilityCertificateValidity">
+            <summary>
+              Looks up a localized string similar to Valid from: {0} to {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertUtilityMultipleCertificatesFooter">
+            <summary>
+              Looks up a localized string similar to ... {0} more..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertUtilityMultipleCertificatesHeader">
+            <summary>
+              Looks up a localized string similar to The following certificates meet all given criteria:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CommitmentTypeIndicationAttributeInvalid">
+            <summary>
+              Looks up a localized string similar to commitment-type-indication attribute contains an invalid value..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CommitmentTypeIndicationInvalid">
+            <summary>
+              Looks up a localized string similar to commitment-type-indication attribute is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.DebugNoCertificate">
+            <summary>
+              Looks up a localized string similar to Certificate inside main SignerInfo is null..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_InvalidTargetFramework">
+            <summary>
+              Looks up a localized string similar to Unsupported targetFramework value &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_NotOnePrimarySignature">
+            <summary>
+              Looks up a localized string similar to The package signature contains multiple primary signatures..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorByteSignatureNotFound">
+            <summary>
+              Looks up a localized string similar to Byte signature not found in package archive:  0x{0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorByteSignatureTooBig">
+            <summary>
+              Looks up a localized string similar to Byte signature too big to seek in current stream position..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorCertificateHasLifetimeSignerEKU">
+            <summary>
+              Looks up a localized string similar to Certificates with lifetime signer EKU are not supported..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorDuplicatePackages">
+            <summary>
+              Looks up a localized string similar to There are duplicate packages: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidAllowedVersions">
+            <summary>
+              Looks up a localized string similar to Invalid allowedVersions for package id &apos;{0}&apos;: &apos;{1}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChain">
+            <summary>
+              Looks up a localized string similar to Certificate chain validation failed with error: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChainUnspecifiedReason">
+            <summary>
+              Looks up a localized string similar to Certificate chain validation failed for an unspecified reason..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidMinClientVersion">
+            <summary>
+              Looks up a localized string similar to Invalid minClientVersion: &apos;{0}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageArchive">
+            <summary>
+              Looks up a localized string similar to Invalid package archive..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageVersion">
+            <summary>
+              Looks up a localized string similar to Invalid package version for package id &apos;{0}&apos;: &apos;{1}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageVersionForDependency">
+            <summary>
+              Looks up a localized string similar to Invalid package version for a dependency with id &apos;{0}&apos; in package &apos;{1}&apos;: &apos;{2}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPublicKey">
+            <summary>
+              Looks up a localized string similar to Could not validate signature. Certificate does not meet the public key requirements..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorManifestFileNotFound">
+            <summary>
+              Looks up a localized string similar to Manifest file not found at &apos;{0}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorMultipleTimestamps">
+            <summary>
+              Looks up a localized string similar to Multiple timestamps are not accepted..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorNoCertificate">
+            <summary>
+              Looks up a localized string similar to The primary signature did not have a signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorNoTimestamp">
+            <summary>
+              Looks up a localized string similar to The primary signature should be timestamped to enable long-term signature validity after the certificate has expired..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorNullOrEmptyPackageId">
+            <summary>
+              Looks up a localized string similar to Null or empty package id.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorPackageNotSigned">
+            <summary>
+              Looks up a localized string similar to Package is not signed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorPackageSignatureInvalid">
+            <summary>
+              Looks up a localized string similar to Package signature is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorPackageTampered">
+            <summary>
+              Looks up a localized string similar to Package contents might have been tampered..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorSignatureFileTooBig">
+            <summary>
+              Looks up a localized string similar to Signature file is not of a reasonable size. Package contents might have been tampered..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorSignatureVerificationFailed">
+            <summary>
+              Looks up a localized string similar to Primary signature validation failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorSigningCertUntrustedRoot">
+            <summary>
+              Looks up a localized string similar to Signing certificate chains to an untrusted root..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
+            <summary>
+              Looks up a localized string similar to Unable to delete temporary file &apos;{0}&apos;. Error: &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorZip64NotSupported">
+            <summary>
+              Looks up a localized string similar to ZIP64 signed packages are not supported..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FailedFileTime">
+            <summary>
+              Looks up a localized string similar to Failed to update file time for {0}: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FailToLoadPackagesConfig">
+            <summary>
+              Looks up a localized string similar to Fail to load packages.config as XML file. Please check it. .
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FailToWritePackagesConfig">
+            <summary>
+              Looks up a localized string similar to Failed to write packages.config as XML file &apos;{0}&apos;. Error: &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.FallbackFolderNotFound">
+            <summary>
+              Looks up a localized string similar to Unable to find fallback package folder &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidNuspecElement">
+            <summary>
+              Looks up a localized string similar to {0} This validation error occurred in a &apos;{1}&apos; element..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidNuspecEntry">
+            <summary>
+              Looks up a localized string similar to The nuspec contains an invalid entry &apos;{0}&apos; in package &apos;{1}&apos; ..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageFrameworkFolderName">
+            <summary>
+              Looks up a localized string similar to The framework in the folder name of &apos;{0}&apos; in package &apos;{1}&apos; could not be parsed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageSignature">
+            <summary>
+              Looks up a localized string similar to Package {0} signature is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidSignatureContent">
+            <summary>
+              Looks up a localized string similar to The package signature content is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Log_InstallingPackage">
+            <summary>
+              Looks up a localized string similar to Installing {0} {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MinClientVersionAlreadyExist">
+            <summary>
+              Looks up a localized string similar to MinClientVersion already exists in packages.config.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MissingNuspec">
+            <summary>
+              Looks up a localized string similar to Nuspec file does not exist in package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MultipleNuspecFiles">
+            <summary>
+              Looks up a localized string similar to Package contains multiple nuspec files..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.MustContainAbsolutePath">
+            <summary>
+              Looks up a localized string similar to &apos;{0}&apos; must contain an absolute path &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageEntryAlreadyExist">
+            <summary>
+              Looks up a localized string similar to Package entry already exists in packages.config. Id: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageEntryNotExist">
+            <summary>
+              Looks up a localized string similar to Package entry does not exists in packages.config. Id: {0}, Version: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageMinVersionNotSatisfied">
+            <summary>
+              Looks up a localized string similar to The &apos;{0}&apos; package requires NuGet client version &apos;{1}&apos; or above, but the current NuGet version is &apos;{2}&apos;. To upgrade NuGet, please go to http://docs.nuget.org/consume/installing-nuget.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackagesNodeNotExist">
+            <summary>
+              Looks up a localized string similar to Packages node does not exists in packages.config at {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.PackageStreamShouldBeSeekable">
+            <summary>
+              Looks up a localized string similar to Package stream should be seekable.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureCentralDirectoryHeaderInvalid">
+            <summary>
+              Looks up a localized string similar to Invalid central directory header for signature entry: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureContainsInvalidAttribute">
+            <summary>
+              Looks up a localized string similar to Package signature contains an invalid attribute: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureDebug_HashOidFound">
+            <summary>
+              Looks up a localized string similar to Signature hash oid found: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureFailureInvalidHashAlgorithmOid">
+            <summary>
+              Looks up a localized string similar to The primary signature uses an unsupported hash algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureFileCompressed">
+            <summary>
+              Looks up a localized string similar to File was found to be compressed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureHashAlgorithm">
+            <summary>
+              Looks up a localized string similar to Signature Hash Algorithm: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureInvalidCompressionMethod">
+            <summary>
+              Looks up a localized string similar to Invalid compression method. Expected &apos;{0}&apos;, actual &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureInvalidExternalFileAttributes">
+            <summary>
+              Looks up a localized string similar to The package signature file entry is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureInvalidGeneralPurposeBits">
+            <summary>
+              Looks up a localized string similar to Invalid general purpose bit flags. Expected &apos;{0}&apos;, actual &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureLocalFileHeaderInvalid">
+            <summary>
+              Looks up a localized string similar to Invalid local file header for signature entry: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureNotYetValid">
+            <summary>
+              Looks up a localized string similar to The signing certificate is not yet valid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignaturePackageIntegrityFailure">
+            <summary>
+              Looks up a localized string similar to Package integrity check failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureType">
+            <summary>
+              Looks up a localized string similar to Signature type: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignedPackageArchiveIOExtraRead">
+            <summary>
+              Looks up a localized string similar to Package stream read position cannot be longer than the length of the stream..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignedPackageArchiveIOInvalidRead">
+            <summary>
+              Looks up a localized string similar to Package stream read position cannot be before the current position in the stream..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignedPackageNotSignedOnRemove">
+            <summary>
+              Looks up a localized string similar to The package is not signed. Unable to remove signature from an unsigned package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignedPackageNotSignedOnVerify">
+            <summary>
+              Looks up a localized string similar to The package is not signed. Unable to verify signature from an unsigned package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignedPackagePackageAlreadySigned">
+            <summary>
+              Looks up a localized string similar to The package already contains a signature. Please remove the existing signature before adding a new signature..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignedPackageUnableToAccessSignature">
+            <summary>
+              Looks up a localized string similar to The package was not opened correctly to perform Signature operations. Please use a Stream based constructor to have access to Signature attributes of the package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignFailureCertificateInvalidProviderType">
+            <summary>
+              Looks up a localized string similar to The following certificate cannot be used for package signing as the private key provider is unsupported:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateFailsPublicKeyLengthRequirement">
+            <summary>
+              Looks up a localized string similar to The signing certificate does not meet a minimum public key length requirement..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateHasUnsupportedSignatureAlgorithm">
+            <summary>
+              Looks up a localized string similar to The signing certificate has an unsupported signature algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateV2Invalid">
+            <summary>
+              Looks up a localized string similar to signing-certificate-v2 attribute value does not match the current certificate chain..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.StringCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to String argument &apos;{0}&apos; cannot be null or empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampCertificateChainBuildFailure">
+            <summary>
+              Looks up a localized string similar to The timestamp service&apos;s certificate chain could not be built for the following certificate: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampCertificateInvalid">
+            <summary>
+              Looks up a localized string similar to The timestamp service&apos;s certificate has a valid time in the future: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampFailureAuthorCertNotValid">
+            <summary>
+              Looks up a localized string similar to Author certificate was not valid when it was timestamped..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidContentType">
+            <summary>
+              Looks up a localized string similar to Timestamp signature validation failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHash">
+            <summary>
+              Looks up a localized string similar to Timestamp integrity check failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHashAlgorithmOid">
+            <summary>
+              Looks up a localized string similar to The timestamp uses as unsupported hash algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHttpScheme">
+            <summary>
+              Looks up a localized string similar to The timestamper url &apos;{0}&apos; has an invalid uri scheme. The supported schemes are &apos;{1}&apos; and &apos;{2}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampFailureNonceMismatch">
+            <summary>
+              Looks up a localized string similar to Timestamp response does not contain a matching response..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampInvalid">
+            <summary>
+              Looks up a localized string similar to The signature contains an invalid timestamp..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampNoCertificate">
+            <summary>
+              Looks up a localized string similar to The timestamp signature did not have a signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampNotYetValid">
+            <summary>
+              Looks up a localized string similar to The timestamp signing certificate is not yet valid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampResponseExceptionGeneral">
+            <summary>
+              Looks up a localized string similar to Timestamp service&apos;s response does not meet the NuGet package signature specification: &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampValue">
+            <summary>
+              Looks up a localized string similar to Timestamp: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnableToAddEntry">
+            <summary>
+              Looks up a localized string similar to An error occurred while updating packages.config. The file was closed before the entry could be added..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnableToParseClientVersion">
+            <summary>
+              Looks up a localized string similar to Unable to parse the current NuGet client version..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnableToReadPackageHashInformation">
+            <summary>
+              Looks up a localized string similar to Package hash information could not be read from the package signature..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnsupportedSignatureFormatVersion">
+            <summary>
+              Looks up a localized string similar to The package signature format version is not supported. Updating your client may solve this problem..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerificationAuthorCertDisplay">
+            <summary>
+              Looks up a localized string similar to Verifying signature with author certificate: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerificationDefaultCertDisplay">
+            <summary>
+              Looks up a localized string similar to Verifying signature with certificate: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerificationTimestamperCertDisplay">
+            <summary>
+              Looks up a localized string similar to Verifying timestamp with timestamping service certificate: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.WarningOfflineRevocationCheck">
+            <summary>
+              Looks up a localized string similar to Could not check revocation status of signing certificate online..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.WarningUnknownSignatureType">
+            <summary>
+              Looks up a localized string similar to Could not validate signature. Unknown signature type..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.WarningUntrustedRoot">
+            <summary>
+              Looks up a localized string similar to Signing certificate does not chain to a trusted root..
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder``1(System.Collections.Generic.IEnumerable{``0},System.StringComparer,System.Func{``0,System.String},System.Func{``0,System.String[]})">
+            <summary>
+            Order dependencies by children first.
+            </summary>
+            <param name="items">Items to sort.</param>
+            <param name="comparer">Comparer for Ids.</param>
+            <param name="getId">Retrieve the id of the item.</param>
+            <param name="getDependencies">Retrieve dependency ids.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder(System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependencyInfo})">
+            <summary>
+            Order dependencies by children first.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder(System.Collections.Generic.List{NuGet.Packaging.TopologicalSortUtility.ItemDependencyInfo},System.StringComparer)">
+            <summary>
+            Order dependencies by children first.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.VersionFolderPathResolver">
+            <summary>
+            A V3 path resolver.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.VersionFolderPathResolver.RootPath">
+            <summary>
+            Gets the packages directory root folder.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.VersionFolderPathResolver.IsLowerCase">
+            <summary>
+            Gets a flag indicating whether or not package ID's and versions are made lowercase.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.Packaging.VersionFolderPathResolver" /> class.
+            </summary>
+            <param name="rootPath">The packages directory root folder.</param>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String,System.Boolean)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.Packaging.VersionFolderPathResolver" /> class.
+            </summary>
+            <param name="rootPath">The packages directory root folder.</param>
+            <param name="isLowercase"><c>true</c> if package ID's and versions are made lowercase;
+            otherwise <c>false</c>.</param>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetInstallPath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package install path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package install path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetVersionListPath(System.String)">
+            <summary>
+            Gets the package version list path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <returns>The package version list path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageFilePath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package file path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetManifestFilePath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the manifest file path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The manifest file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetHashPath(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the hash file path.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The hash file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetHashFileName(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the hash file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The hash file name.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetVersionListDirectory(System.String)">
+            <summary>
+            Gets the version list directory.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <returns>The version list directory.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageDirectory(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package directory.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package directory.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageFileName(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the package file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The package file name.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetPackageDownloadMarkerFileName(System.String)">
+            <summary>
+            Gets the package download marker file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <returns>The package download marker file name.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.GetManifestFileName(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Gets the manifest file name.
+            </summary>
+            <param name="packageId">The package ID.</param>
+            <param name="version">The package version.</param>
+            <returns>The manifest file name.</returns>
+        </member>
+        <member name="T:NuGet.RuntimeModel.IObjectWriter">
+            <summary>
+            Provides functionality for writing an object graph.
+            The output format is defined by implementors.
+            </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteObjectStart(System.String)">
+             <summary>
+             Writes the start of a nested object.
+            
+             This new object becomes the scope for all other method calls until either WriteObjectStart
+             is called again to start a new nested object or WriteObjectEnd is called.
+            
+             Every call to WriteObjectStart must be balanced by a corresponding call to WriteObjectEnd.
+             </summary>
+             <param name="name">The name of the object.  Throws if <c>null</c>.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteObjectEnd">
+             <summary>
+             Writes the end of a nested object.
+            
+             The parent object for this object becomes the scope for subsequent method calls.
+             If this object is the root object, no further writing is allowed.
+            
+             Every call to WriteObjectStart must be balanced by a corresponding call to WriteObjectEnd.
+             </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.Int32)">
+            <summary>
+            Writes a name-value pair.
+            </summary>
+            <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
+            <param name="value">The datum.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.Boolean)">
+            <summary>
+            Writes a name-value pair.
+            </summary>
+            <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
+            <param name="value">The datum.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.String)">
+            <summary>
+            Writes a name-value pair.
+            </summary>
+            <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
+            <param name="value">The datum.</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameArray(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Writes a name-collection pair.
+            </summary>
+            <param name="name">The name of the data.  Throws if <c>null</c>.</param>
+            <param name="values">The data.</param>
+        </member>
+        <member name="T:NuGet.RuntimeModel.JsonObjectWriter">
+             <summary>
+             Generates JSON from an object graph.
+            
+             This is non-private only to facilitate unit testing.
+             </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.JsonObjectWriter.GetJson">
+             <summary>
+             Gets the JSON for the object.
+            
+             Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJson"/> is called, no further writing is allowed.
+             </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.JsonObjectWriter.GetJObject">
+            <summary>
+            Gets the JObject (in-memory JSON model) for the object.
+            
+            Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJObject"/> is called, no further writing is allowed.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.RuntimeModel.JsonObjectWriter.WriteTo(Newtonsoft.Json.JsonTextWriter)">
+             <summary>
+             Writes the result to a <c>JsonTextWriter</c>.
+            
+             Once WriteTo is called, no further writing is allowed.
+             </summary>
+        </member>
+        <member name="P:NuGet.RuntimeModel.RuntimeDependencySet.Id">
+            <summary>
+            Package Id
+            </summary>
+        </member>
+        <member name="P:NuGet.RuntimeModel.RuntimeDependencySet.Dependencies">
+            <summary>
+            Package dependencies
+            </summary>
+        </member>
+        <member name="P:NuGet.RuntimeModel.RuntimeDescription.RuntimeDependencySets">
+            <summary>
+            RID specific package dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeDescription.Merge(NuGet.RuntimeModel.RuntimeDescription,NuGet.RuntimeModel.RuntimeDescription)">
+            <summary>
+            Merges the content of the other runtime description in to this runtime description
+            </summary>
+            <param name="other">The other description to merge in to this description</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.Merge(NuGet.RuntimeModel.RuntimeGraph,NuGet.RuntimeModel.RuntimeGraph)">
+            <summary>
+            Merges the content of the other runtime graph in to this runtime graph
+            </summary>
+            <param name="other">The other graph to merge in to this graph</param>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.ExpandRuntime(System.String)">
+            <summary>
+            Find all compatible RIDs including the current RID.
+            </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.ExpandRuntimeInternal(System.String)">
+            <summary>
+            Expand runtimes in a BFS walk. This ensures that nearest RIDs are returned first.
+            Ordering is important for finding the nearest runtime dependency.
+            </summary>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.AreCompatible(System.String,System.String)">
+            <summary>
+            Determines if two runtime identifiers are compatible, based on the import graph
+            </summary>
+            <param name="criteria">The criteria being tested</param>
+            <param name="provided">The value the criteria is being tested against</param>
+            <returns>
+            true if an asset for the runtime in <paramref name="provided" /> can be installed in a project
+            targetting <paramref name="criteria" />, false otherwise
+            </returns>
+        </member>
+        <member name="M:NuGet.RuntimeModel.RuntimeGraph.FindRuntimeDependenciesInternal(NuGet.RuntimeModel.RuntimeGraph.RuntimeDependencyKey)">
+            <summary>
+            Find all possible dependencies for package id.
+            </summary>
+        </member>
+        <member name="T:NuGet.RuntimeModel.RuntimeGraph.Cache`1">
+            <summary>
+            Helper for renting hashsets and lists.
+            </summary>
+        </member>
+        <member name="T:NuGet.RuntimeModel.RuntimeGraph.RuntimeDependencyKey">
+            <summary>
+            RID + package id
+            </summary>
+        </member>
+        <member name="T:NuGet.RuntimeModel.RuntimeGraph.RuntimeCompatKey">
+            <summary>
+            RID -> RID compatibility key
+            </summary>
+        </member>
+        <member name="T:NuGet.RuntimeModel.RuntimePackageDependency">
+            <summary>
+            A package dependency for a specific RID.
+            </summary>
+        </member>
+        <member name="P:NuGet.RuntimeModel.RuntimePackageDependency.Id">
+            <summary>
+            Dependency package id.
+            </summary>
+        </member>
+        <member name="P:NuGet.RuntimeModel.RuntimePackageDependency.VersionRange">
+            <summary>
+            Dependency version constraint.
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
+        </member>
+    </members>
+</doc>

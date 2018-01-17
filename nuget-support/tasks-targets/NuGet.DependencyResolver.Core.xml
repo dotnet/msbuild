@@ -1,0 +1,347 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.DependencyResolver.Core</name>
+    </assembly>
+    <members>
+        <member name="T:NuGet.DependencyResolver.GraphEdge`1">
+            <summary>
+            GraphEdge holds a reference to the parent node, the incoming edge to the parent, and
+            the out going edge to the current position of the walk.
+            
+            Root -> OuterEdge -> Node -> Edge -> (Current Node)
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.GraphEdge`1.OuterEdge">
+            <summary>
+            Incoming edge to <see cref="P:NuGet.DependencyResolver.GraphEdge`1.Item"/>.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.GraphEdge`1.Item">
+            <summary>
+            Graph node between <see cref="P:NuGet.DependencyResolver.GraphEdge`1.OuterEdge"/> and <see cref="P:NuGet.DependencyResolver.GraphEdge`1.Edge"/>.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.GraphEdge`1.Edge">
+            <summary>
+            Outgoing edge from <see cref="P:NuGet.DependencyResolver.GraphEdge`1.Item"/>.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetPath``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            A 1.0.0 -> B 1.0.0 -> C 2.0.0
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetPathWithLastRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            A 1.0.0 -> B 1.0.0 -> C (= 2.0.0)
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetIdAndRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Prints the id and version constraint for a node.
+            </summary>
+            <remarks>Projects will not display a range.</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetIdAndVersionOrRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Prints the id and version of a node. If the version does not exist use the range.
+            </summary>
+            <remarks>Projects will not display a version or range.</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetId``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Id of the node.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetVersionOrDefault``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Version of the resolved node version if it exists.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.GetVersionRange``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            Dependency range for the node.
+            </summary>
+            <remarks>Defaults to All</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.GraphOperations.IsPackage``1(NuGet.DependencyResolver.GraphNode{``0})">
+            <summary>
+            True if the node is resolved to a package or allows a package if unresolved.
+            </summary>
+        </member>
+        <member name="T:NuGet.DependencyResolver.LibraryRangeCacheKey">
+            <summary>
+            Helper class to hold a library range and framework.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.LibraryRangeCacheKey.Framework">
+            <summary>
+            Target framework
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.LibraryRangeCacheKey.LibraryRange">
+            <summary>
+            Library range information.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.PackagingUtility.GetLibraryDependencyFromNuspec(NuGet.Packaging.Core.PackageDependency)">
+            <summary>
+            Convert a nuspec dependency to a library dependency.
+            </summary>
+        </member>
+        <member name="T:NuGet.DependencyResolver.IRemoteDependencyProvider">
+            <summary>
+            A remote dependency provider.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.IRemoteDependencyProvider.IsHttp">
+            <summary>
+            Gets a flag indicating whether or not the provider source is HTTP or HTTPS.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.IRemoteDependencyProvider.Source">
+            <summary>
+            Gets the package source.
+            </summary>
+            <remarks>Optional. This will be <c>null</c> for project providers.</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.IRemoteDependencyProvider.FindLibraryAsync(NuGet.LibraryModel.LibraryRange,NuGet.Frameworks.NuGetFramework,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously discovers all versions of a package from a source and selects the best match.
+            </summary>
+            <remarks>This does not download the package.</remarks>
+            <param name="libraryRange">A library range.</param>
+            <param name="targetFramework">A target framework.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.LibraryModel.LibraryIdentity" />
+            instance.</returns>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="libraryRange" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="targetFramework" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="cacheContext" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.DependencyResolver.IRemoteDependencyProvider.GetDependenciesAsync(NuGet.LibraryModel.LibraryIdentity,NuGet.Frameworks.NuGetFramework,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets package dependencies.
+            </summary>
+            <param name="libraryIdentity">A library identity.</param>
+            <param name="targetFramework">A target framework.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.LibraryModel.LibraryDependencyInfo" />
+            instance.</returns>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="libraryIdentity" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="targetFramework" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="cacheContext" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.DependencyResolver.IRemoteDependencyProvider.GetPackageDownloaderAsync(NuGet.Packaging.Core.PackageIdentity,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a package downloader.
+            </summary>
+            <param name="packageIdentity">A package identity.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.Packaging.IPackageDownloader" />
+            instance.</returns>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="packageIdentity" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="cacheContext" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="!:OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="T:NuGet.DependencyResolver.LocalDependencyProvider">
+            <summary>
+            A local dependency provider.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.LocalDependencyProvider.#ctor(NuGet.DependencyResolver.IDependencyProvider)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.DependencyResolver.LocalDependencyProvider" /> class.
+            </summary>
+            <param name="dependencyProvider"></param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="dependencyProvider" />
+            is <c>null</c>.</exception>
+        </member>
+        <member name="P:NuGet.DependencyResolver.LocalDependencyProvider.IsHttp">
+            <summary>
+            Gets a flag indicating whether or not the provider source is HTTP or HTTPS.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.LocalDependencyProvider.Source">
+            <summary>
+            Gets the package source.
+            </summary>
+            <remarks>Optional. This will be <c>null</c> for project providers.</remarks>
+        </member>
+        <member name="M:NuGet.DependencyResolver.LocalDependencyProvider.FindLibraryAsync(NuGet.LibraryModel.LibraryRange,NuGet.Frameworks.NuGetFramework,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously discovers all versions of a package from a source and selects the best match.
+            </summary>
+            <remarks>This does not download the package.</remarks>
+            <param name="libraryRange">A library range.</param>
+            <param name="targetFramework">A target framework.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.LibraryModel.LibraryIdentity" />
+            instance.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="libraryRange" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="targetFramework" />
+            is either <c>null</c> or empty.</exception>
+        </member>
+        <member name="M:NuGet.DependencyResolver.LocalDependencyProvider.GetDependenciesAsync(NuGet.LibraryModel.LibraryIdentity,NuGet.Frameworks.NuGetFramework,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets package dependencies.
+            </summary>
+            <param name="libraryIdentity">A library identity.</param>
+            <param name="targetFramework">A target framework.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.LibraryModel.LibraryDependencyInfo" />
+            instance.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="libraryIdentity" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="targetFramework" />
+            is either <c>null</c> or empty.</exception>
+        </member>
+        <member name="M:NuGet.DependencyResolver.LocalDependencyProvider.GetPackageDownloaderAsync(NuGet.Packaging.Core.PackageIdentity,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a package downloader.
+            </summary>
+            <param name="packageIdentity">A package identity.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.Packaging.IPackageDownloader" />
+            instance.</returns>
+            <exception cref="T:System.NotSupportedException">Thrown always.</exception>
+        </member>
+        <member name="T:NuGet.DependencyResolver.LocalMatch">
+            <summary>
+            Extends <see cref="T:NuGet.DependencyResolver.RemoteMatch"/> to add a reference to the full Library.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.LocalMatch.LocalLibrary">
+            <summary>
+            Full local Library metadata
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.LocalMatch.LocalProvider">
+            <summary>
+            The local provider where the library was found.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.RemoteWalkContext.FindLibraryEntryCache">
+            <summary>
+            Library entry cache.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.RemoteWalkContext.IsMsBuildBased">
+            <summary>
+            True if this is a csproj or similar project. Xproj should be false.
+            </summary>
+        </member>
+        <member name="T:NuGet.DependencyResolver.Strings">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.Strings.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.Strings.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.DependencyResolver.Strings.Error_PackageNotFoundWhenExpected">
+            <summary>
+              Looks up a localized string similar to The feed &apos;{0}&apos; lists package &apos;{1}&apos; but multiple attempts to download the nupkg have failed. The feed is either invalid or required packages were removed while the current operation was in progress. Verify the package exists on the feed and try again..
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
+        </member>
+    </members>
+</doc>

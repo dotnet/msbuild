@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.LibraryModel</name>
+    </assembly>
+    <members>
+        <member name="P:NuGet.LibraryModel.LibraryDependency.AutoReferenced">
+            <summary>
+            True if the PackageReference is added by the SDK and not the user.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryDependency.HasFlag(NuGet.LibraryModel.LibraryDependencyTypeFlag)">
+            <summary>
+            Type property flag
+            </summary>
+        </member>
+        <member name="P:NuGet.LibraryModel.LibraryDependencyInfo.Resolved">
+            <summary>
+            False if the package could not be found.
+            </summary>
+        </member>
+        <member name="P:NuGet.LibraryModel.LibraryDependencyInfo.Library">
+            <summary>
+            Original library identity from the nuspec.
+            This contains the original casing for the id/version.
+            </summary>
+        </member>
+        <member name="P:NuGet.LibraryModel.LibraryDependencyInfo.Dependencies">
+            <summary>
+            Dependencies
+            </summary>
+        </member>
+        <member name="P:NuGet.LibraryModel.LibraryDependencyInfo.Framework">
+            <summary>
+            Target framework used to select the dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryDependencyInfo.CreateUnresolved(NuGet.LibraryModel.LibraryIdentity,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Unresolved
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryDependencyInfo.Create(NuGet.LibraryModel.LibraryIdentity,NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.LibraryModel.LibraryDependency})">
+            <summary>
+            Resolved
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryDependencyTarget.PackageProjectExternal">
+            <summary>
+            A package, project, or external project
+            </summary>
+        </member>
+        <member name="T:NuGet.LibraryModel.LibraryDependencyTargetUtils">
+            <summary>
+            Helper methods for dealing with LibraryDependencyTarget strings.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryDependencyTargetUtils.Parse(System.String)">
+            <summary>
+            Convert flag string into a LibraryTypeFlag.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryDependencyTargetUtils.GetFlagString(NuGet.LibraryModel.LibraryDependencyTarget)">
+            <summary>
+            Convert type flags to a friendly string.
+            </summary>
+        </member>
+        <member name="T:NuGet.LibraryModel.LibraryIncludeFlagUtils">
+            <summary>
+            Helper methods for dealing with include/exclude flag strings.
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryIncludeFlagUtils.DefaultSuppressParent">
+            <summary>
+            By default build, contentFiles, and analyzers do not flow transitively between projects.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryIncludeFlagUtils.GetFlags(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Convert set of flag strings into a LibraryIncludeFlags.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryIncludeFlagUtils.GetFlagString(NuGet.LibraryModel.LibraryIncludeFlags)">
+            <summary>
+            Convert library flags to a friendly string.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryIncludeFlagUtils.GetFlags(System.String,NuGet.LibraryModel.LibraryIncludeFlags)">
+            <summary>
+            Convert set of flag strings into a LibraryIncludeFlags.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryRange.TypeConstraintAllows(NuGet.LibraryModel.LibraryDependencyTarget)">
+            <summary>
+            True if the type constraint allows the flag.
+            </summary>
+        </member>
+        <member name="M:NuGet.LibraryModel.LibraryRange.TypeConstraintAllowsAnyOf(NuGet.LibraryModel.LibraryDependencyTarget)">
+            <summary>
+            True if any flags are allowed by the constraint.
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryType.Project">
+            <summary>
+            Indicates that the library comes from compiling an XRE-based Project
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryType.ExternalProject">
+            <summary>
+            Indicates that the library comes from compiling an external project (such as an MSBuild-based project)
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryType.Package">
+            <summary>
+            Indicates that the library comes from a NuGet Package
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryType.Assembly">
+            <summary>
+            Indicates that the library comes from a stand-alone .NET Assembly
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryType.Reference">
+            <summary>
+            Indicates that the library comes from a .NET Assembly in a globally-accessible
+            location such as the GAC or the Framework Reference Assemblies
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryType.WinMD">
+            <summary>
+            Indicates that the library comes from a Windows Metadata Assembly (.winmd file)
+            </summary>
+        </member>
+        <member name="F:NuGet.LibraryModel.LibraryType.Unresolved">
+            <summary>
+            Indicates that the library could not be resolved
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
+        </member>
+    </members>
+</doc>
