@@ -53,7 +53,7 @@
 
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </ForPublishing>
     </ItemGroup>
@@ -71,7 +71,7 @@
 
     <ItemGroup>
       <CliVersionBadgeToUpload>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </CliVersionBadgeToUpload>
     </ItemGroup>
