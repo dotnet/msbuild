@@ -96,7 +96,7 @@ cp -R mono/SdkResolvers ${DESTDIR}${SDK_RESOLVERS_OUT_DIR}
 # install nuget sdk resolver
 NUGET_RESOLVER_OUT_DIR=${MSBUILD_INSTALL_BIN_DIR}/SdkResolvers/NuGet.MSBuildSdkResolver
 mkdir -p ${DESTDIR}${NUGET_RESOLVER_OUT_DIR}
-cp ${MSBUILD_OUT_DIR}/NuGet.MSBuildSdkResolver* ${DESTDIR}${NUGET_RESOLVER_OUT_DIR}
+mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/NuGet.MSBuildSdkResolver* ${DESTDIR}${NUGET_RESOLVER_OUT_DIR}
 
 sed -e 's,@bindir@,'$MONO_PREFIX'/bin,' -e 's,@mono_instdir@,'$MONO_PREFIX/lib/mono',' msbuild-mono-deploy.in > msbuild-mono-deploy.tmp
 chmod +x msbuild-mono-deploy.tmp

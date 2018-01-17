@@ -1,0 +1,421 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.Build.Tasks</name>
+    </assembly>
+    <members>
+        <member name="M:NuGet.Build.Tasks.BuildTasksUtility.AddAllProjectsForRestore(NuGet.ProjectModel.DependencyGraphSpec)">
+            <summary>
+            Add all restorable projects to the restore list.
+            This is the behavior for --recursive
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.GetProjectTargetFrameworksTask">
+            <summary>
+            Determine the project's targetframework(s) based
+            on the available properties.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.ProjectPath">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetFrameworkMoniker">
+            <summary>
+            Optional TargetFrameworkMoniker property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetPlatformIdentifier">
+            <summary>
+            Optional TargetPlatformIdentifier property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetPlatformMinVersion">
+            <summary>
+            Optional TargetPlatformMinVersion property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetPlatformVersion">
+            <summary>
+            Optional TargetPlatformVersion property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetFrameworks">
+            <summary>
+            Optional TargetFrameworks property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.TargetFramework">
+            <summary>
+            Optional TargetFrameworks property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetProjectTargetFrameworksTask.ProjectTargetFrameworks">
+            <summary>
+            ; delimited list of target frameworks for the project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.CurrentProjectName">
+            <summary>
+            The current project's name.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.CurrentProjectTargetFramework">
+            <summary>
+            The current project's target framework.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.AnnotatedProjectReferences">
+            <summary>
+            The project references for property lookup.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.AssignedProjects">
+            <summary>
+            The project references with assigned properties.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.ProjectPath">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestoreGraphItems">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.ToolFramework">
+            <summary>
+            Tool runtime framework where this will be executed.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestoreSources">
+            <summary>
+            NuGet sources
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestoreFallbackFolders">
+            <summary>
+            NuGet fallback folders
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestorePackagesPath">
+            <summary>
+            User packages folder
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestoreConfigFilePaths">
+            <summary>
+            Config File Paths used
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestorePackageReferencesTask.ProjectUniqueName">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestorePackageReferencesTask.TargetFrameworks">
+            <summary>
+            Target frameworks to apply this for. If empty this applies to all.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestorePackageReferencesTask.RestoreGraphItems">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectJsonPathTask.ProjectPath">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectJsonPathTask.ProjectJsonPath">
+            <summary>
+            Output path to project.json if it exists.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.ProjectUniqueName">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.ParentProjectPath">
+            <summary>
+            Root project path used for resolving the absolute path.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.TargetFrameworks">
+            <summary>
+            Target frameworks to apply this for. If empty this applies to all.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.RestoreGraphItems">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.GetRestoreSettingsTask">
+            <summary>
+            Get all the settings to be used for project restore.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.RestoreSettingsPerFramework">
+            <summary>
+            Settings read with TargetFramework set
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.RestorePackagesPathOverride">
+            <summary>
+            Command line value of RestorePackagesPath
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.RestoreSourcesOverride">
+            <summary>
+            Command line value of RestoreSources
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.RestoreFallbackFoldersOverride">
+            <summary>
+            Command line value of RestoreFallbackFolders
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.MSBuildStartupDirectory">
+            <summary>
+            Original working directory
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.OutputSources">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.Tasks.GetRestoreSettingsTask.GetPropertyValues(Microsoft.Build.Framework.ITaskItem[],System.String)">
+            <summary>
+            Read a metadata property from each item and split the values.
+            Nulls and empty values are ignored.
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.Tasks.GetRestoreSettingsTask.GetGlobalAbsolutePath(System.String)">
+            <summary>
+            Resolve a path against MSBuildStartupDirectory
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.GetRestoreSolutionProjectsTask">
+            <summary>
+            Convert .metaproj paths to project paths.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSolutionProjectsTask.ProjectReferences">
+            <summary>
+            Solution project references.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSolutionProjectsTask.SolutionFilePath">
+            <summary>
+            Root path used for resolving the absolute project paths.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSolutionProjectsTask.OutputProjectReferences">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.RestoreSettingsUtils">
+            <summary>
+            This class contains the logic for the settings using during restore. 
+            It contains methods with the settings precedence logic as well.
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.Tasks.RestoreSettingsUtils.GetValue``1(System.Func{``0}[])">
+            <summary>
+            Return the value from the first function that returns non-null.
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.RestoreTask">
+            <summary>
+            .NET Core compatible restore task for PackageReference and UWP project.json projects.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreGraphItems">
+            <summary>
+            DG file entries
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreDisableParallel">
+            <summary>
+            Disable parallel project restores and downloads
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreNoCache">
+            <summary>
+            Disable the web cache
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreIgnoreFailedSources">
+            <summary>
+            Ignore errors from package sources
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreRecursive">
+            <summary>
+            Restore all projects.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreForce">
+            <summary>
+            Force restore, skip no op
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.HideWarningsAndErrors">
+            <summary>
+            Do not display Errors and Warnings to the user. 
+            The Warnings and Errors are written into the assets file and will be read by an sdk target.
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.Strings">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.NoCompatibleTargetFramework">
+            <summary>
+              Looks up a localized string similar to Project &apos;{0}&apos; targets &apos;{2}&apos;. It cannot be referenced by a project that targets &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.NoProjectsProvidedToTask">
+            <summary>
+              Looks up a localized string similar to Unable to find a project to restore!.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.NoProjectsToRestore">
+            <summary>
+              Looks up a localized string similar to Nothing to do. None of the projects specified contain packages to restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.RestoreCanceled">
+            <summary>
+              Looks up a localized string similar to Restore canceled!.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.UnsupportedTargetFramework">
+            <summary>
+              Looks up a localized string similar to The framework &apos;{0}&apos; is not a supported target framework..
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.WarnForInvalidProjectsTask.AllProjects">
+            <summary>
+            All known projects.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.WarnForInvalidProjectsTask.ValidProjects">
+            <summary>
+            All valid projects for restore.
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.Tasks.WriteRestoreGraphTask">
+            <summary>
+            Generate dg file output.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.WriteRestoreGraphTask.RestoreGraphItems">
+            <summary>
+            DG file entries
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.WriteRestoreGraphTask.RestoreRecursive">
+            <summary>
+            Restore all projects.
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.Tasks.WriteRestoreGraphTask.GetNullForEmpty(System.String)">
+            <summary>
+            Convert empty strings to null
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.MSBuildLogger">
+            <summary>
+            TaskLoggingHelper -> ILogger
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.MSBuildLogger.LogForNonMono(NuGet.Common.IRestoreLogMessage)">
+            <summary>
+            Log using with metadata for non mono platforms.
+            </summary>
+        </member>
+        <member name="M:NuGet.Build.MSBuildLogger.LogForMono(NuGet.Common.ILogMessage)">
+            <summary>
+            Log using basic methods to avoid missing methods on mono.
+            </summary>
+        </member>
+        <member name="T:NuGet.Build.MSBuildTaskItem">
+            <summary>
+            TaskItem wrapper
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
+        </member>
+    </members>
+</doc>

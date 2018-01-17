@@ -1,0 +1,738 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuGet.Packaging.Core</name>
+    </assembly>
+    <members>
+        <member name="T:NuGet.Packaging.Core.IPackageIdentityComparer">
+            <summary>
+            Compares the id and version of a package
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Core.PackageDependencyComparer.Default">
+            <summary>
+            Default comparer
+            Null ranges and the All range are treated as equal.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependencyInfoComparer.Default">
+            <summary>
+            Default comparer
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageIdentityComparer">
+            <summary>
+            Compares the Id, Version, and Version release label. Version build metadata is ignored.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.#ctor">
+            <summary>
+            Default version range comparer.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.#ctor(NuGet.Versioning.VersionComparison)">
+            <summary>
+            Compare versions with a specific VersionComparison
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.#ctor(NuGet.Versioning.IVersionComparer)">
+            <summary>
+            Compare versions with a specific IVersionComparer
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentityComparer.Default">
+            <summary>
+            Default comparer that compares on the id, version, and version release labels.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.Equals(NuGet.Packaging.Core.PackageIdentity,NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            True if the package identities are the same when ignoring build metadata.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.GetHashCode(NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            Hash code of the id and version
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentityComparer.Compare(NuGet.Packaging.Core.PackageIdentity,NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            Compares on the Id first, then version
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.ContentFilesEntry">
+            <summary>
+            metadata/contentFiles/files entry from a nuspec
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.Include">
+            <summary>
+            Included files
+            </summary>
+            <remarks>Required</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.Exclude">
+            <summary>
+            Excluded files
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.BuildAction">
+            <summary>
+            Build action
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.CopyToOutput">
+            <summary>
+            If true the item will be copied to the output folder.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.ContentFilesEntry.Flatten">
+            <summary>
+            If true the content items will keep the same folder structure in the output
+            folder.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.ExtractPackageFileDelegate">
+            <summary>
+            Callback invoked to extract a package file.
+            </summary>
+            <param name="sourceFile">The path of the file in the package.</param>
+            <param name="targetPath">The path to write to.</param>
+            <param name="fileStream">The file <see cref="T:System.IO.Stream"/>.</param>
+            <returns>The file name if the file was written; otherwise <c>null</c>.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.IAsyncPackageCoreReader">
+            <summary>
+            A basic asynchronous package reader that provides the identity, min client version, and file access.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetIdentityAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets the identity of the package.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.Packaging.Core.PackageIdentity" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetMinClientVersionAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets the minimum client version needed to consume the package.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.Versioning.NuGetVersion" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetPackageTypesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets zero or more package types from the .nuspec.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IReadOnlyList`1" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetStreamAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously returns a file stream from the package.
+            </summary>
+            <param name="path">The file path in the package.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.IO.Stream" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetFilesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets all files in the package.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetFilesAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets files in a folder in the package.
+            </summary>
+            <param name="folder">A folder path in the package.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" /> for files under the specified folder.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetNuspecAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a nuspec stream.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.IO.Stream" />.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.GetNuspecFileAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets a nuspec file path.
+            </summary>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:System.String" />
+            representing the nuspec file path.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IAsyncPackageCoreReader.CopyFilesAsync(System.String,System.Collections.Generic.IEnumerable{System.String},NuGet.Packaging.Core.ExtractPackageFileDelegate,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously copies files from a package to a new location.
+            </summary>
+            <param name="destination">The destination path to copy to.</param>
+            <param name="packageFiles">The package files to copy.</param>
+            <param name="extractFile">A package file extraction delegate.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns am
+            <see cref="T:System.Collections.Generic.IEnumerable`1" /> for the copied file paths.</returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
+        </member>
+        <member name="T:NuGet.Packaging.Core.INuspecCoreReader">
+            <summary>
+            A basic nuspec reader that understands ONLY the id, version, and min client version of a package.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetId">
+            <summary>
+            Package Id
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetVersion">
+            <summary>
+            Package Version
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetMinClientVersion">
+            <summary>
+            Minimum client version needed to consume the package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetIdentity">
+            <summary>
+            Id and Version of a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.INuspecCoreReader.GetMetadata">
+            <summary>
+            Package metadata in the nuspec
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.IPackageCoreReader">
+            <summary>
+            Basic package reader that provides the identity, min client version, and file access.
+            </summary>
+            <remarks>Higher level concepts used for normal development nupkgs should go at a higher level</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetIdentity">
+            <summary>
+            Gets the package identity.
+            </summary>
+            <returns>A package identity.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetMinClientVersion">
+            <summary>
+            Gets the minimum client version needed to consume the package.
+            </summary>
+            <returns>A NuGet version.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+            <returns>A readonly list of package types.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetStream(System.String)">
+            <summary>
+            Gets a file stream from the package.
+            </summary>
+            <returns>A stream for a file in the package.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetFiles">
+            <summary>
+            Gets all files in the package.
+            </summary>
+            <returns>An enumerable of files in the package.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetFiles(System.String)">
+            <summary>
+            Gets files in a folder in the package.
+            </summary>
+            <param name="folder">Folder path</param>
+            <returns>An enumerable of files under specified folder.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetNuspec">
+            <summary>
+            Gets a nuspec stream.
+            </summary>
+            <returns>A stream for the nuspec.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.GetNuspecFile">
+            <summary>
+            Gets a nuspec file path.
+            </summary>
+            <returns>The nuspec file path.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.IPackageCoreReader.CopyFiles(System.String,System.Collections.Generic.IEnumerable{System.String},NuGet.Packaging.Core.ExtractPackageFileDelegate,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Copies files from a package to a new location.
+            </summary>
+            <param name="destination">The destination folder path.</param>
+            <param name="packageFiles">The package files to copy.</param>
+            <param name="extractFile">A package file extraction delegate.</param>
+            <param name="logger">A logger.</param>
+            <param name="token">A cancellation token.</param>
+            <returns>An enumerable of paths of files copied to the destination.</returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecCoreReader">
+            <summary>
+            A basic nuspec reader that understand id, version, and a flat list of dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.#ctor(System.IO.Stream)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Reads a nuspec from XML
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReader.GetDependencies">
+            <summary>
+            Returns a flat list of dependencies from a nuspec
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecCoreReaderBase">
+            <summary>
+            A very basic Nuspec reader that understands the Id, Version, PackageType, and MinClientVersion of a package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.String)">
+            <summary>
+            Read a nuspec from a path.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.IO.Stream)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.IO.Stream,System.Boolean)">
+            <summary>
+            Read a nuspec from a stream.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.#ctor(System.Xml.Linq.XDocument)">
+            <summary>
+            Reads a nuspec from XML
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetId">
+            <summary>
+            Id of the package
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetVersion">
+            <summary>
+            Version of the package
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMinClientVersion">
+            <summary>
+            The minimum client version this package supports.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetPackageTypes">
+            <summary>
+            Gets zero or more package types from the .nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.IsServiceable">
+            <summary>
+            Returns if the package is serviceable.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetDevelopmentDependency">
+            <summary>
+            The developmentDependency attribute
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMetadata">
+            <summary>
+            Nuspec Metadata
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecCoreReaderBase.GetMetadataValue(System.String)">
+            <summary>
+            Returns a nuspec metadata value or string.Empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.NuspecCoreReaderBase.MetadataValues">
+            <summary>
+            Indexed metadata values of the XML elements in the nuspec.
+            If duplicate keys exist only the first is used.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.NuspecCoreReaderBase.Xml">
+            <summary>
+            Raw XML doc
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.NuspecUtility">
+            <summary>
+            Until NuspecReader and Manifest are unified, this is a place to share implementations of
+            reading and parsing specific elements out of the .nuspec XML.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecUtility.GetPackageTypes(System.Xml.Linq.XElement,System.Boolean)">
+            <summary>
+            Gets the package types from a .nuspec metadata XML element.
+            </summary>
+            <param name="metadataNode">The metadata XML element.</param>
+            <param name="useMetadataNamespace">
+            Whether or not to use the metadata element's namespace when finding the package type
+            nodes. If false is specified, only the local names of the package type nodes are used
+            for comparison. If true is specified, the package type nodes must have the same
+            namespace as the metadata node.
+            </param>
+            <returns>
+            A list of package types. If no package types are found in the metadata node, an empty
+            list is returned.
+            </returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.NuspecUtility.IsServiceable(System.Xml.Linq.XElement)">
+            <summary>
+            Gets the value of serviceable element from a .nuspec metadata XML element.
+            </summary>
+            <param name="metadataNode">The metadata XML element.</param>
+            <returns>
+            true if the serviceable element is set in the .nuspec file as true, else false.
+            </returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageDependency">
+            <summary>
+            Represents a package dependency Id and allowed version range.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.Id">
+            <summary>
+            Dependency package Id
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.Include">
+            <summary>
+            Types to include from the dependency package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.Exclude">
+            <summary>
+            Types to exclude from the dependency package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.VersionRange">
+            <summary>
+            Range of versions allowed for the depenency
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependency.GetHashCode">
+            <summary>
+            Hash code from the default PackageDependencyComparer
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependency.ToString">
+            <summary>
+            Id and Version range string
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageDependencyInfo">
+            <summary>
+            Represents a package identity and the dependencies of a package.
+            </summary>
+            <remarks>
+            This class does not support groups of dependencies, the group will need to be selected before
+            populating this.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependencyInfo.#ctor(System.String,NuGet.Versioning.NuGetVersion,System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependency})">
+            <summary>
+            Represents a package identity and the dependencies of a package.
+            </summary>
+            <param name="id">package name</param>
+            <param name="version">package version</param>
+            <param name="dependencies">package dependencies</param>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependencyInfo.Dependencies">
+            <summary>
+            Package dependencies
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependencyInfo.GetHashCode">
+            <summary>
+            Hash code from the default PackageDependencyInfoComparer
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageDependencyInfo.ToString">
+            <summary>
+            Example: Id : Dependency1, Dependency2
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageIdentity">
+            <summary>
+            Represents the core identity of a nupkg.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.#ctor(System.String,NuGet.Versioning.NuGetVersion)">
+            <summary>
+            Creates a new package identity.
+            </summary>
+            <param name="id">name</param>
+            <param name="version">version</param>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.Id">
+            <summary>
+            Package name
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.Version">
+            <summary>
+            Package Version
+            </summary>
+            <remarks>can be null</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.HasVersion">
+            <summary>
+            True if the version is non-null
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.Equals(NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            True if the package identities are the same.
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.Equals(NuGet.Packaging.Core.PackageIdentity,NuGet.Versioning.VersionComparison)">
+            <summary>
+            True if the identity objects are equal based on the given comparison mode.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.CompareTo(NuGet.Packaging.Core.PackageIdentity)">
+            <summary>
+            Sorts based on the id, then version
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.Equals(System.Object)">
+            <summary>
+            Compare using the default comparer.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.GetHashCode">
+            <summary>
+            Creates a hash code using the default comparer.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageIdentity.Comparer">
+            <summary>
+            An equality comparer that checks the id, version, and version release label.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Core.PackageIdentity.ToString">
+            <summary>
+            PackageIdentity.ToString returns packageId.packageVersion"
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.PackageType">
+             It is important that this type remains immutable due to the cloning of package specs
+            
+        </member>
+        <member name="F:NuGet.Packaging.Core.PackagingCoreConstants.EmptyFolder">
+            <summary>
+            _._ denotes an empty folder since OPC does not allow an
+            actual empty folder.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Core.PackagingCoreConstants.ForwardSlashEmptyFolder">
+            <summary>
+            /_._ can be used to check empty folders from package readers where the / is normalized.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Core.Strings">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.InvalidPackageTypeVersion">
+            <summary>
+              Looks up a localized string similar to Nuspec file contains a package type with an invalid package version &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MissingMetadataNode">
+            <summary>
+              Looks up a localized string similar to Nuspec file does not contain the &apos;{0}&apos; node..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MissingNuspec">
+            <summary>
+              Looks up a localized string similar to Nuspec file does not exist in package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MissingPackageTypeName">
+            <summary>
+              Looks up a localized string similar to Nuspec file contains a package type that is missing the name attribute..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MultipleNuspecFiles">
+            <summary>
+              Looks up a localized string similar to Package contains multiple nuspec files..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.MultiplePackageTypes">
+            <summary>
+              Looks up a localized string similar to Nuspec file contains multiple package types. Zero or one package type nodes are allowed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.Strings.StringCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to String argument &apos;{0}&apos; cannot be null or empty.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.FrameworkSpecificGroup">
+            <summary>
+            A group of items/files from a nupkg with the same target framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.FrameworkSpecificGroup.#ctor(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Framework specific group
+            </summary>
+            <param name="targetFramework">group target framework</param>
+            <param name="items">group items</param>
+        </member>
+        <member name="P:NuGet.Packaging.FrameworkSpecificGroup.TargetFramework">
+            <summary>
+            Group target framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.FrameworkSpecificGroup.Items">
+            <summary>
+            Item relative paths
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.PackageDependencyGroup">
+            <summary>
+            Package dependencies grouped to a target framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.PackageDependencyGroup.#ctor(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependency})">
+            <summary>
+            Dependency group
+            </summary>
+            <param name="targetFramework">target framework</param>
+            <param name="packages">dependant packages</param>
+        </member>
+        <member name="P:NuGet.Packaging.PackageDependencyGroup.TargetFramework">
+            <summary>
+            Dependency group target framework
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.PackageDependencyGroup.Packages">
+            <summary>
+            Package dependencies
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
+            </summary>
+            <typeparam name="TSource">The type of the list</typeparam>
+            <typeparam name="TKey">The type of the sorting key</typeparam>
+            <param name="self">This list</param>
+            <param name="other">The other list</param>
+            <param name="keySelector">The function to extract the key from each item in the list</param>
+            <param name="orderComparer">An optional comparer for comparing keys</param>
+            <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sets for equality, allowing either sequence to be null.
+            If one is null, both have to be null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
+            Avoid mutating the return value.
+            </summary>
+        </member>
+    </members>
+</doc>
