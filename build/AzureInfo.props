@@ -36,5 +36,5 @@
     <BlobFeedExpectedURL Condition="'$(BlobFeedExpectedURL)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</BlobFeedExpectedURL>
     <BlobFeedCloudDropAccessToken>$(PB_PublishBlobFeedKey)</BlobFeedCloudDropAccessToken>
     <BlobFeedCloudDropAccessToken Condition="'$(BlobFeedCloudDropAccessToken)' == ''">$(BLOBFEED_STORAGE_KEY)</BlobFeedCloudDropAccessToken>
-</PropertyGroup>
+  </PropertyGroup>
 </Project>
