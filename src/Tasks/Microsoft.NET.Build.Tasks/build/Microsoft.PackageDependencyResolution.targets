@@ -164,7 +164,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="RunResolvePackageDependencies"
           Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
           DependsOnTargets="ReportAssetsLogMessages">
-    
+
     <!-- Verify that the assets file has a target for the right framework.  Otherwise, if we restored for the
          wrong framework, we'd end up finding no references to pass to the compiler, and we'd get a ton of
          compile errors. -->
@@ -192,6 +192,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
           DependsOnTargets="ReportAssetsLogMessages">
 
+    <PropertyGroup Condition="'$(EnsureRuntimePackageDependencies)' == ''
+                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                          and '$(EnsureNETCoreAppRuntime)' != 'false'">
+      <EnsureRuntimePackageDependencies>true</EnsureRuntimePackageDependencies>
+    </PropertyGroup>
+
     <ResolvePackageAssets 
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectPath="$(MSBuildProjectFullPath)"
@@ -201,11 +207,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
+      EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
       >
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
           (that was spread across different tasks/targets) for backwards compatibility.  -->
-
       <Output TaskParameter="Analyzers" ItemName="ResolvedAnalyzers" />
       <Output TaskParameter="ContentFilesToPreprocess" ItemName="_ContentFilesToPreprocess" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="ResolvedFrameworkAssemblies" />
@@ -213,8 +219,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="ResourceAssemblies" ItemName="ResourceCopyLocalItems" />
       <Output TaskParameter="RuntimeAssemblies" ItemName="RuntimeCopyLocalItems" />
       <Output TaskParameter="RuntimeTargets" ItemName="ResolvedRuntimeTargets" />
-
-   
       <Output TaskParameter="CompileTimeAssemblies" ItemName="ResolvedCompileFileDefinitions" />
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
     </ResolvePackageAssets>

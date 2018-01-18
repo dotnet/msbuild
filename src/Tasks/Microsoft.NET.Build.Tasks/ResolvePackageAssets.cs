@@ -32,6 +32,12 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool MarkPackageReferencesAsExternallyResolved { get; set; }
 
+        /// <summary>
+        /// Check that there is at least one package dependency in the RID graph that is not in the RID-agnostic graph.
+        /// Used as a heuristic to detect invalid RIDs.
+        /// </summary>
+        public bool EnsureRuntimePackageDependencies { get; set; }
+
         [Output]
         public ITaskItem[] Analyzers { get; private set; }
 
@@ -69,6 +75,8 @@ namespace Microsoft.NET.Build.Tasks
             var targetFramework = NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker);
             var compileTimeTarget = lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtime: null);
             var runtimeTarget = lockFile.GetTargetAndThrowIfNotFound(targetFramework, RuntimeIdentifier);
+
+            CheckRuntimePackageDependencies(compileTimeTarget, runtimeTarget);
 
             Analyzers = RaiseAnalyzers(
                 lockFile,
@@ -356,6 +364,17 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return paths;
+        }
+
+        private void CheckRuntimePackageDependencies(LockFileTarget compileTimeTarget, LockFileTarget runtimeTarget)
+        {
+            if (EnsureRuntimePackageDependencies && !string.IsNullOrEmpty(RuntimeIdentifier))
+            {
+                if (compileTimeTarget.Libraries.Count >= runtimeTarget.Libraries.Count)
+                {
+                    throw new BuildErrorException(Strings.UnsupportedRuntimeIdentifier, RuntimeIdentifier);
+                }
+            }
         }
 
         private static bool IsPackage(LockFileTargetLibrary library)

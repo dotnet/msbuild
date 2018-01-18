@@ -347,6 +347,11 @@
         <target state="new">Pack as tool does not support self contained.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnsupportedRuntimeIdentifier">
+        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="new">Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
