@@ -94,7 +94,8 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                     packageId: _packageId,
                     packageVersion: _packageVersion,
                     nugetconfig: configFile,
-                    targetframework: _framework);
+                    targetframework: _framework,
+                    source: _source);
             }
             catch (PackageObtainException ex)
             {
