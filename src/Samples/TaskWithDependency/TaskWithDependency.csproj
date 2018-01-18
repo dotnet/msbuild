@@ -3,7 +3,7 @@
     <UseProductOutputPath>true</UseProductOutputPath>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="TaskWithDependencyTest.proj">
