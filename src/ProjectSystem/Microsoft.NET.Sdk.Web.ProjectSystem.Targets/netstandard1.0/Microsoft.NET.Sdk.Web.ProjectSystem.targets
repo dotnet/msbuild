@@ -78,7 +78,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedRazorCompileToolset Condition="'$(MvcRazorCompileOnPublish)' == '' And '$(RazorCompileToolset)' == 'RazorSdk'">$(RazorCompileToolset)</ResolvedRazorCompileToolset>
     
       <!-- If RazorSdk is not referenced, fall-back to Precompilation tool -->
-      <ResolvedRazorCompileToolset Condition="'$(ResolvedRazorCompileToolset)' == 'RazorSdk' And '$(IsRazorSdkReferenced)' != 'true'">PrecompilationTool</ResolvedRazorCompileToolset>
+      <ResolvedRazorCompileToolset Condition="'$(ResolvedRazorCompileToolset)' == 'RazorSdk' And '$(IsRazorCompilerReferenced)' != 'true'">PrecompilationTool</ResolvedRazorCompileToolset>
     </PropertyGroup>
   
 </Project>
