@@ -79,6 +79,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     
       <!-- If RazorSdk is not referenced, fall-back to Precompilation tool -->
       <ResolvedRazorCompileToolset Condition="'$(ResolvedRazorCompileToolset)' == 'RazorSdk' And '$(IsRazorCompilerReferenced)' != 'true'">PrecompilationTool</ResolvedRazorCompileToolset>
+      
+      <!-- Previous versions of the precompilation tool still depends on the msbuild property 'MvcRazorCompileOnPublish'. Hence, setting it to the old default value -->
+      <MvcRazorCompileOnPublish Condition="'$(MvcRazorCompileOnPublish)' == ''">true</MvcRazorCompileOnPublish>
     </PropertyGroup>
   
 </Project>
