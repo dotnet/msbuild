@@ -2,7 +2,7 @@
   <PropertyGroup>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="14.3.0" />

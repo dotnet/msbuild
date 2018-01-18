@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.Build</AssemblyName>
-    <TargetFrameworks>netstandard1.3;net46;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(ReferenceAssemblyTargetFrameworks)</TargetFrameworks>
     <ImplementationProject>$(RepoRoot)src\Build\Microsoft.Build.csproj</ImplementationProject>
 
     <PackageDescription>This package contains the Microsoft.Build assembly which is used to create, edit, and evaluation MSBuild projects.</PackageDescription>

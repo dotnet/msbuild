@@ -18,4 +18,9 @@
     <PackageTags>MSBuild</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ReferenceAssemblyTargetFrameworks>netstandard1.3;netstandard2.0</ReferenceAssemblyTargetFrameworks>
+    <ReferenceAssemblyTargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">netstandard1.3;net46;netstandard2.0</ReferenceAssemblyTargetFrameworks>
+  </PropertyGroup>
+
 </Project>

@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
-    <TargetFrameworks>netstandard1.3;net46;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(ReferenceAssemblyTargetFrameworks)</TargetFrameworks>
     <ImplementationProject>$(RepoRoot)src\Utilities\Microsoft.Build.Utilities.csproj</ImplementationProject>
 
     <PackageDescription>This package contains the Microsoft.Build.Utilities.Core assembly which is used to implement custom MSBuild tasks.</PackageDescription>
