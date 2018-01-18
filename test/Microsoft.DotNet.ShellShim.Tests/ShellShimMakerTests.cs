@@ -6,21 +6,50 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
     public class ShellShimMakerTests : TestBase
     {
-        private readonly string _pathToPlaceShim;
+        private readonly ITestOutputHelper _output;
 
-        public ShellShimMakerTests()
+        public ShellShimMakerTests(ITestOutputHelper output)
         {
-            _pathToPlaceShim = Path.GetTempPath();
+            _output = output;
+        }
+
+        [Theory]
+        [InlineData("my_native_app.exe", null)]
+        [InlineData("./my_native_app.js", "nodejs")]
+        [InlineData(@"C:\tools\my_native_app.dll", "dotnet")]
+        public void GivenAnRunnerOrEntryPointItCanCreateConfig(string entryPoint, string runner)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return;
+
+            var shellShimMaker = new ShellShimMaker(TempRoot.Root);
+
+            var tmpFile = Path.Combine(TempRoot.Root, Path.GetRandomFileName());
+
+            shellShimMaker.CreateConfigFile(tmpFile, entryPoint, runner);
+
+            new FileInfo(tmpFile).Should().Exist();
+
+            var generated = XDocument.Load(tmpFile);
+
+            generated.Descendants("appSettings")
+                .Descendants("add")
+                .Should()
+                .Contain(e => e.Attribute("key").Value == "runner" && e.Attribute("value").Value == (runner ?? string.Empty))
+                .And
+                .Contain(e => e.Attribute("key").Value == "entryPoint" && e.Attribute("value").Value == entryPoint);
         }
 
         [Fact]
@@ -28,7 +57,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             var outputDll = MakeHelloWorldExecutableDll();
 
-            var shellShimMaker = new ShellShimMaker(_pathToPlaceShim);
+            var shellShimMaker = new ShellShimMaker(TempRoot.Root);
             var shellCommandName = nameof(ShellShimMakerTests) + Path.GetRandomFileName();
 
             shellShimMaker.CreateShim(
@@ -39,14 +68,37 @@ namespace Microsoft.DotNet.ShellShim.Tests
             stdOut.Should().Contain("Hello World");
         }
 
+        [Theory]
+        [InlineData("arg1 arg2", new[] { "arg1", "arg2" })]
+        [InlineData(" \"arg1 with space\" arg2", new[] { "arg1 with space", "arg2" })]
+        [InlineData(" \"arg with ' quote\" ", new[] { "arg with ' quote" })]
+        public void GivenAShimItPassesThroughArguments(string arguments, string[] expectedPassThru)
+        {
+            var outputDll = MakeHelloWorldExecutableDll();
+
+            var shellShimMaker = new ShellShimMaker(TempRoot.Root);
+            var shellCommandName = nameof(ShellShimMakerTests) + Path.GetRandomFileName();
+
+            shellShimMaker.CreateShim(
+                outputDll.FullName,
+                shellCommandName);
+
+            var stdOut = ExecuteInShell(shellCommandName, arguments);
+
+            for (int i = 0; i < expectedPassThru.Length; i++)
+            {
+                stdOut.Should().Contain($"{i} = {expectedPassThru[i]}");
+            }
+        }
+
         [Fact]
         public void GivenAnExecutablePathWithExistingSameNameShimItThrows()
         {
             var shellCommandName = nameof(ShellShimMakerTests) + Path.GetRandomFileName();
 
-            MakeNameConflictingCommand(_pathToPlaceShim, shellCommandName);
+            MakeNameConflictingCommand(TempRoot.Root, shellCommandName);
 
-            var shellShimMaker = new ShellShimMaker(_pathToPlaceShim);
+            var shellShimMaker = new ShellShimMaker(TempRoot.Root);
 
             Action a = () => shellShimMaker.EnsureCommandNameUniqueness(shellCommandName);
             a.ShouldThrow<GracefulException>()
@@ -61,7 +113,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             var shellCommandName = nameof(ShellShimMakerTests) + Path.GetRandomFileName();
 
-            var shellShimMaker = new ShellShimMaker(_pathToPlaceShim);
+            var shellShimMaker = new ShellShimMaker(TempRoot.Root);
 
             Action a = () => shellShimMaker.EnsureCommandNameUniqueness(shellCommandName);
             a.ShouldNotThrow();
@@ -72,17 +124,18 @@ namespace Microsoft.DotNet.ShellShim.Tests
             File.WriteAllText(Path.Combine(pathToPlaceShim, shellCommandName), string.Empty);
         }
 
-        private string ExecuteInShell(string shellCommandName)
+        private string ExecuteInShell(string shellCommandName, string arguments = "")
         {
             ProcessStartInfo processStartInfo;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                var file = Path.Combine(TempRoot.Root, shellCommandName + ".exe");
                 processStartInfo = new ProcessStartInfo
                 {
-                    FileName = "CMD.exe",
-                    Arguments = $"/C {shellCommandName}",
-                    UseShellExecute = false
+                    FileName = file,
+                    UseShellExecute = false,
+                    Arguments = arguments,
                 };
             }
             else
@@ -90,11 +143,13 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 processStartInfo = new ProcessStartInfo
                 {
                     FileName = "sh",
-                    Arguments = shellCommandName,
+                    Arguments = shellCommandName + " " + arguments,
                     UseShellExecute = false
                 };
             }
-            processStartInfo.WorkingDirectory = _pathToPlaceShim;
+
+            _output.WriteLine($"Launching '{processStartInfo.FileName} {processStartInfo.Arguments}'");
+            processStartInfo.WorkingDirectory = TempRoot.Root;
             processStartInfo.EnvironmentVariables["PATH"] = Path.GetDirectoryName(new Muxer().MuxerPath);
 
             processStartInfo.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);

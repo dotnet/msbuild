@@ -1,0 +1,36 @@
+<!-- This file should only be used when building dotnet for windows. -->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Only included to ensure this is built first. -->
+    <ProjectReference Include="..\tool_launcher\tool_launcher.csproj"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"
+      SetTargetFramework="TargetFramework=net45"
+      PrivateAssets="All" />
+    <ProjectReference Include="..\tool_launcher\tool_launcher.csproj"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"
+      SetTargetFramework="TargetFramework=net35"
+      PrivateAssets="All" />
+  </ItemGroup>
+
+  <Target Name="EmbedDotnetLauncher" BeforeTargets="PrepareForBuild">
+    <MSBuild Projects="..\tool_launcher\tool_launcher.csproj" Targets="GetTargetPath" Properties="TargetFramework=net45;Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" PropertyName="DotnetLauncherNet45FullPath" />
+    </MSBuild>
+    <MSBuild Projects="..\tool_launcher\tool_launcher.csproj" Targets="GetTargetPath" Properties="TargetFramework=net35;Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" PropertyName="DotnetLauncherNet35FullPath" />
+    </MSBuild>
+    <ItemGroup>
+      <EmbeddedResource Include="$(DotnetLauncherNet45FullPath)" LogicalName="Microsoft.DotNet.Tools.Launcher.Executable.Net45" />
+      <EmbeddedResource Include="$(DotnetLauncherNet45FullPath).config" LogicalName="Microsoft.DotNet.Tools.Launcher.Config.Net45" />
+      <EmbeddedResource Include="$(DotnetLauncherNet35FullPath)" LogicalName="Microsoft.DotNet.Tools.Launcher.Executable.Net35" />
+      <EmbeddedResource Include="$(DotnetLauncherNet35FullPath).config" LogicalName="Microsoft.DotNet.Tools.Launcher.Config.Net35" />
+    </ItemGroup>
+  </Target>
+
+</Project>

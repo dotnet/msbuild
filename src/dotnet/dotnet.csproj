@@ -76,4 +76,5 @@
     <Folder Include="commands\dotnet-migrate\xlf" />
     <Folder Include="dotnet-complete\commands\" />
   </ItemGroup>
+  <Import Project="dotnet.win.targets" Condition="'$(OS)' == 'Windows_NT'" />
 </Project>
