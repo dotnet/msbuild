@@ -932,7 +932,6 @@ namespace Microsoft.Build.Execution
         public BuildManager() { }
         public BuildManager(string hostName) { }
         public static Microsoft.Build.Execution.BuildManager DefaultBuildManager { get { throw null; } }
-        public static bool WaitForDebugger { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public void BeginBuild(Microsoft.Build.Execution.BuildParameters parameters) { }
         public Microsoft.Build.Execution.BuildResult Build(Microsoft.Build.Execution.BuildParameters parameters, Microsoft.Build.Execution.BuildRequestData requestData) { throw null; }
         public Microsoft.Build.Execution.BuildResult BuildRequest(Microsoft.Build.Execution.BuildRequestData requestData) { throw null; }
