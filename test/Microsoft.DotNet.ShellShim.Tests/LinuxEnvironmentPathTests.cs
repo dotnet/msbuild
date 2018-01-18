@@ -19,10 +19,10 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenEnvironmentAndReporterItCanPrintOutInstructionToAddPath()
         {
-            var fakeReporter = new FakeReporter();
+            var reporter = new BufferedReporter();
             var linuxEnvironmentPath = new LinuxEnvironmentPath(
                 new BashPathUnderHomeDirectory("/myhome", "executable/path"),
-                fakeReporter,
+                reporter,
                 new FakeEnvironmentProvider(
                     new Dictionary<string, string>
                     {
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             linuxEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
             // similar to https://code.visualstudio.com/docs/setup/mac
-            fakeReporter.Message.Should().Be(
+            reporter.Lines.Should().Equal(
                 string.Format(
                     CommonLocalizableStrings.EnvironmentPathLinuxManualInstruction,
                     "/myhome/executable/path", "/myhome/executable/path"));
@@ -42,10 +42,10 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenEnvironmentAndReporterItPrintsNothingWhenenvironmentExists()
         {
-            var fakeReporter = new FakeReporter();
+            var reporter = new BufferedReporter();
             var linuxEnvironmentPath = new LinuxEnvironmentPath(
                 new BashPathUnderHomeDirectory("/myhome", "executable/path"),
-                fakeReporter,
+                reporter,
                 new FakeEnvironmentProvider(
                     new Dictionary<string, string>
                     {
@@ -55,16 +55,16 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             linuxEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
-            fakeReporter.Message.Should().BeEmpty();
+            reporter.Lines.Should().BeEmpty();
         }
 
         [Fact]
         public void GivenAddPackageExecutablePathToUserPathJustRunItPrintsInstructionToLogout()
         {
-            var fakeReporter = new FakeReporter();
+            var reporter = new BufferedReporter();
             var linuxEnvironmentPath = new LinuxEnvironmentPath(
                 new BashPathUnderHomeDirectory("/myhome", "executable/path"),
-                fakeReporter,
+                reporter,
                 new FakeEnvironmentProvider(
                     new Dictionary<string, string>
                     {
@@ -75,8 +75,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             linuxEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
-            fakeReporter.Message.Should()
-                .Be(CommonLocalizableStrings.EnvironmentPathLinuxNeedLogout);
+            reporter.Lines.Should()
+                .Equal(CommonLocalizableStrings.EnvironmentPathLinuxNeedLogout);
         }
     }
 }

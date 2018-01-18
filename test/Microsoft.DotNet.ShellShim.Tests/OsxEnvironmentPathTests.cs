@@ -19,10 +19,10 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenEnvironmentAndReporterItCanPrintOutInstructionToAddPath()
         {
-            var fakeReporter = new FakeReporter();
+            var reporter = new BufferedReporter();
             var osxEnvironmentPath = new OSXEnvironmentPath(
                 new BashPathUnderHomeDirectory("/myhome", "executable/path"),
-                fakeReporter,
+                reporter,
                 new FakeEnvironmentProvider(
                     new Dictionary<string, string>
                     {
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             osxEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
             // similar to https://code.visualstudio.com/docs/setup/mac
-            fakeReporter.Message.Should().Be(
+            reporter.Lines.Should().Equal(
                 string.Format(
                     CommonLocalizableStrings.EnvironmentPathOSXManualInstruction,
                     "/myhome/executable/path", "/myhome/executable/path"));
@@ -44,10 +44,10 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData("~/executable/path")]
         public void GivenEnvironmentAndReporterItPrintsNothingWhenenvironmentExists(string existingPath)
         {
-            var fakeReporter = new FakeReporter();
+            var reporter = new BufferedReporter();
             var osxEnvironmentPath = new OSXEnvironmentPath(
                 new BashPathUnderHomeDirectory("/myhome", "executable/path"),
-                fakeReporter,
+                reporter,
                 new FakeEnvironmentProvider(
                     new Dictionary<string, string>
                     {
@@ -57,16 +57,16 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             osxEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
-            fakeReporter.Message.Should().BeEmpty();
+            reporter.Lines.Should().BeEmpty();
         }
 
         [Fact]
         public void GivenAddPackageExecutablePathToUserPathJustRunItPrintsInstructionToLogout()
         {
-            var fakeReporter = new FakeReporter();
+            var reporter = new BufferedReporter();
             var osxEnvironmentPath = new OSXEnvironmentPath(
                 new BashPathUnderHomeDirectory("/myhome", "executable/path"),
-                fakeReporter,
+                reporter,
                 new FakeEnvironmentProvider(
                     new Dictionary<string, string>
                     {
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             osxEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
-            fakeReporter.Message.Should().Be(CommonLocalizableStrings.EnvironmentPathOSXNeedReopen);
+            reporter.Lines.Should().Equal(CommonLocalizableStrings.EnvironmentPathOSXNeedReopen);
         }
     }
 }

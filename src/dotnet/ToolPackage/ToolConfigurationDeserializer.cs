@@ -29,35 +29,29 @@ namespace Microsoft.DotNet.ToolPackage
                 catch (InvalidOperationException e) when (e.InnerException is XmlException)
                 {
                     throw new ToolConfigurationException(
-                        string.Format(CommonLocalizableStrings.ToolSettingsInvalidXml, e.InnerException.Message));
+                        string.Format(
+                            CommonLocalizableStrings.ToolSettingsInvalidXml,
+                            e.InnerException.Message));
                 }
             }
 
             if (dotNetCliTool.Commands.Length != 1)
             {
-                throw new ToolConfigurationException(
-                    CommonLocalizableStrings.ToolSettingMoreThanOneCommand);
+                throw new ToolConfigurationException(CommonLocalizableStrings.ToolSettingsMoreThanOneCommand);
             }
 
             if (dotNetCliTool.Commands[0].Runner != "dotnet")
             {
                 throw new ToolConfigurationException(
-                    CommonLocalizableStrings.ToolSettingInvalidRunner);
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsUnsupportedRunner,
+                        dotNetCliTool.Commands[0].Name,
+                        dotNetCliTool.Commands[0].Runner));
             }
 
-            var commandName = dotNetCliTool.Commands[0].Name;
-            var toolAssemblyEntryPoint = dotNetCliTool.Commands[0].EntryPoint;
-
-            try
-            {
-                return new ToolConfiguration(commandName, toolAssemblyEntryPoint);
-            }
-            catch (ArgumentException e)
-            {
-                throw new ToolConfigurationException(
-                    string.Format(CommonLocalizableStrings.ToolSettingsContainError,
-                    e.Message));
-            }
+            return new ToolConfiguration(
+                dotNetCliTool.Commands[0].Name,
+                dotNetCliTool.Commands[0].EntryPoint);
         }
     }
 }
