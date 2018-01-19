@@ -101,37 +101,5 @@
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.props" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.targets" target="v15.0/bin/amd64" />
-
-    <!-- Nuget. Todo: remove this after VS 15.5 is released -->
-<!-- 
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\Newtonsoft.Json.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Build.Tasks.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Build.Tasks.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Build.Tasks.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Build.Tasks.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Commands.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Commands.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Commands.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Commands.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Common.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Common.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Common.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Common.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Configuration.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Configuration.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Configuration.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Configuration.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.DependencyResolver.Core.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.DependencyResolver.Core.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.DependencyResolver.Core.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.DependencyResolver.Core.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Frameworks.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Frameworks.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Frameworks.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Frameworks.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.LibraryModel.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.LibraryModel.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.LibraryModel.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.LibraryModel.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.Core.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.Core.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.Core.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.Core.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Packaging.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.ProjectModel.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.ProjectModel.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.ProjectModel.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.ProjectModel.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Protocol.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Protocol.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Protocol.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Protocol.xml" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.dll" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.dll" />
-    <file src="$repoRoot$\bin\Bootstrap\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.xml" target="Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.Versioning.xml" />
- -->
-
   </files>
 </package>
