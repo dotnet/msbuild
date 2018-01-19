@@ -42,7 +42,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="2.1.7" PrivateAssets="All" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
   </ItemGroup>
   
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
