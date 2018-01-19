@@ -27,14 +27,9 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_builds_a_simple_desktop_app()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var targetFramework = "net45";
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
@@ -61,29 +56,21 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Theory]
-
+        [WindowsOnlyTheory]
         // If we don't set platformTarget and don't use native dependency, we get working AnyCPU app.
         [InlineData("defaults", null, false, "Native code was not used (MSIL)")]
-
         // If we don't set platformTarget and do use native dependency, we get working x86 app.
         [InlineData("defaultsNative", null, true, "Native code was used (X86)")]
-
         // If we set x86 and don't use native dependency, we get working x86 app.
         [InlineData("x86", "x86", false, "Native code was not used (X86)")]
-
         // If we set x86 and do use native dependency, we get working x86 app.
         [InlineData("x86Native", "x86", true, "Native code was used (X86)")]
-
         // If we set x64 and don't use native dependency, we get working x64 app.
         [InlineData("x64", "x64", false, "Native code was not used (Amd64)")]
-
         // If we set x64 and do use native dependency, we get working x64 app.
         [InlineData("x64Native", "x64", true, "Native code was used (Amd64)")]
-
         // If we set AnyCPU and don't use native dependency, we get working  AnyCPU app.
         [InlineData("AnyCPU", "AnyCPU", false, "Native code was not used (MSIL)")]
-
         // If we set AnyCPU and do use native dependency, we get any CPU app that can't find its native dependency.
         // Tests current behavior, but ideally we'd also raise a build diagnostic in this case: https://github.com/dotnet/sdk/issues/843
         [InlineData("AnyCPUNative", "AnyCPU", true, "Native code failed (MSIL)")]
@@ -93,11 +80,6 @@ namespace Microsoft.NET.Build.Tests
              bool useNativeCode,
              string expectedProgramOutput)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             foreach (bool multiTarget in new[] { false, true })
             {
                 var testAsset = _testAssetsManager
@@ -140,26 +122,17 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [Theory]
-
+        [WindowsOnlyTheory]
         // implict rid with option to append rid to output path off -> do not append
         [InlineData("implicitOff", "", false, false)]
-
         // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
         [InlineData("implicitOn", "", true, false)]
-
         // explicit  rid with option to append rid to output path off -> do not append
         [InlineData("explicitOff", "win7-x86", false, false)]
-        
         // explicit rid with option to append rid to output path on -> append
         [InlineData("explicitOn", "win7-x64", true, true)]
         public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             foreach (bool multiTarget in new[] { false, true })
             {
                 var testAsset = _testAssetsManager
@@ -231,8 +204,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("win7-x86", "x86")]
         [InlineData("win8-x86-aot", "x86")]
         [InlineData("win7-x64", "x64")]
@@ -248,11 +220,6 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("arm-something", "AnyCPU")]
         public void It_builds_with_inferred_platform_target(string runtimeIdentifier, string expectedPlatformTarget)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + runtimeIdentifier)
                 .WithSource()
@@ -272,14 +239,9 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo(expectedPlatformTarget);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_respects_explicit_platform_target()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopMinusRid")
                 .WithSource()
@@ -299,14 +261,9 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("x64");
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_includes_default_framework_references()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testProject = new TestProject()
             {
                 Name = "DefaultReferences",
@@ -346,14 +303,9 @@ namespace DefaultReferences
 
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_reports_a_single_failure_if_reference_assemblies_are_not_found()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testProject = new TestProject()
             {
                 Name = "MissingReferenceAssemblies",
@@ -383,14 +335,9 @@ namespace DefaultReferences
             result.StdOut.Should().Contain("1 Error(s)");
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_does_not_report_conflicts_if_the_same_framework_assembly_is_referenced_multiple_times()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testProject = new TestProject()
             {
                 Name = "DuplicateFrameworkReferences",
@@ -421,14 +368,9 @@ namespace DefaultReferences
                 .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_does_not_report_conflicts_when_referencing_a_nuget_package()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testProject = new TestProject()
             {
                 Name = "DesktopConflictsNuGet",
@@ -504,14 +446,9 @@ namespace DefaultReferences
             buildResult.Should().NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_generates_binding_redirects_if_needed()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource()

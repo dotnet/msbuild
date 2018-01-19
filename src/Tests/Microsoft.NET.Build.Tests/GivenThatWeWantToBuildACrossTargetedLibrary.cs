@@ -50,14 +50,9 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_builds_desktop_library_successfully_on_windows()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
                 .WithSource()

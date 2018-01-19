@@ -22,14 +22,9 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_can_use_HttpClient_and_exchange_the_type_with_a_NETStandard_library()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var netStandardLibrary = new TestProject()
             {
                 Name = "NETStandardLibrary",
@@ -199,14 +194,9 @@ public class NETFramework
                 .Pass();
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_can_preserve_compilation_context_and_reference_netstandard_library()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopReferencingNetStandardLibrary")
                 .WithSource()
@@ -224,14 +214,9 @@ public class NETFramework
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_resolves_assembly_conflicts_with_a_NETFramework_library()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             TestProject project = new TestProject()
             {
                 Name = "NETFrameworkLibrary",

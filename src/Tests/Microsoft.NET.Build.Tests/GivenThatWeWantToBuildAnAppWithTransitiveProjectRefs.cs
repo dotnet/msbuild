@@ -77,14 +77,9 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("This string came from AuxLibrary!");
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void The_clean_target_removes_all_files_from_the_output_folder()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithTransitiveProjectRefs")
                 .WithSource()
