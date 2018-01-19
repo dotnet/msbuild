@@ -209,4 +209,6 @@
     <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
     <CopyToSuiteBin>true</CopyToSuiteBin>
   </PropertyGroup>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='Windows_NT'" />
 </Project>

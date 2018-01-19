@@ -11,6 +11,8 @@
   <ItemGroup>
     <EmbeddedResource Remove="@(EmbeddedResource)" />
     <Reference Remove="@(Reference)" />
+    <PackageReference Remove="@(PackageReference)" />
+    <ProjectReference Remove="@(ProjectReference)" />
     <SwrFile Remove="@(SwrFile)" />
   </ItemGroup>
 

@@ -2,6 +2,7 @@
    <!-- AssemblyName must be set before importing Sdk.props to set the vsix file name. -->
    <PropertyGroup>
        <AssemblyName>Microsoft.Build</AssemblyName>
+       <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(OsEnvironment)' != 'Windows_NT'">true</ShouldSkipProject>
    </PropertyGroup>
 
    <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
@@ -12,9 +13,6 @@
     <!-- Not sure what the right ID is here -->
     <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
   </PropertyGroup>
-
-  <!-- Don't try to build this package if building for Mono -->
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(MonoBuild)' == 'true'" />
   
   <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
@@ -25,9 +23,13 @@
      <SwrFile Include="*.swr" /> 
   </ItemGroup>
 
-  <Import Project="..\GetBinPaths.targets" />
+  <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
+  <Import Project="..\GetBinPaths.targets" Condition="!$(ShouldSkipProject)"/>
 
-  <Target Name="SetVsixProperties" BeforeTargets="Build" DependsOnTargets="SetBinPaths">
+  <Target Name="SetVsixProperties"
+    BeforeTargets="Build"
+    DependsOnTargets="SetBinPaths"
+    Condition="!$(ShouldSkipProject)">
     <ItemGroup>
       <SwrProperty Include="Version=$(BuildVersion)" />
       <SwrProperty Include="X86BinPath=$(X86BinPath)" />
@@ -37,5 +39,8 @@
       <SwrProperty Include="MSBuildConversionBinPath=$(MSBuildConversionBinPath)" />
     </ItemGroup>
   </Target>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
+
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 </Project>
