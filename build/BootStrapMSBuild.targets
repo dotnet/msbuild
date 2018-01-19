@@ -14,9 +14,7 @@
     <!-- TODO: Mono build should use BootstrapNetCore logic -->
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
-
-    <CreateBootstrap Condition="'$(CreateBootstrap)' == ''">true</CreateBootstrap>
-    
+   
   </PropertyGroup>
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"

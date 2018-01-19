@@ -126,7 +126,7 @@ function InstallRepoToolset {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)
-    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd | Out-Null
+    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to build $ToolsetProj"
@@ -203,7 +203,7 @@ function Build {
     $testStage0 = $test
   }
 
-  CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs $logCmd  /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack $properties
+  CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs @logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true $properties
 
   if (-not $bootstrapOnly)
   {
@@ -238,7 +238,7 @@ function Build {
       # - Don't pack
       # - Do run tests (if not skipped)
       # - Don't try to create a bootstrap deployment
-      CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs /nr:false $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+      CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs /nr:false @logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
     }
     finally
     {
@@ -255,7 +255,7 @@ function Build {
 
   if ($ci)
   {
-#    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd | Out-Null
+#    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
     git status | Out-Null
     git --no-pager diff HEAD --word-diff=plain --exit-code | Out-Null
 
@@ -283,16 +283,15 @@ function CallMSBuild
 
 function GetLogCmd([string] $logName)
 {
+  $logCmd = @()
   if ($ci -or $log) {
     Create-Directory $LogDir
-    $logCmd = "/bl:" + (Join-Path $LogDir "$logName.binlog")
+    $logCmd = $logCmd + ("/bl:" + (Join-Path $LogDir "$logName.binlog"))
 
     # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
     if ($ci) {
-      $logCmd += " /flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"'
+      $logCmd = $logCmd + ("/flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"')
     }
-  } else {
-    $logCmd = ""
   }
 
   return $logCmd;
