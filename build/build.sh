@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ "$1" ==  "-fromScript" ]; then
+  otherScript=$2
+  shift 2
+  echo Executed from $otherScript with arguments: $*
+fi
+
 build=false
 ci=false
 configuration="Debug"
@@ -137,6 +143,10 @@ function CallMSBuild {
     commandLine="$msbuildHost $msbuildToUse $*"
   fi
 
+  echo ============= MSBuild command ============= 
+  echo "$commandLine"
+  echo ===========================================
+
   $commandLine
 
   LASTEXITCODE=$?
@@ -147,7 +157,6 @@ function CallMSBuild {
     StopProcesses
     exit $LASTEXITCODE
   fi
-
 }
 
 function GetVersionsPropsVersion {
@@ -297,9 +306,8 @@ function Build {
 
 function StopProcesses {
   echo "Killing running build processes..."
-  pkill -9 "dotnet"
-  pkill -9 "msbuild"
-  pkill -9 "vbcscompiler"
+  pkill -9 -il "dotnet"
+  pkill -9 -il "vbcscompiler"
 }
 
 SOURCE="${BASH_SOURCE[0]}"
