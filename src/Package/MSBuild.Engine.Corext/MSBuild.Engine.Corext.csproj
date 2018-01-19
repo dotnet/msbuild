@@ -24,5 +24,7 @@
       <NuspecProperties>$(NuspecProperties);MSBuildConversionBinPath=$(MSBuildConversionBinPath.TrimEnd('\\/'))</NuspecProperties>
     </PropertyGroup>
   </Target>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='Windows_NT'" />
   
 </Project>

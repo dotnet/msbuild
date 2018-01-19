@@ -33,4 +33,6 @@
     <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Engine\Microsoft.Build.Engine.csproj" />
   </ItemGroup>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='Windows_NT'" />
 </Project>
