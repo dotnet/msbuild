@@ -22,14 +22,9 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_builds_the_projects_successfully()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
@@ -40,14 +35,9 @@ namespace Microsoft.NET.Build.Tests
             VerifyProjectsBuild(testAsset);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_builds_with_disable_implicit_frameworkRefs()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
@@ -99,14 +89,9 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().HaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void The_clean_target_removes_all_files_from_the_output_folder()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences", "CleanTargetRemovesAll")
                 .WithSource();

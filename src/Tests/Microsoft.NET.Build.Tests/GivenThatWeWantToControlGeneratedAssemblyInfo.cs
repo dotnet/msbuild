@@ -89,12 +89,12 @@ namespace Microsoft.NET.Build.Tests
             actualInfo.Should().Equal(expectedInfo);
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("netcoreapp1.1")]
         [InlineData("net45")]
         public void It_respects_version_prefix(string targetFramework)
         {
-            if (targetFramework == "net45" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (targetFramework == "net45")
             {
                 return;
             }
@@ -118,12 +118,12 @@ namespace Microsoft.NET.Build.Tests
             info["AssemblyInformationalVersionAttribute"].Should().Be("1.2.3");
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("netcoreapp1.1")]
         [InlineData("net45")]
         public void It_respects_version_changes_on_incremental_build(string targetFramework)
         {
-            if (targetFramework == "net45" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (targetFramework == "net45")
             {
                 return;
             }

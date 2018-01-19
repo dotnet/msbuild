@@ -71,14 +71,9 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(expectedOutput);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_publishes_the_app_config_if_necessary()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource()
