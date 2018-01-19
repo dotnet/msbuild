@@ -114,7 +114,7 @@
     <!-- Not really sure why but we need to have the wrong version of this dll by default -->
     <Copy SourceFiles="$(NuGetPackageRoot)\system.text.encoding.codepages\4.4.0\runtimes\win\lib\netcoreapp2.0\System.Text.Encoding.CodePages.dll"
           DestinationFolder="$(BootstrapDestination)runtimes\win\lib\netstandard1.3\" />
-    <Copy SourceFiles="$(NuGetPackageRoot)\system.text.encoding.codepages\4.4.0\runtimes\win\lib\netcoreapp2.0\System.Text.Encoding.CodePages.dll"
+    <Copy SourceFiles="$(NuGetPackageRoot)\system.text.encoding.codepages\4.4.0\lib\netstandard2.0\System.Text.Encoding.CodePages.dll"
           DestinationFolder="$(BootstrapDestination)runtimes\unix\lib\netstandard1.3\" />
     
     <!-- Microsoft.Portable.CSharp.targets imports this file with a capital T -->
