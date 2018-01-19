@@ -12,6 +12,9 @@
 
                 "bin/MSBuild/net46/*/*.resources.dll",
 
+                "bin/MSBuild/net46/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll",
+                "bin/MSBuild/net46/SdkResolvers/NuGet.MSBuildSdkResolver/*/NuGet.MSBuildSdkResolver.resources.dll",
+
                 "bin/MSBuildTaskHost/net35/MSBuildTaskHost.exe",
                 "bin/MSBuildTaskHost/net35/*/MSBuildTaskHost.resources.dll",
 
@@ -28,6 +31,9 @@
                 "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Utilities.Core.dll",
 
                 "bin/MSBuild/netcoreapp2.0/*/*.resources.dll",
+
+                "bin/MSBuild/netcoreapp2.0/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll",
+                "bin/MSBuild/netcoreapp2.0/SdkResolvers/NuGet.MSBuildSdkResolver/*/NuGet.MSBuildSdkResolver.resources.dll",
 
                 "bin/ref/Microsoft.Build.Framework.Package/*/Microsoft.Build.Framework.dll",
                 "bin/ref/Microsoft.Build.Package/*/Microsoft.Build.dll",
