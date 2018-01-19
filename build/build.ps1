@@ -203,7 +203,7 @@ function Build {
 
   $msbuildArgs = AddLogCmd "Build" $commonMSBuildArgs
 
-  CallMSBuild $RepoToolsetBuildProj @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true $properties
+  CallMSBuild $RepoToolsetBuildProj @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true @properties
 
   if (-not $bootstrapOnly)
   {
@@ -238,7 +238,7 @@ function Build {
       # - Don't pack
       # - Do run tests (if not skipped)
       # - Don't try to create a bootstrap deployment
-      CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+      CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
     }
     finally
     {
