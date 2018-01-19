@@ -132,5 +132,10 @@
   <!-- Import common project targets provided by RepoToolset -->
   <Import Project="$(RepoToolsetDir)Imports.targets" />
 
+  <!-- Override in-box GenerateSatelliteAssemblies, as we are using CoreGenerateSatelliteAssemblies instead.
+       With https://github.com/Microsoft/msbuild/pull/2726 this is no longer necessary, but that change is not
+       in VS 15.5 (which is what we use for Jenkins right now). -->
+  <Target Name="GenerateSatelliteAssemblies" />
+
 
 </Project>
