@@ -120,13 +120,13 @@ function InstallRepoToolset {
   $RepoToolsetDir = Join-Path $NuGetPackageRoot "roslyntools.repotoolset\$RepoToolsetVersion\tools"
   $RepoToolsetBuildProj = Join-Path $RepoToolsetDir "Build.proj"
 
-  $logCmd = GetLogCmd("Toolset")
-
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
+    $msbuildArgs = "/t:restore", "/m", "/nologo", "/clp:Summary", "/warnaserror", "/v:$verbosity"
+    $msbuildArgs = AddLogCmd "Toolset" $msbuildArgs
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)
-    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
+    CallMSBuild $ToolsetProj @msbuildArgs | Out-Null
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to build $ToolsetProj"
@@ -184,8 +184,6 @@ function Build {
     }
   }
 
-  $logCmd = GetLogCmd("Build")
-
   $solution = Join-Path $RepoRoot "MSBuild.sln"
 
   $commonMSBuildArgs = "/m", "/nologo", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:SolutionPath=$solution", "/p:CIBuild=$ci"
@@ -203,7 +201,9 @@ function Build {
     $testStage0 = $test
   }
 
-  CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs @logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true $properties
+  $msbuildArgs = AddLogCmd "Build" $commonMSBuildArgs
+
+  CallMSBuild $RepoToolsetBuildProj @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true $properties
 
   if (-not $bootstrapOnly)
   {
@@ -228,7 +228,7 @@ function Build {
     # Use separate artifacts folder for stage 2
     $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
 
-    $logCmd = GetLogCmd("BuildWithBootstrap")
+    $msbuildArgs = AddLogCmd "BuildWithBootstrap" $commonMSBuildArgs
 
     try
     {
@@ -238,7 +238,7 @@ function Build {
       # - Don't pack
       # - Do run tests (if not skipped)
       # - Don't try to create a bootstrap deployment
-      CallMSBuild $RepoToolsetBuildProj @commonMSBuildArgs /nr:false @logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+      CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
     }
     finally
     {
@@ -281,20 +281,20 @@ function CallMSBuild
   }
 }
 
-function GetLogCmd([string] $logName)
+function AddLogCmd([string] $logName, [string[]] $extraArgs)
 {
-  $logCmd = @()
+
   if ($ci -or $log) {
     Create-Directory $LogDir
-    $logCmd = $logCmd + ("/bl:" + (Join-Path $LogDir "$logName.binlog"))
+    $extraArgs = $extraArgs + ("/bl:" + (Join-Path $LogDir "$logName.binlog"))
 
     # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
     if ($ci) {
-      $logCmd = $logCmd + ("/flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"')
+      $extraArgs = $extraArgs + ("/flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"')
     }
   }
 
-  return $logCmd;
+  return $extraArgs;
 }
 
 function Stop-Processes() {
