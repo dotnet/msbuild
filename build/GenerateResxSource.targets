@@ -32,7 +32,8 @@
           Inputs="@(EmbeddedResourceSG)"
           Outputs="%(EmbeddedResourceSG.SourceOutputPath)"
           >
-    <GenerateResxSource ResxFile="%(EmbeddedResourceSG.FullPath)"
+    <GenerateResxSource Condition=" $(DesignTimeBuild) != 'true' "
+                        ResxFile="%(EmbeddedResourceSG.FullPath)"
                         ResourceName="%(EmbeddedResourceSG.ManifestResourceName)" 
                         SourceOutputPath="%(EmbeddedResourceSG.SourceOutputPath)" />
   </Target>
