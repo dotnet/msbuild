@@ -59,15 +59,9 @@ namespace Microsoft.NET.Build.Tests
             buildCommand.Execute().Should().Pass();
         }
 
-
-        [Fact]
+        [WindowsOnlyFact]
         public void It_can_use_HttpClient_and_exchange_the_type_with_a_NETStandard_library()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var netStandardLibrary = new TestProject()
             {
                 Name = "NETStandardLibrary",
@@ -237,14 +231,9 @@ public class NETFramework
                 .Pass();
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_can_preserve_compilation_context_and_reference_netstandard_library()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopReferencingNetStandardLibrary")
                 .WithSource()
@@ -262,14 +251,9 @@ public class NETFramework
             }
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/1803")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/1803")]
         public void It_resolves_assembly_conflicts_with_a_NETFramework_library()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             TestProject project = new TestProject()
             {
                 Name = "NETFrameworkLibrary",
@@ -320,16 +304,11 @@ public static class {project.Name}
                 .NotHaveStdOutContaining("MSB3243");
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(false)]
         [InlineData(true)]
         public void It_uses_hintpath_when_replacing_simple_name_references(bool useFacades)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             TestProject project = new TestProject()
             {
                 Name = "NETFrameworkLibrary",

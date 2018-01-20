@@ -283,15 +283,16 @@ namespace Microsoft.NET.Publish.Tests
             {
                 // profiling symbols are not supported on OSX
                 symbolsFolder.Should().NotExist();
-                return;
             }
+            else
+            {
+                var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("9.0.1").Sub("lib").Sub("netstandard1.0");
+                newtonsoftSymbolsFolder.Should().Exist();
 
-            var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("9.0.1").Sub("lib").Sub("netstandard1.0");
-            newtonsoftSymbolsFolder.Should().Exist();
-
-            var newtonsoftSymbolsFiles = newtonsoftSymbolsFolder.GetFiles().ToArray();
-            newtonsoftSymbolsFiles.Length.Should().Be(1);
-            newtonsoftSymbolsFiles[0].Name.Should().StartWith("Newtonsoft.Json").And.EndWith(symbolFileExtension);
+                var newtonsoftSymbolsFiles = newtonsoftSymbolsFolder.GetFiles().ToArray();
+                newtonsoftSymbolsFiles.Length.Should().Be(1);
+                newtonsoftSymbolsFiles[0].Name.Should().StartWith("Newtonsoft.Json").And.EndWith(symbolFileExtension);
+            }
         }
 
         private static HashSet<PackageIdentity> ParseStoreArtifacts(string path)
