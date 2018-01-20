@@ -75,15 +75,9 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/1810")]
+        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/1810")]
         public void All_props_and_targets_add_themselves_to_MSBuildAllTargets()
         {
-            //  Disable this test when using full Framework MSBuild, as the paths to the props and targets are different
-            if (UsingFullFrameworkMSBuild)
-            {
-                return;
-            }
-
             List<string> expectedAllProjects = new List<string>();
             string baseIntermediateDirectory = null;
 
