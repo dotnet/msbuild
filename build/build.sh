@@ -114,17 +114,21 @@ function CreateDirectory {
   fi
 }
 
+function QQ {
+  echo '"'$*'"'
+}
+
 function GetLogCmd {
   if $ci || $log
   then
     CreateDirectory $LogDir
 
-    local logCmd="/bl:$LogDir/$1.binlog"
+    local logCmd="/bl:$(QQ $LogDir/$1.binlog)"
 
     # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
     if $ci
     then
-      logCmd="$logCmd /fl /flp:Verbosity=diag;LogFile=\"$LogDir/$1.log\""
+      logCmd="$logCmd /fl /flp:Verbosity=diag\;LogFile=$(QQ $LogDir/$1.log)"
     fi
   else
     logCmd=""
@@ -136,18 +140,18 @@ function GetLogCmd {
 function CallMSBuild {
   local commandLine=""
 
-  if [ -z $msbuildHost ]
+  if [ -z "$msbuildHost" ]
   then
-    commandLine="$msbuildToUse $*"
+    commandLine="$(QQ $msbuildToUse) $*"
   else
-    commandLine="$msbuildHost $msbuildToUse $*"
+    commandLine="$(QQ $msbuildHost) $(QQ $msbuildToUse) $*"
   fi
 
   echo ============= MSBuild command ============= 
   echo "$commandLine"
   echo ===========================================
 
-  $commandLine
+  eval $commandLine
 
   LASTEXITCODE=$?
 
@@ -221,7 +225,7 @@ function InstallRepoToolset {
   if [ ! -d "$RepoToolsetBuildProj" ]
   then
     ToolsetProj="$ScriptRoot/Toolset.proj"
-    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
+    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
   fi
 }
 
@@ -260,7 +264,7 @@ function Build {
 
   solution="$RepoRoot/MSBuild.sln"
 
-  commonMSBuildArgs="/m /nologo /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$solution /p:CIBuild=$ci"
+  commonMSBuildArgs="/m /nologo /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $solution) /p:CIBuild=$ci"
 
   # Only enable warnaserror on CI runs.
   if $ci
@@ -275,7 +279,7 @@ function Build {
     testStage0=$test
   fi
 
-  CallMSBuild $RepoToolsetBuildProj $commonMSBuildArgs $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack $properties
+  CallMSBuild $(QQ $RepoToolsetBuildProj) $commonMSBuildArgs $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack $properties
 
   if ! $bootstrapOnly
   then
@@ -298,7 +302,7 @@ function Build {
       # - Don't pack
       # - Do run tests (if not skipped)
       # - Don't try to create a bootstrap deployment
-    CallMSBuild $RepoToolsetBuildProj $commonMSBuildArgs /nr:false $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+    CallMSBuild $(QQ $RepoToolsetBuildProj) $commonMSBuildArgs /nr:false $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
 
     StopProcesses
   fi
