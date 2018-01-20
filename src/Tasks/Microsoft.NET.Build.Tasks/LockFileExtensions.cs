@@ -97,7 +97,47 @@ namespace Microsoft.NET.Build.Tasks
 
             return projectDeps;
         }
-        
+
+        public static HashSet<string> GetProjectFileDependencySet(this LockFile lockFile)
+        {
+            // Get package name from e.g. Microsoft.VSSDK.BuildTools >= 15.0.25604-Preview4
+            string GetPackageNameFromDependency(string dependency)
+            {
+                int indexOfWhiteSpace = IndexOfWhiteSpace(dependency);
+                if (indexOfWhiteSpace < 0)
+                {
+                    return dependency;
+                }
+
+                return dependency.Substring(0, indexOfWhiteSpace);
+            }
+
+            int IndexOfWhiteSpace(string s)
+            {
+                for (int i = 0; i < s.Length; i++)
+                {
+                    if (char.IsWhiteSpace(s[i]))
+                    {
+                        return i;
+                    }
+                }
+
+                return -1;
+            }
+
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in lockFile.ProjectFileDependencyGroups)
+            {
+                foreach (string dependency in group.Dependencies)
+                {
+                    string packageName = GetPackageNameFromDependency(dependency);
+                    set.Add(packageName);
+                }
+            }
+
+            return set;
+        }
 
         public static HashSet<string> GetPlatformExclusionList(
             this LockFileTarget lockFileTarget,
@@ -169,10 +209,47 @@ namespace Microsoft.NET.Build.Tasks
             string assetType)
         {
             return library.RuntimeTargets
-                .FilterPlaceHolderFiles()
+                .FilterPlaceholderFiles()
                 .Cast<LockFileRuntimeTarget>()
                 .Where(t => string.Equals(t.AssetType, assetType, StringComparison.OrdinalIgnoreCase))
                 .GroupBy(t => t.Runtime);
         }
+
+
+        // A package is a TransitiveProjectReference if it is a project, is not directly referenced,
+        // and does not contain a placeholder compile time assembly
+        public static bool IsTransitiveProjectReference(this LockFileTargetLibrary library, LockFile lockFile, ref HashSet<string> directProjectDependencies)
+        {
+            if (!library.IsProject())
+            {
+                return false;
+            }
+
+            if (directProjectDependencies == null)
+            {
+                directProjectDependencies = lockFile.GetProjectFileDependencySet();
+            }
+
+            return !directProjectDependencies.Contains(library.Name) 
+                && !library.CompileTimeAssemblies.Any(f => f.IsPlaceholderFile());
+        }
+
+        public static IEnumerable<LockFileItem> FilterPlaceholderFiles(this IEnumerable<LockFileItem> files)
+            => files.Where(f => !f.IsPlaceholderFile());
+
+        public static bool IsPlaceholderFile(this LockFileItem item)
+            => NuGetUtils.IsPlaceholderFile(item.Path);
+
+        public static bool IsPackage(this LockFileTargetLibrary library)
+            => library.Type == "package";
+
+        public static bool IsPackage(this LockFileLibrary library)
+            => library.Type == "package";
+
+        public static bool IsProject(this LockFileTargetLibrary library)
+            => library.Type == "project";
+
+        public static bool IsProject(this LockFileLibrary library)
+            => library.Type == "project";
     }
 }

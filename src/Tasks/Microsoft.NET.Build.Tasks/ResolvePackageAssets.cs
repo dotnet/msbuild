@@ -173,11 +173,11 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var library in target.Libraries)
             {
-                if (IsPackage(library))
+                if (library.IsPackage())
                 {
                     foreach (T asset in getAssets(library))
                     {
-                        if (!IsPlaceholder(asset) && (filter == null || filter(asset)))
+                        if (!asset.IsPlaceholderFile() && (filter == null || filter(asset)))
                         {
                             var item = CreatePackageAssetItem(library, ResolvePackageAssetPath(library, asset.Path));
                             setup?.Invoke(asset, item);
@@ -196,7 +196,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var library in target.Libraries)
             {
-                if (IsPackage(library))
+                if (library.IsPackage())
                 {
                     foreach (string frameworkAssembly in library.FrameworkAssemblies)
                     {
@@ -219,13 +219,11 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var library in target.Libraries)
             {
-                if (IsProject(library))
+                if (library.IsTransitiveProjectReference(lockFile, ref directProjectDependencies))
                 {
                     if (projectReferencePaths == null)
                     {
-                        Debug.Assert(directProjectDependencies == null);
                         projectReferencePaths = GetProjectReferencePaths(lockFile);
-                        directProjectDependencies = GetDirectProjectDependencies(lockFile);
                     }
 
                     if (!directProjectDependencies.Contains(library.Name))
@@ -238,46 +236,6 @@ namespace Microsoft.NET.Build.Tasks
             return items.ToArray();
         }
 
-        private static HashSet<string> GetDirectProjectDependencies(LockFile lockFile)
-        {
-            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var group in lockFile.ProjectFileDependencyGroups)
-            {
-                foreach (string dependency in group.Dependencies)
-                {
-                    string packageName = GetPackageNameFromDependency(dependency);
-                    set.Add(packageName);
-                }
-            }
-
-            return set;
-        }
-
-        private static string GetPackageNameFromDependency(string dependency)
-        {
-            int indexOfWhiteSpace = IndexOfWhiteSpace(dependency);
-            if (indexOfWhiteSpace < 0)
-            {
-                return dependency;
-            }
-
-            return dependency.Substring(0, indexOfWhiteSpace);
-        }
-
-        private static int IndexOfWhiteSpace(string s)
-        {
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (char.IsWhiteSpace(s[i]))
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
         private ITaskItem[] RaiseAnalyzers(LockFile lockFile, LockFileTarget target)
         {
             var items = new List<ITaskItem>();
@@ -285,11 +243,11 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var library in lockFile.Libraries)
             {
-                if (IsPackage(library))
+                if (library.IsPackage())
                 {
                     foreach (var file in library.Files)
                     {
-                        if (IsAnalyzer(file) && FileMatchesProjectLanguage(file))
+                        if (NuGetUtils.IsApplicableAnalyzer(file, ProjectLanguage))
                         {
                             if (targetLibraries == null)
                             {
@@ -306,34 +264,6 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return items.ToArray();
-        }
-
-        private static bool IsAnalyzer(string file)
-        {
-            // This logic is preserved from previous implementations.
-            // See https://github.com/NuGet/Home/issues/6279#issuecomment-353696160 for possible issues with it.
-            return file.StartsWith("analyzers", StringComparison.Ordinal)
-                && file.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private bool FileMatchesProjectLanguage(string file)
-        {
-            // This logic is preserved from previous implementations.
-            // See https://github.com/NuGet/Home/issues/6279#issuecomment-353696160 for possible issues with it.
-            bool CS() => file.IndexOf("/cs/",  StringComparison.OrdinalIgnoreCase) >= 0;
-            bool VB() => file.IndexOf("/vb/", StringComparison.OrdinalIgnoreCase) >= 0;
-
-            switch (ProjectLanguage)
-            {
-                case "C#":
-                    return CS() || !VB();
-
-                case "VB":
-                    return VB() || !CS();
-
-                default:
-                    return false;
-            }
         }
 
         private static ITaskItem CreatePackageAssetItem(LockFileTargetLibrary package, string itemSpec)
@@ -357,7 +287,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var library in lockFile.Libraries)
             {
-                if (IsProject(library))
+                if (library.IsProject())
                 {
                     paths[library.Name] = NormalizeRelativePath(library.MSBuildProject);
                 }
@@ -376,22 +306,6 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
         }
-
-        private static bool IsPackage(LockFileTargetLibrary library)
-            => library.Type == "package";
-
-        private static bool IsPackage(LockFileLibrary library)
-            => library.Type == "package";
-
-        private static bool IsProject(LockFileTargetLibrary library)
-            => library.Type == "project";
-
-        private static bool IsProject(LockFileLibrary library)
-            => library.Type == "project";
-
-        // PERF: avoiding allocations here. We can depend on forward slashes in assets file.
-        private static bool IsPlaceholder(LockFileItem asset) 
-            => asset.Path.EndsWith("/_._", StringComparison.Ordinal);
 
         private static string NormalizeRelativePath(string relativePath)
             => relativePath.Replace('/', Path.DirectorySeparatorChar);

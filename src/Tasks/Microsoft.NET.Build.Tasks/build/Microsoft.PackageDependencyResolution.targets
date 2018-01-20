@@ -379,7 +379,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!--
         Update Reference items with NuGetPackageId metadata to set ExternallyResolved appropriately.
         NetStandard.Library adds its assets in targets this way and not in the standard way that
-        would get ExternallyResolved set in ResolvedCompileFileDefinitions below.
+        would get ExternallyResolved set in ResolvePackageAssets.
        -->
       <Reference Condition="'%(Reference.NuGetPackageId)' != ''">
         <ExternallyResolved>true</ExternallyResolved>
