@@ -23,22 +23,65 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var packageObtainer =
                 ConstructDefaultPackageObtainer(toolsPath);
-            ToolConfigurationAndExecutableDirectory toolConfigurationAndExecutableDirectory = packageObtainer.ObtainAndReturnExecutablePath(
+            ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath = packageObtainer.ObtainAndReturnExecutablePath(
                 packageId: TestPackageId,
                 packageVersion: TestPackageVersion,
                 nugetconfig: nugetConfigPath,
                 targetframework: _testTargetframework);
 
-            var executable = toolConfigurationAndExecutableDirectory
-                .ExecutableDirectory
-                .WithFile(
-                    toolConfigurationAndExecutableDirectory
-                        .Configuration
-                        .ToolAssemblyEntryPoint);
+            var executable = toolConfigurationAndExecutablePath
+                .Executable;
 
             File.Exists(executable.Value)
                 .Should()
                 .BeTrue(executable + " should have the executable");
+        }
+
+        [Fact]
+        public void GivenNoFeedItThrows()
+        {
+            var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
+
+            ToolPackageObtainer packageObtainer =
+                ConstructDefaultPackageObtainer(toolsPath);
+
+            Action a = () => packageObtainer.ObtainAndReturnExecutablePath(
+                packageId: TestPackageId,
+                packageVersion: TestPackageVersion,
+                targetframework: _testTargetframework);
+
+            a.ShouldThrow<PackageObtainException>();
+        }
+
+        [Fact]
+        public void GivenOfflineFeedWhenCallItCanDownloadThePackage()
+        {
+            var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
+
+            ToolPackageObtainer packageObtainer =
+                new ToolPackageObtainer(
+                    toolsPath: new DirectoryPath(toolsPath),
+                    offlineFeedPath: new DirectoryPath(GetTestLocalFeedPath()),
+                    getTempProjectPath: GetUniqueTempProjectPathEachTest,
+                    bundledTargetFrameworkMoniker: new Lazy<string>(),
+                    packageToProjectFileAdder: new PackageToProjectFileAdder(),
+                    projectRestorer: new ProjectRestorer());
+
+            ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
+                packageObtainer.ObtainAndReturnExecutablePath(
+                    packageId: TestPackageId,
+                    packageVersion: TestPackageVersion,
+                    targetframework: _testTargetframework);
+
+            var executable = toolConfigurationAndExecutablePath
+                .Executable;
+
+            File.Exists(executable.Value)
+                .Should()
+                .BeTrue(executable + " should have the executable");
+
+            executable.Value.Should().NotContain(GetTestLocalFeedPath(), "Executalbe should not be still in fallbackfolder");
+            executable.Value.Should().Contain(toolsPath, "Executalbe should be copied to tools Path");
         }
 
         [Fact]
@@ -49,15 +92,23 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var packageObtainer =
                 ConstructDefaultPackageObtainer(toolsPath);
-            ToolConfigurationAndExecutableDirectory toolConfigurationAndExecutableDirectory =
-                packageObtainer.ObtainAndReturnExecutablePath(
-                    packageId: TestPackageId,
-                    packageVersion: TestPackageVersion,
-                    nugetconfig: nugetConfigPath,
-                    targetframework: _testTargetframework);
 
-            var assetJsonPath = toolConfigurationAndExecutableDirectory
-                .ExecutableDirectory
+            ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath = packageObtainer.ObtainAndReturnExecutablePath(
+                packageId: TestPackageId,
+                packageVersion: TestPackageVersion,
+                nugetconfig: nugetConfigPath,
+                targetframework: _testTargetframework);
+
+            /*
+              From mytool.dll to project.assets.json
+               .dotnet/.tools/packageid/version/packageid/version/mytool.dll
+                      /dependency1 package id/
+                      /dependency2 package id/
+                      /project.assets.json
+             */
+            var assetJsonPath = toolConfigurationAndExecutablePath
+                .Executable
+                .GetDirectoryPath()
                 .GetParentPath()
                 .GetParentPath()
                 .GetParentPath()
@@ -89,21 +140,18 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var packageObtainer =
                 new ToolPackageObtainer(
                     new DirectoryPath(toolsPath),
+                    new DirectoryPath("no such path"),
                     () => uniqueTempProjectPath,
                     new Lazy<string>(),
                     new PackageToProjectFileAdder(),
                     new ProjectRestorer());
-            ToolConfigurationAndExecutableDirectory toolConfigurationAndExecutableDirectory = packageObtainer.ObtainAndReturnExecutablePath(
-                packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
-                targetframework: _testTargetframework);
+            ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
+                packageObtainer.ObtainAndReturnExecutablePath(
+                    packageId: TestPackageId,
+                    packageVersion: TestPackageVersion,
+                    targetframework: _testTargetframework);
 
-            var executable = toolConfigurationAndExecutableDirectory
-                .ExecutableDirectory
-                .WithFile(
-                    toolConfigurationAndExecutableDirectory
-                        .Configuration
-                        .ToolAssemblyEntryPoint);
+            var executable = toolConfigurationAndExecutablePath.Executable;
 
             File.Exists(executable.Value)
                 .Should()
@@ -118,17 +166,13 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var packageObtainer =
                 ConstructDefaultPackageObtainer(toolsPath);
-            ToolConfigurationAndExecutableDirectory toolConfigurationAndExecutableDirectory = packageObtainer.ObtainAndReturnExecutablePath(
+            ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath = packageObtainer.ObtainAndReturnExecutablePath(
                 packageId: TestPackageId,
+                packageVersion: TestPackageVersion,
                 nugetconfig: nugetConfigPath,
                 targetframework: _testTargetframework);
 
-            var executable = toolConfigurationAndExecutableDirectory
-                .ExecutableDirectory
-                .WithFile(
-                    toolConfigurationAndExecutableDirectory
-                        .Configuration
-                        .ToolAssemblyEntryPoint);
+            var executable = toolConfigurationAndExecutablePath.Executable;
 
             File.Exists(executable.Value)
                 .Should()
@@ -167,22 +211,18 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var packageObtainer =
                 new ToolPackageObtainer(
                     new DirectoryPath(toolsPath),
+                    new DirectoryPath("no such path"),
                     GetUniqueTempProjectPathEachTest,
                     new Lazy<string>(() => BundledTargetFramework.GetTargetFrameworkMoniker()),
                     new PackageToProjectFileAdder(),
                     new ProjectRestorer());
-            ToolConfigurationAndExecutableDirectory toolConfigurationAndExecutableDirectory =
+            ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
                 packageObtainer.ObtainAndReturnExecutablePath(
                     packageId: TestPackageId,
                     packageVersion: TestPackageVersion,
                     nugetconfig: nugetConfigPath);
 
-            var executable = toolConfigurationAndExecutableDirectory
-                .ExecutableDirectory
-                .WithFile(
-                    toolConfigurationAndExecutableDirectory
-                        .Configuration
-                        .ToolAssemblyEntryPoint);
+            var executable = toolConfigurationAndExecutablePath.Executable;
 
             File.Exists(executable.Value)
                 .Should()
@@ -205,7 +245,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             a.ShouldThrow<PackageObtainException>()
                 .And
                 .Message.Should().Contain("does not exist");
-
         }
 
         [Fact]
@@ -218,16 +257,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 packageVersion: TestPackageVersion,
                 targetframework: _testTargetframework,
-                source: Path.Combine(
-                            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                            "TestAssetLocalNugetFeed"));
+                source: GetTestLocalFeedPath());
 
-            var executable = toolConfigurationAndExecutableDirectory
-                .ExecutableDirectory
-                .WithFile(
-                    toolConfigurationAndExecutableDirectory
-                        .Configuration
-                        .ToolAssemblyEntryPoint);
+            var executable = toolConfigurationAndExecutableDirectory.Executable;
 
             File.Exists(executable.Value)
                 .Should()
@@ -247,6 +279,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             return new ToolPackageObtainer(
                 new DirectoryPath(toolsPath),
+                new DirectoryPath("no such path"),
                 GetUniqueTempProjectPathEachTest,
                 new Lazy<string>(),
                 new PackageToProjectFileAdder(),
@@ -256,7 +289,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         private static FilePath WriteNugetConfigFileToPointToTheFeed()
         {
             var nugetConfigName = "nuget.config";
-            var executeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             var tempPathForNugetConfigWithWhiteSpace =
                 Path.Combine(Path.GetTempPath(),
@@ -266,9 +298,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetConfig.Write(
                 directory: tempPathForNugetConfigWithWhiteSpace,
                 configname: nugetConfigName,
-                localFeedPath: Path.Combine(executeDirectory, "TestAssetLocalNugetFeed"));
+                localFeedPath: GetTestLocalFeedPath());
+
             return new FilePath(Path.GetFullPath(Path.Combine(tempPathForNugetConfigWithWhiteSpace, nugetConfigName)));
         }
+
+        private static string GetTestLocalFeedPath() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestAssetLocalNugetFeed");
 
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";

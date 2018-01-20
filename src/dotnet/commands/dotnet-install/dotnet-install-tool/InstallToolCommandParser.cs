@@ -16,6 +16,10 @@ namespace Microsoft.DotNet.Cli
                     .With(name: LocalizableStrings.PackageIdArgumentName,
                           description: LocalizableStrings.PackageIdArgumentDescription),
                 Create.Option(
+                    "-g|--global",
+                    LocalizableStrings.GlobalOptionDescription,
+                    Accept.NoArguments()),
+                Create.Option(
                     "--version",
                     LocalizableStrings.VersionOptionDescription,
                     Accept.ExactlyOneArgument()),

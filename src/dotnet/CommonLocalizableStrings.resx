@@ -584,4 +584,10 @@ Output: {1}</value>
   <data name="FailInstallToolSameName" xml:space="preserve">
     <value>Failed to install tool {0}. A command with the same name already exists.</value>
   </data>
+  <data name="ToolPackageMissingEntryPointFile" xml:space="preserve">
+    <value>Package '{0}' is missing entry point file {1}.</value>
+  </data>
+  <data name="ToolPackageMissingSettingsFile" xml:space="preserve">
+    <value>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</value>
+  </data>
 </root>

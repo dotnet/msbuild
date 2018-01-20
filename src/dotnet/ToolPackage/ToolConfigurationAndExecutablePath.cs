@@ -5,17 +5,18 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ToolPackage
 {
-    internal class ToolConfigurationAndExecutableDirectory
+    internal class ToolConfigurationAndExecutablePath
     {
-        public ToolConfigurationAndExecutableDirectory(
+        public ToolConfigurationAndExecutablePath(
             ToolConfiguration toolConfiguration,
-            DirectoryPath executableDirectory)
+            FilePath executable)
         {
             Configuration = toolConfiguration;
-            ExecutableDirectory = executableDirectory;
+            Executable = executable;
         }
 
         public ToolConfiguration Configuration { get; }
-        public DirectoryPath ExecutableDirectory { get; }
+
+        public FilePath Executable { get; }
     }
 }

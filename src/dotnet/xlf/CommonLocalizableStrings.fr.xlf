@@ -787,6 +787,16 @@ You can do this by running the following command:
 setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolPackageMissingEntryPointFile">
+        <source>Package '{0}' is missing entry point file {1}.</source>
+        <target state="new">Package '{0}' is missing entry point file {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageMissingSettingsFile">
+        <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
+        <target state="new">Package '{0}' is missing tool settings file DotnetToolSettings.xml.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

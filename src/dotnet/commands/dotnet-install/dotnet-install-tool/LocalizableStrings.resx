@@ -129,13 +129,13 @@
   <data name="VersionOptionDescription" xml:space="preserve">
     <value>Version of the tool package in NuGet.</value>
   </data>
-    <data name="SourceOptionDescription" xml:space="preserve">
+  <data name="SourceOptionDescription" xml:space="preserve">
     <value>Specifies a NuGet package source to use during installation.</value>
   </data>
   <data name="SourceOptionName" xml:space="preserve">
     <value>SOURCE</value>
   </data>
-    <data name="CommandDescription" xml:space="preserve">
+  <data name="CommandDescription" xml:space="preserve">
     <value>Installs a tool for use on the command line.</value>
   </data>
   <data name="ConfigFileOptionDescription" xml:space="preserve">
@@ -171,5 +171,14 @@ The error was:
   <data name="InstallationSucceeded" xml:space="preserve">
     <value>
 The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</value>
+  </data>
+  <data name="GlobalOptionDescription" xml:space="preserve">
+    <value>Install user wide.</value>
+  </data>
+  <data name="InstallFullCommandNameLocalized" xml:space="preserve">
+    <value>.NET Install Command</value>
+  </data>
+  <data name="InstallToolCommandOnlySupportGlobal" xml:space="preserve">
+    <value>The --global switch (-g) is currently required because only user wide tools are supported.</value>
   </data>
 </root>

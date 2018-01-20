@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
         private static string _configFilePath;
         private static string _framework;
         private static string _source;
+        private static bool _global;
 
         public InstallToolCommand(
             AppliedOption appliedCommand,
@@ -37,27 +38,28 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
             _source = appliedCommand.ValueOrDefault<string>("source");
+            _global = appliedCommand.ValueOrDefault<bool>("global");
         }
 
         public override int Execute()
         {
-            var executablePackagePath = new DirectoryPath(new CliFolderPathCalculator().ExecutablePackagesPath);
+            if (!_global)
+            {
+                throw new GracefulException(LocalizableStrings.InstallToolCommandOnlySupportGlobal);
+            }
 
-            var toolConfigurationAndExecutableDirectory = ObtainPackage(executablePackagePath);
+            var cliFolderPathCalculator = new CliFolderPathCalculator();
+            var executablePackagePath = new DirectoryPath(cliFolderPathCalculator.ExecutablePackagesPath);
+            var offlineFeedPath = new DirectoryPath(cliFolderPathCalculator.CliFallbackFolderPath);
 
-            DirectoryPath executable = toolConfigurationAndExecutableDirectory
-                .ExecutableDirectory
-                .WithSubDirectories(
-                    toolConfigurationAndExecutableDirectory
-                        .Configuration
-                        .ToolAssemblyEntryPoint);
+            var toolConfigurationAndExecutablePath = ObtainPackage(executablePackagePath, offlineFeedPath);
 
             var shellShimMaker = new ShellShimMaker(executablePackagePath.Value);
-            var commandName = toolConfigurationAndExecutableDirectory.Configuration.CommandName;
+            var commandName = toolConfigurationAndExecutablePath.Configuration.CommandName;
             shellShimMaker.EnsureCommandNameUniqueness(commandName);
 
             shellShimMaker.CreateShim(
-                executable.Value,
+                toolConfigurationAndExecutablePath.Executable.Value,
                 commandName);
 
             EnvironmentPathFactory
@@ -70,7 +72,9 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             return 0;
         }
 
-        private static ToolConfigurationAndExecutableDirectory ObtainPackage(DirectoryPath executablePackagePath)
+        private static ToolConfigurationAndExecutablePath ObtainPackage(
+            DirectoryPath executablePackagePath,
+            DirectoryPath offlineFeedPath)
         {
             try
             {
@@ -83,6 +87,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                 var toolPackageObtainer =
                     new ToolPackageObtainer(
                         executablePackagePath,
+                        offlineFeedPath,
                         () => new DirectoryPath(Path.GetTempPath())
                             .WithSubDirectories(Path.GetRandomFileName())
                             .WithFile(Path.GetRandomFileName() + ".csproj"),
@@ -97,6 +102,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                     targetframework: _framework,
                     source: _source);
             }
+
             catch (PackageObtainException ex)
             {
                 throw new GracefulException(
