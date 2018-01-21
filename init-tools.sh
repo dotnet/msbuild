@@ -1,21 +1,72 @@
 #!/usr/bin/env bash
 
+# ---------------------------------------------------------------------
+# Util functions
+# ---------------------------------------------------------------------
+
+partingLine () {
+  printf -v _hr "%*s" $(tput cols) && echo ${_hr// /${1--}}
+}
+
+
+# ---------------------------------------------------------------------
+# Global variables
+# ---------------------------------------------------------------------
+
+#   msbuild
+#   │
+#   ├── init-tools.sh                        <---- __scriptpath
+#   ├── init-tools.log                       <---- __init_tools_log
+#   │
+#   ├── BuildToolsVersion.txt                <---- __BUILD_TOOLS_PACKAGE_VERSION
+#   ├── DotnetCLIVersion.txt                 <---- __DOTNET_TOOLS_VERSION
+#   │
+#   ├── Tools                                <---- __TOOLRUNTIME_DIR
+#   │   ├── tool-runtime
+#   │   ├── 1.0.27-prerelease-00927-05       <---- __PROJECT_JSON_PATH
+#   │   │   ├── project.json                 <---- __PROJECT_JSON_FILE
+#   │   │   └── done                         <---- __INIT_TOOLS_DONE_MARKER
+#   │   └── dotnetcli                        <---- __DOTNET_PATH
+#   │       └── dotnet                       <---- __DOTNET_CMD
+#   │
+#   ├── packages                             <---- __PACKAGES_DIR
+#   │   └── microsoft.dotnet.buildtools
+#           └── 1.0.27-prerelease-00927-05
+#               └── lib                      <---- __BUILD_TOOLS_PATH
+#                   └── init-tools.sh
+
+# path for this file
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
+
+# log file
 __init_tools_log=$__scriptpath/init-tools.log
-__PACKAGES_DIR=$__scriptpath/packages
+
+# version
+__BUILD_TOOLS_PACKAGE_VERSION=$(cat $__scriptpath/BuildToolsVersion.txt)
+__DOTNET_TOOLS_VERSION=$(cat $__scriptpath/DotnetCLIVersion.txt)
+
+# Tools folder
 __TOOLRUNTIME_DIR=$__scriptpath/Tools
 __DOTNET_PATH=$__TOOLRUNTIME_DIR/dotnetcli
 __DOTNET_CMD=$__DOTNET_PATH/dotnet
 if [ -z "$__BUILDTOOLS_SOURCE" ]; then __BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json; fi
-__BUILD_TOOLS_PACKAGE_VERSION=$(cat $__scriptpath/BuildToolsVersion.txt)
-__DOTNET_TOOLS_VERSION=$(cat $__scriptpath/DotnetCLIVersion.txt)
-__BUILD_TOOLS_PATH=$__PACKAGES_DIR/Microsoft.DotNet.BuildTools/$__BUILD_TOOLS_PACKAGE_VERSION/lib
 __PROJECT_JSON_PATH=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION
 __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
 __PROJECT_JSON_CONTENTS="{ \"dependencies\": { \"Microsoft.DotNet.BuildTools\": \"$__BUILD_TOOLS_PACKAGE_VERSION\" }, \"frameworks\": { \"netcoreapp1.0\": { } } }"
 __INIT_TOOLS_DONE_MARKER=$__PROJECT_JSON_PATH/done
+
+# packages folder
+__PACKAGES_DIR=$__scriptpath/packages
+__BUILD_TOOLS_PATH=$__PACKAGES_DIR/Microsoft.DotNet.BuildTools/$__BUILD_TOOLS_PACKAGE_VERSION/lib
+
 # Temporarily set until build tools is updated to support the new all lowercase package directories
 export __INIT_TOOLS_RESTORE_ARGS=--legacy-packages-directory
+
+
+# ---------------------------------------------------------------------
+# Linux distribution
+# ---------------------------------------------------------------------
+
 # Extended version of platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
 get_current_linux_name() {
     # Detect Distro
@@ -65,6 +116,11 @@ get_current_linux_name() {
     return 0
 }
 
+
+# ---------------------------------------------------------------------
+# dotnet pkg variables
+# ---------------------------------------------------------------------
+
 if [ -z "$__DOTNET_PKG" ]; then
 OSName=$(uname -s)
     case $OSName in
@@ -86,14 +142,39 @@ OSName=$(uname -s)
             ;;
   esac
 fi
+
+
+# ---------------------------------------------------------------------
+# Dealing
+# ---------------------------------------------------------------------
+
 if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
-    if [ -e $__TOOLRUNTIME_DIR ]; then rm -rf -- $__TOOLRUNTIME_DIR; fi
+
+    if [ -e $__TOOLRUNTIME_DIR ]; then
+        rm -rf -- $__TOOLRUNTIME_DIR
+    fi
+
+    partingLine ─
+    echo ''
     echo "Running: $__scriptpath/init-tools.sh" > $__init_tools_log
+    echo ''
+
+
+    # ---------------------------------------------------------------------
+    # download and install dotnet cli
+    # ---------------------------------------------------------------------
+
     if [ ! -e $__DOTNET_PATH ]; then
-        echo "Installing dotnet cli..."
+
         __DOTNET_LOCATION="https://dotnetcli.blob.core.windows.net/dotnet/Sdk/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
-        # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
+
+        partingLine ─
+        echo ''
+        echo "Installing dotnet cli..."
         echo "Installing '${__DOTNET_LOCATION}' to '$__DOTNET_PATH/dotnet.tar'" >> $__init_tools_log
+        echo ''
+
+        # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
         which curl > /dev/null 2> /dev/null
         if [ $? -ne 0 ]; then
             mkdir -p "$__DOTNET_PATH"
@@ -101,25 +182,80 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         else
             curl --retry 10 -sSL --create-dirs -o $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
         fi
+
         cd $__DOTNET_PATH
         tar -xf $__DOTNET_PATH/dotnet.tar
-
         cd $__scriptpath
+
     fi
 
-    if [ ! -d "$__PROJECT_JSON_PATH" ]; then mkdir "$__PROJECT_JSON_PATH"; fi
+
+    # ---------------------------------------------------------------------
+    # create project.json file
+    # ---------------------------------------------------------------------
+
+    if [ ! -d "$__PROJECT_JSON_PATH" ]; then
+        mkdir "$__PROJECT_JSON_PATH"
+    fi
+
     echo $__PROJECT_JSON_CONTENTS > "$__PROJECT_JSON_FILE"
 
+
+    # ---------------------------------------------------------------------
+    # dotnet restore for Tools folder
+    # ---------------------------------------------------------------------
+
     if [ ! -e $__BUILD_TOOLS_PATH ]; then
+
+        partingLine ─
+        echo ''
         echo "Restoring BuildTools version $__BUILD_TOOLS_PACKAGE_VERSION..."
         echo "Running: $__DOTNET_CMD restore \"$__PROJECT_JSON_FILE\" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE $__INIT_TOOLS_RESTORE_ARGS" >> $__init_tools_log
-        $__DOTNET_CMD restore "$__PROJECT_JSON_FILE" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE $__INIT_TOOLS_RESTORE_ARGS >> $__init_tools_log
-        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."1>&2; fi
+        echo ''
+
+        declare -a arr_dotnetRestore=(
+
+            $__DOTNET_CMD
+            restore
+            $__PROJECT_JSON_FILE
+            --no-cache
+            --packages
+            $__PACKAGES_DIR
+            --source
+            $__BUILDTOOLS_SOURCE
+            $__INIT_TOOLS_RESTORE_ARGS
+
+        )
+
+        ${arr_dotnetRestore[@]} >> $__init_tools_log
+
+        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then
+
+            echo ''
+            echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details." 1>&2
+            echo "============= $__init_tools_log =================="
+            cat $__init_tools_log
+            echo "============= end of $__init_tools_log ==========="
+            echo ''
+
+        fi
+
     fi
 
+
+    # ---------------------------------------------------------------------
+    # dotnet restore for tool-runtime folder
+    # ---------------------------------------------------------------------
+
+
+    partingLine ─
+    echo ''
     echo "Initializing BuildTools..."
     echo "Running: $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR" >> $__init_tools_log
+    echo ''
+
     $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR >> $__init_tools_log
+
     if [ "$?" != "0" ]; then
         echo "ERROR: An error occured when trying to initialize the tools. Please check '$__init_tools_log' for more details."1>&2
         exit 1
@@ -127,6 +263,7 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
 
     touch $__INIT_TOOLS_DONE_MARKER
     echo "Done initializing tools."
+
 else
     echo "Tools are already initialized"
 fi
