@@ -21,10 +21,10 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
         }
 
         // TODO: make this !windows once Mono 5.0+ is available in an OSX image
-        if (osName.startsWith('Ubuntu')) {
-            runtimes.add('Mono')
-            runtimes.add('MonoTest')
-        }
+        // if (osName.startsWith('Ubuntu')) {
+        //     runtimes.add('Mono')
+        //     runtimes.add('MonoTest')
+        // }
 
         runtimes.each { runtime ->
             def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}", isPR)
