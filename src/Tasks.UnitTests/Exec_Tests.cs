@@ -3,11 +3,14 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using PlatformID = Xunit.PlatformID;
 
@@ -430,6 +433,33 @@ namespace Microsoft.Build.UnitTests
         public void ExecTaskUtf8NeverWithAnsi()
         {
             RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never");
+        }
+
+        [Theory]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                testEnvironment.SetEnvironmentVariable(environmentVariableName, environmentVariableValue);
+
+                Exec exec = PrepareExec("exit 0");
+
+                TypeInfo execType = typeof(Exec).GetTypeInfo();
+                MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
+
+                if (autoRunShouldBeDisabled)
+                {
+                    commandLine.ShouldContain("/D ");
+                }
+                else
+                {
+                    commandLine.ShouldNotContain("/D ");
+                }
+            }
         }
 
 

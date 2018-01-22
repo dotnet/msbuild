@@ -795,5 +795,73 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("echo \"hello \\\"world\\\"\"");
             engine.Errors.ShouldBe(0);
         }
+
+#if !RUNTIME_TYPE_NETCORE
+        /// <summary>
+        /// Verifies that a ToolTask running under the command processor on Windows has autorun
+        /// disabled or enabled depending on an escape hatch.
+        /// </summary>
+        [Theory]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", "0", true)]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                testEnvironment.SetEnvironmentVariable(environmentVariableName, environmentVariableValue);
+
+                ToolTaskThatGetsCommandLine task = new ToolTaskThatGetsCommandLine
+                {
+                    UseCommandProcessor = true
+                };
+
+                task.Execute();
+
+                if (autoRunShouldBeDisabled)
+                {
+                    task.CommandLineCommands.ShouldContain("/D ");
+                }
+                else
+                {
+                    task.CommandLineCommands.ShouldNotContain("/D ");
+                }
+            }
+        }
+#endif
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> that allows tests to verify the command-line that was generated.
+        /// </summary>
+        internal sealed class ToolTaskThatGetsCommandLine : ToolTask
+        {
+            protected override string ToolName
+            {
+                get { return "cmd.exe"; }
+            }
+
+            protected override string GenerateFullPathToTool()
+            {
+                return null;
+            }
+
+            protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
+            {
+                PathToTool = pathToTool;
+                ResponseFileCommands = responseFileCommands;
+                CommandLineCommands = commandLineCommands;
+
+                return 0;
+            }
+            protected override void LogToolCommand(string message)
+            {
+            }
+
+            public string CommandLineCommands { get; private set; }
+
+            public string PathToTool { get; private set; }
+
+            public string ResponseFileCommands { get; private set; }
+        }
     }
 }
