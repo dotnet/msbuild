@@ -1,3 +1,4 @@
 @echo off
-powershell -ExecutionPolicy ByPass %~dp0build.ps1 -build -sign -pack -ci -prepareMachine %*
+REM -sign temporarily disabled
+powershell -ExecutionPolicy ByPass %~dp0build.ps1 -build -pack -ci -prepareMachine %*
 exit /b %ErrorLevel%
