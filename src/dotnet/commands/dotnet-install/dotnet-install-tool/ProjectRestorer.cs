@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
-                RuntimeEnvironment.GetRuntimeIdentifier(),
+                GetRuntimeIdentifierWithMacOsHighSierraFallback(),
                 $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToQuotedString()}"
             });
 
@@ -55,6 +55,18 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                         LocalizableStrings.FailedToRestorePackage,
                         result.StartInfo.WorkingDirectory, result.StartInfo.Arguments, result.StdErr, result.StdOut));
             }
+        }
+
+        // walk around for https://github.com/dotnet/corefx/issues/26488
+        // fallback osx.10.13 to osx
+        private static string GetRuntimeIdentifierWithMacOsHighSierraFallback()
+        {
+            if (RuntimeEnvironment.GetRuntimeIdentifier() == "osx.10.13-x64")
+            {
+                return "osx-x64";
+            }
+
+            return RuntimeEnvironment.GetRuntimeIdentifier();
         }
     }
 }
