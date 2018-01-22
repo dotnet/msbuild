@@ -8,6 +8,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-bash $ScriptRoot/build.sh -fromScript $0 -build -skipTests -ci $*
+bash $ScriptRoot/build.sh -fromScript $0 -build -ci $*
 
 exit $?
