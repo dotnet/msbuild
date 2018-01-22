@@ -1546,7 +1546,8 @@ namespace Microsoft.Build.Utilities
                         }
 
                         // /D: Do not load AutoRun configuration from the registry (perf)
-                        commandLineCommands = "/D /C \"" + batchFileForCommandLine + "\"";
+                        commandLineCommands = $"{(Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd ? String.Empty : "/D ")}/C \"{batchFileForCommandLine}\"";
+
                         if (EchoOff)
                         {
                             commandLineCommands = "/Q " + commandLineCommands;
