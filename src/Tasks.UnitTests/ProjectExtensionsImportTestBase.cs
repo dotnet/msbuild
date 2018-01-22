@@ -67,6 +67,8 @@ namespace Microsoft.Build.UnitTests
         /// Ensures that even if the MSBuildProjectExtensionsPath exists, the extensions are not imported if the functionality is disabled via the <see cref="PropertyNameToEnableImport"/>.
         /// </summary>
         [Fact]
+        // https://github.com/Microsoft/msbuild/issues/2884
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DoesNotImportProjectWhenDisabled()
         {
             // ---------------------

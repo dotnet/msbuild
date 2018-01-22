@@ -486,6 +486,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// of means of item creation. 
         /// </summary>
         [Fact]
+        // https://github.com/Microsoft/msbuild/issues/2884
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void TestDefiningProjectMetadata()
         {
             string projectA = Path.Combine(ObjectModelHelpers.TempProjectDir, "a.proj");
