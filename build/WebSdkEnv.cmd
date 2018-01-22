@@ -17,7 +17,7 @@ if not defined FeedTasksPackage (
 )
 
 if not defined FeedTasksPackageVersion (
-    set FeedTasksPackageVersion=1.0.0-prerelease-02203-01
+    set FeedTasksPackageVersion=2.1.0-prerelease-02419-02
 )
 
 set "WebSdkRoot=%~dp0"
