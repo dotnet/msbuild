@@ -199,12 +199,12 @@
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
         <source>Display the installed SDKs.</source>
-        <target state="new">Display the installed SDKs.</target>
+        <target state="translated">설치된 SDK를 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListRuntimesCommandDefinition">
         <source>Display the installed runtimes.</source>
-        <target state="new">Display the installed runtimes.</target>
+        <target state="translated">설치된 런타임을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">

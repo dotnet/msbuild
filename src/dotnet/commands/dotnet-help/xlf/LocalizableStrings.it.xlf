@@ -199,12 +199,12 @@
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
         <source>Display the installed SDKs.</source>
-        <target state="new">Display the installed SDKs.</target>
+        <target state="translated">Visualizza gli SDK installati.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListRuntimesCommandDefinition">
         <source>Display the installed runtimes.</source>
-        <target state="new">Display the installed runtimes.</target>
+        <target state="translated">Visualizza i runtime installati.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">

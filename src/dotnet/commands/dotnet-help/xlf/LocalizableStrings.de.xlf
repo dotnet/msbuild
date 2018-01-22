@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="translated">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Laufzeit).</target>
+        <target state="translated">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Runtime).</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
@@ -199,12 +199,12 @@
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
         <source>Display the installed SDKs.</source>
-        <target state="new">Display the installed SDKs.</target>
+        <target state="translated">Die installierten SDKs anzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListRuntimesCommandDefinition">
         <source>Display the installed runtimes.</source>
-        <target state="new">Display the installed runtimes.</target>
+        <target state="translated">Die installierten Runtimes anzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
@@ -249,7 +249,7 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="translated">Speichert die angegebenen Assemblys im Laufzeitspeicher.</target>
+        <target state="translated">Speichert die angegebenen Assemblys im Runtimespeicher.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallDefinition">

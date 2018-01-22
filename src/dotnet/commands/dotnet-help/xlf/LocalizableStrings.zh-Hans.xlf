@@ -199,12 +199,12 @@
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
         <source>Display the installed SDKs.</source>
-        <target state="new">Display the installed SDKs.</target>
+        <target state="translated">显示安装的 SDK。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListRuntimesCommandDefinition">
         <source>Display the installed runtimes.</source>
-        <target state="new">Display the installed runtimes.</target>
+        <target state="translated">显示安装的运行时。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">

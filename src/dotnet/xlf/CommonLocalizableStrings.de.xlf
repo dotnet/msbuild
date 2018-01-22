@@ -646,7 +646,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="translated">Veröffentlichen Sie das Projekt für eine angegebene Laufzeit. Wird zum Erstellen einer eigenständigen Bereitstellung verwendet. Standardmäßig wird eine frameworkabhängige App veröffentlicht.</target>
+        <target state="translated">Veröffentlichen Sie das Projekt für eine angegebene Runtime. Wird zum Erstellen einer eigenständigen Bereitstellung verwendet. Standardmäßig wird eine frameworkabhängige App veröffentlicht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">

@@ -216,7 +216,7 @@
       </trans-unit>
       <trans-unit id="IgnoringPreferCLIRuntimeFile">
         <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
-        <target state="translated">{0}: Die Datei "prefercliruntime" wird ignoriert, da das Tool-Ziellaufwerk ({1}) eine andere Hauptversion aufweist als die aktuelle CLI-Laufzeit ({2}).</target>
+        <target state="translated">{0}: Die Datei "prefercliruntime" wird ignoriert, da das Tool-Ziellaufwerk ({1}) eine andere Hauptversion aufweist als die aktuelle CLI-Runtime ({2}).</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindToolRuntimeConfigFile">
