@@ -49,12 +49,13 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             }
 
             var cliFolderPathCalculator = new CliFolderPathCalculator();
-            var executablePackagePath = new DirectoryPath(cliFolderPathCalculator.ExecutablePackagesPath);
             var offlineFeedPath = new DirectoryPath(cliFolderPathCalculator.CliFallbackFolderPath);
 
-            var toolConfigurationAndExecutablePath = ObtainPackage(executablePackagePath, offlineFeedPath);
+            var toolConfigurationAndExecutablePath = ObtainPackage(
+                executablePackagePath: new DirectoryPath(cliFolderPathCalculator.ToolsPackagePath),
+                offlineFeedPath: offlineFeedPath);
 
-            var shellShimMaker = new ShellShimMaker(executablePackagePath.Value);
+            var shellShimMaker = new ShellShimMaker(cliFolderPathCalculator.ToolsShimPath);
             var commandName = toolConfigurationAndExecutablePath.Configuration.CommandName;
             shellShimMaker.EnsureCommandNameUniqueness(commandName);
 
