@@ -796,7 +796,6 @@ namespace Microsoft.Build.UnitTests
             engine.Errors.ShouldBe(0);
         }
 
-#if !RUNTIME_TYPE_NETCORE
         /// <summary>
         /// Verifies that a ToolTask running under the command processor on Windows has autorun
         /// disabled or enabled depending on an escape hatch.
@@ -805,6 +804,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
         [InlineData("MSBUILDUSERAUTORUNINCMD", "0", true)]
         [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "nonlinuxtests")]
         public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -828,7 +829,6 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
-#endif
 
         /// <summary>
         /// A simple implementation of <see cref="ToolTask"/> that allows tests to verify the command-line that was generated.

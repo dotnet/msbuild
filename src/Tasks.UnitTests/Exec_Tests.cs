@@ -438,6 +438,8 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
         [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "nonlinuxtests")]
         public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
