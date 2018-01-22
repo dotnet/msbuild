@@ -446,7 +446,8 @@ namespace Microsoft.Build.UnitTests
 
                 Exec exec = PrepareExec("exit 0");
 
-                TypeInfo execType = typeof(Exec).GetTypeInfo();
+                Type execType = typeof(Exec);
+
                 MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
 
                 string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
