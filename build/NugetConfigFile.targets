@@ -1,10 +1,11 @@
 <Project ToolsVersion="15.0">
-  <Target Name="WriteNugetConfigFile">
+  <Target Name="WriteNugetConfigFile"
+          Condition=" !Exists('$(GeneratedNuGetConfig)') ">
 
-      <ItemGroup>
-        <NugetConfigPrivateFeeds Include="$(ExternalRestoreSources.Split(';'))" />
-      </ItemGroup>
-    
+    <ItemGroup>
+      <NugetConfigPrivateFeeds Include="$(ExternalRestoreSources.Split(';'))" />
+    </ItemGroup>
+
     <PropertyGroup>
       <NugetConfigHeader>
         <![CDATA[
@@ -40,13 +41,13 @@
 </configuration>
         ]]>
       </NugetConfigSuffix>
-    
-  </PropertyGroup>
+
+    </PropertyGroup>
 
     <WriteLinesToFile File="$(GeneratedNuGetConfig)"
                       Lines="$(NugetConfigHeader)"
                       Overwrite="true" />
-    
+
     <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != '' and '$(DotNetBuildOffline)' != 'true'"
                       File="$(GeneratedNuGetConfig)"
                       Lines="&lt;add key=&quot;PrivateBlobFeed&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
