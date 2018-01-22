@@ -235,6 +235,19 @@ function ErrorHostType {
 }
 
 function Build {
+  if $prepareMachine
+  then
+    CreateDirectory "$NuGetPackageRoot"
+    dotnet nuget locals all --clear
+    LASTEXITCODE=$?
+
+    if [ $LASTEXITCODE != 0 ]
+    then
+      echo "Failed to clear NuGet cache"
+      exit $LASTEXITCODE
+    fi
+  fi
+
   InstallDotNetCli
 
   if [ "$hostType" = "core" ]
@@ -246,19 +259,6 @@ function Build {
   fi
 
   InstallRepoToolset
-
-  if $prepareMachine
-  then
-    CreateDirectory "$NuGetPackageRoot"
-    dotnet nuget locals all --clear
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to clear NuGet cache"
-      return $LASTEXITCODE
-    fi
-  fi
 
   local logCmd=$(GetLogCmd Build)
 

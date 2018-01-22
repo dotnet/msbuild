@@ -156,6 +156,15 @@ function LocateVisualStudio {
 }
 
 function Build {
+  if ($prepareMachine) {
+    Create-Directory $NuGetPackageRoot
+    dotnet nuget locals all --clear
+
+    if($LASTEXITCODE -ne 0) {
+      throw "Failed to clear NuGet cache"
+    }
+  }
+
   InstallDotNetCli
   InstallNuget
 
@@ -174,15 +183,6 @@ function Build {
   }
 
   $RepoToolsetBuildProj = InstallRepoToolset
-
-  if ($prepareMachine) {
-    Create-Directory $NuGetPackageRoot
-    dotnet nuget locals all --clear
-
-    if($LASTEXITCODE -ne 0) {
-      throw "Failed to clear NuGet cache"
-    }
-  }
 
   $solution = Join-Path $RepoRoot "MSBuild.sln"
 
