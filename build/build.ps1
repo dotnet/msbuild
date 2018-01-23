@@ -88,7 +88,7 @@ function InstallDotNetCli {
 
   if (!(Test-Path $SdkInstallDir)) {
     # Use Invoke-Expression so that $DotNetInstallVerbosity is not positionally bound when empty
-    Invoke-Expression -Command "$DotNetInstallScript -Version $DotNetCliVersion $DotNetInstallVerbosity"
+    Invoke-Expression -Command "& '$DotNetInstallScript' -Version $DotNetCliVersion $DotNetInstallVerbosity"
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to install stage0"
