@@ -1,0 +1,23 @@
+﻿{
+  "dependencies": {
+    "NuGet.Commands": "4.6.0-rtm-4822",
+    "NuGet.Protocol": "4.6.0-rtm-4822",
+    "Shouldly": "3.0.0-beta0003",
+    "xunit": "2.1.0"
+  },
+  "frameworks": {
+    "net46": {
+      "dependencies": {
+       "System.Runtime.InteropServices.RuntimeInformation": "4.3.0"
+      }
+    },
+    "netstandard1.5": {
+      "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "System.Collections.NonGeneric": "4.0.1",
+        "System.Xml.XmlDocument": "4.0.1"
+      },
+      "imports": [ "portable-net451+win81" ]
+    }
+  }
+}
