@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -87,7 +88,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that if an SDK resolver throws while creating an instance that a warning is logged.
         /// </summary>
         [Fact]
-        public void VerifyWarningLoggedWhenResolverFailsToLoad()
+        public void VerifyThrowsWhenResolverFailsToLoad()
         {
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
@@ -99,12 +100,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 GetResolverTypesFunc = assembly => new[] { typeof(MockSdkResolverThatDoesNotLoad) }
             };
 
-            sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
-
-            _logger.Warnings.Select(i => i.Message).ShouldBe(new []
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                $"The SDK resolver type \"{nameof(MockSdkResolverThatDoesNotLoad)}\" failed to load. A8BB8B3131D3475D881ACD3AF8D75BD6"
+                sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
             });
+
+            exception.Message.ShouldBe($"The SDK resolver type \"{nameof(MockSdkResolverThatDoesNotLoad)}\" failed to load. A8BB8B3131D3475D881ACD3AF8D75BD6");
+
+            Exception innerException = exception.InnerException.ShouldBeOfType<Exception>();
+
+            innerException.Message.ShouldBe(MockSdkResolverThatDoesNotLoad.ExpectedMessage);
+
+            _logger.WarningCount.ShouldBe(0);
             _logger.ErrorCount.ShouldBe(0);
         }
 
@@ -113,7 +120,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// is logged with the appropriate message.
         /// </summary>
         [Fact]
-        public void VerifyWarningLoggedResolverHasNoPublicConstructor()
+        public void VerifyThrowsWhenResolverHasNoPublicConstructor()
         {
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
@@ -125,12 +132,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 GetResolverTypesFunc = assembly => new[] { typeof(MockSdkResolverNoPublicConstructor) }
             };
 
-            sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
-
-            _logger.Warnings.Select(i => i.Message).ShouldBe(new[]
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                $"The SDK resolver type \"{nameof(MockSdkResolverNoPublicConstructor)}\" failed to load. No parameterless constructor defined for this object."
+                sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
             });
+
+            exception.Message.ShouldBe($"The SDK resolver type \"{nameof(MockSdkResolverNoPublicConstructor)}\" failed to load. No parameterless constructor defined for this object.");
+
+            exception.InnerException.ShouldBeOfType<MissingMethodException>();
+
+            _logger.WarningCount.ShouldBe(0);
             _logger.ErrorCount.ShouldBe(0);
         }
 
@@ -155,14 +166,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
             };
 
-            IList<SdkResolverBase> resolvers = sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
-
-            resolvers.Count.ShouldBe(1);
-
-            _logger.Warnings.Select(i => i.Message).ShouldBe(new[]
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                $"The SDK resolver assembly \"{assemblyPath}\" could not be loaded. {expectedMessage}"
+                sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
             });
+
+            exception.Message.ShouldBe($"The SDK resolver assembly \"{assemblyPath}\" could not be loaded. {expectedMessage}");
+
+            Exception innerException = exception.InnerException.ShouldBeOfType<Exception>();
+
+            innerException.Message.ShouldBe(expectedMessage);
+
+            _logger.WarningCount.ShouldBe(0);
             _logger.ErrorCount.ShouldBe(0);
         }
 

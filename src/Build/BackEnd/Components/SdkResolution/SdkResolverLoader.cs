@@ -85,7 +85,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
             catch (Exception e)
             {
-                loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolverAssembly", resolverPath, e.Message);
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e, "CouldNotLoadSdkResolverAssembly", resolverPath, e.Message);
 
                 return;
             }
@@ -102,11 +102,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     // Attempt to get the inner exception in this case, but fall back to the top exception message
                     string message = e.InnerException?.Message ?? e.Message;
 
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", type.Name, message);
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e.InnerException ?? e, "CouldNotLoadSdkResolver", type.Name, message);
                 }
                 catch (Exception e)
                 {
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", type.Name, e.Message);
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e, "CouldNotLoadSdkResolver", type.Name, e.Message);
                 }
             }
         }
