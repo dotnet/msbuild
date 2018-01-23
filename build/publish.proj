@@ -60,7 +60,12 @@
     <PushToBlobFeed AccountKey="$(BlobFeedAccessToken)"
                 ExpectedFeedUrl="$(ExpectedFeedUrl)"
                 ItemsToPush="@(SignedPackages)"
-                Overwrite="false" />
+                Overwrite="false"
+                ManifestBranch="$(ManifestBranch)"
+                ManifestBuildId="$(ManifestBuildId)"
+                ManifestCommit="$(ManifestCommit)"
+                ManifestName="websdk"
+                SkipCreateManifest="false" />
   </Target>
 
   </Project>
