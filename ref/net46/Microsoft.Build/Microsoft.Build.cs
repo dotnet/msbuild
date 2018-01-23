@@ -987,8 +987,10 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) { }
         public BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags) { }
         public BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags, System.Collections.Generic.IEnumerable<string> propertiesToTransfer) { }
+        public BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags, System.Collections.Generic.IEnumerable<string> propertiesToTransfer, Microsoft.Build.Execution.RequestedProjectState requestedProjectState) { }
         public BuildRequestData(string projectFullPath, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) { }
         public BuildRequestData(string projectFullPath, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags) { }
+        public BuildRequestData(string projectFullPath, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags, Microsoft.Build.Execution.RequestedProjectState requestedProjectState) { }
         public string ExplicitlySpecifiedToolsVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Execution.BuildRequestDataFlags Flags { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectPropertyInstance> GlobalProperties { get { throw null; } }
@@ -996,6 +998,7 @@ namespace Microsoft.Build.Execution
         public string ProjectFullPath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Execution.ProjectInstance ProjectInstance { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public System.Collections.Generic.IEnumerable<string> PropertiesToTransfer { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Execution.RequestedProjectState RequestedProjectState { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public System.Collections.Generic.ICollection<string> TargetNames { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     [System.FlagsAttribute]
@@ -1005,6 +1008,7 @@ namespace Microsoft.Build.Execution
         IgnoreExistingProjectState = 4,
         None = 0,
         ProvideProjectStateAfterBuild = 2,
+        ProvideSubsetOfStateAfterBuild = 32,
         ReplaceExistingProjectInstance = 1,
         SkipNonexistentTargets = 16,
     }
@@ -1121,6 +1125,7 @@ namespace Microsoft.Build.Execution
         public Microsoft.Build.Execution.ProjectInstance DeepCopy(bool isImmutable) { throw null; }
         public bool EvaluateCondition(string condition) { throw null; }
         public string ExpandString(string unexpandedValue) { throw null; }
+        public Microsoft.Build.Execution.ProjectInstance FilteredCopy(Microsoft.Build.Execution.RequestedProjectState filter) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Execution.ProjectItemDefinitionInstance item) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Execution.ProjectItemInstance item) { throw null; }
         public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectItemInstance> GetItems(string itemType) { throw null; }
@@ -1359,6 +1364,12 @@ namespace Microsoft.Build.Execution
         public Microsoft.Build.Construction.ElementLocation PropertyNameLocation { get { throw null; } }
         public string TaskParameter { get { throw null; } }
         public override Microsoft.Build.Construction.ElementLocation TaskParameterLocation { get { throw null; } }
+    }
+    public partial class RequestedProjectState
+    {
+        public RequestedProjectState() { }
+        public System.Collections.Generic.IDictionary<string, System.Collections.Generic.List<string>> ItemFilters { get { throw null; } set { } }
+        public System.Collections.Generic.List<string> PropertyFilters { get { throw null; } set { } }
     }
     public partial class TargetResult : Microsoft.Build.Execution.ITargetResult
     {
