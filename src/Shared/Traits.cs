@@ -122,6 +122,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
 
+        /// <summary>
+        /// Enables the user of autorun functionality in CMD.exe on Windows which is disabled by default in MSBuild.
+        /// </summary>
+        public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
+
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
