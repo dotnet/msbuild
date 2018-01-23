@@ -89,6 +89,11 @@ namespace Microsoft.Build.BackEnd
         private BuildRequestDataFlags _buildRequestDataFlags;
 
         /// <summary>
+        /// Filter describing properties, items, and metadata of interest for this request.
+        /// </summary>
+        private RequestedProjectState _requestedProjectState;
+
+        /// <summary>
         /// If set, skip targets that are not defined in the projects to be built.
         /// </summary>
         private bool _skipNonexistentTargets;
@@ -111,6 +116,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="parentBuildEventContext">The build event context of the parent project.</param>
         /// <param name="parentRequest">The parent build request, if any.</param>
         /// <param name="buildRequestDataFlags">Additional flags for the request.</param>
+        /// <param name="requestedProjectState">Filter for desired build results.</param>
         public BuildRequest(
             int submissionId,
             int nodeRequestId,
@@ -119,7 +125,8 @@ namespace Microsoft.Build.BackEnd
             HostServices hostServices,
             BuildEventContext parentBuildEventContext,
             BuildRequest parentRequest,
-            BuildRequestDataFlags buildRequestDataFlags = BuildRequestDataFlags.None)
+            BuildRequestDataFlags buildRequestDataFlags = BuildRequestDataFlags.None,
+            RequestedProjectState requestedProjectState = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, "targets");
             ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, "parentBuildEventContext");
@@ -142,6 +149,7 @@ namespace Microsoft.Build.BackEnd
 
             _nodeRequestId = nodeRequestId;
             _buildRequestDataFlags = buildRequestDataFlags;
+            _requestedProjectState = requestedProjectState;
         }
 
         /// <summary>
@@ -282,6 +290,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Filter describing properties, items, and metadata of interest for this request.
+        /// </summary>
+        public RequestedProjectState RequestedProjectState
+        {
+            get { return _requestedProjectState; }
+            set { _requestedProjectState = value; }
+        }
+
+
+        /// <summary>
         /// The route for host-aware tasks back to the host
         /// </summary>
         internal HostServices HostServices
@@ -338,6 +356,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _buildEventContext);
             translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
             translator.Translate(ref _skipNonexistentTargets);
+            translator.Translate(ref _requestedProjectState);
 
             // UNDONE: (Compat) Serialize the host object.
         }

@@ -863,7 +863,8 @@ namespace Microsoft.Build.Execution
                     submission.BuildRequestData.HostServices,
                     BuildEventContext.Invalid,
                     null,
-                    submission.BuildRequestData.Flags);
+                    submission.BuildRequestData.Flags,
+                    submission.BuildRequestData.RequestedProjectState);
 
                 if (_shuttingDown)
                 {
