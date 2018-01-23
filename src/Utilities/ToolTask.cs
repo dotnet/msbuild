@@ -1545,7 +1545,9 @@ namespace Microsoft.Build.Utilities
                             batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
                         }
 
-                        commandLineCommands = "/C \"" + batchFileForCommandLine + "\"";
+                        // /D: Do not load AutoRun configuration from the registry (perf)
+                        commandLineCommands = $"{(Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd ? String.Empty : "/D ")}/C \"{batchFileForCommandLine}\"";
+
                         if (EchoOff)
                         {
                             commandLineCommands = "/Q " + commandLineCommands;
