@@ -42,13 +42,6 @@
             ]
         },
         {
-            "certificate": "VsixSHA2",
-            "strongName": null,
-            "values": [
-                "VSSetup/Insertion/Microsoft.Build.vsix"
-            ]
-          },
-        {
             "certificate": null,
             "strongName": null,
             "values": [
