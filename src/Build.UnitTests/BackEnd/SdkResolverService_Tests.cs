@@ -3,11 +3,9 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.UnitTests.BackEnd;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Shouldly;
 using Xunit;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
@@ -18,17 +16,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolverService_Tests
     {
-        private readonly StringBuilder _log;
-        private readonly MockLoggingContext _loggingContext;
+        private readonly MockLogger _logger;
+        private readonly LoggingContext _loggingContext;
 
         public SdkResolverService_Tests()
         {
-            _log = new StringBuilder();
+            _logger = new MockLogger();
+            ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            loggingService.RegisterLogger(_logger);
 
-            MockLoggingService logger = new MockLoggingService(message => _log.AppendLine(message));
-            BuildEventContext bec = new BuildEventContext(0, 0, 0, 0, 0);
-
-            _loggingContext = new MockLoggingContext(logger, bec);
+            _loggingContext = new MockLoggingContext(
+                loggingService,
+                new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
         }
 
         [Fact]
@@ -40,13 +39,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            string logResult = _log.ToString();
-            Assert.Null(result);
-            Assert.Contains("MockSdkResolver1 running", logResult);
-            Assert.Contains("MockSdkResolver2 running", logResult);
-            Assert.Contains("ERROR1", logResult);
-            Assert.Contains("ERROR2", logResult);
-            Assert.Contains("WARNING2", logResult);
+            result.ShouldBeNull();
+
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver2 running");
+            _logger.Errors.Select(i => i.Message).ShouldBe(new [] { "ERROR1", "ERROR2" });
+            _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING2" });
         }
 
         [Fact]
@@ -58,8 +56,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            Assert.Equal("resolverpath1", result);
-            Assert.Contains("EXMESSAGE", _log.ToString());
+            result.ShouldBe("resolverpath1");
+            _logger.Warnings.Select(i => i.Message).ShouldBe(new [] { "The SDK resolver \"MockSdkResolverThrows\" failed to run. EXMESSAGE" });
         }
 
         [Fact]
@@ -72,7 +70,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
             Assert.Equal("resolverpath1", result);
-            Assert.Contains("MockSdkResolver1 running", _log.ToString().Trim());
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
         }
 
         [Fact]
@@ -86,16 +84,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            string logResult = _log.ToString();
-            Assert.Equal("resolverpath2", result);
+            result.ShouldBe("resolverpath2");
 
             // Both resolvers should run, and no ERROR string.
-            Assert.Contains("MockSdkResolver1 running", logResult);
-            Assert.Contains("MockSdkResolver2 running", logResult);
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver2 running");
 
             // Resolver2 gives a warning on success or failure.
-            Assert.Contains("WARNING2", logResult);
-            Assert.DoesNotContain("ERROR", logResult);
+            _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING2" });
+            _logger.ErrorCount.ShouldBe(0);
         }
 
         [Fact]
