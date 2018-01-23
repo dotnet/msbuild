@@ -3858,6 +3858,12 @@ namespace Microsoft.Build.Evaluation
                 {
                     return null;
                 }
+                catch (OverflowException)
+                {
+                    // https://github.com/Microsoft/msbuild/issues/2882
+                    // test: PropertyFunctionMathMaxOverflow
+                    return null;
+                }
 
                 return coercedArguments;
             }

@@ -3597,6 +3597,13 @@ $(
             TestPropertyFunction("$(prop.TrimEnd('a'))", "prop", "netaa", "net");
         }
 
+        // https://github.com/Microsoft/msbuild/issues/2882
+        [Fact]
+        public void PropertyFunctionMathMaxOverflow()
+        {
+            TestPropertyFunction("$([System.Math]::Max($(X), 0))", "X", "-2010", "0");
+        }
+
         [Fact]
         public void PropertyFunctionStringTrimEnd2()
         {
