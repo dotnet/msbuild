@@ -48,7 +48,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attributes on import element
         /// </summary>
-        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project, XMakeAttributes.sdk };
+        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project, XMakeAttributes.sdk, XMakeAttributes.sdkVersion, XMakeAttributes.sdkMinimumVersion };
 
         /// <summary>
         /// Valid attributes on usingtask element

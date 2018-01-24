@@ -422,12 +422,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        /// <summary>
-        /// Logs a project evaluation started event
-        /// </summary>
-        public BuildEventContext LogProjectEvaluationStarted(int nodeId, int submissionId, string projectFile)
+
+        /// <inheritdoc />
+        public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
         {
             return new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+        }
+
+        /// <inheritdoc />
+        public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile)
+        {
         }
 
         /// <summary>
