@@ -54,7 +54,8 @@ namespace Microsoft.NET.Build.Tasks
             bool IsAnalyzer()
             {
                 return file.StartsWith("analyzers", StringComparison.Ordinal)
-                    && file.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
+                    && file.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+                    && !file.EndsWith(".resources.dll", StringComparison.OrdinalIgnoreCase);
             }
 
             bool CS() => file.IndexOf("/cs/", StringComparison.OrdinalIgnoreCase) >= 0;
