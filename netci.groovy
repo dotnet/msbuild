@@ -13,7 +13,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
                        'Ubuntu16.04':'20170731']
 
 [true, false].each { isPR ->
-    ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
+    ['Windows_NT', 'OSX10.13', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
         def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
