@@ -193,6 +193,13 @@ function Build {
     # the C++ tools aren't installed, and we don't want this to fail the build
     $commonMSBuildArgs = $commonMSBuildArgs + "/warnaserror" 
   }
+
+  if ($hostType -ne 'full')
+  {
+    # Make signing a no-op if building not using full Framework MSBuild (as all of the assets that are signed won't be produced)
+    $emptySignToolDataPath = [io.path]::combine($RepoRoot, 'build', 'EmptySignToolData.json')
+    $commonMSBuildArgs = $commonMSBuildArgs + "/p:SignToolDataPath=`"$emptySignToolDataPath`""
+  }
   
   # Only test using stage 0 MSBuild if -bootstrapOnly is specified
   $testStage0 = $false

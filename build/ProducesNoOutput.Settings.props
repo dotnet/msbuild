@@ -9,5 +9,6 @@
     <NonShipping>true</NonShipping>
     <NoStdLib>true</NoStdLib>
     <LanguageTargets>$(MSBuildThisFileDirectory)ProducesNoOutput.Imports.props</LanguageTargets>
+    <ProducesNoOutput>true</ProducesNoOutput>
   </PropertyGroup>
 </Project>

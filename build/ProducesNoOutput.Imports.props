@@ -2,7 +2,7 @@
   <PropertyGroup>
     <MSBuildTargetsFilePath>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildTargetsFilePath>
 
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <Import Project="$(MSBuildTargetsFilePath)" />
@@ -25,5 +25,8 @@
   <Target Name="RuntimeImplementationProjectOutputGroup" />   <!-- Group always attempts resolve runtime, regardless of <CopyNuGetImplementations>-->
   <Target Name="GetReferenceAssemblyPaths" />                 <!-- Don't go looking for framewoek reference assemblies-->
   <Target Name="GetFrameworkPaths"  />                        <!-- ^ -->
+
+  <Target Name="GetBuildVersion" />                           <!-- For Packages projects, which use GetNuGetPackageVersionEx which depends on GetBuildVersion -->
+  <Target Name="Pack" />
 
 </Project>
