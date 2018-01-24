@@ -185,8 +185,7 @@ namespace Microsoft.Build.UnitTests
          */
         public void Initialize(IEventSource eventSource)
         {
-            eventSource.AnyEventRaised +=
-                    new AnyEventHandler(LoggerEventHandler);
+            eventSource.AnyEventRaised += LoggerEventHandler;
         }
 
         /// <summary>
@@ -219,6 +218,8 @@ namespace Microsoft.Build.UnitTests
             _testOutputHelper = testOutputHelper;
         }
 
+        public List<Action<object, BuildEventArgs>> AdditionalHandlers { get; set; } = new List<Action<object, BuildEventArgs>>();
+
         /*
          * Method:  LoggerEventHandler
          *
@@ -228,6 +229,11 @@ namespace Microsoft.Build.UnitTests
         internal void LoggerEventHandler(object sender, BuildEventArgs eventArgs)
         {
             AllBuildEvents.Add(eventArgs);
+
+            foreach (var handler in AdditionalHandlers)
+            {
+                handler(sender, eventArgs);
+            }
 
             if (eventArgs is BuildWarningEventArgs)
             {

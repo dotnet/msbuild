@@ -6,11 +6,13 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Evaluation
@@ -38,7 +40,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             GC.Collect();
         }
 
-        private static void AssertLoggingEvents(Action<Project, MockLogger> loggingTest)
+        private static void AssertLoggingEvents(
+            Action<Project, MockLogger> loggingTest = null,
+            MockLogger firstEvaluationLogger = null,
+            Func<Project, MockLogger> reevaluationLoggerFactory = null)
         {
             var projectImportContents =
                 @"<Project>
@@ -76,18 +81,28 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 projectContents = string.Format(projectContents, importFile);
 
-
                 var projectFile = env.CreateFile().Path;
                 File.WriteAllText(projectFile, projectContents);
 
-                var logger = new MockLogger();
-                collection.RegisterLogger(logger);
+                firstEvaluationLogger = firstEvaluationLogger ?? new MockLogger();
+                collection.RegisterLogger(firstEvaluationLogger);
 
                 var project = new Project(projectFile, null, null, collection);
 
-                Assert.NotEmpty(logger.AllBuildEvents);
+                firstEvaluationLogger.AllBuildEvents.ShouldNotBeEmpty();
 
-                loggingTest.Invoke(project, logger);
+                if (reevaluationLoggerFactory != null)
+                {
+                    var reevaluationLogger = reevaluationLoggerFactory.Invoke(project);
+                    collection.RegisterLogger(reevaluationLogger);
+
+                    project.SetProperty("aProperty", "Value");
+                    project.ReevaluateIfNecessary();
+
+                    reevaluationLogger.AllBuildEvents.ShouldNotBeEmpty();
+                }
+
+                loggingTest?.Invoke(project, firstEvaluationLogger);
             }
         }
 
@@ -95,29 +110,67 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void AllEvaluationEventsShouldHaveAnEvaluationId()
         {
             AssertLoggingEvents(
-                (project, mockLogger) =>
+                (project, firstEvaluationLogger) =>
                 {
                     var evaluationId = project.LastEvaluationId;
+                    evaluationId.ShouldNotBe(BuildEventContext.InvalidEvaluationId);
 
-                    Assert.NotEqual(BuildEventContext.InvalidEvaluationId, evaluationId);
-
-                    foreach (var buildEvent in mockLogger.AllBuildEvents)
+                    foreach (var buildEvent in firstEvaluationLogger.AllBuildEvents)
                     {
-                        Assert.Equal(evaluationId, buildEvent.BuildEventContext.EvaluationId);
+                        buildEvent.BuildEventContext.EvaluationId.ShouldBe(evaluationId);
                     }
                 });
         }
 
         [Fact]
-        public void FirstAndLastEvaluationEventsShouldBeStartedAndEnded()
+        public void GivenOneProjectThereShouldBeOneStartedAndOneEndedEvent()
         {
             AssertLoggingEvents(
-                (project, mockLogger) =>
+                (project, firstEvaluationLogger) =>
                 {
-                    Assert.True(mockLogger.AllBuildEvents.Count >= 2);
+                    var allBuildEvents = firstEvaluationLogger.AllBuildEvents;
 
-                    Assert.StartsWith("Evaluation started", mockLogger.AllBuildEvents.First().Message);
-                    Assert.StartsWith("Evaluation finished", mockLogger.AllBuildEvents.Last().Message);
+                    allBuildEvents.Count.ShouldBeGreaterThan(2);
+
+                    for (var i = 0; i < allBuildEvents.Count; i++)
+                    {
+                        var buildEvent = allBuildEvents[i];
+
+                        if (i == 0)
+                        {
+                            buildEvent.Message.ShouldStartWith("Evaluation started");
+                        }
+                        else if (i == allBuildEvents.Count - 1)
+                        {
+                            buildEvent.Message.ShouldStartWith("Evaluation finished");
+                        }
+                        else
+                        {
+                            buildEvent.Message.ShouldNotStartWith("Evaluation started");
+                            buildEvent.Message.ShouldNotStartWith("Evaluation finished");
+                        }
+                    }
+                });
+        }
+
+        [Fact]
+        public void ProjectShouldHaveValidEvaluationIdDuringEvaluation()
+        {
+            AssertLoggingEvents(
+                null,
+                null,
+                project => new MockLogger
+                {
+                    AdditionalHandlers = new List<Action<object, BuildEventArgs>>
+                    {
+                        (sender, args) =>
+                        {
+                            var eventEvaluationId = args.BuildEventContext.EvaluationId;
+
+                            eventEvaluationId.ShouldNotBe(BuildEventContext.InvalidEvaluationId);
+                            project.LastEvaluationId.ShouldBe(eventEvaluationId);
+                        }
+                    }
                 });
         }
     }
