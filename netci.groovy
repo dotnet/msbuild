@@ -8,7 +8,7 @@ def branch = GithubBranchName
 
 // What this repo is using for its machine images at the current time
 def imageVersionMap = ['Windows_NT':'latest-dev15-5',
-                       'OSX':'OSX10.13',
+                       'OSX10.13':'latest',
                        'Ubuntu14.04':'latest-or-auto',
                        'Ubuntu16.04':'20170731']
 
