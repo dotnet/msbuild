@@ -888,7 +888,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   <!--
 ============================================================================================================================================
   <Import Project=""Sdk.props"" Sdk=""MSBuildUnitTestSdk"">
-  This import was added implicitly because of the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
+  This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
 
 {sdkPropsPath}
 ============================================================================================================================================
@@ -909,7 +909,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   <!--
 ============================================================================================================================================
   <Import Project=""Sdk.targets"" Sdk=""MSBuildUnitTestSdk"">
-  This import was added implicitly because of the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
+  This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
 
 {sdkTargetsPath}
 ============================================================================================================================================
@@ -928,6 +928,171 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 Helpers.VerifyAssertLineByLine(expected, writer.ToString());
             }
         }
+
+        [Fact]
+        public void ImportedProjectsSdkImportsAreInPreprocessedOutput()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                string sdk1 = env.CreateFolder().FolderPath;
+                string sdk2 = env.CreateFolder().FolderPath;
+
+                env.WithTransientTestState(new TransientSdkResolution(new Dictionary<string, string>
+                {
+                    {"MSBuildUnitTestSdk1", sdk1},
+                    {"MSBuildUnitTestSdk2", sdk2},
+                }));
+
+
+                string sdkPropsPath1 = Path.Combine(sdk1, "Sdk.props");
+                string sdkTargetsPath1 = Path.Combine(sdk1, "Sdk.targets");
+
+                File.WriteAllText(sdkPropsPath1, @"<Project>
+    <PropertyGroup>
+        <SdkProps1Imported>true</SdkProps1Imported>
+    </PropertyGroup>
+</Project>");
+                File.WriteAllText(sdkTargetsPath1, @"<Project>
+    <PropertyGroup>
+        <SdkTargets1Imported>true</SdkTargets1Imported>
+    </PropertyGroup>
+</Project>");
+
+                string sdkPropsPath2 = Path.Combine(sdk2, "Sdk.props");
+                string sdkTargetsPath2 = Path.Combine(sdk2, "Sdk.targets");
+
+                File.WriteAllText(sdkPropsPath2, @"<Project>
+    <PropertyGroup>
+        <SdkProps2Imported>true</SdkProps2Imported>
+    </PropertyGroup>
+</Project>");
+                File.WriteAllText(sdkTargetsPath2, @"<Project>
+    <PropertyGroup>
+        <SdkTargets2Imported>true</SdkTargets2Imported>
+    </PropertyGroup>
+</Project>");
+
+
+                TransientTestProjectWithFiles import = env.CreateTestProjectWithFiles(@"<Project Sdk='MSBuildUnitTestSdk2'>
+    <PropertyGroup>
+        <MyImportWasImported>true</MyImportWasImported>
+    </PropertyGroup>
+</Project>");
+                string importPath = Path.GetFullPath(import.ProjectFile);
+                string content = $@"<Project Sdk='MSBuildUnitTestSdk1'>
+  <Import Project='{importPath}' />
+  <PropertyGroup>
+    <p>v1</p>
+  </PropertyGroup>
+</Project>";
+
+                Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+
+                StringWriter writer = new StringWriter();
+
+                project.SaveLogicalProject(writer);
+
+                string expected = ObjectModelHelpers.CleanupFileContents(
+                    $@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project>
+  <!--
+============================================================================================================================================
+  <Import Project=""Sdk.props"" Sdk=""MSBuildUnitTestSdk1"">
+  This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk1"".
+
+{sdkPropsPath1}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <SdkProps1Imported>true</SdkProps1Imported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+
+
+============================================================================================================================================
+-->
+  <!--
+============================================================================================================================================
+  <Import Project=""{importPath}"">
+
+{importPath}
+============================================================================================================================================
+-->
+  <!--
+============================================================================================================================================
+  <Import Project=""Sdk.props"" Sdk=""MSBuildUnitTestSdk2"">
+  This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk2"".
+
+{sdkPropsPath2}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <SdkProps2Imported>true</SdkProps2Imported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+
+{importPath}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <MyImportWasImported>true</MyImportWasImported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  <Import Project=""Sdk.targets"" Sdk=""MSBuildUnitTestSdk2"">
+  This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk2"".
+
+{sdkTargetsPath2}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <SdkTargets2Imported>true</SdkTargets2Imported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+
+{importPath}
+============================================================================================================================================
+-->
+  <!--
+============================================================================================================================================
+  </Import>
+
+
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <p>v1</p>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  <Import Project=""Sdk.targets"" Sdk=""MSBuildUnitTestSdk1"">
+  This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk1"".
+
+{sdkTargetsPath1}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <SdkTargets1Imported>true</SdkTargets1Imported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+
+
+============================================================================================================================================
+-->
+</Project>");
+                Helpers.VerifyAssertLineByLine(expected, writer.ToString());
+            }
+        }
+
+
 
         /// <summary>
         /// Verifies that the Preprocessor works when the import graph contains unevaluated duplicates.  This can occur if two projects in 
