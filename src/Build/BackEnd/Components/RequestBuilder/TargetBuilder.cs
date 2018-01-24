@@ -196,10 +196,17 @@ namespace Microsoft.Build.BackEnd
                 resultsToReport.ProjectStateAfterBuild = _projectInstance;
             }
 
+            if (_requestEntry.Request.RequestedProjectState != null)
+            {
+                resultsToReport.ProjectStateAfterBuild =
+                    _projectInstance.FilteredCopy(_requestEntry.Request.RequestedProjectState);
+            }
+
             configuration.IsCacheable = previousCacheableStatus;
 
             return resultsToReport;
         }
+
 
         #region IBuildComponent Members
 
