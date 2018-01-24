@@ -3379,6 +3379,69 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
+                else if (objectInstance == null)
+                {
+                    if (_receiverType == typeof(Math))
+                    {
+                        if (string.Equals(_methodMethodName, "Max", StringComparison.OrdinalIgnoreCase))
+                        {
+                            double arg0, arg1;
+                            if (TryGetArgs(args, out arg0, out arg1))
+                            {
+                                returnVal = Math.Max(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, "Min", StringComparison.OrdinalIgnoreCase))
+                        {
+                            double arg0, arg1;
+                            if (TryGetArgs(args, out arg0, out arg1))
+                            {
+                                returnVal = Math.Min(arg0, arg1);
+                                return true;
+                            }
+                        }
+                    }
+                    else if (_receiverType == typeof(IntrinsicFunctions))
+                    {
+                        if (string.Equals(_methodMethodName, "Add", StringComparison.OrdinalIgnoreCase))
+                        {
+                            double arg0, arg1;
+                            if (TryGetArgs(args, out arg0, out arg1))
+                            {
+                                returnVal = arg0 + arg1;
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, "Subtract", StringComparison.OrdinalIgnoreCase))
+                        {
+                            double arg0, arg1;
+                            if (TryGetArgs(args, out arg0, out arg1))
+                            {
+                                returnVal = arg0 - arg1;
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, "Multiply", StringComparison.OrdinalIgnoreCase))
+                        {
+                            double arg0, arg1;
+                            if (TryGetArgs(args, out arg0, out arg1))
+                            {
+                                returnVal = arg0 * arg1;
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, "Divide", StringComparison.OrdinalIgnoreCase))
+                        {
+                            double arg0, arg1;
+                            if (TryGetArgs(args, out arg0, out arg1))
+                            {
+                                returnVal = arg0 / arg1;
+                                return true;
+                            }
+                        }
+                    }
+                }
 
                 returnVal = null;
                 return false;
@@ -3430,6 +3493,29 @@ namespace Microsoft.Build.Evaluation
                     value1 != null &&
                     int.TryParse(value0, out arg0) &&
                     int.TryParse(value1, out arg1))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryGetArgs(object[] args, out double arg0, out double arg1)
+            {
+                arg0 = 0;
+                arg1 = 0;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                var value0 = args[0] as string;
+                var value1 = args[1] as string;
+                if (value0 != null &&
+                    value1 != null &&
+                    double.TryParse(value0, out arg0) &&
+                    double.TryParse(value1, out arg1))
                 {
                     return true;
                 }
