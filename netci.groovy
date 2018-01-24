@@ -59,7 +59,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
                     }
 
                     break;
-                case 'OSX':
+                case 'OSX10.13':
                     newJob.with{
                         steps{
                             def buildCmd = "./build/cibuild.sh"
