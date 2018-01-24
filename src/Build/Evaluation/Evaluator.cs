@@ -803,6 +803,9 @@ namespace Microsoft.Build.Evaluation
 
                 _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
+
+                _evaluationLoggingContext.LogProjectEvaluationStarted();
+
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
 #if MSBUILDENABLEVSPROFILING
