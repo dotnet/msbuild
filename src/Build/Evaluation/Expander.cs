@@ -3347,6 +3347,30 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, "PadRight", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int totalWidth;
+                        string paddingChar;
+                        if (TryGetArg(args, out totalWidth))
+                        {
+                            returnVal = text.PadRight(totalWidth);
+                            return true;
+                        }
+                        else if (TryGetArgs(args, out totalWidth, out paddingChar) && paddingChar.Length == 1)
+                        {
+                            returnVal = text.PadRight(totalWidth, paddingChar[0]);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, "TrimStart", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string trimChars;
+                        if (TryGetArg(args, out trimChars) && trimChars.Length > 0)
+                        {
+                            returnVal = text.TrimStart(trimChars.ToCharArray());
+                            return true;
+                        }
+                    }
                     else if (string.Equals(_methodMethodName, "TrimEnd", StringComparison.OrdinalIgnoreCase))
                     {
                         string trimChars;

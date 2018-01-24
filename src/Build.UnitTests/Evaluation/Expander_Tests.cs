@@ -3586,9 +3586,33 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringPadRight1()
+        {
+            TestPropertyFunction("$(prop.PadRight(2))", "prop", "x", "x ");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringPadRight2()
+        {
+            TestPropertyFunction("$(prop.PadRight(2, '0'))", "prop", "x", "x0");
+        }
+
+        [Fact]
         public void PropertyFunctionStringTrimEndCharArray()
         {
             TestPropertyFunction("$(prop.TrimEnd('.0123456789'))", "prop", "net461", "net");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimStart()
+        {
+            TestPropertyFunction("$(X.TrimStart('vV'))", "X", "v40", "40");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimStartNoQuotes()
+        {
+            TestPropertyFunction("$(X.TrimStart(vV))", "X", "v40", "40");
         }
 
         [Fact]
