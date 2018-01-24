@@ -13,7 +13,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ShellShim
 {
-    public class ShellShimMaker
+    public class ShellShimMaker : IShellShimMaker
     {
         private const string LauncherExeResourceName = "Microsoft.DotNet.Tools.Launcher.Executable";
         private const string LauncherConfigResourceName = "Microsoft.DotNet.Tools.Launcher.Config";
