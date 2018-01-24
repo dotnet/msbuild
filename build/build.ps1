@@ -156,16 +156,18 @@ function LocateVisualStudio {
 }
 
 function Build {
+  InstallDotNetCli
+  $env:DOTNET_HOST_PATH = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
+
   if ($prepareMachine) {
     Create-Directory $NuGetPackageRoot
-    dotnet nuget locals all --clear
+    "$env:DOTNET_HOST_PATH nuget locals all --clear"
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to clear NuGet cache"
     }
   }
 
-  InstallDotNetCli
   InstallNuget
 
   if ($hostType -eq 'full')
@@ -174,8 +176,7 @@ function Build {
   }
   elseif ($hostType -eq 'core')
   {
-    $msbuildHost = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
-    $env:DOTNET_HOST_PATH = $msbuildHost
+    $msbuildHost = $env:DOTNET_HOST_PATH
   }
   else
   {

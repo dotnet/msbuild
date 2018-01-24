@@ -142,9 +142,9 @@ function CallMSBuild {
 
   if [ -z "$msbuildHost" ]
   then
-    commandLine="$(QQ $msbuildToUse) $*"
+    commandLine="$msbuildToUse $*"
   else
-    commandLine="$(QQ $msbuildHost) $(QQ $msbuildToUse) $*"
+    commandLine="$msbuildHost $msbuildToUse $*"
   fi
 
   echo ============= MSBuild command ============= 
@@ -235,10 +235,15 @@ function ErrorHostType {
 }
 
 function Build {
+  InstallDotNetCli
+  
+  # don't double quote this otherwise the csc tooltask will fail with double double-quotting
+  export DOTNET_HOST_PATH="$DOTNET_INSTALL_DIR/dotnet"
+
   if $prepareMachine
   then
     CreateDirectory "$NuGetPackageRoot"
-    dotnet nuget locals all --clear
+    eval "$(QQ $DOTNET_HOST_PATH) nuget locals all --clear"
     LASTEXITCODE=$?
 
     if [ $LASTEXITCODE != 0 ]
@@ -248,12 +253,9 @@ function Build {
     fi
   fi
 
-  InstallDotNetCli
-
   if [ "$hostType" = "core" ]
   then
-    msbuildHost="$DOTNET_INSTALL_DIR/dotnet"
-    export DOTNET_HOST_PATH=$msbuildHost
+    msbuildHost=$(QQ $DOTNET_HOST_PATH)
   else
     ErrorHostType
   fi
@@ -287,7 +289,7 @@ function Build {
 
     if [ $hostType = "core" ]
     then
-      msbuildToUse="$bootstrapRoot/netcoreapp2.0/MSBuild/MSBuild.dll"
+      msbuildToUse=$(QQ "$bootstrapRoot/netcoreapp2.0/MSBuild/MSBuild.dll")
     else
       ErrorHostType
     fi
