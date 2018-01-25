@@ -204,7 +204,6 @@ namespace Microsoft.TemplateEngine.Cli
             string content = string.Format(projectFile, references.ToString());
             _paths.WriteAllText(proj, content);
 
-            _paths.CreateDirectory(_paths.User.Packages);
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
 
             int additionalSlots = nuGetSources?.Count * 2 ?? 0;
@@ -224,17 +223,19 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             Dotnet.Restore(restoreArgs).ForwardStdOut().ForwardStdErr().Execute();
+            string stagingDir = Path.Combine(_paths.User.ScratchDir, "Staging");
+            _paths.CreateDirectory(stagingDir);
 
             List<string> newLocalPackages = new List<string>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))
             {
-                string path = Path.Combine(_paths.User.Packages, Path.GetFileName(packagePath));
-                _paths.Copy(packagePath, path);
-                newLocalPackages.Add(path);
+                string stagingPathForPackage = Path.Combine(stagingDir, Path.GetFileName(packagePath));
+                _paths.Copy(packagePath, stagingPathForPackage);
+                newLocalPackages.Add(stagingPathForPackage);
             }
 
-            _paths.DeleteDirectory(_paths.User.ScratchDir);
             InstallLocalPackages(newLocalPackages, false);
+            _paths.DeleteDirectory(_paths.User.ScratchDir);
         }
 
         private void InstallLocalPackages(IReadOnlyList<string> packageNames, bool debugAllowDevInstall)
