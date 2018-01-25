@@ -310,10 +310,15 @@ function Build {
   fi
 }
 
+function KillProcessWithName {
+  echo "Killing processes containing \"$1\""
+  kill $(ps ax | grep -i "$1" | awk '{ print $1 }')
+}
+
 function StopProcesses {
   echo "Killing running build processes..."
-  pkill -9 -il "dotnet"
-  pkill -9 -il "vbcscompiler"
+  KillProcessWithName "dotnet"
+  KillProcessWithName "vbcscompiler"
 }
 
 SOURCE="${BASH_SOURCE[0]}"
