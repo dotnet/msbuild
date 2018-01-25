@@ -40,12 +40,16 @@
     <NoWarn>$(NoWarn);NU1603;1701;1702</NoWarn>
   </PropertyGroup>
 
-  <!--
-    $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
-    Possible Values: Windows_NT / Unix / OSX
-  -->
   <PropertyGroup>
-    <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('windows'))">windows</OsEnvironment>
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('linux'))">linux</OsEnvironment>
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('osx'))">osx</OsEnvironment>
+    <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">bsd</OsEnvironment>
+
+    <OsUnixLike>false</OsUnixLike>
+    <OsUnixLike Condition="$([MSBuild]::IsOsUnixLike())">true</OsUnixLike>
+
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
   </PropertyGroup>
 

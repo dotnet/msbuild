@@ -20,7 +20,7 @@
 
   <PropertyGroup>
     <ReferenceAssemblyTargetFrameworks>netstandard2.0</ReferenceAssemblyTargetFrameworks>
-    <ReferenceAssemblyTargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</ReferenceAssemblyTargetFrameworks>
+    <ReferenceAssemblyTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netstandard2.0</ReferenceAssemblyTargetFrameworks>
   </PropertyGroup>
 
 </Project>

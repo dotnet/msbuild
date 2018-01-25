@@ -22,12 +22,12 @@
     
     <!-- Defaults for target frameworks and architecture -->
     <LibraryTargetFrameworks>netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netstandard2.0</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
     <RuntimeOutputTargetFrameworks>netcoreapp2.0</RuntimeOutputTargetFrameworks>
-    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp2.0</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netcoreapp2.0</RuntimeOutputTargetFrameworks>
 
     <!-- Don't automatically append target framework to output path, since we want to put the Platform Target beforehand, if it's not AnyCPU -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

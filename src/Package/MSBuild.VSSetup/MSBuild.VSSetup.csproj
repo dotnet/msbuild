@@ -2,7 +2,7 @@
    <!-- AssemblyName must be set before importing Sdk.props to set the vsix file name. -->
    <PropertyGroup>
        <AssemblyName>Microsoft.Build</AssemblyName>
-       <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(OsEnvironment)' != 'Windows_NT'">true</ShouldSkipProject>
+       <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(OsEnvironment)' != 'windows'">true</ShouldSkipProject>
    </PropertyGroup>
 
    <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
