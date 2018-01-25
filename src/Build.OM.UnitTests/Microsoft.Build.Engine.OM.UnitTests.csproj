@@ -45,6 +45,9 @@
     <Compile Include="..\Shared\Traits.cs">
       <Link>SharedTraits.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
+      <Link>EngineTestEnvironment.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>

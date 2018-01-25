@@ -68,6 +68,9 @@
     <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
+      <Link>EngineTestEnvironment.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
