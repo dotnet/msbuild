@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 new DirectoryPath("no such path"),
                 GetUniqueTempProjectPathEachTest,
                 new Lazy<string>(),
-                new PackageToProjectFileAdder(),
                 new ProjectRestorer());
 
             Action a = () => packageObtainer.ObtainAndReturnExecutablePath(
@@ -51,7 +50,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     offlineFeedPath: new DirectoryPath(GetTestLocalFeedPath()),
                     getTempProjectPath: GetUniqueTempProjectPathEachTest,
                     bundledTargetFrameworkMoniker: new Lazy<string>(),
-                    packageToProjectFileAdder: new PackageToProjectFileAdder(),
                     projectRestorer: new ProjectRestorer());
 
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
@@ -173,7 +171,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new DirectoryPath("no such path"),
                     () => uniqueTempProjectPath,
                     new Lazy<string>(),
-                    new PackageToProjectFileAdder(),
                     new ProjectRestorer());
             }
 
@@ -278,7 +275,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new DirectoryPath("no such path"),
                     GetUniqueTempProjectPathEachTest,
                     new Lazy<string>(() => BundledTargetFramework.GetTargetFrameworkMoniker()),
-                    new PackageToProjectFileAdder(),
                     new ProjectRestorer());
             }
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
@@ -413,7 +409,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 new DirectoryPath("no such path"),
                 GetUniqueTempProjectPathEachTest,
                 new Lazy<string>(),
-                new PackageToProjectFileAdder(),
                 new ProjectRestorer());
         }
 

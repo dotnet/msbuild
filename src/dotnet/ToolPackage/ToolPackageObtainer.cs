@@ -14,7 +14,6 @@ namespace Microsoft.DotNet.ToolPackage
     {
         private readonly Lazy<string> _bundledTargetFrameworkMoniker;
         private readonly Func<FilePath> _getTempProjectPath;
-        private readonly IPackageToProjectFileAdder _packageToProjectFileAdder;
         private readonly IProjectRestorer _projectRestorer;
         private readonly DirectoryPath _toolsPath;
         private readonly DirectoryPath _offlineFeedPath;
@@ -24,15 +23,12 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath offlineFeedPath,
             Func<FilePath> getTempProjectPath,
             Lazy<string> bundledTargetFrameworkMoniker,
-            IPackageToProjectFileAdder packageToProjectFileAdder,
             IProjectRestorer projectRestorer
         )
         {
             _getTempProjectPath = getTempProjectPath;
             _bundledTargetFrameworkMoniker = bundledTargetFrameworkMoniker;
             _projectRestorer = projectRestorer ?? throw new ArgumentNullException(nameof(projectRestorer));
-            _packageToProjectFileAdder = packageToProjectFileAdder ??
-                                         throw new ArgumentNullException(nameof(packageToProjectFileAdder));
             _toolsPath = toolsPath;
             _offlineFeedPath = offlineFeedPath;
         }
@@ -74,14 +70,6 @@ namespace Microsoft.DotNet.ToolPackage
                 packageVersionOrPlaceHolder,
                 targetframework,
                 toolDirectory);
-
-            if (packageVersionOrPlaceHolder.IsPlaceholder)
-            {
-                InvokeAddPackageRestore(
-                    nugetconfig,
-                    tempProjectPath,
-                    packageId);
-            }
 
             _projectRestorer.Restore(tempProjectPath, toolDirectory, nugetconfig, source);
 
@@ -187,38 +175,18 @@ namespace Microsoft.DotNet.ToolPackage
                             Directory.Exists(_offlineFeedPath.Value) ? _offlineFeedPath.Value : string.Empty),
                         new XElement("RestoreAdditionalProjectFallbackFolders", string.Empty), // block other
                         new XElement("RestoreAdditionalProjectFallbackFoldersExcludes", string.Empty),  // block other
-                        new XElement("DisableImplicitNuGetFallbackFolder","true")  // disable SDK side implicit NuGetFallbackFolder
-                    ),
-                    packageVersion.IsConcreteValue
-                        ? new XElement("ItemGroup",
-                            new XElement("PackageReference",
-                                new XAttribute("Include", packageId),
-                                new XAttribute("Version", packageVersion.Value)
+                        new XElement("DisableImplicitNuGetFallbackFolder", "true")),  // disable SDK side implicit NuGetFallbackFolder
+                     new XElement("ItemGroup",
+                        new XElement("PackageReference",
+                            new XAttribute("Include", packageId),
+                            new XAttribute("Version", packageVersion.IsConcreteValue ? packageVersion.Value : "*") // nuget will restore * for latest
                             ))
-                        : null));
+                        ));
 
             File.WriteAllText(tempProjectPath.Value,
                 tempProjectContent.ToString());
 
             return tempProjectPath;
-        }
-
-        private void InvokeAddPackageRestore(
-            FilePath? nugetconfig,
-            FilePath tempProjectPath,
-            string packageId)
-        {
-            if (nugetconfig != null)
-            {
-                File.Copy(
-                    nugetconfig.Value.Value,
-                    tempProjectPath
-                        .GetDirectoryPath()
-                        .WithFile("nuget.config")
-                        .Value);
-            }
-
-            _packageToProjectFileAdder.Add(tempProjectPath, packageId);
         }
 
         private DirectoryPath CreateIndividualToolVersionDirectory(

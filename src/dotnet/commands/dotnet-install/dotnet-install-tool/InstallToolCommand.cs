@@ -59,7 +59,6 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                                            .WithSubDirectories(Path.GetRandomFileName())
                                            .WithFile(Path.GetRandomFileName() + ".csproj"),
                                        new Lazy<string>(BundledTargetFramework.GetTargetFrameworkMoniker),
-                                       new PackageToProjectFileAdder(),
                                        new ProjectRestorer());
 
             _environmentPathInstruction = environmentPathInstruction
