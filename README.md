@@ -39,8 +39,9 @@ To get started on **Visual Studio 2017**:
   - _.NET Core cross-platform development_
     - Optional, not strictly required (yet) but used to develop .NET Core applications.
 2. Clone the source code (see above).
-3. Build the code using the `cibuild.cmd` script.
-5. Open src/MSBuild.sln solution in Visual Studio 2017.
+2. Open a `Developer Command Prompt for VS 2017` prompt.
+3. Build the code using the `cibuild.cmd` script. This also restores packages needed to open the projects in Visual Studio.
+5. Open `src/MSBuild.sln` in Visual Studio 2017.
 
 ### Building MSBuild in Unix (Mac & Linux)
 MSBuild can be run on Unix systems that support .NET Core. Set-up instructions can be viewed on the wiki:   [Building Testing and Debugging on .Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
