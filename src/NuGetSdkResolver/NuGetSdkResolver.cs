@@ -203,21 +203,13 @@ namespace NuGet.MSBuildSdkResolver
                     return false;
                 }
 
-                if (NativeMethodsShared.IsWindows)
-                {
-                    // Get the installed path and add the expected "Sdk" folder.  Windows file systems are not case sensitive
-                    installedPath = Path.Combine(packageInfo.PathResolver.GetInstallPath(packageInfo.Id, packageInfo.Version), "Sdk");
-                }
-                else
-                {
-                    // On non-Windows, default to proper case "Sdk" folder
-                    installedPath = Path.Combine(packageInfo.PathResolver.GetInstallPath(packageInfo.Id, packageInfo.Version), "Sdk");
+                // Get the installed path and add the expected "Sdk" folder.  Windows file systems are not case sensitive
+                installedPath = Path.Combine(packageInfo.PathResolver.GetInstallPath(packageInfo.Id, packageInfo.Version), "Sdk");
 
-                    if (!Directory.Exists(installedPath))
-                    {
-                        // Fall back to lower case "sdk" folder in case the file system is case sensitive
-                        installedPath = Path.Combine(packageInfo.PathResolver.GetInstallPath(packageInfo.Id, packageInfo.Version), "sdk");
-                    }
+                if (!NativeMethodsShared.IsWindows && !Directory.Exists(installedPath))
+                {
+                    // Fall back to lower case "sdk" folder in case the file system is case sensitive
+                    installedPath = Path.Combine(packageInfo.PathResolver.GetInstallPath(packageInfo.Id, packageInfo.Version), "sdk");
                 }
 
                 installedVersion = packageInfo.Version.ToString();
