@@ -50,32 +50,18 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <Compile Include="..\Common\**\*.cs" Link="Common\%(RecursiveDir)\%(FileName)%(Extension)" />
+    <Compile Include="..\Common\**\*.cs" LinkBase="Common" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="..\Common\Resources\Strings.Designer.cs" Link="Resources\%(FileName)%(Extension)">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="..\Common\Resources\Strings.resx" Link="Resources\%(FileName)%(Extension)">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
-    </EmbeddedResource>
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
     <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
-    <None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
-    <None Include="..\Common\build\**\*" PackagePath="msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\">
-      <Link>msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\%(FileName)%(Extension)</Link>
-    </None>
+    <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
+    <None Include="..\Common\build\**\*" PackagePath="msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\" LinkBase="%(PackagePath)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">

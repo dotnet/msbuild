@@ -44,12 +44,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="FindItemsFromPackages" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ComputeRefAssembliesToPublish"
           Condition="'$(PreserveCompilationContext)' == 'true'"
-          DependsOnTargets="_ComputeLockFileCopyLocal;
+          DependsOnTargets="ResolvePackageAssets;
                             _ParseTargetManifestFiles"
           AfterTargets="ComputeFilesToPublish"
           BeforeTargets="CopyFilesToPublishDirectory">
 
-    <FindItemsFromPackages Items="@(_RuntimeCopyLocalItems)"
+    <FindItemsFromPackages Items="@(RuntimeCopyLocalItems)"
                            Packages="@(RuntimeStorePackages)">
       <Output TaskParameter="ItemsFromPackages" ItemName="_RuntimeItemsInRuntimeStore"/>
     </FindItemsFromPackages>
@@ -64,7 +64,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Similarly, don't copy a compilation assembly if it's also a runtime assembly that is in a runtime store.
       It will be resolved from the runtime store directory at runtime.
       -->
-      <_RefAssembliesToExclude Include="@(_RuntimeItemsInRuntimeStore->'%(ResolvedPath)')" />
+      <_RefAssembliesToExclude Include="@(_RuntimeItemsInRuntimeStore)" />
 
       <ResolvedFileToPublish Include="@(ReferencePath)" Exclude="@(_RefAssembliesToExclude)">
         <RelativePath>$(RefAssembliesFolderName)\%(Filename)%(Extension)</RelativePath>

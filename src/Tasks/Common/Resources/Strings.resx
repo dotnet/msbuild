@@ -324,4 +324,7 @@
   <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
     <value>Pack as tool does not support self contained.</value>
   </data>
+  <data name="UnsupportedRuntimeIdentifier" xml:space="preserve">
+    <value>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</value>
+  </data>
 </root>

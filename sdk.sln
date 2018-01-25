@@ -59,7 +59,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{09AD2F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{7D6CD7B6-0237-40DD-9911-44FF22292131}"
 	ProjectSection(SolutionItems) = preProject
-		src\Tasks\Common\Resources\Strings.Designer.cs = src\Tasks\Common\Resources\Strings.Designer.cs
 		src\Tasks\Common\Resources\Strings.resx = src\Tasks\Common\Resources\Strings.resx
 	EndProjectSection
 EndProject
