@@ -10,10 +10,10 @@ using System.Linq;
 using System.Threading;
 
 using Microsoft.Build.CommandLine;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Microsoft.Build.UnitTests;
 using Xunit;
 using Shouldly;
 
@@ -1995,7 +1995,7 @@ namespace Microsoft.Build.UnitTests
 
         private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null, params string[] arguments)
         {
-            using (TestEnvironment testEnvironment = Engine.UnitTests.TestEnvironment.Create())
+            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
             {
                 TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents, new string[0]);
 
