@@ -123,7 +123,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(RuntimeIdentifier)' != '' and '$(PlatformTarget)' != ''">
 
     <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpper().Contains($(PlatformTarget.ToUpper())))"
-                 ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" />
+                 ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget"
+                 FormatArguments="$(RuntimeIdentifier);$(PlatformTarget)" />
 
   </Target>
 

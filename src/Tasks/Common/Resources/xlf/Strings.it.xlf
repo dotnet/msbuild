@@ -328,8 +328,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
-        <target state="translated">La piattaforma di RuntimeIdentifier e quella di PlatformTarget devono corrispondere.</target>
+        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="needs-review-translation">La piattaforma di RuntimeIdentifier e quella di PlatformTarget devono corrispondere.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">

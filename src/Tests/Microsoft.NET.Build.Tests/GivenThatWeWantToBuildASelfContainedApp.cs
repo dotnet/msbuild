@@ -88,7 +88,8 @@ namespace Microsoft.NET.Build.Tests
 			buildCommand
 				.Execute()
 				.Should()
-                .Fail();
+                .Fail()
+                .And.HaveStdOutContaining("The RuntimeIdentifier platform 'win10-x64' and the PlatformTarget 'x86' must be compatible.");;
         }
 
 		[Fact]
