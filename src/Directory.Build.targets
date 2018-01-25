@@ -23,16 +23,16 @@
     <GenerateProgramFile>false</GenerateProgramFile>
 
     <!-- Respect the traits set up by PlatformSpecific attribute. -->
-    <XunitOptions Condition="'$(OS)'=='Windows_NT'">$(XunitOptions) -notrait category=nonwindowstests</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='Unix'">$(XunitOptions) -notrait category=nonlinuxtests</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='Unix' and '$(NetCoreBuild)'=='true'">-notrait category=nonlinuxtests -notrait category=netcore-linux-failing</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='OSX'">$(XunitOptions) -notrait category=nonosxtests</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='OSX' and '$(NetCoreBuild)'=='true'">-notrait category=nonosxtests -notrait category=netcore-osx-failing</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='FreeBSD'">$(XunitOptions) -notrait category=nonfreebsdtests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='windows'">$(XunitOptions) -notrait category=nonwindowstests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='linux'">$(XunitOptions) -notrait category=nonlinuxtests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='linux' and '$(NetCoreBuild)'=='true'">-notrait category=nonlinuxtests -notrait category=netcore-linux-failing</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='osx'">$(XunitOptions) -notrait category=nonosxtests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='osx' and '$(NetCoreBuild)'=='true'">-notrait category=nonosxtests -notrait category=netcore-osx-failing</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='bsd'">$(XunitOptions) -notrait category=nonfreebsdtests</XunitOptions>
 
     <XunitOptions Condition="'$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=non-mono-tests</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='OSX' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-osx-failing</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='Windows_NT' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='osx' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-osx-failing</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='windows' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
 
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
 
@@ -61,7 +61,7 @@
     <GenerateReferenceAssemblySources>false</GenerateReferenceAssemblySources>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OS)'=='Windows_NT'">
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
@@ -69,7 +69,7 @@
     <GenAPITargetPath>$(RepoRoot)src\Package\ReferenceAssemblies\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OS)'=='Windows_NT'">
+  <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
     <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" Version="$(GenApiVersion)" />
   </ItemGroup>
 
