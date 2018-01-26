@@ -93,6 +93,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             }
         }
 
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void GivenAnExecutablePathWithExistingSameNameShimItThrows(bool testMockBehaviorIsInSync)
@@ -184,7 +185,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             const string testAppName = "TestAppSimple";
             const string emptySpaceToTestSpaceInPath = " ";
             TestAssetInstance testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName + emptySpaceToTestSpaceInPath)
+                .CreateInstance(testAppName + emptySpaceToTestSpaceInPath + "test")
                 .UseCurrentRuntimeFrameworkVersion()
                 .WithRestoreFiles()
                 .WithBuildFiles();
