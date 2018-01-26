@@ -11,8 +11,6 @@ namespace Microsoft.Build.UnitTests
     public  class FixPathOnUnixTests
     {
         [Fact]
-        // failing only on CI https://github.com/Microsoft/msbuild/issues/2884
-        [Trait("Category", "netcore-osx-failing")]
         public void TestPathFixupInMetadata()
         {
             string buildProjectContents = @"
