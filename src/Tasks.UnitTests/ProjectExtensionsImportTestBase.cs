@@ -67,8 +67,6 @@ namespace Microsoft.Build.UnitTests
         /// Ensures that even if the MSBuildProjectExtensionsPath exists, the extensions are not imported if the functionality is disabled via the <see cref="PropertyNameToEnableImport"/>.
         /// </summary>
         [Fact]
-        // https://github.com/Microsoft/msbuild/issues/2884
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void DoesNotImportProjectWhenDisabled()
         {
             // ---------------------
@@ -131,9 +129,6 @@ namespace Microsoft.Build.UnitTests
         /// Ensures that if the default MSBuildProjectExtensions directory is used, that the projects will be imported.
         /// </summary>
         [Fact]
-        // seems to be flaky on !windows
-        // https://github.com/Microsoft/msbuild/issues/2884
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void ImportsProjectIfExists()
         {
             ObjectModelHelpers.CreateFileInTempProjectDirectory(ImportProjectPath, BasicProjectImportContents);

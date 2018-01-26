@@ -176,8 +176,6 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// </summary>
         [Fact]
-        // https://github.com/Microsoft/msbuild/issues/2884
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void ItemListTests()
         {
             Parser p = new Parser();

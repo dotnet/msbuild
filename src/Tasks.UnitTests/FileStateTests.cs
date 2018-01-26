@@ -348,8 +348,6 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]
-        // failing only on CI https://github.com/Microsoft/msbuild/issues/2884
-        [Trait("Category", "netcore-osx-failing")]
         public void ReadOnlyOnDirectory()
         {
             Assert.Equal(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);
