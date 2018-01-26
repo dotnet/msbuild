@@ -14,6 +14,9 @@
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>MSBuild</tags>
     <dependencies>
+      <!-- It's netstandard and not netcoreapp so that libraries that invoke msbuild programatically can target netstandard (multi proc requires the executable).
+           Otherwise the libraries would be forced to target netcoreapp.
+      -->
       <group targetFramework=".NETStandard1.5">
         <dependency id="Microsoft.Build" version="[$version$]" />
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
@@ -29,7 +32,7 @@
       </group>
     </dependencies>
     <contentFiles>
-      <files include="**" buildAction="None" copyToOutput="true" flatten="false" />
+      <files include="**" buildAction="None" copyToOutput="true" flatten="false" Except="$outputPath$MSBuild.exe;$outputPathNetCore$MSBuild.dll"/>
     </contentFiles>
   </metadata>
   <files>
@@ -37,7 +40,12 @@
       the NugetPack task from BuildTools does not support an empty target so copying under notices instead. -->
     <file src="$thirdPartyNotice$" target="notices\THIRDPARTYNOTICE" />
     
-    <file src="$outputPath$MSBuild.exe" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>
+    <!--
+      net46
+    -->
+    
+    <file src="$outputPath$MSBuild.exe" target="lib\net46\"/>
+
     <file src="$outputPath$MSBuild.exe.config" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPath$Microsoft.Common.CrossTargeting.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPath$Microsoft.Common.CurrentVersion.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>
@@ -68,9 +76,10 @@
     <file src="$outputPath$NuGet.MSBuildSdkResolver.dll" target="contentFiles\any\net46\SdkResolvers\NuGet.MSBuildSdkResolver\" buildAction="None" copyToOutput="true"/>
 
     <!--
-      contentFiles\any\netcoreapp1.0
+      netcoreapp1.0
     -->
-    <file src="$outputPathNetCore$MSBuild.dll" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPathNetCore$MSBuild.dll" target="lib\netcoreapp1.0\"/>
+
     <file src="$outputPathNetCore$MSBuild.runtimeconfig.json" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPathNetCore$Microsoft.Common.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>
     <file src="$outputPathNetCore$Microsoft.Common.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>
