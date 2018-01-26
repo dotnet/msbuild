@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using Microsoft.Build.UnitTests;
 using Xunit;
 
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]
@@ -15,8 +16,8 @@ using Xunit;
 
 public class MSBuildTestAssemblyFixture : IDisposable
 {
-    string _oldTempPath;
     bool _disposed;
+    private TestEnvironment _testEnvironment;
 
     public MSBuildTestAssemblyFixture()
     {
@@ -27,12 +28,29 @@ public class MSBuildTestAssemblyFixture : IDisposable
         var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
         runningTestsField.SetValue(null, true);
 
+        _testEnvironment = TestEnvironment.Create();
+
         //  Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
         //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion
         //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
-        Environment.SetEnvironmentVariable("VisualStudioVersion", string.Empty);
+        _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", string.Empty);
 
-        //  Find correct version of "dotnet", and set DOTNET_HOST_PATH so that the Roslyn tasks will use the right host
+        SetDotnetHostPath(_testEnvironment);
+
+        //  Use a project-specific temporary path
+        //  This is so multiple test projects can be run in parallel without sharing the same temp directory
+        string newTempPath = Path.Combine(AppContext.BaseDirectory, "Temp");
+        _testEnvironment.CreateFolder(newTempPath);
+
+        _testEnvironment.WithTempPath(newTempPath);
+    }
+
+    /// <summary>
+    /// Find correct version of "dotnet", and set DOTNET_HOST_PATH so that the Roslyn tasks will use the right host
+    /// </summary>
+    /// <param name="testEnvironment"></param>
+    private static void SetDotnetHostPath(TestEnvironment testEnvironment)
+    {
         var currentFolder = System.AppContext.BaseDirectory;
 
         while (currentFolder != null)
@@ -53,7 +71,7 @@ public class MSBuildTestAssemblyFixture : IDisposable
                         dotnetPath += ".exe";
                     }
 
-                    Environment.SetEnvironmentVariable("DOTNET_HOST_PATH", dotnetPath);
+                    testEnvironment.SetEnvironmentVariable("DOTNET_HOST_PATH", dotnetPath);
                 }
 
                 break;
@@ -61,28 +79,13 @@ public class MSBuildTestAssemblyFixture : IDisposable
 
             currentFolder = Directory.GetParent(currentFolder)?.FullName;
         }
-
-        //  Use a project-specific temporary path
-        //  This is so multiple test projects can be run in parallel without sharing the same temp directory
-        _oldTempPath = Environment.GetEnvironmentVariable("TMP");
-        string newTempPath = Path.Combine(AppContext.BaseDirectory, "Temp");
-        if (!Directory.Exists(newTempPath))
-        {
-            Directory.CreateDirectory(newTempPath);
-        }
-        Environment.SetEnvironmentVariable("TMP", newTempPath);
     }
 
     public void Dispose()
     {
         if (!_disposed)
         {
-            
-            //  Ideally we would delete the temp directory, but this is apparently failing in some cases (possibly because
-            //  tests are failing and not being cleaned up correctly)
-            //Directory.Delete(Environment.GetEnvironmentVariable("TMP"), true);
-
-            Environment.SetEnvironmentVariable("TMP", _oldTempPath);
+            _testEnvironment.Dispose();
 
             _disposed = true;
         }
