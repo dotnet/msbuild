@@ -340,7 +340,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.NotEqual(Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
         }
 
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
         [Fact]
+#endif
         public void RequestedResultsAreSatisfied()
         {
             const string contents = @"
