@@ -43,11 +43,11 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
-            using (var alternativeTemp = new Helpers.AlternativeTempPath())
+            using (var testEnvironment = TestEnvironment.Create())
             {
                 // This test counts files in TEMP. If it uses the system TEMP, some
                 // other process may interfere. Use a private TEMP instead.
-                var newTempPath = alternativeTemp.Path;
+                var newTempPath = testEnvironment.CreateNewTempPath().TempPath;
 
                 string tempPath = Path.GetTempPath();
                 Assert.StartsWith(newTempPath, tempPath);

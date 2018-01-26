@@ -127,7 +127,23 @@ namespace Microsoft.Build.UnitTests
             return WithInvariant(new StringInvariant(name, value));
         }
 
-        public TransientTempPath WithTempPath(string tempPath, bool deleteTempDirectory = false)
+        /// <summary>
+        /// Creates a new temp path
+        /// </summary>
+        public TransientTempPath CreateNewTempPath()
+        {
+            var folder = CreateFolder();
+            return SetTempPath(folder.FolderPath, true);
+        }
+
+        /// <summary>
+        /// Creates a new temp path
+        /// Sets all OS temp environment variables to the new path
+        ///
+        /// Cleanup:
+        /// - restores OS temp environment variables
+        /// </summary>
+        public TransientTempPath SetTempPath(string tempPath, bool deleteTempDirectory = false)
         {
             var transientTempPath = new TransientTempPath(tempPath, deleteTempDirectory);
             _variants.Add(transientTempPath);
@@ -284,14 +300,15 @@ namespace Microsoft.Build.UnitTests
         private const string TMPDIR = "TMPDIR";
         private const string TEMP = "TEMP";
 
-        private readonly string _tempPath;
         private readonly bool _deleteTempDirectory;
 
         private readonly TempPaths _oldtempPaths;
 
+        public string TempPath { get; }
+
         public TransientTempPath(string tempPath, bool deleteTempDirectory)
         {
-            _tempPath = tempPath;
+            TempPath = tempPath;
             _deleteTempDirectory = deleteTempDirectory;
 
             _oldtempPaths = SetTempPath(tempPath);
@@ -343,7 +360,7 @@ namespace Microsoft.Build.UnitTests
 
             if (_deleteTempDirectory)
             {
-                FileUtilities.DeleteDirectoryNoThrow(_tempPath, recursive: true);
+                FileUtilities.DeleteDirectoryNoThrow(TempPath, recursive: true);
             }
         }
     }

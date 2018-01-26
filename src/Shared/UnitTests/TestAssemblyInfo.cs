@@ -42,7 +42,7 @@ public class MSBuildTestAssemblyFixture : IDisposable
         string newTempPath = Path.Combine(AppContext.BaseDirectory, "Temp");
         _testEnvironment.CreateFolder(newTempPath);
 
-        _testEnvironment.WithTempPath(newTempPath);
+        _testEnvironment.SetTempPath(newTempPath);
     }
 
     /// <summary>
