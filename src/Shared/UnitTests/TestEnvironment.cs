@@ -25,6 +25,8 @@ namespace Microsoft.Build.UnitTests
 
         private readonly ITestOutputHelper _output;
 
+        private bool _disposed;
+
         public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
         {
             var env = new TestEnvironment(output ?? new DefaultOutput());
@@ -44,18 +46,38 @@ namespace Microsoft.Build.UnitTests
             SetDefaultInvariant();
         }
 
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            Cleanup();
+        }
+
+        ~TestEnvironment()
+        {
+            Cleanup();
+        }
+
         /// <summary>
         ///     Revert / cleanup variants and then assert invariants.
         /// </summary>
-        public void Dispose()
+        private void Cleanup()
         {
-            // Reset test variants
-            foreach (var variant in _variants)
-                variant.Revert();
+            if (!_disposed)
+            {
+                _disposed = true;
 
-            // Assert invariants
-            foreach (var item in _invariants)
-                item.AssertInvariant(_output);
+                // Reset test variants
+                foreach (var variant in _variants)
+                    variant.Revert();
+
+                // Assert invariants
+                foreach (var item in _invariants)
+                    item.AssertInvariant(_output);
+            }
+            else
+            {
+                throw new InvalidOperationException("Already disposed");
+            }
         }
 
         /// <summary>
