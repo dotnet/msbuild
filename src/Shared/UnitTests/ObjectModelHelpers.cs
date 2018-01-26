@@ -777,7 +777,7 @@ namespace Microsoft.Build.UnitTests
         private static string s_tempProjectDir = null;
 
         /// <summary>
-        /// Returns the path %TEMP%\TempDirForMSBuildUnitTests
+        /// Creates and returns a unique path under temp
         /// </summary>
         internal static string TempProjectDir
         {
@@ -785,7 +785,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (s_tempProjectDir == null)
                 {
-                    s_tempProjectDir = Path.Combine(Path.GetTempPath(), "TempDirForMSBuildUnitTests");
+                    s_tempProjectDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
                     Directory.CreateDirectory(s_tempProjectDir);
                 }
