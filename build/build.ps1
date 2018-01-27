@@ -250,12 +250,24 @@ function Build {
     }
     finally
     {
-      # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
-      foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
-      {
-        if ($process.Path.StartsWith( $RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
+      # Jenkins does not allow taskkill
+      if (-not $ci) {
+
+        Write-Host "Killing processes"
+        # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
+        foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
         {
-          taskkill /f /pid $process.Id
+          
+          if ([string]::IsNullOrEmpty($process.Path))
+          {
+            Write-Host "Process $($process.Id) $($process.Name) does not have a Path. Skipping killing it."
+            continue
+          }
+
+          if ($process.Path.StartsWith( $RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
+          {
+            taskkill /f /pid $process.Id
+          }
         }
       }
     }
