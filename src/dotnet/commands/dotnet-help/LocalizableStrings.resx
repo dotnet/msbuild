@@ -270,4 +270,7 @@
   <data name="InstallDefinition" xml:space="preserve">
     <value>Installs an item into the development environment.</value>
   </data>
+  <data name="UninstallDefinition" xml:space="preserve">
+    <value>Uninstalls a tool from the development environment.</value>
+  </data>
 </root>

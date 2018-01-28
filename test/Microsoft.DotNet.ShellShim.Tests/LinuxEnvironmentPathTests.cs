@@ -35,8 +35,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
             // similar to https://code.visualstudio.com/docs/setup/mac
             reporter.Lines.Should().Equal(
                 string.Format(
-                    CommonLocalizableStrings.EnvironmentPathLinuxManualInstruction,
-                    "/myhome/executable/path", "/myhome/executable/path"));
+                    CommonLocalizableStrings.EnvironmentPathLinuxManualInstructions,
+                    "/myhome/executable/path"));
         }
 
         [Fact]

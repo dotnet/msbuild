@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var invalidCommandName = "na\0me";
             Action a = () => new ToolConfiguration(invalidCommandName, "my.dll");
-            a.ShouldThrow<ArgumentException>()
+            a.ShouldThrow<ToolConfigurationException>()
                 .And.Message.Should()
                 .Contain(
                     string.Format(

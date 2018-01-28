@@ -39,7 +39,6 @@ namespace Microsoft.DotNet.ShellShim.Tests
             throw new NotImplementedException();
         }
 
-
         public void CreateEmptyFile(string path)
         {
             _files.Add(path, String.Empty);
@@ -48,6 +47,11 @@ namespace Microsoft.DotNet.ShellShim.Tests
         public void WriteAllText(string path, string content)
         {
             _files[path] = content;
+        }
+
+        public void Move(string source, string destination)
+        {
+            throw new NotImplementedException();
         }
 
         public void Delete(string path)

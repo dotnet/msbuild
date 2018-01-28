@@ -18,21 +18,29 @@ namespace Microsoft.DotNet.ToolPackage
 
             DotNetCliTool dotNetCliTool;
 
-            using (var fs = new FileStream(pathToXml, FileMode.Open))
+            try
             {
-                var reader = XmlReader.Create(fs);
-
-                try
+                using (var fs = new FileStream(pathToXml, FileMode.Open))
                 {
+                    var reader = XmlReader.Create(fs);
                     dotNetCliTool = (DotNetCliTool)serializer.Deserialize(reader);
                 }
-                catch (InvalidOperationException e) when (e.InnerException is XmlException)
-                {
-                    throw new ToolConfigurationException(
-                        string.Format(
-                            CommonLocalizableStrings.ToolSettingsInvalidXml,
-                            e.InnerException.Message));
-                }
+            }
+            catch (InvalidOperationException ex) when (ex.InnerException is XmlException)
+            {
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsInvalidXml,
+                        ex.InnerException.Message),
+                    ex.InnerException);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.FailedToRetrieveToolConfiguration,
+                        ex.Message),
+                    ex);
             }
 
             if (dotNetCliTool.Commands.Length != 1)

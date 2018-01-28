@@ -5,9 +5,17 @@ using System;
 
 namespace Microsoft.DotNet.ToolPackage
 {
-    internal class ToolConfigurationException : ArgumentException
+    internal class ToolConfigurationException : Exception
     {
+        public ToolConfigurationException()
+        {
+        }
+
         public ToolConfigurationException(string message) : base(message)
+        {
+        }
+
+        public ToolConfigurationException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }

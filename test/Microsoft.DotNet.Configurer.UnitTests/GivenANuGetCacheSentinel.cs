@@ -183,7 +183,12 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public IEnumerable<string> GetFiles(string path, string searchPattern)
+            public IEnumerable<string> EnumerateFileSystemEntries(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern)
             {
                 throw new NotImplementedException();
             }
@@ -199,6 +204,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             }
 
             public void Delete(string path, bool recursive)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Move(string source, string destination)
             {
                 throw new NotImplementedException();
             }
@@ -258,6 +268,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             }
 
             public void WriteAllText(string path, string content)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Move(string source, string destination)
             {
                 throw new NotImplementedException();
             }
