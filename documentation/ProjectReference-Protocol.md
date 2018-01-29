@@ -51,12 +51,13 @@ If implementing a project with an “outer” (determine what properties to pass
 
 * `GetTargetFrameworks` tells referencing projects what options are available to the build.
   * It returns an item with metadata `TargetFrameworks` indicating what TargetFrameworks are available in the project, as well as boolean metadata `HasSingleTargetFramework` and `IsRidAgnostic`.
+  * This target is _optional_. If not present, the reference will be built with no additional properties.
   * **New** in MSBuild 15.5.
 * `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target for a given `ReferringTargetFramework`.
   * **Deprecated** in MSBuild 15.5.
   * New for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
   * **Conditions**: only when metadata `SkipGetTargetFrameworkProperties` for each reference is not true.
-  * Skipped for `*.vcxproj` by default.
+  * Skipped for `*.vcxproj` and references that specify `ReferenceOutputAssembly=false` by default.
   * This should return either
     * a string of the form `TargetFramework=$(NearestTargetFramework);ProjectHasSingleTargetFramework=$(_HasSingleTargetFramework);ProjectIsRidAgnostic=$(_IsRidAgnostic)`, where the value of `NearestTargetFramework` will be used to formulate `TargetFramework` for the following calls and the other two properties are booleans, or
     * an item with metadata `DesiredTargetFrameworkProperties` (key-value pairs of the form `TargetFramework=net46`), `HasSingleTargetFramework` (boolean), and `IsRidAgnostic` (boolean).
@@ -69,7 +70,9 @@ If implementing a project with an “outer” (determine what properties to pass
   * If the `ProjectReference` defines the `Targets` metadata, it is used. If not, no target is passed, and the default target of the reference (usually `Build`) is built.
   * The return value of this target should be identical to that of `GetTargetPath`.
 * `GetNativeManifest` should return a manifest suitable for passing to the `ResolveNativeReferences` target.
+  * As of 15.6, this is _optional_. If a project does not contain a `GetNativeManifest` target, it will not be referencable by native projects but will not fail the build.
 * `GetCopyToOutputDirectoryItems` should return the outputs of a project that should be copied to the output of a referencing project.
+  * As of 15.6, this is _optional_. If a project does not contain a `GetCopyToOutputDirectoryItems` target, projects that reference it will not copy any of its outputs to their own output folders, but the build can succeed.
 * `Clean` should delete all outputs of the project.
   * It is not called during a normal build, only during "Clean" and "Rebuild".
 
