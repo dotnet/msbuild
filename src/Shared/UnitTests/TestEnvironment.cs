@@ -48,8 +48,8 @@ namespace Microsoft.Build.UnitTests
 
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
             Cleanup();
+            GC.SuppressFinalize(this);
         }
 
         ~TestEnvironment()
