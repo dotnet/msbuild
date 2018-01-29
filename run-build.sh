@@ -130,7 +130,8 @@ done
 argsnotargets=( )
 for arg in ${args[@]} 
 do  
-  if [[ ${arg,,} != '/t:'* ]] && [[ ${arg,,} != '/target:'* ]]; then
+  arglower="$(echo $arg | awk '{print tolower($0)}')"
+  if [[ $arglower != '/t:'* ]] && [[ $arglower != '/target:'* ]]; then
     argsnotargets+=($arg)
   fi
 done
