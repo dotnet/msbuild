@@ -137,5 +137,7 @@
        in VS 15.5 (which is what we use for Jenkins right now). -->
   <Target Name="GenerateSatelliteAssemblies" />
 
+  <!-- Import parent targets -->
+  <Import Project="..\Directory.Build.targets"/>
 
 </Project>
