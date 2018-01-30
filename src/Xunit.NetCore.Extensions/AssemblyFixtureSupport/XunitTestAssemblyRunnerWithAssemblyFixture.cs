@@ -11,6 +11,7 @@ namespace Xunit.NetCore.Extensions
     public class XunitTestAssemblyRunnerWithAssemblyFixture : XunitTestAssemblyRunner
     {
         readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
+        List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
 
         public XunitTestAssemblyRunnerWithAssemblyFixture(ITestAssembly testAssembly,
                                                           IEnumerable<IXunitTestCase> testCases,
@@ -33,8 +34,10 @@ namespace Xunit.NetCore.Extensions
                                                                                     .Cast<AssemblyFixtureAttribute>()
                                                                                     .ToList();
 
+                this.assemblyFixtureAttributes = fixturesAttrs;
+
                 // Instantiate all the fixtures
-                foreach (var fixtureAttr in fixturesAttrs)
+                foreach (var fixtureAttr in fixturesAttrs.Where(a => a.LifetimeScope == AssemblyFixtureAttribute.Scope.Assembly))
                     assemblyFixtureMappings[fixtureAttr.FixtureType] = Activator.CreateInstance(fixtureAttr.FixtureType);
             });
         }
@@ -52,6 +55,7 @@ namespace Xunit.NetCore.Extensions
                                                                    ITestCollection testCollection,
                                                                    IEnumerable<IXunitTestCase> testCases,
                                                                    CancellationTokenSource cancellationTokenSource)
-            => new XunitTestCollectionRunnerWithAssemblyFixture(assemblyFixtureMappings, testCollection, testCases, DiagnosticMessageSink, messageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), cancellationTokenSource).RunAsync();
+            => new XunitTestCollectionRunnerWithAssemblyFixture(assemblyFixtureMappings, assemblyFixtureAttributes,
+                testCollection, testCases, DiagnosticMessageSink, messageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), cancellationTokenSource).RunAsync();
     }
 }

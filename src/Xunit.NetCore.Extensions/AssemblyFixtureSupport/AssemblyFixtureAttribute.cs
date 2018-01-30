@@ -11,6 +11,15 @@ namespace Xunit
         }
 
         public Type FixtureType { get; private set; }
+
+        public Scope LifetimeScope { get; set; }
+
+        public enum Scope
+        {
+            Assembly,
+            Class,
+            Method
+        }
     }
 
 }
