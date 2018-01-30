@@ -39,12 +39,15 @@ namespace Microsoft.DotNet.Scripts
 
         private Lazy<string> _dotNetVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("DOTNET_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info"));
         private Lazy<string> _coreSetupVersionFragment = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_FRAGMENT", GetDefaultCoreSetupVersionFragment()));
+
+        private Lazy<string> _roslynVersionFragment = new Lazy<string>(() => GetEnvironmentVariable("ROSLYN_VERSION_FRAGMENT"));
         private Lazy<string> _gitHubUpstreamOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"));
         private Lazy<string> _gitHubProject = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PROJECT", "cli"));
         private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", GetDefaultUpstreamBranch()));
         private Lazy<string[]> _gitHubPullRequestNotifications = new Lazy<string[]>(() =>
                                                 GetEnvironmentVariable("GITHUB_PULL_REQUEST_NOTIFICATIONS", "")
                                                     .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+
         private Config()
         {
         }
@@ -54,6 +57,8 @@ namespace Microsoft.DotNet.Scripts
         public string Password => _password.Value;
         public string DotNetVersionUrl => _dotNetVersionUrl.Value;
         public string CoreSetupVersionFragment => _coreSetupVersionFragment.Value;
+        public string RoslynVersionFragment => _roslynVersionFragment.Value;
+        public bool HasRoslynVersionFragment => !string.IsNullOrEmpty(RoslynVersionFragment);
         public string GitHubUpstreamOwner => _gitHubUpstreamOwner.Value;
         public string GitHubProject => _gitHubProject.Value;
         public string GitHubUpstreamBranch => _gitHubUpstreamBranch.Value;
