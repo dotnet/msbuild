@@ -4,6 +4,7 @@
 using Microsoft.DotNet.VersionTools;
 using Microsoft.DotNet.VersionTools.Automation;
 using Microsoft.DotNet.VersionTools.Dependencies;
+using Microsoft.DotNet.VersionTools.Dependencies.BuildOutput;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,7 +30,7 @@ namespace Microsoft.DotNet.Scripts
 
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
             var dependencyBuildInfos = buildInfos.Select(buildInfo =>
-                new DependencyBuildInfo(
+                new BuildDependencyInfo(
                     buildInfo,
                     upgradeStableVersions: true,
                     disabledPackages: Enumerable.Empty<string>()));
@@ -50,11 +51,14 @@ namespace Microsoft.DotNet.Scripts
                     body += PullRequestCreator.NotificationString(s_config.GitHubPullRequestNotifications);
                 }
 
-                new PullRequestCreator(gitHubAuth, origin, upstreamBranch)
+                new PullRequestCreator(gitHubAuth)
                     .CreateOrUpdateAsync(
                         suggestedMessage,
                         suggestedMessage + $" ({upstreamBranch.Name})",
-                        body)
+                        body,
+                        upstreamBranch,
+                        origin,
+                        new PullRequestOptions())
                     .Wait();
             }
         }
