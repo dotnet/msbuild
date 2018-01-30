@@ -45,6 +45,9 @@
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>Shared\FileUtilities.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TempFileUtilities.cs">
+      <Link>Shared\TempFileUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>Shared\FileUtilitiesRegex.cs</Link>
     </Compile>
