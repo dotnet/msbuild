@@ -26,13 +26,13 @@ namespace Microsoft.DotNet.ShellShim
                 pathToPlaceShim ?? throw new ArgumentNullException(nameof(pathToPlaceShim));
         }
 
-        public void CreateShim(string packageExecutablePath, string shellCommandName)
+        public void CreateShim(FilePath packageExecutable, string shellCommandName)
         {
             FilePath shimPath = GetShimPath(shellCommandName);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                CreateConfigFile(shimPath.Value + ".config", entryPoint: packageExecutablePath, runner: "dotnet");
+                CreateConfigFile(shimPath.Value + ".config", entryPoint: packageExecutable, runner: "dotnet");
                 using (var shim = File.Create(shimPath.Value))
                 using (var exe = typeof(ShellShimMaker).Assembly.GetManifestResourceStream(LauncherExeResourceName))
                 {
@@ -41,8 +41,6 @@ namespace Microsoft.DotNet.ShellShim
             }
             else
             {
-                var packageExecutable = new FilePath(packageExecutablePath);
-
                 var script = new StringBuilder();
                 script.AppendLine("#!/bin/sh");
                 script.AppendLine($"dotnet {packageExecutable.ToQuotedString()} \"$@\"");
@@ -63,7 +61,7 @@ namespace Microsoft.DotNet.ShellShim
             }
         }
 
-        internal void CreateConfigFile(string outputPath, string entryPoint, string runner)
+        internal void CreateConfigFile(string outputPath, FilePath entryPoint, string runner)
         {
             XDocument config;
             using (var resource = typeof(ShellShimMaker).Assembly.GetManifestResourceStream(LauncherConfigResourceName))
@@ -72,7 +70,7 @@ namespace Microsoft.DotNet.ShellShim
             }
 
             var appSettings = config.Descendants("appSettings").First();
-            appSettings.Add(new XElement("add", new XAttribute("key", "entryPoint"), new XAttribute("value", entryPoint)));
+            appSettings.Add(new XElement("add", new XAttribute("key", "entryPoint"), new XAttribute("value", entryPoint.Value)));
             appSettings.Add(new XElement("add", new XAttribute("key", "runner"), new XAttribute("value", runner ?? string.Empty)));
             config.Save(outputPath);
         }

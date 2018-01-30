@@ -23,11 +23,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _fileSystem = fileSystem ?? new FileSystemWrapper();
         }
 
-        public void CreateShim(string packageExecutablePath, string shellCommandName)
+        public void CreateShim(FilePath packageExecutable, string shellCommandName)
         {
-            var packageExecutable = new FilePath(packageExecutablePath);
-
-
             var fakeshim = new FakeShim
             {
                 Runner = "dotnet",

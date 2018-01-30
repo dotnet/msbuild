@@ -13,6 +13,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Test.Utilities.Mock;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,8 +32,9 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData("my_native_app.exe", null)]
         [InlineData("./my_native_app.js", "nodejs")]
         [InlineData(@"C:\tools\my_native_app.dll", "dotnet")]
-        public void GivenAnRunnerOrEntryPointItCanCreateConfig(string entryPoint, string runner)
+        public void GivenAnRunnerOrEntryPointItCanCreateConfig(string entryPointPath, string runner)
         {
+            var entryPoint = new FilePath(entryPointPath);
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return;
 
@@ -51,7 +53,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Should()
                 .Contain(e => e.Attribute("key").Value == "runner" && e.Attribute("value").Value == (runner ?? string.Empty))
                 .And
-                .Contain(e => e.Attribute("key").Value == "entryPoint" && e.Attribute("value").Value == entryPoint);
+                .Contain(e => e.Attribute("key").Value == "entryPoint" && e.Attribute("value").Value == entryPoint.Value);
         }
 
         [Fact]
@@ -63,7 +65,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             var shellCommandName = nameof(ShellShimMakerTests) + Path.GetRandomFileName();
 
             shellShimMaker.CreateShim(
-                outputDll.FullName,
+                new FilePath(outputDll.FullName),
                 shellCommandName);
             var stdOut = ExecuteInShell(shellCommandName);
 
@@ -82,7 +84,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             var shellCommandName = nameof(ShellShimMakerTests) + Path.GetRandomFileName();
 
             shellShimMaker.CreateShim(
-                outputDll.FullName,
+                new FilePath(outputDll.FullName),
                 shellCommandName);
 
             var stdOut = ExecuteInShell(shellCommandName, arguments);

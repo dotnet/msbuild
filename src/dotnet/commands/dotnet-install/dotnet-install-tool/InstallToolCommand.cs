@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             _shellShimMaker.EnsureCommandNameUniqueness(commandName);
 
             _shellShimMaker.CreateShim(
-                toolConfigurationAndExecutablePath.Executable.Value,
+                toolConfigurationAndExecutablePath.Executable,
                 commandName);
 
             _environmentPathInstruction
