@@ -33,6 +33,7 @@
                     ManifestBuildId="$(FullNugetVersion)"
                     ManifestCommit="$(CommitHash)"
                     ManifestName="$(BuildName)"
+                    ManifestBuildData="ProductVersion=$(FullNugetVersion)"
                     Overwrite="$(OverwriteOnPublish)" 
                     PublishFlatContainer="true" 
                     SkipCreateManifest="$(IsNotOrchestratedPublish)" />
@@ -51,6 +52,7 @@
                     ManifestBuildId="$(FullNugetVersion)"
                     ManifestCommit="$(CommitHash)"
                     ManifestName="$(BuildName)"
+                    ManifestBuildData="ProductVersion=$(FullNugetVersion)"
                     Overwrite="$(OverwriteOnPublish)" 
                     PublishFlatContainer="true" 
                     SkipCreateManifest="$(IsNotOrchestratedPublish)" />

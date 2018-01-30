@@ -1,9 +1,10 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <Product>Sdk</Product>
     <IsNotOrchestratedPublish>true</IsNotOrchestratedPublish>
     <IsNotOrchestratedPublish Condition="'$(PB_PublishBlobFeedUrl)' != ''">false</IsNotOrchestratedPublish>
-    <BlobStoragePartialRelativePath>Sdk</BlobStoragePartialRelativePath>
-    <BlobStoragePartialRelativePath Condition="'$(IsNotOrchestratedPublish)' == 'false'">assets/$(BlobStoragePartialRelativePath)</BlobStoragePartialRelativePath>
+    <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
+    <BlobStoragePartialRelativePath Condition="'$(IsNotOrchestratedPublish)' == 'false'">assets/$(Product)</BlobStoragePartialRelativePath>
     
     <!-- Values related to the download of assets from blob storage -->
     <DefaultCoreSetupBlobRootUrl>https://dotnetcli.azureedge.net/dotnet/</DefaultCoreSetupBlobRootUrl>
