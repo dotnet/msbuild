@@ -20,7 +20,8 @@
     <!-- Reference the corresponding source project so that it will be built (and GenAPI will update the reference assembly source)
          before this project builds, but don't use the output in any way. -->
     <ProjectReference Include="$(ImplementationProject)" ReferenceOutputAssembly="false"
-                      SetTargetFramework="TargetFramework=$(TargetFrameworkForSourceProject)" />
+                      SetTargetFramework="TargetFramework=$(TargetFrameworkForSourceProject)"
+                      OutputItemType="ImplementationAssemblyResolvedProjectReferencePath"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +35,15 @@
     
     <TfmSpecificPackageFile Include="$(TargetPath)" Pack="True" PackagePath="lib/$(TargetFramework)" />
   </ItemGroup>
+
+  <Target Name="IncludeDocumentationFile" AfterTargets="ResolveProjectReferences">
+    <PropertyGroup>
+      <ImplementationDocumentationFile>@(ImplementationAssemblyResolvedProjectReferencePath->'%(RootDir)%(Directory)%(Filename).xml')</ImplementationDocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(ImplementationDocumentationFile)" Pack="True" PackagePath="lib/$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
   
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>

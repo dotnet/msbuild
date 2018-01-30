@@ -1,5 +1,9 @@
 ﻿<Project>
 
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(PlatformTarget)' == 'x64'">
     <OutputPath>$(OutputPath)$(Platform)\$(TargetFramework.ToLowerInvariant())\</OutputPath>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(Platform)\$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
@@ -137,5 +141,9 @@
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' != 'true'">
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DocumentationFile/>
+  </PropertyGroup>
 
 </Project>
