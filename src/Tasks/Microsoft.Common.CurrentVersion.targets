@@ -330,6 +330,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <GenerateBindingRedirectsOutputType Condition="'$(OutputType)'=='exe' or '$(OutputType)'=='winexe'">true</GenerateBindingRedirectsOutputType>
+    <!-- It would be a breaking change to automatically turn on binding redirects for existing projects, so turn them on only when opting into a new framework. -->
+    <AutoGenerateBindingRedirects Condition="'$(AutoGenerateBindingRedirects)' == '' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetFrameworkVersion.TrimStart(vV))' >= '4.7.2'">true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(AutoUnifyAssemblyReferences)' == ''">
     <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
@@ -1559,9 +1561,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       We give this treatment to .vcxproj by default since no .vcxproj can target more
       than one framework.
+
+      Likewise if the dependency is for build ordering instead of an assembly reference
+      (ReferenceOutputAssembly=false), skip the checks since we can't know what TF
+      the output would need to be compatible with.
    -->
    <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and '%(Extension)' == '.vcxproj'">
+      <_MSBuildProjectReferenceExistent
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and
+                   ('%(Extension)' == '.vcxproj' or '%(ReferenceOutputAssembly)' == 'false')">
         <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
       </_MSBuildProjectReferenceExistent>
    </ItemGroup>
@@ -1905,8 +1913,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
         <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
-        <TargetFrameworkVersion>$(TargetFrameworkVersion)</TargetFrameworkVersion>
-        <TargetFrameworkVersion Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</TargetFrameworkVersion>
+        <TargetFrameworkVersion>$(TargetFrameworkVersion.TrimStart('vV'))</TargetFrameworkVersion>
         <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
         <CopyUpToDateMarker>@(CopyUpToDateMarker)</CopyUpToDateMarker>
       </TargetPathWithTargetPlatformMoniker>
@@ -4324,7 +4331,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          input to projects that reference this one. -->
     <Touch Files="@(CopyUpToDateMarker)"
            AlwaysCreate="true"
-           Condition="'@(ReferencesCopiedInThisBuild)' != ''" />
+           Condition="'@(ReferencesCopiedInThisBuild)' != ''">
+        <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
+    </Touch>
 
   </Target>
 

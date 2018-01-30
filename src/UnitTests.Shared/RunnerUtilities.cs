@@ -1,4 +1,5 @@
 ﻿using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Diagnostics;
 
@@ -39,7 +40,8 @@ namespace Microsoft.Build.UnitTests.Shared
             {
                 var comSpec = Environment.GetEnvironmentVariable("ComSpec");
 
-                arguments = $"/C \"{pathToExecutable} {arguments}\"";
+                // /D: Do not load AutoRun configuration from the registry (perf)
+                arguments = $"{(Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd ? String.Empty : "/D ")}/C \"{pathToExecutable} {arguments}\"";
                 pathToExecutable = comSpec;
             }
             else

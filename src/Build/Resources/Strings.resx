@@ -1200,8 +1200,12 @@
     <comment>{StrBegin="MSB4236: "}</comment>
   </data>
   <data name="CouldNotLoadSdkResolver" UESanitized="false" Visibility="Public">
-    <value>MSB4237: An SDK resolver was found but could not be loaded. {0}</value>
+    <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>
     <comment>{StrBegin="MSB4237: "}</comment>
+  </data>
+  <data name="CouldNotLoadSdkResolverAssembly" UESanitized="false" Visibility="Public">
+    <value>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</value>
+    <comment>{StrBegin="MSB4244: "}</comment>
   </data>
   <data name="CouldNotRunSdkResolver" UESanitized="false" Visibility="Public">
     <value>MSB4242: The SDK resolver "{0}" failed to run. {1}</value>
@@ -1676,7 +1680,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4244.
+        Next message code should be MSB4245.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

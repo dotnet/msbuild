@@ -616,6 +616,10 @@ namespace Microsoft.Build.Tasks
                 if (NativeMethodsShared.IsWindows)
                 {
                     commandLine.AppendSwitch("/Q"); // echo off
+                    if(!Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd)
+                    {
+                        commandLine.AppendSwitch("/D"); // do not load AutoRun configuration from the registry (perf)
+                    }
                     commandLine.AppendSwitch("/C"); // run then terminate
 
                     // If for some crazy reason the path has a & character and a space in it

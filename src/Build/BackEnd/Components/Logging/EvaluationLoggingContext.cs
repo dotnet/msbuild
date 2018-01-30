@@ -19,10 +19,15 @@ namespace Microsoft.Build.BackEnd.Components.Logging
         public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext buildEventContext, string projectFile) :
             base(
                 loggingService,
-                loggingService.LogProjectEvaluationStarted(buildEventContext.NodeId, buildEventContext.SubmissionId, projectFile))
+                loggingService.CreateEvaluationBuildEventContext(buildEventContext.NodeId, buildEventContext.SubmissionId))
         {
             _projectFile = projectFile;
             IsValid = true;
+        }
+
+        public void LogProjectEvaluationStarted()
+        {
+            LoggingService.LogProjectEvaluationStarted(BuildEventContext, _projectFile);
         }
 
         /// <summary>

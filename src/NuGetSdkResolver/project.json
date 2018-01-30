@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
-    "NuGet.Commands": "4.5.0",
-    "NuGet.Protocol": "4.5.0"
+      "NuGet.Commands": "4.6.0-rtm-4822",
+      "NuGet.Protocol": "4.6.0-rtm-4822"
   },
   "frameworks": {
     "net46": {
