@@ -11,8 +11,10 @@ namespace Xunit.NetCore.Extensions
     {
         readonly Dictionary<Type, object> assemblyFixtureMappings;
         readonly IMessageSink diagnosticMessageSink;
+        readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
 
         public XunitTestCollectionRunnerWithAssemblyFixture(Dictionary<Type, object> assemblyFixtureMappings,
+                                                            List<AssemblyFixtureAttribute> assemblyFixtureAttributes,
                                                             ITestCollection testCollection,
                                                             IEnumerable<IXunitTestCase> testCases,
                                                             IMessageSink diagnosticMessageSink,
@@ -22,7 +24,13 @@ namespace Xunit.NetCore.Extensions
                                                             CancellationTokenSource cancellationTokenSource)
             : base(testCollection, testCases, diagnosticMessageSink, messageBus, testCaseOrderer, aggregator, cancellationTokenSource)
         {
+            if (assemblyFixtureAttributes == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyFixtureAttributes));
+            }
+
             this.assemblyFixtureMappings = assemblyFixtureMappings;
+            this.assemblyFixtureAttributes = assemblyFixtureAttributes;
             this.diagnosticMessageSink = diagnosticMessageSink;
         }
 
@@ -34,8 +42,8 @@ namespace Xunit.NetCore.Extensions
             foreach (var kvp in CollectionFixtureMappings)
                 combinedFixtures[kvp.Key] = kvp.Value;
 
-            // We've done everything we need, so let the built-in types do the rest of the heavy lifting
-            return new XunitTestClassRunner(testClass, @class, testCases, diagnosticMessageSink, MessageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), CancellationTokenSource, combinedFixtures).RunAsync();
+            
+            return new XunitTestClassRunnerWithAssemblyFixture(assemblyFixtureAttributes, testClass, @class, testCases, diagnosticMessageSink, MessageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), CancellationTokenSource, combinedFixtures).RunAsync();
         }
     }
 }

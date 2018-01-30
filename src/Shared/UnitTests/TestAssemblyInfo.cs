@@ -14,6 +14,10 @@ using Xunit;
 
 [assembly: AssemblyFixture(typeof(MSBuildTestAssemblyFixture))]
 
+//  Wrap a TestEnvironment around each test method and class so if invariants have changed we will know where
+[assembly: AssemblyFixture(typeof(MSBuildTestEnvironmentFixture), LifetimeScope = AssemblyFixtureAttribute.Scope.Class)]
+[assembly: AssemblyFixture(typeof(MSBuildTestEnvironmentFixture), LifetimeScope = AssemblyFixtureAttribute.Scope.Method)]
+
 public class MSBuildTestAssemblyFixture : IDisposable
 {
     bool _disposed;
@@ -79,6 +83,27 @@ public class MSBuildTestAssemblyFixture : IDisposable
 
             currentFolder = Directory.GetParent(currentFolder)?.FullName;
         }
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _testEnvironment.Dispose();
+
+            _disposed = true;
+        }
+    }
+}
+
+public class MSBuildTestEnvironmentFixture : IDisposable
+{
+    bool _disposed;
+    private TestEnvironment _testEnvironment;
+
+    public MSBuildTestEnvironmentFixture()
+    {
+        _testEnvironment = TestEnvironment.Create();
     }
 
     public void Dispose()
