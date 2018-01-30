@@ -43,8 +43,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
 
-            resolvers.Select(i => i.GetType()).ShouldBe(new [] { typeof(DefaultSdkResolver) });
-
+            resolvers.Select(i => i.GetType().FullName).ShouldBe(new [] { "NuGet.MSBuildSdkResolver.NuGetSdkResolver", typeof(DefaultSdkResolver).FullName });
+            
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
         }
