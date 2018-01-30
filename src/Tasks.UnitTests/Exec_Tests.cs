@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
