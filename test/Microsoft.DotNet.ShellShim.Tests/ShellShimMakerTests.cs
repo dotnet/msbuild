@@ -72,6 +72,20 @@ namespace Microsoft.DotNet.ShellShim.Tests
             stdOut.Should().Contain("Hello World");
         }
 
+        [Fact]
+        public void GivenAnExecutablePathDirectoryThatDoesNotExistItCanGenerateShimFile()
+        {
+            var outputDll = MakeHelloWorldExecutableDll();
+            var extraNonExistDirectory = Path.GetRandomFileName();
+            var shellShimMaker = new ShellShimMaker(Path.Combine(TempRoot.Root, extraNonExistDirectory));
+            var shellCommandName = nameof(ShellShimMakerTests) + Path.GetRandomFileName();
+
+            Action a = () => shellShimMaker.CreateShim(
+                new FilePath(outputDll.FullName),
+                shellCommandName);
+            a.ShouldNotThrow<DirectoryNotFoundException>();
+        }
+
         [Theory]
         [InlineData("arg1 arg2", new[] { "arg1", "arg2" })]
         [InlineData(" \"arg1 with space\" arg2", new[] { "arg1 with space", "arg2" })]

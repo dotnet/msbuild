@@ -30,6 +30,11 @@ namespace Microsoft.DotNet.ShellShim
         {
             FilePath shimPath = GetShimPath(shellCommandName);
 
+            if (!Directory.Exists(shimPath.GetDirectoryPath().Value))
+            {
+                Directory.CreateDirectory(shimPath.GetDirectoryPath().Value);
+            }
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 CreateConfigFile(shimPath.Value + ".config", entryPoint: packageExecutable, runner: "dotnet");
