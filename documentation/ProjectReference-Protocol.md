@@ -70,9 +70,9 @@ If implementing a project with an “outer” (determine what properties to pass
   * If the `ProjectReference` defines the `Targets` metadata, it is used. If not, no target is passed, and the default target of the reference (usually `Build`) is built.
   * The return value of this target should be identical to that of `GetTargetPath`.
 * `GetNativeManifest` should return a manifest suitable for passing to the `ResolveNativeReferences` target.
-  * As of 15.6, this is _optional_. If a project does not contain a `GetNativeManifest` target, it will not be referencable by native projects but will not fail the build.
+  * As of 15.7, this is _optional_. If a project does not contain a `GetNativeManifest` target, it will not be referencable by native projects but will not fail the build.
 * `GetCopyToOutputDirectoryItems` should return the outputs of a project that should be copied to the output of a referencing project.
-  * As of 15.6, this is _optional_. If a project does not contain a `GetCopyToOutputDirectoryItems` target, projects that reference it will not copy any of its outputs to their own output folders, but the build can succeed.
+  * As of 15.7, this is _optional_. If a project does not contain a `GetCopyToOutputDirectoryItems` target, projects that reference it will not copy any of its outputs to their own output folders, but the build can succeed.
 * `Clean` should delete all outputs of the project.
   * It is not called during a normal build, only during "Clean" and "Rebuild".
 
