@@ -42,6 +42,12 @@
          https://github.com/Microsoft/msbuild/issues/2865-->
     <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Disable warnings from XML documentation. https://github.com/Microsoft/msbuild/issues/2927 -->
+    <NoWarn>$(NoWarn);1570;1572;1573;1587</NoWarn>
+
+    <GenAPIAdditionalParameters>-excludeApiList:$(MSBuildThisFileDirectory)ExcludeAPIList.txt</GenAPIAdditionalParameters>
   </PropertyGroup>
 
   <ItemGroup>

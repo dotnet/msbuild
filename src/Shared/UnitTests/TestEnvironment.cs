@@ -74,10 +74,6 @@ namespace Microsoft.Build.UnitTests
                 foreach (var item in _invariants)
                     item.AssertInvariant(_output);
             }
-            else
-            {
-                throw new InvalidOperationException("Already disposed");
-            }
         }
 
         /// <summary>
@@ -263,7 +259,13 @@ namespace Microsoft.Build.UnitTests
 
         public override void AssertInvariant(ITestOutputHelper output)
         {
-            Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
+            var currentValue = _accessorFunc();
+
+            //  Something like the following might be preferrable, but the assertion method truncates the values leaving us without
+            //  useful information.  So use Assert.True instead
+            //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
+
+            Assert.True(currentValue == _originalValue, $"Expected {_name} to be '{_originalValue}', but it was '{currentValue}'");
         }
     }
 
