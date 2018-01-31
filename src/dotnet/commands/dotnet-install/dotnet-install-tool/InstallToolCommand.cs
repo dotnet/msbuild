@@ -50,10 +50,9 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             _global = appliedCommand.ValueOrDefault<bool>("global");
 
             var cliFolderPathCalculator = new CliFolderPathCalculator();
-            var executablePackagePath = new DirectoryPath(cliFolderPathCalculator.ExecutablePackagesPath);
             var offlineFeedPath = new DirectoryPath(cliFolderPathCalculator.CliFallbackFolderPath);
             _toolPackageObtainer = toolPackageObtainer ?? new ToolPackageObtainer(
-                                       executablePackagePath,
+                                       new DirectoryPath(cliFolderPathCalculator.ToolsPackagePath),
                                        offlineFeedPath,
                                        () => new DirectoryPath(Path.GetTempPath())
                                            .WithSubDirectories(Path.GetRandomFileName())
@@ -65,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                                           ?? EnvironmentPathFactory
                                               .CreateEnvironmentPathInstruction();
 
-            _shellShimMaker = shellShimMaker ?? new ShellShimMaker(executablePackagePath.Value);
+            _shellShimMaker = shellShimMaker ?? new ShellShimMaker(cliFolderPathCalculator.ToolsShimPath);
 
             _reporter = reporter ?? Reporter.Output;
         }
