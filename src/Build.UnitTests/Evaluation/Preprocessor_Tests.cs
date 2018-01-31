@@ -931,7 +931,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2932")]
         public void ImportedProjectsSdkImportsAreInPreprocessedOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())
