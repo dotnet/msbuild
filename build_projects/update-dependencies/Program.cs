@@ -28,6 +28,11 @@ namespace Microsoft.DotNet.Scripts
 
             buildInfos.Add(GetBuildInfo("CoreSetup", s_config.CoreSetupVersionFragment, fetchLatestReleaseFile: false));
 
+            if (s_config.HasRoslynVersionFragment)
+            {
+                buildInfos.Add(GetBuildInfo("Roslyn", s_config.RoslynVersionFragment, fetchLatestReleaseFile: false));
+            }
+
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
             var dependencyBuildInfos = buildInfos.Select(buildInfo =>
                 new BuildDependencyInfo(
@@ -88,6 +93,11 @@ namespace Microsoft.DotNet.Scripts
             yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETCoreAppPackageVersion", "Microsoft.NETCore.App");
             yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetPlatformAbstractionsPackageVersion", "Microsoft.DotNet.PlatformAbstractions");
             yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftExtensionsDependencyModelPackageVersion", "Microsoft.Extensions.DependencyModel");
+
+            if (s_config.HasRoslynVersionFragment)
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftCodeAnalysisCSharpPackageVersion", "Microsoft.CodeAnalysis.CSharp");
+            }
         }
 
         private static IDependencyUpdater CreateRegexUpdater(string repoRelativePath, string propertyName, string packageId)
