@@ -3586,15 +3586,46 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringPadRight1()
+        {
+            TestPropertyFunction("$(prop.PadRight(2))", "prop", "x", "x ");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringPadRight2()
+        {
+            TestPropertyFunction("$(prop.PadRight(2, '0'))", "prop", "x", "x0");
+        }
+
+        [Fact]
         public void PropertyFunctionStringTrimEndCharArray()
         {
             TestPropertyFunction("$(prop.TrimEnd('.0123456789'))", "prop", "net461", "net");
         }
 
         [Fact]
+        public void PropertyFunctionStringTrimStart()
+        {
+            TestPropertyFunction("$(X.TrimStart('vV'))", "X", "v40", "40");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimStartNoQuotes()
+        {
+            TestPropertyFunction("$(X.TrimStart(vV))", "X", "v40", "40");
+        }
+
+        [Fact]
         public void PropertyFunctionStringTrimEnd1()
         {
             TestPropertyFunction("$(prop.TrimEnd('a'))", "prop", "netaa", "net");
+        }
+
+        // https://github.com/Microsoft/msbuild/issues/2882
+        [Fact]
+        public void PropertyFunctionMathMaxOverflow()
+        {
+            TestPropertyFunction("$([System.Math]::Max($(X), 0))", "X", "-2010", "0");
         }
 
         [Fact]
@@ -3604,6 +3635,60 @@ $(
             {
                 TestPropertyFunction("$(prop.TrimEnd('a', 'b'))", "prop", "stringab", "string");
             });
+        }
+
+        [Fact]
+        public void PropertyFunctionMathMin()
+        {
+            TestPropertyFunction("$([System.Math]::Min($(X), 20))", "X", "30", "20");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildAdd()
+        {
+            TestPropertyFunction("$([MSBuild]::Add($(X), 5))", "X", "7", "12");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildSubtract()
+        {
+            TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000))", "X", "20100042", "42");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildMultiply()
+        {
+            TestPropertyFunction("$([MSBuild]::Multiply($(X), 8800))", "X", "2", "17600");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildDivide()
+        {
+            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", "6.5536");
+        }
+
+        [Fact]
+        public void PropertyFunctionConvertToString()
+        {
+            TestPropertyFunction("$([System.Convert]::ToString(`.`))", "_", "_", ".");
+        }
+
+        [Fact]
+        public void PropertyFunctionConvertToInt32()
+        {
+            TestPropertyFunction("$([System.Convert]::ToInt32(42))", "_", "_", "42");
+        }
+
+        [Fact]
+        public void PropertyFunctionToCharArray()
+        {
+            TestPropertyFunction("$([System.Convert]::ToString(`.`).ToCharArray())", "_", "_", ".");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringArrayGetValue()
+        {
+            TestPropertyFunction("$(X.Split($([System.Convert]::ToString(`.`).ToCharArray())).GetValue($([System.Convert]::ToInt32(0))))", "X", "ab.cd", "ab");
         }
 
         private void TestPropertyFunction(string expression, string propertyName, string propertyValue, string expected)

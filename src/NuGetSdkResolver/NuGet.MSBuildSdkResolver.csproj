@@ -10,8 +10,8 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" Private="false"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.Commands" Version="4.5.0" />
-    <PackageReference Include="NuGet.Protocol" Version="4.5.0" />
+    <PackageReference Include="NuGet.Commands" Version="4.6.0-rtm-4822" />
+    <PackageReference Include="NuGet.Protocol" Version="4.6.0-rtm-4822" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -44,6 +44,9 @@
     </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>Shared\FileUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\TempFileUtilities.cs">
+      <Link>Shared\TempFileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>Shared\FileUtilitiesRegex.cs</Link>

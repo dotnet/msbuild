@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -368,13 +369,20 @@ namespace Microsoft.Build.BackEnd.Logging
         void LogBuildFinished(bool success);
 
         /// <summary>
+        /// Create an evaluation context, by generating a new evaluation id.
+        /// </summary>
+        /// <param name="nodeId">The node id</param>
+        /// <param name="submissionId">The submission id</param>
+        /// <returns></returns>
+        BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId);
+
+        /// <summary>
         /// Logs that a project evaluation has started
         /// </summary>
-        /// <param name="nodeId">The id of the node which is evaluating this project.</param>
-        /// <param name="submissionId">The id of the submission.</param>
-        /// <param name="projectFile">Project file to build</param>
+        /// <param name="eventContext">The event context to use for logging</param>
+        /// <param name="projectFile">Project file being built</param>
         /// <returns>The evaluation event context for the project.</returns>
-        BuildEventContext LogProjectEvaluationStarted(int nodeId, int submissionId, string projectFile);
+        void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile);
 
         /// <summary>
         /// Logs that a project evaluation has finished

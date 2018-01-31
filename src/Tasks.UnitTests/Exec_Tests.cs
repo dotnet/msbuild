@@ -3,11 +3,14 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -429,6 +432,36 @@ namespace Microsoft.Build.UnitTests
         public void ExecTaskUtf8NeverWithAnsi()
         {
             RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never");
+        }
+
+        [Theory]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "nonlinuxtests")]
+        public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                testEnvironment.SetEnvironmentVariable(environmentVariableName, environmentVariableValue);
+
+                Exec exec = PrepareExec("exit 0");
+
+                Type execType = typeof(Exec);
+
+                MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
+
+                if (autoRunShouldBeDisabled)
+                {
+                    commandLine.ShouldContain("/D ");
+                }
+                else
+                {
+                    commandLine.ShouldNotContain("/D ");
+                }
+            }
         }
 
 

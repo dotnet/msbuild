@@ -10,7 +10,7 @@
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
     <!-- This version should be kept in sync with `project.json` -->
-    <FeedTasksPackageVersion>2.1.0-prerelease-02221-02</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.1.0-prerelease-02419-02</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)packages\$(FeedTasksPackage)\$(FeedTasksPackageVersion)\build\$(FeedTasksPackage).targets" />
@@ -23,7 +23,12 @@
     <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
                     AccountKey="$(AccountKey)"
                     ItemsToPush="@(ItemsToPush)"
-                    Overwrite="$(PublishOverwrite)" />
+                    Overwrite="$(PublishOverwrite)"
+                    ManifestBranch="$(ManifestBranch)"
+                    ManifestBuildId="$(ManifestBuildId)"
+                    ManifestCommit="$(ManifestCommit)"
+                    ManifestName="msbuild"
+                    SkipCreateManifest="false" />
   </Target>
 
 </Project>

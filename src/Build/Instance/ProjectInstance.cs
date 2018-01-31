@@ -474,8 +474,11 @@ namespace Microsoft.Build.Execution
         /// Deep clone of this object.
         /// Useful for compiling a single file; or for keeping resolved assembly references between builds.
         /// </summary>
-        private ProjectInstance(ProjectInstance that, bool isImmutable)
+        private ProjectInstance(ProjectInstance that, bool isImmutable, RequestedProjectState filter = null)
         {
+            ErrorUtilities.VerifyThrow(filter == null || isImmutable,
+                "The result of a filtered ProjectInstance clone must be immutable.");
+
             _directory = that._directory;
             _projectFileLocation = that._projectFileLocation;
             _hostServices = that._hostServices;
@@ -484,50 +487,146 @@ namespace Microsoft.Build.Execution
 
             TranslateEntireState = that.TranslateEntireState;
 
-            _properties = new PropertyDictionary<ProjectPropertyInstance>(that._properties.Count);
-
-            foreach (ProjectPropertyInstance property in that.Properties)
+            if (filter == null)
             {
-                _properties.Set(property.DeepClone(_isImmutable));
+                _properties = new PropertyDictionary<ProjectPropertyInstance>(that._properties.Count);
+
+                foreach (ProjectPropertyInstance property in that.Properties)
+                {
+                    _properties.Set(property.DeepClone(_isImmutable));
+                }
+
+                _items = new ItemDictionary<ProjectItemInstance>(that._items.ItemTypes.Count);
+
+                foreach (ProjectItemInstance item in that.Items)
+                {
+                    _items.Add(item.DeepClone(this));
+                }
+
+                _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(that._globalProperties.Count);
+
+                foreach (ProjectPropertyInstance globalProperty in that.GlobalPropertiesDictionary)
+                {
+                    _globalProperties.Set(globalProperty.DeepClone(_isImmutable));
+                }
+
+                _environmentVariableProperties =
+                    new PropertyDictionary<ProjectPropertyInstance>(that._environmentVariableProperties.Count);
+
+                foreach (ProjectPropertyInstance environmentProperty in that._environmentVariableProperties)
+                {
+                    _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
+                }
+
+                this.DefaultTargets = new List<string>(that.DefaultTargets);
+                this.InitialTargets = new List<string>(that.InitialTargets);
+                ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
+                    ProjectItemDefinitionInstance>) this).BeforeTargets = CreateCloneDictionary(
+                    ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
+                        ProjectItemDefinitionInstance>) that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
+                ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
+                    ProjectItemDefinitionInstance>) this).AfterTargets = CreateCloneDictionary(
+                    ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
+                        ProjectItemDefinitionInstance>) that).AfterTargets, StringComparer.OrdinalIgnoreCase);
+                this.TaskRegistry =
+                    that.TaskRegistry; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
+
+                // These are immutable so we don't need to clone them:
+                this.Toolset = that.Toolset;
+                this.SubToolsetVersion = that.SubToolsetVersion;
+                _targets = that._targets;
+                _itemDefinitions = that._itemDefinitions;
+                _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
+
+                this.EvaluatedItemElements = that.EvaluatedItemElements;
+
+                this.ProjectRootElementCache = that.ProjectRootElementCache;
             }
-
-            _items = new ItemDictionary<ProjectItemInstance>(that._items.ItemTypes.Count);
-
-            foreach (ProjectItemInstance item in that.Items)
+            else
             {
-                _items.Add(item.DeepClone(this));
+                if (filter.PropertyFilters != null)
+                {
+                    // If PropertyFilters is defined, filter all types of property to contain
+                    // only those explicitly specified.
+
+                    // Reserve space assuming all specified properties exist.
+                    _properties = new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
+                    _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
+                    _environmentVariableProperties =
+                        new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
+
+                    // Filter each type of property.
+                    foreach (var desiredProperty in filter.PropertyFilters)
+                    {
+                        var regularProperty = that.GetProperty(desiredProperty);
+                        if (regularProperty != null)
+                        {
+                            _properties.Set(regularProperty.DeepClone(isImmutable: true));
+                        }
+
+                        var globalProperty = that.GetProperty(desiredProperty);
+                        if (globalProperty != null)
+                        {
+                            _globalProperties.Set(globalProperty.DeepClone(isImmutable: true));
+                        }
+
+                        var environmentProperty = that.GetProperty(desiredProperty);
+                        if (environmentProperty != null)
+                        {
+                            _environmentVariableProperties.Set(environmentProperty.DeepClone(isImmutable: true));
+                        }
+                    }
+                }
+
+                if (filter.ItemFilters != null)
+                {
+                    // If ItemFilters is defined, filter items down to the list
+                    // specified, optionally also filtering metadata.
+
+                    // Temporarily allow editing items to remove metadata that
+                    // wasn't explicitly asked for.
+                    _isImmutable = false;
+
+                    _items = new ItemDictionary<ProjectItemInstance>(that.Items.Count);
+
+                    foreach (var itemFilter in filter.ItemFilters)
+                    {
+                        foreach (var actualItem in that.GetItems(itemFilter.Key))
+                        {
+                            var filteredItem = actualItem.DeepClone(this);
+
+                            if (itemFilter.Value == null)
+                            {
+                                // No specified list of metadata names, so include all metadata.
+                                // The returned list of items is still filtered by item name.
+                            }
+                            else
+                            {
+                                // Include only the explicitly-asked-for metadata by removing
+                                // any extant metadata.
+                                // UNDONE: This could be achieved at lower GC cost by applying
+                                // the metadata filter at DeepClone time above.
+                                foreach (var metadataName in filteredItem.MetadataNames)
+                                {
+                                    if (!itemFilter.Value.Contains(metadataName, StringComparer.OrdinalIgnoreCase))
+                                    {
+                                        filteredItem.RemoveMetadata(metadataName);
+                                    }
+                                }
+                            }
+
+                            _items.Add(filteredItem);
+                        }
+                    }
+
+                    // Restore immutability after editing newly cloned items.
+                    _isImmutable = isImmutable;
+
+                    // A filtered result is not useful for building anyway; ensure that
+                    // it has minimal IPC wire cost.
+                    _translateEntireState = false;
+                }
             }
-
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(that._globalProperties.Count);
-
-            foreach (ProjectPropertyInstance globalProperty in that.GlobalPropertiesDictionary)
-            {
-                _globalProperties.Set(globalProperty.DeepClone(_isImmutable));
-            }
-
-            _environmentVariableProperties = new PropertyDictionary<ProjectPropertyInstance>(that._environmentVariableProperties.Count);
-
-            foreach (ProjectPropertyInstance environmentProperty in that._environmentVariableProperties)
-            {
-                _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
-            }
-
-            this.DefaultTargets = new List<string>(that.DefaultTargets);
-            this.InitialTargets = new List<string>(that.InitialTargets);
-            ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
-            ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
-            this.TaskRegistry = that.TaskRegistry; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
-
-            // These are immutable so we don't need to clone them:
-            this.Toolset = that.Toolset;
-            this.SubToolsetVersion = that.SubToolsetVersion;
-            _targets = that._targets;
-            _itemDefinitions = that._itemDefinitions;
-            _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
-
-            this.EvaluatedItemElements = that.EvaluatedItemElements;
-
-            this.ProjectRootElementCache = that.ProjectRootElementCache;
         }
 
         /// <summary>
@@ -1475,6 +1574,21 @@ namespace Microsoft.Build.Execution
         public ProjectInstance DeepCopy()
         {
             return DeepCopy(_isImmutable);
+        }
+
+        /// <summary>
+        /// Create an independent clone of this object, keeping ONLY the explicitly
+        /// requested project state.
+        /// </summary>
+        /// <remarks>
+        /// Useful for reducing the wire cost of IPC for out-of-proc nodes used during
+        /// design-time builds that only need to populate a known set of data.
+        /// </remarks>
+        /// <param name="filter">Project state that should be returned.</param>
+        /// <returns></returns>
+        public ProjectInstance FilteredCopy(RequestedProjectState filter)
+        {
+            return new ProjectInstance(this, true, filter);
         }
 
         /// <summary>
