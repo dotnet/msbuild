@@ -42,7 +42,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
                     newJob.with{
                         steps{
                             // all windows builds do a full framework localized build to produce satellite assemblies
-                            def script = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\""
+                            def script = "echo %cd% && call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\" && echo %cd% "
 
                             //  Should the build be Release?  The default is Debug
                             if (runtime == "Full") {
