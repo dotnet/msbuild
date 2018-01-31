@@ -1,0 +1,7 @@
+<Project>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
+  </ItemGroup>
+
+</Project>

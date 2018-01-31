@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.UnitTests;
 using NuGet.Versioning;
 using Shouldly;
 using System.Collections.Generic;

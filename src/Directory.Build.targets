@@ -1,0 +1,143 @@
+﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
+    <StrongNameKeyId>Microsoft</StrongNameKeyId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true'">
+    <StrongNameKeyId>MSBuildTest</StrongNameKeyId>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Test.snk</AssemblyOriginatorKeyFile>
+    <PublicKey>002400000480000094000000060200000024000052534131000400000100010015c01ae1f50e8cc09ba9eac9147cf8fd9fce2cfe9f8dce4f7301c4132ca9fb50ce8cbf1df4dc18dd4d210e4345c744ecb3365ed327efdbc52603faa5e21daa11234c8c4a73e51f03bf192544581ebe107adee3a34928e39d04e524a9ce729d5090bfd7dad9d10c722c0def9ccc08ff0a03790e48bcd1f9b6c476063e1966a1c4</PublicKey>
+    <PublicKeyToken>9d77cc7ad39b68eb</PublicKeyToken>
+
+    <!-- Repeat setting DebugType (already set in Directory.Build.props, but repeat here because because xunit.core.targets overrides it) -->
+    <DebugType>embedded</DebugType>
+    <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
+
+    <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
+    <OutputType>Exe</OutputType>
+    <GenerateProgramFile>false</GenerateProgramFile>
+
+    <!-- Respect the traits set up by PlatformSpecific attribute. -->
+    <XunitOptions Condition="'$(OsEnvironment)'=='windows'">$(XunitOptions) -notrait category=nonwindowstests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='linux'">$(XunitOptions) -notrait category=nonlinuxtests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='linux' and '$(NetCoreBuild)'=='true'">-notrait category=nonlinuxtests -notrait category=netcore-linux-failing</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='osx'">$(XunitOptions) -notrait category=nonosxtests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='osx' and '$(NetCoreBuild)'=='true'">-notrait category=nonosxtests -notrait category=netcore-osx-failing</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='bsd'">$(XunitOptions) -notrait category=nonfreebsdtests</XunitOptions>
+
+    <XunitOptions Condition="'$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=non-mono-tests</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='osx' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-osx-failing</XunitOptions>
+    <XunitOptions Condition="'$(OsEnvironment)'=='windows' and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
+
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
+
+    <XUnitRunnerAdditionalArguments>$(XunitOptions)</XUnitRunnerAdditionalArguments>
+    
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
+    <!-- MSBuild isn't xunit analyzer clean, so remove the reference to the xunit package added by the repo toolset and
+         replace it with references to xunit.core and xunit.assert. -->
+    <PackageReference Remove="xunit" />
+    <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.assert" Version="$(XUnitVersion)" />
+
+    <!-- Don't localize unit test projects -->
+    <PackageReference Remove="XliffTasks" />
+
+    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" />
+    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestProgram.cs" />
+
+  </ItemGroup>
+
+  <!-- GenAPI settings -->
+  <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
+    <!-- Disable reference assembly source when building for Mono, as some APIs are excluded when compiling for Mono -->
+    <GenerateReferenceAssemblySources>false</GenerateReferenceAssemblySources>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
+    <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
+    <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
+    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPITargetPath>$(RepoRoot)src\Package\ReferenceAssemblies\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
+  </PropertyGroup>
+  
+  <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
+    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" Version="$(GenApiVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
+    <PackageReference Include="xunit.console" Version="$(XUnitVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OutputType)' == 'Exe'">
+    <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
+         tests from picking up these files from the repo root. -->
+    <Content Include="$(RepoRoot)src\Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest"
+             Visible="false" Pack="false"/>
+  </ItemGroup>
+  
+  <PropertyGroup>
+    <!-- Native equivalent is /LARGEADDRESSAWARE on the linker -->
+    <EditBinFlags Condition="'$(LargeAddressAware)'=='true'">$(EditBinFlags) /LARGEADDRESSAWARE</EditBinFlags>    
+  </PropertyGroup>
+  
+  <!-- We want this target to be incremental, but editbin affects the file in place.  So use
+       a marker file. -->
+  <Target Name="EditBin"
+          AfterTargets="CoreCompile"
+          Inputs="@(IntermediateAssembly)"
+          Outputs="@(IntermediateAssembly->'%(Identity).editbin_marker')"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(PlatformTarget)' == 'x86' and '$(EditBinFlags)'!=''">
+    <PropertyGroup>
+      <!-- Don't require all developers to install C++ tools just to
+           get editbin.exe -->
+      <EditBinContinueOnError>WarnAndContinue</EditBinContinueOnError>
+      <!-- But DO fail the build on CI and official builds if we can't
+           produce the right outputs. Continuing on error to allow
+           test results even on a misconfigured build machine. -->
+      <EditBinContinueOnError Condition="'$(TF_BUILD)' == 'True' or '$(JENKINS_URL)' != '' or '$(OfficialBuild)' == 'true' or '$(CIBuild)' == 'true'">ErrorAndContinue</EditBinContinueOnError>
+
+      <!--
+        * VSINSTALLDIR is set by the Developer Command Prompt. When building from MicroBuild, this isn't set.
+        * VsInstallRoot is discovered by MSBuild, but in our bootstrapped build it's wrong (VS isn't installed
+          to our 'bin' folder). When building from MicroBuild (or any installed VS), this value is correct.
+      -->
+      <EditBinCommand Condition="'$(VSINSTALLDIR)' != ''">call &quot;$(VSINSTALLDIR)\Common7\Tools\VsDevCmd.bat&quot; /no_logo&amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) &quot;@(IntermediateAssembly)&quot;</EditBinCommand>
+      <EditBinCommand Condition="'$(VsInstallRoot)' != '' and '$(EditBinCommand)' == ''">call &quot;$(VsInstallRoot)\Common7\Tools\VsDevCmd.bat&quot; /no_logo&amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) &quot;@(IntermediateAssembly)&quot;</EditBinCommand>
+    </PropertyGroup>
+
+    <Exec Command="$(EditBinCommand)"
+          ContinueOnError="$(EditBinContinueOnError)">
+      <Output TaskParameter="ExitCode" PropertyName="EditBinExitCode"/>
+    </Exec>
+
+    <!-- Only write the marker file if we successfully ran EditBin, to avoid the warning disappearing from incremental
+         WarnAndContinue builds -->
+    <Touch Files="%(IntermediateAssembly.Identity).editbin_marker" AlwaysCreate="true"
+           Condition="'$(EditBinExitCode)' == '0'"/>
+    <ItemGroup>
+      <FileWrites Include="%(IntermediateAssembly.Identity).editbin_marker" Condition="'$(EditBinExitCode)' == '0'"/>
+    </ItemGroup>
+
+  </Target>
+
+  <!-- Import common project targets provided by RepoToolset -->
+  <Import Project="$(RepoToolsetDir)Imports.targets" />
+
+  <!-- Override in-box GenerateSatelliteAssemblies, as we are using CoreGenerateSatelliteAssemblies instead.
+       With https://github.com/Microsoft/msbuild/pull/2726 this is no longer necessary, but that change is not
+       in VS 15.5 (which is what we use for Jenkins right now). -->
+  <Target Name="GenerateSatelliteAssemblies" />
+
+  <!-- Import parent targets -->
+  <Import Project="..\Directory.Build.targets"/>
+
+</Project>

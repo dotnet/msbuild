@@ -1,0 +1,10 @@
+﻿<Project>
+
+    <!-- Import parent props -->
+  <Import Project="..\Directory.Build.props"/>
+
+  <PropertyGroup>
+    <ThirdPartyNotice>$(RepoRoot)THIRDPARTYNOTICES.txt</ThirdPartyNotice>
+  </PropertyGroup>
+
+</Project>

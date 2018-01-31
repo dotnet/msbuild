@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Shared
 {
@@ -112,5 +113,50 @@ namespace Microsoft.Build.Shared
                 throw new IOException(ResourceUtilities.FormatResourceString("Shared.FailedCreatingTempFile", ex.Message), ex);
             }
         }
+
+        public class TempWorkingDirectory : IDisposable
+        {
+            public string Path { get; private set; }
+
+            public TempWorkingDirectory(string sourcePath, [CallerMemberName] string name = null)
+            {
+                if (name == null)
+                {
+                    Path = FileUtilities.GetTemporaryDirectory();
+                }
+                else
+                {
+                    Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), name);
+                }
+                if (Directory.Exists(Path))
+                {
+                    Directory.Delete(Path, true);
+                }
+                CopyDirectory(sourcePath, Path);
+            }
+
+            public void Dispose()
+            {
+                Directory.Delete(Path, true);
+            }
+            static void CopyDirectory(string source, string dest)
+            {
+                Directory.CreateDirectory(dest);
+
+                DirectoryInfo sourceInfo = new DirectoryInfo(source);
+                foreach (var fileInfo in sourceInfo.GetFiles())
+                {
+                    string destFile = System.IO.Path.Combine(dest, fileInfo.Name);
+                    fileInfo.CopyTo(destFile);
+                }
+                foreach (var subdirInfo in sourceInfo.GetDirectories())
+                {
+                    string destDir = System.IO.Path.Combine(dest, subdirInfo.Name);
+                    CopyDirectory(subdirInfo.FullName, destDir);
+                }
+            }
+
+        }
+
     }
 }

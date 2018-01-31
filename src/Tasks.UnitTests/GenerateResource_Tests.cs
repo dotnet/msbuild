@@ -14,6 +14,7 @@ using System.Text;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
@@ -179,7 +180,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  ResX to Resources with references that are used in the resx
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "Depends on referencing System.dll")]
+#else
         [Fact]
+#endif
         public void ResX2ResourcesWithReferences()
         {
             string systemDll = Utilities.GetPathToCopiedSystemDLL();
@@ -600,7 +605,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// otherwise up to date
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "Depends on referencing System.dll")]
+#else
         [Fact]
+#endif
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -2125,7 +2134,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
 #endif
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2511,7 +2520,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;
@@ -2700,12 +2709,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             t.References = new ITaskItem[]
                 {
                     new TaskItem(p2pReference),
-#if FEATURE_ASSEMBLY_LOCATION
+#if !RUNTIME_TYPE_NETCORE
                     // Path to System.dll
                     new TaskItem(new Uri((typeof(string)).Assembly.EscapedCodeBase).LocalPath)
 #else
-                    // Path to System.dll
-                    new TaskItem(new Uri(Path.Combine(Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath), "System.dll")).LocalPath)
 #endif
                 };
 
@@ -3093,6 +3100,65 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             GenerateResource t = new GenerateResource();
 
             Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
+        }
+
+        //  Regression test for https://github.com/Microsoft/msbuild/issues/2206
+        [Theory]
+        [InlineData("\n")]
+        [InlineData("\r\n")]
+        [InlineData("\r")]
+        public void ResxValueNewlines(string newline)
+        {
+            string resxValue = "First line" + newline + "second line" + newline;
+            string resxDataName = "DataWithNewline";
+            string data = "<data name=\"" + resxDataName + "\">" + newline +
+                "<value>" + resxValue + "</value>" + newline + "</data>";
+
+            string resxFile = null;
+
+            GenerateResource t = Utilities.CreateTask(_output);
+            t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+            try
+            {
+                resxFile = Utilities.WriteTestResX(false, null, data);
+
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                Utilities.ExecuteTask(t);
+
+                string resourcesFile = t.OutputResources[0].ItemSpec;
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+                resourcesFile = t.FilesWritten[0].ItemSpec;
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+
+                Dictionary<string, object> valuesFromResource = new Dictionary<string, object>();
+                using (var resourceReader = new System.Resources.ResourceReader(resourcesFile))
+                {
+                    IDictionaryEnumerator resEnum = resourceReader.GetEnumerator();
+                    while (resEnum.MoveNext())
+                    {
+                        string name = (string)resEnum.Key;
+                        object value = resEnum.Value;
+                        valuesFromResource[name] = value;
+                    }
+                }
+
+                Assert.True(valuesFromResource.ContainsKey(resxDataName));
+                Assert.Equal(resxValue, valuesFromResource[resxDataName]);
+            }
+            finally
+            {
+
+                File.Delete(t.Sources[0].ItemSpec);
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    if (File.Exists(item.ItemSpec))
+                    {
+                        File.Delete(item.ItemSpec);
+                    }
+                }
+            }
         }
     }
 }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn/api/v3/index.json</RestoreSources>
+    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/nuget-build/api/v3/index.json</RestoreSources>
+    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json</RestoreSources>
+    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json</RestoreSources>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <!-- Repo Version Information (these versions shouldn't actually be used because NerdBank.GitVersioning should
+       override the versions set by Repo Toolset) -->
+  <PropertyGroup>
+    <VersionBase>15.1.0</VersionBase>
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
+
+    <UseShippingAssemblyVersion>true</UseShippingAssemblyVersion>
+  </PropertyGroup>
+
+  <!-- Repo Toolset Features -->
+  <PropertyGroup>
+    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
+
+    <UsingToolVSSDK>true</UsingToolVSSDK>
+    <!-- Tell repo toolset not to define the GetBuildVersion target, as it would conflict with NerdBank.GitVersioning -->
+    <DefineGetBuildVersionTargetForVsix>false</DefineGetBuildVersionTargetForVsix>
+
+    <!-- Use later version of XliffTasks which has a fix for .resx files consumed by multiple projects.
+         See https://github.com/dotnet/xliff-tasks/pull/34 -->
+    <XliffTasksVersion>0.2.0-beta-000081</XliffTasksVersion>
+
+  </PropertyGroup>
+
+  <!-- Toolset Dependencies -->
+  <PropertyGroup>
+    <DotNetCliVersion>2.1.1-preview-007216</DotNetCliVersion>
+    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62512-02</RoslynToolsRepoToolsetVersion>
+    <VSWhereVersion>2.2.7</VSWhereVersion>
+
+    <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
+    <GitVersioningVersion>2.1.16</GitVersioningVersion>
+  </PropertyGroup>
+
+  <!-- Production Dependencies -->
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <!-- Test Dependencies -->
+  <PropertyGroup>
+    <MicrosoftNetCompilersVersion>2.4.0</MicrosoftNetCompilersVersion>
+    <MicrosoftNetCoreCompilersVersion>2.6.0-beta3-62309-01</MicrosoftNetCoreCompilersVersion>
+    <MicrosoftCodeAnalysisBuildTasksVersion>3.0.0-beta1-61516-01</MicrosoftCodeAnalysisBuildTasksVersion>
+    <!--<NuGetVersion>4.6.0-rtm-4822</NuGetVersion>-->
+  </PropertyGroup>
+
+</Project>

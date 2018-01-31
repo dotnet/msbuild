@@ -14,21 +14,35 @@ using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    public class FileMatcherTest
+    public class FileMatcherTest : IDisposable
     {
+        private readonly TestEnvironment _env;
+
+        public FileMatcherTest(ITestOutputHelper output)
+        {
+            _env = TestEnvironment.Create(output);
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
+
         [Fact]
         public void GetFilesPatternMatching()
         {
-            var workingPath = Path.Combine(Path.GetTempPath(), "Test");
-            var files = new string[]
+            var workingPath = _env.CreateFolder().FolderPath;
+
+            var files = new[]
             {
                 "Foo.cs",
                 "Foo2.cs",
@@ -40,43 +54,36 @@ namespace Microsoft.Build.UnitTests
                 "file.bak.txt"
             };
 
-            try
+            foreach (var file in files)
             {
-                Directory.CreateDirectory(workingPath);
-                foreach (var file in files)
-                {
-                    File.WriteAllBytes(Path.Combine(workingPath, file), new byte[5000]);
-                }
-
-                var patterns = new Dictionary<string, int>
-                {
-                    {"*.txt", 5},
-                    {"???.cs", 1},
-                    {"????.cs", 1},
-                    {"file?.txt", 1},
-                    {"fi?e?.txt", 2},
-                    {"???.*", 1},
-                    {"????.*", 4},
-                    {"*.???", 5},
-                    {"f??e1.txt", 2},
-                    {"file.*.txt", 1}
-                };
-                foreach (var pattern in patterns)
-                {
-                    try
-                    {
-                        Assert.Equal(pattern.Value, FileMatcher.GetFiles(workingPath, pattern.Key).Length);
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine($"Pattern {pattern} failed");
-                        throw;
-                    }
-                }
+                File.WriteAllBytes(Path.Combine(workingPath, file), new byte[5000]);
             }
-            finally
+
+            var patterns = new Dictionary<string, int>
             {
-                FileUtilities.DeleteWithoutTrailingBackslash(workingPath, true);
+                {"*.txt", 5},
+                {"???.cs", 1},
+                {"????.cs", 1},
+                {"file?.txt", 1},
+                {"fi?e?.txt", 2},
+                {"???.*", 1},
+                {"????.*", 4},
+                {"*.???", 5},
+                {"f??e1.txt", 2},
+                {"file.*.txt", 1}
+            };
+
+            foreach (var pattern in patterns)
+            {
+                try
+                {
+                    Assert.Equal(pattern.Value, FileMatcher.GetFiles(workingPath, pattern.Key).Length);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Pattern {pattern} failed");
+                    throw;
+                }
             }
         }
 
@@ -215,10 +222,11 @@ namespace Microsoft.Build.UnitTests
                 @"src\bar\inner\baz.cs"
             }
         )]
-        public void GetFilesComplexGlobbingMatching(string includePattern, string[] excludePatterns, string[] expectedMatchings)
+        public void GetFilesComplexGlobbingMatching(string includePattern, string[] excludePatterns,
+            string[] expectedMatchings)
         {
-            var workingPath = Path.Combine(Path.GetTempPath(), "Globbing");
-            var files = new []
+            var workingPath = _env.CreateFolder().FolderPath;
+            var files = new[]
             {
                 @"src\foo.cs",
                 @"src\bar.cs",
@@ -247,6 +255,7 @@ namespace Microsoft.Build.UnitTests
                         Assert.Equal(0, matchedFiles.Length);
                         return;
                     }
+
                     // We have to lower file paths as the result could be in uppercase e.g. "SRC\foo.cs"
                     var normMatchedFiles = matchedFiles
                         .Select(o => o.Replace(Path.DirectorySeparatorChar, '\\').ToLowerInvariant()).ToArray();
@@ -254,91 +263,87 @@ namespace Microsoft.Build.UnitTests
                     {
                         Assert.Contains(matchedFile, expectedMatchings);
                     }
+
                     Assert.Equal(expectedMatchings.Length, matchedFiles.Length);
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Globbing failed for include {include} with excludes {string.Join(",", excludes)}, " +
-                                      $"should have no matches: {hasNoMatches}, " +
-                                      $"returned files: {(matchedFiles != null ? string.Join(",", matchedFiles) : null)}");
+                    Console.WriteLine(
+                        $"Globbing failed for include {include} with excludes {string.Join(",", excludes)}, " +
+                        $"should have no matches: {hasNoMatches}, " +
+                        $"returned files: {(matchedFiles != null ? string.Join(",", matchedFiles) : null)}");
                     throw;
                 }
             };
 
-            try
+            // Create directories and files
+            foreach (var file in files)
             {
-                // Create directories and files
-                foreach (var file in files)
-                {
-                    var normFile = file.Replace('\\', Path.DirectorySeparatorChar);
-                    var dirPath = Path.Combine(workingPath, Path.GetDirectoryName(normFile));
+                var normFile = file.Replace('\\', Path.DirectorySeparatorChar);
+                var dirPath = Path.Combine(workingPath, Path.GetDirectoryName(normFile));
 
-                    Directory.CreateDirectory(dirPath);
-                    File.WriteAllBytes(Path.Combine(dirPath, Path.GetFileName(normFile)), new byte[5000]);
-                }
-
-                // Normal matching
-                match(includePattern, excludePatterns, false);
-                // Include forward slash
-                match(includePattern.Replace('\\', '/'), excludePatterns, false);
-                // Excludes forward slash
-                match(includePattern, excludePatterns.Select(o => o.Replace('\\', '/')).ToArray(), false);
-
-                // Backward compatibilities:
-                // 1. When an include or exclude starts with a fixed directory part e.g. "src/foo/**",
-                //    then matching should be case-sensitive on Linux, as the directory was checked for its existance
-                //    by using Directory.Exists, which is case-sensitive on Linux (on OSX is not).
-                // 2. On Unix, when an include uses a simple ** wildcard e.g. "**\*.cs", the file pattern e.g. "*.cs",
-                //    should be matched case-sensitive, as files were retrieved by using the searchPattern parameter
-                //    of Directory.GetFiles, which is case-sensitive on Unix.
-                var shouldHaveNoMatches = false;
-
-                // Do not test uppercase excludes on Linux, as it is not simple to figure out which files shall
-                // be excluded
-                if (!NativeMethodsShared.IsLinux)
-                {
-                    // Excludes uppercase
-                    match(includePattern, excludePatterns.Select(o => o.ToUpperInvariant()).ToArray(), false);
-                }
-                else
-                {
-                    // On Linux, we will have no matches for an uppercase include, when it starts with a fixed directory part
-                    // e.g. "SRC/FOO"
-                    shouldHaveNoMatches = !includePattern.StartsWith("**");
-                }
-                if (NativeMethodsShared.IsUnixLike)
-                {
-                    // On Unix, we will have no matches for an uppercase include, that has a simple ** wildcard and a file pattern
-                    // e.g. "**\*.CS"
-                    string fixedDirectoryPart;
-                    string wildcardDirectoryPart;
-                    string filenamePart;
-                    string matchFileExpression;
-                    bool needsRecursion;
-                    bool isLegalFileSpec;
-                    FileMatcher.GetFileSpecInfo(includePattern,
-                        out fixedDirectoryPart,
-                        out wildcardDirectoryPart,
-                        out filenamePart,
-                        out matchFileExpression,
-                        out needsRecursion,
-                        out isLegalFileSpec,
-                        FileMatcher.s_defaultGetFileSystemEntries);
-                    bool matchWithRegex =
-                        // if we have a directory specification that uses wildcards, and
-                        (wildcardDirectoryPart.Length > 0) &&
-                        // the specification is not a simple "**"
-                        (wildcardDirectoryPart != ("**" + new string(Path.DirectorySeparatorChar, 1)));
-                    shouldHaveNoMatches |= !matchWithRegex && filenamePart.Any(char.IsLetter);
-                }
-
-                // Include uppercase
-                match(includePattern.ToUpperInvariant(), excludePatterns, shouldHaveNoMatches);
+                Directory.CreateDirectory(dirPath);
+                File.WriteAllBytes(Path.Combine(dirPath, Path.GetFileName(normFile)), new byte[5000]);
             }
-            finally
+
+            // Normal matching
+            match(includePattern, excludePatterns, false);
+            // Include forward slash
+            match(includePattern.Replace('\\', '/'), excludePatterns, false);
+            // Excludes forward slash
+            match(includePattern, excludePatterns.Select(o => o.Replace('\\', '/')).ToArray(), false);
+
+            // Backward compatibilities:
+            // 1. When an include or exclude starts with a fixed directory part e.g. "src/foo/**",
+            //    then matching should be case-sensitive on Linux, as the directory was checked for its existance
+            //    by using Directory.Exists, which is case-sensitive on Linux (on OSX is not).
+            // 2. On Unix, when an include uses a simple ** wildcard e.g. "**\*.cs", the file pattern e.g. "*.cs",
+            //    should be matched case-sensitive, as files were retrieved by using the searchPattern parameter
+            //    of Directory.GetFiles, which is case-sensitive on Unix.
+            var shouldHaveNoMatches = false;
+
+            // Do not test uppercase excludes on Linux, as it is not simple to figure out which files shall
+            // be excluded
+            if (!NativeMethodsShared.IsLinux)
             {
-                FileUtilities.DeleteWithoutTrailingBackslash(workingPath, true);
+                // Excludes uppercase
+                match(includePattern, excludePatterns.Select(o => o.ToUpperInvariant()).ToArray(), false);
             }
+            else
+            {
+                // On Linux, we will have no matches for an uppercase include, when it starts with a fixed directory part
+                // e.g. "SRC/FOO"
+                shouldHaveNoMatches = !includePattern.StartsWith("**");
+            }
+
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                // On Unix, we will have no matches for an uppercase include, that has a simple ** wildcard and a file pattern
+                // e.g. "**\*.CS"
+                string fixedDirectoryPart;
+                string wildcardDirectoryPart;
+                string filenamePart;
+                string matchFileExpression;
+                bool needsRecursion;
+                bool isLegalFileSpec;
+                FileMatcher.GetFileSpecInfo(includePattern,
+                    out fixedDirectoryPart,
+                    out wildcardDirectoryPart,
+                    out filenamePart,
+                    out matchFileExpression,
+                    out needsRecursion,
+                    out isLegalFileSpec,
+                    FileMatcher.s_defaultGetFileSystemEntries);
+                bool matchWithRegex =
+                    // if we have a directory specification that uses wildcards, and
+                    (wildcardDirectoryPart.Length > 0) &&
+                    // the specification is not a simple "**"
+                    (wildcardDirectoryPart != ("**" + new string(Path.DirectorySeparatorChar, 1)));
+                shouldHaveNoMatches |= !matchWithRegex && filenamePart.Any(char.IsLetter);
+            }
+
+            // Include uppercase
+            match(includePattern.ToUpperInvariant(), excludePatterns, shouldHaveNoMatches);
         }
 
         [Fact]
@@ -1101,7 +1106,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // Nothing's too long for Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // Nothing's too long for Unix
         public void IllegalTooLongPath()
         {
             string longString = new string('X', 500) + "*"; // need a wildcard to do anything
@@ -1139,45 +1144,27 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress367780_CrashOnStarDotDot()
         {
-            string workingPath = Path.Combine(Path.GetTempPath(), "Regress367780");
+            string workingPath = _env.CreateFolder().FolderPath;
             string workingPathSubfolder = Path.Combine(workingPath, "SubDir");
             string offendingPattern = Path.Combine(workingPath, @"*\..\bar");
             string[] files = new string[0];
 
-            try
-            {
-                Directory.CreateDirectory(workingPath);
-                Directory.CreateDirectory(workingPathSubfolder);
+            Directory.CreateDirectory(workingPath);
+            Directory.CreateDirectory(workingPathSubfolder);
 
-                files = FileMatcher.GetFiles(workingPath, offendingPattern);
-            }
-            finally
-            {
-                FileUtilities.DeleteWithoutTrailingBackslash(workingPathSubfolder);
-                FileUtilities.DeleteWithoutTrailingBackslash(workingPath);
-            }
+            files = FileMatcher.GetFiles(workingPath, offendingPattern);
         }
 
         [Fact]
         public void Regress141071_StarStarSlashStarStarIsLiteral()
         {
-            string workingPath = Path.Combine(Path.GetTempPath(), "Regress141071");
+            string workingPath = _env.CreateFolder().FolderPath;
             string fileName = Path.Combine(workingPath, "MyFile.txt");
             string offendingPattern = Path.Combine(workingPath, @"**\**");
 
-            string[] files = new string[0];
-
-            try
-            {
-                Directory.CreateDirectory(workingPath);
-                File.WriteAllText(fileName, "Hello there.");
-                files = FileMatcher.GetFiles(workingPath, offendingPattern);
-            }
-            finally
-            {
-                File.Delete(fileName);
-                FileUtilities.DeleteWithoutTrailingBackslash(workingPath);
-            }
+            Directory.CreateDirectory(workingPath);
+            File.WriteAllText(fileName, "Hello there.");
+            var files = FileMatcher.GetFiles(workingPath, offendingPattern);
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
@@ -1188,25 +1175,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress14090_TrailingDotMatchesNoExtension()
         {
-            string workingPath = Path.Combine(Path.GetTempPath(), "Regress141071");
+            string workingPath = _env.CreateFolder().FolderPath;
             string workingPathSubdir = Path.Combine(workingPath, "subdir");
             string workingPathSubdirBing = Path.Combine(workingPathSubdir, "bing");
 
             string offendingPattern = Path.Combine(workingPath, @"**\sub*\*.");
 
-            string[] files = new string[0];
-
-            try
-            {
-                Directory.CreateDirectory(workingPath);
-                Directory.CreateDirectory(workingPathSubdir);
-                File.AppendAllText(workingPathSubdirBing, "y");
-                files = FileMatcher.GetFiles(workingPath, offendingPattern);
-            }
-            finally
-            {
-                FileUtilities.DeleteWithoutTrailingBackslash(workingPath, true);
-            }
+            Directory.CreateDirectory(workingPath);
+            Directory.CreateDirectory(workingPathSubdir);
+            File.AppendAllText(workingPathSubdirBing, "y");
+            var files = FileMatcher.GetFiles(workingPath, offendingPattern);
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
