@@ -1545,15 +1545,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       We give this treatment to .vcxproj by default since no .vcxproj can target more
       than one framework.
-
-      Likewise if the dependency is for build ordering instead of an assembly reference
-      (ReferenceOutputAssembly=false), skip the checks since we can't know what TF
-      the output would need to be compatible with.
    -->
    <ItemGroup>
-      <_MSBuildProjectReferenceExistent
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and
-                   ('%(Extension)' == '.vcxproj' or '%(ReferenceOutputAssembly)' == 'false')">
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and '%(Extension)' == '.vcxproj'">
         <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
       </_MSBuildProjectReferenceExistent>
    </ItemGroup>
