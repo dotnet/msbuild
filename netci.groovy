@@ -43,7 +43,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
                     newJob.with{
                         steps{
                             // Protect against VsDevCmd behaviour of changing the current working directory https://developercommunity.visualstudio.com/content/problem/26780/vsdevcmdbat-changes-the-current-working-directory.html
-                            def script = "pushd %CD% && call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\" && popd"
+                            def script = "set VSCMD_START_DIR=\"%CD%\" && call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\""
 
                             //  Should the build be Release?  The default is Debug
                             if (runtime == "Full") {
