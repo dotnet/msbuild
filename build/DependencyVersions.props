@@ -46,7 +46,6 @@
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
     <CliDepsSatellitesRoslynPackageVersion>2.6.0-pre-20171122-1</CliDepsSatellitesRoslynPackageVersion>
-    <CliDepsSatellitesFSharpPackageVersion>4.4.1-pre-20171122-1</CliDepsSatellitesFSharpPackageVersion>
   </PropertyGroup>
 
   <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->
