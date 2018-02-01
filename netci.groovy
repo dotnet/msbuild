@@ -3,6 +3,7 @@ import jobs.generation.*;
 
 // The input project name
 def project = GithubProject
+
 // The input branch name (e.g. master)
 def branch = GithubBranchName
 
