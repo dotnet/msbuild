@@ -15,7 +15,7 @@
     <AssemblyName>MSBuild</AssemblyName>
     <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
-    <LargeAddressAware Condition="'$(Platform)' == 'x86'">true</LargeAddressAware>
+    <LargeAddressAware Condition="'$(PlatformTarget)' == 'x86'">true</LargeAddressAware>
 
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
