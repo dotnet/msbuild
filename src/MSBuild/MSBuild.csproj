@@ -258,7 +258,10 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="NuGetSdkResolverResolvedProjectReferencePath" />
+    <ProjectReference Include="..\NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="NuGetSdkResolverResolvedProjectReferencePath">
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=net46</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=netstandard2.0</SetTargetFramework>
+    </ProjectReference>
   </ItemGroup>
 
   <Target Name="CopyNuGetSdkResolver" AfterTargets="ResolveProjectReferences">

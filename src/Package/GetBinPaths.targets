@@ -3,7 +3,8 @@
   <ItemGroup>
     <!-- Reference projects whose outputs are used in the package.  Use OutputItemType to get the path to the output assembly,
          from which we will later derive the path to the output folder, which is passed as a variable to the .swr file. -->
-    <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildResolvedProjectReferencePath" />
+    <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildResolvedProjectReferencePath"
+                      SetTargetFramework="TargetFramework=$(TargetFramework)"/>
     <ProjectReference Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
     <ProjectReference Include="..\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildConversionResolvedProjectReferencePath" />
 
