@@ -931,7 +931,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             }
         }
 
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2932")]
+        [Fact]
         public void ImportedProjectsSdkImportsAreInPreprocessedOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1002,7 +1002,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   <Import Project=""Sdk.props"" Sdk=""MSBuildUnitTestSdk1"">
   This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk1"".
 
-{sdkPropsPath1}
+{sdkPropsPath1.Replace("--", "__")}
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -1017,9 +1017,9 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 -->
   <!--
 ============================================================================================================================================
-  <Import Project=""{importPath}"">
+  <Import Project=""{importPath.Replace("--", "__")}"">
 
-{importPath}
+{importPath.Replace("--", "__")}
 ============================================================================================================================================
 -->
   <!--
@@ -1027,7 +1027,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   <Import Project=""Sdk.props"" Sdk=""MSBuildUnitTestSdk2"">
   This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk2"".
 
-{sdkPropsPath2}
+{sdkPropsPath2.Replace("--", "__")}
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -1037,7 +1037,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-{importPath}
+{importPath.Replace("--", "__")}
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -1048,7 +1048,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   <Import Project=""Sdk.targets"" Sdk=""MSBuildUnitTestSdk2"">
   This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk2"".
 
-{sdkTargetsPath2}
+{sdkTargetsPath2.Replace("--", "__")}
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -1058,7 +1058,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-{importPath}
+{importPath.Replace("--", "__")}
 ============================================================================================================================================
 -->
   <!--
@@ -1076,7 +1076,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   <Import Project=""Sdk.targets"" Sdk=""MSBuildUnitTestSdk1"">
   This import was added implicitly because the Project element's Sdk attribute specified ""MSBuildUnitTestSdk1"".
 
-{sdkTargetsPath1}
+{sdkTargetsPath1.Replace("--", "__")}
 ============================================================================================================================================
 -->
   <PropertyGroup>
