@@ -15,7 +15,7 @@
     <AssemblyName>MSBuild</AssemblyName>
     <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
-    <LargeAddressAware>true</LargeAddressAware>
+    <LargeAddressAware Condition="'$(Platform)' == 'x86'">true</LargeAddressAware>
 
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
@@ -217,6 +217,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+    <PackageReference Include="LargeAddressAware" Version="$(LargeAddressAwareVersion)" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />

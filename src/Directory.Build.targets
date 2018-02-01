@@ -84,51 +84,6 @@
              Visible="false" Pack="false"/>
   </ItemGroup>
   
-  <PropertyGroup>
-    <!-- Native equivalent is /LARGEADDRESSAWARE on the linker -->
-    <EditBinFlags Condition="'$(LargeAddressAware)'=='true'">$(EditBinFlags) /LARGEADDRESSAWARE</EditBinFlags>    
-  </PropertyGroup>
-  
-  <!-- We want this target to be incremental, but editbin affects the file in place.  So use
-       a marker file. -->
-  <Target Name="EditBin"
-          AfterTargets="CoreCompile"
-          Inputs="@(IntermediateAssembly)"
-          Outputs="@(IntermediateAssembly->'%(Identity).editbin_marker')"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(PlatformTarget)' == 'x86' and '$(EditBinFlags)'!=''">
-    <PropertyGroup>
-      <!-- Don't require all developers to install C++ tools just to
-           get editbin.exe -->
-      <EditBinContinueOnError>WarnAndContinue</EditBinContinueOnError>
-      <!-- But DO fail the build on CI and official builds if we can't
-           produce the right outputs. Continuing on error to allow
-           test results even on a misconfigured build machine. -->
-      <EditBinContinueOnError Condition="'$(TF_BUILD)' == 'True' or '$(JENKINS_URL)' != '' or '$(OfficialBuild)' == 'true' or '$(CIBuild)' == 'true'">ErrorAndContinue</EditBinContinueOnError>
-
-      <!--
-        * VSINSTALLDIR is set by the Developer Command Prompt. When building from MicroBuild, this isn't set.
-        * VsInstallRoot is discovered by MSBuild, but in our bootstrapped build it's wrong (VS isn't installed
-          to our 'bin' folder). When building from MicroBuild (or any installed VS), this value is correct.
-      -->
-      <EditBinCommand Condition="'$(VSINSTALLDIR)' != ''">call &quot;$(VSINSTALLDIR)\Common7\Tools\VsDevCmd.bat&quot; /no_logo&amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) &quot;@(IntermediateAssembly)&quot;</EditBinCommand>
-      <EditBinCommand Condition="'$(VsInstallRoot)' != '' and '$(EditBinCommand)' == ''">call &quot;$(VsInstallRoot)\Common7\Tools\VsDevCmd.bat&quot; /no_logo&amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) &quot;@(IntermediateAssembly)&quot;</EditBinCommand>
-    </PropertyGroup>
-
-    <Exec Command="$(EditBinCommand)"
-          ContinueOnError="$(EditBinContinueOnError)">
-      <Output TaskParameter="ExitCode" PropertyName="EditBinExitCode"/>
-    </Exec>
-
-    <!-- Only write the marker file if we successfully ran EditBin, to avoid the warning disappearing from incremental
-         WarnAndContinue builds -->
-    <Touch Files="%(IntermediateAssembly.Identity).editbin_marker" AlwaysCreate="true"
-           Condition="'$(EditBinExitCode)' == '0'"/>
-    <ItemGroup>
-      <FileWrites Include="%(IntermediateAssembly.Identity).editbin_marker" Condition="'$(EditBinExitCode)' == '0'"/>
-    </ItemGroup>
-
-  </Target>
-
   <!-- Import common project targets provided by RepoToolset -->
   <Import Project="$(RepoToolsetDir)Imports.targets" />
 
