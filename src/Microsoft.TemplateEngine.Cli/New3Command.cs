@@ -65,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public static IInstaller Installer { get; set; }
+        internal static Installer Installer { get; set; }
 
         public string CommandName { get; }
 
@@ -80,12 +80,41 @@ namespace Microsoft.TemplateEngine.Cli
             return Run(commandName, host, telemetryLogger, onFirstRun, args, null);
         }
 
-        private static Mutex _entryMutex = new Mutex(false, "{5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2}");
+        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
+        private static Mutex _entryMutex;
+
+        private static Mutex EnsureEntryMutex(string hivePath, ITemplateEngineHost host)
+        {
+            if (_entryMutex == null)
+            {
+                string _entryMutexIdentity;
+
+                // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
+                if (!string.IsNullOrEmpty(hivePath))
+                {
+                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_").Replace("/", "_");
+                }
+                else
+                {
+                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_").Replace("/", "_");
+                }
+
+                _entryMutex = new Mutex(false, _entryMutexIdentity);
+            }
+
+            return _entryMutex;
+        }
+
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
         {
-            if (!_entryMutex.WaitOne())
+            if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
-                return -1;
+                EnsureEntryMutex(hivePath, host);
+
+                if (!_entryMutex.WaitOne())
+                {
+                    return -1;
+                }
             }
 
             try
@@ -94,7 +123,10 @@ namespace Microsoft.TemplateEngine.Cli
             }
             finally
             {
-                _entryMutex.ReleaseMutex();
+                if (_entryMutex != null)
+                {
+                    _entryMutex.ReleaseMutex();
+                }
             }
         }
 
@@ -314,7 +346,8 @@ namespace Microsoft.TemplateEngine.Cli
         {
             _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, _commandInput.ToInstallList.Count.ToString() } });
 
-            Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList);
+            bool allowDevInstall = _commandInput.HasDebuggingFlag("--dev:install");
+            Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList, allowDevInstall);
 
             //TODO: When an installer that directly calls into NuGet is available,
             //  return a more accurate representation of the outcome of the operation
@@ -338,11 +371,6 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 return CreationResultStatus.InvalidParamValues;
-            }
-
-            if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
-            {
-                Installer.InstallPackages(_commandInput.ToInstallList.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]), _commandInput.InstallNuGetSourceList);
             }
 
             if (_commandInput.ToUninstallList != null)

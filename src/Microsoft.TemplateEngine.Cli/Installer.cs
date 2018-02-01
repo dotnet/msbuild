@@ -29,9 +29,11 @@ namespace Microsoft.TemplateEngine.Cli
             ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId);
         }
 
-        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null);
+        public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false);
 
-        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources)
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources) => InstallPackages(installationRequests, nuGetSources, false);
+
+        public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall)
         {
             List<string> localSources = new List<string>();
             List<Package> packages = new List<Package>();
@@ -60,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (localSources.Count > 0)
             {
-                InstallLocalPackages(localSources);
+                InstallLocalPackages(localSources, debugAllowDevInstall);
             }
 
             if (packages.Count > 0)
@@ -202,7 +204,6 @@ namespace Microsoft.TemplateEngine.Cli
             string content = string.Format(projectFile, references.ToString());
             _paths.WriteAllText(proj, content);
 
-            _paths.CreateDirectory(_paths.User.Packages);
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
 
             int additionalSlots = nuGetSources?.Count * 2 ?? 0;
@@ -222,20 +223,22 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             Dotnet.Restore(restoreArgs).ForwardStdOut().ForwardStdErr().Execute();
+            string stagingDir = Path.Combine(_paths.User.ScratchDir, "Staging");
+            _paths.CreateDirectory(stagingDir);
 
             List<string> newLocalPackages = new List<string>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))
             {
-                string path = Path.Combine(_paths.User.Packages, Path.GetFileName(packagePath));
-                _paths.Copy(packagePath, path);
-                newLocalPackages.Add(path);
+                string stagingPathForPackage = Path.Combine(stagingDir, Path.GetFileName(packagePath));
+                _paths.Copy(packagePath, stagingPathForPackage);
+                newLocalPackages.Add(stagingPathForPackage);
             }
 
+            InstallLocalPackages(newLocalPackages, false);
             _paths.DeleteDirectory(_paths.User.ScratchDir);
-            InstallLocalPackages(newLocalPackages);
         }
 
-        private void InstallLocalPackages(IReadOnlyList<string> packageNames)
+        private void InstallLocalPackages(IReadOnlyList<string> packageNames, bool debugAllowDevInstall)
         {
             List<string> toInstall = new List<string>();
 
@@ -268,7 +271,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         string fullDirectory = new DirectoryInfo(pkg).FullName;
                         string fullPathGlob = Path.Combine(fullDirectory, pattern);
-                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(fullPathGlob, out IReadOnlyList<Guid> contentMountPointIds);
+                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(fullPathGlob, out IReadOnlyList<Guid> contentMountPointIds, debugAllowDevInstall);
 
                         foreach (Guid mountPointId in contentMountPointIds)
                         {
@@ -278,7 +281,7 @@ namespace Microsoft.TemplateEngine.Cli
                     else if (_environmentSettings.Host.FileSystem.DirectoryExists(pkg) || _environmentSettings.Host.FileSystem.FileExists(pkg))
                     {
                         string packageLocation = new DirectoryInfo(pkg).FullName;
-                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(packageLocation, out IReadOnlyList<Guid> contentMountPointIds);
+                        ((SettingsLoader)(_environmentSettings.SettingsLoader)).UserTemplateCache.Scan(packageLocation, out IReadOnlyList<Guid> contentMountPointIds, debugAllowDevInstall);
 
                         foreach (Guid mountPointId in contentMountPointIds)
                         {
