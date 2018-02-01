@@ -339,6 +339,15 @@ namespace Microsoft.Build.Tasks
         public bool UseSourcePath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class GetAssemblyIdentity : Microsoft.Build.Tasks.TaskExtension
+    {
+        public GetAssemblyIdentity() { }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] Assemblies { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public partial class GetFrameworkPath : Microsoft.Build.Tasks.TaskExtension
     {
         public GetFrameworkPath() { }
