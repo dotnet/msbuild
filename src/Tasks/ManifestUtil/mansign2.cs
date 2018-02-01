@@ -640,13 +640,16 @@ namespace System.Deployment.Internal.CodeSigning
 
             // Setup up XMLDSIG engine.
             ManifestSignedXml2 signedXml = new ManifestSignedXml2(licenseDom);
-            signedXml.SigningKey = rsaPrivateKey;
+            // only needs to change the provider type when RSACryptoServiceProvider is used
+            var rsaCsp = rsaPrivateKey is RSACryptoServiceProvider ?
+                            GetFixedRSACryptoServiceProvider(rsaPrivateKey as RSACryptoServiceProvider, useSha256) : rsaPrivateKey;
+            signedXml.SigningKey = rsaCsp;
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             if (signer.UseSha256)
                 signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
 
             // Add the key information.
-            signedXml.KeyInfo.AddClause(new RSAKeyValue(rsaPrivateKey));
+            signedXml.KeyInfo.AddClause(new RSAKeyValue(rsaCsp));
             signedXml.KeyInfo.AddClause(new KeyInfoX509Data(signer.Certificate, signer.IncludeOption));
 
             // Add the enveloped reference.
