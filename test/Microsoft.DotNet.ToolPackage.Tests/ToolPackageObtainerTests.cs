@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Install.Tool;
 using Xunit;
@@ -21,6 +22,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [Fact]
         public void GivenNoFeedItThrows()
         {
+            var reporter = new BufferedReporter();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
             ToolPackageObtainer packageObtainer =
@@ -29,7 +31,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 new DirectoryPath("no such path"),
                 GetUniqueTempProjectPathEachTest,
                 new Lazy<string>(),
-                new ProjectRestorer());
+                new ProjectRestorer(reporter));
 
             Action a = () => packageObtainer.ObtainAndReturnExecutablePath(
                 packageId: TestPackageId,
@@ -37,11 +39,15 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 targetframework: _testTargetframework);
 
             a.ShouldThrow<PackageObtainException>();
+
+            reporter.Lines.Count.Should().Be(1);
+            reporter.Lines[0].Should().Contain(TestPackageId);
         }
 
         [Fact]
         public void GivenOfflineFeedWhenCallItCanDownloadThePackage()
         {
+            var reporter = new BufferedReporter();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
             ToolPackageObtainer packageObtainer =
@@ -50,13 +56,15 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     offlineFeedPath: new DirectoryPath(GetTestLocalFeedPath()),
                     getTempProjectPath: GetUniqueTempProjectPathEachTest,
                     bundledTargetFrameworkMoniker: new Lazy<string>(),
-                    projectRestorer: new ProjectRestorer());
+                    projectRestorer: new ProjectRestorer(reporter));
 
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
                 packageObtainer.ObtainAndReturnExecutablePath(
                     packageId: TestPackageId,
                     packageVersion: TestPackageVersion,
                     targetframework: _testTargetframework);
+
+            reporter.Lines.Should().BeEmpty();
 
             var executable = toolConfigurationAndExecutablePath
                 .Executable;
@@ -77,11 +85,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         public void GivenNugetConfigAndPackageNameAndVersionAndTargetFrameworkWhenCallItCanDownloadThePackage(
             bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             FilePath nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
             var packageObtainer =
-                ConstructDefaultPackageObtainer(toolsPath, testMockBehaviorIsInSync, nugetConfigPath.Value);
+                ConstructDefaultPackageObtainer(toolsPath, reporter, testMockBehaviorIsInSync, nugetConfigPath.Value);
 
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath
                 = packageObtainer.ObtainAndReturnExecutablePath(
@@ -89,6 +98,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     packageVersion: TestPackageVersion,
                     nugetconfig: nugetConfigPath,
                     targetframework: _testTargetframework);
+
+            reporter.Lines.Should().BeEmpty();
 
             FilePath executable = toolConfigurationAndExecutablePath.Executable;
             File.Exists(executable.Value)
@@ -104,11 +115,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         public void GivenNugetConfigAndPackageNameAndVersionAndTargetFrameworkWhenCallItCreateAssetFile(
             bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
             var packageObtainer =
-                ConstructDefaultPackageObtainer(toolsPath, testMockBehaviorIsInSync, nugetConfigPath.Value);
+                ConstructDefaultPackageObtainer(toolsPath, reporter, testMockBehaviorIsInSync, nugetConfigPath.Value);
 
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutableDirectory =
                 packageObtainer.ObtainAndReturnExecutablePath(
@@ -116,6 +128,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     packageVersion: TestPackageVersion,
                     nugetconfig: nugetConfigPath,
                     targetframework: _testTargetframework);
+
+            reporter.Lines.Should().BeEmpty();
 
             /*
               From mytool.dll to project.assets.json
@@ -146,6 +160,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenAllButNoNugetConfigFilePathItCanDownloadThePackage(bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             var uniqueTempProjectPath = GetUniqueTempProjectPathEachTest();
             var tempProjectDirectory = uniqueTempProjectPath.GetDirectoryPath();
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
@@ -171,7 +186,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new DirectoryPath("no such path"),
                     () => uniqueTempProjectPath,
                     new Lazy<string>(),
-                    new ProjectRestorer());
+                    new ProjectRestorer(reporter));
             }
 
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
@@ -179,6 +194,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     packageId: TestPackageId,
                     packageVersion: TestPackageVersion,
                     targetframework: _testTargetframework);
+
+            reporter.Lines.Should().BeEmpty();
 
             var executable = toolConfigurationAndExecutablePath.Executable;
 
@@ -194,17 +211,20 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenAllButNoPackageVersionItCanDownloadThePackage(bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
             var packageObtainer =
-                ConstructDefaultPackageObtainer(toolsPath, testMockBehaviorIsInSync, nugetConfigPath.Value);
+                ConstructDefaultPackageObtainer(toolsPath, reporter, testMockBehaviorIsInSync, nugetConfigPath.Value);
 
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
                 packageObtainer.ObtainAndReturnExecutablePath(
                     packageId: TestPackageId,
                     nugetconfig: nugetConfigPath,
                     targetframework: _testTargetframework);
+
+            reporter.Lines.Should().BeEmpty();
 
             var executable = toolConfigurationAndExecutablePath.Executable;
 
@@ -220,21 +240,26 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenAllButNoPackageVersionAndInvokeTwiceItShouldNotThrow(bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
             var packageObtainer =
-                ConstructDefaultPackageObtainer(toolsPath, testMockBehaviorIsInSync, nugetConfigPath.Value);
+                ConstructDefaultPackageObtainer(toolsPath, reporter, testMockBehaviorIsInSync, nugetConfigPath.Value);
 
             packageObtainer.ObtainAndReturnExecutablePath(
                 packageId: TestPackageId,
                 nugetconfig: nugetConfigPath,
                 targetframework: _testTargetframework);
 
+            reporter.Lines.Should().BeEmpty();
+
             Action secondCall = () => packageObtainer.ObtainAndReturnExecutablePath(
                 packageId: TestPackageId,
                 nugetconfig: nugetConfigPath,
                 targetframework: _testTargetframework);
+
+            reporter.Lines.Should().BeEmpty();
 
             secondCall.ShouldNotThrow();
         }
@@ -244,6 +269,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenAllButNoTargetFrameworkItCanDownloadThePackage(bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
@@ -261,7 +287,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                             {
                                 new MockFeedPackage
                                 {
-                                    PackageId = "global.tool.console.demo",
+                                    PackageId = TestPackageId,
                                     Version = "1.0.4"
                                 }
                             }
@@ -275,13 +301,15 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new DirectoryPath("no such path"),
                     GetUniqueTempProjectPathEachTest,
                     new Lazy<string>(() => BundledTargetFramework.GetTargetFrameworkMoniker()),
-                    new ProjectRestorer());
+                    new ProjectRestorer(reporter));
             }
             ToolConfigurationAndExecutablePath toolConfigurationAndExecutablePath =
                 packageObtainer.ObtainAndReturnExecutablePath(
                     packageId: TestPackageId,
                     packageVersion: TestPackageVersion,
                     nugetconfig: nugetConfigPath);
+
+            reporter.Lines.Should().BeEmpty();
 
             var executable = toolConfigurationAndExecutablePath.Executable;
 
@@ -297,10 +325,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenNonExistentNugetConfigFileItThrows(bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
             var packageObtainer =
-                ConstructDefaultPackageObtainer(toolsPath, testMockBehaviorIsInSync);
+                ConstructDefaultPackageObtainer(toolsPath, reporter, testMockBehaviorIsInSync);
 
             var nonExistNugetConfigFile = new FilePath("NonExistent.file");
             Action a = () =>
@@ -317,6 +346,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 .Message.Should().Contain(string.Format(
                     CommonLocalizableStrings.NuGetConfigurationFileDoesNotExist,
                     Path.GetFullPath(nonExistNugetConfigFile.Value)));
+
+            reporter.Lines.Should().BeEmpty();
         }
 
         [Theory]
@@ -324,14 +355,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenASourceItCanObtainThePackageFromThatSource(bool testMockBehaviorIsInSync)
         {
+            var reporter = new BufferedReporter();
             var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName());
 
-            var packageObtainer = ConstructDefaultPackageObtainer(toolsPath);
+            var packageObtainer = ConstructDefaultPackageObtainer(toolsPath, reporter);
             var toolConfigurationAndExecutableDirectory = packageObtainer.ObtainAndReturnExecutablePath(
                 packageId: TestPackageId,
                 packageVersion: TestPackageVersion,
                 targetframework: _testTargetframework,
                 source:GetTestLocalFeedPath());
+
+            reporter.Lines.Should().BeEmpty();
 
             var executable = toolConfigurationAndExecutableDirectory.Executable;
 
@@ -353,6 +387,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
         private static IToolPackageObtainer ConstructDefaultPackageObtainer(
             string toolsPath,
+            IReporter reporter,
             bool testMockBehaviorIsInSync = false,
             string addNugetConfigFeedWithFilePath = null,
             string addSourceFeedWithFilePath = null)
@@ -372,7 +407,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                                 {
                                     new MockFeedPackage
                                     {
-                                        PackageId = "global.tool.console.demo",
+                                        PackageId = TestPackageId,
                                         Version = "1.0.4"
                                     }
                                 }
@@ -393,7 +428,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                                 {
                                     new MockFeedPackage
                                     {
-                                        PackageId = "global.tool.console.demo",
+                                        PackageId = TestPackageId,
                                         Version = "1.0.4"
                                     }
                                 }
@@ -409,7 +444,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 new DirectoryPath("no such path"),
                 GetUniqueTempProjectPathEachTest,
                 new Lazy<string>(),
-                new ProjectRestorer());
+                new ProjectRestorer(reporter));
         }
 
         private static FilePath WriteNugetConfigFileToPointToTheFeed()

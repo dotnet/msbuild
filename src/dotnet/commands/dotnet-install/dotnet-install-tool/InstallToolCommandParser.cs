@@ -36,7 +36,8 @@ namespace Microsoft.DotNet.Cli
                     "-f|--framework",
                     LocalizableStrings.FrameworkOptionDescription,
                     Accept.ExactlyOneArgument()),
-                CommonOptions.HelpOption());
+                CommonOptions.HelpOption(),
+                CommonOptions.VerbosityOption());
         }
     }
 }

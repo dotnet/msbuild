@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -38,7 +40,8 @@ namespace Microsoft.DotNet.ToolPackage
             string packageVersion = null,
             FilePath? nugetconfig = null,
             string targetframework = null,
-            string source = null)
+            string source = null,
+            string verbosity = null)
         {
             if (packageId == null)
             {
@@ -71,7 +74,7 @@ namespace Microsoft.DotNet.ToolPackage
                 targetframework,
                 toolDirectory);
 
-            _projectRestorer.Restore(tempProjectPath, toolDirectory, nugetconfig, source);
+            _projectRestorer.Restore(tempProjectPath, toolDirectory, nugetconfig, source, verbosity);
 
             if (packageVersionOrPlaceHolder.IsPlaceholder)
             {

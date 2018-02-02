@@ -56,7 +56,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             string packageVersion = null,
             FilePath? nugetconfig = null,
             string targetframework = null,
-            string source = null)
+            string source = null,
+            string verbosity = null)
         {
             _beforeRunObtain();
 
