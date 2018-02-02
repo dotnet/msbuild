@@ -32,8 +32,6 @@ To get started on **Visual Studio 2017**:
 
 1. [Install Visual Studio 2017](https://www.visualstudio.com/vs/).  Select the following Workloads:
   - _.NET desktop development_
-  - _Desktop development with C++_
-    - Optional, build warnings may occur without it.
   - _.NET Core cross-platform development_
     - Optional, not strictly required (yet) but used to develop .NET Core applications.
 2. Clone the source code (see above).
