@@ -45,7 +45,7 @@
 
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <LargeAddressAwareVersion>1.0.1</LargeAddressAwareVersion>
+    <LargeAddressAwareVersion>1.0.2</LargeAddressAwareVersion>
   </PropertyGroup>
 
   <!-- Test Dependencies -->
