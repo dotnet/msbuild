@@ -18,7 +18,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     there is no dependency in nuspec. And add Microsoft.NETCore.Platforms, which is used to select correct RID assets.
     -->
   <PropertyGroup>
-    <NETCorePlatformsImplicitPackageVersion Condition=" '$(NETCorePlatformsImplicitPackageVersion)' == '' ">2.0.1</NETCorePlatformsImplicitPackageVersion>
+    <NETCorePlatformsImplicitPackageVersion Condition="'$(NETCorePlatformsImplicitPackageVersion)' == ''">$(BundledNETCorePlatformsVersion)</NETCorePlatformsImplicitPackageVersion>
+    <NETCorePlatformsImplicitPackageVersion Condition="'$(NETCorePlatformsImplicitPackageVersion)' == ''">2.0.1</NETCorePlatformsImplicitPackageVersion>
+
     <_ToolsSettingsFilePath>$(BaseIntermediateOutputPath)DotnetToolSettings.xml</_ToolsSettingsFilePath>
   </PropertyGroup>
 
