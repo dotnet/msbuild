@@ -676,46 +676,46 @@
       </trans-unit>
       <trans-unit id="CannotBeNullOrWhitespace">
         <source>Cannot be null or whitespace.</source>
-        <target state="new">Cannot be null or whitespace.</target>
+        <target state="translated">Non può essere Null o costituito da spazi vuoti.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainInvalidCharacters">
         <source>Contains one or more invalid characters: {0}</source>
-        <target state="new">Contains one or more invalid characters: {0}</target>
+        <target state="translated">Contiene uno o più caratteri non validi: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>The tool's settings file is invalid xml.
 {0}</source>
-        <target state="new">The tool's settings file is invalid xml.
+        <target state="translated">Il file di impostazioni dello strumento è costituito da codice XML non valido.
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingInvalidRunner">
         <source>The tool's settings file has non "dotnet" as runner.</source>
-        <target state="new">The tool's settings file has non "dotnet" as runner.</target>
+        <target state="translated">Lo strumento di esecuzione del file di impostazioni dello strumento non è "dotnet".</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingMoreThanOneCommand">
         <source>The tool's settings file has more than one command defined.</source>
-        <target state="new">The tool's settings file has more than one command defined.</target>
+        <target state="translated">Per il file di impostazioni dello strumento è definito più di un comando.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsContainError">
         <source>The tool's settings file contains error.
 {0}</source>
-        <target state="new">The tool's settings file contains error.
+        <target state="translated">Il file di impostazioni dello strumento contiene un errore.
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file {0} does not exist.</source>
-        <target state="new">NuGet configuration file {0} does not exist.</target>
+        <target state="translated">Il file di configurazione NuGet {0} non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</target>
+        <target state="translated">Dal momento che è stato appena installato .NET Core SDK, è necessario disconnettersi o riavviare la sessione prima di eseguire lo strumento installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstruction">
@@ -726,8 +726,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash. You can do this by running the following command:
+        <target state="translated">Il percorso dell'eseguibile degli strumenti non è stato trovato. Assicurarsi che {0} sia stato aggiunto a PATH.
+Se si usa bash, è possibile verificarlo eseguendo il comando seguente:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -737,7 +737,7 @@ EOF</target>
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</target>
+        <target state="translated">Dal momento che è stato appena installato .NET Core SDK, è necessario riaprire il terminale prima di eseguire lo strumento installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstruction">
@@ -748,8 +748,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash, You can do this by running the following command:
+        <target state="translated">Il percorso dell'eseguibile degli strumenti non è stato trovato. Assicurarsi che {0} sia stato aggiunto a PATH.
+Se si usa bash, è possibile verificarlo eseguendo il comando seguente:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -759,21 +759,21 @@ EOF</target>
       </trans-unit>
       <trans-unit id="FailInstallToolSameName">
         <source>Failed to install tool {0}. A command with the same name already exists.</source>
-        <target state="new">Failed to install tool {0}. A command with the same name already exists.</target>
+        <target state="translated">Non è stato possibile installare lo strumento {0}. Esiste già un comando con lo stesso nome.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailInstallToolPermission">
         <source>Failed to change permission:
 Error: {0}
 Output: {1}</source>
-        <target state="new">Failed to change permission:
-Error: {0}
+        <target state="translated">Non è stato possibile cambiare l'autorizzazione:
+Errore: {0}
 Output: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</target>
+        <target state="translated">Dal momento che è stato appena installato .NET Core SDK, è necessario riaprire la finestra del prompt dei comandi prima di eseguire lo strumento installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstruction">
@@ -781,20 +781,20 @@ Output: {1}</target>
 You can do this by running the following command:
 
 setx PATH "%PATH%;{1}"</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-You can do this by running the following command:
+        <target state="translated">Il percorso dell'eseguibile degli strumenti non è stato trovato. Assicurarsi che {0} sia stato aggiunto a PATH.
+Per verificarlo, eseguire il comando seguente:
 
 setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingEntryPointFile">
         <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="new">Package '{0}' is missing entry point file {1}.</target>
+        <target state="translated">Nel pacchetto '{0}' manca il file del punto di ingresso {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingSettingsFile">
         <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="new">Package '{0}' is missing tool settings file DotnetToolSettings.xml.</target>
+        <target state="translated">Nel pacchetto '{0}' manca il file di impostazioni dello strumento DotnetToolSettings.xml.</target>
         <note />
       </trans-unit>
     </body>

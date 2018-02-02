@@ -676,46 +676,46 @@
       </trans-unit>
       <trans-unit id="CannotBeNullOrWhitespace">
         <source>Cannot be null or whitespace.</source>
-        <target state="new">Cannot be null or whitespace.</target>
+        <target state="translated">不能为 NULL 或空白。</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainInvalidCharacters">
         <source>Contains one or more invalid characters: {0}</source>
-        <target state="new">Contains one or more invalid characters: {0}</target>
+        <target state="translated">包含一个或多个无效字符: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>The tool's settings file is invalid xml.
 {0}</source>
-        <target state="new">The tool's settings file is invalid xml.
+        <target state="translated">工具的设置文件为无效 xml。
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingInvalidRunner">
         <source>The tool's settings file has non "dotnet" as runner.</source>
-        <target state="new">The tool's settings file has non "dotnet" as runner.</target>
+        <target state="translated">工具的设置文件不具有作为运行程序的 "dotnet"。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingMoreThanOneCommand">
         <source>The tool's settings file has more than one command defined.</source>
-        <target state="new">The tool's settings file has more than one command defined.</target>
+        <target state="translated">工具的设置文件已定义多个命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsContainError">
         <source>The tool's settings file contains error.
 {0}</source>
-        <target state="new">The tool's settings file contains error.
+        <target state="translated">工具的设置文件包含错误。
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file {0} does not exist.</source>
-        <target state="new">NuGet configuration file {0} does not exist.</target>
+        <target state="translated">NuGet 配置文件 {0} 不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</target>
+        <target state="translated">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要注销或重新启动会话。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstruction">
@@ -726,8 +726,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash. You can do this by running the following command:
+        <target state="translated">找不到工具可执行文件路径。请确保已将 {0} 添加到 PATH。
+如果使用 bash，可通过运行以下命令来执行此操作:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -737,7 +737,7 @@ EOF</target>
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</target>
+        <target state="translated">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要重新打开终端。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstruction">
@@ -748,8 +748,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash, You can do this by running the following command:
+        <target state="translated">找不到工具可执行文件路径。请确保已将 {0} 添加到 PATH。
+如果使用 bash，可通过运行以下命令来执行此操作:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -759,21 +759,21 @@ EOF</target>
       </trans-unit>
       <trans-unit id="FailInstallToolSameName">
         <source>Failed to install tool {0}. A command with the same name already exists.</source>
-        <target state="new">Failed to install tool {0}. A command with the same name already exists.</target>
+        <target state="translated">未能安装工具 {0}。已存在同名的命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailInstallToolPermission">
         <source>Failed to change permission:
 Error: {0}
 Output: {1}</source>
-        <target state="new">Failed to change permission:
-Error: {0}
-Output: {1}</target>
+        <target state="translated">未能更改权限:
+错误: {0}
+输出: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</target>
+        <target state="translated">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要重新打开命令提示符窗口。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstruction">
@@ -781,20 +781,20 @@ Output: {1}</target>
 You can do this by running the following command:
 
 setx PATH "%PATH%;{1}"</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-You can do this by running the following command:
+        <target state="translated">找不到工具可执行文件路径。请确保已将 {0} 添加到 PATH。
+可通过运行以下命令来执行此操作:
 
 setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingEntryPointFile">
         <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="new">Package '{0}' is missing entry point file {1}.</target>
+        <target state="translated">包“{0}”缺少入口点文件 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingSettingsFile">
         <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="new">Package '{0}' is missing tool settings file DotnetToolSettings.xml.</target>
+        <target state="translated">包“{0}”缺少工具设置文件 DotnetToolSettings.xml。</target>
         <note />
       </trans-unit>
     </body>

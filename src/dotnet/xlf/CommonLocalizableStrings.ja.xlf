@@ -676,46 +676,46 @@
       </trans-unit>
       <trans-unit id="CannotBeNullOrWhitespace">
         <source>Cannot be null or whitespace.</source>
-        <target state="new">Cannot be null or whitespace.</target>
+        <target state="translated">null または空白文字にすることはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainInvalidCharacters">
         <source>Contains one or more invalid characters: {0}</source>
-        <target state="new">Contains one or more invalid characters: {0}</target>
+        <target state="translated">1 つ以上の無効な文字が含まれています: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>The tool's settings file is invalid xml.
 {0}</source>
-        <target state="new">The tool's settings file is invalid xml.
+        <target state="translated">ツールの設定ファイルは無効な xml です。
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingInvalidRunner">
         <source>The tool's settings file has non "dotnet" as runner.</source>
-        <target state="new">The tool's settings file has non "dotnet" as runner.</target>
+        <target state="translated">ツールの設定ファイルにはランナーとしての非 "dotnet" があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingMoreThanOneCommand">
         <source>The tool's settings file has more than one command defined.</source>
-        <target state="new">The tool's settings file has more than one command defined.</target>
+        <target state="translated">ツールの設定ファイルで複数のコマンドが定義されています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsContainError">
         <source>The tool's settings file contains error.
 {0}</source>
-        <target state="new">The tool's settings file contains error.
+        <target state="translated">ツールの設定ファイルにエラーが含まれています。
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file {0} does not exist.</source>
-        <target state="new">NuGet configuration file {0} does not exist.</target>
+        <target state="translated">NuGet 構成ファイル {0} は存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ログアウトするか、セッションを再起動する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstruction">
@@ -726,8 +726,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash. You can do this by running the following command:
+        <target state="translated">ツールの実行可能パスが見つかりません。{0} が PATH に追加されていることを確認してください。
+bash を使用している場合、次のコマンドを実行してこれを行えます:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -737,7 +737,7 @@ EOF</target>
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstruction">
@@ -748,8 +748,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash, You can do this by running the following command:
+        <target state="translated">ツールの実行可能パスが見つかりません。{0} が PATH に追加されていることを確認してください。
+bash を使用している場合、次のコマンドを実行してこれを行えます:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -759,21 +759,21 @@ EOF</target>
       </trans-unit>
       <trans-unit id="FailInstallToolSameName">
         <source>Failed to install tool {0}. A command with the same name already exists.</source>
-        <target state="new">Failed to install tool {0}. A command with the same name already exists.</target>
+        <target state="translated">ツール {0} をインストールできませんでした。同じ名前のコマンドが既に存在しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailInstallToolPermission">
         <source>Failed to change permission:
 Error: {0}
 Output: {1}</source>
-        <target state="new">Failed to change permission:
-Error: {0}
-Output: {1}</target>
+        <target state="translated">アクセス許可を変更できませんでした:
+エラー: {0}
+出力: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、コマンド プロンプト ウィンドウを再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstruction">
@@ -781,20 +781,20 @@ Output: {1}</target>
 You can do this by running the following command:
 
 setx PATH "%PATH%;{1}"</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-You can do this by running the following command:
+        <target state="translated">ツールの実行可能パスが見つかりません。{0} が PATH に追加されていることを確認してください。
+次のコマンドを実行してこれを行えます:
 
 setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingEntryPointFile">
         <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="new">Package '{0}' is missing entry point file {1}.</target>
+        <target state="translated">パッケージ '{0}' にエントリ ポイント ファイル {1} がありません。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingSettingsFile">
         <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="new">Package '{0}' is missing tool settings file DotnetToolSettings.xml.</target>
+        <target state="translated">パッケージ '{0}' にツール設定ファイル DotnetToolSettings.xml がありません。</target>
         <note />
       </trans-unit>
     </body>

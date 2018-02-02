@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="InstallDefinition">
         <source>Installs an item into the development environment.</source>
-        <target state="new">Installs an item into the development environment.</target>
+        <target state="translated">項目を開発環境にインストールします。</target>
         <note />
       </trans-unit>
     </body>

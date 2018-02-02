@@ -4,19 +4,19 @@
     <body>
       <trans-unit id="SourceOptionDescription">
         <source>Specifies a NuGet package source to use during installation.</source>
-        <target state="new">Specifies a NuGet package source to use during installation.</target>
+        <target state="translated">Especifica uma origem do pacote NuGet a ser usada durante a instalação.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">ORIGEM</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>
 The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</source>
-        <target state="new">
-The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</target>
+        <target state="translated">
+A instalação foi bem-sucedida. Se não houver outras instruções, digite o seguinte comando no shell diretamente para invocar: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToAddPackage">
@@ -24,7 +24,7 @@ The installation succeeded. If there are no further instructions, you can type t
 WorkingDirectory: {0}
 Arguments: {1}
 Output: {2}{3}</source>
-        <target state="new">Failed to add package.
+        <target state="translated">Falha ao adicionar pacote.
 WorkingDirectory: {0}
 Arguments: {1}
 Output: {2}{3}</target>
@@ -35,7 +35,7 @@ Output: {2}{3}</target>
 WorkingDirectory: {0}
 Arguments: {1}
 Output: {2}{3}</source>
-        <target state="new">Failed to restore package. 
+        <target state="translated">Falha ao restaurar pacote.
 WorkingDirectory: {0}
 Arguments: {1}
 Output: {2}{3}</target>
@@ -46,8 +46,8 @@ Output: {2}{3}</target>
 NuGet returned:
 
 {0}</source>
-        <target state="new">Install failed. Failed to download package:
-NuGet returned:
+        <target state="translated">Falha na instalação. Falha ao baixar o pacote:
+o NuGet retornou:
 
 {0}</target>
         <note />
@@ -57,60 +57,60 @@ NuGet returned:
 The error was:
 
 {0}</source>
-        <target state="new">Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
+        <target state="translated">Falha na instalação. O arquivo de configuração no pacote NuGet da ferramenta não é válido. Contate o proprietário do pacote NuGet.
+O erro foi o seguinte:
 
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to install.</source>
-        <target state="new">NuGet Package Id of the tool to install.</target>
+        <target state="translated">A ID do pacote NuGet da ferramenta a ser instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Installs a tool for use on the command line.</source>
-        <target state="new">Installs a tool for use on the command line.</target>
+        <target state="translated">Instala uma ferramenta para uso na linha de comando.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
+        <target state="translated">O arquivo de configuração do NuGet a ser usado.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
-        <target state="new">The target framework to install the tool for.</target>
+        <target state="translated">A estrutura de destino para a qual instalar a ferramenta.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>Version of the tool package in NuGet.</source>
-        <target state="new">Version of the tool package in NuGet.</target>
+        <target state="translated">Versão do pacote da ferramenta no NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to install.</source>
-        <target state="new">Please specify one tool Package Id to install.</target>
+        <target state="translated">Especifique uma ID de Pacote da ferramenta a ser instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install user wide.</source>
-        <target state="new">Install user wide.</target>
+        <target state="translated">Instale para todo o usuário.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
-        <target state="new">.NET Install Command</target>
+        <target state="translated">Comando de instalação do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandOnlySupportGlobal">
         <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="new">The --global switch (-g) is currently required because only user wide tools are supported.</target>
+        <target state="translated">A opção --global (-g) é obrigatória, pois somente ferramentas para todo o usuário são compatíveis.</target>
         <note />
       </trans-unit>
     </body>
