@@ -329,7 +329,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
-        <target state="needs-review-translation">RuntimeIdentifier プラットフォームと PlatformTarget は一致している必要があります。</target>
+        <target state="translated">RuntimeIdentifier プラットフォーム '{0}' と PlatformTarget '{1}' には互換性が必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -344,12 +344,12 @@
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>Pack as tool does not support self contained.</source>
-        <target state="new">Pack as tool does not support self contained.</target>
+        <target state="translated">Pack As ツールは自己完結型をサポートしていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedRuntimeIdentifier">
         <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
-        <target state="new">Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</target>
+        <target state="translated">プロジェクトはランタイム '{0}' をターゲットとしていますが、ランタイム固有のパッケージを解決しませんでした。このランタイムはターゲットのフレームワークでサポートされていない可能性があります。</target>
         <note />
       </trans-unit>
     </body>
