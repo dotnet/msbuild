@@ -41,11 +41,11 @@
 
     <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
     <GitVersioningVersion>2.1.16</GitVersioningVersion>
+    <LargeAddressAwareVersion>1.0.2</LargeAddressAwareVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <LargeAddressAwareVersion>1.0.2</LargeAddressAwareVersion>
   </PropertyGroup>
 
   <!-- Test Dependencies -->
