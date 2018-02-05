@@ -429,8 +429,7 @@ namespace Microsoft.Build.BackEnd
 
 #if RUNTIME_TYPE_NETCORE
             // Run the child process with the same host as the currently-running process.
-            string pathToHost;
-            using (Process currentProcess = Process.GetCurrentProcess()) pathToHost = currentProcess.MainModule.FileName;
+            var pathToHost = GetCurrentHost();
             commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
@@ -509,6 +508,22 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", childProcessId);
             return childProcessId;
+#endif
+        }
+
+        /// <summary>
+        /// Identify the .NET host of the current process
+        /// </summary>
+        /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
+        private static string GetCurrentHost()
+        {
+#if RUNTIME_TYPE_NETCORE
+            using (Process currentProcess = Process.GetCurrentProcess())
+            {
+                return currentProcess.MainModule.FileName;
+            }
+#else
+            return null;
 #endif
         }
 
