@@ -161,44 +161,11 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
-            }
-
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-
-                if (!String.IsNullOrEmpty(msbuildExeName))
-                {
-                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.  
-                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
-                }
-            }
-
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = "MSBuild.exe";
-            }
-
-#if FEATURE_NODE_REUSE
-            string msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
-
-            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(msbuildName));
-
-            // Trivial sort to try to prefer most recently used nodes
-            nodeProcesses.Sort
-                (
-                delegate (Process left, Process right)
-                {
-                    return left.Id - right.Id;
-                }
-
-                );
+            string msbuildName;
+            var candidateProcesses = GetPossibleRunningNodes(out msbuildName, ref msbuildLocation);
 
             CommunicationsUtilities.Trace("Attempting to connect to each existing msbuild.exe process in turn to establish node {0}...", nodeId);
-            foreach (Process nodeProcess in nodeProcesses)
+            foreach (Process nodeProcess in candidateProcesses)
             {
                 if (nodeProcess.Id == Process.GetCurrentProcess().Id)
                 {
@@ -224,7 +191,6 @@ namespace Microsoft.Build.BackEnd
                     return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
                 }
             }
-#endif
 
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
@@ -279,6 +245,42 @@ namespace Microsoft.Build.BackEnd
             // We were unable to launch a node.
             CommunicationsUtilities.Trace("FAILED TO CONNECT TO A CHILD NODE");
             return null;
+        }
+
+        private List<Process> GetPossibleRunningNodes(out string msbuildName, ref string msbuildLocation)
+        {
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
+            }
+
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+
+                if (!String.IsNullOrEmpty(msbuildExeName))
+                {
+                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
+                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
+                }
+            }
+
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = "MSBuild.exe";
+            }
+
+
+            msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
+
+            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(msbuildName));
+
+            // Trivial sort to try to prefer most recently used nodes
+            nodeProcesses.Sort
+            (
+                delegate(Process left, Process right) { return left.Id - right.Id; }
+            );
+            return nodeProcesses;
         }
 
         /// <summary>
