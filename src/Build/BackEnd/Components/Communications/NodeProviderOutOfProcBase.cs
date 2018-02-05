@@ -270,16 +270,15 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = "MSBuild.exe";
             }
 
-
             msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
 
-            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(msbuildName));
+            var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost()) ?? msbuildName;
+
+            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(expectedProcessName));
 
             // Trivial sort to try to prefer most recently used nodes
-            nodeProcesses.Sort
-            (
-                delegate(Process left, Process right) { return left.Id - right.Id; }
-            );
+            nodeProcesses.Sort((left, right) => left.Id - right.Id);
+
             return nodeProcesses;
         }
 
