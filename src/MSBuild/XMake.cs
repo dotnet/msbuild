@@ -2137,11 +2137,6 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-#if !FEATURE_NODE_REUSE
-            if(enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
-                CommandLineSwitchException.Throw("InvalidNodeReuseTrueValue", parameters[parameters.Length - 1]);
-#endif
-
             return enableNodeReuse;
         }
 
