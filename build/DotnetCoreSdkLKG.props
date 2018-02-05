@@ -14,7 +14,7 @@
   <PropertyGroup>
     <DotNetCoreSdkLKGRootUrl>$(DotnetBlobRootUrl)/Sdk/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGRootUrl>
     <DotNetCoreSdkLKGDownloadUrl>$(DotNetCoreSdkLKGRootUrl)$(DotNetCoreSdkLKGCompressedFileName)$(CoreSetupBlobAccessTokenParam)</DotNetCoreSdkLKGDownloadUrl>
-    <DotNetCoreSdkLKGDownloadDirectory>$(IntermediateDirectory)/toolsetDownload/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGDownloadDirectory>
+    <DotNetCoreSdkLKGDownloadDirectory>$(IntermediateDirectory)/SDKDownloadForTests/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGDownloadDirectory>
     <DotNetCoreSdkLKGArchive>$(DotNetCoreSdkLKGDownloadDirectory)$(DotNetCoreSdkLKGCompressedFileName)</DotNetCoreSdkLKGArchive>
   </PropertyGroup>
 

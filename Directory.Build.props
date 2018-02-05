@@ -5,9 +5,7 @@ Projects which don't import dir.props:
 
 build\RestoreDependency.proj
 build\Signing.proj
-build\package\Installer.DEB.proj
 build\sdks\sdks.csproj
-build\templates\templates.csproj
 build\test\RunTest.proj
 build_projects\Microsoft.DotNet.Cli.Build.SelfTest\InvokeWithStage2.proj
 build_projects\update-dependencies\update-dependencies.csproj
@@ -39,11 +37,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
-
-  <Import Project="build/DerivedHostMachineInfo.props" />
+  <Import Project="build/MSBuildExtensions.props" />
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
-  <Import Project="build/MSBuildExtensions.props" />
   <Import Project="build/SetupPreviousStage.props" />
   <Import Project="build/OutputDirectories.props" />
 
@@ -55,10 +51,10 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <Import Project="build/AzureInfo.props" />
     <Import Project="build/BuildDefaults.props" />
+    <Import Project="build/BundledCLI.props" />
     <Import Project="build/VersionBadge.props" />
     <Import Project="build/DotnetCoreSdkLKG.props" />
     <Import Project="build/BackwardsCompatibilityRuntimes.props" />
-
     <Import Project="build/InstallerInfo.props" />
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>

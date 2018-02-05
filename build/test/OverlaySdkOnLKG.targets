@@ -4,14 +4,21 @@
       <OverlaySDK Include="$(DotNetCoreSdkLKGPublishDirectory)/**/*" />
       <TemplatesToOverlay Include="$(IntermediateDirectory)/Templates/*.nupkg" />
       <LzmaArchiveToOverlay Include="$(IntermediateDirectory)/nuGetPackagesArchive.lzma" />
+      <OverlayCLI Include="$(CLIPublishDirectory)/sdk/$(CLI_ArchiveVersion)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
           DestinationFiles="@(OverlaySDK->'$(OutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <Copy SourceFiles="@(TemplatesToOverlay)" DestinationFiles="@(TemplatesToOverlay->'$(SdkOutputDirectory)/Templates/%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(TemplatesToOverlay)" 
+          DestinationFiles="@(TemplatesToOverlay->'$(SdkOutputDirectory)/Templates/%(Filename)%(Extension)')" />
 
-    <Copy SourceFiles="@(LzmaArchiveToOverlay)" DestinationFiles="@(LzmaArchiveToOverlay->'$(SdkOutputDirectory)/%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(LzmaArchiveToOverlay)" 
+          DestinationFiles="@(LzmaArchiveToOverlay->'$(SdkOutputDirectory)/%(Filename)%(Extension)')" />
+  
+    <Copy SourceFiles="@(OverlayCLI)"
+          DestinationFiles="@(OverlayCLI->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  
   </Target>
 
   <Target Name="PrepareLKGForOverlay">

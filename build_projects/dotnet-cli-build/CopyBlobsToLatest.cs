@@ -31,8 +31,6 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string NugetVersion { get; set; }
 
-        public bool Coherent { get; set; }
-
         private AzurePublisher AzurePublisherTool
         {
             get
@@ -83,10 +81,6 @@ namespace Microsoft.DotNet.Cli.Build
 
                 string cliVersion = Utils.GetVersionFileContent(CommitHash, NugetVersion);
                 AzurePublisherTool.PublishStringToBlob($"{targetFolder}/latest.version", cliVersion);
-                if (Coherent == true)
-                {
-                    AzurePublisherTool.PublishStringToBlob($"{targetFolder}/latest.coherent.version", cliVersion);
-                }
             }
             finally
             {

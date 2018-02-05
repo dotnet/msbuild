@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Directory.Build.props" />
 
   <ItemGroup>
@@ -43,7 +43,7 @@
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
-  <Target Name="BuildTheWholeCli" DependsOnTargets="$(CLITargets)" />
+  <Target Name="Build" DependsOnTargets="$(CLITargets)" />
 
   <Import Project="build/GitCommitInfo.targets" />
   <Import Project="build/HostInfo.targets" />

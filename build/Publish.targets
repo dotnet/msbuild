@@ -10,7 +10,6 @@
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
           DependsOnTargets="Init;
                             Package;
-                            EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
 
@@ -25,10 +24,9 @@
 
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
-      <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
-                     Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
+      <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)" />
       <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' "/>
     </ItemGroup>
 
     <ItemGroup>
@@ -41,8 +39,6 @@
   <Target Name="PublishCliVersionBadge">
     <ItemGroup>
       <CliVersionBadgeToUpload Include="$(VersionBadge)" />
-      <CliVersionBadgeToUpload Include="$(CoherentBadge)"
-              Condition=" '$(Coherent)' == 'true' " />
     </ItemGroup>
 
     <ItemGroup>
