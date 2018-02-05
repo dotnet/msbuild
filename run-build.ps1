@@ -29,14 +29,14 @@ if($Help)
 
 # The first 'pass' call to "dotnet msbuild build.proj" has a hard-coded "WriteDynamicPropsToStaticPropsFiles" target
 #    therefore, this call should not have other targets defined. Remove all targets passed in as 'extra parameters'.
-$ExtraParametersNoTargets = ""
 if ($ExtraParameters)
 {
-    foreach ($param in $ExtraParameters.split())
+    $ExtraParametersNoTargets = $ExtraParameters.GetRange(0,$ExtraParameters.Count)
+    foreach ($param in $ExtraParameters)
     {
-        if((-not $param.StartsWith("/t")) -and (-not $param.StartsWith("/T")))
+        if(($param.StartsWith("/t:", [StringComparison]::OrdinalIgnoreCase)) -or ($param.StartsWith("/target:", [StringComparison]::OrdinalIgnoreCase)))
         {
-            $ExtraParametersNoTargets += "{0} " -f $param
+            $ExtraParametersNoTargets.Remove("$param") | Out-Null
         }
     }
 }

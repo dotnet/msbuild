@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="2.1.0-preview1-26116-04" />
     <PackageReference Include="Microsoft.Build" Version="15.4.8" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.4.8" />
     <PackageReference Include="Microsoft.CSharp" Version="4.0.1" />
