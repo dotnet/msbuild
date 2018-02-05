@@ -544,11 +544,7 @@ namespace Microsoft.Build.CommandLine
                 string schemaFile = null;
 #endif
                 int cpuCount = 1;
-#if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
-#else
-                bool enableNodeReuse = false;
-#endif
                 TextWriter preprocessWriter = null;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
@@ -2028,7 +2024,6 @@ namespace Microsoft.Build.CommandLine
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
                     // figure out if we shold reuse nodes
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
                     // determine what if any writer to preprocess to
@@ -2109,11 +2104,7 @@ namespace Microsoft.Build.CommandLine
         internal static bool ProcessNodeReuseSwitch(string[] parameters)
         {
             bool enableNodeReuse;
-#if FEATURE_NODE_REUSE
             enableNodeReuse = true;
-#else
-            enableNodeReuse = false;
-#endif
 
             if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse in a gated checkin, without using the flag
             {
@@ -2333,7 +2324,6 @@ namespace Microsoft.Build.CommandLine
                     {
                         OutOfProcNode node = new OutOfProcNode();
 
-                        // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
                         shutdownReason = node.Run(nodeReuse, out nodeException);
@@ -3473,9 +3463,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
-#if FEATURE_NODE_REUSE // Do not advertise the switch when feature is off, even though we won't fail to parse it for compatibility with existing build scripts
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
-#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
