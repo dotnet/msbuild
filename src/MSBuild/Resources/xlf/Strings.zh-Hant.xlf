@@ -754,19 +754,6 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
     </target>
         <note />
       </trans-unit>
-      <trans-unit id="HelpMessage_27_DebuggerSwitch">
-        <source>  /debug
-                     Causes a debugger prompt to appear immediately so that
-                     Visual Studio can be attached for you to debug the
-                     MSBuild XML and any tasks and loggers it uses.
-   </source>
-        <target state="translated">  /debug
-                     使偵錯工具提示立即顯示，
-                     讓 Visual Studio 得以連結，以供您
-                     對 MSBuild XML 及其使用的任何工作與記錄器進行偵錯。
-   </target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
         <target state="translated">MSBUILD : Configuration error MSB1043: 應用程式無法啟動。{0}</target>

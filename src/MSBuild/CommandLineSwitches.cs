@@ -48,9 +48,6 @@ namespace Microsoft.Build.CommandLine
             OldOM,
 #endif
             DistributedFileLogger,
-#if FEATURE_MSBUILD_DEBUGGER
-            Debugger,
-#endif
             DetailedSummary,
 #if DEBUG
             WaitForDebugger,
@@ -235,9 +232,6 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null, null              ),
 #endif
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null, null              ),
-#if FEATURE_MSBUILD_DEBUGGER
-            new ParameterlessSwitchInfo(  new string[] { "debug", "d" },                    ParameterlessSwitch.Debugger,              null, "DebuggerEnabled" ),
-#endif
             new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null             ),
 #if DEBUG
             new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null , null             ),
