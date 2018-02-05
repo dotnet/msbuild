@@ -4,7 +4,7 @@
       <ItemGroup>
         <NugetConfigPrivateFeeds Include="$(ExternalRestoreSources.Split(';'))" />
       </ItemGroup>
-    
+
     <PropertyGroup>
       <NugetConfigHeader>
         <![CDATA[
@@ -20,7 +20,7 @@
         <![CDATA[
     <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
     <add key="templating" value="https://dotnet.myget.org/F/templating/api/v3/index.json" />
-    <add key="aspnetcore-dev" value="https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json" />
+    <add key="aspnetcore-release" value="https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json" />
     <add key="websdkfeed" value="https://dotnet.myget.org/F/dotnet-web/api/v3/index.json" />
     <add key="cli-deps" value="https://dotnet.myget.org/F/cli-deps/api/v3/index.json" />
     <add key="roslyn" value="https://dotnet.myget.org/f/roslyn/api/v3/index.json" />
@@ -29,7 +29,7 @@
     <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
     <add key="vstest" value="https://dotnet.myget.org/F/vstest/api/v3/index.json" />
     <add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" />
-    <add key="dotnet-corefxlab" value="https://dotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json" /> 
+    <add key="dotnet-corefxlab" value="https://dotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json" />
         ]]>
       </NugetConfigCLIFeeds>
 
@@ -39,13 +39,13 @@
 </configuration>
         ]]>
       </NugetConfigSuffix>
-    
+
   </PropertyGroup>
 
     <WriteLinesToFile File="$(GeneratedNuGetConfig)"
                       Lines="$(NugetConfigHeader)"
                       Overwrite="true" />
-    
+
     <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != '' and '$(DotNetBuildOffline)' != 'true'"
                       File="$(GeneratedNuGetConfig)"
                       Lines="&lt;add key=&quot;PrivateBlobFeed&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
