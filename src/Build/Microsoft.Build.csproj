@@ -410,8 +410,6 @@
     <Compile Include="Construction\Solution\SolutionFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Debugger\DebuggerLocalType.cs" />
-    <Compile Include="Debugger\DebuggerManager.cs" />
     <!-- #### DEFINITION MODEL ### -->
     <Compile Include="Definition\BuiltInMetadata.cs" />
     <Compile Include="Definition\ProjectCollection.cs" />

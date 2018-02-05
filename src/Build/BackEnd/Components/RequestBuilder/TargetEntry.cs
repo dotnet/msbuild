@@ -13,9 +13,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
-#if FEATURE_MSBUILD_DEBUGGER
-using Microsoft.Build.Debugging;
-#endif
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -839,22 +836,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
 
-#if FEATURE_MSBUILD_DEBUGGER
-                    if (DebuggerManager.DebuggingEnabled)
-                    {
-                        DebuggerManager.EnterState(targetChildInstance.Location, lookupForExecution.GlobalsForDebugging /* does not matter which lookup we get this from */);
-                    }
-#endif
-
                     // Execute the task.
                     lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
 
-#if FEATURE_MSBUILD_DEBUGGER
-                    if (DebuggerManager.DebuggingEnabled)
-                    {
-                        DebuggerManager.LeaveState(targetChildInstance.Location);
-                    }
-#endif
                     if (lastResult.ResultCode == WorkUnitResultCode.Failed)
                     {
                         aggregatedTaskResult = WorkUnitResultCode.Failed;

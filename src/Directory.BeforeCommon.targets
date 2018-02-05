@@ -132,11 +132,6 @@
     <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
   </PropertyGroup>
 
-  <!-- Change define constants as needed -->
-  <PropertyGroup Condition="'$(MsbuildDebugger)' == 'true' AND '$(MonoBuild)' != 'true'">
-    <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
   </PropertyGroup>

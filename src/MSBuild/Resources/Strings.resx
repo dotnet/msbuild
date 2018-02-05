@@ -579,13 +579,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (Short form: /ds)
     </value>
   </data>
-  <data name="HelpMessage_27_DebuggerSwitch" UESanitized="false" Visibility="Public">
-   <value>  /debug
-                     Causes a debugger prompt to appear immediately so that
-                     Visual Studio can be attached for you to debug the
-                     MSBuild XML and any tasks and loggers it uses.
-   </value>
-  </data>
   <data name="HelpMessage_28_WarnAsErrorSwitch" UESanitized="false" Visibility="Public">
     <value>  /warnaserror[:code[;code2]]
                      List of warning codes to treats as errors.  Use a semicolon

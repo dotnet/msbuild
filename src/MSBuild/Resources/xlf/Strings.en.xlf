@@ -764,19 +764,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </target>
         <note />
       </trans-unit>
-      <trans-unit id="HelpMessage_27_DebuggerSwitch">
-        <source>  /debug
-                     Causes a debugger prompt to appear immediately so that
-                     Visual Studio can be attached for you to debug the
-                     MSBuild XML and any tasks and loggers it uses.
-   </source>
-        <target state="new">  /debug
-                     Causes a debugger prompt to appear immediately so that
-                     Visual Studio can be attached for you to debug the
-                     MSBuild XML and any tasks and loggers it uses.
-   </target>
-        <note />
-      </trans-unit>
       <trans-unit id="HelpMessage_28_WarnAsErrorSwitch">
         <source>  /warnaserror[:code[;code2]]
                      List of warning codes to treats as errors.  Use a semicolon
