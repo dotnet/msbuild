@@ -16,5 +16,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
         string GetDirectoryFullName(string path);
 
         void CreateDirectory(string path);
+
+        void Delete(string path, bool recursive);
     }
 }

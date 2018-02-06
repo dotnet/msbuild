@@ -793,6 +793,11 @@ setx PATH "%PATH%;{1}"</target>
         <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="new">Tool '{0}' is already installed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

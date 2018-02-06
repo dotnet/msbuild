@@ -588,4 +588,7 @@ Output: {1}</value>
   <data name="ToolPackageMissingSettingsFile" xml:space="preserve">
     <value>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</value>
   </data>
+  <data name="ToolPackageConflictPackageId" xml:space="preserve">
+    <value>Tool '{0}' is already installed.</value>
+  </data>
 </root>

@@ -2,7 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Transactions;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -18,12 +22,56 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         public ShellShimMakerMock(string pathToPlaceShim, IFileSystem fileSystem = null)
         {
             _pathToPlaceShim =
-                pathToPlaceShim ?? throw new ArgumentNullException(nameof(pathToPlaceShim));
+                pathToPlaceShim ??
+                throw new ArgumentNullException(nameof(pathToPlaceShim));
 
             _fileSystem = fileSystem ?? new FileSystemWrapper();
         }
 
+        public void EnsureCommandNameUniqueness(string shellCommandName)
+        {
+            if (_fileSystem.File.Exists(GetShimPath(shellCommandName).Value))
+            {
+                throw new GracefulException(
+                    string.Format(CommonLocalizableStrings.FailInstallToolSameName,
+                        shellCommandName));
+            }
+        }
+
         public void CreateShim(FilePath packageExecutable, string shellCommandName)
+        {
+            var createShimTransaction = new CreateShimTransaction(
+                createShim: locationOfShimDuringTransaction =>
+                {
+                    EnsureCommandNameUniqueness(shellCommandName);
+                    PlaceShim(packageExecutable, shellCommandName, locationOfShimDuringTransaction);
+                },
+                rollback: locationOfShimDuringTransaction =>
+                {
+                    foreach (FilePath f in locationOfShimDuringTransaction)
+                    {
+                        if (File.Exists(f.Value))
+                        {
+                            File.Delete(f.Value);
+                        }
+                    }
+                });
+
+            using (var transactionScope = new TransactionScope())
+            {
+                Transaction.Current.EnlistVolatile(createShimTransaction, EnlistmentOptions.None);
+                createShimTransaction.CreateShim();
+
+                transactionScope.Complete();
+            }
+        }
+
+        public void Remove(string shellCommandName)
+        {
+            File.Delete(GetShimPath(shellCommandName).Value);
+        }
+
+        private void PlaceShim(FilePath packageExecutable, string shellCommandName, List<FilePath> locationOfShimDuringTransaction)
         {
             var fakeshim = new FakeShim
             {
@@ -32,18 +80,20 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             };
             var script = JsonConvert.SerializeObject(fakeshim);
 
-            FilePath scriptPath = new FilePath(Path.Combine(_pathToPlaceShim, shellCommandName));
+            FilePath scriptPath = GetShimPath(shellCommandName);
             _fileSystem.File.WriteAllText(scriptPath.Value, script);
+            locationOfShimDuringTransaction.Add(scriptPath);
         }
 
-        public void EnsureCommandNameUniqueness(string shellCommandName)
+        private FilePath GetShimPath(string shellCommandName)
         {
-            if (_fileSystem.File.Exists(Path.Combine(_pathToPlaceShim, shellCommandName)))
+            var scriptPath = Path.Combine(_pathToPlaceShim, shellCommandName);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                throw new GracefulException(
-                    string.Format(CommonLocalizableStrings.FailInstallToolSameName,
-                        shellCommandName));
+                scriptPath += ".exe";
             }
+
+            return new FilePath(scriptPath);
         }
 
         public class FakeShim

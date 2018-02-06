@@ -50,6 +50,11 @@ namespace Microsoft.DotNet.ShellShim.Tests
             _files[path] = content;
         }
 
+        public void Delete(string path)
+        {
+            throw new NotImplementedException();
+        }
+
         public static FakeFile Empty => new FakeFile(new Dictionary<string, string>());
     }
 }

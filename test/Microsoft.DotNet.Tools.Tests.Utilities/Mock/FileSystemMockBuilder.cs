@@ -106,6 +106,16 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             {
                 _files[path] = content;
             }
+
+            public void Delete(string path)
+            {
+                if (!Exists(path))
+                {
+                    return;
+                }
+
+                _files.Remove(path);
+            }
         }
 
         private class DirectoryMock : IDirectory
@@ -142,6 +152,22 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             public void CreateDirectory(string path)
             {
                 _files.Add(path, path);
+            }
+
+            public void Delete(string path, bool recursive)
+            {
+                if (!recursive && Exists(path) == true)
+                {
+                    if (_files.Keys.Where(k => k.StartsWith(path)).Count() > 1)
+                    {
+                        throw new IOException("The directory is not empty");
+                    }
+                }
+
+                foreach (var k in _files.Keys.Where(k => k.StartsWith(path)).ToList())
+                {
+                    _files.Remove(k);
+                }
             }
         }
 
