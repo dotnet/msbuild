@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"c:\packages\SourcePackage1\"), task.MappedSourceRoots[0].ItemSpec);
             Assert.Equal(@"/_1/", task.MappedSourceRoots[0].GetMetadata("MappedPath"));
 
-            Assert.Equal(@"/packages/SourcePackage2/", task.MappedSourceRoots[1].ItemSpec);
+            Assert.Equal(FileUtilities.FixFilePath(@"/packages/SourcePackage2/"), task.MappedSourceRoots[1].ItemSpec);
             Assert.Equal(@"/_2/", task.MappedSourceRoots[1].GetMetadata("MappedPath"));
 
             Assert.Equal(FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\"), task.MappedSourceRoots[2].ItemSpec);
@@ -80,14 +80,14 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(3, task.MappedSourceRoots.Length);
 
-            Assert.Equal(@"!@#:;$%^&*()_+|{}", task.MappedSourceRoots[0].ItemSpec);
+            Assert.Equal(FileUtilities.FixFilePath(@"!@#:;$%^&*()_+|{}"), task.MappedSourceRoots[0].ItemSpec);
             Assert.Equal(@"/_1/", task.MappedSourceRoots[0].GetMetadata("MappedPath"));
 
-            Assert.Equal("****", task.MappedSourceRoots[1].ItemSpec);
+            Assert.Equal(FileUtilities.FixFilePath("****"), task.MappedSourceRoots[1].ItemSpec);
             Assert.Equal(@"/_/", task.MappedSourceRoots[1].GetMetadata("MappedPath"));
             Assert.Equal(@"Git", task.MappedSourceRoots[1].GetMetadata("SourceControl"));
 
-            Assert.Equal(@"****\|||:;\", task.MappedSourceRoots[2].ItemSpec);
+            Assert.Equal(FileUtilities.FixFilePath(@"****\|||:;\"), task.MappedSourceRoots[2].ItemSpec);
             Assert.Equal(@"/_/|||:;/", task.MappedSourceRoots[2].GetMetadata("MappedPath"));
             Assert.Equal(@"Git", task.MappedSourceRoots[2].GetMetadata("SourceControl"));
         }
