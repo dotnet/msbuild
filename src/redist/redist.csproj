@@ -83,6 +83,7 @@
       <RoslynDeps Include="$(RoslynDirectory)/bincore/vbc.deps.json" />
       <RoslynDeps Include="$(RoslynDirectory)/bincore/VBCSCompiler.deps.json" />
       <RoslynSatelliteDeps Include="$(RoslynDirectory)/bincore/tool_roslyn_satellites.deps.json" />
+      <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>
     </ItemGroup>
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
@@ -98,7 +99,7 @@
       Configuration="$(Configuration)"
       ProjectPath="$(SrcDirectory)/tool_roslyn_satellites/tool_roslyn_satellites.csproj" />
     <AddToDeps TargetDeps="@(RoslynDeps)" AdditionalDeps="@(RoslynSatelliteDeps)" />
-    <Delete Files="@(RoslynSatelliteDeps)" />
+    <Delete Files="@(RoslynSatelliteDeps);@(RoslynFrameworkAssemblies)" />
   </Target>
 
   <Target Name="PublishFSharp"

@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.New.Tests
             // For testing the 2.1 templates - some of their packages are currently only in private feeds.
             var configFile = Path.Combine(rootPath, "NuGet.Config");
             AspNetNuGetConfiguration.WriteNuGetConfigWithAspNetPrivateFeeds(configFile);
-			      // For "normal" builds, once the packages needed for 2.1 templates are in the public feeds
+            // For "normal" builds, once the packages needed for 2.1 templates are in the public feeds
             //var configFile = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
             foreach (string cSharpTemplate in cSharpTemplates)
