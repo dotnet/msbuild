@@ -37,15 +37,15 @@
     </Content>
   </ItemGroup>
 
-  <Target Name="PublishAspNetRuntimePackageStore"
+  <Target Name="PublishAspNetSharedFramework"
           AfterTargets="CrossgenPublishDir">
     <ItemGroup>
-      <AspNetRuntimePackageStore Remove="*" />
-      <AspNetRuntimePackageStore Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
+      <AspNetSharedFramework Remove="*" />
+      <AspNetSharedFramework Include="$(AspNetCoreSharedFxPublishDirectory)/**/*" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(AspNetRuntimePackageStore)"
-          DestinationFiles="@(AspNetRuntimePackageStore->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AspNetSharedFramework)"
+          DestinationFiles="@(AspNetSharedFramework->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishSharedFramework"
@@ -69,7 +69,7 @@
 
   <Target Name="PublishRoslyn"
           BeforeTargets="Publish">
-          
+
     <ItemGroup>
       <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
     </ItemGroup>
@@ -104,7 +104,7 @@
 
   <Target Name="PublishFSharp"
           BeforeTargets="Publish">
-          
+
     <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
@@ -141,7 +141,7 @@
         <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
       </MSBuildExtensionsContent>
     </ItemGroup>
-    
+
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
             DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
 
@@ -262,11 +262,11 @@
       <RoslynTargets Include="%(RoslynFilesWithPEMarker.FullPath)" Condition=" '%(RoslynFilesWithPEMarker.IsPE)' == 'True' " />
       <FSharpTargets Include="%(FSharpFilesWithPEMarker.FullPath)" Condition=" '%(FSharpFilesWithPEMarker.IsPE)' == 'True' " />
       <RemainingTargets Include="%(RemainingFilesWithPEMarker.FullPath)" Condition=" '%(RemainingFilesWithPEMarker.IsPE)' == 'True' " />
- 
+
       <RoslynFolders Include="@(RoslynTargets-&gt;DirectoryName()-&gt;Distinct())" />
       <FSharpFolders Include="@(FSharpTargets-&gt;DirectoryName()-&gt;Distinct())" />
       <RemainingFolders Include="@(RemainingTargets-&gt;DirectoryName()-&gt;Distinct())" />
- 
+
       <!-- FSharp.Build.dll causes the FSharp folder to be included. Remove it, as we don't want other FSharp dlls being included in the crossgen. -->
       <RemainingFolders Remove="$(PublishDir)FSharp\**\*" />
     </ItemGroup>
@@ -291,7 +291,7 @@
         CreateSymbols="$(CreateCrossgenSymbols)"
         DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(RoslynFolders);$(SharedFrameworkNameVersionPath)" />
- 
+
     <Crossgen
         SourceAssembly="%(FSharpTargets.FullPath)"
         DestinationPath="%(FSharpTargets.FullPath)"
@@ -316,7 +316,7 @@
   <Target Name="ChmodPublishDir"
           AfterTargets="CrossgenPublishDir"
           Condition=" '$(OSName)' != 'win' ">
-    
+
     <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
@@ -330,7 +330,7 @@
       <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Move SourceFiles="@(PdbsToMove)" 
+    <Move SourceFiles="@(PdbsToMove)"
           DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
