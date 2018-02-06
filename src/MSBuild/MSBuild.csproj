@@ -226,28 +226,6 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <!-- Reference NuGet packages in order to copy tasks and targets into bootstrap folder.  Exclude assets so that
-         the packages are just downloaded, not used in the build. -->
-    <!--<PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Commands" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Common" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Configuration" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Dependencyresolver.Core" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Librarymodel" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Projectmodel" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Protocol" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersion)" ExcludeAssets="All" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" ExcludeAssets="All" />-->
-
-    <!-- Avoid package downgrades for these packages caused by reference to NewtonSoft.Json -->
-    <!--<PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />-->
-  </ItemGroup>
-
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects
        that reference this one. -->
   <Target Name="AddRuntimeDependenciesToContent" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'" BeforeTargets="GetCopyToOutputDirectoryItems">
@@ -284,5 +262,7 @@
 
   </Target>
 
-  <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" />
+  <!-- Import targets to create bootstrap version of MSBuild if building for full Framework.
+       For .NET Core, a separate MSBuild.Bootstrap project is used. -->
+  <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" Condition="$(TargetFramework.StartsWith('net4'))" />
 </Project>

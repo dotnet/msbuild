@@ -736,6 +736,7 @@
     </Content>
     <Content Include="Microsoft.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">15.0\Microsoft.Common.props</Link>
     </Content>
     <Content Include="Microsoft.Common.tasks">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
