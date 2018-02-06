@@ -413,6 +413,15 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] DirectoriesCreated { get { throw null; } }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class MapSourceRoots : Microsoft.Build.Tasks.TaskExtension
+    {
+        public MapSourceRoots() { }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] MappedSourceRoots { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] SourceRoots { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public override bool Execute() { throw null; }
+    }
     public sealed partial class Message : Microsoft.Build.Tasks.TaskExtension
     {
         public Message() { }
