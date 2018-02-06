@@ -73,9 +73,6 @@
     <Compile Include="..\Shared\Compat\defaultbinder.cs">
       <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\PipeSecurity.cs">
-      <Link>SharedUtilities\Compat\PipeSecurity.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared\EncodingUtilities.cs">

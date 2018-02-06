@@ -295,14 +295,9 @@ namespace Microsoft.Build.BackEnd
         //  on non-Windows operating systems
         private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
-#if FALSE
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
 #if FEATURE_PIPE_SECURITY
+            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
             IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
             if (remoteOwner != identifier)
             {
@@ -312,7 +307,6 @@ namespace Microsoft.Build.BackEnd
 #endif
         }
 
-
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
@@ -321,7 +315,12 @@ namespace Microsoft.Build.BackEnd
             // Try and connect to the process.
             string pipeName = "MSBuild" + nodeProcessId;
 
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            PipeOptions pipeOptions = PipeOptions.Asynchronous;
+
+            // TODO: when https://github.com/dotnet/corefx/issues/25427 is available
+            // pipeOptions |= PipeOptions.CurrentUserOnly;
+
+            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, pipeOptions);
             CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
             try
