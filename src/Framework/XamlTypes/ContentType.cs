@@ -103,8 +103,8 @@ namespace Microsoft.Build.Framework.XamlTypes
                 throw new ArgumentNullException("metadataName");
             }
 
-            string value;
-            _metadata.Value.TryGetValue(metadataName, out value);
+            _metadata.Value.TryGetValue(metadataName, out string value);
+
             return value;
         }
 

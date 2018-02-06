@@ -276,7 +276,7 @@ function Build {
   if ($ci)
   {
 #    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
-    git status | Out-Null
+    git status
     git --no-pager diff HEAD --word-diff=plain --exit-code | Out-Null
 
     if($LASTEXITCODE -ne 0) {
