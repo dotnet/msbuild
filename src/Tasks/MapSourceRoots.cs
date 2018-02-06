@@ -3,14 +3,27 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
+    /// <summary>
+    /// Given a list of SourceRoot items produces a list of the same items with added <c>MappedPath</c> metadata that
+    /// contains calculated deterministic source path for each SourceRoot.
+    /// </summary>
+    /// <remarks>
+    /// Does not perform any path validation.
+    /// </remarks>
     public sealed class MapSourceRoots : TaskExtension
     {
+        /// <summary>
+        /// SourceRoot items with the following optional well-known metadata:
+        /// <list type="bullet">
+        ///   <term>SourceControl</term><description>Indicates name of the source control system the source root is tracked by (e.g. Git, TFVC, etc.), if any.</description>
+        ///   <term>NestedRoot</term><description>If a value is specified the source root is nested (e.g. git submodule). The value is a path to this root relative to the containing root.</description>
+        ///   <term>ContainingRoot</term><description>Identifies another source root item that this source root is nested under.</description>
+        /// </list>
+        /// </summary>
         [Required]
         public ITaskItem[] SourceRoots { get; set; }
 
