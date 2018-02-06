@@ -2004,7 +2004,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: The SDK resolver type "{0}" failed to load. {1}</source>
-        <target state="updated">MSB4237: не удалось загрузить найденный сопоставитель SDK. Ошибка: {0}.</target>
+        <target state="translated">MSB4237: не удалось загрузить сопоставитель SDK типа "{0}". {1}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2059,61 +2059,61 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolverAssembly">
         <source>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</source>
-        <target state="new">MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</target>
+        <target state="translated">MSB4244: не удалось загрузить сборку сопоставителя SDK типа "{0}". {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
         <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="new">MSB4242: The SDK resolver "{0}" failed to run. {1}</target>
+        <target state="translated">MSB4242: не удалось запустить сопоставитель SDK "{0}". {1}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
+        <target state="translated">MSB4243: не удалось запустить сопоставитель SDK на базе NuGet, так как не удалось найти сборки NuGet. Проверьте свою установку MSBuild или укажите папку, содержащую требуемые сборки NuGet, в качестве значения переменной среды "{0}". {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</target>
-        <note></note>
+        <target state="translated">Проект "{0}" не был импортирован "{1}" в ({2},{3}), так как файл недопустим.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedMissingFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</target>
-        <note></note>
+        <target state="translated">Проект "{0}" не был импортирован "{1}" в ({2},{3}), так как файл не существует.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="new">MSBUILD : error MSB4239: Error writing profiling report. {0}</target>
-        <note></note>
+        <target state="translated">MSBUILD — ошибка MSB4239: ошибка при записи отчета профилирования. {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">
         <source>Writing profiler report to '{0}'...</source>
-        <target state="new">Writing profiler report to '{0}'...</target>
-        <note></note>
+        <target state="translated">Запись отчета профилирования в "{0}"…</target>
+        <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReportDone">
         <source>Done writing report.</source>
-        <target state="new">Done writing report.</target>
-        <note></note>
+        <target state="translated">Отчет записан.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="new">MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</target>
+        <target state="translated">MSB4240: невозможно указать множество версий одного пакета SDK "{0}". Будет использована версия SDK "{1}", уже указанная "{2}", а версия "{3}" будет пропущена.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="new">MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</target>
+        <target state="translated">MSB4241: ссылка на пакет SDK "{0}" версии "{1}" была сопоставлена версии "{2}". Возможно, вы используете версию, отличную от ожидаемой, если вы не обновили версию по ссылке.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResolving">
         <source>Resolving SDK '{0}'...</source>
-        <target state="new">Resolving SDK '{0}'...</target>
+        <target state="translated">Сопоставление SDK "{0}"…</target>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
