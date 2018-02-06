@@ -90,6 +90,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     </CoreBuildDependsOn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <CoreCleanDependsOn>
+      SuppressAssetsLogMessages;
+      $(CoreCleanDependsOn)
+    </CoreCleanDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RebuildDependsOn>
+      UnsuppressAssetsLogMessages;
+      $(RebuildDependsOn)
+    </RebuildDependsOn>
+  </PropertyGroup>
+
   <!--
     ============================================================
                                         GenerateBuildDependencyFile
@@ -182,6 +196,32 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)" FinalOutputPath="$(ProjectRuntimeConfigFilePath)" />
     </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        SuppressAssetsLogMessages
+
+    Suppresses log messages from an existing project assets file.
+    ============================================================
+    -->
+  <Target Name="SuppressAssetsLogMessages" Condition="'$(UnsuppressAssetsLogMessages)' != 'true'">
+    <PropertyGroup>
+      <EmitAssetsLogMessages>false</EmitAssetsLogMessages>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        UnsuppressAssetsLogMessages
+
+    Unsuppresses log messages from an existing project assets file.
+    ============================================================
+    -->
+  <Target Name="UnsuppressAssetsLogMessages">
+    <PropertyGroup>
+      <UnsuppressAssetsLogMessages>true</UnsuppressAssetsLogMessages>
+    </PropertyGroup>
   </Target>
 
   <!--
