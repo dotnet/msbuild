@@ -1,0 +1,26 @@
+<Project>
+    <PropertyGroup>
+        <TargetToGetItemsToCopy>GetExtensionsItemsToCopy</TargetToGetItemsToCopy>
+        <DependencyNuPkgPath>$(NuGetPackagesDir)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion)</DependencyNuPkgPath>
+    </PropertyGroup>
+
+    <Target Name="GetExtensionsItemsToCopy">
+		<ItemGroup>
+			<FilesToCopy
+                Include="$(DependencyNuPkgPath)/msbuildExtensions/**"
+                Exclude="$(DependencyNuPkgPath)/msbuildExtensions/**/netcoreapp1.0/**"
+                OutputDirectory="$(MSBuildExtensionsPathOutputDirectory)" />
+
+			<FilesToCopy
+                Include="$(DependencyNuPkgPath)/msbuildExtensions-ver/**"
+                OutputDirectory="$(MSBuildExtensionsPathToolsVersionOutputDirectory)" />
+		</ItemGroup>
+    </Target>
+
+    <Target Name="PrintMSExtensionsNuGetURL" AfterTargets="DeployNuGetFiles">
+        <Message
+            Text="Add this to mono's tools/nuget-hash-extractor/download.sh:
+                MS_EXTN_VERSIONS=&quot;%24MS_EXTN_VERSIONS $(DependencyPackageVersion)&quot; # $(CLIBlobBaseURL)/build/DependencyVersions.props"
+                Importance="High" />
+    </Target>
+</Project>

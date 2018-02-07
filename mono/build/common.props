@@ -1,0 +1,12 @@
+<Project>
+	<PropertyGroup>
+		<RepoRoot>$(MSBuildThisFileDirectory)\..\..\</RepoRoot>
+
+        <CLICommitHash>501e11d928c21608999c934f0a7078570b688c6c</CLICommitHash>
+        <CLIBlobBaseURL>https://raw.githubusercontent.com/dotnet/cli/$(CLICommitHash)</CLIBlobBaseURL>
+
+        <NuGetPackagesDir>$(HOME)\.nuget\packages</NuGetPackagesDir>
+
+        <SdkVersionsFile>$(MSBuildThisFileDirectory)\SdkVersions.txt</SdkVersionsFile>
+	</PropertyGroup>
+</Project>

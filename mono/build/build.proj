@@ -1,0 +1,17 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)\common.props" />
+
+    <Target Name="Build" DependsOnTargets="FetchAndUpdateSdksAndNuGets" />
+
+    <Target Name="FetchAndUpdateSdksAndNuGets">
+        <Delete Files="$(SdkVersionsFile)" />
+
+        <Exec Command="curl $(CLIBlobBaseURL)/build/DependencyVersions.props -o DependencyVersions.props" />
+        <Exec Command="curl $(CLIBlobBaseURL)/build/BundledSdks.props -o BundledSdks.props" />
+
+        <WriteLinesToFile File="$(SdkVersionsFile)" Lines="OldCLICommitHash=$(CLICommitHash)%3B" />
+
+        <MSBuild Projects="sdks_and_nugets/update_sdks_and_nugets.proj" Properties="_RunningFromBuildProject=true"/>
+    </Target>
+
+</Project>

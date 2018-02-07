@@ -1,0 +1,39 @@
+<Project DefaultTargets="DeployNuGetFiles">
+    <Import Project="$(MSBuildThisFileDirectory)\..\common.props" />
+    <Import Project="$(ProjectWithProperties)" />
+
+    <Target Name="PrintNameAndVersion" BeforeTargets="DeployNuGetFiles">
+        <Message Text="** NuGet $(DependencyPackageName) version $(DependencyPackageVersion)" Importance="High" />
+
+        <WriteLinesToFile File="$(SdkVersionsFile)" Lines="$(DependencyPackageName)=$(DependencyPackageVersion)%3B" />
+    </Target>
+
+    <Target Name="DeployNuGetFiles"
+            DependsOnTargets="$(TargetToPrepareProps);EnsureDependencyRestored;$(TargetToGetItemsToCopy)"
+            Inputs="@(FilesToCopy)"
+            Outputs="@(FilesToCopy->'%(OutputDirectory)\%(RecursiveDir)\%(FileName)%(Extension)')">
+
+        <Copy
+            SourceFiles="@(FilesToCopy)"
+            DestinationFiles="@(FilesToCopy->'%(OutputDirectory)\%(RecursiveDir)\%(FileName)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
+
+        <Exec Command="chmod -x @(CopiedFiles->'%(Identity)', ' ')"
+              Condition="'$(OS)' != 'Windows_NT'" />
+    </Target>
+
+    <Target Name="EnsureDependencyRestored"
+            Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')" >
+
+        <Error
+            Condition="'$(DependencyPackageVersion)' == ''"
+            Text="Missing version for Sdk/nuget named '$(DependencyPackageName)'" />
+
+        <Message Importance="High" Text="Restoring package named $(DependencyPackageName) version='$(DependencyPackageVersion)'"/>
+        <MSBuild
+            Projects="$(MSBuildThisFileDirectory)\sdks\sdks.csproj"
+            Targets="Restore"
+            Properties="DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion)"/>
+    </Target>
+</Project>
