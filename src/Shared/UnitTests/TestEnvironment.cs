@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests
             WithInvariant(new StringInvariant("Path.GetTempPath()", Path.GetTempPath));
 
             // Temp folder should not change before and after a test
-            WithInvariant(new StringInvariant("Directory.GetCurrentDirectory", Directory.GetCurrentDirectory));
+            // WithInvariant(new StringInvariant("Directory.GetCurrentDirectory", Directory.GetCurrentDirectory));
 
             // Common set of MSBuild environment variables that should remain the same before and after a test
             // runs. If these differ it likely indicates an issue with the test.
