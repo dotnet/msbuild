@@ -68,15 +68,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 sdk.Name,
                 key => RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
 
-            if (!String.IsNullOrWhiteSpace(response.Error))
-            {
-                // Log an error that occured on the main node request handler thread which cannot log errors
-                loggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(sdkReferenceLocation), response.Error);
-
-                return null;
-            }
-
-            if (response.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, response.Version))
+            if (!SdkResolverService.IsReferenceSameVersion(sdk, response.Version))
             {
                 // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version already specified at "{1}" will be used and the version will be "{2}" ignored.
                 loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, response.ElementLocation, sdk.Version);

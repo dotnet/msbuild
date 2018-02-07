@@ -238,16 +238,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     }
                     catch (Exception e)
                     {
-                        // Errors cannot be logged in this background thread so it must be sent to the awaiting
-                        // node to be logged.
-                        response = new SdkResolverResponse(e);
+                        ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
+                        loggingService.LogFatalError(new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath).BuildEventContext, e, new BuildEventFileInfo(request.ElementLocation), "CouldNotRunSdkResolver", "foo", e.Message);
                     }
                     finally
                     {
                         // Get the node manager and send the response back to the node that requested the SDK
                         INodeManager nodeManager = Host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                        nodeManager.SendData(request.NodeId, response);
+                        nodeManager.SendData(request.NodeId, response ?? new SdkResolverResponse());
                     }
                 }));
             }

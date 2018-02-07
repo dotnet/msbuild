@@ -11,9 +11,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     internal sealed class SdkResolverResponse : INodePacket
     {
-        private string _error;
         private string _fullPath;
         private string _version;
+
+        public SdkResolverResponse()
+        {
+        }
 
         public SdkResolverResponse(string fullPath, string version)
         {
@@ -26,21 +29,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             Translate(translator);
         }
 
-        public SdkResolverResponse(Exception exception)
-        {
-            // Only translate the exception message so we don't have to serialize the whole object
-            _error = exception.Message;
-        }
-
         /// <summary>
         /// Gets or sets the <see cref="ElementLocation"/> of the reference that created this response.
         /// </summary>
         public Construction.ElementLocation ElementLocation { get; set; }
-
-        /// <summary>
-        /// Gets an optional error associated with the response.
-        /// </summary>
-        public string Error => _error;
 
         /// <summary>
         /// Gets the full path to the resolved SDK.
@@ -63,7 +55,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             translator.Translate(ref _fullPath);
             translator.Translate(ref _version);
-            translator.Translate(ref _error);
         }
     }
 }
