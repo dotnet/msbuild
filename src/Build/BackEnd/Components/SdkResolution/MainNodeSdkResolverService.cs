@@ -239,7 +239,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     catch (Exception e)
                     {
                         ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
-                        loggingService.LogFatalError(new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath).BuildEventContext, e, new BuildEventFileInfo(request.ElementLocation), "CouldNotRunSdkResolver", "foo", e.Message);
+
+                        EvaluationLoggingContext loggingContext = new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath);
+
+                        loggingService.LogFatalBuildError(loggingContext.BuildEventContext, e, new BuildEventFileInfo(request.ElementLocation));
                     }
                     finally
                     {
