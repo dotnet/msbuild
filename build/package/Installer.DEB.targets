@@ -120,5 +120,4 @@
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
   </Target>
-
 </Project>
