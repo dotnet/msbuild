@@ -1,0 +1,9 @@
+OldCLICommitHash=501e11d928c21608999c934f0a7078570b688c6c;
+NuGet.Build.Tasks.Pack=4.6.0-rtm-4782;
+Microsoft.NET.Sdk=2.1.0-preview1-62414-02;
+Microsoft.NET.Sdk.Web=2.0.0-rel-20171110-671;
+Microsoft.NET.Sdk.Publish=2.0.0-rel-20171110-671;
+Microsoft.NET.Sdk.Web.ProjectSystem=2.0.0-rel-20171110-671;
+FSharp.NET.Sdk=1.0.4-bundled-0100;
+Microsoft.NET.Build.Extensions=2.1.0-preview1-62414-02;
+NuGet.Build.Tasks=4.6.0-rtm-4782;
