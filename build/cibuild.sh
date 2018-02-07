@@ -10,6 +10,6 @@ ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 mkdir -p $ScriptRoot/../artifacts/2Debug/TestResults
 
-cp $ScriptRoot/Microsoft.Build.Engine.UnitTests_netcoreapp2.0_x64.xml $ScriptRoot/../artifacts/2Debug/TestResults
+cp -v $ScriptRoot/Microsoft.Build.Engine.UnitTests_netcoreapp2.0_x64.xml $ScriptRoot/../artifacts/2Debug/TestResults
 
 exit $?
