@@ -1408,13 +1408,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="new">  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
-                     to the specified file. If the extension of the specified
-                     file is '.md', the result is generated in markdown
-                     format. Otherwise, a tab separated file is produced.
+        <target state="translated">  /profileevaluation:&lt;檔案&gt;    
+                     分析 MSBuild 評估並將結果寫入
+                     指定的檔案。若所指定檔案的副檔名為 
+                     '.md'，結果會以 Markdown 格式
+                     產生。否則會產生定位字元分隔檔案。
     </target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="HelpMessage_33_RestorePropertySwitch">
         <source>  /restoreProperty:&lt;n&gt;=&lt;v&gt;
@@ -1428,15 +1428,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      Example:
                        /restoreProperty:IsRestore=true;MyProperty=value
     </source>
-        <target state="new">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Set or override these project-level properties only
-                     during restore and do not use properties specified
-                     with the /property argument. &lt;n&gt; is the property
-                     name, and &lt;v&gt; is the property value. Use a
-                     semicolon or a comma to separate multiple properties,
-                     or specify each property separately.
-                     (Short form: /rp)
-                     Example:
+        <target state="translated">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     請僅在還原期間設定或覆寫這些專案層級
+                     的屬性，並請勿使用以 /property 引數
+                     指定的屬性。&lt;n&gt; 為屬性名稱，
+                     &lt;v&gt; 則為屬性值。請使用分號或點 (.) 
+                     分隔多個屬性，
+                     或個別指定各屬性。
+                     (簡短形式: /rp)
+                     範例:
                        /restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
@@ -1446,13 +1446,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1053: Provided filename is not valid. {0}</target>
-        <note></note>
+        <target state="translated">MSBUILD : 錯誤 MSB1053: 提供的檔案名稱無效。{0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
-        <target state="new">MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</target>
-        <note></note>
+        <target state="translated">MSBUILD :錯誤 MSB1054: 必須指定檔案名稱才能產生分析工具結果。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

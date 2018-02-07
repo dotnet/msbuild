@@ -2004,7 +2004,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: The SDK resolver type "{0}" failed to load. {1}</source>
-        <target state="updated">MSB4237: Znaleziono program rozpoznawania zestawu SDK, ale nie można go załadować. Błąd: {0}.</target>
+        <target state="translated">MSB4237: Nie można załadować typu programu rozpoznawania zestawu SDK „{0}”. {1}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2059,61 +2059,61 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolverAssembly">
         <source>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</source>
-        <target state="new">MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</target>
+        <target state="translated">MSB4244: Nie można załadować zestawu programu rozpoznawania zestawu SDK „{0}”. {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
         <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="new">MSB4242: The SDK resolver "{0}" failed to run. {1}</target>
+        <target state="translated">MSB4242: Nie można uruchomić programu rozpoznawania zestawu SDK „{0}”. {1}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
+        <target state="translated">MSB4243: Nie można uruchomić programu rozpoznawania zestawu SDK opartego na narzędziu NuGet, ponieważ nie można zlokalizować zestawów NuGet. Sprawdź instalację programu MSBuild lub ustaw zmienną środowiskową „{0}” na folder zawierający wymagane zestawy NuGet. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</target>
-        <note></note>
+        <target state="translated">Projekt „{0}” nie został zaimportowany przez projekt „{1}” w lokalizacji ({2},{3}), ponieważ plik był nieprawidłowy.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedMissingFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</target>
-        <note></note>
+        <target state="translated">Projekt „{0}” nie został zaimportowany przez projekt „{1}” w lokalizacji ({2},{3}), ponieważ plik nie istniał.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="new">MSBUILD : error MSB4239: Error writing profiling report. {0}</target>
-        <note></note>
+        <target state="translated">MSBUILD : błąd MSB4239: Błąd zapisywania raportu profilowania. {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">
         <source>Writing profiler report to '{0}'...</source>
-        <target state="new">Writing profiler report to '{0}'...</target>
-        <note></note>
+        <target state="translated">Trwa zapisywanie raportu profilera w: „{0}”...</target>
+        <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReportDone">
         <source>Done writing report.</source>
-        <target state="new">Done writing report.</target>
-        <note></note>
+        <target state="translated">Zakończono zapisywanie raportu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="new">MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</target>
+        <target state="translated">MSB4240: Nie można określić wielu wersji tego samego zestawu SDK „{0}”. Zostanie użyta wersja zestawu SDK „{1}” określona już przez lokalizację „{2}”, a wersja „{3}” zostanie zignorowana.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="new">MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</target>
+        <target state="translated">MSB4241: Odwołanie do zestawu SDK „{0}” w wersji „{1}” zostało rozpoznane jako wersja „{2}”. Może zostać użyta inna wersja niż oczekiwana, jeśli nie zaktualizujesz wersji określonej w odwołaniu, tak aby była zgodna.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResolving">
         <source>Resolving SDK '{0}'...</source>
-        <target state="new">Resolving SDK '{0}'...</target>
+        <target state="translated">Trwa rozpoznawanie zestawu SDK „{0}”...</target>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
