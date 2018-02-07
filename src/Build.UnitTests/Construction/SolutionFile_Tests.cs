@@ -705,19 +705,26 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseFirstProjectLineWhereProjectPathHasBackslash()
         {
-            SolutionFile p = new SolutionFile();
-            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
-            ProjectInSolution proj = new ProjectInSolution(p);
+            using (var env = TestEnvironment.Create())
+            {
+                var solutionFolder = env.CreateFolder(Path.Combine(FileUtilities.GetTemporaryDirectory(), "sln"));
+                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.FolderPath, "RelativePath"));
 
-            p.ParseFirstProjectLine
-            (
-                "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"Relative\\path\\to\\project file\"    , \"Unique name-GUID\"",
-                 proj
-            );
-            Assert.Equal(SolutionProjectType.Unknown, proj.ProjectType);
-            Assert.Equal("ProjectInSubdirectory", proj.ProjectName);
-            Assert.Equal(Path.Combine("Relative", "path", "to", "project file"), proj.RelativePath);
-            Assert.Equal("Unique name-GUID", proj.ProjectGuid);
+                SolutionFile p = new SolutionFile();
+                p.FullPath = Path.Combine(solutionFolder.FolderPath, "RelativePath", "project file");
+                p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.FolderPath);
+                ProjectInSolution proj = new ProjectInSolution(p);
+
+                p.ParseFirstProjectLine
+                (
+                    "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"RelativePath\\project file\"    , \"Unique name-GUID\"",
+                    proj
+                );
+                Assert.Equal(SolutionProjectType.Unknown, proj.ProjectType);
+                Assert.Equal("ProjectInSubdirectory", proj.ProjectName);
+                Assert.Equal(Path.Combine("RelativePath", "project file"), proj.RelativePath);
+                Assert.Equal("Unique name-GUID", proj.ProjectGuid);
+            }
         }
 
         /// <summary>
