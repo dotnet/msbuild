@@ -2004,7 +2004,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: The SDK resolver type "{0}" failed to load. {1}</source>
-        <target state="translated">MSB4237: The SDK-Resolvertyp "{0}" konnte nicht geladen werden. {1}</target>
+        <target state="translated">MSB4237: Der SDK-Resolvertyp "{0}" konnte nicht geladen werden. {1}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2024,17 +2024,17 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedFalseCondition">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" bei ({2},{3}) aufgrund einer falschen Bedingung nicht importiert; ({4}) wurde als ({5}) ausgewertet.</target>
+        <target state="translated">Das Projekt "{0}" wurde aufgrund einer falschen Bedingung nicht von "{1}" in ({2},{3}) importiert; ({4}) wurde als ({5}) ausgewertet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedNoMatches">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" bei ({2},{3}) aufgrund nicht übereinstimmender Dateien nicht importiert.</target>
+        <target state="translated">Das Projekt "{0}" wurde aufgrund nicht übereinstimmender Dateien nicht von "{1}" in ({2},{3}) importiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedEmptyFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" bei ({2},{3}) nicht importiert, da die Datei leer war.</target>
+        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht in ({2},{3}) importiert, da die Datei leer war.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectImported">
@@ -2074,12 +2074,12 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht um ({2},{3}) importiert, weil die Datei ungültig ist.</target>
+        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht in ({2},{3}) importiert, weil die Datei ungültig ist.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedMissingFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht um ({2},{3}) importiert, weil die Datei nicht vorhanden ist.</target>
+        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht in ({2},{3}) importiert, weil die Datei nicht vorhanden ist.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
