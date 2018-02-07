@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <!-- Repeat setting DebugType (already set in Directory.Build.props, but repeat here because because xunit.core.targets overrides it) -->
+    <DebugType Condition=" '$(TargetFramework)' == '' ">full</DebugType>
+    <DebugType Condition=" '$(TargetFramework)' != '' ">embedded</DebugType>
+    <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
@@ -13,10 +18,6 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Test.snk</AssemblyOriginatorKeyFile>
     <PublicKey>002400000480000094000000060200000024000052534131000400000100010015c01ae1f50e8cc09ba9eac9147cf8fd9fce2cfe9f8dce4f7301c4132ca9fb50ce8cbf1df4dc18dd4d210e4345c744ecb3365ed327efdbc52603faa5e21daa11234c8c4a73e51f03bf192544581ebe107adee3a34928e39d04e524a9ce729d5090bfd7dad9d10c722c0def9ccc08ff0a03790e48bcd1f9b6c476063e1966a1c4</PublicKey>
     <PublicKeyToken>9d77cc7ad39b68eb</PublicKeyToken>
-
-    <!-- Repeat setting DebugType (already set in Directory.Build.props, but repeat here because because xunit.core.targets overrides it) -->
-    <DebugType>embedded</DebugType>
-    <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
 
     <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
     <OutputType>Exe</OutputType>
@@ -66,11 +67,11 @@
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPITargetPath>$(RepoRoot)src\Package\ReferenceAssemblies\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
+    <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
-    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" Version="$(GenApiVersion)" />
+    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" Version="$(GenApiVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
@@ -91,6 +92,19 @@
        With https://github.com/Microsoft/msbuild/pull/2726 this is no longer necessary, but that change is not
        in VS 15.5 (which is what we use for Jenkins right now). -->
   <Target Name="GenerateSatelliteAssemblies" />
+
+  <Target Name="RemoveSatelliteDllsFromBuildOutputInPackage"
+          BeforeTargets="GenerateNuspec"
+          AfterTargets="_CalculateInputsOutputsForPack"
+          Condition=" '$(GenerateReferenceAssemblySources)' == 'true' ">
+    <!--
+      Could not find a way to tell NuGet to exclude the satellite assemblies from the NuGet package so this target
+      does it.
+    -->
+    <ItemGroup>
+      <_BuildOutputInPackage Remove="$(IntermediateOutputPath)%(_TargetFramework.Identity)\**\$(AssemblyName).resources.dll" />
+    </ItemGroup>
+  </Target>
 
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>

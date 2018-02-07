@@ -4,6 +4,8 @@
     <TargetFramework>net46</TargetFramework>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</Description>
   </PropertyGroup>
   <ItemGroup>
     <!-- Source Files -->

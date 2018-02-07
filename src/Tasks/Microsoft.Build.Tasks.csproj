@@ -7,8 +7,9 @@
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
-
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -967,5 +968,14 @@
   </ItemGroup>
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
     <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Content items in this project are used to copy files to the output directory but we don't
+      want them included in the package.  We can't use IncludeContentInPack because we do need
+      to include third party notices.
+    -->
+    <Content Update="@(Content)" Pack="false" />
   </ItemGroup>
 </Project>
