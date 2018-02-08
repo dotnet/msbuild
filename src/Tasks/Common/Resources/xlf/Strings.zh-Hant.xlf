@@ -329,7 +329,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
-        <target state="needs-review-translation">RuntimeIdentifier 平台必須與 PlatformTarget 相符。</target>
+        <target state="translated">RuntimeIdentifier 平台 '{0}' 必須與 PlatformTarget '{1}' 相容。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -344,12 +344,12 @@
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>Pack as tool does not support self contained.</source>
-        <target state="new">Pack as tool does not support self contained.</target>
+        <target state="translated">當作工具使用的套件不支援自主形式。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedRuntimeIdentifier">
         <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
-        <target state="new">Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</target>
+        <target state="translated">專案以執行階段 '{0}' 為目標，但未解析任何專屬於執行階段的套件。目標 Framework 可能不支援此執行階段。</target>
         <note />
       </trans-unit>
     </body>

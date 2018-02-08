@@ -329,7 +329,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
-        <target state="needs-review-translation">Las plataformas RuntimeIdentifier y PlatformTarget deben coincidir.</target>
+        <target state="translated">Las plataformas RuntimeIdentifier "{0}" y PlatformTarget "{1}" deben ser compatibles.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -344,12 +344,12 @@
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>Pack as tool does not support self contained.</source>
-        <target state="new">Pack as tool does not support self contained.</target>
+        <target state="translated">El paquete como herramienta no admite la autocontención.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedRuntimeIdentifier">
         <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
-        <target state="new">Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</target>
+        <target state="translated">El proyecto se dirige al tiempo de ejecución "{0}" pero no resolvió ningún paquete específico del tiempo de ejecución. Es posible que este tiempo de ejecución no sea compatible con la plataforma de destino.</target>
         <note />
       </trans-unit>
     </body>
