@@ -1147,10 +1147,9 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (DirectoryNotFoundException)
                 {
-#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
                     // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
-                    NativeMethodsShared.SetCurrentDirectory(Environment.SystemDirectory);
-#endif
+                    NativeMethodsShared.SetCurrentDirectory(
+                        BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
                 }
             }
 
