@@ -590,6 +590,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // "Cannot fail on path too long with Unix"
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -3432,11 +3433,13 @@ $(
                 "()"
             };
 
+#if !RUNTIME_TYPE_NETCORE
             if (NativeMethodsShared.IsWindows)
             {
                 // '|' is only an invalid character in Windows filesystems
                 errorTests.Add("$([System.IO.Path]::Combine(`|`,`b`))");
             }
+#endif
 
 #if FEATURE_WIN32_REGISTRY
             if (NativeMethodsShared.IsWindows)

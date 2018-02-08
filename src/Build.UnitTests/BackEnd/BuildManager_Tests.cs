@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #elif MONO
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
-        [Theory]
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/2057")]
         [InlineData(8, false)]
 #endif
         public void ShutdownNodesAfterParallelBuild(int numberOfParallelProjectsToBuild, bool enbaleDebugComm)

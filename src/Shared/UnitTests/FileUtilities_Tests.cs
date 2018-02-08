@@ -264,6 +264,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void HasExtension_WhenInvalidFileName_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
