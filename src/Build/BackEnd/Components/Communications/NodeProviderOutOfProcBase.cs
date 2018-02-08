@@ -557,8 +557,15 @@ namespace Microsoft.Build.BackEnd
 
             int childProcessId = processInfo.dwProcessId;
 
-            NativeMethodsShared.CloseHandle(processInfo.hProcess);
-            NativeMethodsShared.CloseHandle(processInfo.hThread);
+            if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+            {
+                NativeMethodsShared.CloseHandle(processInfo.hProcess);
+            }
+
+            if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+            {
+                NativeMethodsShared.CloseHandle(processInfo.hThread);
+            }
 
             CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", childProcessId);
             return childProcessId;
