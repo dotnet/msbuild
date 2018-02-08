@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftAspNetCoreAllPackageVersion>2.1.0-preview1-28124</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAllPackageVersion>2.1.0-preview1-28228</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.1.0-preview2-26131-06</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.6.0-preview-000054-1286830</MicrosoftBuildPackageVersion>
@@ -9,7 +9,7 @@
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftFSharpCompilerPackageVersion>4.2.0-rtm-171122-0</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>10.1.2-rtm-180131-0</MicrosoftFSharpCompilerPackageVersion>
     <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0-beta1-62608-01</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
@@ -44,21 +44,19 @@
     <NuGetPackagingPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetPackagingPackageVersion>
     <NuGetProjectModelPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelPackageVersion>
     <NuGetVersioningPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetVersioningPackageVersion>
-    <MicrosoftNETTestSdkPackageVersion>15.6.0-preview-20171211-02</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.6.0-preview-20180109-01</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
-    <CLI_Deps_Satellites_Build>pre-20171122-1</CLI_Deps_Satellites_Build>
-    <CliDepsSatellitesRoslynPackageVersion>2.6.0-$(CLI_Deps_Satellites_Build)</CliDepsSatellitesRoslynPackageVersion>
-    <CliDepsSatellitesFSharpPackageVersion>4.4.1-$(CLI_Deps_Satellites_Build)</CliDepsSatellitesFSharpPackageVersion>
+    <CliDepsSatellitesRoslynPackageVersion>2.6.0-pre-20171122-1</CliDepsSatellitesRoslynPackageVersion>
   </PropertyGroup>
 
   <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->
   <Import Condition=" Exists('$(OrchestratedPackageVersionsProps)') " Project="$(OrchestratedPackageVersionsProps)" />
 
   <PropertyGroup>
-    <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-25908-02</CLI_NETStandardLibraryNETFrameworkVersion>
+    <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</CLI_NETStandardLibraryNETFrameworkVersion>
 
     <SharedHostVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedHostVersion>
     <HostFxrVersion>$(MicrosoftNETCoreAppPackageVersion)</HostFxrVersion>
@@ -67,9 +65,9 @@
 
   <!-- infrastructure and test only dependencies -->
   <PropertyGroup>
-    <VersionToolsVersion>2.1.0-prerelease-02430-04</VersionToolsVersion>
-    <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
     <BuildTasksFeedToolVersion>2.1.0-prerelease-02430-04</BuildTasksFeedToolVersion>
+    <VersionToolsVersion>$(BuildTasksFeedToolVersion)</VersionToolsVersion>
+    <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
   </PropertyGroup>
 
 </Project>

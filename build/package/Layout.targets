@@ -16,7 +16,7 @@
       <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**/*" />
       <SdkLanguagePackInput Include="$(OutputDirectory)/sdk/**/$(SatelliteAssemblies)" />
 
-      <AspNetRuntimeFilesInput Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
+      <AspNetRuntimeFilesInput Include="$(AspNetCoreSharedFxPublishDirectory)/**/*" />
 
       <MSBuildExtensionsInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions/**/*" />
       <MSBuildExtensionsVerInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions-ver/**/*" />

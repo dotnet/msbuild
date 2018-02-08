@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="NuGet.tempaspnetpatch.config" />
-    <EmbeddedResource Include="NuGet.tempaspnetpatch.config" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
   </ItemGroup>
