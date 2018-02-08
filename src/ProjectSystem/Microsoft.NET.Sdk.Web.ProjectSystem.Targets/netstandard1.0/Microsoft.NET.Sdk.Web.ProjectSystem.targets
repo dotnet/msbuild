@@ -66,22 +66,5 @@ Copyright (c) .NET Foundation. All rights reserved.
         </ItemGroup>
     </When>
   </Choose>
-  
-    <PropertyGroup>
-      <!-- Default value for the property 'MvcRazorCompileOnPublish' is empty. -->
-      <ResolvedRazorCompileToolset Condition="'$(MvcRazorCompileOnPublish)' == 'true'">PrecompilationTool</ResolvedRazorCompileToolset>
 
-      <!-- Default scenario: websdk sets the default value of the property 'RazorCompileToolset' to 'Implicit' in the props -->
-      <ResolvedRazorCompileToolset Condition="'$(MvcRazorCompileOnPublish)' == '' And '$(RazorCompileToolset)' == 'Implicit'">RazorSdk</ResolvedRazorCompileToolset>
-      
-      <ResolvedRazorCompileToolset Condition="'$(MvcRazorCompileOnPublish)' == '' And '$(RazorCompileToolset)' == 'PrecompilationTool'">$(RazorCompileToolset)</ResolvedRazorCompileToolset>
-      <ResolvedRazorCompileToolset Condition="'$(MvcRazorCompileOnPublish)' == '' And '$(RazorCompileToolset)' == 'RazorSdk'">$(RazorCompileToolset)</ResolvedRazorCompileToolset>
-    
-      <!-- If RazorSdk is not referenced, fall-back to Precompilation tool -->
-      <ResolvedRazorCompileToolset Condition="'$(ResolvedRazorCompileToolset)' == 'RazorSdk' And '$(IsRazorCompilerReferenced)' != 'true'">PrecompilationTool</ResolvedRazorCompileToolset>
-      
-      <!-- Previous versions of the precompilation tool still depends on the msbuild property 'MvcRazorCompileOnPublish'. Hence, setting it to the old default value -->
-      <MvcRazorCompileOnPublish Condition="'$(MvcRazorCompileOnPublish)' == ''">true</MvcRazorCompileOnPublish>
-    </PropertyGroup>
-  
 </Project>

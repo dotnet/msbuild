@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
@@ -20,6 +21,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         public const string DotNetExeName = "dotnet";
         public const string DotNetInstallArgs = "new -i Microsoft.dotnet.web.projecttemplates.1.x::1.0.0-*";
         public const string DotNetNewAdditionalArgs = "";
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public FolderPublish20(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
 
         [Theory]
         [InlineData("netcoreapp2.0", "Release", "core")]
@@ -33,7 +40,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true, testOutputHelper: _testOutputHelper);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
             string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType);

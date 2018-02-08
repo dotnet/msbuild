@@ -18,6 +18,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
+  <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />
   
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.props" />
   
