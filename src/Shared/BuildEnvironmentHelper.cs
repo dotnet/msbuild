@@ -327,11 +327,15 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static bool IsProcessInList(string processName, string[] processList)
         {
-            return
-                processList.Any(
-                    s =>
-                        Path.GetFileNameWithoutExtension(processName)?
-                            .IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0);
+            var processFileName = Path.GetFileNameWithoutExtension(processName);
+
+            if (string.IsNullOrEmpty(processFileName))
+            {
+                return false;
+            }
+
+            return processList.Any(s =>
+                processFileName.Equals(s, StringComparison.OrdinalIgnoreCase));
         }
 
         private static string GetProcessFromRunningProcess()
