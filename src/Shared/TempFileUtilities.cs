@@ -114,6 +114,23 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        internal static void CopyDirectory(string source, string dest)
+        {
+            Directory.CreateDirectory(dest);
+
+            DirectoryInfo sourceInfo = new DirectoryInfo(source);
+            foreach (var fileInfo in sourceInfo.GetFiles())
+            {
+                string destFile = System.IO.Path.Combine(dest, fileInfo.Name);
+                fileInfo.CopyTo(destFile);
+            }
+            foreach (var subdirInfo in sourceInfo.GetDirectories())
+            {
+                string destDir = System.IO.Path.Combine(dest, subdirInfo.Name);
+                CopyDirectory(subdirInfo.FullName, destDir);
+            }
+        }
+
         public class TempWorkingDirectory : IDisposable
         {
             public string Path { get; private set; }
@@ -139,23 +156,6 @@ namespace Microsoft.Build.Shared
             {
                 Directory.Delete(Path, true);
             }
-            static void CopyDirectory(string source, string dest)
-            {
-                Directory.CreateDirectory(dest);
-
-                DirectoryInfo sourceInfo = new DirectoryInfo(source);
-                foreach (var fileInfo in sourceInfo.GetFiles())
-                {
-                    string destFile = System.IO.Path.Combine(dest, fileInfo.Name);
-                    fileInfo.CopyTo(destFile);
-                }
-                foreach (var subdirInfo in sourceInfo.GetDirectories())
-                {
-                    string destDir = System.IO.Path.Combine(dest, subdirInfo.Name);
-                    CopyDirectory(subdirInfo.FullName, destDir);
-                }
-            }
-
         }
 
     }
