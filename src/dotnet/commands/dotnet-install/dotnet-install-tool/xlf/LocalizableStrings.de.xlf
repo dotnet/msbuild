@@ -30,39 +30,6 @@ Argumente: {1}
 Ausgabe: {2}{3}</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToRestorePackage">
-        <source>Failed to restore package. 
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</source>
-        <target state="translated">Fehler beim Wiederherstellen des Pakets. 
-WorkingDirectory: {0}
-Argumente: {1}
-Ausgabe: {2}{3}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedNuget">
-        <source>Install failed. Failed to download package:
-NuGet returned:
-
-{0}</source>
-        <target state="translated">Fehler bei der Installation. Fehler beim Herunterladen des Pakets:
-NuGet hat Folgendes zurückgegeben:
-
-{0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedPackage">
-        <source>Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
-
-{0}</source>
-        <target state="translated">Fehler bei der Installation. Die Einstellungsdatei im NuGet-Paket des Tools ist ungültig. Wenden Sie sich an den Besitzer des NuGet-Pakets.
-Folgender Fehler wurde gemeldet:
-
-{0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to install.</source>
         <target state="translated">NuGet-Paket-ID des zu installierenden Tools.</target>
@@ -111,6 +78,26 @@ Folgender Fehler wurde gemeldet:
       <trans-unit id="InstallToolCommandOnlySupportGlobal">
         <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
         <target state="translated">Die Option --global (-g) ist aktuell erforderlich, weil nur benutzerweite Tools unterstützt werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolConfiguration">
+        <source>The settings file in the tool's NuGet package is invalid: {0}</source>
+        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedContactAuthor">
+        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
+        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationRestoreFailed">
+        <source>The tool package could not be restored.</source>
+        <target state="new">The tool package could not be restored.</target>
         <note />
       </trans-unit>
     </body>

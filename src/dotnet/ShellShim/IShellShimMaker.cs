@@ -1,8 +1,10 @@
-﻿namespace Microsoft.DotNet.ShellShim
+﻿using Microsoft.Extensions.EnvironmentAbstractions;
+
+namespace Microsoft.DotNet.ShellShim
 {
     public interface IShellShimMaker
     {
-        void CreateShim(string packageExecutablePath, string shellCommandName);
+        void CreateShim(FilePath packageExecutable, string shellCommandName);
         void EnsureCommandNameUniqueness(string shellCommandName);
     }
 }

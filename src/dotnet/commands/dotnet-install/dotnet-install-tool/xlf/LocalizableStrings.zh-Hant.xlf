@@ -30,39 +30,6 @@ WorkingDirectory: {0}
 輸出: {2}{3}</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToRestorePackage">
-        <source>Failed to restore package. 
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</source>
-        <target state="translated">無法還原套件。
-WorkingDirectory: {0}
-引數: {1}
-輸出: {2}{3}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedNuget">
-        <source>Install failed. Failed to download package:
-NuGet returned:
-
-{0}</source>
-        <target state="translated">安裝失敗。無法下載套件:
-傳回的 NuGet:
-
-{0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedPackage">
-        <source>Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
-
-{0}</source>
-        <target state="translated">安裝失敗。工具 NuGet 套件中的設定檔無效。請連絡 NuGet 套件的擁有者。
-錯誤為:
-
-{0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to install.</source>
         <target state="translated">要安裝之工具的 NuGet 套件識別碼。</target>
@@ -111,6 +78,26 @@ The error was:
       <trans-unit id="InstallToolCommandOnlySupportGlobal">
         <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
         <target state="translated">因為只支援適用於全體使用者的工具，所以目前必須有 --global 參數 (-g)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolConfiguration">
+        <source>The settings file in the tool's NuGet package is invalid: {0}</source>
+        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedContactAuthor">
+        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
+        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationRestoreFailed">
+        <source>The tool package could not be restored.</source>
+        <target state="new">The tool package could not be restored.</target>
         <note />
       </trans-unit>
     </body>

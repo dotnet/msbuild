@@ -674,37 +674,9 @@
         <target state="translated">Il progetto `{0}` è stato rimosso dalla soluzione.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CannotBeNullOrWhitespace">
-        <source>Cannot be null or whitespace.</source>
-        <target state="translated">Non può essere Null o costituito da spazi vuoti.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ContainInvalidCharacters">
-        <source>Contains one or more invalid characters: {0}</source>
-        <target state="translated">Contiene uno o più caratteri non validi: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
-        <source>The tool's settings file is invalid xml.
-{0}</source>
-        <target state="translated">Il file di impostazioni dello strumento è costituito da codice XML non valido.
-{0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingInvalidRunner">
-        <source>The tool's settings file has non "dotnet" as runner.</source>
-        <target state="translated">Lo strumento di esecuzione del file di impostazioni dello strumento non è "dotnet".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingMoreThanOneCommand">
-        <source>The tool's settings file has more than one command defined.</source>
-        <target state="translated">Per il file di impostazioni dello strumento è definito più di un comando.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingsContainError">
-        <source>The tool's settings file contains error.
-{0}</source>
-        <target state="translated">Il file di impostazioni dello strumento contiene un errore.
+        <source>Invalid XML: {0}</source>
+        <target state="needs-review-translation">Il file di impostazioni dello strumento è costituito da codice XML non valido.
 {0}</target>
         <note />
       </trans-unit>
@@ -795,6 +767,36 @@ setx PATH "%PATH%;{1}"</target>
       <trans-unit id="ToolPackageMissingSettingsFile">
         <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
         <target state="translated">Nel pacchetto '{0}' manca il file di impostazioni dello strumento DotnetToolSettings.xml.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="new">Tool defines a command with a missing name setting.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="new">Command '{0}' is missing an entry point setting.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="new">Command '{0}' contains one or more of the following invalid characters: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="new">More than one command is defined for the tool.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="new">Tool '{0}' is already installed.</target>
         <note />
       </trans-unit>
     </body>

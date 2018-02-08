@@ -84,6 +84,7 @@
                     ManifestBuildId="$(FullNugetVersion)"
                     ManifestCommit="$(CommitHash)"
                     ManifestName="$(BuildName)"
+                    ManifestBuildData="ProductVersion=$(FullNugetVersion)"
                     Overwrite="false" 
                     PublishFlatContainer="true" 
                     SkipCreateManifest="$(IsNotOrchestratedPublish)" />

@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.ToolPackage
@@ -15,32 +16,35 @@ namespace Microsoft.DotNet.ToolPackage
         {
             if (string.IsNullOrWhiteSpace(commandName))
             {
-                throw new ArgumentNullException(nameof(commandName), CommonLocalizableStrings.CannotBeNullOrWhitespace);
+                throw new ToolConfigurationException(CommonLocalizableStrings.ToolSettingsMissingCommandName);
             }
-
-            EnsureNoInvalidFilenameCharacters(commandName, nameof(toolAssemblyEntryPoint));
 
             if (string.IsNullOrWhiteSpace(toolAssemblyEntryPoint))
             {
-                throw new ArgumentNullException(nameof(toolAssemblyEntryPoint), CommonLocalizableStrings.CannotBeNullOrWhitespace);
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsMissingEntryPoint,
+                        commandName));
             }
+
+            EnsureNoInvalidFilenameCharacters(commandName);
 
             CommandName = commandName;
             ToolAssemblyEntryPoint = toolAssemblyEntryPoint;
         }
 
-        private void EnsureNoInvalidFilenameCharacters(string commandName, string nameOfParam)
+        private void EnsureNoInvalidFilenameCharacters(string commandName)
         {
-            char[] invalidCharactors = Path.GetInvalidFileNameChars();
-            if (commandName.IndexOfAny(invalidCharactors) != -1)
+            var invalidCharacters = Path.GetInvalidFileNameChars();
+            if (commandName.IndexOfAny(invalidCharacters) != -1)
             {
-                throw new ArgumentException(
-                    paramName: nameof(nameOfParam),
-                    message: string.Format(CommonLocalizableStrings.ContainInvalidCharacters,
-                        new string(invalidCharactors)));
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsInvalidCommandName,
+                        commandName,
+                        string.Join(", ", invalidCharacters.Select(c => $"'{c}'"))));
             }
         }
-
 
         public string CommandName { get; }
         public string ToolAssemblyEntryPoint { get; }

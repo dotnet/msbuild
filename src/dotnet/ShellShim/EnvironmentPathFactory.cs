@@ -32,20 +32,20 @@ namespace Microsoft.DotNet.ShellShim
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 environmentPath = new WindowsEnvironmentPath(
-                    cliFolderPathCalculator.ExecutablePackagesPath,
+                    cliFolderPathCalculator.ToolsShimPath,
                     Reporter.Output);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && hasSuperUserAccess)
             {
                 environmentPath = new LinuxEnvironmentPath(
-                    cliFolderPathCalculator.ExecutablePackagesPathInUnix,
+                    cliFolderPathCalculator.ToolsShimPathInUnix,
                     Reporter.Output,
                     environmentProvider, new FileWrapper());
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && hasSuperUserAccess)
             {
                 environmentPath = new OSXEnvironmentPath(
-                    executablePath: cliFolderPathCalculator.ExecutablePackagesPathInUnix,
+                    executablePath: cliFolderPathCalculator.ToolsShimPathInUnix,
                     reporter: Reporter.Output,
                     environmentProvider: environmentProvider,
                     fileSystem: new FileWrapper());

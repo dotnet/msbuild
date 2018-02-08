@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Transactions;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
@@ -12,20 +14,27 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
     internal class ToolPackageObtainerMock : IToolPackageObtainer
     {
-        private readonly Action _beforeRunObtain;
+        private readonly string _toolsPath;
         public const string FakeEntrypointName = "SimulatorEntryPoint.dll";
         public const string FakeCommandName = "SimulatorCommand";
+        private readonly Action _beforeRunObtain;
+        private readonly Action _duringObtain;
         private static IFileSystem _fileSystem;
         private string _fakeExecutableDirectory;
         private List<MockFeed> _mockFeeds;
+        private string _packageIdVersionDirectory;
 
         public ToolPackageObtainerMock(
             IFileSystem fileSystemWrapper = null,
             bool useDefaultFeed = true,
             IEnumerable<MockFeed> additionalFeeds = null,
-            Action beforeRunObtain = null)
+            Action beforeRunObtain = null,
+            Action duringObtain = null,
+            string toolsPath = null)
         {
-            _beforeRunObtain = beforeRunObtain ?? (() => { });
+            _toolsPath = toolsPath ?? "toolsPath";
+            _beforeRunObtain = beforeRunObtain ?? (() => {});
+            _duringObtain = duringObtain ?? (() => {});
             _fileSystem = fileSystemWrapper ?? new FileSystemWrapper();
             _mockFeeds = new List<MockFeed>();
 
@@ -34,14 +43,14 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 _mockFeeds.Add(new MockFeed
                 {
                     Type = MockFeedType.FeedFromLookUpNugetConfig,
-                    Packages = new List<MockFeedPackage>
-                    {
-                        new MockFeedPackage
+                        Packages = new List<MockFeedPackage>
                         {
-                            PackageId = "global.tool.console.demo",
-                            Version = "1.0.4"
+                            new MockFeedPackage
+                            {
+                                PackageId = "global.tool.console.demo",
+                                    Version = "1.0.4"
+                            }
                         }
-                    }
                 });
             }
 
@@ -56,44 +65,100 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             string packageVersion = null,
             FilePath? nugetconfig = null,
             string targetframework = null,
-            string source = null)
+            string source = null,
+            string verbosity = null)
         {
-            _beforeRunObtain();
+            var stagedFile = Path.Combine(_toolsPath, ".stage", Path.GetRandomFileName());
+            bool afterStage = false;
 
-            PickFeedByNugetConfig(nugetconfig);
-            PickFeedBySource(source);
+            var toolPackageObtainTransaction = new ToolPackageObtainTransaction(
+                obtainAndReturnExecutablePath: (_) =>
+                {
+                    if (Directory.Exists(Path.Combine(_toolsPath, packageId)))
+                    {
+                        throw new PackageObtainException(
+                            string.Format(CommonLocalizableStrings.ToolPackageConflictPackageId, packageId));
+                    }
 
-            MockFeedPackage package = _mockFeeds
-                .SelectMany(f => f.Packages)
-                .Where(p => MatchPackageVersion(p, packageId, packageVersion)).OrderByDescending(p => p.Version)
-                .FirstOrDefault();
+                    _beforeRunObtain();
 
-            if (package == null)
+                    PickFeedByNugetConfig(nugetconfig);
+                    PickFeedBySource(source);
+
+                    MockFeedPackage package = _mockFeeds
+                        .SelectMany(f => f.Packages)
+                        .Where(p => MatchPackageVersion(p, packageId, packageVersion)).OrderByDescending(p => p.Version)
+                        .FirstOrDefault();
+
+                    if (package == null)
+                    {
+                        throw new PackageObtainException("simulated cannot find package");
+                    }
+
+                    packageVersion = package.Version;
+                    targetframework = targetframework ?? "targetframework";
+
+                    _packageIdVersionDirectory = Path.Combine(_toolsPath, packageId, packageVersion);
+
+                    _fakeExecutableDirectory = Path.Combine(_packageIdVersionDirectory,
+                        packageId, packageVersion, "morefolders", "tools",
+                        targetframework);
+
+                    SimulateStageFile();
+                    _duringObtain();
+
+                    _fileSystem.File.Delete(stagedFile);
+                    afterStage = true;
+
+                    _fileSystem.Directory.CreateDirectory(_packageIdVersionDirectory);
+                    _fileSystem.File.CreateEmptyFile(Path.Combine(_packageIdVersionDirectory, "project.assets.json"));
+                    _fileSystem.Directory.CreateDirectory(_fakeExecutableDirectory);
+                    var fakeExecutable = Path.Combine(_fakeExecutableDirectory, FakeEntrypointName);
+                    _fileSystem.File.CreateEmptyFile(fakeExecutable);
+
+                    return new ToolConfigurationAndExecutablePath(
+                        toolConfiguration: new ToolConfiguration(FakeCommandName, FakeEntrypointName),
+                        executable : new FilePath(fakeExecutable));;
+                },
+
+                rollback: (_) =>
+                {
+                    if (afterStage == false)
+                    {
+                        if (_fileSystem.File.Exists(stagedFile))
+                        {
+                            _fileSystem.File.Delete(stagedFile);
+                        }
+                    }
+                    else
+                    {
+                        if (_fileSystem.Directory.Exists(Path.Combine(_toolsPath, packageId)))
+                        {
+                            _fileSystem.Directory.Delete(Path.Combine(_toolsPath, packageId), true);
+                        }
+                    }
+                }
+            );
+
+            using(var transactionScope = new TransactionScope())
             {
-                throw new PackageObtainException("simulated cannot find package");
+                Transaction.Current.EnlistVolatile(toolPackageObtainTransaction, EnlistmentOptions.None);
+                var toolConfigurationAndExecutablePath = toolPackageObtainTransaction.ObtainAndReturnExecutablePath();
+
+                transactionScope.Complete();
+                return toolConfigurationAndExecutablePath;
+            }
+        }
+
+        private void SimulateStageFile()
+        {
+            var stageDirectory = Path.Combine(_toolsPath, ".stage");
+            if (!_fileSystem.Directory.Exists(stageDirectory))
+            {
+                _fileSystem.Directory.CreateDirectory(stageDirectory);
             }
 
-            packageVersion = package.Version;
-            targetframework = targetframework ?? "targetframework";
-
-            var packageIdVersionDirectory = Path.Combine("toolPath", packageId, packageVersion);
-
-            _fakeExecutableDirectory = Path.Combine(packageIdVersionDirectory,
-                packageId, packageVersion, "morefolders", "tools",
-                targetframework);
-            var fakeExecutable = Path.Combine(_fakeExecutableDirectory, FakeEntrypointName);
-
-            if (!_fileSystem.Directory.Exists(_fakeExecutableDirectory))
-            {
-                _fileSystem.Directory.CreateDirectory(_fakeExecutableDirectory);
-            }
-
-            _fileSystem.File.CreateEmptyFile(Path.Combine(packageIdVersionDirectory, "project.assets.json"));
-            _fileSystem.File.CreateEmptyFile(fakeExecutable);
-
-            return new ToolConfigurationAndExecutablePath(
-                toolConfiguration: new ToolConfiguration(FakeCommandName, FakeEntrypointName),
-                executable: new FilePath(fakeExecutable));
+            _fileSystem.File.CreateEmptyFile(Path.Combine(stageDirectory, "stagedfile"));
         }
 
         private void PickFeedBySource(string source)

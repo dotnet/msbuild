@@ -12,20 +12,23 @@ namespace Microsoft.DotNet.Configurer
 {
     public class CliFolderPathCalculator
     {
-        private const string ToolsFolderName = "tools";
+        // ToolsShimFolderName ToolPackageFolderName cannot be the same
+        // or if the PackageId is the same as CommandName, they will conflict on unix.
+        private const string ToolsShimFolderName = "tools";
+        private const string ToolPackageFolderName = "toolspkgs";
         private const string DotnetProfileDirectoryName = ".dotnet";
 
         public string CliFallbackFolderPath => Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
                                                Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
         
-        public string ExecutablePackagesPath => Path.Combine(DotnetUserProfileFolderPath, ToolsFolderName);
-
-        public BashPathUnderHomeDirectory ExecutablePackagesPathInUnix
+        public string ToolsShimPath => Path.Combine(DotnetUserProfileFolderPath, ToolsShimFolderName);
+        public string ToolsPackagePath => Path.Combine(DotnetUserProfileFolderPath, ToolPackageFolderName);
+        public BashPathUnderHomeDirectory ToolsShimPathInUnix
         {
             get
             {
                 return new BashPathUnderHomeDirectory(Environment.GetEnvironmentVariable("HOME"),
-                    Path.Combine(DotnetProfileDirectoryName, ToolsFolderName));
+                    Path.Combine(DotnetProfileDirectoryName, ToolsShimFolderName));
             }
         }
 
