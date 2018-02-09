@@ -95,7 +95,6 @@
 
   <Target Name="RemoveSatelliteDllsFromBuildOutputInPackage"
           BeforeTargets="GenerateNuspec"
-          AfterTargets="_CalculateInputsOutputsForPack"
           Condition=" '$(IncludeSatelliteOutputInPack)' == 'false' ">
     <!--
       Could not find a way to tell NuGet to exclude the satellite assemblies from the NuGet package so this target
