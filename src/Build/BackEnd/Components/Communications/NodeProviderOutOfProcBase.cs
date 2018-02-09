@@ -555,8 +555,20 @@ namespace Microsoft.Build.BackEnd
                 throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
             }
 
-            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", processInfo.dwProcessId);
-            return processInfo.dwProcessId;
+            int childProcessId = processInfo.dwProcessId;
+
+            if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+            {
+                NativeMethodsShared.CloseHandle(processInfo.hProcess);
+            }
+
+            if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+            {
+                NativeMethodsShared.CloseHandle(processInfo.hThread);
+            }
+
+            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", childProcessId);
+            return childProcessId;
 #endif
         }
 
