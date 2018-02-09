@@ -170,6 +170,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _directories.Add(path);
                 CreateDirectoryInvoked = true;
             }
+
+            public void Delete(string path, bool recursive)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -117,59 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="SourceOptionDescription" xml:space="preserve">
-    <value>Specifies a NuGet package source to use during installation.</value>
-  </data>
-  <data name="SourceOptionName" xml:space="preserve">
-    <value>SOURCE</value>
-  </data>
-  <data name="FailedToAddPackage" xml:space="preserve">
-    <value>Failed to add package.
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</value>
-  </data>
-  <data name="FailedToRestorePackage" xml:space="preserve">
-    <value>Failed to restore package. 
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</value>
-  </data>
-  <data name="InstallationSucceeded" xml:space="preserve">
-    <value>
-The installation succeeded. If there is no other instruction. You can type the following command in shell directly to invoke: {0}</value>
-  </data>
-  <data name="InstallCommandDefinition" xml:space="preserve">
-    <value>Add item to development environment.</value>
-  </data>
-  <data name="InstallFailedNuget" xml:space="preserve">
-    <value>Install failed. Failed to download package:
-NuGet returned:
-
-{0}</value>
-  </data>
-  <data name="InstallFailedPackage" xml:space="preserve">
-    <value>Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
-
-{0}</value>
-  </data>
   <data name="InstallFullCommandNameLocalized" xml:space="preserve">
-    <value>NetInstallCommand</value>
+    <value>.NET Install Command</value>
   </data>
-  <data name="InstallToolCommandDefinition" xml:space="preserve">
-    <value>Install tool for use on the command line.</value>
-  </data>
-  <data name="InstallToolConfigfileDefinition" xml:space="preserve">
-    <value>NuGet configuration file</value>
-  </data>
-  <data name="InstallToolFrameworkDefinition" xml:space="preserve">
-    <value>Target framework to publish for. The target framework has to be specified in the project file.</value>
-  </data>
-  <data name="InstallToolPackageIdDefinition" xml:space="preserve">
-    <value>Package Id in NuGet</value>
-  </data>
-  <data name="InstallToolVersionDefinition" xml:space="preserve">
-    <value>Version of the package in NuGet</value>
+  <data name="CommandDescription" xml:space="preserve">
+    <value>Installs an item into the development environment.</value>
   </data>
 </root>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(NuGetPackagesDir)/microsoft.dotnet.build.tasks.feed/$(BuildTasksFeedToolVersion)/build/Microsoft.DotNet.Build.Tasks.Feed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToBlobFeed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/publish/AzureInfo.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/RuntimeCoherence.targets" />
 
@@ -13,7 +13,6 @@
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
                             SetBadgeProps;
-                            SetAzureProps;
                             Package;
                             EvaluateRuntimeCoherence;
                             PublishArtifacts;
@@ -23,7 +22,6 @@
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
                             SetBadgeProps;
-                            SetAzureProps;
                             EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
@@ -39,8 +37,7 @@
                              PublishNupkgToBlobFeed;
                              PublishCliVersionBadge" />
 
-  <Target Name="GatherItemsForPattern"
-          DependsOnTargets="SetAzureProps">
+  <Target Name="GatherItemsForPattern">
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)"
                      Condition=" '$(PublishNativeInstallers)' == 'true' "/>
@@ -57,12 +54,15 @@
     <ItemGroup>
       <ForPublishing>
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </ForPublishing>
     </ItemGroup>
   </Target>
 
-  <Target Name="PublishCliVersionBadge"
-          DependsOnTargets="SetAzureProps">
+  <Target Name="PublishCliVersionBadge">
+    <Error Condition="'$(ArtifactCloudDropAccessToken)' == ''" Text="Missing property ArtifactCloudDropAccessToken." />
+    <Error Condition="'$(ArtifactCloudDropURL)' == ''" Text="Missing property ArtifactCloudDropURL." />
+    
     <ItemGroup>
       <CliVersionBadgeToUpload Include="$(VersionBadge)" />
       <CliVersionBadgeToUpload Include="$(CoherentBadge)"
@@ -72,20 +72,22 @@
     <ItemGroup>
       <CliVersionBadgeToUpload>
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </CliVersionBadgeToUpload>
     </ItemGroup>
 
-    <UploadToAzure
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(CliVersionBadgeToUpload)"
-      Overwrite="$(OverwriteOnPublish)" />
-
-    <SetBlobPropertiesBasedOnFileType
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(CliVersionBadgeToUpload)" />
+    <Message Text="Publish badges to blob feed started: $(ArtifactCloudDropURL)" />
+    <PushToBlobFeed ExpectedFeedUrl="$(ArtifactCloudDropURL)"
+                    AccountKey="$(ArtifactCloudDropAccessToken)"
+                    ItemsToPush="@(CliVersionBadgeToUpload)"
+                    ManifestBranch="$(BranchName)"
+                    ManifestBuildId="$(FullNugetVersion)"
+                    ManifestCommit="$(CommitHash)"
+                    ManifestName="$(BuildName)"
+                    ManifestBuildData="ProductVersion=$(FullNugetVersion)"
+                    Overwrite="false" 
+                    PublishFlatContainer="true" 
+                    SkipCreateManifest="$(IsNotOrchestratedPublish)" />
   </Target>
+
 </Project>

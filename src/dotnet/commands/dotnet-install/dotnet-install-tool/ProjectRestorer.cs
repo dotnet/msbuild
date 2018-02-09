@@ -9,17 +9,24 @@ using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using LocalizableStrings = Microsoft.DotNet.Tools.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Install.Tool
 {
     internal class ProjectRestorer : IProjectRestorer
     {
+        private IReporter _reporter;
+
+        public ProjectRestorer(IReporter reporter)
+        {
+            _reporter = reporter;
+        }
+
         public void Restore(
             FilePath projectPath,
             DirectoryPath assetJsonOutput,
             FilePath? nugetconfig,
-            string source = null)
+            string source = null,
+            string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
 
@@ -39,23 +46,39 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
-                RuntimeEnvironment.GetRuntimeIdentifier(),
+                GetRuntimeIdentifierWithMacOsHighSierraFallback(),
                 $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToQuotedString()}"
             });
 
+            argsToPassToRestore.Add($"/verbosity:{verbosity ?? "quiet"}");
+
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
-                .Create("restore", argsToPassToRestore)
-                .CaptureStdOut()
-                .CaptureStdErr();
+                .Create("restore", argsToPassToRestore);
+
+            if (_reporter != null)
+            {
+                command = command
+                    .OnOutputLine((line) => _reporter.WriteLine(line))
+                    .OnErrorLine((line) => _reporter.WriteLine(line));
+            }
 
             var result = command.Execute();
             if (result.ExitCode != 0)
             {
-                throw new PackageObtainException(
-                    string.Format(
-                        LocalizableStrings.FailedToRestorePackage,
-                        result.StartInfo.WorkingDirectory, result.StartInfo.Arguments, result.StdErr, result.StdOut));
+                throw new PackageObtainException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
+        }
+
+        // walk around for https://github.com/dotnet/corefx/issues/26488
+        // fallback osx.10.13 to osx
+        private static string GetRuntimeIdentifierWithMacOsHighSierraFallback()
+        {
+            if (RuntimeEnvironment.GetRuntimeIdentifier() == "osx.10.13-x64")
+            {
+                return "osx-x64";
+            }
+
+            return RuntimeEnvironment.GetRuntimeIdentifier();
         }
     }
 }

@@ -1,9 +1,9 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>2</VersionMinor>
-    <VersionPatch>0</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview1</ReleaseSuffix>
+    <VersionMinor>1</VersionMinor>
+    <VersionPatch>300</VersionPatch>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview2</ReleaseSuffix>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
     <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 

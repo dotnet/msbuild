@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         public void InstallGlobaltoolParserCanGetPackageIdAndPackageVersion()
         {
             var command = Parser.Instance;
-            var result = command.Parse("dotnet install tool console.test.app --version 1.0.1");
+            var result = command.Parse("dotnet install tool -g console.test.app --version 1.0.1");
 
             var parseResult = result["dotnet"]["install"]["tool"];
 
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var command = Parser.Instance;
             var result =
                 command.Parse(
-                    @"dotnet install tool console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
+                    @"dotnet install tool -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
 
             var parseResult = result["dotnet"]["install"]["tool"];
 
@@ -54,10 +54,30 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             const string expectedSourceValue = "TestSourceValue";
 
-            var result = Parser.Instance.Parse($"dotnet install tool --source {expectedSourceValue} console.test.app");
+            var result = Parser.Instance.Parse($"dotnet install tool -g --source {expectedSourceValue} console.test.app");
 
             var appliedOptions = result["dotnet"]["install"]["tool"];
             appliedOptions.ValueOrDefault<string>("source").Should().Be(expectedSourceValue);
+        }
+
+        [Fact]
+        public void InstallToolParserCanGetGlobalOption()
+        {
+            var result = Parser.Instance.Parse("dotnet install tool -g console.test.app");
+
+            var appliedOptions = result["dotnet"]["install"]["tool"];
+            appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
+        }
+
+        [Fact]
+        public void InstallToolParserCanParseVerbosityOption()
+        {
+            const string expectedVerbosityLevel = "diag";
+
+            var result = Parser.Instance.Parse($"dotnet install tool -g --verbosity:{expectedVerbosityLevel} console.test.app");
+
+            var appliedOptions = result["dotnet"]["install"]["tool"];
+            appliedOptions.SingleArgumentOrDefault("verbosity").Should().Be(expectedVerbosityLevel);
         }
     }
 }

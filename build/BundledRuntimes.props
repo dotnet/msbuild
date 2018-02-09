@@ -59,7 +59,7 @@
                              Condition="!Exists('$(AspNetCoreSharedFxArchiveFile)')">
       <Url>$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(AspNetCoreSharedFxArchiveFile)</DownloadFileName>
-      <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
+      <ExtractDestination>$(AspNetCoreSharedFxPublishDirectory)</ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"

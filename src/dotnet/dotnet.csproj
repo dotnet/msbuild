@@ -24,6 +24,7 @@
     <EmbeddedResource Update="**\dotnet-clean\*.resx" Namespace="Microsoft.DotNet.Tools.Clean" />
     <EmbeddedResource Update="**\dotnet-help\*.resx" Namespace="Microsoft.DotNet.Tools.Help" />
     <EmbeddedResource Update="**\dotnet-install\*.resx" Namespace="Microsoft.DotNet.Tools.Install" />
+    <EmbeddedResource Update="**\dotnet-install\dotnet-install-tool\*.resx" Namespace="Microsoft.DotNet.Tools.Install.Tool" />
     <EmbeddedResource Update="**\dotnet-list\*.resx" Namespace="Microsoft.DotNet.Tools.List" />
     <EmbeddedResource Update="**\dotnet-list-proj\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectsInSolution" />
     <EmbeddedResource Update="**\dotnet-list-reference\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectToProjectReferences" />
@@ -75,4 +76,5 @@
     <Folder Include="commands\dotnet-migrate\xlf" />
     <Folder Include="dotnet-complete\commands\" />
   </ItemGroup>
+  <Import Project="dotnet.win.targets" Condition="'$(OS)' == 'Windows_NT'" />
 </Project>

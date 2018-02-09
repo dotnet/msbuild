@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="SourceOptionDescription">
+        <source>Specifies a NuGet package source to use during installation.</source>
+        <target state="new">Specifies a NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallationSucceeded">
+        <source>
+The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</source>
+        <target state="new">
+The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToAddPackage">
+        <source>Failed to add package.
+WorkingDirectory: {0}
+Arguments: {1}
+Output: {2}{3}</source>
+        <target state="new">Failed to add package.
+WorkingDirectory: {0}
+Arguments: {1}
+Output: {2}{3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>NuGet Package Id of the tool to install.</source>
+        <target state="new">NuGet Package Id of the tool to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Installs a tool for use on the command line.</source>
+        <target state="new">Installs a tool for use on the command line.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="new">The NuGet configuration file to use.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to install the tool for.</source>
+        <target state="new">The target framework to install the tool for.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>Version of the tool package in NuGet.</source>
+        <target state="new">Version of the tool package in NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="new">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Please specify one tool Package Id to install.</source>
+        <target state="new">Please specify one tool Package Id to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Install user wide.</source>
+        <target state="new">Install user wide.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET Install Command</source>
+        <target state="new">.NET Install Command</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallToolCommandOnlySupportGlobal">
+        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
+        <target state="new">The --global switch (-g) is currently required because only user wide tools are supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolConfiguration">
+        <source>The settings file in the tool's NuGet package is invalid: {0}</source>
+        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedContactAuthor">
+        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
+        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationRestoreFailed">
+        <source>The tool package could not be restored.</source>
+        <target state="new">The tool package could not be restored.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

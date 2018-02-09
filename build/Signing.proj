@@ -40,6 +40,7 @@
       <!-- Built binaries -->
       <FilesToSign Include="$(OutputDirectory)/sdk/**/csc.exe;
                             $(OutputDirectory)/sdk/**/csc.dll;
+                            $(OutputDirectory)/sdk/**/VBCSCompiler.dll;
                             $(OutputDirectory)/sdk/**/vbc.exe;
                             $(OutputDirectory)/sdk/**/vbc.dll;
                             $(OutputDirectory)/sdk/**/fsc.exe;

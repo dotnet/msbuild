@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
   </ItemGroup>
   <ItemGroup>
@@ -33,16 +34,15 @@
     <None Update="DotnetToolSettingsGolden.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestAssetLocalNugetFeed/*.*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
 
     <Compile Remove="SampleGlobalTool/**" />
     <Content Remove="SampleGlobalTool/**" />
     <EmbeddedResource Remove="SampleGlobalTool/**" />
     <None Remove="SampleGlobalTool/**" />
   </ItemGroup>
-  
+
+  <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
+
   <Target Name="CreateNupkgFromSource" BeforeTargets="Build">
     <PropertyGroup>
       <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalTool</testAssetSourceRoot>
@@ -53,4 +53,16 @@
     <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)/TestAssetLocalNugetFeed">
     </MSBuild>
   </Target>
+
+  <Target Name="DownloadTestAssetPackages" BeforeTargets="Build">
+    <PropertyGroup>
+      <!-- use a prerelease version that supports alpine -->
+      <PlatformsNupkgFileName>microsoft.netcore.platforms.2.1.0-preview1-26115-04.nupkg</PlatformsNupkgFileName>
+      <PlatformsNupkgUri>https://dotnet.myget.org/F/dotnet-core/api/v2/package/Microsoft.NETCore.Platforms/2.1.0-preview1-26115-04</PlatformsNupkgUri>
+    </PropertyGroup>
+
+    <DownloadFile Uri="$(PlatformsNupkgUri)"
+                  DestinationPath="$(OutputPath)/TestAssetLocalNugetFeed/$(PlatformsNupkgFileName)" />
+  </Target>
+
 </Project>

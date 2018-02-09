@@ -199,12 +199,12 @@
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
         <source>Display the installed SDKs.</source>
-        <target state="new">Display the installed SDKs.</target>
+        <target state="translated">Yüklü SDK’ları görüntüleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListRuntimesCommandDefinition">
         <source>Display the installed runtimes.</source>
-        <target state="new">Display the installed runtimes.</target>
+        <target state="translated">Yüklü çalışma zamanlarını görüntüleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
@@ -253,8 +253,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallDefinition">
-        <source>Add item to development environment.</source>
-        <target state="new">Add item to development environment.</target>
+        <source>Installs an item into the development environment.</source>
+        <target state="new">Installs an item into the development environment.</target>
         <note />
       </trans-unit>
     </body>

@@ -39,7 +39,7 @@ SDK commands:
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.
   store            Stores the specified assemblies in the runtime store.
-  install          Add item to development environment.
+  install          Installs an item into the development environment.
   help             Show help.
 
 Common options:

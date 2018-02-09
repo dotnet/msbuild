@@ -646,7 +646,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="translated">Veröffentlichen Sie das Projekt für eine angegebene Laufzeit. Wird zum Erstellen einer eigenständigen Bereitstellung verwendet. Standardmäßig wird eine frameworkabhängige App veröffentlicht.</target>
+        <target state="translated">Veröffentlichen Sie das Projekt für eine angegebene Runtime. Wird zum Erstellen einer eigenständigen Bereitstellung verwendet. Standardmäßig wird eine frameworkabhängige App veröffentlicht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -672,40 +672,6 @@
       <trans-unit id="ProjectRemovedFromTheSolution">
         <source>Project `{0}` removed from the solution.</source>
         <target state="translated">Das Projekt "{0}" wurde aus der Projektmappe entfernt.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CannotBeNullOrWhitespace">
-        <source>Cannot be null or whitespace.</source>
-        <target state="new">Cannot be null or whitespace.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ContainInvalidCharacters">
-        <source>Contains one or more invalid characters: {0}</source>
-        <target state="new">Contains one or more invalid characters: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingsInvalidXml">
-        <source>The tool's settings file is invalid xml.
-{0}</source>
-        <target state="new">The tool's settings file is invalid xml.
-{0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingInvalidRunner">
-        <source>The tool's settings file has non "dotnet" as runner.</source>
-        <target state="new">The tool's settings file has non "dotnet" as runner.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingMoreThanOneCommand">
-        <source>The tool's settings file has more than one command defined.</source>
-        <target state="new">The tool's settings file has more than one command defined.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingsContainError">
-        <source>The tool's settings file contains error.
-{0}</source>
-        <target state="new">The tool's settings file contains error.
-{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
@@ -785,6 +751,51 @@ setx PATH "%PATH%;{1}"</source>
 You can do this by running the following command:
 
 setx PATH "%PATH%;{1}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageMissingEntryPointFile">
+        <source>Package '{0}' is missing entry point file {1}.</source>
+        <target state="new">Package '{0}' is missing entry point file {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageMissingSettingsFile">
+        <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
+        <target state="new">Package '{0}' is missing tool settings file DotnetToolSettings.xml.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="new">Invalid XML: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="new">Tool defines a command with a missing name setting.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="new">Command '{0}' is missing an entry point setting.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="new">Command '{0}' contains one or more of the following invalid characters: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="new">More than one command is defined for the tool.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="new">Tool '{0}' is already installed.</target>
         <note />
       </trans-unit>
     </body>

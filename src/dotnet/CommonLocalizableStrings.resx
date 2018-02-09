@@ -520,28 +520,26 @@
   <data name="NoRestoreDescription" xml:space="preserve">
     <value>Does not do an implicit restore when executing the command.</value>
   </data>
-  <data name="CannotBeNullOrWhitespace" xml:space="preserve">
-    <value>Cannot be null or whitespace.</value>
-  </data>
-  <data name="ContainInvalidCharacters" xml:space="preserve">
-    <value>Contains one or more invalid characters: {0}</value>
-  </data>
   <data name="NuGetConfigurationFileDoesNotExist" xml:space="preserve">
     <value>NuGet configuration file {0} does not exist.</value>
   </data>
-  <data name="ToolSettingInvalidRunner" xml:space="preserve">
-    <value>The tool's settings file has non "dotnet" as runner.</value>
-  </data>
-  <data name="ToolSettingMoreThanOneCommand" xml:space="preserve">
-    <value>The tool's settings file has more than one command defined.</value>
-  </data>
-  <data name="ToolSettingsContainError" xml:space="preserve">
-    <value>The tool's settings file contains error.
-{0}</value>
-  </data>
   <data name="ToolSettingsInvalidXml" xml:space="preserve">
-    <value>The tool's settings file is invalid xml.
-{0}</value>
+    <value>Invalid XML: {0}</value>
+  </data>
+  <data name="ToolSettingsMissingCommandName" xml:space="preserve">
+    <value>Tool defines a command with a missing name setting.</value>
+  </data>
+  <data name="ToolSettingsMissingEntryPoint" xml:space="preserve">
+    <value>Command '{0}' is missing an entry point setting.</value>
+  </data>
+  <data name="ToolSettingsInvalidCommandName" xml:space="preserve">
+    <value>Command '{0}' contains one or more of the following invalid characters: {1}.</value>
+  </data>
+  <data name="ToolSettingsMoreThanOneCommand" xml:space="preserve">
+    <value>More than one command is defined for the tool.</value>
+  </data>
+  <data name="ToolSettingsUnsupportedRunner" xml:space="preserve">
+    <value>Command '{0}' uses unsupported runner '{1}'."</value>
   </data>
   <data name="EnvironmentPathLinuxManualInstruction" xml:space="preserve">
     <value>Cannot find the tools executable path. Please ensure {0} is added to your PATH.
@@ -583,5 +581,14 @@ Output: {1}</value>
   </data>
   <data name="FailInstallToolSameName" xml:space="preserve">
     <value>Failed to install tool {0}. A command with the same name already exists.</value>
+  </data>
+  <data name="ToolPackageMissingEntryPointFile" xml:space="preserve">
+    <value>Package '{0}' is missing entry point file {1}.</value>
+  </data>
+  <data name="ToolPackageMissingSettingsFile" xml:space="preserve">
+    <value>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</value>
+  </data>
+  <data name="ToolPackageConflictPackageId" xml:space="preserve">
+    <value>Tool '{0}' is already installed.</value>
   </data>
 </root>

@@ -124,6 +124,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             {
                 throw new UnauthorizedAccessException();
             }
+
+            public void Delete(string path)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
 
         private class NoPermissionDirectoryFake : IDirectory
@@ -152,6 +157,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             public void CreateDirectory(string path)
             {
                 throw new UnauthorizedAccessException();
+            }
+
+            public void Delete(string path, bool recursive)
+            {
+                throw new NotImplementedException();
             }
         }
 

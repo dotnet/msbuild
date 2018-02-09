@@ -2,6 +2,7 @@
   <ItemGroup>
     <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Razor" Version="$(MicrosoftNETSdkRazorPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(MicrosoftNETSdkWebPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(MicrosoftNETSdkPublishPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(MicrosoftNETSdkWebProjectSystemPackageVersion)" />
