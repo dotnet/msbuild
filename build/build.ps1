@@ -39,6 +39,11 @@ function Print-Usage() {
     Write-Host ""
     Write-Host "Advanced settings:"
     Write-Host "  -dogfood                Setup a dogfood environment using the local build"
+    Write-Host "                          This ignores any actions (such as -build or -restore) that were specified"
+    Write-Host "                          If any additional arguments are specified, they will be interpreted as a"
+    Write-Host "                          command to be run in the dogfood context.  If no additional arguments are"
+    Write-Host "                          specified, then the value of the DOTNET_SDK_DOGFOOD_SHELL environment, if"
+    Write-Host "                          it is set, will be used."
     Write-Host "  -solution <value>       Path to solution to build"
     Write-Host "  -ci                     Set when running on CI server"
     Write-Host "  -log                    Enable logging (by default on CI)"
@@ -219,6 +224,20 @@ function Build {
     }
 
     $env:DOTNET_SDK_TEST_MSBUILD_PATH = Join-Path $env:VSInstallDir "MSBuild\15.0\Bin\msbuild.exe"
+  }
+
+  if ($dogfood)
+  {
+    if ($properties -eq $null -and $env:DOTNET_SDK_DOGFOOD_SHELL -ne $null)
+    {
+      $properties = , $env:DOTNET_SDK_DOGFOOD_SHELL
+    }
+    if ($properties -ne $null)
+    {
+      $Host.UI.RawUI.WindowTitle = "SDK Test ($RepoRoot) ($configuration)"
+      & $properties[0] $properties[1..($properties.Length-1)]
+    }
+    exit 0
   }
 
   if ($ci -or $log) {
