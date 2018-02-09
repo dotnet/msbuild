@@ -13,6 +13,7 @@
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluation MSBuild projects.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
 
   <ItemGroup>

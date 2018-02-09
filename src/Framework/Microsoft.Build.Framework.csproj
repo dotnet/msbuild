@@ -4,6 +4,7 @@
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
 
   <ItemGroup>
