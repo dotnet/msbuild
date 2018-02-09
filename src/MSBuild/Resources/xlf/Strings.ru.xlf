@@ -1395,11 +1395,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="new">  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
-                     to the specified file. If the extension of the specified
-                     file is '.md', the result is generated in markdown
-                     format. Otherwise, a tab separated file is produced.
+        <target state="translated">  /profileevaluation:&lt;файл&gt;    
+                     Профилирует вычисление MSBuild и записывает результат 
+                     в указанный файл. Если файл имеет расширение
+                     ".md", результат создается в формате Markdown.
+                     В противном случае создается файл с разделением табуляцией.
     </target>
         <note />
       </trans-unit>
@@ -1415,16 +1415,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /restoreProperty:IsRestore=true;MyProperty=value
     </source>
-        <target state="new">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Set or override these project-level properties only
-                     during restore and do not use properties specified
-                     with the /property argument. &lt;n&gt; is the property
-                     name, and &lt;v&gt; is the property value. Use a
-                     semicolon or a comma to separate multiple properties,
-                     or specify each property separately.
-                     (Short form: /rp)
-                     Example:
-                       /restoreProperty:IsRestore=true;MyProperty=value
+        <target state="translated">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     Задавайте или переопределяйте эти свойства уровня проекта только
+                     при восстановлении и не используйте указанные свойства
+                     с аргументом "/property". &lt;n&gt; — это имя свойства,
+                     а &lt;v&gt; — его значение. Используйте для разделения
+                     свойств запятую или точку с запятой либо укажите
+                     каждое свойство по-отдельности.
+                     (Краткая форма: /rp)
+                     Пример:
+                       /restoreProperty:IsRestore=true;&lt;Свойство&gt;=&lt;значение&gt;
     </target>
         <note>
       LOCALIZATION: "/restoreProperty" and "/rp" should not be localized.
@@ -1433,12 +1433,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidProfilerValue">
         <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1053: Provided filename is not valid. {0}</target>
+        <target state="translated">MSBUILD: ошибка MSB1053 — указанное имя файла недопустимо. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
-        <target state="new">MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</target>
+        <target state="translated">MSBUILD: ошибка MSB1054 — укажите имя файла, чтобы создать результат профилировщика.</target>
         <note />
       </trans-unit>
     </body>

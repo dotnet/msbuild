@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
@@ -11,6 +13,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     {
         private string _fullPath;
         private string _version;
+
+        public SdkResolverResponse()
+        {
+        }
 
         public SdkResolverResponse(string fullPath, string version)
         {

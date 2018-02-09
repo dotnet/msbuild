@@ -2003,7 +2003,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: The SDK resolver type "{0}" failed to load. {1}</source>
-        <target state="needs-review-translation">MSB4237: 找到了 SDK 解析程序，但其未加载。错误: {0}。</target>
+        <target state="translated">MSB4237: SDK 解析程序类型“{0}”加载失败。{1}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2056,66 +2056,66 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">指定的 API“{0}”不可用，因为加载此项目时设置了 ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectImportSkippedInvalidFile">
-        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectImportSkippedMissingFile">
-        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ErrorWritingProfilerReport">
-        <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="new">MSBUILD : error MSB4239: Error writing profiling report. {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WritingProfilerReport">
-        <source>Writing profiler report to '{0}'...</source>
-        <target state="new">Writing profiler report to '{0}'...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WritingProfilerReportDone">
-        <source>Done writing report.</source>
-        <target state="new">Done writing report.</target>
-        <note />
+      <trans-unit id="CouldNotLoadSdkResolverAssembly">
+        <source>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</source>
+        <target state="translated">MSB4244: 无法加载 SDK 解析程序程序集“{0}”。{1}</target>
+        <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
         <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="new">MSB4242: The SDK resolver "{0}" failed to run. {1}</target>
+        <target state="translated">MSB4242: SDK 解析程序“{0}”运行失败。{1}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
+        <target state="translated">MSB4243: 基于 NuGet 的 SDK 解析程序运行失败，因为无法找到 NuGet 程序集。请检查你安装的 MSBuild 或将环境变量“{0}”设置为包含所需 NuGet 程序集的文件夹。{1}</target>
         <note>{StrBegin="MSB4243: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedInvalidFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
+        <target state="translated">由于文件无效，项目“{0}”不由 ({2},{3}) 处的“{1}”导入。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedMissingFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
+        <target state="translated">由于文件不存在，项目“{0}”不由 ({2},{3}) 处的“{1}”导入。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingProfilerReport">
+        <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
+        <target state="translated">MSBUILD : 错误 MSB4239: 写入分析报告时出错。{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReport">
+        <source>Writing profiler report to '{0}'...</source>
+        <target state="translated">正在将探查器报告写入“{0}”...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReportDone">
+        <source>Done writing report.</source>
+        <target state="translated">已完成写入报告。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="new">MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</target>
+        <target state="translated">MSB4240: 无法指定同一 SDK“{0}”的多个版本。将使用已由“{2}”指定的 SDK 版本“{1}”，并忽略版本“{3}”。</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="new">MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</target>
+        <target state="translated">MSB4241: SDK 引用“{0}”版本“{1}”已改为解析到版本“{2}”。如果不更新要匹配的已引用版本，你可能会使用与预期不同的版本。</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResolving">
         <source>Resolving SDK '{0}'...</source>
-        <target state="new">Resolving SDK '{0}'...</target>
+        <target state="translated">正在解析 SDK“{0}”...</target>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
-      </trans-unit>
-      <trans-unit id="CouldNotLoadSdkResolverAssembly">
-        <source>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</source>
-        <target state="new">MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</target>
-        <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
     </body>
   </file>
