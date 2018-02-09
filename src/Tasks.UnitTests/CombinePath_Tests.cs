@@ -203,6 +203,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void InvalidPath()
         {
             CombinePath t = new CombinePath();

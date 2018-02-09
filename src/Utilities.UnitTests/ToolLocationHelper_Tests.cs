@@ -1376,6 +1376,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void GenerateReferencAssemblyPathTooLong()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1652,6 +1653,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void ChainReferenceAssembliesRedistPathTooLong()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -3108,6 +3110,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void ResolveFromDirectoryPathTooLong()
         {
             Should.Throw<PathTooLongException>(() =>

@@ -1107,6 +1107,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Nothing's too long for Unix
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void IllegalTooLongPath()
         {
             string longString = new string('X', 500) + "*"; // need a wildcard to do anything
