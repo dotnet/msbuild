@@ -674,14 +674,20 @@
         <target state="translated">`{0}` projesi çözümden kaldırıldı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="needs-review-translation">Aracın ayarlar dosyası geçersiz xml içeriyor.
+{0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file {0} does not exist.</source>
-        <target state="new">NuGet configuration file {0} does not exist.</target>
+        <target state="translated">NuGet yapılandırma dosyası {0} yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce oturumunuzu kapatmanız veya oturumu yeniden başlatmanız gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstruction">
@@ -692,18 +698,18 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash. You can do this by running the following command:
+        <target state="translated">Aracın yürütülebilir yolu bulunamıyor. Lütfen {0} öğesinin PATH’e eklendiğinden emin olun.
+Bash kullanıyorsanız, bunu şu komutu çalıştırarak gerçekleştirebilirsiniz:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# .NET Core SDK araçlarını ekle
 export PATH="$PATH:{1}"
 EOF</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce terminali yeniden açmanız gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstruction">
@@ -714,32 +720,32 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash, You can do this by running the following command:
+        <target state="translated">Aracın yürütülebilir yolu bulunamıyor. Lütfen {0} öğesinin PATH’e eklendiğinden emin olun.
+Bash kullanıyorsanız, bunu şu komutu çalıştırarak gerçekleştirebilirsiniz:
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# .NET Core SDK araçlarını ekle
 export PATH="$PATH:{1}"
 EOF</target>
         <note />
       </trans-unit>
       <trans-unit id="FailInstallToolSameName">
         <source>Failed to install tool {0}. A command with the same name already exists.</source>
-        <target state="new">Failed to install tool {0}. A command with the same name already exists.</target>
+        <target state="translated">{0} aracı yüklenemedi. Aynı ada sahip bir komut zaten var.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailInstallToolPermission">
         <source>Failed to change permission:
 Error: {0}
 Output: {1}</source>
-        <target state="new">Failed to change permission:
-Error: {0}
-Output: {1}</target>
+        <target state="translated">İzin değiştirilemedi:
+Hata: {0}
+Çıkış: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK’sını yüklediğinizden, yüklediğiniz aracı çalıştırmadan önce Komut İstemi penceresini yeniden açmanız gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstruction">
@@ -747,25 +753,20 @@ Output: {1}</target>
 You can do this by running the following command:
 
 setx PATH "%PATH%;{1}"</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-You can do this by running the following command:
+        <target state="translated">Aracın yürütülebilir yolu bulunamıyor. Lütfen {0} öğesinin PATH’e eklendiğinden emin olun.
+Bunu şu komutu çalıştırarak gerçekleştirebilirsiniz:
 
 setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingEntryPointFile">
         <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="new">Package '{0}' is missing entry point file {1}.</target>
+        <target state="translated">'{0}' paketinde {1} giriş noktası dosyası eksik.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingSettingsFile">
         <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="new">Package '{0}' is missing tool settings file DotnetToolSettings.xml.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingsInvalidXml">
-        <source>Invalid XML: {0}</source>
-        <target state="new">Invalid XML: {0}</target>
+        <target state="translated">'{0}' paketinde DotnetToolSettings.xml araç ayarları dosyası eksik.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">

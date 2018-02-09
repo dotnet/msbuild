@@ -4,19 +4,19 @@
     <body>
       <trans-unit id="SourceOptionDescription">
         <source>Specifies a NuGet package source to use during installation.</source>
-        <target state="new">Specifies a NuGet package source to use during installation.</target>
+        <target state="translated">Especifica el origen de un paquete NuGet para usarlo durante la instalación.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">ORIGEN</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>
 The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</source>
-        <target state="new">
-The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</target>
+        <target state="translated">
+La instalación se completó correctamente. Si no hay más instrucciones, puede escribir el comando siguiente en el shell directamente para invocar: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToAddPackage">
@@ -24,60 +24,60 @@ The installation succeeded. If there are no further instructions, you can type t
 WorkingDirectory: {0}
 Arguments: {1}
 Output: {2}{3}</source>
-        <target state="new">Failed to add package.
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</target>
+        <target state="translated">No se pudo agregar el paquete.
+Directorio de trabajo: {0}
+Argumentos: {1}
+Salida: {2}{3}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to install.</source>
-        <target state="new">NuGet Package Id of the tool to install.</target>
+        <target state="translated">Id. del paquete de NuGet que se instalará.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Installs a tool for use on the command line.</source>
-        <target state="new">Installs a tool for use on the command line.</target>
+        <target state="translated">Instala una herramienta para usarla en la línea de comandos.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
+        <target state="translated">Archivo de configuración de NuGet que debe usarse.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
-        <target state="new">The target framework to install the tool for.</target>
+        <target state="translated">La plataforma de destino para la que se instala la herramienta.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>Version of the tool package in NuGet.</source>
-        <target state="new">Version of the tool package in NuGet.</target>
+        <target state="translated">Versión del paquete de la herramienta en NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to install.</source>
-        <target state="new">Please specify one tool Package Id to install.</target>
+        <target state="translated">Especifique un id. de paquete para instalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install user wide.</source>
-        <target state="new">Install user wide.</target>
+        <target state="translated">Instale para todos los usuarios.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
-        <target state="new">.NET Install Command</target>
+        <target state="translated">Comando para la instalación de .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandOnlySupportGlobal">
         <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="new">The --global switch (-g) is currently required because only user wide tools are supported.</target>
+        <target state="translated">El conmutador --global (g) se requiere actualmente porque solo se admiten herramientas para todos los usuarios.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolConfiguration">

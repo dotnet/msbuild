@@ -674,14 +674,20 @@
         <target state="translated">'{0}' 프로젝트가 솔루션에서 제거되었습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="needs-review-translation">도구의 설정 파일이 잘못된 xml입니다.
+{0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file {0} does not exist.</source>
-        <target state="new">NuGet configuration file {0} does not exist.</target>
+        <target state="translated">NuGet 구성 파일 {0}이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 로그아웃하거나 세션을 다시 시작해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstruction">
@@ -692,8 +698,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash. You can do this by running the following command:
+        <target state="translated">도구 실행 파일 경로를 찾을 수 없습니다. {0}이(가) 경로에 추가되었는지 확인하세요.
+Bash를 사용하는 경우 다음 명령을 실행하여 이 작업을 수행할 수 있습니다.
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -703,7 +709,7 @@ EOF</target>
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 터미널을 다시 열어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstruction">
@@ -714,8 +720,8 @@ cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{1}"
 EOF</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash, You can do this by running the following command:
+        <target state="translated">도구 실행 파일 경로를 찾을 수 없습니다. {0}이(가) 경로에 추가되었는지 확인하세요.
+Bash를 사용하는 경우 다음 명령을 실행하여 이 작업을 수행할 수 있습니다.
 
 cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -725,21 +731,21 @@ EOF</target>
       </trans-unit>
       <trans-unit id="FailInstallToolSameName">
         <source>Failed to install tool {0}. A command with the same name already exists.</source>
-        <target state="new">Failed to install tool {0}. A command with the same name already exists.</target>
+        <target state="translated">{0} 도구를 설치하지 못했습니다. 이름이 같은 명령이 이미 존재합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailInstallToolPermission">
         <source>Failed to change permission:
 Error: {0}
 Output: {1}</source>
-        <target state="new">Failed to change permission:
-Error: {0}
-Output: {1}</target>
+        <target state="translated">권한을 변경하지 못했습니다.
+오류: {0}
+출력: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="new">Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</target>
+        <target state="translated">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 명령 프롬프트 창을 다시 열어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstruction">
@@ -747,25 +753,20 @@ Output: {1}</target>
 You can do this by running the following command:
 
 setx PATH "%PATH%;{1}"</source>
-        <target state="new">Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-You can do this by running the following command:
+        <target state="translated">도구 실행 파일 경로를 찾을 수 없습니다. {0}이(가) 경로에 추가되었는지 확인하세요.
+다음 명령을 실행하여 이 작업을 수행할 수 있습니다.
 
 setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingEntryPointFile">
         <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="new">Package '{0}' is missing entry point file {1}.</target>
+        <target state="translated">패키지 '{0}'이(가) 누락된 진입점 파일 {1}입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingSettingsFile">
         <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="new">Package '{0}' is missing tool settings file DotnetToolSettings.xml.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolSettingsInvalidXml">
-        <source>Invalid XML: {0}</source>
-        <target state="new">Invalid XML: {0}</target>
+        <target state="translated">패키지 '{0}'이(가) 누락된 도구 설정 파일 DotnetToolSettings.xml입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">

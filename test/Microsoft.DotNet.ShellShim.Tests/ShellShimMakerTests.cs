@@ -12,6 +12,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -152,7 +153,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             a.ShouldThrow<GracefulException>()
                 .And.Message
                 .Should().Contain(
-                    $"Failed to install tool {shellCommandName}. A command with the same name already exists.");
+                    string.Format(CommonLocalizableStrings.FailInstallToolSameName, shellCommandName));
         }
 
         [Theory]

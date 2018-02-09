@@ -4,19 +4,19 @@
     <body>
       <trans-unit id="SourceOptionDescription">
         <source>Specifies a NuGet package source to use during installation.</source>
-        <target state="new">Specifies a NuGet package source to use during installation.</target>
+        <target state="translated">Určuje zdroj balíčku NuGet, který se použije při instalaci.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>
 The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</source>
-        <target state="new">
-The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</target>
+        <target state="translated">
+Instalace byla úspěšná. Pokud nejsou další pokyny, můžete přímo do jádra napsat následující příkaz k vyvolání: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToAddPackage">
@@ -24,60 +24,60 @@ The installation succeeded. If there are no further instructions, you can type t
 WorkingDirectory: {0}
 Arguments: {1}
 Output: {2}{3}</source>
-        <target state="new">Failed to add package.
+        <target state="translated">Nepovedlo se přidat balíček.
 WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</target>
+Argumenty: {1}
+Výstup: {2}{3}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to install.</source>
-        <target state="new">NuGet Package Id of the tool to install.</target>
+        <target state="translated">ID balíčku NuGet nástroje, který se má nainstalovat</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Installs a tool for use on the command line.</source>
-        <target state="new">Installs a tool for use on the command line.</target>
+        <target state="translated">Nainstaluje nástroj, který se bude používat na příkazovém řádku.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
+        <target state="translated">Konfigurační soubor NuGet, který se použije.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
-        <target state="new">The target framework to install the tool for.</target>
+        <target state="translated">Cílová architektura, pro kterou se má nástroj nainstalovat</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>Version of the tool package in NuGet.</source>
-        <target state="new">Version of the tool package in NuGet.</target>
+        <target state="translated">Verze balíčku nástroje v NuGetu</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to install.</source>
-        <target state="new">Please specify one tool Package Id to install.</target>
+        <target state="translated">Zadejte prosím jedno ID balíčku nástroje, který se má nainstalovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install user wide.</source>
-        <target state="new">Install user wide.</target>
+        <target state="translated">Instalovat pro všechny uživatele</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
-        <target state="new">.NET Install Command</target>
+        <target state="translated">Příkaz Instalovat rozhraní .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandOnlySupportGlobal">
         <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="new">The --global switch (-g) is currently required because only user wide tools are supported.</target>
+        <target state="translated">Přepínač --global (-g) se aktuálně vyžaduje, protože se podporují jenom nástroje pro všechny uživatele.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolConfiguration">
