@@ -16,6 +16,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <ArtifactsDir>$(DOTNET_SDK_ARTIFACTS_DIR)</ArtifactsDir>
+    <ArtifactsDir Condition="'$(ArtifactsDir)' == ''">$(RepoRoot)artifacts\</ArtifactsDir>
+    <ArtifactsDir>$([MSBuild]::EnsureTrailingSlash($(ArtifactsDir)))</ArtifactsDir>
     <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\</DOTNET_INSTALL_DIR>
   </PropertyGroup>
 

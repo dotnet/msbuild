@@ -104,7 +104,7 @@ namespace Microsoft.NET.TestFramework
             return ret;
         }
 
-        public static ToolsetInfo Create(string repoRoot, string configuration, TestCommandLine commandLine)
+        public static ToolsetInfo Create(string repoRoot, string repoArtifactsDir, string configuration, TestCommandLine commandLine)
         {
             var ret = new ToolsetInfo();
 
@@ -116,8 +116,8 @@ namespace Microsoft.NET.TestFramework
                 var dotnetCliVersion = GetDotNetCliVersion(repoRoot);
 
                 ret.CliVersionForBundledVersions = dotnetCliVersion;
-                ret.DotNetHostPath = Path.Combine(repoRoot, "artifacts", ".dotnet", dotnetCliVersion, $"dotnet{Constants.ExeSuffix}");
-                ret.SdksPath = Path.Combine(repoRoot, "artifacts", configuration, "bin", "Sdks");
+                ret.DotNetHostPath = Path.Combine(repoArtifactsDir, ".dotnet", dotnetCliVersion, $"dotnet{Constants.ExeSuffix}");
+                ret.SdksPath = Path.Combine(repoArtifactsDir, configuration, "bin", "Sdks");
             }
             else
             {

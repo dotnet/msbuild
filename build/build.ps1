@@ -72,7 +72,7 @@ function InstallDotNetCli {
   $DotNetInstallVerbosity = ""
 
   if (!$env:DOTNET_INSTALL_DIR) {
-    $env:DOTNET_INSTALL_DIR = Join-Path $RepoRoot "artifacts\.dotnet\$DotNetCliVersion"
+    $env:DOTNET_INSTALL_DIR = Join-Path $ArtifactsDir ".dotnet\$DotNetCliVersion"
   }
 
   $DotNetRoot = $env:DOTNET_INSTALL_DIR
@@ -145,7 +145,7 @@ function InstallDotNetCli {
 }
 
 function InstallNuGet {
-  $NugetInstallDir = Join-Path $RepoRoot "artifacts\.nuget"
+  $NugetInstallDir = Join-Path $ArtifactsDir ".nuget"
   $NugetExe = Join-Path $NugetInstallDir "nuget.exe"
 
   if (!(Test-Path -Path $NugetExe)) {
@@ -293,7 +293,11 @@ if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $
 
 $RepoRoot = Join-Path $PSScriptRoot ".."
 $RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot);
-$ArtifactsDir = Join-Path $RepoRoot "artifacts"
+
+$ArtifactsDir = $env:DOTNET_SDK_ARTIFACTS_DIR
+if (!($ArtifactsDir)) {
+  $ArtifactsDir = Join-Path $RepoRoot "artifacts"
+}
 $ArtifactsConfigurationDir = Join-Path $ArtifactsDir $configuration
 $LogDir = Join-Path $ArtifactsConfigurationDir "log"
 $VersionsProps = Join-Path $PSScriptRoot "Versions.props"

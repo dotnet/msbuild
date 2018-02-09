@@ -130,7 +130,7 @@ function InstallDotNetCli {
 
   if [ -z "$DOTNET_INSTALL_DIR" ]
   then
-    export DOTNET_INSTALL_DIR="$RepoRoot/artifacts/.dotnet/$DotNetCliVersion"
+    export DOTNET_INSTALL_DIR="$ArtifactsDir/.dotnet/$DotNetCliVersion"
   fi
 
   DotNetRoot=$DOTNET_INSTALL_DIR
@@ -297,7 +297,14 @@ done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 RepoRoot="$ScriptRoot/.."
-ArtifactsDir="$RepoRoot/artifacts"
+if [ -z $DOTNET_SDK_ARTIFACTS_DIR ]
+then
+  ArtifactsDir="$RepoRoot/artifacts"
+else
+  ArtifactsDir="$DOTNET_SDK_ARTIFACTS_DIR"
+fi
+
+
 ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
 LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
@@ -305,7 +312,7 @@ VersionsProps="$ScriptRoot/Versions.props"
 # HOME may not be defined in some scenarios, but it is required by NuGet
 if [ -z $HOME ]
 then
-  export HOME="$RepoRoot/artifacts/.home/"
+  export HOME="$ArtifactsDir/.home/"
   CreateDirectory "$HOME"
 fi
 
