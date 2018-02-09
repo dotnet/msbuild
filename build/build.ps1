@@ -206,7 +206,6 @@ function Build {
   InstallDotNetCli
   InstallNuget
   CreateBuildEnvScript
-  CreateTestEnvScript
   $RepoToolsetBuildProj = InstallRepoToolset
 
   if ($prepareMachine) {
@@ -276,30 +275,6 @@ set DOTNET_MULTILEVEL_LOOKUP=0
 
 set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
 set NUGET_PACKAGES=$env:NUGET_PACKAGES
-"@
-
-  Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
-}
-
-function CreateTestEnvScript()
-{
-  Create-Directory $ArtifactsConfigurationDir
-  $scriptPath = Join-Path $ArtifactsConfigurationDir "sdk-test-env.bat"
-
-  $scriptContents = @"
-@echo off
-title SDK Test ($RepoRoot) ($configuration)
-set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-set DOTNET_MULTILEVEL_LOOKUP=0
-
-set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
-set NUGET_PACKAGES=$env:NUGET_PACKAGES
-
-set SDK_CLI_VERSION=$DotNetCliVersion
-set MSBuildSDKsPath=$ArtifactsConfigurationDir\bin\Sdks
-set DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR=%MSBuildSDKsPath%
-set NETCoreSdkBundledVersionsProps=$env:DOTNET_INSTALL_DIR\sdk\$DotNetCliVersion\Microsoft.NETCoreSdk.BundledVersions.props
-set MicrosoftNETBuildExtensionsTargets=%MSBuildSDKsPath%\Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets
 "@
 
   Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
