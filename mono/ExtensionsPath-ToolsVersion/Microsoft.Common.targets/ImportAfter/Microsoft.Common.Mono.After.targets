@@ -13,14 +13,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <UsingTask TaskName="Mono.Build.Tasks.FilterDeniedAssemblies" AssemblyFile="$(MSBuildExtensionsPath)\Mono.Build.Tasks.dll" />
 
-    <PropertyGroup>
-        <FilterDeniedAssemblies Condition="$(FilterDeniedAssemblies) == ''">false</FilterDeniedAssemblies>
-    </PropertyGroup>
+    <!--
+         This closely depends on Microsoft/Microsoft.NET.Build.Extensions/Microsoft.NET.Build.Extensions.NETFramework.targets .
+         Specifically, on the `ImplicitlyExpandNETStandardFacades` target which sets
 
+            $(ImplicitlyExpandNETStandardFacades),
+            $(DependsOnNETStandard) and
+            $(NETStandardInbox)
+
+        and is enabled only for '$(TargetFrameworkIdentifier)' == '.NETFramework'.
+
+        Default:
+        - Run this only for .net framework projects 4.6.1 - 4.7, which have any references depending on netstandard
+         -->
     <Target
         Name="FilterDeniedAssemblyReferences"
         BeforeTargets="ResolveAssemblyReferences"
-        Condition="'$(FilterDeniedAssemblies)' == 'true'">
+        Condition="'$(FilterDeniedAssemblies)' == 'true'
+                        or ('$(EnableFilteringDeniedAssembliesForNet46xProjects)' != 'false' and '$(FilterDeniedAssemblies)' == ''
+                            and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(ImplicitlyExpandNETStandardFacades)' == 'true'
+                            and '$(DependsOnNETStandard)' == 'true'  AND '$(NETStandardInbox)' != 'true' AND '$(_TargetFrameworkVersionWithoutV)' &lt; '4.7.1')">
 
         <FilterDeniedAssemblies References="@(Reference)" SearchPaths="$(TargetFrameworkDirectory);$(DesignTimeFacadeDirectories)">
             <Output TaskParameter="DeniedReferencesThatCouldNotBeFixed" ItemName="DeniedReferencesThatCouldNotBeFixed" />
