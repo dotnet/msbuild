@@ -68,7 +68,7 @@ function GetVersionsPropsVersion([string[]] $Name) {
 }
 
 function InstallDotNetCli {
-  $DotNetCliVersion = GetVersionsPropsVersion -Name "DotNetCliVersion"
+  $script:DotNetCliVersion = GetVersionsPropsVersion -Name "DotNetCliVersion"
   $DotNetInstallVerbosity = ""
 
   if (!$env:DOTNET_INSTALL_DIR) {
@@ -84,7 +84,7 @@ function InstallDotNetCli {
     $env:MSBuildSDKsPath = Join-Path $ArtifactsConfigurationDir "bin\Sdks"
     $env:DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = $env:MSBuildSDKsPath
     $env:NETCoreSdkBundledVersionsProps = Join-Path $DotNetRoot "sdk\$DotNetCliVersion\Microsoft.NETCoreSdk.BundledVersions.props"
-    $env:MicrosoftNETBuildExtensionsTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft.Common.Targets\ImportAfter\Microsoft.NET.Build.Extensions.targets"
+    $env:MicrosoftNETBuildExtensionsTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets"
   }
 
   if (!(Test-Path $DotNetInstallScript)) {
@@ -200,6 +200,8 @@ function LocateVisualStudio {
 function Build {
   InstallDotNetCli
   InstallNuget
+  CreateBuildEnvScript
+  CreateTestEnvScript
   $RepoToolsetBuildProj = InstallRepoToolset
 
   if ($prepareMachine) {
@@ -243,12 +245,54 @@ function Stop-Processes() {
   Get-Process -Name "vbcscompiler" -ErrorAction SilentlyContinue | Stop-Process
 }
 
+function CreateBuildEnvScript()
+{
+  Create-Directory $ArtifactsDir
+  $scriptPath = Join-Path $ArtifactsDir "sdk-build-env.bat"
+  $scriptContents = @"
+@echo off
+title SDK Build ($RepoRoot)
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+set DOTNET_MULTILEVEL_LOOKUP=0
+
+set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
+set NUGET_PACKAGES=$env:NUGET_PACKAGES
+"@
+
+  Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
+}
+
+function CreateTestEnvScript()
+{
+  Create-Directory $ArtifactsConfigurationDir
+  $scriptPath = Join-Path $ArtifactsConfigurationDir "sdk-test-env.bat"
+
+  $scriptContents = @"
+@echo off
+title SDK Test ($RepoRoot) ($configuration)
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+set DOTNET_MULTILEVEL_LOOKUP=0
+
+set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
+set NUGET_PACKAGES=$env:NUGET_PACKAGES
+
+set SDK_CLI_VERSION=$DotNetCliVersion
+set MSBuildSDKsPath=$ArtifactsConfigurationDir\bin\Sdks
+set DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR=%MSBuildSDKsPath%
+set NETCoreSdkBundledVersionsProps=$env:DOTNET_INSTALL_DIR\sdk\$DotNetCliVersion\Microsoft.NETCoreSdk.BundledVersions.props
+set MicrosoftNETBuildExtensionsTargets=%MSBuildSDKsPath%\Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets
+"@
+
+  Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
+}
+
 if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
   Print-Usage
   exit 0
 }
 
 $RepoRoot = Join-Path $PSScriptRoot ".."
+$RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot);
 $ArtifactsDir = Join-Path $RepoRoot "artifacts"
 $ArtifactsConfigurationDir = Join-Path $ArtifactsDir $configuration
 $LogDir = Join-Path $ArtifactsConfigurationDir "log"
