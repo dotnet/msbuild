@@ -47,6 +47,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         private DateTime timestamp;
 
+        [NonSerialized]
+        private DateTime? _localTimestamp;
+
         /// <summary>
         /// Thread id
         /// </summary>
@@ -105,78 +108,48 @@ namespace Microsoft.Build.Framework
                 // Rather than storing dates in Local time all the time, we store in UTC type, and only
                 // convert to Local when the user requests access to this field.  This lets us avoid the
                 // expensive conversion to Local time unless it's absolutely necessary.
-                if (timestamp.Kind == DateTimeKind.Utc)
+                if (!_localTimestamp.HasValue)
                 {
-                    timestamp = timestamp.ToLocalTime();
+                    _localTimestamp = timestamp.Kind == DateTimeKind.Utc || timestamp.Kind == DateTimeKind.Unspecified
+                        ? timestamp.ToLocalTime()
+                        : timestamp;
                 }
 
-                return timestamp;
+                return _localTimestamp.Value;
             }
         }
 
         /// <summary>
         /// The thread that raised event.  
         /// </summary>
-        public int ThreadId
-        {
-            get
-            {
-                return threadId;
-            }
-        }
+        public int ThreadId => threadId;
 
         /// <summary>
         /// Text of event. 
         /// </summary>
         public virtual string Message
         {
-            get
-            {
-                return message;
-            }
-
-            protected set
-            {
-                message = value;
-            }
+            get => message;
+            protected set => message = value;
         }
 
         /// <summary>
         /// Custom help keyword associated with event.
         /// </summary>
-        public string HelpKeyword
-        {
-            get
-            {
-                return helpKeyword;
-            }
-        }
+        public string HelpKeyword => helpKeyword;
 
         /// <summary>
         /// Name of the object sending this event.
         /// </summary>
-        public string SenderName
-        {
-            get
-            {
-                return senderName;
-            }
-        }
+        public string SenderName => senderName;
 
         /// <summary>
         /// Event contextual information for the build event argument
         /// </summary>
         public BuildEventContext BuildEventContext
         {
-            get
-            {
-                return buildEventContext;
-            }
-
-            set
-            {
-                buildEventContext = value;
-            }
+            get => buildEventContext;
+            set => buildEventContext = value;
         }
 
 #if FEATURE_BINARY_SERIALIZATION
