@@ -177,8 +177,9 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             const string testAppName = "TestAppSimple";
             const string emptySpaceToTestSpaceInPath = " ";
+            const string directoryNamePostFix = "Test";
             TestAssetInstance testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName + emptySpaceToTestSpaceInPath)
+                .CreateInstance(testAppName + emptySpaceToTestSpaceInPath + directoryNamePostFix)
                 .UseCurrentRuntimeFrameworkVersion()
                 .WithRestoreFiles()
                 .WithBuildFiles();
