@@ -51,6 +51,9 @@ while [[ $# > 0 ]]; do
       echo ""
       echo "Advanced settings:"
       echo "  --dogfood                Setup a dogfood environment using the local build"
+      echo "                           For this to have an effect, you will need to source the build script."
+      echo "                           If this option is specified, any actions (such as --build or --restore)"
+      echo "                           will be ignored."
       echo "  --solution <value>       Path to solution to build"
       echo "  --ci                     Set when running on CI server"
       echo "  --log                    Enable logging (by default on CI)"
@@ -259,26 +262,29 @@ function Build {
     fi
   fi
 
-  if $ci || $log
+  if [ $dogfood != true ]
   then
-    CreateDirectory $LogDir
-    logCmd="/bl:$LogDir/Build.binlog"
-  else
-    logCmd=""
-  fi
+    if $ci || $log
+    then
+      CreateDirectory $LogDir
+      logCmd="/bl:$LogDir/Build.binlog"
+    else
+      logCmd=""
+    fi
 
-  if [ -z $solution ]
-  then
-    solution="$RepoRoot/sdk.sln"
-  fi
+    if [ -z $solution ]
+    then
+      solution="$RepoRoot/sdk.sln"
+    fi
 
-  dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
-  LASTEXITCODE=$?
+    dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
+    LASTEXITCODE=$?
 
-  if [ $LASTEXITCODE != 0 ]
-  then
-    echo "Failed to build $RepoToolsetBuildProj"
-    return $LASTEXITCODE
+    if [ $LASTEXITCODE != 0 ]
+    then
+      echo "Failed to build $RepoToolsetBuildProj"
+      return $LASTEXITCODE
+    fi
   fi
 }
 
@@ -340,4 +346,10 @@ then
   StopProcesses
 fi
 
-exit $LASTEXITCODE
+# The script should be sourced if using --dogfood, which means in that case we don't want to exit
+if [ $dogfood = true ]
+then
+  return $LASTEXITCODE
+else
+  exit $LASTEXITCODE
+fi
