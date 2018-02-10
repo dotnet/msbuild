@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return new CompilationOptions(
-                compilerOptionsItem.GetMetadata("DefineConstants")?.Split(';'),
+                compilerOptionsItem.GetMetadata("DefineConstants")?.Split(';', StringSplitOptions.RemoveEmptyEntries),
                 compilerOptionsItem.GetMetadata("LangVersion"),
                 compilerOptionsItem.GetMetadata("PlatformTarget"),
                 compilerOptionsItem.GetBooleanMetadata("AllowUnsafeBlocks"),
