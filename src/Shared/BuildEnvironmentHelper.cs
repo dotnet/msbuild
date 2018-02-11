@@ -75,7 +75,9 @@ namespace Microsoft.Build.Shared
             var possibleLocations = new Func<BuildEnvironment>[]
             {
                 TryFromEnvironmentVariable,
+#if !MONO                
                 TryFromVisualStudioProcess,
+#endif
                 TryFromMSBuildProcess,
                 TryFromMSBuildAssembly,
                 TryFromDevConsole,
