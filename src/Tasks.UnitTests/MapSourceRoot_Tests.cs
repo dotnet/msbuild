@@ -7,16 +7,27 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class MapSourceRoots_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public MapSourceRoots_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void BasicMapping()
         {
+            var engine = new MockEngine(_output);
+
             var task = new MapSourceRoots
             {
+                BuildEngine = engine,
                 SourceRoots = new[]
                 {
                     new TaskItem(@"c:\packages\SourcePackage1\"),
@@ -35,7 +46,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            task.Execute();
+            Assert.True(task.Execute());
 
             Assert.Equal(4, task.MappedSourceRoots.Length);
 
@@ -58,8 +69,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidChars()
         {
+            var engine = new MockEngine(_output);
+
             var task = new MapSourceRoots
             {
+                BuildEngine = engine,
                 SourceRoots = new[]
                 {
                     new TaskItem(@"!@#:;$%^&*()_+|{}"),
@@ -76,7 +90,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            task.Execute();
+            Assert.True(task.Execute());
 
             Assert.Equal(3, task.MappedSourceRoots.Length);
 
@@ -95,8 +109,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NestedRoots_Separators()
         {
+            var engine = new MockEngine(_output);
+
             var task = new MapSourceRoots
             {
+                BuildEngine = engine,
                 SourceRoots = new[]
                 {
                     new TaskItem(@"c:\MyProjects\MyProject\"),
@@ -118,7 +135,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            task.Execute();
+            Assert.True(task.Execute());
 
             Assert.Equal(4, task.MappedSourceRoots.Length);
 
@@ -138,7 +155,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SourceRootCaseSensitive()
         {
-            var engine = new MockEngine();
+            var engine = new MockEngine(_output);
 
             var task = new MapSourceRoots
             {
@@ -151,7 +168,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            task.Execute();
+            Assert.True(task.Execute());
 
             Assert.Equal(3, task.MappedSourceRoots.Length);
 
@@ -168,7 +185,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Error_DuplicateSourceRoot()
         {
-            var engine = new MockEngine();
+            var engine = new MockEngine(_output);
 
             var task = new MapSourceRoots
             {
@@ -181,8 +198,8 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            task.Execute();
-            
+            Assert.False(task.Execute());
+
             Assert.Null(task.MappedSourceRoots);
 
             Assert.Equal("ERROR : " + string.Format(task.Log.FormatResourceString(
@@ -192,7 +209,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Error_MissingContainingRoot()
         {
-            var engine = new MockEngine();
+            var engine = new MockEngine(_output);
 
             var task = new MapSourceRoots
             {
@@ -209,7 +226,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            task.Execute();
+            Assert.False(task.Execute());
 
             Assert.Null(task.MappedSourceRoots);
 
@@ -220,7 +237,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Error_NoContainingRootSpecified()
         {
-            var engine = new MockEngine();
+            var engine = new MockEngine(_output);
 
             var task = new MapSourceRoots
             {
@@ -236,7 +253,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            task.Execute();
+            Assert.False(task.Execute());
 
             Assert.Null(task.MappedSourceRoots);
 
