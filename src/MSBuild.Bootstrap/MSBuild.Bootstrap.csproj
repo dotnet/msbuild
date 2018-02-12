@@ -15,6 +15,10 @@
   <ItemGroup>
     <!-- Include SDKs from the Stage 0 .NET Core SDK -->
     <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- This file is needed so the dotnet CLI knows how to map preview SDK versions to tfms (because tfms do not have preview information on them) -->
+    <!-- This is because according to semver, 2.1.0-preview is not >= 2.1.0 -->
+    <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
