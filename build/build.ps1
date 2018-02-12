@@ -230,7 +230,7 @@ function Build {
     }
     else
     {
-      $msbuildToUse = Join-Path $bootstrapRoot "netcoreapp2.0\MSBuild\\MSBuild.dll"
+      $msbuildToUse = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\\MSBuild.dll"
     }
 
     # Use separate artifacts folder for stage 2

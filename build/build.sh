@@ -288,7 +288,7 @@ function Build {
 
     if [ $hostType = "core" ]
     then
-      msbuildToUse=$(QQ "$bootstrapRoot/netcoreapp2.0/MSBuild/MSBuild.dll")
+      msbuildToUse=$(QQ "$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll")
     else
       ErrorHostType
     fi
