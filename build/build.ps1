@@ -39,6 +39,11 @@ function Print-Usage() {
     Write-Host ""
     Write-Host "Advanced settings:"
     Write-Host "  -dogfood                Setup a dogfood environment using the local build"
+    Write-Host "                          This ignores any actions (such as -build or -restore) that were specified"
+    Write-Host "                          If any additional arguments are specified, they will be interpreted as a"
+    Write-Host "                          command to be run in the dogfood context.  If no additional arguments are"
+    Write-Host "                          specified, then the value of the DOTNET_SDK_DOGFOOD_SHELL environment, if"
+    Write-Host "                          it is set, will be used."
     Write-Host "  -solution <value>       Path to solution to build"
     Write-Host "  -ci                     Set when running on CI server"
     Write-Host "  -log                    Enable logging (by default on CI)"
@@ -68,11 +73,11 @@ function GetVersionsPropsVersion([string[]] $Name) {
 }
 
 function InstallDotNetCli {
-  $DotNetCliVersion = GetVersionsPropsVersion -Name "DotNetCliVersion"
+  $script:DotNetCliVersion = GetVersionsPropsVersion -Name "DotNetCliVersion"
   $DotNetInstallVerbosity = ""
 
   if (!$env:DOTNET_INSTALL_DIR) {
-    $env:DOTNET_INSTALL_DIR = Join-Path $RepoRoot "artifacts\.dotnet\$DotNetCliVersion"
+    $env:DOTNET_INSTALL_DIR = Join-Path $ArtifactsDir ".dotnet\$DotNetCliVersion"
   }
 
   $DotNetRoot = $env:DOTNET_INSTALL_DIR
@@ -84,8 +89,7 @@ function InstallDotNetCli {
     $env:MSBuildSDKsPath = Join-Path $ArtifactsConfigurationDir "bin\Sdks"
     $env:DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = $env:MSBuildSDKsPath
     $env:NETCoreSdkBundledVersionsProps = Join-Path $DotNetRoot "sdk\$DotNetCliVersion\Microsoft.NETCoreSdk.BundledVersions.props"
-    $env:CustomAfterMicrosoftCommonTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions-ver\Microsoft.Common.Targets\ImportAfter\Microsoft.NET.Build.Extensions.targets"
-    $env:MicrosoftNETBuildExtensionsTargets = $env:CustomAfterMicrosoftCommonTargets
+    $env:MicrosoftNETBuildExtensionsTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets"
   }
 
   if (!(Test-Path $DotNetInstallScript)) {
@@ -146,7 +150,7 @@ function InstallDotNetCli {
 }
 
 function InstallNuGet {
-  $NugetInstallDir = Join-Path $RepoRoot "artifacts\.nuget"
+  $NugetInstallDir = Join-Path $ArtifactsDir ".nuget"
   $NugetExe = Join-Path $NugetInstallDir "nuget.exe"
 
   if (!(Test-Path -Path $NugetExe)) {
@@ -201,6 +205,7 @@ function LocateVisualStudio {
 function Build {
   InstallDotNetCli
   InstallNuget
+  CreateBuildEnvScript
   $RepoToolsetBuildProj = InstallRepoToolset
 
   if ($prepareMachine) {
@@ -218,6 +223,20 @@ function Build {
     }
 
     $env:DOTNET_SDK_TEST_MSBUILD_PATH = Join-Path $env:VSInstallDir "MSBuild\15.0\Bin\msbuild.exe"
+  }
+
+  if ($dogfood)
+  {
+    if ($properties -eq $null -and $env:DOTNET_SDK_DOGFOOD_SHELL -ne $null)
+    {
+      $properties = , $env:DOTNET_SDK_DOGFOOD_SHELL
+    }
+    if ($properties -ne $null)
+    {
+      $Host.UI.RawUI.WindowTitle = "SDK Test ($RepoRoot) ($configuration)"
+      & $properties[0] $properties[1..($properties.Length-1)]
+    }
+    exit 0
   }
 
   if ($ci -or $log) {
@@ -244,13 +263,35 @@ function Stop-Processes() {
   Get-Process -Name "vbcscompiler" -ErrorAction SilentlyContinue | Stop-Process
 }
 
+function CreateBuildEnvScript()
+{
+  Create-Directory $ArtifactsDir
+  $scriptPath = Join-Path $ArtifactsDir "sdk-build-env.bat"
+  $scriptContents = @"
+@echo off
+title SDK Build ($RepoRoot)
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+set DOTNET_MULTILEVEL_LOOKUP=0
+
+set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
+set NUGET_PACKAGES=$env:NUGET_PACKAGES
+"@
+
+  Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
+}
+
 if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
   Print-Usage
   exit 0
 }
 
 $RepoRoot = Join-Path $PSScriptRoot ".."
-$ArtifactsDir = Join-Path $RepoRoot "artifacts"
+$RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot);
+
+$ArtifactsDir = $env:DOTNET_SDK_ARTIFACTS_DIR
+if (!($ArtifactsDir)) {
+  $ArtifactsDir = Join-Path $RepoRoot "artifacts"
+}
 $ArtifactsConfigurationDir = Join-Path $ArtifactsDir $configuration
 $LogDir = Join-Path $ArtifactsConfigurationDir "log"
 $VersionsProps = Join-Path $PSScriptRoot "Versions.props"
