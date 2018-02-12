@@ -122,7 +122,7 @@ function InstallRepoToolset {
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
-    $msbuildArgs = "/t:restore", "/m", "/nologo", "/clp:Summary", "/warnaserror", "/v:$verbosity"
+    $msbuildArgs = "/t:restore", "/m", "/clp:Summary", "/warnaserror", "/v:$verbosity"
     $msbuildArgs = AddLogCmd "Toolset" $msbuildArgs
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)
@@ -187,7 +187,7 @@ function Build {
 
   $solution = Join-Path $RepoRoot "MSBuild.sln"
 
-  $commonMSBuildArgs = "/m", "/nologo", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:SolutionPath=$solution", "/p:CIBuild=$ci"
+  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:SolutionPath=$solution", "/p:CIBuild=$ci"
   if ($ci)
   {
     # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
@@ -275,7 +275,7 @@ function Build {
 
   if ($ci)
   {
-#    CallMSBuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
+#    CallMSBuild $ToolsetProj /t:restore /m /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
     git status | Out-Null
     git --no-pager diff HEAD --word-diff=plain --exit-code | Out-Null
 
