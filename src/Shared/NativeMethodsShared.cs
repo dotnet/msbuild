@@ -210,10 +210,6 @@ namespace Microsoft.Build.Shared
             {
                 return CloseHandle(handle);
             }
-
-            [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-            [DllImport("KERNEL32.DLL")]
-            private static extern bool CloseHandle(IntPtr hObject);
         }
 
         /// <summary>
@@ -1373,6 +1369,11 @@ namespace Microsoft.Build.Shared
             out FILETIME lpLastAccessTime,
             out FILETIME lpLastWriteTime
             );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+
+        internal static extern bool CloseHandle(IntPtr hObject);
 
 #endregion
 

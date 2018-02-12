@@ -1406,6 +1406,59 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_32_ProfilerSwitch">
+        <source>  /profileevaluation:&lt;file&gt;    
+                     Profiles MSBuild evaluation and writes the result 
+                     to the specified file. If the extension of the specified
+                     file is '.md', the result is generated in markdown
+                     format. Otherwise, a tab separated file is produced.
+    </source>
+        <target state="translated">  /profileevaluation:&lt;soubor&gt;    
+                     Profiluje vyhodnocení nástroje MSBuild a zapíše výsledek 
+                     do určeného souboru. Pokud je přípona zadaného
+                     souboru .md, vygeneruje se výsledek ve formátu
+                     markdown, jinak vznikne soubor s hodnotami oddělenými tabulátorem.
+    </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_33_RestorePropertySwitch">
+        <source>  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     Set or override these project-level properties only
+                     during restore and do not use properties specified
+                     with the /property argument. &lt;n&gt; is the property
+                     name, and &lt;v&gt; is the property value. Use a
+                     semicolon or a comma to separate multiple properties,
+                     or specify each property separately.
+                     (Short form: /rp)
+                     Example:
+                       /restoreProperty:IsRestore=true;MyProperty=value
+    </source>
+        <target state="translated">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     Tyto vlastnosti na úrovni projektu nastavte nebo přepište
+                     jen během obnovení a nepoužívejte vlastnosti určené
+                     argumentem /property. &lt;n&gt; je název vlastnosti
+                     a &lt;v&gt; je hodnota vlastnosti. K oddělení více 
+                     vlastností použijte středník nebo čárku, případně zadejte
+                     každou vlastnost samostatně.
+                     (Krátký tvar: /rp)
+                     Příklad:
+                       /restoreProperty:IsRestore=true;Vlastnost=hodnota
+    </target>
+        <note>
+      LOCALIZATION: "/restoreProperty" and "/rp" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidProfilerValue">
+        <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
+        <target state="translated">MSBUILD: chyba MSB1053: Zadaný název souboru není platný. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingProfileParameterError">
+        <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
+        <target state="translated">MSBUILD: chyba MSB1054: Kvůli vygenerování výsledku profileru musí být zadaný název souboru.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
