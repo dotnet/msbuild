@@ -754,6 +754,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_InvalidSourceRoot Include="@(SourceRoot)" Condition="!HasTrailingSlash('%(SourceRoot.Identity)')" />
     </ItemGroup>
 
+    <!--
+      The SourceRoot is required to have a trailing directory separator.
+      We do not append one implicitly as we do not know which separator to append on Windows.
+      The usage of SourceRoot might be sensitive to what kind of separator is used (e.g. in SourceLink where it needs
+      to match the corresponding separators used in paths given to the compiler).
+    -->
     <Error Text="SourceRoot paths are required to end with a slash or backslash: @(_InvalidSourceRoot, ', ')"
            Condition="'@(_InvalidSourceRoot)' != ''" />
 
@@ -792,12 +798,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     If the project references a package that provides source control information (such as Microsoft.Build.Tasks.Git, Microsoft.Build.Tasks.TFVC, etc.)
     the revision id becomes available in local build environments as well.
     
-    Extensibility: Redefine SetSourceRevisionId target set SetSourceRevisionId.
+    Extensibility: Add target to InitializeSourceRevisionIdDependsOn to initialize SourceRevisionId.
   -->
 
-  <Target Name="SetSourceRevisionId">
+  <Target Name="InitializeSourceRevisionId"
+          DependsOnTargets="_InitializeSourceRevisionIdFromStandardCI;$(InitializeSourceRevisionIdDependsOn)">
+  </Target>
+
+  <Target Name="_InitializeSourceRevisionIdFromStandardCI">
     <PropertyGroup>
-      <SourceRevisionId>$(STANDARD_CI_SOURCE_REVISION_ID)</SourceRevisionId>
+      <SourceRevisionId Condition="'$(SourceRevisionId)' == ''">$(STANDARD_CI_SOURCE_REVISION_ID)</SourceRevisionId>
     </PropertyGroup>
   </Target>
 

@@ -19,7 +19,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Build servers that comply with Standard CI specification set STANDARD_CI_REPOSITORY_URL and STANDARD_CI_SOURCE_REVISION_ID variables.
       See https://github.com/dotnet/designs/blob/86f4ed0e39fc1b1ab5c4128990b17c4aead4420f/proposed/standard-ci-env-variables.md.
     -->
-    <ContinuousIntegrationBuild Condition="'$(DesignTimeBuild)' != 'true' and '$(STANDARD_CI_REPOSITORY_URL)' != ''">true</ContinuousIntegrationBuild>
+    <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' == '' and '$(DesignTimeBuild)' != 'true' and '$(STANDARD_CI_REPOSITORY_URL)' != ''">true</ContinuousIntegrationBuild>
   </PropertyGroup>
   
   <PropertyGroup>

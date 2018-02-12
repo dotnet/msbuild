@@ -28,7 +28,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] SourceRoots { get; set; }
 
         [Output]
-        public ITaskItem[] MappedSourceRoots { get; set; }
+        public ITaskItem[] MappedSourceRoots { get; private set; }
 
         private static class Names
         {
