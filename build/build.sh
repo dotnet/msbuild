@@ -224,7 +224,7 @@ function InstallRepoToolset {
   if [ ! -d "$RepoToolsetBuildProj" ]
   then
     ToolsetProj="$ScriptRoot/Toolset.proj"
-    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
+    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /clp:Summary /warnaserror /v:$verbosity $logCmd
   fi
 }
 
@@ -265,7 +265,7 @@ function Build {
 
   solution="$RepoRoot/MSBuild.sln"
 
-  commonMSBuildArgs="/m /nologo /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $solution) /p:CIBuild=$ci"
+  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $solution) /p:CIBuild=$ci"
 
   # Only enable warnaserror on CI runs.
   if $ci
