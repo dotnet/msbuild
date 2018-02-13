@@ -12,6 +12,7 @@
     <CopyToSuiteBin>true</CopyToSuiteBin>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
   
   <ItemGroup>
