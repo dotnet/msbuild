@@ -4,6 +4,7 @@
 using Microsoft.DotNet.VersionTools;
 using Microsoft.DotNet.VersionTools.Automation;
 using Microsoft.DotNet.VersionTools.Dependencies;
+using Microsoft.DotNet.VersionTools.Dependencies.BuildOutput;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,9 +28,14 @@ namespace Microsoft.DotNet.Scripts
 
             buildInfos.Add(GetBuildInfo("CoreSetup", s_config.CoreSetupVersionFragment, fetchLatestReleaseFile: false));
 
+            if (s_config.HasRoslynVersionFragment)
+            {
+                buildInfos.Add(GetBuildInfo("Roslyn", s_config.RoslynVersionFragment, fetchLatestReleaseFile: false));
+            }
+
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
             var dependencyBuildInfos = buildInfos.Select(buildInfo =>
-                new DependencyBuildInfo(
+                new BuildDependencyInfo(
                     buildInfo,
                     upgradeStableVersions: true,
                     disabledPackages: Enumerable.Empty<string>()));
@@ -50,11 +56,14 @@ namespace Microsoft.DotNet.Scripts
                     body += PullRequestCreator.NotificationString(s_config.GitHubPullRequestNotifications);
                 }
 
-                new PullRequestCreator(gitHubAuth, origin, upstreamBranch)
+                new PullRequestCreator(gitHubAuth)
                     .CreateOrUpdateAsync(
                         suggestedMessage,
                         suggestedMessage + $" ({upstreamBranch.Name})",
-                        body)
+                        body,
+                        upstreamBranch,
+                        origin,
+                        new PullRequestOptions())
                     .Wait();
             }
         }
@@ -84,6 +93,11 @@ namespace Microsoft.DotNet.Scripts
             yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETCoreAppPackageVersion", "Microsoft.NETCore.App");
             yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetPlatformAbstractionsPackageVersion", "Microsoft.DotNet.PlatformAbstractions");
             yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftExtensionsDependencyModelPackageVersion", "Microsoft.Extensions.DependencyModel");
+
+            if (s_config.HasRoslynVersionFragment)
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftCodeAnalysisCSharpPackageVersion", "Microsoft.CodeAnalysis.CSharp");
+            }
         }
 
         private static IDependencyUpdater CreateRegexUpdater(string repoRelativePath, string propertyName, string packageId)
