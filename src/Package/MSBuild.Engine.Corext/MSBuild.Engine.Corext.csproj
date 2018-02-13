@@ -8,9 +8,6 @@
     <NuspecProperties>$(NuspecProperties);repoRoot=$(RepoRoot.TrimEnd('\\/'))</NuspecProperties>
   </PropertyGroup>
 
-
-
-
   <Import Project="..\NuspecProject.targets" />
   <Import Project="..\GetBinPaths.targets" />
 
@@ -21,6 +18,7 @@
       <NuspecProperties>$(NuspecProperties);TaskHostBinPath=$(MSBuildTaskHostBinPath.TrimEnd('\\/'))</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);TaskHostX64BinPath=$(MSBuildTaskHostX64BinPath.TrimEnd('\\/'))</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);MSBuildConversionBinPath=$(MSBuildConversionBinPath.TrimEnd('\\/'))</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);NuGetMSBuildSdkResolverPath=$(NuGetMSBuildSdkResolverPath.TrimEnd('\\/'))</NuspecProperties>
     </PropertyGroup>
   </Target>
 
