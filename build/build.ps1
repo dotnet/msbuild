@@ -161,7 +161,7 @@ function Build {
 
   if ($prepareMachine) {
     Create-Directory $NuGetPackageRoot
-    "$env:DOTNET_HOST_PATH nuget locals all --clear"
+    & "$env:DOTNET_HOST_PATH" nuget locals all --clear
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to clear NuGet cache"
