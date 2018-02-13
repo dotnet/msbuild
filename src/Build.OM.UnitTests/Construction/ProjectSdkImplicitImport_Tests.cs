@@ -435,6 +435,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             sdk.MinimumVersion.ShouldBe(minimumSdkVersion);
         }
 
+        /// <summary>
+        /// Verifies that when <see cref="ProjectLoadSettings.IgnoreMissingImports"/> is set that we don't throw an <see cref="InvalidProjectFileException"/> when an SDK cannot be found.
+        /// </summary>
+        [Fact]
+        public void IgnoreMissingImportsSdkNotFoundDoesNotThrow()
+        {
+            const string projectContents = @"
+<Project Sdk=""Does.Not.Exist"">
+  <PropertyGroup>
+    <Success>true</Success>
+  </PropertyGroup>
+</Project>
+";
+            ProjectRootElement rootElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(projectContents);
+
+            Project project = new Project(rootElement,
+                globalProperties: null,
+                toolsVersion: null,
+                projectCollection: new ProjectCollection(),
+                loadSettings: ProjectLoadSettings.IgnoreMissingImports);
+
+            project.GetPropertyValue("Success").ShouldBe("true");
+        }
+
         public void Dispose()
         {
             _env.Dispose();
