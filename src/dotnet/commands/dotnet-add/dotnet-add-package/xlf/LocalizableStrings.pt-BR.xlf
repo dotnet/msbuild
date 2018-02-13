@@ -77,6 +77,11 @@
         <target state="translated">PACKAGE_NAME</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdDGFileIOException">
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
+        <target state="translated">Não é possível gerar um arquivo temporário para o projeto '{0}'. Não é possível adicionar a referência do pacote. Limpe i diretório temporário e tente novamente.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

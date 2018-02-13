@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PublishDir>$(FSharpDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
@@ -36,10 +35,15 @@
                                  SectionName="%(AssetsToRemoveFromDeps.SectionName)"
                                  AssetPath="%(AssetsToRemoveFromDeps.Identity)" />
 
+    <!-- Deploy deps and runtime config for fsc.exe and fsi.exe.  Both apps have exactly the same dependencies so this is Ok -->
     <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json;
                        $(PublishDir)/$(TargetName).deps.json;"
           DestinationFiles="$(PublishDir)/fsc.runtimeconfig.json;
                             $(PublishDir)/fsc.deps.json;"/>
+    <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json;
+                       $(PublishDir)/$(TargetName).deps.json;"
+          DestinationFiles="$(PublishDir)/fsi.runtimeconfig.json;
+                            $(PublishDir)/fsi.deps.json;"/>
   </Target>
 
   <Target Name="RemoveFilesAfterPublish"
