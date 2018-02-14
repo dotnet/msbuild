@@ -61,13 +61,15 @@
     <HostFxrVersion>$(MicrosoftNETCoreAppPackageVersion)</HostFxrVersion>
 
     <AspNetCoreTemplatePackageVersion>2.0.6</AspNetCoreTemplatePackageVersion>
-    <!-- This should either be timestamped or notimestamp as appropriate -->
+    <!-- This should either be timestamped or notimestamp as appropriate.
+    AspNetCoreRelease is only used if the value of this property is "timestamped" -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
+
     <!--BranchName and AspNetCoreVersion will not always be the same-->
     <AspNetCoreBranchName>2.0.6</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
     <AspNetCoreVersion>2.0.6</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>10008</AspNetCoreRuntimePackageTimestamp>
+    <AspNetCoreRuntimePackageTimestamp>10010</AspNetCoreRuntimePackageTimestamp>
 
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
     <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
