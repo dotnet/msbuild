@@ -448,15 +448,32 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </PropertyGroup>
 </Project>
 ";
+            MockLogger logger = new MockLogger();
+            ProjectCollection projectCollection = new ProjectCollection();
+            projectCollection.RegisterLogger(logger);
+
             ProjectRootElement rootElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(projectContents);
 
             Project project = new Project(rootElement,
                 globalProperties: null,
                 toolsVersion: null,
-                projectCollection: new ProjectCollection(),
+                projectCollection: projectCollection,
                 loadSettings: ProjectLoadSettings.IgnoreMissingImports);
 
             project.GetPropertyValue("Success").ShouldBe("true");
+            
+            ProjectImportedEventArgs[] events = logger.BuildMessageEvents.OfType<ProjectImportedEventArgs>().ToArray();
+
+            // There are two implicit imports so there should be two logged ProjectImportedEventArgs
+            events.Length.ShouldBe(2);
+
+            events[0].Message.ShouldStartWith("MSB4236");
+            events[0].ImportIgnored.ShouldBeTrue();
+            events[0].ImportedProjectFile.ShouldBeNull();
+
+            events[1].Message.ShouldStartWith("MSB4236");
+            events[1].ImportIgnored.ShouldBeTrue();
+            events[1].ImportedProjectFile.ShouldBeNull();
         }
 
         public void Dispose()
