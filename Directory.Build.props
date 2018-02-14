@@ -32,7 +32,9 @@
 
     <!-- Repository and project URLs (used in nuget packages) -->
     <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
-    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
+    <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
+    <PackageTags>MSBuild</PackageTags>
 
     <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
   </PropertyGroup>
@@ -73,5 +75,10 @@
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">none</DebugType>
     <MachineIndependentBuild>true</MachineIndependentBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);*.log</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
   </PropertyGroup>
 </Project>

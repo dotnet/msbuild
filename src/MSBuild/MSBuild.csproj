@@ -24,6 +24,13 @@
          https://github.com/Microsoft/msbuild/issues/834 Long term
          two files should be generated from a single source. -->
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
+    <IsPackable>true</IsPackable>
+    <ContentTargetFolders>contentFiles</ContentTargetFolders>
+    <BuildOutputTargetFolder>contentFiles\any\</BuildOutputTargetFolder>
+    <PackageId>Microsoft.Build.Runtime</PackageId>
+    <Description>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
@@ -198,8 +205,8 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <!-- Content Files -->
-    <Content Include="MSBuild.ico" />
-    <Content Include="MSBuild.rsp">
+    <Content Include="MSBuild.ico" Pack="false" />
+    <Content Include="MSBuild.rsp" Pack="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Microsoft.Build.CommonTypes.xsd">
@@ -220,11 +227,9 @@
     <PackageReference Include="LargeAddressAware" Version="$(LargeAddressAwareVersion)" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
-
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
-    <!--<ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />-->
   </ItemGroup>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects
@@ -260,6 +265,48 @@
       <NuGetSdkResolverContent Include="$(NuGetSdkResolverOutputPath)NuGet.MSBuildSdkResolver.dll" />
       <NuGetSdkResolverContent Include="$(NuGetSdkResolverOutputPath)**\NuGet.MSBuildSdkResolver.resources.dll" />
       <Content Include="@(NuGetSdkResolverContent)" Link="SdkResolvers\NuGet.MSBuildSdkResolver\%(RecursiveDir)%(NuGetSdkResolverContent.Filename)%(NuGetSdkResolverContent.Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="GetCustomPackageFiles" BeforeTargets="_GetPackageFiles">
+
+    <ItemGroup>
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Data.Entity.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.ServiceModel.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WinFx.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WorkflowBuildExtensions.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Xaml.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.VisualBasic.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.overridetasks" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="15.0\" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.tasks" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.CurrentVersion.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v11.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v12.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v14.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\SdkResolvers\**" Exclude="$(OutputPath)%(_TargetFrameworks.Identity)\SdkResolvers\**\*.resources.dll" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="SdkResolvers\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_PackageFiles Include="@(_OurFiles)" BuildAction="Content" PackagePath="contentFiles\any\%(_OurFiles.TargetFramework)\%(_OurFiles.Subdirectory)%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
   </Target>
