@@ -15,9 +15,7 @@ namespace Microsoft.Build.Framework.Profiler
     /// <summary>
     /// Result of profiling an evaluation
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public struct ProfilerResult
     {
         /// <nodoc/>
@@ -54,9 +52,7 @@ namespace Microsoft.Build.Framework.Profiler
     /// <summary>
     /// Result of timing the evaluation of a given element at a given location
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public struct ProfiledLocation
     {
         /// <nodoc/>

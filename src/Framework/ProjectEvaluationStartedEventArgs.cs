@@ -8,9 +8,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the project evaluation started event.
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public class ProjectEvaluationStartedEventArgs : BuildStatusEventArgs
     {
         /// <summary>

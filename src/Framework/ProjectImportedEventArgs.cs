@@ -8,9 +8,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the project imported event.
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public class ProjectImportedEventArgs : BuildMessageEventArgs
     {
         /// <summary>

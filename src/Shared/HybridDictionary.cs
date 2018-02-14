@@ -8,9 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
-#endif
 
 using Microsoft.Build.Shared;
 
@@ -22,9 +20,7 @@ namespace Microsoft.Build.Collections
     /// </summary>
     /// <typeparam name="TKey">The key type</typeparam>
     /// <typeparam name="TValue">The value type</typeparam>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     internal class HybridDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, ICollection where TValue : class
     {
         /// <summary>
@@ -104,7 +100,6 @@ namespace Microsoft.Build.Collections
             }
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialization constructor.
         /// </summary>
@@ -112,7 +107,6 @@ namespace Microsoft.Build.Collections
         {
             throw new NotImplementedException();
         }
-#endif
 
         /// <summary>
         /// Cloning constructor.

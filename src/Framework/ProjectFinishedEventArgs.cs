@@ -19,9 +19,7 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public class ProjectFinishedEventArgs : BuildStatusEventArgs
     {
         /// <summary>
@@ -78,7 +76,6 @@ namespace Microsoft.Build.Framework
         private string projectFile;
         private bool succeeded;
 
-#if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
@@ -105,7 +102,6 @@ namespace Microsoft.Build.Framework
             succeeded = reader.ReadBoolean();
         }
         #endregion
-#endif
 
         /// <summary>
         /// Project name

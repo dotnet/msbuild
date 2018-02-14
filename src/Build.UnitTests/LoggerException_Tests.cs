@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_BINARY_SERIALIZATION
-
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
@@ -48,5 +46,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-#endif

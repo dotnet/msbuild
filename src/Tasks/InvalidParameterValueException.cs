@@ -48,7 +48,6 @@ namespace Microsoft.Build.Tasks
             ActualValue = actualValue;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Constructor
         /// </summary>
@@ -56,7 +55,6 @@ namespace Microsoft.Build.Tasks
             : base(info, context)
         {
         }
-#endif
 
         private string paramName;
 

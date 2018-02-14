@@ -823,14 +823,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             //  If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
             //  what happens for an event that's not serializable, don't include a default constructor.
-#if FEATURE_BINARY_SERIALIZATION
             /// <summary>
             /// Default constructor
             /// </summary>
             public MyCustomBuildEventArgsNotSerializable() : base()
             {
             }
-#endif
 
             /// <summary>
             /// Constructor which takes a message

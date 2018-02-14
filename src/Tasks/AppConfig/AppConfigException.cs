@@ -70,13 +70,11 @@ namespace Microsoft.Build.Tasks
             this.column = column;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Construct the exception.
         /// </summary>
         protected AppConfigException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
-#endif
     }
 }
