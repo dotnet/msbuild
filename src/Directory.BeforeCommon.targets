@@ -142,4 +142,12 @@
     <DocumentationFile/>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!--
+      For some reason at the moment our $(DocumentationFile) property does not contain the TFM.  I can't figure out why...
+      Resetting it here corrects it because $(IntermediateOutputPath) includes the TFM at this point
+    -->
+    <DocumentationFile Condition=" '$(GenerateDocumentationFile)' == 'true' ">$(IntermediateOutputPath)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
 </Project>

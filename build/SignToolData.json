@@ -12,8 +12,8 @@
 
                 "bin/MSBuild/net46/*/*.resources.dll",
 
-                "bin/MSBuild/net46/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll",
-                "bin/MSBuild/net46/SdkResolvers/NuGet.MSBuildSdkResolver/*/NuGet.MSBuildSdkResolver.resources.dll",
+                "bin/NuGet.MSBuildSdkResolver/net46/NuGet.MSBuildSdkResolver.dll",
+                "bin/NuGet.MSBuildSdkResolver/net46/*/*.resources.dll",
 
                 "bin/MSBuildTaskHost/net35/MSBuildTaskHost.exe",
                 "bin/MSBuildTaskHost/net35/*/MSBuildTaskHost.resources.dll",
@@ -24,21 +24,16 @@
                 "bin/Microsoft.Build.Conversion/net46/Microsoft.Build.Engine.dll",
                 "bin/Microsoft.Build.Conversion/net46/Microsoft.Build.Conversion.Core.dll",
 
-                "bin/MSBuild/netcoreapp2.0/MSBuild.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Framework.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Tasks.Core.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Utilities.Core.dll",
+                "bin/MSBuild/netcoreapp2.1/MSBuild.dll",
+                "bin/MSBuild/netcoreapp2.1/Microsoft.Build.dll",
+                "bin/MSBuild/netcoreapp2.1/Microsoft.Build.Framework.dll",
+                "bin/MSBuild/netcoreapp2.1/Microsoft.Build.Tasks.Core.dll",
+                "bin/MSBuild/netcoreapp2.1/Microsoft.Build.Utilities.Core.dll",
 
-                "bin/MSBuild/netcoreapp2.0/*/*.resources.dll",
+                "bin/MSBuild/netcoreapp2.1/*/*.resources.dll",
 
-                "bin/MSBuild/netcoreapp2.0/SdkResolvers/NuGet.MSBuildSdkResolver/NuGet.MSBuildSdkResolver.dll",
-                "bin/MSBuild/netcoreapp2.0/SdkResolvers/NuGet.MSBuildSdkResolver/*/NuGet.MSBuildSdkResolver.resources.dll",
-
-                "bin/ref/Microsoft.Build.Framework.Package/*/Microsoft.Build.Framework.dll",
-                "bin/ref/Microsoft.Build.Package/*/Microsoft.Build.dll",
-                "bin/ref/Microsoft.Build.Tasks.Core.Package/*/Microsoft.Build.Tasks.Core.dll",
-                "bin/ref/Microsoft.Build.Utilities.Core.Package/*/Microsoft.Build.Utilities.Core.dll"
+                "bin/NuGet.MSBuildSdkResolver/netstandard2.0/NuGet.MSBuildSdkResolver.dll",
+                "bin/NuGet.MSBuildSdkResolver/netstandard2.0/*/NuGet.MSBuildSdkResolver.resources.dll"
             ]
         },
         {
