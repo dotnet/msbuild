@@ -40,13 +40,14 @@ namespace Microsoft.Build.UnitTests
                     {
                         { "SourceControl", "Git" },
                         { "NestedRoot", "a/b" },
-                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
+                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
                         { "some metadata", "some value" },
                     }),
                 }
             };
 
-            Assert.True(task.Execute());
+            bool result = task.Execute();
+            Assert.Equal("", engine.Log);
 
             Assert.Equal(4, task.MappedSourceRoots.Length);
 
@@ -64,6 +65,8 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(@"/_/a/b/", task.MappedSourceRoots[3].GetMetadata("MappedPath"));
             Assert.Equal(@"Git", task.MappedSourceRoots[3].GetMetadata("SourceControl"));
             Assert.Equal(@"some value", task.MappedSourceRoots[3].GetMetadata("some metadata"));
+
+            Assert.True(result);
         }
 
         [Fact]
@@ -85,12 +88,13 @@ namespace Microsoft.Build.UnitTests
                     {
                         { "SourceControl", "Git" },
                         { "NestedRoot", "|||:;" },
-                        { "ContainingRoot", @"****" },
+                        { "ContainingRoot", FileUtilities.FixFilePath(@"****") },
                     }),
                 }
             };
 
-            Assert.True(task.Execute());
+            bool result = task.Execute();
+            Assert.Equal("", engine.Log);
 
             Assert.Equal(3, task.MappedSourceRoots.Length);
 
@@ -104,6 +108,8 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"****\|||:;\"), task.MappedSourceRoots[2].ItemSpec);
             Assert.Equal(@"/_/|||:;/", task.MappedSourceRoots[2].GetMetadata("MappedPath"));
             Assert.Equal(@"Git", task.MappedSourceRoots[2].GetMetadata("SourceControl"));
+
+            Assert.True(result);
         }
 
         [Fact]
@@ -120,22 +126,23 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(@"c:\MyProjects\MyProject\a\a\", new Dictionary<string, string>
                     {
                         { "NestedRoot", @"a/a/" },
-                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
+                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
                     }),
                     new TaskItem(@"c:\MyProjects\MyProject\a\b\", new Dictionary<string, string>
                     {
                         { "NestedRoot", @"a/b\" },
-                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
+                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
                     }),
                     new TaskItem(@"c:\MyProjects\MyProject\a\c\", new Dictionary<string, string>
                     {
                         { "NestedRoot", @"a\c" },
-                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
+                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
                     }),
                 }
             };
 
-            Assert.True(task.Execute());
+            bool result = task.Execute();
+            Assert.Equal("", engine.Log);
 
             Assert.Equal(4, task.MappedSourceRoots.Length);
 
@@ -150,6 +157,8 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\a\c\"), task.MappedSourceRoots[3].ItemSpec);
             Assert.Equal(@"/_/a/c/", task.MappedSourceRoots[3].GetMetadata("MappedPath"));
+
+            Assert.True(result);
         }
 
         [Fact]
@@ -168,7 +177,8 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            Assert.True(task.Execute());
+            bool result = task.Execute();
+            Assert.Equal("", engine.Log);
 
             Assert.Equal(3, task.MappedSourceRoots.Length);
 
@@ -180,6 +190,8 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(FileUtilities.FixFilePath(@"c:\packages\SourcePackage2\"), task.MappedSourceRoots[2].ItemSpec);
             Assert.Equal(@"/_2/", task.MappedSourceRoots[2].GetMetadata("MappedPath"));
+
+            Assert.True(result);
         }
 
         [Fact]
@@ -198,12 +210,14 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            Assert.False(task.Execute());
-
-            Assert.Null(task.MappedSourceRoots);
+            bool result = task.Execute();
 
             Assert.Equal("ERROR : " + string.Format(task.Log.FormatResourceString(
                 "MapSourceRoots.ContainsDuplicate", "SourceRoot", FileUtilities.FixFilePath(@"c:\packages\SourcePackage1\"))) + Environment.NewLine, engine.Log);
+
+            Assert.Null(task.MappedSourceRoots);
+
+            Assert.False(result);
         }
 
         [Fact]
@@ -221,17 +235,18 @@ namespace Microsoft.Build.UnitTests
                     {
                         { "SourceControl", "Git" },
                         { "NestedRoot", "a/b" },
-                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
+                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
                     }),
                 }
             };
 
-            Assert.False(task.Execute());
-
-            Assert.Null(task.MappedSourceRoots);
+            bool result = task.Execute();
 
             Assert.Equal("ERROR : " + string.Format(task.Log.FormatResourceString(
                 "MapSourceRoots.ValueOfNotFoundInItems", "SourceRoot.ContainingRoot", "SourceRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\"))) + Environment.NewLine, engine.Log);
+
+            Assert.Null(task.MappedSourceRoots);
+            Assert.False(result);
         }
 
         [Fact]
@@ -253,12 +268,13 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            Assert.False(task.Execute());
-
-            Assert.Null(task.MappedSourceRoots);
+            bool result = task.Execute();
 
             Assert.Equal("ERROR : " + string.Format(task.Log.FormatResourceString(
                 "MapSourceRoots.ValueOfNotFoundInItems", "SourceRoot.ContainingRoot", "SourceRoot", @"")) + Environment.NewLine, engine.Log);
+
+            Assert.Null(task.MappedSourceRoots);
+            Assert.False(result);
         }
     }
 }
