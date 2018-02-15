@@ -20,11 +20,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputType>Exe</OutputType>
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
-    <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">true</PreserveCompilationContext>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <IsPackable Condition="'$(IsPackable)' == ''">false</IsPackable>
-
-    <_WebSdkHeartsRazorSdk>true</_WebSdkHeartsRazorSdk>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
