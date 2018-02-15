@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         { "SourceControl", "Git" },
                         { "NestedRoot", "a/b" },
-                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
+                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
                         { "some metadata", "some value" },
                     }),
                 }
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         { "SourceControl", "Git" },
                         { "NestedRoot", "|||:;" },
-                        { "ContainingRoot", FileUtilities.FixFilePath(@"****") },
+                        { "ContainingRoot", @"****" },
                     }),
                 }
             };
@@ -126,17 +126,17 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(@"c:\MyProjects\MyProject\a\a\", new Dictionary<string, string>
                     {
                         { "NestedRoot", @"a/a/" },
-                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
+                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
                     }),
                     new TaskItem(@"c:\MyProjects\MyProject\a\b\", new Dictionary<string, string>
                     {
                         { "NestedRoot", @"a/b\" },
-                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
+                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
                     }),
                     new TaskItem(@"c:\MyProjects\MyProject\a\c\", new Dictionary<string, string>
                     {
                         { "NestedRoot", @"a\c" },
-                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
+                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
                     }),
                 }
             };
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         { "SourceControl", "Git" },
                         { "NestedRoot", "a/b" },
-                        { "ContainingRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\") },
+                        { "ContainingRoot", @"c:\MyProjects\MyProject\" },
                     }),
                 }
             };
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
 
             Assert.Equal("ERROR : " + string.Format(task.Log.FormatResourceString(
-                "MapSourceRoots.ValueOfNotFoundInItems", "SourceRoot.ContainingRoot", "SourceRoot", FileUtilities.FixFilePath(@"c:\MyProjects\MyProject\"))) + Environment.NewLine, engine.Log);
+                "MapSourceRoots.ValueOfNotFoundInItems", "SourceRoot.ContainingRoot", "SourceRoot", @"c:\MyProjects\MyProject\")) + Environment.NewLine, engine.Log);
 
             Assert.Null(task.MappedSourceRoots);
             Assert.False(result);

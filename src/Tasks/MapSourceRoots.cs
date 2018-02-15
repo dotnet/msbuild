@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -89,7 +90,10 @@ namespace Microsoft.Build.Tasks
                 if (!string.IsNullOrEmpty(nestedRoot))
                 {
                     string containingRoot = root.GetMetadata(Names.ContainingRoot);
-                    if (containingRoot != null && topLevelMappedPaths.TryGetValue(containingRoot, out var mappedTopLevelPath))
+
+                    // The value of ContainingRoot metadata is a file path that is compared with ItemSpec values of SourceRoot items.
+                    // Since the paths in ItemSpec have backslashes replaced with slashes on non-Windows platforms we need to do the same for ContainingRoot.
+                    if (containingRoot != null && topLevelMappedPaths.TryGetValue(FileUtilities.FixFilePath(containingRoot), out var mappedTopLevelPath))
                     {
                         Debug.Assert(mappedTopLevelPath.EndsWith("/", StringComparison.Ordinal));
                         root.SetMetadata(Names.MappedPath, mappedTopLevelPath + EndWithSlash(nestedRoot.Replace('\\', '/')));
