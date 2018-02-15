@@ -5,7 +5,7 @@
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
       <NugetPackagesArchiveName>nuGetPackagesArchive-$(AspNetCoreVersion).lzma</NugetPackagesArchiveName>
       <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
-      <NugetPackagesArchiveBlobUrl>$(CoreSetupRootUrl)$(AspNetCoreVersion)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
+      <NugetPackagesArchiveBlobUrl>$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
     </PropertyGroup>
 
     <Target Name="GetNuGetPackagesArchive"
