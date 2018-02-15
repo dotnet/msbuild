@@ -8,11 +8,12 @@
     <PackageReleaseVersion Condition="'$(PackageReleaseVersion)' == '' ">2.1.300</PackageReleaseVersion>
     <PackageBuildQuality>$(BUILD_QUALITY)</PackageBuildQuality>
     <PackageBuildQuality Condition=" '$(PackageBuildQuality)' == '' ">preview2</PackageBuildQuality>
+    <PackageDateTime Condition="'$(PackageDateTime)' == ''">$([System.DateTime]::Now.ToString("yyyyMMdd"))</PackageDateTime> 
     <PackageVersion>$(PackageReleaseVersion)-$(PackageBuildQuality)</PackageVersion>
     <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
     <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == '0' And '$(BUILD_BUILDNUMBER)' != ''">$(BUILD_BUILDNUMBER)</BUILD_NUMBER>
-    <AssemblyReleaseVersion>$(PackageReleaseVersion).0</AssemblyReleaseVersion>
-    <PackageVersion Condition="'$(NO_TIMESTAMP)' != 'true'">$(PackageVersion)-$([System.DateTime]::Now.ToString("yyyyMMdd"))-$(BUILD_NUMBER)</PackageVersion>
+    <AssemblyReleaseVersion>$(PackageReleaseVersion).$(BUILD_NUMBER)</AssemblyReleaseVersion> 
+    <PackageVersion Condition="'$(NO_TIMESTAMP)' != 'true'">$(PackageVersion)-$(PackageDateTime)-$(BUILD_NUMBER)</PackageVersion> 
   </PropertyGroup>
   
   <PropertyGroup>  
