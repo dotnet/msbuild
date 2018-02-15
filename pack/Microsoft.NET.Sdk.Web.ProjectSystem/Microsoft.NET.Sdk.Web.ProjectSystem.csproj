@@ -1,32 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
-
     <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\</WebSdkRoot>
     <WebSdkSource Condition="'$(WebSdkSource)' ==''">$(WebSdkRoot)src\</WebSdkSource>
+  </PropertyGroup>
+  
+  <Import Project="$(WebSdkRoot)\build\Version.props" />
+  
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.6</TargetFrameworks>
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
-    <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
-    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">2.0.0-dev$(CurrentDate)-1</WebSdkVersion>
-
-    <!--NuGet Properties-->
-    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
-    <IncludeBuildOutput>False</IncludeBuildOutput>
-    
-    <!-- Package Properties-->
-    <PackageName>Microsoft.NET.Sdk.Web.ProjectSystem</PackageName>
-    <description>
-      This package contains MSBuild targets and tasks for building ASP.NET Core projects. This package is required for building ASP.NET Core projects.
-    </description>
-    <language>en-US</language>
-    <version>$(WebSdkVersion)</version>
-    <authors>Microsoft Corporation</authors>
-    <owners>Microsoft</owners>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <licenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
-    <projectUrl>https://github.com/aspnet/websdk</projectUrl>
-    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
   </PropertyGroup>
   
   <ItemGroup>

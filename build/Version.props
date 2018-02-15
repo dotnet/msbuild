@@ -1,0 +1,124 @@
+<Project ToolsVersion="15.0">
+
+  <PropertyGroup>
+	  <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\</WebSdkRoot>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(PackageVersion)' == '' ">
+    <PackageReleaseVersion Condition="'$(PackageReleaseVersion)' == '' ">2.1.300</PackageReleaseVersion>
+    <PackageBuildQuality>$(BUILD_QUALITY)</PackageBuildQuality>
+    <PackageBuildQuality Condition=" '$(PackageBuildQuality)' == '' ">preview2</PackageBuildQuality>
+    <PackageVersion>$(PackageReleaseVersion)-$(PackageBuildQuality)</PackageVersion>
+    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
+    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == '0' And '$(BUILD_BUILDNUMBER)' != ''">$(BUILD_BUILDNUMBER)</BUILD_NUMBER>
+    <AssemblyReleaseVersion>$(PackageReleaseVersion).0</AssemblyReleaseVersion>
+    <PackageVersion Condition="'$(NO_TIMESTAMP)' != 'true'">$(PackageVersion)-$([System.DateTime]::Now.ToString("yyyyMMdd"))-$(BUILD_NUMBER)</PackageVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup>  
+	<!--NuGet Properties-->
+    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
+    <IncludeBuildOutput>False</IncludeBuildOutput>
+	
+	<PackageName>$(MSBuildProjectName)</PackageName>
+	  <Title>$(MSBuildProjectName)</Title>
+	  <Version>$(PackageVersion)</Version>
+    <Description>This package contains MSBuild targets and tasks for building and publishing ASP.NET Core projects. This package is required for building and publishing ASP.NET Core projects.</Description>
+	
+    <Authors>Microsoft</Authors>
+    <ProjectUrl>https://github.com/aspnet/websdk</ProjectUrl>
+    <LicenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</LicenseUrl>
+    <ImageUrl>http://go.microsoft.com/fwlink/?LinkID=288859</ImageUrl>
+    <Tags>WebSdk</Tags>
+    <Company>Microsoft</Company>
+    <Copyright>Copyright © Microsoft Corporation</Copyright>	
+    <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
+	
+    <GenerateAssemblyInfo Condition="'$(BuildingInsideVisualStudio)' != ''">False</GenerateAssemblyInfo>
+    <GenerateAssemblyFileVersionAttribute>False</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyVersionAttribute>False</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>False</GenerateAssemblyInformationalVersionAttribute>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>$(WebSdkRoot)\tools\Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ArtifactsDir>$(WebSdkRoot)\artifacts\</ArtifactsDir>
+    <GitInfoFile>$(ArtifactsDir)GitInfo.cs</GitInfoFile>
+    <GitInfoProps>$(ArtifactsDir)GitInfo.props</GitInfoProps>
+  </PropertyGroup>
+  
+  <Target Name="CollectGitInfo">
+    <PropertyGroup>
+      <GitInfoCommitCount Condition="'$(COMMIT_HASH)' != ''">$(COMMIT_COUNT)</GitInfoCommitCount>
+      <GitInfoCommitHash Condition="'$(COMMIT_HASH)' != ''">$(COMMIT_HASH)</GitInfoCommitHash>
+      <GitExitCode>0</GitExitCode>
+    </PropertyGroup>
+
+    <Exec Command="git rev-list --count HEAD" ConsoleToMSBuild="true" Condition="'$(COMMIT_HASH)' == ''" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitInfoCommitCount" />
+      <Output TaskParameter="ExitCode" PropertyName="GitExitCode" />
+    </Exec>
+
+    <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" Condition="'$(COMMIT_HASH)' == ''" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitInfoCommitHash" />
+      <Output TaskParameter="ExitCode" PropertyName="GitExitCode" />
+    </Exec>
+
+    <PropertyGroup Condition="'$(GitExitCode)' != '0'">
+      <GitInfoCommitCount>0</GitInfoCommitCount>
+      <GitInfoCommitHash>UNKNOWN</GitInfoCommitHash>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <GitCommitInfoContent>
+<![CDATA[
+[assembly: System.Reflection.AssemblyVersion("$(AssemblyReleaseVersion)")]
+[assembly: System.Reflection.AssemblyFileVersion("$(AssemblyReleaseVersion)")]
+[assembly: System.Reflection.AssemblyInformationalVersion("$(PackageVersion)+$(GitInfoCommitCount).$(GitInfoCommitHash)")]
+
+namespace Microsoft.WebSdk
+{
+    internal static class GitInfo
+    {
+        public static string PackageVersion { get%3B } = "$(PackageVersion)"%3B
+        public static string CommitCount { get%3B } = "$(GitInfoCommitCount)"%3B
+        public static string CommitHash { get%3B } = "$(GitInfoCommitHash)"%3B
+    }
+}
+]]>
+      </GitCommitInfoContent>
+      <GitInfoPropsContent>
+<![CDATA[
+<Project ToolsVersion="15.0">
+  <PropertyGroup>
+    <Version>$(PackageReleaseVersion)</Version>
+    <FileVersion>$(PackageReleaseVersion)</FileVersion>
+    <InformationalVersion>$(PackageVersion)+$(GitInfoCommitCount).$(GitInfoCommitHash)</InformationalVersion>
+    <PackageReleaseNotes>Commit Hash: $(GitInfoCommitHash)</PackageReleaseNotes>
+  </PropertyGroup>
+</Project>
+]]>
+      </GitInfoPropsContent>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(GitInfoFile)"
+                      Lines="$(GitCommitInfoContent)"
+                      Overwrite="true" />
+
+    <WriteLinesToFile File="$(GitInfoProps)"
+                      Lines="$(GitInfoPropsContent)"
+                      Overwrite="true" />
+  </Target>
+
+    <ItemGroup>
+        <Compile Include="$(GitInfoFile)" Condition="Exists('$(GitInfoFile)')" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+  <Import Project="$(GitInfoProps)" Condition="Exists('$(GitInfoProps)')" />
+</Project>

@@ -1,18 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\..\</WebSdkRoot>
+  </PropertyGroup>
+  
+  <Import Project="$(WebSdkRoot)\build\Version.props" />
+
   <PropertyGroup>
     <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <AssemblyName>Microsoft.NET.Sdk.Publish.Tasks</AssemblyName>
-    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\..\</WebSdkRoot>
-    <AssemblyOriginatorKeyFile>$(WebSdkRoot)\tools\Key.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <DelaySign>true</DelaySign>
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />

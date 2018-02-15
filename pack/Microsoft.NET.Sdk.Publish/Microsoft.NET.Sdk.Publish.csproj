@@ -1,33 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
-    
     <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\</WebSdkRoot>
     <WebSdkSource Condition="'$(WebSdkSource)' == '' ">$(WebSdkRoot)\src\</WebSdkSource>
     <WebSdkBuild Condition="'$(WebSdkBuild)' == '' ">$(WebSdkRoot)\build\</WebSdkBuild>
+  </PropertyGroup>
+  
+  <Import Project="$(WebSdkRoot)\build\Version.props" />
 
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.6</TargetFrameworks>  
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
     <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
-    <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
-    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">2.0.0-dev$(CurrentDate)-1</WebSdkVersion>
-    
-    <!-- NuGet properties-->
-    <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
-    <IncludeBuildOutput>False</IncludeBuildOutput>
-
-    <!-- Package Properties-->
-    <PackageName>Microsoft.NET.Sdk.Publish</PackageName>
-    <Version>$(WebSdkVersion)</Version>
-    <Title>Microsoft.NET.Sdk.Publish</Title>
-    <Authors>Microsoft Corporation</Authors>
-    <Owners>Microsoft</Owners>
-    <LicenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</LicenseUrl>
-    <ProjectUrl>https://github.com/aspnet/websdk</ProjectUrl>
-    <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
-    <Description>This package contains MSBuild targets and tasks for publishing ASP.NET projects. This package is required for publishing ASP.NET Core projects.</Description>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
