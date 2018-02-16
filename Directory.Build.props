@@ -57,6 +57,7 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <Import Project="build/BundledTools.props" />
     <Import Project="build/BundledSdks.props" />
     <Import Project="build/BundledTemplates.props" />
+    <Import Project="build/BundledDotnetTools.props" />
 
     <Import Project="build/BuildDefaults.props" />
     <Import Project="build/BundledRuntimes.props" />

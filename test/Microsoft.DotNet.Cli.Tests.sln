@@ -1,6 +1,7 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-add-reference.Tests", "dotnet-add-reference.Tests\dotnet-add-reference.Tests.csproj", "{AB63A3E5-76A3-4EE9-A380-8E0C7B7644DC}"
 EndProject
@@ -89,6 +90,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Tools.Tests.ComponentMocks", "Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj", "{A3DE5654-7755-45C8-8AE5-5B5B00BEB248}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-install-tool.Tests", "dotnet-install-tool.Tests\dotnet-install-tool.Tests.csproj", "{E2F5F115-0DE4-4CC0-920C-EF6F89D15EAB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsertionTests", "InsertionTests\InsertionTests.csproj", "{A9713391-3D44-4664-9C41-75765218FD6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -592,6 +595,18 @@ Global
 		{E2F5F115-0DE4-4CC0-920C-EF6F89D15EAB}.Release|x64.Build.0 = Release|Any CPU
 		{E2F5F115-0DE4-4CC0-920C-EF6F89D15EAB}.Release|x86.ActiveCfg = Release|Any CPU
 		{E2F5F115-0DE4-4CC0-920C-EF6F89D15EAB}.Release|x86.Build.0 = Release|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Debug|x64.Build.0 = Debug|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Debug|x86.Build.0 = Debug|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|x64.ActiveCfg = Release|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|x64.Build.0 = Release|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|x86.ActiveCfg = Release|Any CPU
+		{A9713391-3D44-4664-9C41-75765218FD6C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

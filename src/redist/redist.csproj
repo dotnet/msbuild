@@ -179,8 +179,8 @@
       <TemplatesToBundle Include="$(RepoRoot)/build/BundledTemplates.proj">
         <Properties>
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
-          TemplatePackageName=%(BundledTemplate.Identity);
-          TemplatePackageVersion=%(BundledTemplate.Version);
+          TemplateFillInPackageName=%(BundledTemplate.Identity);
+          TemplateFillInPackageVersion=%(BundledTemplate.Version);
           PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </TemplatesToBundle>
@@ -189,6 +189,25 @@
     <MSBuild
       BuildInParallel="False"
       Projects="@(TemplatesToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishDotnetTools"
+          AfterTargets="Publish">
+    <ItemGroup>
+      <DotnetToolsToBundle Include="$(RepoRoot)/build/BundledDotnetTools.proj">
+        <Properties>
+          DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
+          TemplateFillInPackageName=%(BundledDotnetTools.Identity);
+          TemplateFillInPackageVersion=%(BundledDotnetTools.Version);
+          PreviousStageDirectory=$(PreviousStageDirectory)
+        </Properties>
+      </DotnetToolsToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(DotnetToolsToBundle)">
     </MSBuild>
   </Target>
 
