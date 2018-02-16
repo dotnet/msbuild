@@ -119,6 +119,13 @@ function InstallDotNetCli {
   DotNetCliVersion="$( GetVersionsPropsVersion DotNetCliVersion )"
   DotNetInstallVerbosity=""
 
+  if [ -z "$DOTNET_INSTALL_DIR" ]
+  then
+    export DOTNET_INSTALL_DIR="$ArtifactsDir/.dotnet/$DotNetCliVersion"
+  fi
+
+  DotNetRoot=$DOTNET_INSTALL_DIR
+
   if $dogfood
   then
     export SDK_REPO_ROOT="$RepoRoot"
@@ -129,12 +136,6 @@ function InstallDotNetCli {
     export MicrosoftNETBuildExtensionsTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/Microsoft.NET.Build.Extensions.targets"
   fi
 
-  if [ -z "$DOTNET_INSTALL_DIR" ]
-  then
-    export DOTNET_INSTALL_DIR="$ArtifactsDir/.dotnet/$DotNetCliVersion"
-  fi
-
-  DotNetRoot=$DOTNET_INSTALL_DIR
   DotNetInstallScript="$DotNetRoot/dotnet-install.sh"
 
   if [ ! -a "$DotNetInstallScript" ]
