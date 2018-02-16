@@ -75,22 +75,8 @@
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <ItemGroup>
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/csc.runtimeconfig.json" />
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/vbc.runtimeconfig.json" />
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/VBCSCompiler.runtimeconfig.json" />
-      <RoslynDeps Include="$(RoslynDirectory)/bincore/csc.deps.json" />
-      <RoslynDeps Include="$(RoslynDirectory)/bincore/vbc.deps.json" />
       <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>
     </ItemGroup>
-    <PropertyGroup>
-      <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
-    </PropertyGroup>
-    <ReplaceFileContents
-      InputFile="%(RoslynRuntimeConfigs.Identity)"
-      DestinationFile="%(RoslynRuntimeConfigs.Identity)"
-      ReplacementPatterns="$(ReplacementPattern)"
-      ReplacementStrings="$(ReplacementString)" />
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
