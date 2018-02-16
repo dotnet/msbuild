@@ -352,6 +352,11 @@
         <target state="translated">Il progetto è destinato al runtime '{0}' ma non ha risolto pacchetti specifici del runtime. È possibile che questo runtime non sia supportato dal framework di destinazione.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UsingPreviewSdkWarning">
+        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://docs.microsoft.com/en-us/dotnet/core/tools/global-json</source>
+        <target state="new">You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://docs.microsoft.com/en-us/dotnet/core/tools/global-json</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

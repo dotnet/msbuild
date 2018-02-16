@@ -45,6 +45,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkError" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="NETSdkMessage" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <!--
   ============================================================

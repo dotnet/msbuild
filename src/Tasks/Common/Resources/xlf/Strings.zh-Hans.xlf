@@ -352,6 +352,11 @@
         <target state="translated">项目的目标是运行时“{0}”，但未解析任何运行时特定的包。目标框架可能不支持此运行时。</target>
         <note />
       </trans-unit>
+      <trans-unit id="UsingPreviewSdkWarning">
+        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://docs.microsoft.com/en-us/dotnet/core/tools/global-json</source>
+        <target state="new">You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://docs.microsoft.com/en-us/dotnet/core/tools/global-json</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -327,4 +327,7 @@
   <data name="UnsupportedRuntimeIdentifier" xml:space="preserve">
     <value>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</value>
   </data>
+  <data name="UsingPreviewSdkWarning" xml:space="preserve">
+    <value>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://docs.microsoft.com/en-us/dotnet/core/tools/global-json</value>
+  </data>
 </root>

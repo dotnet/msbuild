@@ -96,7 +96,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="!$(TargetFramework.Contains(';'))"
                  ResourceName="CannotInferTargetFrameworkIdentiferAndVersion"
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
-    
+
     <NETSdkError Condition="$(TargetFramework.Contains(';'))"
                  ResourceName="TargetFrameworkWithSemicolon"
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
