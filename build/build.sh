@@ -126,8 +126,7 @@ function InstallDotNetCli {
     export MSBuildSDKsPath="$ArtifactsConfigurationDir/bin/Sdks"
     export DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR="$MSBuildSDKsPath"
     export NETCoreSdkBundledVersionsProps="$DotNetRoot/sdk/$DotNetCliVersion/Microsoft.NETCoreSdk.BundledVersions.props"
-    export CustomAfterMicrosoftCommonTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions-ver/Microsoft.Common.Targets/ImportAfter/Microsoft.NET.Build.Extensions.targets"
-    export MicrosoftNETBuildExtensionsTargets="$CustomAfterMicrosoftCommonTargets"
+    export MicrosoftNETBuildExtensionsTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/Microsoft.NET.Build.Extensions.targets"
   fi
 
   if [ -z "$DOTNET_INSTALL_DIR" ]

@@ -89,7 +89,7 @@ function InstallDotNetCli {
     $env:MSBuildSDKsPath = Join-Path $ArtifactsConfigurationDir "bin\Sdks"
     $env:DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = $env:MSBuildSDKsPath
     $env:NETCoreSdkBundledVersionsProps = Join-Path $DotNetRoot "sdk\$DotNetCliVersion\Microsoft.NETCoreSdk.BundledVersions.props"
-    $env:MicrosoftNETBuildExtensionsTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets"
+    $env:MicrosoftNETBuildExtensionsTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets"
   }
 
   if (!(Test-Path $DotNetInstallScript)) {
