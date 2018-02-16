@@ -328,8 +328,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
-        <target state="translated">La piattaforma di RuntimeIdentifier e quella di PlatformTarget devono corrispondere.</target>
+        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="translated">La piattaforma '{0}' di RuntimeIdentifier e quella '{1}' di PlatformTarget devono essere compatibili.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -344,7 +344,12 @@
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>Pack as tool does not support self contained.</source>
-        <target state="new">Pack as tool does not support self contained.</target>
+        <target state="translated">La creazione di pacchetti come strumenti non prevede elementi autonomi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedRuntimeIdentifier">
+        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="translated">Il progetto è destinato al runtime '{0}' ma non ha risolto pacchetti specifici del runtime. È possibile che questo runtime non sia supportato dal framework di destinazione.</target>
         <note />
       </trans-unit>
     </body>

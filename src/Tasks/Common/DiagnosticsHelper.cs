@@ -23,43 +23,6 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] GetDiagnosticMessages() => _diagnosticMessages.ToArray();
 
-        public ITaskItem Add(string diagnosticCode, string message, string filePath, DiagnosticMessageSeverity severity)
-            => Add(diagnosticCode, message, filePath, severity, startLine: 1, startColumn: 0);
-
-        public ITaskItem Add(string diagnosticCode, string message, string filePath, DiagnosticMessageSeverity severity, int startLine, int startColumn)
-            => Add(
-                diagnosticCode,
-                message,
-                filePath,
-                severity,
-                startLine,
-                startColumn,
-                targetFrameworkMoniker: null,
-                packageId: null);
-
-        public ITaskItem Add(
-            string diagnosticCode,
-            string message,
-            string filePath,
-            DiagnosticMessageSeverity severity,
-            int startLine,
-            int startColumn,
-            string targetFrameworkMoniker,
-            string packageId,
-            bool logToMSBuild = true)
-            => Add(
-                diagnosticCode,
-                message,
-                filePath,
-                severity,
-                startLine,
-                startColumn,
-                endLine: startLine,
-                endColumn: startColumn,
-                targetFrameworkMoniker: targetFrameworkMoniker,
-                packageId: packageId,
-                logToMSBuild: logToMSBuild);
-
         public ITaskItem Add(
             string diagnosticCode,
             string message,

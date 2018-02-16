@@ -123,7 +123,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(RuntimeIdentifier)' != '' and '$(PlatformTarget)' != ''">
 
     <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpper().Contains($(PlatformTarget.ToUpper())))"
-                 ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" />
+                 ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget"
+                 FormatArguments="$(RuntimeIdentifier);$(PlatformTarget)" />
 
   </Target>
 
@@ -149,7 +150,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     compiling the exe if no copy-local native dependencies were resolved from NuGet 
   -->
   <Target Name="AdjustDefaultPlatformTargetForNetFrameworkExeWithNoNativeCopyLocalItems"
-          AfterTargets="ResolvePackageDependenciesForBuild"
+          AfterTargets="ResolvePackageAssets"
           BeforeTargets="CoreCompile"
           Condition="'$(_UsingDefaultPlatformTarget)' == 'true' and
                      '$(_UsingDefaultRuntimeIdentifier)' == 'true' and 

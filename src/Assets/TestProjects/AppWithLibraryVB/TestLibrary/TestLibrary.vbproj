@@ -3,5 +3,6 @@
     <Version>42.43.44.45-alpha</Version>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard1.5</TargetFramework>
+    <RootNamespace />
   </PropertyGroup>
 </Project>

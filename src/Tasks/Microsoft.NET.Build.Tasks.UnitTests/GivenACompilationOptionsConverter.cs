@@ -65,6 +65,40 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         generateXmlDocumentation: true)
                 };
 
+                yield return new object[] {
+                    new MockTaskItem(
+                        itemSpec: "CompilerOptions",
+                        metadata: new Dictionary<string, string>
+                        {
+                            { "DefineConstants", ";NETCOREAPP1_0" },
+                            { "LangVersion", "6" },
+                            { "PlatformTarget", "x64" },
+                            { "AllowUnsafeBlocks", "true" },
+                            { "TreatWarningsAsErrors", "false" },
+                            //{ "Optimize", "" }, Explicitly not setting Optmize
+                            { "AssemblyOriginatorKeyFile", "../keyfile.snk" },
+                            { "DelaySign", "" },
+                            { "PublicSign", "notFalseOrTrue" },
+                            { "DebugType", "portable" },
+                            { "OutputType", "Exe" },
+                            { "GenerateDocumentationFile", "true" },
+                        }
+                    ),
+                    new CompilationOptions(
+                        defines: new[] { "NETCOREAPP1_0" },
+                        languageVersion: "6",
+                        platform: "x64",
+                        allowUnsafe: true,
+                        warningsAsErrors: false,
+                        optimize: null,
+                        keyFile: "../keyfile.snk",
+                        delaySign: null,
+                        publicSign: null,
+                        debugType: "portable",
+                        emitEntryPoint: true,
+                        generateXmlDocumentation: true)
+                };
+
                 yield return new object[]
                 {
                     null,
