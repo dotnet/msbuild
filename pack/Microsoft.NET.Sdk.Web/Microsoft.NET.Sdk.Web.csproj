@@ -4,9 +4,9 @@
     <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\</WebSdkRoot>
     <WebSdkSource Condition="'$(WebSdkSource)' ==''">$(WebSdkRoot)src\</WebSdkSource>
   </PropertyGroup>
-  
+
   <Import Project="$(WebSdkRoot)\build\Version.props" />
-  
+
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6</TargetFrameworks>
     <OutputType>library</OutputType>
@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(PackageVersion)" />
     <PackageReference Include="Microsoft.NET.Sdk.Publish" Version="$(PackageVersion)" />
-    
+
     <Content Include="$(WebSdkSource)\Web\Microsoft.NET.Sdk.Web.Targets\Sdk.props">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>

@@ -5,11 +5,11 @@
     <WebSdkSource Condition="'$(WebSdkSource)' == '' ">$(WebSdkRoot)\src\</WebSdkSource>
     <WebSdkBuild Condition="'$(WebSdkBuild)' == '' ">$(WebSdkRoot)\build\</WebSdkBuild>
   </PropertyGroup>
-  
+
   <Import Project="$(WebSdkRoot)\build\Version.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>  
+    <TargetFrameworks>netstandard1.6</TargetFrameworks>
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
     <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
