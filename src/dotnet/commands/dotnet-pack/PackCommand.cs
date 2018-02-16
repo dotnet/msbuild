@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
             msbuildArgs.AddRange(parsedPack.Arguments);
 
-            bool noRestore = parsedPack.HasOption("--no-restore");
+            bool noRestore = parsedPack.HasOption("--no-restore") || parsedPack.HasOption("--no-build");
 
             return new PackCommand(
                 msbuildArgs,

@@ -16,7 +16,7 @@ param(
 
 if($Help)
 {
-    Write-Output "Usage: .\run-build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-Help]"
+    Write-Output "Usage: .\run-build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-NoBuild] [-Help]"
     Write-Output ""
     Write-Output "Options:"
     Write-Output "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
@@ -25,6 +25,20 @@ if($Help)
     Write-Output "  -NoBuild                           Skip building the product"
     Write-Output "  -Help                              Display this help message"
     exit 0
+}
+
+# The first 'pass' call to "dotnet msbuild build.proj" has a hard-coded "WriteDynamicPropsToStaticPropsFiles" target
+#    therefore, this call should not have other targets defined. Remove all targets passed in as 'extra parameters'.
+if ($ExtraParameters)
+{
+    $ExtraParametersNoTargets = $ExtraParameters.GetRange(0,$ExtraParameters.Count)
+    foreach ($param in $ExtraParameters)
+    {
+        if(($param.StartsWith("/t:", [StringComparison]::OrdinalIgnoreCase)) -or ($param.StartsWith("/target:", [StringComparison]::OrdinalIgnoreCase)))
+        {
+            $ExtraParametersNoTargets.Remove("$param") | Out-Null
+        }
+    }
 }
 
 $env:CONFIGURATION = $Configuration;
@@ -53,18 +67,6 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
     mkdir $env:DOTNET_INSTALL_DIR | Out-Null
 }
 
-# We also need to pull down a project.json based CLI that is used by some tests
-# so create another directory for that.
-if (!$env:DOTNET_INSTALL_DIR_PJ)
-{
-    $env:DOTNET_INSTALL_DIR_PJ="$RepoRoot\.dotnet_stage0PJ\$Architecture"
-}
-
-if (!(Test-Path $env:DOTNET_INSTALL_DIR_PJ))
-{
-    mkdir $env:DOTNET_INSTALL_DIR_PJ | Out-Null
-}
-
 
 
 # Disable first run since we want to control all package sources
@@ -80,16 +82,8 @@ $env:VSTEST_TRACE_BUILD=1
 # install a stage0
 $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
 
-Write-Output "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
-Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
-if ($LastExitCode -ne 0)
-{
-    Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
-    exit $LastExitCode
-}
-
-Write-Output "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
-Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
+Write-Output "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Invoke-Expression "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 if ($LastExitCode -ne 0)
 {
     Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
@@ -106,7 +100,7 @@ if ($NoBuild)
 }
 else
 {
-    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParameters
+    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParametersNoTargets
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }

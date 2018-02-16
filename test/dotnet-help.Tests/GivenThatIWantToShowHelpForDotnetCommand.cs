@@ -38,6 +38,9 @@ SDK commands:
   nuget            Provides additional NuGet commands.
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.
+  store            Stores the specified assemblies in the runtime store.
+  install          Installs an item into the development environment.
+  help             Show help.
 
 Common options:
   -v|--verbosity        Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].
@@ -48,13 +51,15 @@ Run 'dotnet COMMAND --help' for more information on a command.
 sdk-options:
   --version        Display .NET Core SDK version.
   --info           Display .NET Core information.
+  --list-sdks      Display the installed SDKs.
+  --list-runtimes  Display the installed runtimes.
   -d|--diagnostics Enable diagnostic output.
 
 runtime-options:
   --additionalprobingpath <path>    Path containing probing policy and assemblies to probe for.
   --fx-version <version>            Version of the installed Shared Framework to use to run the application.
   --roll-forward-on-no-candidate-fx Roll forward on no candidate shared framework is enabled.
-  --additional-deps <path>          Path to additonal deps.json file.";
+  --additional-deps <path>          Path to additional deps.json file.";
 
         [Theory]
         [InlineData("--help")]
@@ -86,6 +91,19 @@ runtime-options:
 
           cmd.Should().Fail();
           cmd.StdErr.Should().Contain(string.Format(Tools.Help.LocalizableStrings.CommandDoesNotExist, "invalid"));
+          cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
+        }
+
+        [Theory]
+        [InlineData("complete")]
+        [InlineData("parse")]
+        public void WhenCommandWithoutDocLinkIsPassedToDotnetHelpItPrintsError(string command)
+        {
+          var cmd = new DotnetCommand()
+                .ExecuteWithCapturedOutput($"help {command}");
+
+          cmd.Should().Fail();
+          cmd.StdErr.Should().Contain(string.Format(Tools.Help.LocalizableStrings.CommandDoesNotExist, command));
           cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
 

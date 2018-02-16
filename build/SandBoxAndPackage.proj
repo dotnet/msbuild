@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(RepoRoot)/Directory.Build.props" />
+
+  <PropertyGroup>
+    <SandBoxFolderName>bin/WorkingCopy</SandBoxFolderName>
+    <RelativeSandBoxPackageOutputFolder>$(SandBoxFolderName)/RelativeSandBoxPackageOutputFolder</RelativeSandBoxPackageOutputFolder>
+    <SandBoxRepoRoot>$(RepoRoot)/$(SandBoxFolderName)/$(LinuxDistrosNeedNativeInstaller)</SandBoxRepoRoot>
+    <NugetCacheFolderName>.nuget</NugetCacheFolderName>
+    <RelativeCompileOutputPath>bin/2</RelativeCompileOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MirrorOfRepoRootForTools Include="$(RepoRoot)/**/*.*" Exclude="$(RepoRoot)/$(SandBoxFolderName)/**/*.*;$(RepoRoot)/nuget/**/*.*;$(RepoRoot)/bin/**/*.*" />
+    <ArtifactsToPackage Include="$(RepoRoot)/$(RelativeCompileOutputPath)/$(Rid)/**/*.*"/>
+    <LocalDirectoryBuildpropsToPreventFurtherLookUpForIt Include="$(RepoRoot)/bin/Directory.Build.props"/>
+    <ToolsCacheToSpeedUp Include="$(RepoRoot)/$(RelativeCLIBuildBinaries)/**/*.*"/>
+    <NugetCacheToSpeedUp Include="$(RepoRoot)/$(NugetCacheFolderName)/**/*.*" />
+  </ItemGroup>
+
+  <Target Name="SandBoxAndPackage" DependsOnTargets="PackageWithDocker;CopyPackageResult"/>
+
+  <Target Name="PrepareSandBox" >
+    <Copy
+      SourceFiles="@(MirrorOfRepoRootForTools)"
+      DestinationFiles="@(MirrorOfRepoRootForTools -> '$(SandBoxRepoRoot)/%(RecursiveDir)%(Filename)%(Extension)')"/>
+
+    <Exec Command="sh -c 'cd $(SandBoxRepoRoot) &amp;&amp; git clean -fxd'"/>
+
+    <Copy
+      SourceFiles="@(ArtifactsToPackage)"
+      DestinationFiles="@(ArtifactsToPackage -> '$(SandBoxRepoRoot)/$(RelativeCompileOutputPath)/$(Rid)/%(RecursiveDir)%(Filename)%(Extension)')"/>
+
+    <Copy
+      SourceFiles="@(LocalDirectoryBuildpropsToPreventFurtherLookUpForIt)"
+      DestinationFiles="@(LocalDirectoryBuildpropsToPreventFurtherLookUpForIt -> '$(SandBoxRepoRoot)/$(RelativeCompileOutputPath)/$(Rid)/%(RecursiveDir)%(Filename)%(Extension)')"/>
+
+    <Copy
+      SourceFiles="@(ToolsCacheToSpeedUp)"
+      DestinationFiles="@(ToolsCacheToSpeedUp -> '$(SandBoxRepoRoot)/$(RelativeCLIBuildBinaries)/%(RecursiveDir)%(Filename)%(Extension)')"/>
+
+    <Copy
+      SourceFiles="@(NugetCacheToSpeedUp)"
+      DestinationFiles="@(NugetCacheToSpeedUp -> '$(SandBoxRepoRoot)/$(NugetCacheFolderName)/%(RecursiveDir)%(Filename)%(Extension)')"/>
+
+  </Target>
+
+  <Target Name="PackageWithDocker" DependsOnTargets="PrepareSandBox">
+    <PropertyGroup>
+      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(SandBoxRepoRoot)/build.sh</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
+      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) --configuration $(BuildConfiguration)</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
+      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) --docker $(DockerFolder)</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
+      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) --skip-prereqs</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
+      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) /t:GenerateInstallersAndCopyOutOfSandBox</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
+      <CommandToInvokeBuildScriptInDockerToPackageInSandBox>$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) /p:RelativeSandBoxPackageOutputFolder=$(RelativeSandBoxPackageOutputFolder)</CommandToInvokeBuildScriptInDockerToPackageInSandBox>
+      <CommandExitCodeFirstTime>0</CommandExitCodeFirstTime>
+      <PipeStderrToStdoutToCatchFirstFailure>2&gt;&amp;1</PipeStderrToStdoutToCatchFirstFailure>
+    </PropertyGroup>
+
+    <Exec Command="$(CommandToInvokeBuildScriptInDockerToPackageInSandBox) $(PipeStderrToStdoutToCatchFirstFailure)" ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="CommandExitCodeFirstTime"/>
+    </Exec>
+
+    <PropertyGroup>
+      <ShouldRetryDueToFirstTimeFailed Condition=" '$(CommandExitCodeFirstTime)' != '0' ">true</ShouldRetryDueToFirstTimeFailed>
+    </PropertyGroup>
+
+    <Exec Condition=" '$(ShouldRetryDueToFirstTimeFailed)' == 'true' " Command="$(CommandToInvokeBuildScriptInDockerToPackageInSandBox)" />
+  </Target >
+
+  <Target Name="CopyPackageResult">
+    <ItemGroup>
+      <SandboxPackageResultFiles Include="$(SandBoxRepoRoot)/$(RelativeSandBoxPackageOutputFolder)/**/*.*"/>
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(SandboxPackageResultFiles)"
+      DestinationFolder="$(InstallerOutputDirectory)/%(RecursiveDir)"/>
+  </Target >
+</Project>

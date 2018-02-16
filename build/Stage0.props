@@ -1,9 +1,0 @@
-<Project>
-    <PropertyGroup>
-      <Stage0Directory>$(RepoRoot)/.dotnet_stage0/$(Architecture)</Stage0Directory>
-      <Stage0PjDirectory>$(RepoRoot)/.dotnet_stage0PJ/$(Architecture)</Stage0PjDirectory>
-      <DotnetStage0>$(Stage0Directory)/dotnet$(ExeExtension)</DotnetStage0>
-      <IsDesktopAvailable>False</IsDesktopAvailable>
-      <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
-    </PropertyGroup>
-</Project>

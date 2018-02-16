@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
@@ -14,26 +16,37 @@ namespace Microsoft.DotNet.Configurer
         private INuGetCachePrimer _nugetCachePrimer;
         private INuGetCacheSentinel _nugetCacheSentinel;
         private IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
+        private IAspNetCertificateSentinel _aspNetCertificateSentinel;
+        private IAspNetCoreCertificateGenerator _aspNetCoreCertificateGenerator;
         private string _cliFallbackFolderPath;
+        private readonly IEnvironmentPath _pathAdder;
 
         public DotnetFirstTimeUseConfigurer(
             INuGetCachePrimer nugetCachePrimer,
             INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
+            IAspNetCertificateSentinel aspNetCertificateSentinel,
+            IAspNetCoreCertificateGenerator aspNetCoreCertificateGenerator,
             IEnvironmentProvider environmentProvider,
             IReporter reporter,
-            string cliFallbackFolderPath)
+            string cliFallbackFolderPath,
+            IEnvironmentPath pathAdder)
         {
             _nugetCachePrimer = nugetCachePrimer;
             _nugetCacheSentinel = nugetCacheSentinel;
             _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
+            _aspNetCertificateSentinel = aspNetCertificateSentinel;
+            _aspNetCoreCertificateGenerator = aspNetCoreCertificateGenerator;
             _environmentProvider = environmentProvider;
             _reporter = reporter;
             _cliFallbackFolderPath = cliFallbackFolderPath;
+            _pathAdder = pathAdder ?? throw new ArgumentNullException(nameof(pathAdder));
         }
 
         public void Configure()
         {
+            AddPackageExecutablePath();
+
             if (ShouldPrintFirstTimeUseNotice())
             {
                 PrintFirstTimeUseNotice();
@@ -51,6 +64,48 @@ namespace Microsoft.DotNet.Configurer
 
                     _nugetCachePrimer.PrimeCache();
                 }
+            }
+
+            if(ShouldGenerateAspNetCertificate())
+            {
+                GenerateAspNetCertificate();
+            }
+        }
+
+        private void GenerateAspNetCertificate()
+        {
+            _aspNetCoreCertificateGenerator.GenerateAspNetCoreDevelopmentCertificate();
+
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.AspNetCertificateInstalled);
+
+            _aspNetCertificateSentinel.CreateIfNotExists();
+        }
+
+        private bool ShouldGenerateAspNetCertificate()
+        {
+            var generateAspNetCertificate =
+                _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
+
+            return ShouldRunFirstRunExperience() &&
+                generateAspNetCertificate &&
+                !_aspNetCertificateSentinel.Exists();
+        }
+
+        private void AddPackageExecutablePath()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!_firstTimeUseNoticeSentinel.Exists())
+                { 
+                    // Invoke when Windows first run
+                    _pathAdder.AddPackageExecutablePathToUserPath();
+                }
+            }
+            else
+            {
+                // Invoke during installer, otherwise, _pathAdder will be no op object that this point
+                _pathAdder.AddPackageExecutablePathToUserPath();
             }
         }
 
