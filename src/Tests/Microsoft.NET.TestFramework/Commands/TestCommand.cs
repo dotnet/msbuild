@@ -5,6 +5,7 @@ using Microsoft.DotNet.Cli.Utils;
 using System.Collections.Generic;
 using Xunit.Abstractions;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -13,6 +14,10 @@ namespace Microsoft.NET.TestFramework.Commands
         private Dictionary<string, string> _environment = new Dictionary<string, string>();
 
         public ITestOutputHelper Log { get; }
+
+        public string WorkingDirectory { get; set; }
+
+        public List<string> Arguments { get; set; } = new List<string>();
 
         protected TestCommand(ITestOutputHelper log)
         {
@@ -27,29 +32,40 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
-        public ProcessStartInfo GetProcessStartInfo(params string[] args)
+        private SdkCommandSpec CreateCommandSpec(string[] args)
         {
             var commandSpec = CreateCommand(args);
-
             foreach (var kvp in _environment)
             {
                 commandSpec.Environment[kvp.Key] = kvp.Value;
             }
+
+            if (WorkingDirectory != null)
+            {
+                commandSpec.WorkingDirectory = WorkingDirectory;
+            }
+
+            if (Arguments.Any())
+            {
+                commandSpec.Arguments = Arguments.Concat(commandSpec.Arguments).ToList();
+            }
+
+            return commandSpec;
+        }
+
+        public ProcessStartInfo GetProcessStartInfo(params string[] args)
+        {
+            var commandSpec = CreateCommandSpec(args);
 
             return commandSpec.ToProcessStartInfo();
         }
 
         public CommandResult Execute(params string[] args)
         {
-            var command = CreateCommand(args)
+            var command = CreateCommandSpec(args)
                 .ToCommand()
                 .CaptureStdOut()
                 .CaptureStdErr();
-
-            foreach (var variable in _environment)
-            {
-                command.EnvironmentVariable(variable.Key, variable.Value);
-            }
 
             var result = command.Execute();
 
