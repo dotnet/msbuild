@@ -86,7 +86,7 @@
 [assembly: System.Reflection.AssemblyFileVersion("$(AssemblyReleaseVersion)")]
 [assembly: System.Reflection.AssemblyInformationalVersion("$(PackageVersion)+$(GitInfoCommitCount).$(GitInfoCommitHash)")]
 
-namespace Microsoft.WebSdk
+namespace Microsoft.NET.Sdk.Web
 {
     internal static class GitInfo
     {
@@ -122,6 +122,8 @@ namespace Microsoft.WebSdk
 
   <ItemGroup>
     <Compile Include="$(GitInfoFile)" Condition="Exists('$(GitInfoFile)')" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(WebSdkRoot)/src/GitInfo.cs" Condition="!Exists('$(GitInfoFile)')" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+
   </ItemGroup>
 
   <Import Project="$(GitInfoProps)" Condition="Exists('$(GitInfoProps)')" />
