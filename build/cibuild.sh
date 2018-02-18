@@ -8,6 +8,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-bash $ScriptRoot/build.sh -fromScript $0 -build -ci -prepareMachine $*
+mkdir -p $ScriptRoot/../artifacts/2Debug/TestResults
+
+cp -v $ScriptRoot/Microsoft.Build.Engine.UnitTests_netcoreapp2.0_x64.xml $ScriptRoot/../artifacts/2Debug/TestResults
 
 exit $?
