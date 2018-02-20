@@ -40,7 +40,7 @@ SDK commands:
   vstest           Runs Microsoft Test Execution Command Line Tool.
   store            Stores the specified assemblies in the runtime store.
   install          Installs an item into the development environment.
-  uninstall        Uninstalls a tool from the development environment.
+  uninstall        Uninstalls an item from the development environment.
   help             Show help.
 
 Common options:

@@ -271,6 +271,6 @@
     <value>Installs an item into the development environment.</value>
   </data>
   <data name="UninstallDefinition" xml:space="preserve">
-    <value>Uninstalls a tool from the development environment.</value>
+    <value>Uninstalls an item from the development environment.</value>
   </data>
 </root>
