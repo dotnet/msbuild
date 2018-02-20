@@ -814,8 +814,8 @@ namespace Microsoft.Build.BackEnd
                     {
                         StringBuilder message = new StringBuilder();
 
-                        message.AppendFormat("Bad OverallResult for ConfigurationId {0}, GlobalRequestId {1}, NodeRequestId {2}, ParentGlobalRequestId {3}, SubmissionId {4}",
-                            result.ConfigurationId, result.GlobalRequestId, result.NodeRequestId, result.ParentGlobalRequestId, result.SubmissionId);
+                        message.AppendFormat("Failed OverallResult for ConfigurationId {0}, GlobalRequestId {1}, NodeRequestId {2}, ParentGlobalRequestId {3}, SubmissionId {4}: \"{5}\"",
+                            result.ConfigurationId, result.GlobalRequestId, result.NodeRequestId, result.ParentGlobalRequestId, result.SubmissionId, _projectLoggingContext._projectFullPath);
                         message.AppendLine();
 
                         message.AppendFormat("  Exception: {0}", result.Exception);
@@ -826,7 +826,7 @@ namespace Microsoft.Build.BackEnd
 
                         foreach (var resultByTarget in result.ResultsByTarget)
                         {
-                            message.AppendFormat("  Target {0} : {1}", resultByTarget.Key, resultByTarget.Value.ResultCode);
+                            message.AppendFormat("  Target \"{0}\" : {1}", resultByTarget.Key, resultByTarget.Value.ResultCode);
                             message.AppendLine();
                         }
 
