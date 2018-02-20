@@ -680,31 +680,9 @@
 {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="NuGetConfigurationFileDoesNotExist">
-        <source>NuGet configuration file {0} does not exist.</source>
-        <target state="translated">Konfigurační soubor NuGet {0} neexistuje.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
         <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje se odhlásit nebo restartovat relaci.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnvironmentPathLinuxManualInstruction">
-        <source>Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash. You can do this by running the following command:
-
-cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{1}"
-EOF</source>
-        <target state="translated">Nejde najít cestu ke spustitelnému souboru nástrojů. Zkontrolujte, jestli v cestě (PATH) máte přidaný {0}.
-Pokud používáte bash, můžete to provést spuštěním následujícího příkazu:
-
-cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{1}"
-EOF</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
@@ -712,51 +690,9 @@ EOF</target>
         <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít terminál.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EnvironmentPathOSXManualInstruction">
-        <source>Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-If you are using bash, You can do this by running the following command:
-
-cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{1}"
-EOF</source>
-        <target state="translated">Nejde najít cestu ke spustitelnému souboru nástrojů. Zkontrolujte, jestli v cestě (PATH) máte přidaný {0}.
-Pokud používáte bash, můžete to provést spuštěním následujícího příkazu:
-
-cat &lt;&lt; EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{1}"
-EOF</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailInstallToolSameName">
-        <source>Failed to install tool {0}. A command with the same name already exists.</source>
-        <target state="translated">Instalace nástroje {0} byla neúspěšná. Už existuje příkaz se stejným názvem.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailInstallToolPermission">
-        <source>Failed to change permission:
-Error: {0}
-Output: {1}</source>
-        <target state="translated">Změna oprávnění byla neúspěšná:
-Chyba: {0}
-Výstup: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
         <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít okno příkazového řádku.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnvironmentPathWindowsManualInstruction">
-        <source>Cannot find the tools executable path. Please ensure {0} is added to your PATH.
-You can do this by running the following command:
-
-setx PATH "%PATH%;{1}"</source>
-        <target state="translated">Nejde najít cestu ke spustitelnému souboru nástrojů. Zkontrolujte, jestli v cestě (PATH) máte přidaný {0}.
-Můžete to provést spuštěním následujícího příkazu:
-
-setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageMissingEntryPointFile">
@@ -795,8 +731,122 @@ setx PATH "%PATH%;{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
-        <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <source>Tool '{0}' (version '{1}') is already installed.</source>
+        <target state="new">Tool '{0}' (version '{1}') is already installed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShellShimConflict">
+        <source>Command '{0}' conflicts with an existing command from another tool.</source>
+        <target state="new">Command '{0}' conflicts with an existing command from another tool.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyExecutablePath">
+        <source>Cannot create shell shim for an empty executable path.</source>
+        <target state="new">Cannot create shell shim for an empty executable path.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyCommand">
+        <source>Cannot create shell shim for an empty command.</source>
+        <target state="new">Cannot create shell shim for an empty command.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRetrieveToolConfiguration">
+        <source>Failed to retrieve tool configuration: {0}</source>
+        <target state="new">Failed to retrieve tool configuration: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="new">Failed to install tool package '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</source>
+        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</target>
         <note />
       </trans-unit>
     </body>

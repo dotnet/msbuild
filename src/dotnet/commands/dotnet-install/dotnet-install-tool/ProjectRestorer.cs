@@ -14,27 +14,27 @@ namespace Microsoft.DotNet.Tools.Install.Tool
 {
     internal class ProjectRestorer : IProjectRestorer
     {
-        private IReporter _reporter;
+        private readonly IReporter _reporter;
 
-        public ProjectRestorer(IReporter reporter)
+        public ProjectRestorer(IReporter reporter = null)
         {
             _reporter = reporter;
         }
 
         public void Restore(
-            FilePath projectPath,
+            FilePath project,
             DirectoryPath assetJsonOutput,
-            FilePath? nugetconfig,
+            FilePath? nugetConfig = null,
             string source = null,
             string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
 
-            argsToPassToRestore.Add(projectPath.Value);
-            if (nugetconfig != null)
+            argsToPassToRestore.Add(project.Value);
+            if (nugetConfig != null)
             {
                 argsToPassToRestore.Add("--configfile");
-                argsToPassToRestore.Add(nugetconfig.Value.Value);
+                argsToPassToRestore.Add(nugetConfig.Value.Value);
             }
 
             if (source != null)
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             var result = command.Execute();
             if (result.ExitCode != 0)
             {
-                throw new PackageObtainException(LocalizableStrings.ToolInstallationRestoreFailed);
+                throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
         }
 

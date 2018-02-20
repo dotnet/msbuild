@@ -13,21 +13,10 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
-        <source>
-The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</source>
-        <target state="translated">
+        <source>If there were no additional instructions, you can type the following command to invoke the tool: {0}
+Tool '{1}' (version '{2}') was successfully installed.</source>
+        <target state="needs-review-translation">
 Yükleme başarılı oldu. Daha fazla yönerge yoksa, çağırmak için şu komutu doğrudan kabuğa yazabilirsiniz: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToAddPackage">
-        <source>Failed to add package.
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</source>
-        <target state="translated">Paket eklenemedi.
-WorkingDirectory: {0}
-Bağımsız değişkenler: {1}
-Çıkış: {2}{3}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -93,6 +82,21 @@ Bağımsız değişkenler: {1}
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolAlreadyInstalled">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="new">Tool '{0}' is already installed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateToolShim">
+        <source>Failed to create shell shim for tool '{0}': {1}</source>
+        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="new">NuGet configuration file '{0}' does not exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">

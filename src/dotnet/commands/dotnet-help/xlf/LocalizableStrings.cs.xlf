@@ -257,6 +257,11 @@
         <target state="translated">Nainstaluje položku do vývojového prostředí.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UninstallDefinition">
+        <source>Uninstalls a tool from the development environment.</source>
+        <target state="new">Uninstalls a tool from the development environment.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

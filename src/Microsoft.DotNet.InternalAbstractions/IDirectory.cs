@@ -11,12 +11,16 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         ITemporaryDirectory CreateTemporaryDirectory();
 
-        IEnumerable<string> GetFiles(string path, string searchPattern);
+        IEnumerable<string> EnumerateFileSystemEntries(string path);
+
+        IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern);
 
         string GetDirectoryFullName(string path);
 
         void CreateDirectory(string path);
 
         void Delete(string path, bool recursive);
+
+        void Move(string source, string destination);
     }
 }

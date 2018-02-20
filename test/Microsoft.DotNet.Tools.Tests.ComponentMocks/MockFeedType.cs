@@ -7,6 +7,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     {
         FeedFromLookUpNugetConfig,
         ExplicitNugetConfig,
-        Source
+        Source,
+        OfflineFeed
     }
 }

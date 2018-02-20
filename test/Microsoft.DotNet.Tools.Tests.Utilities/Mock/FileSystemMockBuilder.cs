@@ -107,6 +107,22 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 _files[path] = content;
             }
 
+            public void Move(string source, string destination)
+            {
+                if (!Exists(source))
+                {
+                    throw new FileNotFoundException("source does not exist.");
+                }
+                if (Exists(destination))
+                {
+                    throw new IOException("destination exists.");
+                }
+
+                var content = _files[source];
+                _files.Remove(source);
+                _files[destination] = content;
+            }
+
             public void Delete(string path)
             {
                 if (!Exists(path))
@@ -134,9 +150,21 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 return _temporaryDirectory;
             }
 
-            public IEnumerable<string> GetFiles(string path, string searchPattern)
+            public IEnumerable<string> EnumerateFileSystemEntries(string path)
             {
-                throw new NotImplementedException();
+                foreach (var entry in _files.Keys.Where(k => Path.GetDirectoryName(k) == path))
+                {
+                    yield return entry;
+                }
+            }
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern)
+            {
+                if (searchPattern != "*")
+                {
+                    throw new NotImplementedException();
+                }
+                return EnumerateFileSystemEntries(path);
             }
 
             public string GetDirectoryFullName(string path)
@@ -151,7 +179,12 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
             public void CreateDirectory(string path)
             {
-                _files.Add(path, path);
+                var current = path;
+                while (!string.IsNullOrEmpty(current))
+                {
+                    _files[current] = current;
+                    current = Path.GetDirectoryName(current);
+                }
             }
 
             public void Delete(string path, bool recursive)
@@ -167,6 +200,29 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 foreach (var k in _files.Keys.Where(k => k.StartsWith(path)).ToList())
                 {
                     _files.Remove(k);
+                }
+            }
+
+            public void Move(string source, string destination)
+            {
+                if (!Exists(source))
+                {
+                    throw new IOException("The source directory does not exist.");
+                }
+                if (Exists(destination))
+                {
+                    throw new IOException("The destination already exists.");
+                }
+
+                foreach (var kvp in _files.Where(kvp => kvp.Key.StartsWith(source)).ToList())
+                {
+                    var newKey = destination + kvp.Key.Substring(source.Length);
+                    var newValue = kvp.Value.StartsWith(source) ?
+                        destination + kvp.Value.Substring(source.Length) :
+                        kvp.Value;
+
+                    _files.Add(newKey, newValue);
+                    _files.Remove(kvp.Key);
                 }
             }
         }
