@@ -699,6 +699,35 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
+        /// Test some characters that are valid in a file name but that also could be
+        /// considered a delimiter by a parser. Does quoting work for special characters?
+        /// </summary>
+        [Fact]
+        public void ParseFirstProjectLineWhereProjectPathHasBackslash()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var solutionFolder = env.CreateFolder(Path.Combine(FileUtilities.GetTemporaryDirectory(), "sln"));
+                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.FolderPath, "RelativePath"));
+
+                SolutionFile p = new SolutionFile();
+                p.FullPath = Path.Combine(solutionFolder.FolderPath, "RelativePath", "project file");
+                p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.FolderPath);
+                ProjectInSolution proj = new ProjectInSolution(p);
+
+                p.ParseFirstProjectLine
+                (
+                    "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"RelativePath\\project file\"    , \"Unique name-GUID\"",
+                    proj
+                );
+                Assert.Equal(SolutionProjectType.Unknown, proj.ProjectType);
+                Assert.Equal("ProjectInSubdirectory", proj.ProjectName);
+                Assert.Equal(Path.Combine("RelativePath", "project file"), proj.RelativePath);
+                Assert.Equal("Unique name-GUID", proj.ProjectGuid);
+            }
+        }
+
+        /// <summary>
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in.
         /// </summary>
