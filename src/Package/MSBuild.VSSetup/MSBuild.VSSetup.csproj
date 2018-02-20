@@ -40,7 +40,7 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="!$(ShouldSkipProject)"/>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 </Project>

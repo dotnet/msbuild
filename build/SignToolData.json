@@ -42,6 +42,13 @@
             "values": [
                 "packages/*.nupkg"
             ]
+        },
+        {
+            "certificate": "Vsix",
+            "strongName": null,
+            "values": [
+                "VSSetup/Insertion/*.vsix"
+            ]
         }
     ],
     "exclude": [
