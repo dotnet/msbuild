@@ -60,7 +60,7 @@ while [[ $# > 0 ]]; do
       configuration=$2
       shift 2
       ;;
-    -help)
+    -h | -help)
       Help
       exit 0
       ;;
