@@ -27,6 +27,9 @@ path-to-application:
   nuget            {LocalizableStrings.NugetDefinition}
   msbuild          {LocalizableStrings.MsBuildDefinition}
   vstest           {LocalizableStrings.VsTestDefinition}
+  store            {LocalizableStrings.StoreDefinition}
+  install          {LocalizableStrings.InstallDefinition}
+  help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:
   -v|--verbosity        {CommonLocalizableStrings.VerbosityOptionDescription}
@@ -37,6 +40,8 @@ path-to-application:
 sdk-options:
   --version        {LocalizableStrings.SDKVersionCommandDefinition}
   --info           {LocalizableStrings.SDKInfoCommandDefinition}
+  --list-sdks      {LocalizableStrings.SDKListSdksCommandDefinition}
+  --list-runtimes  {LocalizableStrings.SDKListRuntimesCommandDefinition}
   -d|--diagnostics {LocalizableStrings.SDKDiagnosticsCommandDefinition}
 
 runtime-options:

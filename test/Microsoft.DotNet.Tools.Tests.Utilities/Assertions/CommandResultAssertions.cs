@@ -69,6 +69,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> NotHaveStdOutContaining(string pattern)
+        {
+            Execute.Assertion.ForCondition(!_commandResult.StdOut.Contains(pattern))
+                .FailWith(AppendDiagnosticsTo($"The command output contained a result it should not have contained: {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> HaveStdOutMatching(string pattern, RegexOptions options = RegexOptions.None)
         {
             Execute.Assertion.ForCondition(Regex.Match(_commandResult.StdOut, pattern, options).Success)
