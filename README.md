@@ -9,8 +9,8 @@ Looking for V1 of the .NET Core tooling?
 
 If you are looking for the v2.0 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
 
-> **Note:** the master branch of the CLI repo is based on post-v2.0 of .NET Core and is considered pre-release. For production-level usage, use the
-> v2.0 of the tools.
+> **Note:** the master branch of the CLI repo is based on an upcoming update of the SDK and is considered pre-release. For production-level usage, please use the
+> released version of the tools available at https://dot.net/core
 
 Found an issue?
 ---------------
