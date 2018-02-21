@@ -68,5 +68,16 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["install"]["tool"];
             appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
         }
+
+        [Fact]
+        public void InstallToolParserCanParseVerbosityOption()
+        {
+            const string expectedVerbosityLevel = "diag";
+
+            var result = Parser.Instance.Parse($"dotnet install tool -g --verbosity:{expectedVerbosityLevel} console.test.app");
+
+            var appliedOptions = result["dotnet"]["install"]["tool"];
+            appliedOptions.SingleArgumentOrDefault("verbosity").Should().Be(expectedVerbosityLevel);
+        }
     }
 }

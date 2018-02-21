@@ -38,16 +38,21 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             Action a = () => ToolConfigurationDeserializer.Deserialize("DotnetToolSettingsMissing.xml");
             a.ShouldThrow<ToolConfigurationException>()
                 .And.Message.Should()
-                .Contain(string.Format(CommonLocalizableStrings.ToolSettingsContainError, string.Empty));
+                .Contain(CommonLocalizableStrings.ToolSettingsMissingCommandName);
         }
 
         [Fact]
         public void GivenInvalidCharAsFileNameItThrows()
         {
-            Action a = () => new ToolConfiguration("na\0me", "my.dll");
-            a.ShouldThrow<ArgumentException>()
+            var invalidCommandName = "na\0me";
+            Action a = () => new ToolConfiguration(invalidCommandName, "my.dll");
+            a.ShouldThrow<ToolConfigurationException>()
                 .And.Message.Should()
-                .Contain(string.Format(CommonLocalizableStrings.ContainInvalidCharacters, string.Empty));
+                .Contain(
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsInvalidCommandName,
+                        invalidCommandName,
+                        string.Join(", ", Path.GetInvalidFileNameChars().Select(c => $"'{c}'"))));
         }
     }
 }

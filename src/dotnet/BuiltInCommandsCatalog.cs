@@ -18,6 +18,7 @@ using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Sln;
 using Microsoft.DotNet.Tools.Store;
 using Microsoft.DotNet.Tools.Test;
+using Microsoft.DotNet.Tools.Uninstall;
 using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
 using Microsoft.DotNet.Tools.Install;
@@ -148,6 +149,10 @@ namespace Microsoft.DotNet.Cli
             ["install"] = new BuiltInCommandMetadata
             {
                 Command = InstallCommand.Run
+            },
+            ["uninstall"] = new BuiltInCommandMetadata
+            {
+                Command = UninstallCommand.Run
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {

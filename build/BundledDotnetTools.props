@@ -1,0 +1,6 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <BundledDotnetTools Include="dotnet-watch" Version="$(AspNetCoreVersion)" />
+    <BundledDotnetTools Include="dotnet-dev-certs" Version="$(AspNetCoreVersion)" />
+  </ItemGroup>
+</Project>

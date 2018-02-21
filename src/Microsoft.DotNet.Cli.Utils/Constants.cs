@@ -21,5 +21,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static readonly string ProjectArgumentName = "<PROJECT>";
         public static readonly string SolutionArgumentName = "<SLN_FILE>";
+        public static readonly string ToolPackageArgumentName = "<PACKAGE_ID>";
     }
 }

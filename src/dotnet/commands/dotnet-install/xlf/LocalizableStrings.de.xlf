@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
-        <target state="new">.NET Install Command</target>
+        <target state="translated">.NET-Installationsbefehl</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Installs an item into the development environment.</source>
-        <target state="new">Installs an item into the development environment.</target>
+        <target state="translated">Installiert ein Element in der Entwicklungsumgebung.</target>
         <note />
       </trans-unit>
     </body>
