@@ -71,8 +71,8 @@ def static getBuildJobName(def configuration, def os) {
                    "--config Configuration \"${configuration}\"" +
                    "--architecture \"${arch}\"" +
                    "--machinepool \"perfsnake\"" +
-                   "--output \"${perfWorkingDirectory}\submission.json\"")
-                   batchFile("py \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\\tools\\upload.py \"${perfWorkingDirectory}\submission.json\" --container coreclr")
+                   "--output \"${perfWorkingDirectory}\\submission.json\"")
+                   batchFile("py \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\\tools\\upload.py \"${perfWorkingDirectory}\\submission.json\" --container coreclr")
                 }
             }
 
