@@ -5,6 +5,7 @@
 
 import jobs.generation.ArchivalSettings;
 import jobs.generation.Utilities;
+import jobs.generation.TriggerBuilder;
 
 def project = GithubProject
 def branch = GithubBranchName
