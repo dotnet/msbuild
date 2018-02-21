@@ -815,7 +815,10 @@ namespace Microsoft.Build.BackEnd
                         StringBuilder message = new StringBuilder();
 
                         message.AppendFormat("Failed OverallResult for ConfigurationId {0}, GlobalRequestId {1}, NodeRequestId {2}, ParentGlobalRequestId {3}, SubmissionId {4}: \"{5}\"",
-                            result.ConfigurationId, result.GlobalRequestId, result.NodeRequestId, result.ParentGlobalRequestId, result.SubmissionId, _projectLoggingContext._projectFullPath);
+                            result.ConfigurationId, result.GlobalRequestId, result.NodeRequestId, result.ParentGlobalRequestId, result.SubmissionId, _requestEntry.RequestConfiguration.ProjectFullPath);
+                        message.AppendLine();
+
+                        message.AppendFormat("  Requested targets: {0}", string.Join(";", _requestEntry.RequestConfiguration.TargetNames));
                         message.AppendLine();
 
                         message.AppendFormat("  Exception: {0}", result.Exception);

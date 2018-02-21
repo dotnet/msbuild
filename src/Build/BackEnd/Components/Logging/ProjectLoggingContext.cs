@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// The project's full path
         /// </summary>
-        public string _projectFullPath;
+        private string _projectFullPath;
 
         /// <summary>
         /// The parent node logging context this context was derived from.
