@@ -4,113 +4,104 @@
     <body>
       <trans-unit id="SourceOptionDescription">
         <source>Specifies a NuGet package source to use during installation.</source>
-        <target state="new">Specifies a NuGet package source to use during installation.</target>
+        <target state="translated">Consente di specificare un'origine pacchetto NuGet da usare durante l'installazione.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">ORIGINE</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
-        <source>
-The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</source>
-        <target state="new">
-The installation succeeded. If there are no further instructions, you can type the following command in shell directly to invoke: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToAddPackage">
-        <source>Failed to add package.
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</source>
-        <target state="new">Failed to add package.
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToRestorePackage">
-        <source>Failed to restore package. 
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</source>
-        <target state="new">Failed to restore package. 
-WorkingDirectory: {0}
-Arguments: {1}
-Output: {2}{3}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedNuget">
-        <source>Install failed. Failed to download package:
-NuGet returned:
-
-{0}</source>
-        <target state="new">Install failed. Failed to download package:
-NuGet returned:
-
-{0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailedPackage">
-        <source>Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
-
-{0}</source>
-        <target state="new">Install failed. The settings file in the tool's NuGet package is not valid. Please contact the owner of the NuGet package.
-The error was:
-
-{0}</target>
+        <source>If there were no additional instructions, you can type the following command to invoke the tool: {0}
+Tool '{1}' (version '{2}') was successfully installed.</source>
+        <target state="needs-review-translation">
+L'installazione è riuscita. Se non ci sono altre istruzioni, è possibile digitare direttamente nella shell il comando seguente da richiamare: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to install.</source>
-        <target state="new">NuGet Package Id of the tool to install.</target>
+        <target state="translated">ID pacchetto NuGet dello strumento da installare.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Installs a tool for use on the command line.</source>
-        <target state="new">Installs a tool for use on the command line.</target>
+        <target state="translated">Installa uno strumento da usare sulla riga di comando.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
+        <target state="translated">File di configurazione NuGet da usare.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
-        <target state="new">The target framework to install the tool for.</target>
+        <target state="translated">Framework di destinazione per cui installare lo strumento.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>Version of the tool package in NuGet.</source>
-        <target state="new">Version of the tool package in NuGet.</target>
+        <target state="translated">Versione del pacchetto dello strumento in NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to install.</source>
-        <target state="new">Please specify one tool Package Id to install.</target>
+        <target state="translated">Specificare un ID pacchetto dello strumento da installare.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install user wide.</source>
-        <target state="new">Install user wide.</target>
+        <target state="translated">Esegue l'installazione a livello di utente.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
-        <target state="new">.NET Install Command</target>
+        <target state="translated">Comando di installazione .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandOnlySupportGlobal">
         <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="new">The --global switch (-g) is currently required because only user wide tools are supported.</target>
+        <target state="translated">L'opzione --global (-g) è attualmente obbligatoria perché sono supportati solo gli strumenti a livello di utente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolConfiguration">
+        <source>The settings file in the tool's NuGet package is invalid: {0}</source>
+        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedContactAuthor">
+        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
+        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolAlreadyInstalled">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="new">Tool '{0}' is already installed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateToolShim">
+        <source>Failed to create shell shim for tool '{0}': {1}</source>
+        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationRestoreFailed">
+        <source>The tool package could not be restored.</source>
+        <target state="new">The tool package could not be restored.</target>
         <note />
       </trans-unit>
     </body>

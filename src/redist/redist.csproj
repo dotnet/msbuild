@@ -75,22 +75,8 @@
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <ItemGroup>
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/csc.runtimeconfig.json" />
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/vbc.runtimeconfig.json" />
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/VBCSCompiler.runtimeconfig.json" />
-      <RoslynDeps Include="$(RoslynDirectory)/bincore/csc.deps.json" />
-      <RoslynDeps Include="$(RoslynDirectory)/bincore/vbc.deps.json" />
       <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>
     </ItemGroup>
-    <PropertyGroup>
-      <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
-    </PropertyGroup>
-    <ReplaceFileContents
-      InputFile="%(RoslynRuntimeConfigs.Identity)"
-      DestinationFile="%(RoslynRuntimeConfigs.Identity)"
-      ReplacementPatterns="$(ReplacementPattern)"
-      ReplacementStrings="$(ReplacementString)" />
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
@@ -193,8 +179,8 @@
       <TemplatesToBundle Include="$(RepoRoot)/build/BundledTemplates.proj">
         <Properties>
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
-          TemplatePackageName=%(BundledTemplate.Identity);
-          TemplatePackageVersion=%(BundledTemplate.Version);
+          TemplateFillInPackageName=%(BundledTemplate.Identity);
+          TemplateFillInPackageVersion=%(BundledTemplate.Version);
           PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </TemplatesToBundle>
@@ -203,6 +189,25 @@
     <MSBuild
       BuildInParallel="False"
       Projects="@(TemplatesToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishDotnetTools"
+          AfterTargets="Publish">
+    <ItemGroup>
+      <DotnetToolsToBundle Include="$(RepoRoot)/build/BundledDotnetTools.proj">
+        <Properties>
+          DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
+          TemplateFillInPackageName=%(BundledDotnetTools.Identity);
+          TemplateFillInPackageVersion=%(BundledDotnetTools.Version);
+          PreviousStageDirectory=$(PreviousStageDirectory)
+        </Properties>
+      </DotnetToolsToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(DotnetToolsToBundle)">
     </MSBuild>
   </Target>
 

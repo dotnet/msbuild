@@ -1,12 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using Microsoft.Extensions.EnvironmentAbstractions;
 
-namespace Microsoft.DotNet.ToolPackage
+namespace Microsoft.DotNet.ShellShim
 {
-    internal interface IPackageToProjectFileAdder
+    internal interface IShellShimRepository
     {
-        void Add(FilePath projectPath, string packageId);
+        void CreateShim(FilePath targetExecutablePath, string commandName);
+
+        void RemoveShim(string commandName);
     }
 }

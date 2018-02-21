@@ -18,46 +18,48 @@ namespace Microsoft.DotNet.ToolPackage
 
             DotNetCliTool dotNetCliTool;
 
-            using (var fs = new FileStream(pathToXml, FileMode.Open))
+            try
             {
-                var reader = XmlReader.Create(fs);
-
-                try
+                using (var fs = new FileStream(pathToXml, FileMode.Open))
                 {
+                    var reader = XmlReader.Create(fs);
                     dotNetCliTool = (DotNetCliTool)serializer.Deserialize(reader);
                 }
-                catch (InvalidOperationException e) when (e.InnerException is XmlException)
-                {
-                    throw new ToolConfigurationException(
-                        string.Format(CommonLocalizableStrings.ToolSettingsInvalidXml, e.InnerException.Message));
-                }
+            }
+            catch (InvalidOperationException ex) when (ex.InnerException is XmlException)
+            {
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsInvalidXml,
+                        ex.InnerException.Message),
+                    ex.InnerException);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.FailedToRetrieveToolConfiguration,
+                        ex.Message),
+                    ex);
             }
 
             if (dotNetCliTool.Commands.Length != 1)
             {
-                throw new ToolConfigurationException(
-                    CommonLocalizableStrings.ToolSettingMoreThanOneCommand);
+                throw new ToolConfigurationException(CommonLocalizableStrings.ToolSettingsMoreThanOneCommand);
             }
 
             if (dotNetCliTool.Commands[0].Runner != "dotnet")
             {
                 throw new ToolConfigurationException(
-                    CommonLocalizableStrings.ToolSettingInvalidRunner);
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsUnsupportedRunner,
+                        dotNetCliTool.Commands[0].Name,
+                        dotNetCliTool.Commands[0].Runner));
             }
 
-            var commandName = dotNetCliTool.Commands[0].Name;
-            var toolAssemblyEntryPoint = dotNetCliTool.Commands[0].EntryPoint;
-
-            try
-            {
-                return new ToolConfiguration(commandName, toolAssemblyEntryPoint);
-            }
-            catch (ArgumentException e)
-            {
-                throw new ToolConfigurationException(
-                    string.Format(CommonLocalizableStrings.ToolSettingsContainError,
-                    e.Message));
-            }
+            return new ToolConfiguration(
+                dotNetCliTool.Commands[0].Name,
+                dotNetCliTool.Commands[0].EntryPoint);
         }
     }
 }

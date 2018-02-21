@@ -14,19 +14,27 @@ namespace Microsoft.DotNet.Tools.Install.Tool
 {
     internal class ProjectRestorer : IProjectRestorer
     {
+        private readonly IReporter _reporter;
+
+        public ProjectRestorer(IReporter reporter = null)
+        {
+            _reporter = reporter;
+        }
+
         public void Restore(
-            FilePath projectPath,
+            FilePath project,
             DirectoryPath assetJsonOutput,
-            FilePath? nugetconfig,
-            string source = null)
+            FilePath? nugetConfig = null,
+            string source = null,
+            string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
 
-            argsToPassToRestore.Add(projectPath.Value);
-            if (nugetconfig != null)
+            argsToPassToRestore.Add(project.Value);
+            if (nugetConfig != null)
             {
                 argsToPassToRestore.Add("--configfile");
-                argsToPassToRestore.Add(nugetconfig.Value.Value);
+                argsToPassToRestore.Add(nugetConfig.Value.Value);
             }
 
             if (source != null)
@@ -42,18 +50,22 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                 $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToQuotedString()}"
             });
 
+            argsToPassToRestore.Add($"/verbosity:{verbosity ?? "quiet"}");
+
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
-                .Create("restore", argsToPassToRestore)
-                .CaptureStdOut()
-                .CaptureStdErr();
+                .Create("restore", argsToPassToRestore);
+
+            if (_reporter != null)
+            {
+                command = command
+                    .OnOutputLine((line) => _reporter.WriteLine(line))
+                    .OnErrorLine((line) => _reporter.WriteLine(line));
+            }
 
             var result = command.Execute();
             if (result.ExitCode != 0)
             {
-                throw new PackageObtainException(
-                    string.Format(
-                        LocalizableStrings.FailedToRestorePackage,
-                        result.StartInfo.WorkingDirectory, result.StartInfo.Arguments, result.StdErr, result.StdOut));
+                throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
         }
 

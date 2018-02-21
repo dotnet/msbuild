@@ -29,6 +29,7 @@ path-to-application:
   vstest           {LocalizableStrings.VsTestDefinition}
   store            {LocalizableStrings.StoreDefinition}
   install          {LocalizableStrings.InstallDefinition}
+  uninstall        {LocalizableStrings.UninstallDefinition}
   help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:

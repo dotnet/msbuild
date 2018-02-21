@@ -199,12 +199,12 @@
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
         <source>Display the installed SDKs.</source>
-        <target state="new">Display the installed SDKs.</target>
+        <target state="translated">Отображение установленных пакетов SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListRuntimesCommandDefinition">
         <source>Display the installed runtimes.</source>
-        <target state="new">Display the installed runtimes.</target>
+        <target state="translated">Отображение установленных сред выполнения.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
@@ -254,7 +254,12 @@
       </trans-unit>
       <trans-unit id="InstallDefinition">
         <source>Installs an item into the development environment.</source>
-        <target state="new">Installs an item into the development environment.</target>
+        <target state="translated">Устанавливает элемент в среде разработки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallDefinition">
+        <source>Uninstalls a tool from the development environment.</source>
+        <target state="new">Uninstalls a tool from the development environment.</target>
         <note />
       </trans-unit>
     </body>
