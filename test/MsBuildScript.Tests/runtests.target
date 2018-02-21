@@ -1,0 +1,15 @@
+<Project DefaultTargets="RunMsBuildScriptTests">
+  <Import Project="../../dir.props" />
+  <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
+
+  <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="EnsureFileExistsOnAzureBlobStorage" AssemblyFile="$(CLIBuildDll)" />
+
+  <Target Name="RunMsBuildScriptTests" DependsOnTargets="EnsureAllDependencyFilesExist"></Target>
+
+  <Target Name="EnsureAllDependencyFilesExist">
+    <EnsureFileExistsOnAzureBlobStorage Condition="'$(DownloadedAspNetCoreSharedFxInstallerFileName)' != ''" FileUrl="$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(DownloadedAspNetCoreSharedFxInstallerFileName)" />
+    <EnsureFileExistsOnAzureBlobStorage Condition="'$(AspNetCoreSharedFxArchiveFileName)' != ''" FileUrl="$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)" />
+    <EnsureFileExistsOnAzureBlobStorage Condition="'$(NugetPackagesArchiveName)' != ''" FileUrl="$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(NugetPackagesArchiveName)" />
+  </Target>
+</Project>

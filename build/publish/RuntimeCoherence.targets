@@ -7,19 +7,19 @@
   <Target Name="ReadAspNetCoreSharedRuntimeVersionFile"
         DependsOnTargets="DownloadHostAndSharedFxArtifacts">
     <ItemGroup>
-      <File Include="$(AspNetCoreSharedRuntimeVersionFile)" />
+      <File Include="$(AspNetCoreSharedFxBaseRuntimeVersionFile)" />
     </ItemGroup>
     <ReadLinesFromFile File="@(File)">
       <Output
           TaskParameter="Lines"
-          ItemName="AspNetCoreSharedRuntimeVersion"/>
+          PropertyName="AspNetCoreSharedFxBaseRuntimeVersion"/>
     </ReadLinesFromFile>
   </Target>
-  
+
   <Target Name="CompareRuntimeVersions">
     <PropertyGroup>
       <Coherent>false</Coherent>
-      <Coherent Condition=" '$(MicrosoftNETCoreAppPackageVersion)' == '@(AspNetCoreSharedRuntimeVersion)' ">true</Coherent>
+      <Coherent Condition=" '$(MicrosoftNETCoreAppPackageVersion)' == '$(AspNetCoreSharedFxBaseRuntimeVersion)' ">true</Coherent>
     </PropertyGroup>
   </Target>
 </Project>

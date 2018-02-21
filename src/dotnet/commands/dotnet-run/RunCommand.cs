@@ -146,22 +146,38 @@ namespace Microsoft.DotNet.Tools.Run
 
         private void EnsureProjectIsBuilt()
         {
-            List<string> buildArgs = new List<string>();
-
-            buildArgs.Add(Project);
-
-            buildArgs.Add("/nologo");
-            buildArgs.Add("/verbosity:quiet");
-
-            buildArgs.AddRange(RestoreArgs);
+            var restoreArgs = GetRestoreArguments();
 
             var buildResult =
-                new RestoringCommand(buildArgs, RestoreArgs, new [] { Project }, NoRestore).Execute();
+                new RestoringCommand(
+                    restoreArgs.Prepend(Project),
+                    restoreArgs,
+                    new [] { Project },
+                    NoRestore
+                ).Execute();
+
             if (buildResult != 0)
             {
                 Reporter.Error.WriteLine();
                 throw new GracefulException(LocalizableStrings.RunCommandException);
             }
+        }
+
+        private List<string> GetRestoreArguments()
+        {
+            List<string> args = new List<string>()
+            {
+                "/nologo"
+            };
+
+            if (!RestoreArgs.Any(a => a.StartsWith("/verbosity:")))
+            {
+                args.Add("/verbosity:quiet");
+            }
+
+            args.AddRange(RestoreArgs);
+
+            return args;
         }
 
         private ICommand GetRunCommand()

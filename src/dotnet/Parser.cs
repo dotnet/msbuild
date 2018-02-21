@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         private static void ConfigureCommandLineLocalizedStrings()
         {
             DefaultHelpViewText.AdditionalArgumentsSection =
-                $"{UsageCommandsAdditionalArgsHeader}:{NewLine}  {LocalizableStrings.RunCommandAdditionalArgsHelpText}";
+                $"{UsageCommandsAdditionalArgsHeader}{NewLine}  {LocalizableStrings.RunCommandAdditionalArgsHelpText}";
             DefaultHelpViewText.ArgumentsSection.Title = UsageArgumentsHeader;
             DefaultHelpViewText.CommandsSection.Title = UsageCommandsHeader;
             DefaultHelpViewText.OptionsSection.Title = UsageOptionsHeader;
@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Cli
                                     Create.Command("vstest", ""),
                                     CompleteCommandParser.Complete(),
                                     InternalReportinstallsuccessCommandParser.InternalReportinstallsuccess(),
+                                    InstallCommandParser.Install(),
                                     CommonOptions.HelpOption(),
                                     Create.Option("--info", ""),
                                     Create.Option("-d", ""),

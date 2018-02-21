@@ -124,13 +124,10 @@
     <value>Command used to run .NET apps</value>
   </data>
   <data name="CommandOptionNoBuildDescription" xml:space="preserve">
-    <value>Skip building the project prior to running. By default, the project will be built.</value>
+    <value>Do not build project before running.  Implies --no-restore.</value>
   </data>
   <data name="CommandOptionFrameworkDescription" xml:space="preserve">
     <value>Build and run the app using the specified framework. The framework has to be specified in the project file. </value>
-  </data>
-  <data name="CommandOptionNoBuild" xml:space="preserve">
-    <value>Do not build the project before running.</value>
   </data>
   <data name="CommandOptionProjectDescription" xml:space="preserve">
     <value>The path to the project file to run (defaults to the current directory if there is only one project).</value>

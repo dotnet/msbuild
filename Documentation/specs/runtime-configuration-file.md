@@ -9,8 +9,8 @@ The runtime configuration files store the dependencies of an application (former
 There are two runtime configuration files for a particular application. Given a project named `MyApp`, the compilation process produces the following files (on Windows, other platforms are similar):
 
 * `MyApp.dll` - The managed assembly for `MyApp`, including an ECMA-compliant entry point token.
-* `MyApp.exe` - A copy of the `corehost.exe` executable.
-* `MyApp.runtimeconfig.json` - An **optional** configuration file containing runtime configuration settings.
+* `MyApp.exe` - A copy of the `corehost.exe` executable. Only present when the application is a self-contained application.
+* `MyApp.runtimeconfig.json` - An **optional** configuration file containing runtime configuration settings. This file is required for portable applications, but not for self-contained apps.
 * `MyApp.deps.json` - A list of dependencies, as well as compilation context data and compilation dependencies. Not technically required, but required to use the servicing or package cache/shared package install features.
 
 The `MyApp.runtimeconfig.json` is designed to be user-editable (in the case of an app consumer wanting to change various CLR runtime options for an app, much like the `MyApp.exe.config` XML file works in .NET 4.x today). However, the `MyApp.deps.json` file is designed to be processed by automated tools and should not be user-edited. Having the files as separate makes this clearer. We could use a different format for the deps file, but if we're already integrating a JSON parser into the host, it seems most appropriate to re-use that here. Also, there are diagnostic benefits to being able to read the `.deps.json` file in a simple text editor.

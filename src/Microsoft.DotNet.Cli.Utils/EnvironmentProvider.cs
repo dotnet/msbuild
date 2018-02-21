@@ -11,7 +11,10 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class EnvironmentProvider : IEnvironmentProvider
     {
+        private static char[] s_pathSeparator = new char[] { Path.PathSeparator };
+        private static char[] s_quote = new char[] { '"' };
         private IEnumerable<string> _searchPaths;
+        private readonly Lazy<string> _userHomeDirectory = new Lazy<string>(() => Environment.GetEnvironmentVariable("HOME") ?? string.Empty);
         private IEnumerable<string> _executableExtensions;
 
         public IEnumerable<string> ExecutableExtensions
@@ -42,13 +45,27 @@ namespace Microsoft.DotNet.Cli.Utils
 
                     searchPaths.AddRange(Environment
                         .GetEnvironmentVariable("PATH")
-                        .Split(Path.PathSeparator)
-                        .Select(p => p.Trim('"')));
+                        .Split(s_pathSeparator)
+                        .Select(p => p.Trim(s_quote))
+                        .Select(p => ExpandTildeSlash(p)));
 
                     _searchPaths = searchPaths;
                 }
 
                 return _searchPaths;
+            }
+        }
+
+        private string ExpandTildeSlash(string path)
+        {
+            const string tildeSlash = "~/";
+            if (path.StartsWith(tildeSlash, StringComparison.Ordinal) && !string.IsNullOrEmpty(_userHomeDirectory.Value))
+            {
+                return Path.Combine(_userHomeDirectory.Value, path.Substring(tildeSlash.Length));
+            }
+            else
+            {
+                return path;
             }
         }
 

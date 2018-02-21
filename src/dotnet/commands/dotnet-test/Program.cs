@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Test
                 }
             }
 
-            bool noRestore = parsedTest.HasOption("--no-restore");
+            bool noRestore = parsedTest.HasOption("--no-restore") || parsedTest.HasOption("--no-build");
 
             return new TestCommand(
                 msbuildArgs,

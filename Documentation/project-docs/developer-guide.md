@@ -27,8 +27,7 @@ In order to build .NET Command Line Interface, you need the following installed 
 ## Building/Running
 
 1. Run `build.cmd` or `build.sh` from the root depending on your OS. If you don't want to execute tests, run `build.cmd /t:Compile` or `./build.sh /t:Compile`. 
-  - To build the CLI in macOS Sierra, you need to set the DOTNET_RUNTIME_ID environment variable by running `export DOTNET_RUNTIME_ID=osx.10.11-x64`.
-2. Use `artifacts/{RID}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to use the build output when invoking `dotnet` from the current console.
+2. The CLI that is built (we call it stage 2) will be laid out in the `bin\2\{RID}\dotnet` folder.  You can run `dotnet.exe` or `dotnet` from that folder to try out the `dotnet` command.
 
 ## A simple test
 Using the `dotnet` built in the previous step:
@@ -40,8 +39,12 @@ Using the `dotnet` built in the previous step:
 
 ## Running tests
 
-1. To run all tests invoke `build.cmd` or `build.sh` which will build the product and run the tests.
-2. To run a specific test, cd into that test's directory and execute `dotnet test`. If using this approach, make sure to add `artifacts/{RID}/stage2` to your `PATH` and set the `NUGET_PACKAGES` environment variable to point to the repo's `.nuget/packages` directory.
+1. To run all tests, invoke `build.cmd` or `build.sh` which will build the product and run the tests.
+2. To run a specific test project:
+    - Run `scripts\cli-test-env.bat` on Windows, or [source](https://en.wikipedia.org/wiki/Source_(command)) `scripts/cli-test-env.sh` on Linux or OS X.  This will add the stage 2 `dotnet` folder to your path and set up other environment variables which are used for running tests.
+    - `cd` into the test's directory
+    - Run `dotnet test`
+    - Refer to the command-line help for `dotnet test` if you want to run a specific test in the test project
 
 ## Adding a Command
 

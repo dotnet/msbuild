@@ -197,6 +197,16 @@
         <target state="translated">显示 .NET Core 信息。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="new">Display the installed SDKs.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="new">Display the installed runtimes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
         <source>Enable diagnostic output.</source>
         <target state="translated">启用诊断输出。</target>
@@ -233,8 +243,18 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
-        <target state="translated">其他 deps.json 文件的路径。</target>
+        <source>Path to additional deps.json file.</source>
+        <target state="translated">指向其他 deps.json 文件的路径。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Stores the specified assemblies in the runtime store.</source>
+        <target state="translated">在运行时存储中存储指定的程序集。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallDefinition">
+        <source>Installs an item into the development environment.</source>
+        <target state="new">Installs an item into the development environment.</target>
         <note />
       </trans-unit>
     </body>

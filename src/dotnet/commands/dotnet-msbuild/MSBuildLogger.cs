@@ -11,10 +11,10 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
-    public sealed class MSBuildLogger : Logger
+    public sealed class MSBuildLogger : INodeLogger
     {
         private readonly IFirstTimeUseNoticeSentinel _sentinel =
-            new FirstTimeUseNoticeSentinel(new CliFallbackFolderPathCalculator());
+            new FirstTimeUseNoticeSentinel(new CliFolderPathCalculator());
         private readonly ITelemetry _telemetry;
         private const string NewEventName = "msbuild";
         private const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
@@ -38,7 +38,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
             }
         }
 
-        public override void Initialize(IEventSource eventSource)
+        public void Initialize(IEventSource eventSource, int nodeCount)
+        {
+            Initialize(eventSource);
+        }
+
+        public void Initialize(IEventSource eventSource)
         {
             try
             {
@@ -76,7 +81,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
             FormatAndSend(_telemetry, args);
         }
 
-        public override void Shutdown()
+        public void Shutdown()
         {
             try
             {
@@ -86,8 +91,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
             {
                 // Exceptions during telemetry shouldn't cause anything else to fail
             }
-
-            base.Shutdown();
         }
+
+        public LoggerVerbosity Verbosity { get; set; }
+
+        public string Parameters { get; set; }
     }
 }

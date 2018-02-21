@@ -27,8 +27,8 @@
             "package_version": "%SHARED_HOST_RPM_VERSION%"
         },
         {
-            "package_name": "%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_NAME%",
-            "package_version": "%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_VERSION%"
+            "package_name": "%ASPNETCORE_SHAREDFX_RPM_PACKAGE_NAME%",
+            "package_version": "%ASPNETCORE_SHAREDFX_RPM_PACKAGE_VERSION%"
         }
     ],
     "directories": [
