@@ -1,8 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
@@ -39,7 +36,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         [InlineData("netcoreapp1.1", "Release", "core")]
         [InlineData("netcoreapp1.0", "Debug", "core")]
         [InlineData("netcoreapp1.1", "Debug", "core")]
-        public async Task EmptyWebCore(string templateFramework, string configuration, string msBuildType)
+        public void EmptyWebCore(string templateFramework, string configuration, string msBuildType)
         {
             string projectName = $"{nameof(EmptyWebCore)}_{Path.GetRandomFileName()}";
 
@@ -51,9 +48,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
-            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType);
-
-            Assert.Equal($"Hello World!", resultText);
+            Publish(testFolder, projectName, configuration, msBuildType);
         }
 
 
@@ -62,7 +57,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         [InlineData("netcoreapp1.1", "Release", "core")]
         [InlineData("netcoreapp1.0", "Debug", "core")]
         [InlineData("netcoreapp1.1", "Debug", "core")]
-        public async Task WebAPICore(string templateFramework, string configuration, string msBuildType)
+        public void WebAPICore(string templateFramework, string configuration, string msBuildType)
         {
             string projectName = $"{nameof(WebAPICore)}_{Path.GetRandomFileName()}";
 
@@ -74,9 +69,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
-            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:false, resultUrl:"http://localhost:5000/api/Values");
-
-            Assert.Equal(resultText, "[\"value1\",\"value2\"]");
+            Publish(testFolder, projectName, configuration, msBuildType, isStandAlone:false, resultUrl:"http://localhost:5000/api/Values");
         }
 
         [Theory]
@@ -92,7 +85,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         [InlineData("netcoreapp1.1", "Release", "core", "Individual", "true")]
         [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "true")]
         [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "true")]
-        public async Task MvcCore(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB)
+        public void MvcCore(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB)
         {
             string projectName = $"{nameof(MvcCore)}_{Path.GetRandomFileName()}";
 
@@ -109,9 +102,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
-            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType);
-
-            Assert.Contains($"<title>Home Page -", resultText);
+            Publish(testFolder, projectName, configuration, msBuildType);
         }
 
 
@@ -135,7 +126,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         //[InlineData("netcoreapp1.1", "Release", "core", "net462")]
         //[InlineData("netcoreapp1.0", "Debug", "core", "net462")]
         //[InlineData("netcoreapp1.1", "Debug", "core", "net462")]
-        public async Task EmptyWebNET(string templateFramework, string configuration, string msBuildType, string targetFramework)
+        public void EmptyWebNET(string templateFramework, string configuration, string msBuildType, string targetFramework)
         {
             string projectName = $"{nameof(EmptyWebNET)}_{Path.GetRandomFileName()}";
 
@@ -149,9 +140,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
 
-            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
-
-            Assert.Equal($"Hello World!", resultText);
+            Publish(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
         }
 
         [Theory]
@@ -174,7 +163,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         //[InlineData("netcoreapp1.1", "Release", "core", "net462")]
         //[InlineData("netcoreapp1.0", "Debug", "core", "net462")]
         //[InlineData("netcoreapp1.1", "Debug", "core", "net462")]
-        public async Task WebAPINET(string templateFramework, string configuration, string msBuildType, string targetFramework)
+        public void WebAPINET(string templateFramework, string configuration, string msBuildType, string targetFramework)
         {
             string projectName = $"{nameof(WebAPINET)}_{Path.GetRandomFileName()}";
 
@@ -186,9 +175,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
-            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true, resultUrl: "http://localhost:5000/api/Values");
-
-            Assert.Equal(resultText, "[\"value1\",\"value2\"]");
+            Publish(testFolder, projectName, configuration, msBuildType, isStandAlone:true, resultUrl: "http://localhost:5000/api/Values");
         }
 
         [Theory]
@@ -244,7 +231,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         //[InlineData("netcoreapp1.1", "Release", "core", "Individual", "true", "net462")]
         //[InlineData("netcoreapp1.0", "Debug", "core", "Individual", "true", "net462")]
         //[InlineData("netcoreapp1.1", "Debug", "core", "Individual", "true", "net462")]
-        public async Task MvcNET(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB, string targetFramework)
+        public void MvcNET(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB, string targetFramework)
         {
             string projectName = $"{nameof(MvcNET)}_{Path.GetRandomFileName()}";
 
@@ -261,93 +248,45 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
-            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
+            Publish(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
 
-            Assert.Contains($"<title>Home Page -", resultText);
         }
 
-        private async Task<string> RestoreBuildPublishAndRun(string testFolder, string projectName, string configuration, string msBuildType, bool isStandAlone = false, string resultUrl = "http://localhost:5000")
+        private void Publish(string testFolder, string projectName, string configuration, string msBuildType, bool isStandAlone = false, string resultUrl = "http://localhost:5000")
         {
-            int? runningProcess = null;
-            HttpResponseMessage result = null;
-            try
+            int? exitCode = 0;
+
+            // dotnet restore
+            string dotnetRestoreArguments = "restore";
+            exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotnetRestoreArguments, testFolder, out int? processId2);
+            Assert.True(exitCode.HasValue && exitCode.Value == 0);
+
+            // dotnet build
+            string dotnetBuildArguments = "build";
+            exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotnetBuildArguments, testFolder, out int? processId3);
+            Assert.True(exitCode.HasValue && exitCode.Value == 0);
+
+            // msbuild publish
+            string fileName = "msbuild";
+            string publishOutputFolder = $"bin\\{configuration}\\PublishOutput";
+            string dotnetPublishArguments = $"{projectName}.csproj /p:DeployOnBuild=true /p:Configuration={configuration} /p:PublishUrl={publishOutputFolder}";
+            if (string.Equals(msBuildType, "core"))
             {
-                int? exitCode = 0;
-
-                // dotnet restore
-                string dotnetRestoreArguments = "restore";
-                exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotnetRestoreArguments, testFolder, out int? processId2);
-                Assert.True(exitCode.HasValue && exitCode.Value == 0);
-
-                // dotnet build
-                string dotnetBuildArguments = "build";
-                exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotnetBuildArguments, testFolder, out int? processId3);
-                Assert.True(exitCode.HasValue && exitCode.Value == 0);
-
-                // msbuild publish
-                string fileName = "msbuild";
-                string publishOutputFolder = $"bin\\{configuration}\\PublishOutput";
-                string dotnetPublishArguments = $"{projectName}.csproj /p:DeployOnBuild=true /p:Configuration={configuration} /p:PublishUrl={publishOutputFolder}";
-                if (string.Equals(msBuildType, "core"))
-                {
-                    dotnetPublishArguments = $"{fileName} {dotnetPublishArguments}";
-                    fileName = DotNetExeName;
-                }
-                exitCode = new ProcessWrapper().RunProcess(fileName, dotnetPublishArguments, testFolder, out int? processId4);
-                Assert.True(exitCode.HasValue && exitCode.Value == 0);
-
-                string publishOutputFolderFullPath = Path.Combine(testFolder, publishOutputFolder);
-                string dotNetRunArguments = $"{projectName}.dll";
+                dotnetPublishArguments = $"{fileName} {dotnetPublishArguments}";
                 fileName = DotNetExeName;
-                if (isStandAlone)
-                {
-                    dotNetRunArguments = null;
-                    fileName = Path.Combine(publishOutputFolderFullPath, $"{projectName}.exe");
-                }
-                exitCode = new ProcessWrapper().RunProcess(fileName, dotNetRunArguments, publishOutputFolderFullPath, out runningProcess, waitForExit: false);
-
-                // Wait for 2 seconds for the application to start
-                await Task.Delay(TimeSpan.FromSeconds(2));
-
-                CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                while (!tokenSource.IsCancellationRequested)
-                {
-                    try
-                    {
-                        using (HttpClient client = new HttpClient())
-                        {
-                            result = await client.GetAsync(resultUrl);
-                            if (result.StatusCode == System.Net.HttpStatusCode.OK)
-                            {
-                                break;
-                            }
-                            await Task.Delay(100);
-                        }
-                    }
-                    catch
-                    {
-                        throw new Exception("Application is not running");
-                    }
-                }
             }
-            finally
-            {
-                if (runningProcess != null)
-                {
-                    ProcessWrapper.KillProcessTree(runningProcess.Value);
-                }
-            }
+            exitCode = new ProcessWrapper().RunProcess(fileName, dotnetPublishArguments, testFolder, out int? processId4);
+            Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
+            string publishOutputFolderFullPath = Path.Combine(testFolder, publishOutputFolder);
+
+            Assert.True(File.Exists(Path.Combine(publishOutputFolderFullPath, "web.config")));
 
             try
             {
                 Directory.Delete(testFolder, true);
             }
             catch { }
-
-            Assert.True(result != null);
-            string resultText = await result.Content.ReadAsStringAsync();
-            return resultText;
         }
     }
 }
