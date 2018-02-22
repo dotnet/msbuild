@@ -8,7 +8,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
     {
         public FolderPublish10()
         {
-            Initialize();
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, DotNetInstallArgs, BaseTestDirectory, out int? processId1, createDirectoryIfNotExists: true);
+            if (exitCode.HasValue && exitCode != 0)
+            {
+                throw new Exception("1.0 Template installation failed");
+            }
         }
 
         public string BaseTestDirectory
@@ -16,15 +20,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             get
             {
                 return Path.Combine(AppContext.BaseDirectory, nameof(FolderPublish10));
-            }
-        }
-
-        public void Initialize()
-        {
-            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, DotNetInstallArgs, BaseTestDirectory, out int? processId1, createDirectoryIfNotExists: true);
-            if (exitCode.HasValue && exitCode != 0)
-            {
-                throw new Exception("1.0 Template installation failed");
             }
         }
 
