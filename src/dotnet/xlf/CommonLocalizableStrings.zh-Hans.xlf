@@ -676,8 +676,7 @@
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>Invalid XML: {0}</source>
-        <target state="needs-review-translation">工具的设置文件为无效 xml。
-{0}</target>
+        <target state="translated">无效的 XML: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
@@ -771,32 +770,32 @@ setx PATH "%PATH%;{1}"</target>
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
-        <target state="new">Tool defines a command with a missing name setting.</target>
+        <target state="translated">工具使用缺失的名称设置定义命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingEntryPoint">
         <source>Command '{0}' is missing an entry point setting.</source>
-        <target state="new">Command '{0}' is missing an entry point setting.</target>
+        <target state="translated">命令“{0}”缺少入口点设置。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidCommandName">
         <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
-        <target state="new">Command '{0}' contains one or more of the following invalid characters: {1}.</target>
+        <target state="translated">命令“{0}”包含一个或多个以下无效字符: {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMoreThanOneCommand">
         <source>More than one command is defined for the tool.</source>
-        <target state="new">More than one command is defined for the tool.</target>
+        <target state="translated">为工具定义了多个命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsUnsupportedRunner">
         <source>Command '{0}' uses unsupported runner '{1}'."</source>
-        <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
+        <target state="translated">命令“{0}”使用不受支持的运行程序“{1}”。”</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">已安装工具“{0}”。</target>
         <note />
       </trans-unit>
     </body>

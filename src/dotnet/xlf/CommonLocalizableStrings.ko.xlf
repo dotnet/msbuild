@@ -595,7 +595,7 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}.</source>
-        <target state="translated">‘{0}’ 프로젝트를 평가할 수 없습니다. 다음 오류와 함께 평가가 실패했습니다.
+        <target state="translated">'{0}' 프로젝트를 평가할 수 없습니다. 다음 오류와 함께 평가가 실패했습니다.
 {1}</target>
         <note />
       </trans-unit>
@@ -676,8 +676,7 @@
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>Invalid XML: {0}</source>
-        <target state="needs-review-translation">도구의 설정 파일이 잘못된 xml입니다.
-{0}</target>
+        <target state="translated">잘못된 XML: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
@@ -771,32 +770,32 @@ setx PATH "%PATH%;{1}"</target>
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
-        <target state="new">Tool defines a command with a missing name setting.</target>
+        <target state="translated">도구에서 이름 설정 없이 명령을 정의합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingEntryPoint">
         <source>Command '{0}' is missing an entry point setting.</source>
-        <target state="new">Command '{0}' is missing an entry point setting.</target>
+        <target state="translated">'{0}' 명령에 진입점 설정이 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidCommandName">
         <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
-        <target state="new">Command '{0}' contains one or more of the following invalid characters: {1}.</target>
+        <target state="translated">'{0}' 명령에 다음과 같은 잘못된 문자가 하나 이상 포함되어 있습니다. {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMoreThanOneCommand">
         <source>More than one command is defined for the tool.</source>
-        <target state="new">More than one command is defined for the tool.</target>
+        <target state="translated">도구에 대해 두 개 이상의 명령이 등록되어 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsUnsupportedRunner">
         <source>Command '{0}' uses unsupported runner '{1}'."</source>
-        <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
+        <target state="translated">'{0}' 명령에서 지원되지 않는 실행기 '{1}'을(를) 사용합니다."</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">'{0}' 도구가 이미 설치되어 있습니다.</target>
         <note />
       </trans-unit>
     </body>

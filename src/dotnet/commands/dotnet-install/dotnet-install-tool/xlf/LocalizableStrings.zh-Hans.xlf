@@ -82,22 +82,22 @@ WorkingDirectory: {0}
       </trans-unit>
       <trans-unit id="InvalidToolConfiguration">
         <source>The settings file in the tool's NuGet package is invalid: {0}</source>
-        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <target state="translated">工具的 NuGet 包中的设置文件无效: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">工具“{0}”安装失败。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <target state="translated">工具“{0}”安装失败。请联系工具作者获取帮助。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
         <source>The tool package could not be restored.</source>
-        <target state="new">The tool package could not be restored.</target>
+        <target state="translated">无法还原工具包。</target>
         <note />
       </trans-unit>
     </body>

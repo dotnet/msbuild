@@ -676,8 +676,7 @@
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>Invalid XML: {0}</source>
-        <target state="needs-review-translation">O arquivo de configuração da ferramenta é um XML inválido.
-{0}</target>
+        <target state="translated">XML inválido: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
@@ -771,32 +770,32 @@ setx PATH "%PATH%;{1}"</target>
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
-        <target state="new">Tool defines a command with a missing name setting.</target>
+        <target state="translated">A ferramenta define um comando com uma configuração de nome ausente.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingEntryPoint">
         <source>Command '{0}' is missing an entry point setting.</source>
-        <target state="new">Command '{0}' is missing an entry point setting.</target>
+        <target state="translated">Há uma configuração de ponto de entrada ausente no comando '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidCommandName">
         <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
-        <target state="new">Command '{0}' contains one or more of the following invalid characters: {1}.</target>
+        <target state="translated">O comando '{0}' contém um ou mais dos seguintes caracteres inválidos: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMoreThanOneCommand">
         <source>More than one command is defined for the tool.</source>
-        <target state="new">More than one command is defined for the tool.</target>
+        <target state="translated">Há mais de um comando definido para a ferramenta.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsUnsupportedRunner">
         <source>Command '{0}' uses unsupported runner '{1}'."</source>
-        <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
+        <target state="translated">O comando '{0}' usa um executor '{1}' sem suporte."</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">A ferramenta '{0}' já está instalada.</target>
         <note />
       </trans-unit>
     </body>

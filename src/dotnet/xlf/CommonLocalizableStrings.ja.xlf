@@ -676,8 +676,7 @@
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>Invalid XML: {0}</source>
-        <target state="needs-review-translation">ツールの設定ファイルは無効な xml です。
-{0}</target>
+        <target state="translated">XML が無効です: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
@@ -771,32 +770,32 @@ setx PATH "%PATH%;{1}"</target>
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
-        <target state="new">Tool defines a command with a missing name setting.</target>
+        <target state="translated">ツールは、名前設定がないコマンドを定義します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingEntryPoint">
         <source>Command '{0}' is missing an entry point setting.</source>
-        <target state="new">Command '{0}' is missing an entry point setting.</target>
+        <target state="translated">コマンド '{0}' にエントリ ポイント設定がありません。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidCommandName">
         <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
-        <target state="new">Command '{0}' contains one or more of the following invalid characters: {1}.</target>
+        <target state="translated">コマンド '{0}' には次の無効な文字が 1 つまたは複数含まれています: {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMoreThanOneCommand">
         <source>More than one command is defined for the tool.</source>
-        <target state="new">More than one command is defined for the tool.</target>
+        <target state="translated">ツールに対して複数のコマンドが定義されています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsUnsupportedRunner">
         <source>Command '{0}' uses unsupported runner '{1}'."</source>
-        <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
+        <target state="translated">コマンド '{0}' はサポートされていないランナー '{1}' を使用します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">ツール '{0}' は既にインストールされています。</target>
         <note />
       </trans-unit>
     </body>

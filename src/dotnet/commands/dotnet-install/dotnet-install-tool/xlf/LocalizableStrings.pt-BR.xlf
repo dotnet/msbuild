@@ -82,22 +82,22 @@ Output: {2}{3}</target>
       </trans-unit>
       <trans-unit id="InvalidToolConfiguration">
         <source>The settings file in the tool's NuGet package is invalid: {0}</source>
-        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <target state="translated">O arquivo de configurações no pacote NuGet da ferramenta é inválido: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">Não foi possível instalar a ferramenta '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <target state="translated">Não foi possível instalar a ferramenta '{0}'. Entre em contato com o autor da ferramenta para obter assistência.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
         <source>The tool package could not be restored.</source>
-        <target state="new">The tool package could not be restored.</target>
+        <target state="translated">O pacote da ferramenta não pôde ser restaurado.</target>
         <note />
       </trans-unit>
     </body>

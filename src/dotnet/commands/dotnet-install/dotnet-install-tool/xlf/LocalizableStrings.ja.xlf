@@ -82,22 +82,22 @@ Output: {2}{3}</source>
       </trans-unit>
       <trans-unit id="InvalidToolConfiguration">
         <source>The settings file in the tool's NuGet package is invalid: {0}</source>
-        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <target state="translated">ツールの NuGet パッケージ内の設定ファイルが無効です: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">ツール '{0}' をインストールできませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <target state="translated">ツール '{0}' をインストールできませんでした。ツールの作成者にお問い合わせください。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
         <source>The tool package could not be restored.</source>
-        <target state="new">The tool package could not be restored.</target>
+        <target state="translated">ツール パッケージを復元できませんでした。</target>
         <note />
       </trans-unit>
     </body>
