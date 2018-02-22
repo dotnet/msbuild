@@ -310,7 +310,7 @@
     <value>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</value>
   </data>
   <data name="GetDependsOnNETStandardFailedWithException" xml:space="preserve">
-    <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</value>
+    <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</value>
   </data>
   <data name="UnsupportedSDKVersionForNetStandard20" xml:space="preserve">
     <value>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</value>
@@ -320,5 +320,8 @@
   </data>
   <data name="FrameworkListPathNotRooted" xml:space="preserve">
     <value>Framework list file path '{0}' is not rooted. Only full paths are supported.</value>
+  </data>
+  <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
+    <value>Pack as tool does not support self contained.</value>
   </data>
 </root>

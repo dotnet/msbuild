@@ -1,17 +1,21 @@
-﻿using FluentAssertions;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
+
+using FluentAssertions;
+
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Xml.Linq;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,6 +25,38 @@ namespace Microsoft.NET.Build.Tests
     {
         public GivenThatWeWantToBuildADesktopLibrary(ITestOutputHelper log) : base(log)
         {
+        }
+
+        [WindowsOnlyFact]
+        public void It_gets_implicit_designtime_facades_when_package_reference_uses_system_runtime()
+        {
+            // The repro here is very sensitive to the target framework and packages used. This specific case
+            // net46 using only System.Collections.Immutable v1.4.0 will not pull in System.Runtime from a
+            // package or from Microsoft.NET.Build.Extensions as a primary reference and so RARs dependency
+            // walk needs to find it in order for ImplictlyExpandDesignTimeFacades to inject it.
+
+            var netFrameworkLibrary = new TestProject()
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net46",
+                IsSdkProject = true,
+            };
+
+            netFrameworkLibrary.PackageReferences.Add(new TestPackageReference("System.Collections.Immutable", "1.4.0"));
+
+            netFrameworkLibrary.SourceFiles["NETFramework.cs"] = @"
+                using System.Collections.Immutable;
+                public class NETFramework
+                {
+                    public void Method1()
+                    {
+                        ImmutableList<string>.Empty.Add("""");
+                    }
+                }";
+
+            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "FacadesFromTargetFramework").Restore(Log, netFrameworkLibrary.Name);
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            buildCommand.Execute().Should().Pass();
         }
 
         [WindowsOnlyFact]
@@ -215,7 +251,7 @@ public class NETFramework
             }
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/1803")]
         public void It_resolves_assembly_conflicts_with_a_NETFramework_library()
         {
             TestProject project = new TestProject()
@@ -252,14 +288,14 @@ public static class {project.Name}
                     }
 
                 })
-                .Restore(Log, project.Name);
+                .Restore(Log, project.Name, "/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json");
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
             var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
-                .Execute()
+                .Execute("/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json")
                 .Should()
                 .Pass()
                 .And
@@ -268,16 +304,11 @@ public static class {project.Name}
                 .NotHaveStdOutContaining("MSB3243");
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(false)]
         [InlineData(true)]
         public void It_uses_hintpath_when_replacing_simple_name_references(bool useFacades)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             TestProject project = new TestProject()
             {
                 Name = "NETFrameworkLibrary",
@@ -348,11 +379,85 @@ public static class {project.Name}
 
             //  There should be a Reference item where the ItemSpec is the simple name System.Net.Http
             valuesWithMetadata.Should().ContainSingle(v => v.value == "System.Net.Http");
-            
+
             //  The Reference item with the simple name should have a HintPath to the DLL in the NuGet package
             valuesWithMetadata.Single(v => v.value == "System.Net.Http")
                 .metadata["HintPath"]
-                .Should().Be(correctHttpReference);            
+                .Should().Be(correctHttpReference);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(null)]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_marks_extension_references_as_externally_resolved(bool? markAsExternallyResolved)
+        {
+            var project = new TestProject
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net462",
+                IsSdkProject = true
+            };
+
+            var netStandard2Project = new TestProject
+            {
+                Name = "NETStandard20Project",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true
+            };
+
+            project.ReferencedProjects.Add(netStandard2Project);
+
+            var asset = _testAssetsManager.CreateTestProject(
+                project,
+                "ExternallyResolvedExtensions",
+                markAsExternallyResolved.ToString())
+                .WithProjectChanges((path, p) =>
+                {
+                    if (markAsExternallyResolved != null)
+                    {
+                        var ns = p.Root.Name.Namespace;
+                        p.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "MarkNETFrameworkExtensionAssembliesAsExternallyResolved",
+                                    markAsExternallyResolved)));
+                    }
+                })
+                .Restore(Log, project.Name);
+
+            var command = new GetValuesCommand(
+                Log,
+                Path.Combine(asset.Path, project.Name),
+                project.TargetFrameworks,
+                "Reference",
+                GetValuesCommand.ValueType.Item);
+
+            command.MetadataNames.AddRange(new[] { "ExternallyResolved", "HintPath" });
+            command.Execute().Should().Pass();
+
+            int frameworkReferenceCount = 0;
+            int extensionReferenceCount = 0;
+            var references = command.GetValuesWithMetadata();
+
+            foreach (var (value, metadata) in references)
+            {
+                if (metadata["HintPath"] == "")
+                {
+                    // implicit framework reference (not externally resolved)
+                    metadata["ExternallyResolved"].Should().BeEmpty();
+                    frameworkReferenceCount++;
+                }
+                else
+                {
+                    // reference added by Microsoft.NET.Build.Extensions
+                    metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true).ToString());
+                    extensionReferenceCount++;
+                }
+            }
+
+            // make sure both cases were encountered
+            frameworkReferenceCount.Should().BeGreaterThan(0);
+            extensionReferenceCount.Should().BeGreaterThan(0);
         }
     }
 }

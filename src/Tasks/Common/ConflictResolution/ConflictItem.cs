@@ -24,6 +24,11 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         Version FileVersion { get; }
         string PackageId { get; }
         string DisplayName { get; }
+
+        // NOTE: Technically this should be NuGetVersion because System.Version doesn't work with semver.
+        // However, the only scenarios we need to support this property for in conflict resolution is stable versions
+        // of System packages. PackageVersion will be null if System.Version can't parse the version (i.e. if is pre-release)
+        Version PackageVersion { get; }
     }
 
     // Wraps an ITask item and adds lazy evaluated properties used by Conflict resolution.
@@ -103,7 +108,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             {
                 if (_fileName == null)
                 {
-                    _fileName = OriginalItem == null ? String.Empty : OriginalItem.GetMetadata(MetadataNames.FileName) + OriginalItem.GetMetadata(MetadataNames.Extension);
+                    _fileName = OriginalItem == null ? String.Empty : Path.GetFileName(OriginalItem.ItemSpec);
                 }
                 return _fileName;
             }
@@ -165,7 +170,31 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             }
             private set { _packageId = value; }
         }
-        
+
+        private bool _hasPackageVersion;
+        private Version _packageVersion;
+        public Version PackageVersion
+        {
+            get
+            {
+                if (!_hasPackageVersion)
+                {
+                    _packageVersion = null;
+
+                    var packageVersionString = OriginalItem?.GetMetadata(nameof(MetadataNames.NuGetPackageVersion)) ?? String.Empty;
+
+                    if (packageVersionString.Length != 0)
+                    {
+                        Version.TryParse(packageVersionString, out _packageVersion);
+                    }
+
+                    // PackageVersion may be null but don't try to recalculate it
+                    _hasPackageVersion = true;
+                }
+
+                return _packageVersion;
+            }
+        }
 
         private string _sourcePath;
         public string SourcePath

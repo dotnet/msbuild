@@ -152,5 +152,45 @@ namespace Microsoft.NET.Build.Tests
                 return command;
             }
         }
+
+        [Fact]
+        public void It_respects_custom_assembly_atrribute_items_on_incremental_build()
+        {
+            var targetFramework = "netstandard1.5";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("KitchenSink", identifier: targetFramework)
+                .WithSource()
+                .Restore(Log, "TestLibrary");
+
+            var firstBuildCommand = BuildProject(buildNumber: "1");
+            var assemblyPath = Path.Combine(firstBuildCommand.GetOutputDirectory(targetFramework).FullName, "TestLibrary.dll");
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("BuildNumber:1");
+
+            var firstWriteTime = File.GetLastWriteTimeUtc(assemblyPath);
+
+            // When rebuilding with the same value
+            BuildProject(buildNumber: "1");
+
+            // the build should no-op.
+            File.GetLastWriteTimeUtc(assemblyPath).Should().Be(firstWriteTime);
+
+            // When the same project is built again using a different build number
+            BuildProject(buildNumber: "2");
+
+            // the file should change
+            File.GetLastWriteTimeUtc(assemblyPath).Should().NotBe(firstWriteTime);
+
+            // and the custom assembly should be generated with the updated value.
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("BuildNumber:2");
+
+            BuildCommand BuildProject(string buildNumber)
+            {
+                var command = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "TestLibrary"));
+                command.Execute($"/p:BuildNumber={buildNumber}")
+                       .Should()
+                       .Pass();
+                return command;
+            }
+        }
     }
 }

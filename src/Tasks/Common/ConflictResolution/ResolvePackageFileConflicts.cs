@@ -31,6 +31,17 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         /// </summary>
         public string[] PreferredPackages { get; set; }
 
+        /// <summary>
+        /// A collection of items that contain information of which packages get overridden
+        /// by which packages before doing any other conflict resolution.
+        /// </summary>
+        /// <remarks>
+        /// This is an optimizaiton so AssemblyVersions, FileVersions, etc. don't need to be read
+        /// in the default cases where platform packages (Microsoft.NETCore.App) should override specific packages
+        /// (System.Console v4.3.0).
+        /// </remarks>
+        public ITaskItem[] PackageOverrides { get; set; }
+
         [Output]
         public ITaskItem[] ReferencesWithoutConflicts { get; set; }
 
@@ -44,6 +55,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         {
             var log = new MSBuildLog(Log);
             var packageRanks = new PackageRank(PreferredPackages);
+            var packageOverrides = new PackageOverrideResolver<ConflictItem>(PackageOverrides);
 
             //  Treat assemblies from FrameworkList.xml as platform assemblies that also get considered at compile time
             IEnumerable<ConflictItem> compilePlatformItems = null;
@@ -60,7 +72,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             // resolve conflicts at compile time
             var referenceItems = GetConflictTaskItems(References, ConflictItemType.Reference).ToArray();
 
-            var compileConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
+            var compileConflictScope = new ConflictResolver<ConflictItem>(packageRanks, packageOverrides, log);
 
             compileConflictScope.ResolveConflicts(referenceItems,
                 ci => ItemUtilities.GetReferenceFileName(ci.OriginalItem),
@@ -74,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             }
 
             // resolve conflicts that class in output
-            var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
+            var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, packageOverrides, log);
 
             runtimeConflictScope.ResolveConflicts(referenceItems,
                 ci => ItemUtilities.GetReferenceTargetPath(ci.OriginalItem),
@@ -95,7 +107,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             // resolve conflicts with platform (eg: shared framework) items
             // we only commit the platform items since its not a conflict if other items share the same filename.
-            var platformConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
+            var platformConflictScope = new ConflictResolver<ConflictItem>(packageRanks, packageOverrides, log);
             var platformItems = PlatformManifests?.SelectMany(pm => PlatformManifestReader.LoadConflictItems(pm.ItemSpec, log)) ?? Enumerable.Empty<ConflictItem>();
 
             if (compilePlatformItems != null)

@@ -118,19 +118,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- List of supported .NET Core and .NET Standard TFMs -->
   <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
 
-  <!-- Temporary workarounds -->
-  <PropertyGroup>
-    <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
-    <NoLogo Condition=" '$(NoLogo)' == '' ">true</NoLogo>
-
-    <!-- Workaround: https://github.com/Microsoft/msbuild/issues/720 -->
-    <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
-  </PropertyGroup>
-
-  <!-- Workaround: https://github.com/dotnet/sdk/issues/1001 -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
-
   <!-- Workaround: https://github.com/dotnet/sdk/issues/1001 -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
@@ -138,4 +125,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
+
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
 </Project>

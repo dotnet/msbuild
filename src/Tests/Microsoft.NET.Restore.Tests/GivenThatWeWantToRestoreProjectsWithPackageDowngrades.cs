@@ -22,8 +22,7 @@ namespace Microsoft.NET.Restore.Tests
         {
         }
 
-        // https://github.com/dotnet/sdk/issues/1327
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void DowngradeWarningsAreErrorsByDefault()
         {
             const string testProjectName = "ProjectWithDowngradeWarning";

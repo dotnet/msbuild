@@ -60,7 +60,6 @@ namespace Microsoft.NET.Build.Tests
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
@@ -122,7 +121,6 @@ namespace Microsoft.NET.Build.Tests
 			string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
 			Command.Create(selfContainedExecutableFullPath, new string[] { })
-				.EnsureExecutable()
 				.CaptureStdOut()
 				.Execute()
 				.Should()

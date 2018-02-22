@@ -84,8 +84,7 @@ function InstallDotNetCli {
     $env:MSBuildSDKsPath = Join-Path $ArtifactsConfigurationDir "bin\Sdks"
     $env:DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = $env:MSBuildSDKsPath
     $env:NETCoreSdkBundledVersionsProps = Join-Path $DotNetRoot "sdk\$DotNetCliVersion\Microsoft.NETCoreSdk.BundledVersions.props"
-    $env:CustomAfterMicrosoftCommonTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions-ver\Microsoft.Common.Targets\ImportAfter\Microsoft.NET.Build.Extensions.targets"
-    $env:MicrosoftNETBuildExtensionsTargets = $env:CustomAfterMicrosoftCommonTargets
+    $env:MicrosoftNETBuildExtensionsTargets = Join-Path $env:MSBuildSDKsPath "Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft.Common.Targets\ImportAfter\Microsoft.NET.Build.Extensions.targets"
   }
 
   if (!(Test-Path $DotNetInstallScript)) {
@@ -115,7 +114,7 @@ function InstallDotNetCli {
 
   if (!(Test-Path $NetCoreApp10Dir)) {
     # Use Invoke-Expression so that $DotNetInstallVerbosity is not positionally bound when empty
-    Invoke-Expression -Command "$DotNetInstallScript -Channel `"Preview`" -Version $NetCoreApp10Version -SharedRuntime $DotNetInstallVerbosity"
+    Invoke-Expression -Command "$DotNetInstallScript -Version $NetCoreApp10Version -SharedRuntime $DotNetInstallVerbosity"
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to install 1.0 shared framework"
@@ -128,10 +127,23 @@ function InstallDotNetCli {
 
   if (!(Test-Path $NetCoreApp11Dir)) {
     # Use Invoke-Expression so that $DotNetInstallVerbosity is not positionally bound when empty
-    Invoke-Expression -Command "$DotNetInstallScript -Channel `"Release/1.1.0`" -Version $NetCoreApp11Version -SharedRuntime $DotNetInstallVerbosity"
+    Invoke-Expression -Command "$DotNetInstallScript -Version $NetCoreApp11Version -SharedRuntime $DotNetInstallVerbosity"
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to install 1.1 shared framework"
+    }
+  }
+
+  # Install 2.0 shared framework
+  $NetCoreApp20Version = "2.0.0"
+  $NetCoreApp20Dir = Join-Path $DotNetRoot "shared\Microsoft.NETCore.App\$NetCoreApp20Version"
+
+  if (!(Test-Path $NetCoreApp20Dir)) {
+    # Use Invoke-Expression so that $DotNetInstallVerbosity is not positionally bound when empty
+    Invoke-Expression -Command "$DotNetInstallScript -Version $NetCoreApp20Version -SharedRuntime $DotNetInstallVerbosity"
+
+    if($LASTEXITCODE -ne 0) {
+      throw "Failed to install 2.0 shared framework"
     }
   }
 

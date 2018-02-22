@@ -1,22 +1,24 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using NuGet.Packaging;
-using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Xml.Linq;
-using Xunit;
+
+using FluentAssertions;
+
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
+
+using NuGet.Packaging;
+using NuGet.ProjectModel;
+
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
@@ -35,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "TestTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = "netcoreapp2.1",
                 IsExe = true
             };
 
@@ -53,7 +55,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DependencyContextTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = "netcoreapp2.1",
                 IsExe = true
             };
 
@@ -94,7 +96,7 @@ class Program
             DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant()));
 
             var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name)
-                .Restore(Log, toolProject.Name);
+                .Restore(Log, toolProject.Name, "/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json");
 
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
@@ -126,6 +128,7 @@ class Program
 
             var restoreCommand = toolReferencerInstance.GetRestoreCommand(Log, toolReferencer.Name);
             restoreCommand.AddSource(nupkgPath);
+            restoreCommand.AddSource("https://dotnet.myget.org/F/dotnet-core/api/v3/index.json");
             restoreCommand.Execute().Should().Pass();
 
             string toolAssetsFilePath = Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "1.0.0", toolProject.TargetFrameworks, "project.assets.json");

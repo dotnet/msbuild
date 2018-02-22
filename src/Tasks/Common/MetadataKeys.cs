@@ -50,5 +50,8 @@ namespace Microsoft.NET.Build.Tasks
 
         // Publish Target Manifest
         public const string RuntimeStoreManifestNames = "RuntimeStoreManifestNames";
+
+        // Conflict Resolution
+        public const string OverriddenPackages = "OverriddenPackages";
     }
 }

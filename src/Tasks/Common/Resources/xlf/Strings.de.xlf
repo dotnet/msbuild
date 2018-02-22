@@ -318,8 +318,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
-        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="translated">Die aufgelöste Datei enthält ein fehlerhaftes Image oder keine Metadaten, oder der Zugriff ist aus anderen Gründen nicht möglich. {0}</target>
+        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
+        <target state="translated">Die aufgelöste Datei enthält ein fehlerhaftes Image oder keine Metadaten, oder der Zugriff ist aus anderen Gründen nicht möglich. {0} {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
@@ -340,6 +340,11 @@
       <trans-unit id="FrameworkListPathNotRooted">
         <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
         <target state="translated">Der Framework-Listendateipfad "{0}" hat keinen Stamm. Nur vollständige Pfade werden unterstützt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="new">Pack as tool does not support self contained.</target>
         <note />
       </trans-unit>
     </body>

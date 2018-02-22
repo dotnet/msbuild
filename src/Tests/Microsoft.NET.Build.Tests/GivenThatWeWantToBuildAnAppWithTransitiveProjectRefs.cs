@@ -117,5 +117,28 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().OnlyHaveFiles(Array.Empty<string>());
         }
+
+        [Fact]
+        public void It_does_not_build_the_project_successfully()
+        {
+            // NOTE the project dependencies in AppWithTransitiveProjectRefs:
+            // TestApp --depends on--> MainLibrary --depends on--> AuxLibrary
+            // (TestApp transitively depends on AuxLibrary)
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithTransitiveProjectRefs", "BuildAppWithTransitiveProjectRefDisabled")
+                .WithSource();
+
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "MainLibrary");
+            testAsset.Restore(Log, "AuxLibrary");
+
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            buildCommand
+                .Execute("/p:DisableTransitiveProjectReferences=true")
+                .Should()
+                .Fail();
+        }
     }
 }
