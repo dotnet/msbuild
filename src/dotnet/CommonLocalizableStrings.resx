@@ -610,11 +610,11 @@ setx PATH "%PATH%;{0}"
   <data name="FailedToUninstallToolPackage" xml:space="preserve">
     <value>Failed to uninstall tool package '{0}': {1}</value>
   </data>
-  <data name="ToolPackageMissingEntryPointFile" xml:space="preserve">
-    <value>Package '{0}' is missing entry point file {1}.</value>
+  <data name="MissingToolEntryPointFile" xml:space="preserve">
+    <value>Entry point file '{0}' for command '{1}' was not found in the package.</value>
   </data>
-  <data name="ToolPackageMissingSettingsFile" xml:space="preserve">
-    <value>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</value>
+  <data name="MissingToolSettingsFile" xml:space="preserve">
+    <value>Settings file 'DotnetToolSettings.xml' was not found in the package.</value>
   </data>
   <data name="ToolPackageConflictPackageId" xml:space="preserve">
     <value>Tool '{0}' (version '{1}') is already installed.</value>

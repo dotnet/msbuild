@@ -109,10 +109,8 @@ namespace Microsoft.DotNet.ToolPackage
                 var dotnetToolSettings = FindItemInTargetLibrary(library, ToolSettingsFileName);
                 if (dotnetToolSettings == null)
                 {
-                    throw new ToolPackageException(
-                        string.Format(
-                            CommonLocalizableStrings.ToolPackageMissingSettingsFile,
-                            PackageId));
+                    throw new ToolConfigurationException(
+                        CommonLocalizableStrings.MissingToolSettingsFile);
                 }
 
                 var toolConfigurationPath =
@@ -127,11 +125,11 @@ namespace Microsoft.DotNet.ToolPackage
                 var entryPointFromLockFile = FindItemInTargetLibrary(library, configuration.ToolAssemblyEntryPoint);
                 if (entryPointFromLockFile == null)
                 {
-                    throw new ToolPackageException(
+                    throw new ToolConfigurationException(
                         string.Format(
-                            CommonLocalizableStrings.ToolPackageMissingEntryPointFile,
-                            PackageId,
-                            configuration.ToolAssemblyEntryPoint));
+                            CommonLocalizableStrings.MissingToolEntryPointFile,
+                            configuration.ToolAssemblyEntryPoint,
+                            configuration.CommandName));
                 }
 
                 // Currently only "dotnet" commands are supported
@@ -148,10 +146,9 @@ namespace Microsoft.DotNet.ToolPackage
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
             {
-                throw new ToolPackageException(
+                throw new ToolConfigurationException(
                     string.Format(
                         CommonLocalizableStrings.FailedToRetrieveToolConfiguration,
-                        PackageId,
                         ex.Message),
                     ex);
             }

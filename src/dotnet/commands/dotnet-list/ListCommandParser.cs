@@ -3,24 +3,24 @@
 
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
+using Microsoft.DotNet.Tools.List.Tool;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class ListCommandParser
     {
-        public static Command List() =>
-            Create.Command("list",
-                           LocalizableStrings.NetListCommand,
-                           Accept.ZeroOrOneArgument()
-                                 .With(name: CommonLocalizableStrings.CmdProjectFile,
-                                       description:
-                                       CommonLocalizableStrings.ArgumentsProjectDescription)
-                                 .DefaultToCurrentDirectory(),
-                           CommonOptions.HelpOption(),
-                           Create.Command("reference",
-                                          Tools.List.ProjectToProjectReferences.LocalizableStrings.AppFullName,
-                                          Accept.ZeroOrOneArgument(),
-                                          CommonOptions.HelpOption()));
+        public static Command List() => Create.Command(
+            "list",
+            LocalizableStrings.NetListCommand,
+            Accept.ZeroOrOneArgument()
+                .With(
+                    name: CommonLocalizableStrings.CmdProjectFile,
+                    description: CommonLocalizableStrings.ArgumentsProjectDescription)
+                .DefaultToCurrentDirectory(),
+            CommonOptions.HelpOption(),
+            ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences(),
+            ListToolCommandParser.ListTool());
     }
 }

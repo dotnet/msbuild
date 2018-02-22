@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List reference in the project.</source>
-        <target state="translated">Projede başvuruyu listeleyin.</target>
+        <source>List project references or installed tools.</source>
+        <target state="needs-review-translation">Projede başvuruyu listeleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">

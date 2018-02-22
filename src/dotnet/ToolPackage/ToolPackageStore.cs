@@ -15,13 +15,37 @@ namespace Microsoft.DotNet.ToolPackage
 
         public DirectoryPath Root { get; private set; }
 
-        public IEnumerable<IToolPackage> GetInstalledPackages(string packageId)
+        public IEnumerable<IToolPackage> GetInstalledPackages(string packageId = null)
         {
-            if (packageId == null)
+            if (packageId != null)
             {
-                throw new ArgumentNullException(nameof(packageId));
+                return EnumerateVersions(packageId);
             }
 
+            return EnumerateAllPackages().SelectMany(p => p);
+        }
+
+        private IEnumerable<IEnumerable<IToolPackage>> EnumerateAllPackages()
+        {
+            if (!Directory.Exists(Root.Value))
+            {
+                yield break;
+            }
+
+            foreach (var subdirectory in Directory.EnumerateDirectories(Root.Value))
+            {
+                var packageId = Path.GetFileName(subdirectory);
+                if (packageId == ToolPackageInstaller.StagingDirectory)
+                {
+                    continue;
+                }
+
+                yield return EnumerateVersions(packageId);
+            }
+        }
+
+        private IEnumerable<IToolPackage> EnumerateVersions(string packageId)
+        {
             var packageRootDirectory = Root.WithSubDirectories(packageId);
             if (!Directory.Exists(packageRootDirectory.Value))
             {

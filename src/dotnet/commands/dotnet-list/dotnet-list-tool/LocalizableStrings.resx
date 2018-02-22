@@ -117,14 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppFullName" xml:space="preserve">
-    <value>.NET Core Project-to-Project dependency viewer</value>
+  <data name="CommandDescription" xml:space="preserve">
+    <value>Lists installed tools in the current development environment.</value>
   </data>
-  <data name="AppDescription" xml:space="preserve">
-    <value>Command to list project to project references</value>
+  <data name="GlobalOptionDescription" xml:space="preserve">
+    <value>List user wide tools.</value>
   </data>
-  <data name="NoReferencesFound" xml:space="preserve">
-    <value>There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </value>
+  <data name="ListToolCommandOnlySupportsGlobal" xml:space="preserve">
+    <value>The --global switch (-g) is currently required because only user wide tools are supported.</value>
+  </data>
+  <data name="InvalidPackageWarning" xml:space="preserve">
+    <value>Warning: tool package '{0}' is invalid: {1}</value>
+  </data>
+  <data name="PackageIdColumn" xml:space="preserve">
+    <value>Package Id</value>
+  </data>
+  <data name="VersionColumn" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="CommandsColumn" xml:space="preserve">
+    <value>Commands</value>
   </data>
 </root>

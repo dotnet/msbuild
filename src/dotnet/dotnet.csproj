@@ -26,6 +26,7 @@
     <EmbeddedResource Update="**\dotnet-install\dotnet-install-tool\*.resx" Namespace="Microsoft.DotNet.Tools.Install.Tool" />
     <EmbeddedResource Update="**\dotnet-list\*.resx" Namespace="Microsoft.DotNet.Tools.List" />
     <EmbeddedResource Update="**\dotnet-list-reference\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectToProjectReferences" />
+    <EmbeddedResource Update="**\dotnet-list-tool\*.resx" Namespace="Microsoft.DotNet.Tools.List.Tool" />
     <EmbeddedResource Update="**\dotnet-migrate\*.resx" Namespace="Microsoft.DotNet.Tools.Migrate" />
     <EmbeddedResource Update="**\dotnet-msbuild\*.resx" Namespace="Microsoft.DotNet.Tools.MSBuild" />
     <EmbeddedResource Update="**\dotnet-pack\*.resx" Namespace="Microsoft.DotNet.Tools.Pack" />

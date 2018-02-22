@@ -694,16 +694,6 @@
         <target state="translated">Dado que acaba de instalar el SDK de .Net Core, tendrá que volver a abrir la ventana del símbolo del sistema antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPackageMissingEntryPointFile">
-        <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="translated">Al paquete "{0}" le falta el archivo de punto de entrada {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPackageMissingSettingsFile">
-        <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="translated">Al paquete "{0}" le falta el archivo de configuración de herramientas DotnetToolSettings.xml.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
         <target state="translated">La herramienta define un comando en el que falta un valor de nombre.</target>
@@ -851,6 +841,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
         <source>Column maximum width must be greater than zero.</source>
         <target state="new">Column maximum width must be greater than zero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
         <note />
       </trans-unit>
     </body>

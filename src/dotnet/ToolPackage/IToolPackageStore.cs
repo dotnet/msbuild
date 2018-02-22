@@ -11,6 +11,6 @@ namespace Microsoft.DotNet.ToolPackage
     {
         DirectoryPath Root { get; }
 
-        IEnumerable<IToolPackage> GetInstalledPackages(string packageId);
+        IEnumerable<IToolPackage> GetInstalledPackages(string packageId = null);
     }
 }

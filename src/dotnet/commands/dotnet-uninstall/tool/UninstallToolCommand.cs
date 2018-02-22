@@ -67,9 +67,9 @@ namespace Microsoft.DotNet.Tools.Uninstall.Tool
             catch (InvalidOperationException)
             {
                 _errorReporter.WriteLine(
-                string.Format(
-                    LocalizableStrings.ToolHasMultipleVersionsInstalled,
-                    packageId).Red());
+                    string.Format(
+                        LocalizableStrings.ToolHasMultipleVersionsInstalled,
+                        packageId).Red());
                 return 1;
             }
 

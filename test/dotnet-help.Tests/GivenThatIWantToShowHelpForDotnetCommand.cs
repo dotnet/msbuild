@@ -34,7 +34,7 @@ SDK commands:
   sln              Modify solution (SLN) files.
   add              Add reference to the project.
   remove           Remove reference from the project.
-  list             List reference in the project.
+  list             List project references or installed tools.
   nuget            Provides additional NuGet commands.
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.

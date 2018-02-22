@@ -694,16 +694,6 @@
         <target state="translated">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要重新打开命令提示符窗口。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPackageMissingEntryPointFile">
-        <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="translated">包“{0}”缺少入口点文件 {1}。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPackageMissingSettingsFile">
-        <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="translated">包“{0}”缺少工具设置文件 DotnetToolSettings.xml。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
         <target state="translated">工具使用缺失的名称设置定义命令。</target>
@@ -851,6 +841,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
         <source>Column maximum width must be greater than zero.</source>
         <target state="new">Column maximum width must be greater than zero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
         <note />
       </trans-unit>
     </body>
