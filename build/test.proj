@@ -82,7 +82,7 @@
 
     <!-- Run .NET Core Tests -->
     <Exec
-      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp1.1 /p:Configuration=$(Configuration)" />
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp2.0 /p:Configuration=$(Configuration)" />
 
     <!-- Run .NET Framework Tests -->
     <Exec
