@@ -18,6 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [InlineData("TestAssets.TemplateWithMultipleRenamesOnSameFile --fooRename base --barRename ball", "MultipleRenamesOnSameFileTest.json")]
         [InlineData("TestAssets.TemplateWithMultipleRenamesOnSameFileHandlesOverlap --fooRename pin --oobRename ball", "MultipleRenamesOnSameFileHandlesOverlapTest.json")]
         [InlineData("TestAssets.TemplateWithMultipleRenamesOnSameFileHandlesInducedOverlap --fooRename bar --barRename baz", "MultipleRenamesOnSameFileHandlesInducedOverlapTest.json")]
+        [InlineData("TestAssets.TemplateWithCaseSensitiveNameBasedRenames --name NewName", "CaseSensitiveNameBasedRenamesTest.json")]
         public void VerifyTemplateContentRenames(string args, params string[] scripts)
         {
             Run(args, scripts);

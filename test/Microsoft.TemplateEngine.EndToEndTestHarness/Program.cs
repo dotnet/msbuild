@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
@@ -203,9 +204,9 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
             var builtIns = new AssemblyComponentCatalog(new[]
             {
-                typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,
-                typeof(ConditionalConfig).GetTypeInfo().Assembly,
-                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly
+                typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
+                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
+                typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly     // for assembly: Microsoft.TemplateEngine.Cli
             });
 
             return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, new[] { "dotnetcli" });
