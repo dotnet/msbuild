@@ -51,6 +51,8 @@ using System.Security.Permissions;
 #endif
 #endif
 
+[assembly: ComVisible(false)]
+
 [assembly: CLSCompliant(true)]
 
 [assembly: AssemblyTitle("Microsoft.Build.dll")]

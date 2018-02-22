@@ -72,6 +72,8 @@ using System.Windows.Markup;
 #endif
 #endif
 
+[assembly: ComVisible(false)]
+
 [assembly: CLSCompliant(true)]
 
 [assembly: AssemblyTitle("Microsoft.Build.Framework.dll")]

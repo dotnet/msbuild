@@ -38,6 +38,8 @@ using System.Runtime.InteropServices;
 #endif
 #endif
 
+[assembly: ComVisible(false)]
+
 [assembly: CLSCompliant(true)]
 
 [assembly: AssemblyTitle("Microsoft.Build.Utilities.Core.dll")]

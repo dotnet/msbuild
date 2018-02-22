@@ -35,6 +35,8 @@ using System.Runtime.CompilerServices;
 #endif
 #endif
 
+[assembly: ComVisible(false)]
+
 [assembly: CLSCompliant(true)]
 
 [assembly: AssemblyTitle("Microsoft.Build.Tasks.Core.dll")]
