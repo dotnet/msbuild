@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
@@ -86,7 +86,16 @@ namespace Microsoft.TemplateEngine.Cli
                                 Choices = choicesAndDescriptions
                             };
 
-                            outputParams.Add(combinedParameter);
+                            if (combinedParameter is IAllowDefaultIfOptionWithoutValue combinedParamWithDefault
+                                && paramInfo.Value is IAllowDefaultIfOptionWithoutValue paramInfoValueWithDefault)
+                            {
+                                combinedParamWithDefault.DefaultIfOptionWithoutValue = paramInfoValueWithDefault.DefaultIfOptionWithoutValue;
+                                outputParams.Add(combinedParamWithDefault as TemplateParameter);
+                            }
+                            else
+                            {
+                                outputParams.Add(combinedParameter);
+                            }
                         }
                     }
 
@@ -153,6 +162,12 @@ namespace Microsoft.TemplateEngine.Cli
                 DataType = "string",
                 Choices = null
             };
+
+            if (parameter is IAllowDefaultIfOptionWithoutValue parameterWithNoValueDefault)
+            {
+                parameterWithNoValueDefault.DefaultIfOptionWithoutValue = null;
+                parameter = parameterWithNoValueDefault as TemplateParameter;
+            }
 
             return true;
         }
