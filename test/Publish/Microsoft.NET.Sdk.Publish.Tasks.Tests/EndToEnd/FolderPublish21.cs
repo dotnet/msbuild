@@ -5,13 +5,13 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
-    public class FolderPublish20
+    public class FolderPublish21
     {
         public string BaseTestDirectory
         {
             get
             {
-                return Path.Combine(AppContext.BaseDirectory, nameof(FolderPublish20));
+                return Path.Combine(AppContext.BaseDirectory, nameof(FolderPublish21));
             }
         }
 
@@ -19,14 +19,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         public const string DotNetNewAdditionalArgs = "";
         private readonly ITestOutputHelper _testOutputHelper;
 
-        public FolderPublish20(ITestOutputHelper testOutputHelper)
+        public FolderPublish21(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core")]
-        [InlineData("netcoreapp2.0", "Debug", "core")]
+        [InlineData("netcoreapp2.1", "Release", "core")]
+        [InlineData("netcoreapp2.1", "Debug", "core")]
         public void EmptyWebCore(string templateFramework, string configuration, string msBuildType)
         {
             string projectName = $"{nameof(EmptyWebCore)}_{Path.GetRandomFileName()}";
@@ -44,8 +44,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core")]
-        [InlineData("netcoreapp2.0", "Debug", "core")]
+        [InlineData("netcoreapp2.1", "Release", "core")]
+        [InlineData("netcoreapp2.1", "Debug", "core")]
         public void WebAPICore(string templateFramework, string configuration, string msBuildType)
         {
             string projectName = $"{nameof(WebAPICore)}_{Path.GetRandomFileName()}";
@@ -61,12 +61,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core", "none", "false")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "none", "false")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "false")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "false")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "true")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "true")]
+        [InlineData("netcoreapp2.1", "Release", "core", "none", "false")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "none", "false")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "false")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "false")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "true")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "true")]
         public void MvcCore(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB)
         {
             string projectName = $"{nameof(MvcCore)}_{Path.GetRandomFileName()}";
@@ -88,12 +88,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core", "none", "false")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "none", "false")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "false")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "false")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "true")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "true")]
+        [InlineData("netcoreapp2.1", "Release", "core", "none", "false")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "none", "false")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "false")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "false")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "true")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "true")]
         public void RazorCore(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB)
         {
             string projectName = $"{nameof(RazorCore)}_{Path.GetRandomFileName()}";
@@ -115,11 +115,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "net461")]
 
-        //[InlineData("netcoreapp2.0", "Release", "core", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "net462")]
         public void EmptyWebNET(string templateFramework, string configuration, string msBuildType, string targetFramework)
         {
             string projectName = $"{nameof(EmptyWebNET)}_{Path.GetRandomFileName()}";
@@ -136,11 +136,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "net461")]
 
-        //[InlineData("netcoreapp2.0", "Release", "core", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "net462")]
         public void WebAPINET(string templateFramework, string configuration, string msBuildType, string targetFramework)
         {
             string projectName = $"{nameof(WebAPINET)}_{Path.GetRandomFileName()}";
@@ -156,19 +156,19 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core", "none", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "none", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "true", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "true", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "true", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "true", "net461")]
 
-        //[InlineData("netcoreapp2.0", "Release", "core", "none", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "none", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Release", "core", "Individual", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "Individual", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Release", "core", "Individual", "true", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "Individual", "true", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "none", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "none", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "Individual", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "Individual", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "Individual", "true", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "Individual", "true", "net462")]
         public void MvcNET(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB, string targetFramework)
         {
             string projectName = $"{nameof(MvcNET)}_{Path.GetRandomFileName()}";
@@ -190,19 +190,19 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp2.0", "Release", "core", "none", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "none", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "false", "net461")]
-        [InlineData("netcoreapp2.0", "Release", "core", "Individual", "true", "net461")]
-        [InlineData("netcoreapp2.0", "Debug", "core", "Individual", "true", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp2.1", "Release", "core", "Individual", "true", "net461")]
+        [InlineData("netcoreapp2.1", "Debug", "core", "Individual", "true", "net461")]
 
-        //[InlineData("netcoreapp2.0", "Release", "core", "none", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "none", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Release", "core", "Individual", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "Individual", "false", "net462")]
-        //[InlineData("netcoreapp2.0", "Release", "core", "Individual", "true", "net462")]
-        //[InlineData("netcoreapp2.0", "Debug", "core", "Individual", "true", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "none", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "none", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "Individual", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "Individual", "false", "net462")]
+        //[InlineData("netcoreapp2.1", "Release", "core", "Individual", "true", "net462")]
+        //[InlineData("netcoreapp2.1", "Debug", "core", "Individual", "true", "net462")]
         public void RazorNET(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB, string targetFramework)
         {
             string projectName = $"{nameof(RazorNET)}_{Path.GetRandomFileName()}";
