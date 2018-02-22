@@ -62,10 +62,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build\**\*" PackagePath="build\" />
-    <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\"  />
+    <None Include="targets\**\*" PackagePath="build\" />
+    <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
-    <None Include="..\Common\build\**\*" PackagePath="build\" LinkBase="build" />
+    <None Include="..\Common\targets\**\*" PackagePath="build\" LinkBase="targets" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
   </ItemGroup>
 
@@ -87,7 +87,7 @@
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\FSharp.NET.Sdk\**" SdkName="FSharp.NET.Sdk" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Publish\**" SdkName="Microsoft.NET.Sdk.Publish" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web\**" SdkName="Microsoft.NET.Sdk.Web" />
-      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web.ProjectSystem\**" SdkName="Microsoft.NET.Sdk.Web.ProjectSystem"/>
+      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web.ProjectSystem\**" SdkName="Microsoft.NET.Sdk.Web.ProjectSystem" />
       <LayoutFile Include="@(Stage0SdkFile)">
         <TargetPath>..\%(Stage0SdkFile.SdkName)\%(Stage0SdkFile.RecursiveDir)%(Stage0SdkFile.Filename)%(Stage0SdkFile.Extension)</TargetPath>
       </LayoutFile>
