@@ -2117,6 +2117,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</target>
         <target state="new">MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
+      <trans-unit id="OM_IncorrectEvaluationContextType">
+        <source>The provided evaluation context of type {0} was not created using the API factory {1}.</source>
+        <target state="new">The provided evaluation context of type {0} was not created using the API factory {1}.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
