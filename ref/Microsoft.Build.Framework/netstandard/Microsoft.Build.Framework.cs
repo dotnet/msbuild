@@ -543,6 +543,19 @@ namespace Microsoft.Build.Framework
     }
     public delegate void TelemetryEventHandler(object sender, Microsoft.Build.Framework.TelemetryEventArgs e);
 }
+namespace Microsoft.Build.Framework.EvaluationContext
+{
+    public abstract partial class EvaluationContext
+    {
+        protected EvaluationContext() { }
+    }
+    public abstract partial class EvaluationContextFactory
+    {
+        protected EvaluationContextFactory() { }
+        public abstract Microsoft.Build.Framework.EvaluationContext.EvaluationContext CreateContext();
+        public abstract Microsoft.Build.Framework.EvaluationContext.EvaluationContext CreateNullContext();
+    }
+}
 namespace Microsoft.Build.Framework.Profiler
 {
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
