@@ -80,9 +80,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
         public void ClearCache(int submissionId)
         {
-            ConcurrentDictionary<SdkResolver, object> notused;
-
-            _resolverStateBySubmission.TryRemove(submissionId, out notused);
+            _resolverStateBySubmission.TryRemove(submissionId, out _);
         }
 
         /// <summary>
@@ -152,6 +150,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 if (result.Success)
                 {
                     LogWarnings(loggingContext, sdkReferenceLocation, result);
+
+                    if (!IsReferenceSameVersion(sdk, result.Version))
+                    {
+                        // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
+                        loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, result.Version);
+                    }
+
+                    // Associate the element location of the resolved SDK reference
+                    result.ElementLocation = sdkReferenceLocation;
+
                     return result;
                 }
 

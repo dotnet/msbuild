@@ -11,6 +11,7 @@ using Xunit;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
+using SdkResultImpl = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -48,11 +49,37 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        public void AssertResolutionWarnsIfResolvedVersionIsDifferentFromReferencedVersion()
+        {
+            var sdk = new SdkReference("foo", "1.0.0", null);
+
+            SdkResolverService.Instance.InitializeForTests(
+                null,
+                new List<SdkResolver>
+                {
+                    new ConfigurableMockResolver(
+                        new SdkResultImpl(
+                            sdk,
+                            "path",
+                            "2.0.0",
+                            Enumerable.Empty<string>()
+                            ))
+                });
+
+            string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+
+            result.ShouldBe("path");
+
+            _logger.WarningCount.ShouldBe(1);
+            _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
+        }
+
+        [Fact]
         public void AssertErrorLoggedWhenResolverThrows()
         {
             SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeErrorResolver: true));
 
-            SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
+            SdkReference sdk = new SdkReference("1sdkName", "version1", "minimumVersion");
 
             string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
@@ -80,7 +107,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // 2sdkName will cause MockSdkResolver1 to fail with an error reason. The error will not
             // be logged because MockSdkResolver2 will succeed.
-            SdkReference sdk = new SdkReference("2sdkName", "referencedVersion", "minimumVersion");
+            SdkReference sdk = new SdkReference("2sdkName", "version2", "minimumVersion");
 
             string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
@@ -179,6 +206,22 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public override int Priority => -1;
 
             public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory) => null;
+        }
+
+        private class ConfigurableMockResolver : SdkResolver
+        {
+            private readonly SdkResultImpl _result;
+
+            public ConfigurableMockResolver(SdkResultImpl result)
+            {
+                _result = result;
+            }
+
+            public override string Name => nameof(ConfigurableMockResolver);
+
+            public override int Priority => int.MaxValue;
+
+            public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory) => _result;
         }
 
         private class MockSdkResolver1 : SdkResolver

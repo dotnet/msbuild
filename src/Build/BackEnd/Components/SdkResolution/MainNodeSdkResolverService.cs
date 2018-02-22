@@ -151,21 +151,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <returns>An <see cref="SdkResult"/> containing information about the SDK if one was resolved, otherwise <code>null</code>.</returns>
         private SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
-            SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-
-            if (sdkResult != null)
-            {
-                if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
-                {
-                    // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, sdkResult.Version);
-                }
-
-                // Associate the element location of the resolved SDK reference
-                sdkResult.ElementLocation = sdkReferenceLocation;
-            }
-
-            return sdkResult;
+            return SdkResolverService.Instance.GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
         }
 
         /// <summary>
