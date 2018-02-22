@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -26,12 +27,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
         }
 
         [Theory]
-        [MemberData("ConnectionStringsData")]
+        [MemberData(nameof(ConnectionStringsData))]
         public void TransformAppSettings_NoAppSettingsInSourceFolder(ITaskItem[] connectionStringData)
         {
             //Arrange
-            string projectFolder = Path.Combine(Path.GetTempPath(), "ProjectFolder");
-            string publishDir = Path.Combine(Path.GetTempPath(), "PublishDirectory");
+            string projectFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string publishDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             if (!Directory.Exists(publishDir))
             {
                 Directory.CreateDirectory(publishDir);
@@ -73,12 +74,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
 
         [Theory]
-        [MemberData("ConnectionStringsData")]
+        [MemberData(nameof(ConnectionStringsData))]
         public void TransformAppSettings_FailsIfPublishDirectoryDoesNotExist(ITaskItem[] connectionStringData)
         {
             //Arrange
-            string projectFolder = Path.Combine(Path.GetTempPath(), "ProjectFolder");
-            string publishDir = Path.Combine(Path.GetTempPath(), "PublishDirectory");
+            string projectFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string publishDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             ITaskItem[] destinationConnectionStrings = connectionStringData;
 
             TransformAppSettings task = new TransformAppSettings()
@@ -96,12 +97,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
         }
 
         [Theory]
-        [MemberData("ConnectionStringsData")]
+        [MemberData(nameof(ConnectionStringsData))]
         public void TransformAppSettings_OverrideSourceAppSettingsName(ITaskItem[] connectionStringData)
         {
             //Arrange
-            string projectFolder = Path.Combine(Path.GetTempPath(), "ProjectFolder");
-            string publishDir = Path.Combine(Path.GetTempPath(), "PublishDirectory");
+            string projectFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string publishDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             if (!Directory.Exists(publishDir))
             {
                 Directory.CreateDirectory(publishDir);
@@ -144,12 +145,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
         }
 
         [Theory]
-        [MemberData("ConnectionStringsData")]
+        [MemberData(nameof(ConnectionStringsData))]
         public void TransformAppSettings_OverrideDestinationAppSettingsName(ITaskItem[] connectionStringData)
         {
             //Arrange
-            string projectFolder = Path.Combine(Path.GetTempPath(), "ProjectFolder");
-            string publishDir = Path.Combine(Path.GetTempPath(), "PublishDirectory");
+            string projectFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string publishDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             if (!Directory.Exists(publishDir))
             {
                 Directory.CreateDirectory(publishDir);

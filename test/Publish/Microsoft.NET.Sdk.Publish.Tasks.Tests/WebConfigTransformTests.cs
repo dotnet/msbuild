@@ -146,8 +146,8 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         }
 
         [Theory]
-        [InlineData("aspNetCore", "hostingModel", "foo")]
-        public void WebConfigTransform_Throws_IfHostingModelValueIsUndefined(string elementName, string attributeName, string attributeValue)
+        [InlineData("foo")]
+        public void WebConfigTransform_Throws_IfHostingModelValueIsUndefined(string attributeValue)
         {
             var input = WebConfigTemplate;
 
@@ -161,7 +161,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
             var input = WebConfigTemplate;
 
             var output = WebConfigTransform.Transform(input, "test.dll", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: attributeValue);
-            Assert.Equal(null, (string)output.Descendants(elementName).Single().Attribute(attributeName));
+            Assert.Null((string)output.Descendants(elementName).Single().Attribute(attributeName));
         }
 
         [Fact]
