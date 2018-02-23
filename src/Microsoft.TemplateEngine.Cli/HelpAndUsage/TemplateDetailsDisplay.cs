@@ -146,18 +146,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
                         if (!string.IsNullOrEmpty(resolvedValue))
                         {
-                            if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
+                            // bools get ToString() values of "True" & "False", but most templates use "true" & "false"
+                            // So do a case-insensitive comparison on bools, case-sensitive on other values.
+                            StringComparison comparisonType = string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                                ? StringComparison.OrdinalIgnoreCase
+                                : StringComparison.Ordinal;
+
+                            if (!string.Equals(param.DefaultValue, resolvedValue, comparisonType))
                             {
-                                if (!string.Equals(param.DefaultValue, resolvedValue, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    // bools get ToString() values of "True" & "False", but most templates use "true" & "false"
-                                    // So do a case-insensitive comparison on bools.
-                                    configuredValue = resolvedValue;
-                                }
-                            }
-                            else if (!string.Equals(param.DefaultValue, resolvedValue, StringComparison.Ordinal))
-                            {
-                                // other datatypes need a case-sensitive comparison.
                                 configuredValue = resolvedValue;
                             }
                         }
