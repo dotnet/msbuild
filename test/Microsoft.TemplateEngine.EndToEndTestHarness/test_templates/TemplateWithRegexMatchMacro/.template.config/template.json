@@ -1,0 +1,22 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithRegexMatchMacro",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithRegexMatchMacro",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithRegexMatchMacro",
+  "shortName": "TestAssets.TemplateWithRegexMatchMacro",
+  "symbols": {
+    "isMatch": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "dataType": "bool",
+      "replaces": "test.value1",
+      "parameters": {
+        "source": "name",
+        "pattern": "^hello$"
+      }
+    }
+  }
+}
