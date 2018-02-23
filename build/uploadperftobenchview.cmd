@@ -13,11 +13,11 @@ if "%configuration%" == "" (
 if "%architecture%" == "" (
     echo EnvVar architecture should be set; exiting...
     exit /b 1)
+if "%OS%" == "" (
+    echo EnvVar OS should be set; exiting...
+    exit /b 1)
 if "%runType%" == "" (
     echo EnvVar runType should be set; exiting...
-    exit /b 1)
-if "%BenchviewCommitName%" == "" (
-    echo EnvVar BenchviewCommitName should be set; exiting...
     exit /b 1)
 if "%GIT_BRANCH%" == "" (
     echo EnvVar GIT_BRANCH should be set; exiting...
@@ -25,6 +25,10 @@ if "%GIT_BRANCH%" == "" (
 if "%GIT_COMMIT%" == "" (
     echo EnvVar GIT_COMMIT should be set; exiting...
     exit /b 1)
+if /I "%runType%" == "private" (
+    if "%BenchviewCommitName%" == "" (
+        echo EnvVar BenchviewCommitName should be set; exiting...
+        exit /b 1))
 
 
 powershell -NoProfile wget https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile "%perfWorkingDirectory%\nuget.exe"
@@ -35,9 +39,10 @@ if exist "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat" rmdir /s /q "%p
 REM Do this here to remove the origin but at the front of the branch name as this is a problem for BenchView
 if "%GIT_BRANCH:~0,7%" == "origin/" (set GIT_BRANCH_WITHOUT_ORIGIN=%GIT_BRANCH:origin/=%) else (set GIT_BRANCH_WITHOUT_ORIGIN=%GIT_BRANCH%)
 
-set benchViewName=SDK %runType% %GIT_BRANCH_WITHOUT_ORIGIN%
+set benchViewName=SDK perf %OS% %architecture% %configuration% %runType% %GIT_BRANCH_WITHOUT_ORIGIN%
 if /I "%runType%" == "private" (set benchViewName=%benchViewName% %BenchviewCommitName%)
 if /I "%runType%" == "rolling" (set benchViewName=%benchViewName% %GIT_COMMIT%)
+echo BenchViewName: "%benchViewName%"
 
 echo Creating: "%perfWorkingDirectory%\submission-metadata.json"
 py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission-metadata.py" --name "%benchViewName%" --user-email "dotnet-bot@microsoft.com" -o "%perfWorkingDirectory%\submission-metadata.json"
