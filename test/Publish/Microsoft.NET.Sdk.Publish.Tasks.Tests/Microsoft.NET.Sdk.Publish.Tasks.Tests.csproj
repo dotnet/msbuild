@@ -13,7 +13,7 @@
     <PackageReference Include="xunit.runner.VisualStudio" Version="2.2.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(EndToEndTestsDisabled)' == 'true'">
+  <ItemGroup>
     <Compile Remove="EndToEnd\*.cs" />
   </ItemGroup>
   
