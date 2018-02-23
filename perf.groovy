@@ -17,11 +17,11 @@ def static getBuildJobName(def configuration, def os) {
 // Setup SDK performance tests runs
 [true, false].each { isPR ->
     ['Windows_NT'].each { os ->
+      ['Release'].each { config ->
         ['x64', 'x86'].each { arch ->
-            def architecture = arch
             def jobName = "SDK_Perf_${os}_${arch}"
-            def testEnv = ""
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
+            def perfWorkingDirectory = "%WORKSPACE%\\artifacts\\${config}\\TestResults\\Performance"
 
                 // Set the label.
                 label('windows_server_2016_clr_perf')
@@ -37,48 +37,23 @@ def static getBuildJobName(def configuration, def os) {
                     }
                 }
 
-                def configuration = 'Release'
                 def runType = isPR ? 'private' : 'rolling'
-                def benchViewName = isPR ? 'SDK private %BenchviewCommitName%' : 'SDK rolling %GIT_BRANCH_WITHOUT_ORIGIN% %GIT_COMMIT%'
-                def uploadString = '-uploadToBenchview'
-                def perfWorkingDirectory = '%WORKSPACE%\\artifacts\\${configuration}\\TestResults\\Performance'
 
                 steps {
-                    // Batch
-                    batchFile("powershell -NoProfile wget https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile \"${perfWorkingDirectory}\\nuget.exe\"")
-                    batchFile("if exist \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\" rmdir /s /q \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\"")
-                    batchFile("\"${perfWorkingDirectory}\\nuget.exe\" install Microsoft.BenchView.JSONFormat -Source http://benchviewtestfeed.azurewebsites.net/nuget -OutputDirectory \"${perfWorkingDirectory}\" -Prerelease -ExcludeVersion")
-                    // Do this here to remove the origin but at the front of the branch name as this is a problem for BenchView
-                    //    we have to do it all as one statement because cmd is called each time and we lose the set environment variable
-                    batchFile("if \"%GIT_BRANCH:~0,7%\" == \"origin/\" (set \"GIT_BRANCH_WITHOUT_ORIGIN=%GIT_BRANCH:origin/=%\") else (set \"GIT_BRANCH_WITHOUT_ORIGIN=%GIT_BRANCH%\")\n" +
-                    "set \"BENCHVIEWNAME=${benchViewName}\"\n" +
-                    "set \"BENCHVIEWNAME=%BENCHVIEWNAME:\"=\"\"%\"\n" +
-                    "py \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\\tools\\submission-metadata.py\" --name \"%BENCHVIEWNAME%\" --user-email \"dotnet-bot@microsoft.com\" --output \"${perfWorkingDirectory}\\submission-metadata.json\"\n" +
-                    "py \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\\tools\\build.py\" git --branch %GIT_BRANCH_WITHOUT_ORIGIN% --type ${runType} --output \"${perfWorkingDirectory}\\build.json\"")
-                    batchFile("py \"%WORKSPACE%\\Microsoft.BenchView.JSONFormat\\tools\\machinedata.py\" --output \"${perfWorkingDirectory}\\machinedata.json\"")
-
                    // Build solution and run the performance tests
-                   batchFile("\"%WORKSPACE%\\build.cmd\" -sign -ci -perf /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
+                   batchFile("\"%WORKSPACE%\\build.cmd\" -configuration ${config} -sign -ci -perf /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
 
-                   //Create submission json and upload to Benchview
-                   batchFile("for /f \"tokens=*\" %%a in ('dir /b/a-d ${perfWorkingDirectory}\\*.xml') do (py \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\\tools\\measurement.py xunitscenario \"${perfWorkingDirectory}\\%%a\" --better desc --append --output \"${perfWorkingDirectory}\\measurement.json\")")
-                   batchFile("py \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\\tools\\submission.py\" \"${perfWorkingDirectory}\\measurement.json\"" +
-                   "--build \"${perfWorkingDirectory}\\build.json\"" +
-                   "--machine-data \"${perfWorkingDirectory}\\machinedata.json\"" +
-                   "--metadata \"${perfWorkingDirectory}\\submission-metadata.json\"" +
-                   "--group \"SDK Perf Tests\"" +
-                   "--type \"${runType}\"" +
-                   "--config-name \"${configuration}\"" +
-                   "--config Configuration \"${configuration}\"" +
-                   "--architecture \"${arch}\"" +
-                   "--machinepool \"perfsnake\"" +
-                   "--output \"${perfWorkingDirectory}\\submission.json\"")
-                   batchFile("py \"${perfWorkingDirectory}\\Microsoft.BenchView.JSONFormat\\tools\\upload.py \"${perfWorkingDirectory}\\submission.json\" --container coreclr")
+                   // Upload perf results to BenchView
+                   batchFile("set perfWorkingDirectory=${perfWorkingDirectory}\n" +
+                   "set configuration=${config}\n" +
+                   "set architecture=${arch}\n" +
+                   "set runType=${runType}\n" +
+                   "\"%WORKSPACE%\\build\\uploadperftobenchview.cmd\"")
                 }
             }
 
             def archiveSettings = new ArchivalSettings()
-            archiveSettings.addFiles('${perfWorkingDirectory}/**')
+            archiveSettings.addFiles("artifacts/${config}/TestResults/Performance/**")
             archiveSettings.setAlwaysArchive()
             Utilities.addArchival(newJob, archiveSettings)
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
@@ -112,6 +87,7 @@ def static getBuildJobName(def configuration, def os) {
                 builder.emitTrigger(newJob)
             }
         }
+      }
     }
 }
 
