@@ -62,10 +62,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="targets\**\*" PackagePath="build\" />
-    <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
+    <None Include="targets\**\*" PackagePath="targets\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
-    <None Include="..\Common\targets\**\*" PackagePath="build\" LinkBase="targets" />
+    <None Include="..\Common\targets\**\*" PackagePath="targets\" LinkBase="targets" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
   </ItemGroup>
 

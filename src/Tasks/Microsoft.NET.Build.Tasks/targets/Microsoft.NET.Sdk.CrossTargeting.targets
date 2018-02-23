@@ -15,7 +15,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <Import Project="..\build\Microsoft.NET.Sdk.Common.targets"/>
+  <Import Project="Microsoft.NET.Sdk.Common.targets"/>
 
   <!--
   ============================================================
