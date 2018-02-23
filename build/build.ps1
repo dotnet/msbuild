@@ -15,6 +15,7 @@ Param(
   [switch] $sign,
   [string] $solution = "",
   [switch] $test,
+  [switch] $perf,
   [string] $verbosity = "minimal",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
@@ -34,6 +35,7 @@ function Print-Usage() {
     Write-Host "  -rebuild                Rebuild solution"
     Write-Host "  -deploy                 Deploy built VSIXes"
     Write-Host "  -test                   Run all unit tests in the solution"
+    Write-Host "  -perf                   Run all performance tests in the solution"
     Write-Host "  -sign                   Sign build outputs"
     Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
     Write-Host ""
@@ -250,7 +252,7 @@ function Build {
     $solution = Join-Path $RepoRoot "sdk.sln"
   }
 
-  dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
+  dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:PerformanceTest=$perf /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
 
   if($LASTEXITCODE -ne 0) {
     throw "Failed to build $RepoToolsetBuildProj"
