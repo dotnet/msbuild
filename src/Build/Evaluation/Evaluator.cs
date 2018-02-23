@@ -37,6 +37,8 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
@@ -2134,7 +2136,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
+                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath)?.Path;
 
                 if (string.IsNullOrEmpty(sdkRootPath))
                 {

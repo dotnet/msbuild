@@ -85,11 +85,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public override string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
-            SdkResult result = GetSdkResultAndCache(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-
-            return result?.Path;
+            return GetSdkResultAndCache(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
         }
 
         /// <summary>
@@ -108,6 +106,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             ErrorUtilities.VerifyThrowInternalNull(sdk, nameof(sdk));
             ErrorUtilities.VerifyThrowInternalNull(loggingContext, nameof(loggingContext));
             ErrorUtilities.VerifyThrowInternalNull(sdkReferenceLocation, nameof(sdkReferenceLocation));
+            ErrorUtilities.VerifyThrowInternalLength(projectPath, nameof(projectPath));
 
             SdkResult result;
 
@@ -151,7 +150,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <returns>An <see cref="SdkResult"/> containing information about the SDK if one was resolved, otherwise <code>null</code>.</returns>
         private SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
-            return SdkResolverService.Instance.GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+            return SdkResolverService.Instance.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
         }
 
         /// <summary>

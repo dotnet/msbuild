@@ -38,7 +38,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             SdkReference sdk = new SdkReference("notfound", "referencedVersion", "minimumVersion");
 
-            string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
             result.ShouldBeNull();
 
@@ -66,9 +66,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             ))
                 });
 
-            string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            result.ShouldBe("path");
+            result.Path.ShouldBe("path");
 
             _logger.WarningCount.ShouldBe(1);
             _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
@@ -81,9 +81,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             SdkReference sdk = new SdkReference("1sdkName", "version1", "minimumVersion");
 
-            string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            result.ShouldBe("resolverpath1");
+            result.Path.ShouldBe("resolverpath1");
             _logger.Warnings.Select(i => i.Message).ShouldBe(new [] { "The SDK resolver \"MockSdkResolverThrows\" failed to run. EXMESSAGE" });
         }
 
@@ -94,9 +94,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
 
-            string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            Assert.Equal("resolverpath1", result);
+            result.Path.ShouldBe("resolverpath1");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
         }
 
@@ -109,9 +109,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // be logged because MockSdkResolver2 will succeed.
             SdkReference sdk = new SdkReference("2sdkName", "version2", "minimumVersion");
 
-            string result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            result.ShouldBe("resolverpath2");
+            result.Path.ShouldBe("resolverpath2");
 
             // Both resolvers should run, and no ERROR string.
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
@@ -132,10 +132,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
 
             // First call should not know state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe("resolverpath");
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").Path.ShouldBe("resolverpath");
 
             // Second call should have received state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe(MockSdkResolverWithState.Expected);
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").Path.ShouldBe(MockSdkResolverWithState.Expected);
         }
 
         [Fact]
@@ -148,10 +148,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
 
             // First call should not know state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe("resolverpath");
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").Path.ShouldBe("resolverpath");
 
             // Second call should have received state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").ShouldBe("resolverpath");
+            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath").Path.ShouldBe("resolverpath");
         }
 
         [Theory]

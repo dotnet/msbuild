@@ -83,17 +83,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _resolverStateBySubmission.TryRemove(submissionId, out _);
         }
 
-        /// <summary>
-        /// Resolves and SDK and gets a result.
-        /// </summary>
-        /// <param name="submissionId">The build submission ID that the resolution request is for.</param>
-        /// <param name="sdk">The <see cref="SdkReference"/> containing information about the referenced SDK.</param>
-        /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
-        /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element which referenced the SDK.</param>
-        /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
-        /// <param name="projectPath">The full path to that referenced the SDK.</param>
-        /// <returns>An <see cref="SdkResult"/> containing information of the SDK if it could be resolved, otherwise <code>null</code>.</returns>
-        public SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
+        public SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             // Lazy initialize the SDK resolvers
             if (_resolvers == null)
@@ -121,7 +112,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 try
                 {
-                    result = (SdkResult) sdkResolver.Resolve(sdk, context, resultFactory);
+                    result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
                 }
                 catch (Exception e) when (e is FileNotFoundException || e is FileLoadException && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
@@ -180,14 +171,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
 
             return null;
-        }
-
-        /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
-        {
-            SdkResult result = GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-
-            return result?.Path;
         }
 
         /// <summary>
