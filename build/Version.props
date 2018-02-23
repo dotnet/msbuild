@@ -5,15 +5,20 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(PackageVersion)' == '' ">
+
+    <!-- If $(PB_VersionStamp) is empty and $(PB_IsStable) is not true, then a default PackageBuildQuality will be added. -->
     <PackageReleaseVersion Condition="'$(PackageReleaseVersion)' == '' ">2.1.300</PackageReleaseVersion>
-    <PackageBuildQuality>$(BUILD_QUALITY)</PackageBuildQuality>
-    <PackageBuildQuality Condition=" '$(PackageBuildQuality)' == '' ">preview2</PackageBuildQuality>
+    <PackageBuildQuality>$(PB_VersionStamp)</PackageBuildQuality>
+    <PackageBuildQuality Condition=" '$(PackageBuildQuality)' == '' And '$(PB_IsStable)' != 'true' ">preview2</PackageBuildQuality>
     <PackageDateTime Condition="'$(PackageDateTime)' == ''">$([System.DateTime]::Now.ToString("yyyyMMdd"))</PackageDateTime>
-    <PackageVersion>$(PackageReleaseVersion)-$(PackageBuildQuality)</PackageVersion>
-    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
-    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == '0' And '$(BUILD_BUILDNUMBER)' != ''">$(BUILD_BUILDNUMBER)</BUILD_NUMBER>
-    <AssemblyReleaseVersion>$(PackageReleaseVersion).$([MSBuild]::Modulo($(BUILD_NUMBER), 65535))</AssemblyReleaseVersion>
-    <PackageVersion Condition="'$(NO_TIMESTAMP)' != 'true'">$(PackageVersion)-$(PackageDateTime)-$(BUILD_NUMBER)</PackageVersion>
+    <PackageBuildNumber Condition="'$(PackageBuildNumber)' == ''">0</PackageBuildNumber>
+    <PackageBuildNumber Condition="'$(PackageBuildNumber)' == '0' And '$(BUILD_BUILDNUMBER)' != ''">$(BUILD_BUILDNUMBER)</PackageBuildNumber>
+
+    <AssemblyReleaseVersion>$(PackageReleaseVersion).$([MSBuild]::Modulo($(PackageBuildNumber), 65535))</AssemblyReleaseVersion>
+
+    <PackageVersion>$(PackageReleaseVersion)</PackageVersion>
+    <PackageVersion Condition="'$(PackageBuildQuality)' != ''">$(PackageReleaseVersion)-$(PackageBuildQuality)</PackageVersion>
+    <PackageVersion Condition="'$(PB_IsStable)' != 'true'">$(PackageVersion)-$(PackageDateTime)-$(PackageBuildNumber)</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>
