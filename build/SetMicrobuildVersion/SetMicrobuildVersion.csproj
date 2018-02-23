@@ -1,4 +1,13 @@
-<Project Sdk="Microsoft.Net.Sdk">
+<Project DefaultTargets="GetBuildVersion">
+
+  <Import Project="..\Versions.props" />
+
+  <PropertyGroup>
+    <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+  </PropertyGroup>
+
+   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
    <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
@@ -8,4 +17,6 @@
    <ItemGroup>
       <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
    </ItemGroup>
+
+   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>
