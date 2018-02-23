@@ -8,6 +8,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Linq;
@@ -265,6 +266,93 @@ public static class {project.Name}
                 .NotHaveStdOutContaining("warning")
                 .And
                 .NotHaveStdOutContaining("MSB3243");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_uses_hintpath_when_replacing_simple_name_references(bool useFacades)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            TestProject project = new TestProject()
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net462",
+                IsSdkProject = true
+            };
+
+            if (useFacades)
+            {
+                var netStandard2Project = new TestProject()
+                {
+                    Name = "NETStandard20Project",
+                    TargetFrameworks = "netstandard2.0",
+                    IsSdkProject = true
+                };
+
+                project.ReferencedProjects.Add(netStandard2Project);
+            }
+
+
+            var testAsset = _testAssetsManager.CreateTestProject(project, "SimpleNamesWithHintPaths", identifier: useFacades ? "_useFacades" : "")
+                .WithProjectChanges((path, p) =>
+                {
+                    if (Path.GetFileNameWithoutExtension(path) == project.Name)
+                    {
+                        var ns = p.Root.Name.Namespace;
+
+                        var itemGroup = new XElement(ns + "ItemGroup");
+                        p.Root.Add(itemGroup);
+
+                        if (!useFacades)
+                        {
+                            itemGroup.Add(new XElement(ns + "PackageReference",
+                                new XAttribute("Include", "System.Net.Http"),
+                                new XAttribute("Version", "4.3.2")));
+                        }
+
+                        itemGroup.Add(new XElement(ns + "Reference",
+                            new XAttribute("Include", "System.Net.Http")));
+                    }
+                })
+                .Restore(Log, project.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, project.Name);
+
+            var getValuesCommand = new GetValuesCommand(Log, projectFolder, project.TargetFrameworks, "Reference", GetValuesCommand.ValueType.Item);
+            getValuesCommand.MetadataNames.Add("HintPath");
+
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string correctHttpReference;
+            if (useFacades)
+            {
+                correctHttpReference = Path.Combine(TestContext.Current.ToolsetUnderTest.BuildExtensionsMSBuildPath, @"net461\lib\System.Net.Http.dll");
+            }
+            else
+            {
+                correctHttpReference = Path.Combine(TestContext.Current.NuGetCachePath, "system.net.http", "4.3.2", "ref", "net46", "System.Net.Http.dll");
+            }
+
+            var valuesWithMetadata = getValuesCommand.GetValuesWithMetadata();
+
+            //  There shouldn't be a Reference item where the ItemSpec is the path to the System.Net.Http.dll from a NuGet package
+            valuesWithMetadata.Should().NotContain(v => v.value == correctHttpReference);
+
+            //  There should be a Reference item where the ItemSpec is the simple name System.Net.Http
+            valuesWithMetadata.Should().ContainSingle(v => v.value == "System.Net.Http");
+            
+            //  The Reference item with the simple name should have a HintPath to the DLL in the NuGet package
+            valuesWithMetadata.Single(v => v.value == "System.Net.Http")
+                .metadata["HintPath"]
+                .Should().Be(correctHttpReference);            
         }
     }
 }

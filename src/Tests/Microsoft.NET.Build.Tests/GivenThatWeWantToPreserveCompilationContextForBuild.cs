@@ -33,7 +33,16 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.AdditionalProperties.Add("PreserveCompilationContext", "true");
-            testProject.PackageReferences.Add(new TestPackageReference("NETStandard.Library.NETFramework", "2.0.0-preview2-25330-01", null));
+
+            var testReference = new TestProject()
+            {
+                Name = "NetStandardLibrary",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true,
+                IsExe = false
+            };
+
+            testProject.ReferencedProjects.Add(testReference);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -59,7 +68,8 @@ namespace Microsoft.NET.Build.Tests
                     .Select(a => a.Split('/').Last())
                     .ToList();
 
-                compileLibraryAssemblyNames.Should().BeEquivalentTo(Net461CompileAssemblies);
+                compileLibraryAssemblyNames.Should().BeEquivalentTo(
+                    Net461CompileAssemblies.Concat(new[] { testReference.Name + ".dll" }));
             }
         }
 

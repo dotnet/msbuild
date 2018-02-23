@@ -41,10 +41,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
          that are in the project folder. -->
     <DefaultExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
-
-    <!-- TODO: Verify why this was originally added and whether we really need it -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);packages/**</DefaultItemExcludes>
-    
+   
   </PropertyGroup>
 
   <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.

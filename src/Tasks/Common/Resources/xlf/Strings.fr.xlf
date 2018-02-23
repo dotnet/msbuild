@@ -324,12 +324,22 @@
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="needs-review-translation">La version de Microsoft.NET.Sdk utilisée par ce projet ne permet pas de prendre en charge .NET Standard 2.0, lequel est nécessaire aux références de ce projet. Installez la version 2.0 ou une version ultérieure du kit .NET Core SDK.</target>
+        <target state="translated">La version de Microsoft.NET.Sdk utilisée par ce projet ne permet pas de prendre en charge les références aux bibliothèques ciblant .NET Standard 1.5 ou ultérieur. Installez la version 2.0 ou ultérieure du kit .NET Core SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
         <target state="translated">La plateforme RuntimeIdentifier et la PlatformTarget doivent correspondre.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorParsingFrameworkListInvalidValue">
+        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="translated">Erreur lors de l'analyse de FrameworkList à partir de '{0}'.  {1} '{2}' n'était pas valide.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkListPathNotRooted">
+        <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="translated">Le chemin du fichier de liste de frameworks '{0}' n'est pas associé à une racine. Seuls les chemins complets sont pris en charge.</target>
         <note />
       </trans-unit>
     </body>

@@ -8,8 +8,8 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionBase>2.0.3</VersionBase>
-    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
+    <VersionBase>15.5.0</VersionBase>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <!-- Repo Toolset Features -->
@@ -19,20 +19,20 @@
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.0.2</DotNetCliVersion>
+    <DotNetCliVersion>15.5.0-preview-007044</DotNetCliVersion>
     <RoslynToolsRepoToolsetVersion>1.0.0-beta-62615-02</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <MicrosoftBuildFrameworkVersion>15.3.409</MicrosoftBuildFrameworkVersion>
-    <MicrosoftBuildUtilitiesCoreVersion>15.3.409</MicrosoftBuildUtilitiesCoreVersion>
+    <MicrosoftBuildFrameworkVersion>15.4.8</MicrosoftBuildFrameworkVersion>
+    <MicrosoftBuildUtilitiesCoreVersion>15.4.8</MicrosoftBuildUtilitiesCoreVersion>
     <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
-    <NETStandardLibraryNETFrameworkVersion>2.0.0-preview3-25514-04</NETStandardLibraryNETFrameworkVersion>
+    <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <NuGetBuildTasksPackVersion>4.4.0-preview3-4475</NuGetBuildTasksPackVersion>
-    <NuGetPackagingVersion>4.4.0-preview3-4475</NuGetPackagingVersion>
+    <NuGetBuildTasksPackVersion>4.5.0-preview2-4529</NuGetBuildTasksPackVersion>
+    <NuGetPackagingVersion>4.5.0-preview2-4529</NuGetPackagingVersion>
     <NuGetProjectModelVersion>4.4.0-preview3-4475</NuGetProjectModelVersion>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>

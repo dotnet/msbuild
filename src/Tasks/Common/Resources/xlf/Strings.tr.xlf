@@ -324,12 +324,22 @@
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="needs-review-translation">Bu proje tarafından kullanılan Microsoft.NET.Sdk, proje başvurularının gerektirdiği .NET Standard 2.0’ı desteklemek için yeterli değil. Lütfen .NET Core SDK 2.0 veya sonraki bir sürümü yükleyin.</target>
+        <target state="translated">Bu proje tarafından kullanılan Microsoft.NET.Sdk, .NET Standard 1.5 veya üzeri kitaplıkları desteklemek için yeterli değil. Lütfen .NET Core SDK 2.0 veya sonraki bir sürümü yükleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
         <target state="translated">RuntimeIdentifier platformu ile PlatformTarget eşleşmelidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorParsingFrameworkListInvalidValue">
+        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="translated">FrameworkList '{0}' öğesinden ayrıştırılırken hata oluştu.  {1} '{2}' geçersizdi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkListPathNotRooted">
+        <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="translated">'{0}' çerçeve listesi dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
         <note />
       </trans-unit>
     </body>

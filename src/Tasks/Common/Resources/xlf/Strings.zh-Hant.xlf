@@ -324,12 +324,22 @@
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="needs-review-translation">此專案所使用的 Microsoft.NET.Sdk 版本，不足以支援此專案參考所需的 .NET Standard 2.0。請安裝 NET Core SDK 2.0 版或更高版本。</target>
+        <target state="translated">這個專案使用的 Microsoft.NET.Sdk 版本過低，無法支援以.NET Standard 1.5 或更高版本為目標的程式庫參考。請安裝.NET Core SDK 2.0 或更高版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
         <target state="translated">RuntimeIdentifier 平台必須與 PlatformTarget 相符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorParsingFrameworkListInvalidValue">
+        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="translated">從 '{0} '剖析 FrameworkList 時發生錯誤。{1} '{2}' 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkListPathNotRooted">
+        <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="translated">架構清單路徑 '{0}' 不是根目錄。僅支援完整路徑。</target>
         <note />
       </trans-unit>
     </body>

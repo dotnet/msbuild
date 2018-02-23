@@ -248,7 +248,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 return item2;
             }
 
-            string message = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.InvariantCulture, Strings.ConflictCouldNotDetermineWinner);
+            string message = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ConflictCouldNotDetermineWinner);
 
             log.LogMessage(message);
             return null;

@@ -319,7 +319,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="needs-review-translation">Verze sady Microsoft.NET.Sdk používaná tímto projektem nestačí pro podporu sady .NET Standard 2.0, kterou vyžadují odkazy tohoto projektu. Nainstalujte verzi 2.0 nebo vyšší sady .NET Core SDK.</target>
+        <target state="translated">Verze sady Microsoft.NET.Sdk používaná tímto projektem nestačí pro podporu odkazů na knihovny, jejichž cílovým rozhraním je .NET Standard 1.5 nebo vyšší. Nainstalujte verzi 2.0 nebo vyšší sady .NET Core SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
@@ -330,6 +330,16 @@
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
         <target state="translated">Platforma RuntimeIdentifier a PlatformTarget se musí shodovat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorParsingFrameworkListInvalidValue">
+        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="translated">Došlo k chybě při analýze FrameworkList z: {0}. {1} {2} byl neplatný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkListPathNotRooted">
+        <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="translated">Cesta k souboru seznamu architektur {0} není uvedena od kořene. Podporují se jen celé cesty.</target>
         <note />
       </trans-unit>
     </body>
