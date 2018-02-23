@@ -66,7 +66,7 @@ For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?l
         <target state="translated">ASP.NET Core
 ------------
 El certificado de desarrollo HTTPS de ASP.NET Core se ha instalado correctamente.
-Para confiar en el certificado (solo Windows y macOS), instale primero la herramienta dev-certs ejecutando “dotnet install tool dotnet-dev-certs -g --version 2.1.0-preview1-final” y, después, ejecute “dotnet-dev-certs https --trust”.
+Para confiar en el certificado (solo Windows y macOS), instale primero la herramienta dev-certs ejecutando "dotnet install tool dotnet-dev-certs -g --version 2.1.0-preview1-final" y, después, ejecute "dotnet-dev-certs https --trust".
 Para obtener más información sobre la configuración HTTPS, vea https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
