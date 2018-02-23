@@ -9,7 +9,7 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.ShellShim
 {
-    public class DoNothingEnvironmentPath : IEnvironmentPath
+    internal class DoNothingEnvironmentPath : IEnvironmentPath
     {
         public void AddPackageExecutablePathToUserPath()
         {

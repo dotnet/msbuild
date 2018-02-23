@@ -125,6 +125,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new UnauthorizedAccessException();
             }
 
+            public void Move(string source, string destination)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
             public void Delete(string path)
             {
                 throw new UnauthorizedAccessException();
@@ -139,7 +144,12 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public IEnumerable<string> GetFiles(string path, string searchPattern)
+            public IEnumerable<string> EnumerateFileSystemEntries(string path)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern)
             {
                 throw new UnauthorizedAccessException();
             }
@@ -163,13 +173,17 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             {
                 throw new NotImplementedException();
             }
+
+            public void Move(string source, string destination)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class Counter
         {
             public int Count { get; private set; }
             public void Increase() { Count++; }
-
         }
     }
 }

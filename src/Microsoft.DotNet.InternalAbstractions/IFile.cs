@@ -25,6 +25,8 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         void WriteAllText(string path, string content);
 
+        void Move(string source, string destination);
+
         void Delete(string path);
     }
 }
