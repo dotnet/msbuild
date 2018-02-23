@@ -8,8 +8,7 @@
   <Target Name="Init"
           DependsOnTargets="PrintBuildInfo;
                             SetTelemetryProfile;
-                            BuildDotnetCliBuildFramework">
-  </Target>
+                            BuildDotnetCliBuildFramework" />
 
   <Target Name="PrintBuildInfo">
     <Message Text="Host info - Rid: $(HostRid), OSName: $(HostOSName)" Importance="High" />

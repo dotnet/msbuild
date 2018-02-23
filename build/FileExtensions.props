@@ -5,16 +5,6 @@
 
       <InternalArchiveExtension>.zip</InternalArchiveExtension>
 
-      <InstallerExtension Condition=" '$(HostOSName)' == 'win' ">.msi</InstallerExtension>
-      <InstallerExtension Condition=" '$(HostOSName)' == 'osx' ">.pkg</InstallerExtension>
-      <InstallerExtension Condition=" '$(IsDebianBaseDistro)' == 'true' ">.deb</InstallerExtension>
-      <InstallerExtension Condition=" '$(IsRPMBasedDistro)' == true ">.rpm</InstallerExtension>
-
-      <BundleExtension Condition=" '$(HostOSName)' == 'win' ">.exe</BundleExtension>
-      <BundleExtension Condition=" '$(HostOSName)' == 'osx' ">$(InstallerExtension)</BundleExtension>
-      <BundleExtension Condition=" '$(IsDebianBaseDistro)' == 'true' ">$(InstallerExtension)</BundleExtension>
-      <BundleExtension Condition=" '$(IsRPMBasedDistro)' == true ">$(InstallerExtension)</BundleExtension>
-
       <DynamicLibPrefix>lib</DynamicLibPrefix>
       <DynamicLibPrefix Condition=" '$(HostOSName)' == 'win' "></DynamicLibPrefix>
 
