@@ -71,17 +71,17 @@ La instalación se completó correctamente. Si no hay más instrucciones, puede 
       </trans-unit>
       <trans-unit id="InvalidToolConfiguration">
         <source>The settings file in the tool's NuGet package is invalid: {0}</source>
-        <target state="new">The settings file in the tool's NuGet package is invalid: {0}</target>
+        <target state="translated">El archivo de configuración del paquete NuGet de la herramienta no es válido: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">No se pudo instalar la herramienta “{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="new">Tool '{0}' failed to install. Please contact the tool author for assistance.</target>
+        <target state="translated">No se pudo instalar la herramienta “{0}”. Póngase en contacto con su creador para obtener asistencia.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
@@ -101,7 +101,7 @@ La instalación se completó correctamente. Si no hay más instrucciones, puede 
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
         <source>The tool package could not be restored.</source>
-        <target state="new">The tool package could not be restored.</target>
+        <target state="translated">No se puede restaurar el paquete de la herramienta.</target>
         <note />
       </trans-unit>
     </body>
