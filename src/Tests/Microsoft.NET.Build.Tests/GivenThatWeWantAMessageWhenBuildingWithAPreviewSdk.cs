@@ -26,18 +26,12 @@ namespace Microsoft.NET.Build.Tests
             TestAsset testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    XNamespace ns = project.Root.Name.Namespace;
-                    XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "_NETCoreSdkIsPreview", true));
-                })
                 .Restore(Log);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 
             buildCommand
-                .Execute()
+                .Execute("/p:_NETCoreSdkIsPreview=true")
                 .Should()
                 .Pass()
                 .And.HaveStdOutContaining(Strings.UsingPreviewSdkWarning);
@@ -54,7 +48,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 
             buildCommand
-                .Execute()
+                .Execute("/p:_NETCoreSdkIsPreview=")
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining(Strings.UsingPreviewSdkWarning);

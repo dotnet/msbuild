@@ -10,7 +10,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Provides a base localizable mechanism for logging messages of different kids from the SDK targets.
     /// </summary>
-    public abstract class NETSdkBaseMessage : TaskBase
+    public abstract class MessageBase : TaskBase
     {
         /// <summary>
         /// The name of the resource in Strings.resx that contains the desired error message.
@@ -23,14 +23,11 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public string[] FormatArguments { get; set; }
 
-        /// <summary>
-        /// <see cref="DiagnosticMessageSeverity"/>
-        /// </summary>
-        protected abstract string Severity { get; }
-
-        protected string MessageImportance { get; set; } = "Normal";
-
         private static readonly string[] EmptyArguments = new[] { "" };
+
+        internal MessageBase()
+        {
+        }
 
         protected override void ExecuteCore()
         {
@@ -43,26 +40,12 @@ namespace Microsoft.NET.Build.Tasks
                 FormatArguments = EmptyArguments;
             }
 
-            DiagnosticMessageSeverity severity =
-                (DiagnosticMessageSeverity)Enum.Parse(typeof(DiagnosticMessageSeverity), Severity, true);
-
             string format = Strings.ResourceManager.GetString(ResourceName, Strings.Culture);
             string message = string.Format(CultureInfo.CurrentCulture, format, FormatArguments);
 
-            switch (severity)
-            {
-                case DiagnosticMessageSeverity.Error:
-                    Log.LogError(message);
-                    break;
-                case DiagnosticMessageSeverity.Warning:
-                    Log.LogWarning(message);
-                    break;
-                case DiagnosticMessageSeverity.Info:
-                    MessageImportance importance =
-                        (MessageImportance)Enum.Parse(typeof(MessageImportance), MessageImportance, true);
-                    Log.LogMessage(importance, message);
-                    break;
-            }
+            LogMessage(message);
         }
+
+        protected abstract void LogMessage(string message);
     }
 }

@@ -15,8 +15,11 @@ namespace Microsoft.NET.Build.Tasks
 #else
         NETSdkError
 #endif
-     : NETSdkBaseMessage
+     : MessageBase
     {
-        protected override string Severity => "Error";
+        protected override void LogMessage(string message)
+        {
+            Log.LogError(message);
+        }
     }
 }

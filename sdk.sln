@@ -52,9 +52,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{09AD2F
 		src\Tasks\Common\ItemUtilities.cs = src\Tasks\Common\ItemUtilities.cs
 		src\Tasks\Common\MetadataKeys.cs = src\Tasks\Common\MetadataKeys.cs
 		src\Tasks\Common\MSBuildLog.cs = src\Tasks\Common\MSBuildLog.cs
-		src\Tasks\Common\NETSdkBaseMessage.cs = src\Tasks\Common\NETSdkBaseMessage.cs
+		src\Tasks\Common\MessageBase.cs = src\Tasks\Common\MessageBase.cs
 		src\Tasks\Common\NETSdkError.cs = src\Tasks\Common\NETSdkError.cs
-		src\Tasks\Common\NETSdkMessage.cs = src\Tasks\Common\NETSdkMessage.cs
 		src\Tasks\Common\NuGetUtils.cs = src\Tasks\Common\NuGetUtils.cs
 		src\Tasks\Common\TaskBase.cs = src\Tasks\Common\TaskBase.cs
 	EndProjectSection
