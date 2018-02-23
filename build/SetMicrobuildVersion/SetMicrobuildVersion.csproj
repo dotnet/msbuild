@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.Net.Sdk">
+
+   <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+  </PropertyGroup>
+
+   <ItemGroup>
+      <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
+   </ItemGroup>
+</Project>
