@@ -207,7 +207,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // Start a thread to resolve an SDK and add it to the list of threads
                 tasks.Add(Task.Run(() =>
                 {
-                    SdkResolverResponse response = null;
+                    SdkResult response = null;
                     try
                     {
                         // Create an SdkReference from the request
@@ -216,10 +216,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
 
                         // This call is usually cached so is very fast but can take longer for a new SDK that is downloaded.  Other queued threads for different SDKs will complete sooner and continue on which unblocks evaluations
-                        SdkResult result = GetSdkResultAndCache(request.SubmissionId, sdkReference, new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath), request.ElementLocation, request.SolutionPath, request.ProjectPath);
-
-                        // Create a response
-                        response = new SdkResolverResponse(result?.Path, result?.Version);
+                        response = GetSdkResultAndCache(request.SubmissionId, sdkReference, new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath), request.ElementLocation, request.SolutionPath, request.ProjectPath);
                     }
                     catch (Exception e)
                     {
@@ -234,7 +231,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         // Get the node manager and send the response back to the node that requested the SDK
                         INodeManager nodeManager = Host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                        nodeManager.SendData(request.NodeId, response ?? new SdkResolverResponse());
+                        nodeManager.SendData(request.NodeId, response ?? new SdkResult());
                     }
                 }));
             }

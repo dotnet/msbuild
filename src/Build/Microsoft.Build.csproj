@@ -232,7 +232,6 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverContext.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverLoader.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverRequest.cs" />
-    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverResponse.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\MainNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\HostedSdkResolverServiceBase.cs" />

@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// An object used to store the last response from a remote node.  Since evaluation is single threaded, this object is only set one at a time.
         /// </summary>
-        private volatile SdkResolverResponse _lastResponse;
+        private volatile SdkResult _lastResponse;
 
         /// <summary>
         /// Initializes a new instance of the OutOfProcNodeSdkResolverService class.
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             switch (packet.Type)
             {
                 case NodePacketType.ResolveSdkResponse:
-                    HandleResponse(packet as SdkResolverResponse);
+                    HandleResponse(packet as SdkResult);
                     break;
             }
         }
@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 key =>
                 {
                     var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-                    return new SdkResult(null, result.FullPath, result.Version, null);
+                    return new SdkResult(null, result.Path, result.Version, null);
                 });
 
             if (sdkResult.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
@@ -94,7 +94,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Handles a response from the main node.
         /// </summary>
         /// <param name="response"></param>
-        private void HandleResponse(SdkResolverResponse response)
+        private void HandleResponse(SdkResult response)
         {
             // Store the last response so the awaiting thread can use it
             _lastResponse = response;
@@ -103,7 +103,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _responseReceivedEvent.Set();
         }
 
-        private SdkResolverResponse RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             // Clear out the last response for good measure
             _lastResponse = null;
