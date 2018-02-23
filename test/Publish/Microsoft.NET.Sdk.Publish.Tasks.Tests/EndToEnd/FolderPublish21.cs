@@ -240,7 +240,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
             // msbuild publish
             string fileName = "msbuild";
-            string publishOutputFolder = $"bin\\{configuration}\\PublishOutput";
+            string publishOutputFolder = Path.Combine("bin", configuration, "PublishOutput");
             string dotnetPublishArguments = $"{projectName}.csproj /p:DeployOnBuild=true /p:Configuration={configuration} /p:PublishUrl={publishOutputFolder}";
             if (string.Equals(msBuildType, "core"))
             {
