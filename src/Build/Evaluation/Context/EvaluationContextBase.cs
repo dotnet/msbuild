@@ -3,11 +3,13 @@
 //-----------------------------------------------------------------------
 // </copyright>
 
+using Microsoft.Build.BackEnd.SdkResolution;
 using PublicEvaluationContext = Microsoft.Build.Framework.EvaluationContext.EvaluationContext;
 
 namespace Microsoft.Build.Evaluation.Context
 {
     internal abstract class EvaluationContextBase : PublicEvaluationContext
     {
+        public abstract ISdkResolverService SdkResolverService { get; }
     }
 }

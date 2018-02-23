@@ -5,7 +5,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
@@ -57,7 +59,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 null,
                 new List<SdkResolver>
                 {
-                    new ConfigurableMockResolver(
+                    new ConfigurableMockSdkResolver(
                         new SdkResultImpl(
                             sdk,
                             "path",
@@ -171,6 +173,46 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkResolverService.IsReferenceSameVersion(sdk, version2).ShouldBe(expected);
         }
 
+        [Fact]
+        public void CachingWrapperShouldWarnWhenMultipleVersionsAreReferenced()
+        {
+            var sdk = new SdkReference("foo", "1.0.0", null);
+
+            var resolver = new ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    "path",
+                    "1.0.0",
+                    Enumerable.Empty<string>()
+                    ));
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(
+                null,
+                new List<SdkResolver>
+                {
+                    resolver
+                });
+
+            var cachingWrapper = new SdkResolverCachingWrapper(service);
+
+            var result = cachingWrapper.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            resolver.ResolvedCalls.Count.ShouldBe(1);
+            result.Path.ShouldBe("path");
+            result.Version.ShouldBe("1.0.0");
+            _logger.WarningCount.ShouldBe(0);
+
+            result = cachingWrapper.ResolveSdk(BuildEventContext.InvalidSubmissionId, new SdkReference("foo", "2.0.0", null), _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            resolver.ResolvedCalls.Count.ShouldBe(1);
+            result.Path.ShouldBe("path");
+            result.Version.ShouldBe("1.0.0");
+            _logger.WarningCount.ShouldBe(1);
+            _logger.Warnings.First().Code.ShouldBe("MSB4240");
+
+            resolver.ResolvedCalls.First().Key.ShouldBe("foo");
+            resolver.ResolvedCalls.Count.ShouldBe(1);
+        }
+
         private class MockLoaderStrategy : SdkResolverLoader
         {
             private readonly bool _includeErrorResolver;
@@ -206,22 +248,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public override int Priority => -1;
 
             public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory) => null;
-        }
-
-        private class ConfigurableMockResolver : SdkResolver
-        {
-            private readonly SdkResultImpl _result;
-
-            public ConfigurableMockResolver(SdkResultImpl result)
-            {
-                _result = result;
-            }
-
-            public override string Name => nameof(ConfigurableMockResolver);
-
-            public override int Priority => int.MaxValue;
-
-            public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory) => _result;
         }
 
         private class MockSdkResolver1 : SdkResolver

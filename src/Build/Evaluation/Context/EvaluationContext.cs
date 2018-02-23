@@ -3,9 +3,12 @@
 //-----------------------------------------------------------------------
 // </copyright>
 
+using Microsoft.Build.BackEnd.SdkResolution;
+
 namespace Microsoft.Build.Evaluation.Context
 {
     internal sealed class EvaluationContext : EvaluationContextBase
     {
+        public override ISdkResolverService SdkResolverService { get; } = new SdkResolverCachingWrapper(new SdkResolverService());
     }
 }

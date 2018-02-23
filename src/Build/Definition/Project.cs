@@ -2753,7 +2753,7 @@ namespace Microsoft.Build.Evaluation
                 _projectCollection.ProjectRootElementCache,
                 s_buildEventContext,
                 null /* no project instance for debugging */,
-                SdkResolverService.Instance,
+                _lastEvaluationContext.SdkResolverService,
                 BuildEventContext.InvalidSubmissionId,
                 _lastEvaluationContext);
 

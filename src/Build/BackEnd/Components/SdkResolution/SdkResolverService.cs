@@ -17,8 +17,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// <summary>
     /// The main implementation of <see cref="ISdkResolverService"/> which resolves SDKs.  This class is the central location for all SDK resolution and is used
     /// directly by the main node and non-build evaluations and is used indirectly by the out-of-proc node when it sends requests to the main node.
-    ///
-    /// All access to this class must go through the singleton <see cref="SdkResolverService.Instance"/>.
     /// </summary>
     internal sealed class SdkResolverService : ISdkResolverService
     {
@@ -47,7 +45,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         private SdkResolverLoader _sdkResolverLoader = new SdkResolverLoader();
 
-        private SdkResolverService()
+        public SdkResolverService()
         {
         }
 

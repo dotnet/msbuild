@@ -3,9 +3,12 @@
 //-----------------------------------------------------------------------
 // </copyright>
 
+using Microsoft.Build.BackEnd.SdkResolution;
+
 namespace Microsoft.Build.Evaluation.Context
 {
     internal sealed class NullEvaluationContext : EvaluationContextBase
     {
+        public override ISdkResolverService SdkResolverService => BackEnd.SdkResolution.SdkResolverService.Instance;
     }
 }

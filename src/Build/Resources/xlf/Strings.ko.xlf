@@ -2097,8 +2097,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
-        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: 동일한 SDK "{0}"의 여러 버전을 지정할 수 없습니다. "{2}"에서 이미 지정한 SDK 버전 "{1}"이(가) 사용되며 "{3}" 버전은 무시됩니다.</target>
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="needs-review-translation">MSB4240: 동일한 SDK "{0}"의 여러 버전을 지정할 수 없습니다. "{2}"에서 이미 지정한 SDK 버전 "{1}"이(가) 사용되며 "{3}" 버전은 무시됩니다.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
