@@ -136,7 +136,7 @@ class Program
 
             var args = new List<string>();
 
-            string generateDepsProjectPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
+            string generateDepsProjectPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
 
             args.Add($"/p:ProjectAssetsFile=\"{toolAssetsFilePath}\"");
 
