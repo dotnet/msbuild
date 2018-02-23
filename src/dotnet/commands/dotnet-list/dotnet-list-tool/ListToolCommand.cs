@@ -46,10 +46,10 @@ namespace Microsoft.DotNet.Tools.List.Tool
 
             table.AddColumn(
                 LocalizableStrings.PackageIdColumn,
-                p => p.PackageId);
+                p => p.Id.ToString());
             table.AddColumn(
                 LocalizableStrings.VersionColumn,
-                p => p.PackageVersion);
+                p => p.Version.ToNormalizedString());
             table.AddColumn(
                 LocalizableStrings.CommandsColumn,
                 p => string.Join(CommandDelimiter, p.Commands.Select(c => c.Name)));
@@ -60,9 +60,9 @@ namespace Microsoft.DotNet.Tools.List.Tool
 
         private IEnumerable<IToolPackage> GetPackages()
         {
-            return _toolPackageStore.GetInstalledPackages()
+            return _toolPackageStore.EnumeratePackages()
                 .Where(PackageHasCommands)
-                .OrderBy(p => p.PackageId)
+                .OrderBy(p => p.Id)
                 .ToArray();
         }
 
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.List.Tool
                 _errorReporter.WriteLine(
                     string.Format(
                         LocalizableStrings.InvalidPackageWarning,
-                        p.PackageId,
+                        p.Id,
                         ex.Message).Yellow());
                 return false;
             }

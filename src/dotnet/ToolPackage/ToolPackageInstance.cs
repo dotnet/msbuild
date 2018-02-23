@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -17,20 +18,21 @@ namespace Microsoft.DotNet.ToolPackage
 
         public ToolPackageInstance(
             IToolPackageStore store,
-            string packageId,
-            string packageVersion,
+            PackageId id,
+            NuGetVersion version,
             DirectoryPath packageDirectory)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
-            PackageId = packageId ?? throw new ArgumentNullException(nameof(packageId));
-            PackageVersion = packageVersion ?? throw new ArgumentNullException(nameof(packageVersion));
-            PackageDirectory = packageDirectory;
             _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
+
+            Id = id;
+            Version = version ?? throw new ArgumentNullException(nameof(version));
+            PackageDirectory = packageDirectory;
         }
 
-        public string PackageId { get; private set; }
+        public PackageId Id { get; private set; }
 
-        public string PackageVersion { get; private set; }
+        public NuGetVersion Version { get; private set; }
 
         public DirectoryPath PackageDirectory { get; private set; }
 
@@ -53,13 +55,9 @@ namespace Microsoft.DotNet.ToolPackage
                     {
                         if (Directory.Exists(PackageDirectory.Value))
                         {
-                            // Use the same staging directory for uninstall instead of temp
+                            // Use the staging directory for uninstall
                             // This prevents cross-device moves when temp is mounted to a different device
-                            var tempPath = _store
-                                .Root
-                                .WithSubDirectories(ToolPackageInstaller.StagingDirectory)
-                                .WithFile(Path.GetRandomFileName())
-                                .Value;
+                            var tempPath = _store.GetRandomStagingDirectory().Value;
                             Directory.Move(PackageDirectory.Value, tempPath);
                             tempPackageDirectory = tempPath;
                         }
@@ -75,7 +73,7 @@ namespace Microsoft.DotNet.ToolPackage
                         throw new ToolPackageException(
                             string.Format(
                                 CommonLocalizableStrings.FailedToUninstallToolPackage,
-                                PackageId,
+                                Id,
                                 ex.Message),
                             ex);
                     }
@@ -116,7 +114,7 @@ namespace Microsoft.DotNet.ToolPackage
                 var toolConfigurationPath =
                     PackageDirectory
                         .WithSubDirectories(
-                            PackageId,
+                            Id.ToString(),
                             library.Version.ToNormalizedString())
                         .WithFile(dotnetToolSettings.Path);
 
@@ -138,7 +136,7 @@ namespace Microsoft.DotNet.ToolPackage
                     "dotnet",
                     PackageDirectory
                         .WithSubDirectories(
-                            PackageId,
+                            Id.ToString(),
                             library.Version.ToNormalizedString())
                         .WithFile(entryPointFromLockFile.Path)));
 
@@ -158,7 +156,8 @@ namespace Microsoft.DotNet.ToolPackage
         {
             return lockFile
                 ?.Targets?.SingleOrDefault(t => t.RuntimeIdentifier != null)
-                ?.Libraries?.SingleOrDefault(l => l.Name == PackageId);
+                ?.Libraries?.SingleOrDefault(l =>
+                    string.Compare(l.Name, Id.ToString(), StringComparison.CurrentCultureIgnoreCase) == 0);
         }
 
         private static LockFileItem FindItemInTargetLibrary(LockFileTargetLibrary library, string targetRelativeFilePath)

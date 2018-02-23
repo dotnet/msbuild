@@ -853,6 +853,11 @@ setx PATH "%PATH%;{0}"
         <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="new">Failed to find staged tool package '{0}'.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

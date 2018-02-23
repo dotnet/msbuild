@@ -104,6 +104,11 @@ Instalacja powiodła się. Jeśli nie ma dodatkowych instrukcji, możesz wpisać
         <target state="translated">Nie można przywrócić pakietu narzędzia.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

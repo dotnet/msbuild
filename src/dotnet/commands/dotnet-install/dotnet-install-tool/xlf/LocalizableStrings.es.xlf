@@ -104,6 +104,11 @@ La instalación se completó correctamente. Si no hay más instrucciones, puede 
         <target state="translated">No se puede restaurar el paquete de la herramienta.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

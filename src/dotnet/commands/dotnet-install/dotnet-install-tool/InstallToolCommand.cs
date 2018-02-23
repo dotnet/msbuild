@@ -13,6 +13,7 @@ using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Install.Tool
 {
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
 
-        private readonly string _packageId;
+        private readonly PackageId _packageId;
         private readonly string _packageVersion;
         private readonly string _configFilePath;
         private readonly string _framework;
@@ -48,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                 throw new ArgumentNullException(nameof(appliedCommand));
             }
 
-            _packageId = appliedCommand.Arguments.Single();
+            _packageId = new PackageId(appliedCommand.Arguments.Single());
             _packageVersion = appliedCommand.ValueOrDefault<string>("version");
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
@@ -91,8 +92,16 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                         Path.GetFullPath(_configFilePath)));
             }
 
-            // Prevent installation if any version of the package is installed
-            if (_toolPackageStore.GetInstalledPackages(_packageId).FirstOrDefault() != null)
+            VersionRange versionRange = null;
+            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
+            {
+                throw new GracefulException(
+                    string.Format(
+                        LocalizableStrings.InvalidNuGetVersionRange,
+                        _packageVersion));
+            }
+
+            if (_toolPackageStore.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
             {
                 _errorReporter.WriteLine(string.Format(LocalizableStrings.ToolAlreadyInstalled, _packageId).Red());
                 return 1;
@@ -113,7 +122,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                 {
                     package = _toolPackageInstaller.InstallPackage(
                         packageId: _packageId,
-                        packageVersion: _packageVersion,
+                        versionRange: versionRange,
                         targetFramework: _framework,
                         nugetConfig: configFile,
                         source: _source,
@@ -133,8 +142,8 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                     string.Format(
                         LocalizableStrings.InstallationSucceeded,
                         string.Join(", ", package.Commands.Select(c => c.Name)),
-                        package.PackageId,
-                        package.PackageVersion).Green());
+                        package.Id,
+                        package.Version.ToNormalizedString()).Green());
                 return 0;
             }
             catch (ToolPackageException ex)

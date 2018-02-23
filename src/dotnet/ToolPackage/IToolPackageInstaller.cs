@@ -4,14 +4,15 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
     internal interface IToolPackageInstaller
     {
         IToolPackage InstallPackage(
-            string packageId,
-            string packageVersion = null,
+            PackageId packageId,
+            VersionRange versionRange = null,
             string targetFramework = null,
             FilePath? nugetConfig = null,
             string source = null,

@@ -11,6 +11,7 @@ using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Install.Tool;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
@@ -63,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             string verbosity = null)
         {
             string packageId;
-            string packageVersion;
+            VersionRange versionRange;
             string targetFramework;
 
             try
@@ -77,7 +78,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 }
 
                 packageId = tokens[0];
-                packageVersion = tokens[1];
+                versionRange = VersionRange.Parse(tokens[1]);
                 targetFramework = tokens[2];
             }
             catch (IOException)
@@ -92,16 +93,16 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
             var feedPackage = GetPackage(
                 packageId,
-                packageVersion,
+                versionRange,
                 nugetConfig,
                 source);
 
-            packageVersion = feedPackage.Version;
+            var packageVersion = feedPackage.Version;
             targetFramework = string.IsNullOrEmpty(targetFramework) ? "targetFramework" : targetFramework;
 
              var fakeExecutableSubDirectory = Path.Combine(
-                packageId,
-                packageVersion,
+                packageId.ToLowerInvariant(),
+                packageVersion.ToLowerInvariant(),
                 "tools",
                 targetFramework,
                 "any");
@@ -116,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
         private MockFeedPackage GetPackage(
             string packageId,
-            string packageVersion = null,
+            VersionRange versionRange = null,
             FilePath? nugetConfig = null,
             string source = null)
         {
@@ -133,7 +134,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     return true;
                 })
                 .SelectMany(f => f.Packages)
-                .Where(p => MatchPackageVersion(p, packageId, packageVersion)).OrderByDescending(p => p.Version)
+                .Where(p => MatchPackage(p, packageId, versionRange)).OrderByDescending(p => p.Version)
                 .FirstOrDefault();
 
             if (package == null)
@@ -148,13 +149,15 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             return package;
         }
 
-        private static bool MatchPackageVersion(MockFeedPackage p, string packageId, string packageVersion)
+        private static bool MatchPackage(MockFeedPackage p, string packageId, VersionRange versionRange)
         {
-            if (string.IsNullOrEmpty(packageVersion))
+            if (string.Compare(p.PackageId, packageId, StringComparison.CurrentCultureIgnoreCase) != 0)
             {
-                return p.PackageId == packageId;
+                return false;
             }
-            return p.PackageId == packageId && p.Version == packageVersion;
+
+            return versionRange == null ||
+                   versionRange.FindBestMatch(new[] { NuGetVersion.Parse(p.Version) }) != null;
         }
     }
 }

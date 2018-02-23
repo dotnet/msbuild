@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -11,6 +12,18 @@ namespace Microsoft.DotNet.ToolPackage
     {
         DirectoryPath Root { get; }
 
-        IEnumerable<IToolPackage> GetInstalledPackages(string packageId = null);
+        DirectoryPath GetRandomStagingDirectory();
+
+        NuGetVersion GetStagedPackageVersion(DirectoryPath stagingDirectory, PackageId packageId);
+
+        DirectoryPath GetRootPackageDirectory(PackageId packageId);
+
+        DirectoryPath GetPackageDirectory(PackageId packageId, NuGetVersion version);
+
+        IEnumerable<IToolPackage> EnumeratePackages();
+
+        IEnumerable<IToolPackage> EnumeratePackageVersions(PackageId packageId);
+
+        IToolPackage GetPackage(PackageId packageId, NuGetVersion version);
     }
 }

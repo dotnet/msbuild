@@ -148,17 +148,12 @@ namespace Microsoft.DotNet.Tests.Commands
 
             installToolCommand.Execute().Should().Be(1);
 
-            _reporter.Lines.Count.Should().Be(2);
-
             _reporter
-                .Lines[0]
+                .Lines
                 .Should()
-                .Contain("Simulated error");
-
-            _reporter
-                .Lines[1]
-                .Should()
-                .Contain(string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
+                .Equal(
+                    "Simulated error".Red(),
+                    string.Format(LocalizableStrings.ToolInstallationFailed, PackageId).Red());
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
@@ -205,20 +200,14 @@ namespace Microsoft.DotNet.Tests.Commands
 
             installToolCommand.Execute().Should().Be(1);
 
-            _reporter.Lines.Count.Should().Be(2);
-
             _reporter
-                .Lines[0]
+                .Lines
                 .Should()
-                .Contain(
+                .Equal(
                     string.Format(
                         LocalizableStrings.InvalidToolConfiguration,
-                        "Simulated error"));
-
-            _reporter
-                .Lines[1]
-                .Should()
-                .Contain(string.Format(LocalizableStrings.ToolInstallationFailedContactAuthor, PackageId));
+                        "Simulated error").Red(),
+                    string.Format(LocalizableStrings.ToolInstallationFailedContactAuthor, PackageId).Red());
         }
 
         [Fact]
@@ -237,13 +226,144 @@ namespace Microsoft.DotNet.Tests.Commands
 
             _reporter
                 .Lines
-                .Single()
                 .Should()
-                .Contain(string.Format(
+                .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
                     ProjectRestorerMock.FakeCommandName,
                     PackageId,
-                    PackageVersion));
+                    PackageVersion).Green());
+        }
+
+        [Fact]
+        public void WhenRunWithInvalidVersionItShouldThrow()
+        {
+            const string invalidVersion = "!NotValidVersion!";
+            ParseResult result = Parser.Instance.Parse($"dotnet install tool -g {PackageId} --version {invalidVersion}");
+            AppliedOption appliedCommand = result["dotnet"]["install"]["tool"];
+
+            var installToolCommand = new InstallToolCommand(
+                appliedCommand,
+                result,
+                _toolPackageStore,
+                CreateToolPackageInstaller(),
+                _shellShimRepositoryMock,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
+                _reporter);
+
+            Action action = () => installToolCommand.Execute();
+
+            action
+                .ShouldThrow<GracefulException>()
+                .WithMessage(string.Format(
+                    LocalizableStrings.InvalidNuGetVersionRange,
+                    invalidVersion));
+        }
+
+        [Fact]
+        public void WhenRunWithExactVersionItShouldSucceed()
+        {
+            ParseResult result = Parser.Instance.Parse($"dotnet install tool -g {PackageId} --version {PackageVersion}");
+            AppliedOption appliedCommand = result["dotnet"]["install"]["tool"];
+
+            var installToolCommand = new InstallToolCommand(
+                appliedCommand,
+                result,
+                _toolPackageStore,
+                CreateToolPackageInstaller(),
+                _shellShimRepositoryMock,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
+                _reporter);
+
+            installToolCommand.Execute().Should().Be(0);
+
+            _reporter
+                .Lines
+                .Should()
+                .Equal(string.Format(
+                    LocalizableStrings.InstallationSucceeded,
+                    ProjectRestorerMock.FakeCommandName,
+                    PackageId,
+                    PackageVersion).Green());
+        }
+
+        [Fact]
+        public void WhenRunWithValidVersionRangeItShouldSucceed()
+        {
+            ParseResult result = Parser.Instance.Parse($"dotnet install tool -g {PackageId} --version [1.0,2.0]");
+            AppliedOption appliedCommand = result["dotnet"]["install"]["tool"];
+
+            var installToolCommand = new InstallToolCommand(
+                appliedCommand,
+                result,
+                _toolPackageStore,
+                CreateToolPackageInstaller(),
+                _shellShimRepositoryMock,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
+                _reporter);
+
+            installToolCommand.Execute().Should().Be(0);
+
+            _reporter
+                .Lines
+                .Should()
+                .Equal(string.Format(
+                    LocalizableStrings.InstallationSucceeded,
+                    ProjectRestorerMock.FakeCommandName,
+                    PackageId,
+                    PackageVersion).Green());
+        }
+
+        [Fact]
+        public void WhenRunWithoutAMatchingRangeItShouldFail()
+        {
+            ParseResult result = Parser.Instance.Parse($"dotnet install tool -g {PackageId} --version [5.0,10.0]");
+            AppliedOption appliedCommand = result["dotnet"]["install"]["tool"];
+
+            var installToolCommand = new InstallToolCommand(
+                appliedCommand,
+                result,
+                _toolPackageStore,
+                CreateToolPackageInstaller(),
+                _shellShimRepositoryMock,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
+                _reporter);
+
+            installToolCommand.Execute().Should().Be(1);
+
+            _reporter
+                .Lines
+                .Should()
+                .Equal(
+                    $"Error: failed to restore package {PackageId}.", // From mock implementation, not localized
+                    LocalizableStrings.ToolInstallationRestoreFailed.Red(),
+                    string.Format(LocalizableStrings.ToolInstallationFailed, PackageId).Red());
+        }
+
+         [Fact]
+        public void WhenRunWithValidVersionWildcardItShouldSucceed()
+        {
+            ParseResult result = Parser.Instance.Parse($"dotnet install tool -g {PackageId} --version 1.0.*");
+            AppliedOption appliedCommand = result["dotnet"]["install"]["tool"];
+
+            var installToolCommand = new InstallToolCommand(
+                appliedCommand,
+                result,
+                _toolPackageStore,
+                CreateToolPackageInstaller(),
+                _shellShimRepositoryMock,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
+                _reporter);
+
+            installToolCommand.Execute().Should().Be(0);
+
+            _reporter
+                .Lines
+                .Should()
+                .Equal(string.Format(
+                    LocalizableStrings.InstallationSucceeded,
+                    ProjectRestorerMock.FakeCommandName,
+                    PackageId,
+                    PackageVersion).Green());
         }
 
         private IToolPackageInstaller CreateToolPackageInstaller(

@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
@@ -28,9 +29,66 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
         public DirectoryPath Root { get; private set; }
 
-        public IEnumerable<IToolPackage> GetInstalledPackages(string packageId)
+        public DirectoryPath GetRandomStagingDirectory()
         {
-            var packageRootDirectory = Root.WithSubDirectories(packageId);
+            return Root.WithSubDirectories(ToolPackageStore.StagingDirectory, Path.GetRandomFileName());
+        }
+
+        public NuGetVersion GetStagedPackageVersion(DirectoryPath stagingDirectory, PackageId packageId)
+        {
+            if (NuGetVersion.TryParse(
+                Path.GetFileName(
+                    _fileSystem.Directory.EnumerateFileSystemEntries(
+                        stagingDirectory.WithSubDirectories(packageId.ToString()).Value).FirstOrDefault()),
+                out var version))
+            {
+                return version;
+            }
+
+            throw new ToolPackageException(
+                string.Format(
+                    CommonLocalizableStrings.FailedToFindStagedToolPackage,
+                    packageId));
+        }
+
+        public DirectoryPath GetRootPackageDirectory(PackageId packageId)
+        {
+            return Root.WithSubDirectories(packageId.ToString());
+        }
+
+        public DirectoryPath GetPackageDirectory(PackageId packageId, NuGetVersion version)
+        {
+            return GetRootPackageDirectory(packageId)
+                .WithSubDirectories(version.ToNormalizedString().ToLowerInvariant());
+        }
+
+        public IEnumerable<IToolPackage> EnumeratePackages()
+        {
+            if (!_fileSystem.Directory.Exists(Root.Value))
+            {
+                yield break;
+            }
+
+            foreach (var subdirectory in _fileSystem.Directory.EnumerateFileSystemEntries(Root.Value))
+            {
+                var name = Path.GetFileName(subdirectory);
+                var packageId = new PackageId(name);
+
+                if (name == ToolPackageStore.StagingDirectory || name != packageId.ToString())
+                {
+                    continue;
+                }
+
+                foreach (var package in EnumeratePackageVersions(packageId))
+                {
+                    yield return package;
+                }
+            }
+        }
+
+        public IEnumerable<IToolPackage> EnumeratePackageVersions(PackageId packageId)
+        {
+            var packageRootDirectory = Root.WithSubDirectories(packageId.ToString());
             if (!_fileSystem.Directory.Exists(packageRootDirectory.Value))
             {
                 yield break;
@@ -38,14 +96,23 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
             foreach (var subdirectory in _fileSystem.Directory.EnumerateFileSystemEntries(packageRootDirectory.Value))
             {
-                var version = Path.GetFileName(subdirectory);
                 yield return new ToolPackageMock(
                     _fileSystem,
                     packageId,
-                    version,
-                    packageRootDirectory.WithSubDirectories(version),
+                    NuGetVersion.Parse(Path.GetFileName(subdirectory)),
+                    new DirectoryPath(subdirectory),
                     _uninstallCallback);
             }
+        }
+
+        public IToolPackage GetPackage(PackageId packageId, NuGetVersion version)
+        {
+            var directory = GetPackageDirectory(packageId, version);
+            if (!_fileSystem.Directory.Exists(directory.Value))
+            {
+                return null;
+            }
+            return new ToolPackageMock(_fileSystem, packageId, version, directory, _uninstallCallback);
         }
     }
 }

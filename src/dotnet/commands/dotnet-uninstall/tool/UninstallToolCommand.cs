@@ -49,12 +49,11 @@ namespace Microsoft.DotNet.Tools.Uninstall.Tool
                 throw new GracefulException(LocalizableStrings.UninstallToolCommandOnlySupportsGlobal);
             }
 
-            var packageId = _options.Arguments.Single();
+            var packageId = new PackageId(_options.Arguments.Single());
             IToolPackage package = null;
-
             try
             {
-                package = _toolPackageStore.GetInstalledPackages(packageId).SingleOrDefault();
+                package = _toolPackageStore.EnumeratePackageVersions(packageId).SingleOrDefault();
                 if (package == null)
                 {
                     _errorReporter.WriteLine(
@@ -92,8 +91,8 @@ namespace Microsoft.DotNet.Tools.Uninstall.Tool
                 _reporter.WriteLine(
                     string.Format(
                         LocalizableStrings.UninstallSucceeded,
-                        package.PackageId,
-                        package.PackageVersion).Green());
+                        package.Id,
+                        package.Version.ToNormalizedString()).Green());
                 return 0;
             }
             catch (ToolPackageException ex)

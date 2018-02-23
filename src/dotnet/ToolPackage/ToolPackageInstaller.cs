@@ -7,13 +7,12 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
     internal class ToolPackageInstaller : IToolPackageInstaller
     {
-        public const string StagingDirectory = ".stage";
-
         private readonly IToolPackageStore _store;
         private readonly IProjectRestorer _projectRestorer;
         private readonly FilePath? _tempProject;
@@ -32,33 +31,27 @@ namespace Microsoft.DotNet.ToolPackage
         }
 
         public IToolPackage InstallPackage(
-            string packageId,
-            string packageVersion = null,
+            PackageId packageId,
+            VersionRange versionRange = null,
             string targetFramework = null,
             FilePath? nugetConfig = null,
             string source = null,
             string verbosity = null)
         {
-            if (packageId == null)
-            {
-                throw new ArgumentNullException(nameof(packageId));
-            }
-
-            var packageRootDirectory = _store.Root.WithSubDirectories(packageId);
+            var packageRootDirectory = _store.GetRootPackageDirectory(packageId);
             string rollbackDirectory = null;
 
             return TransactionalAction.Run<IToolPackage>(
                 action: () => {
                     try
                     {
-
-                        var stageDirectory = _store.Root.WithSubDirectories(StagingDirectory, Path.GetRandomFileName());
+                        var stageDirectory = _store.GetRandomStagingDirectory();
                         Directory.CreateDirectory(stageDirectory.Value);
                         rollbackDirectory = stageDirectory.Value;
 
                         var tempProject = CreateTempProject(
                             packageId: packageId,
-                            packageVersion: packageVersion,
+                            versionRange: versionRange,
                             targetFramework: targetFramework ?? BundledTargetFramework.GetTargetFrameworkMoniker(),
                             restoreDirectory: stageDirectory);
 
@@ -76,29 +69,22 @@ namespace Microsoft.DotNet.ToolPackage
                             File.Delete(tempProject.Value);
                         }
 
-                        packageVersion = Path.GetFileName(
-                            Directory.EnumerateDirectories(
-                                stageDirectory.WithSubDirectories(packageId).Value).Single());
-
-                        var packageDirectory = packageRootDirectory.WithSubDirectories(packageVersion);
+                        var version = _store.GetStagedPackageVersion(stageDirectory, packageId);
+                        var packageDirectory = _store.GetPackageDirectory(packageId, version);
                         if (Directory.Exists(packageDirectory.Value))
                         {
                             throw new ToolPackageException(
                                 string.Format(
                                     CommonLocalizableStrings.ToolPackageConflictPackageId,
                                     packageId,
-                                    packageVersion));
+                                    version.ToNormalizedString()));
                         }
 
                         Directory.CreateDirectory(packageRootDirectory.Value);
                         Directory.Move(stageDirectory.Value, packageDirectory.Value);
                         rollbackDirectory = packageDirectory.Value;
 
-                        return new ToolPackageInstance(
-                            _store,
-                            packageId,
-                            packageVersion,
-                            packageDirectory);
+                        return new ToolPackageInstance(_store, packageId, version, packageDirectory);
                     }
                     catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
                     {
@@ -126,8 +112,8 @@ namespace Microsoft.DotNet.ToolPackage
         }
 
         private FilePath CreateTempProject(
-            string packageId,
-            string packageVersion,
+            PackageId packageId,
+            VersionRange versionRange,
             string targetFramework,
             DirectoryPath restoreDirectory)
         {
@@ -159,8 +145,9 @@ namespace Microsoft.DotNet.ToolPackage
                         new XElement("DisableImplicitNuGetFallbackFolder", "true")),  // disable SDK side implicit NuGetFallbackFolder
                      new XElement("ItemGroup",
                         new XElement("PackageReference",
-                            new XAttribute("Include", packageId),
-                            new XAttribute("Version", packageVersion ?? "*") // nuget will restore * for latest
+                            new XAttribute("Include", packageId.ToString()),
+                            new XAttribute("Version",
+                                versionRange?.ToString("S", new VersionRangeFormatter()) ?? "*") // nuget will restore latest stable for *
                             ))
                         ));
 

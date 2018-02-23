@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
@@ -19,22 +20,22 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
         public ToolPackageMock(
             IFileSystem fileSystem,
-            string packageId,
-            string packageVersion,
+            PackageId id,
+            NuGetVersion version,
             DirectoryPath packageDirectory,
             Action uninstallCallback = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            PackageId = packageId ?? throw new ArgumentNullException(nameof(packageId));
-            PackageVersion = packageVersion ?? throw new ArgumentNullException(nameof(packageVersion));
+            Id = id;
+            Version = version ?? throw new ArgumentNullException(nameof(version));
             PackageDirectory = packageDirectory;
             _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
             _uninstallCallback = uninstallCallback;
         }
 
-        public string PackageId { get; private set; }
+        public PackageId Id { get; private set; }
 
-        public string PackageVersion { get; private set; }
+        public NuGetVersion Version { get; private set; }
 
         public DirectoryPath PackageDirectory { get; private set; }
 
@@ -78,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                         throw new ToolPackageException(
                             string.Format(
                                 CommonLocalizableStrings.FailedToUninstallToolPackage,
-                                PackageId,
+                                Id,
                                 ex.Message),
                             ex);
                     }
@@ -118,7 +119,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 throw new ToolPackageException(
                     string.Format(
                         CommonLocalizableStrings.FailedToRetrieveToolConfiguration,
-                        PackageId,
+                        Id,
                         ex.Message),
                     ex);
             }
