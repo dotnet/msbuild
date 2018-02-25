@@ -7,6 +7,7 @@
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <!-- Source Files -->
