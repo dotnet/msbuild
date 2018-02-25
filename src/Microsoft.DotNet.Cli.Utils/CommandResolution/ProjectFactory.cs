@@ -70,7 +70,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private string GetMSBuildProjPath(string projectDirectory)
         {
-            System.Console.WriteLine($"Dir={projectDirectory}");
             IEnumerable<string> projectFiles = Directory
                 .GetFiles(projectDirectory, "*.*proj")
                 .Where(d => !d.EndsWith(".xproj"));
