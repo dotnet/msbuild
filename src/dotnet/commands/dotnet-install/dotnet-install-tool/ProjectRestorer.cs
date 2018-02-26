@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
 {
     internal class ProjectRestorer : IProjectRestorer
     {
+        private const string AnyRid = "any";
         private readonly IReporter _reporter;
 
         public ProjectRestorer(IReporter reporter = null)
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
-                GetRuntimeIdentifierWithMacOsHighSierraFallback(),
+                AnyRid,
                 $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToQuotedString()}"
             });
 
@@ -67,18 +68,6 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             {
                 throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
-        }
-
-        // walk around for https://github.com/dotnet/corefx/issues/26488
-        // fallback osx.10.13 to osx
-        private static string GetRuntimeIdentifierWithMacOsHighSierraFallback()
-        {
-            if (RuntimeEnvironment.GetRuntimeIdentifier() == "osx.10.13-x64")
-            {
-                return "osx-x64";
-            }
-
-            return RuntimeEnvironment.GetRuntimeIdentifier();
         }
     }
 }

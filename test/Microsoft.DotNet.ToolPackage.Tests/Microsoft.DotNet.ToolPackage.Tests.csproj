@@ -53,16 +53,4 @@
     <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)/TestAssetLocalNugetFeed">
     </MSBuild>
   </Target>
-
-  <Target Name="DownloadTestAssetPackages" BeforeTargets="Build">
-    <PropertyGroup>
-      <!-- use a prerelease version that supports alpine -->
-      <PlatformsNupkgFileName>microsoft.netcore.platforms.2.1.0-preview1-26115-04.nupkg</PlatformsNupkgFileName>
-      <PlatformsNupkgUri>https://dotnet.myget.org/F/dotnet-core/api/v2/package/Microsoft.NETCore.Platforms/2.1.0-preview1-26115-04</PlatformsNupkgUri>
-    </PropertyGroup>
-
-    <DownloadFile Uri="$(PlatformsNupkgUri)"
-                  DestinationPath="$(OutputPath)/TestAssetLocalNugetFeed/$(PlatformsNupkgFileName)" />
-  </Target>
-
 </Project>
