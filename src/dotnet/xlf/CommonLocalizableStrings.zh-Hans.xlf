@@ -848,6 +848,11 @@ setx PATH "%PATH%;{0}"
         <target state="new">Failed to uninstall tool package '{0}': {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="new">Column maximum width must be greater than zero.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -619,4 +619,7 @@ setx PATH "%PATH%;{0}"
   <data name="ToolPackageConflictPackageId" xml:space="preserve">
     <value>Tool '{0}' (version '{1}') is already installed.</value>
   </data>
+  <data name="ColumnMaxWidthMustBeGreaterThanZero" xml:space="preserve">
+    <value>Column maximum width must be greater than zero.</value>
+  </data>
 </root>
