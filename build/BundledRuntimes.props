@@ -12,7 +12,7 @@
 
     <!-- Use the "x64" Rid when downloading Linux shared framework 'DEB' installer files. -->
     <SharedFrameworkInstallerFileRid>$(CoreSetupRid)</SharedFrameworkInstallerFileRid>
-    <SharedFrameworkInstallerFileRid Condition=" '$(IsDebianBaseDistro)' == 'true' ">x64</SharedFrameworkInstallerFileRid>
+    <SharedFrameworkInstallerFileRid Condition=" '$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true' ">x64</SharedFrameworkInstallerFileRid>
 
     <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
     <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
@@ -70,7 +70,7 @@
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedRuntimeDepsInstallerFile"
-                         Condition="'$(IsDebianBaseDistro)' == 'true' And '$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedRuntimeDepsInstallerFile)') And '$(InstallerExtension)' != ''">
+                         Condition="('$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true') And '$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedRuntimeDepsInstallerFile)') And '$(InstallerExtension)' != ''">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedRuntimeDepsInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
