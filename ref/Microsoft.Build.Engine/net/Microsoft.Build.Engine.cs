@@ -1,7 +1,6 @@
 namespace Microsoft.Build.BuildEngine
 {
     [System.Diagnostics.DebuggerDisplayAttribute("BuildItem (Name = { Name }, Include = { Include }, FinalItemSpec = { FinalItemSpec }, Condition = { Condition } )")]
-    [System.ObsoleteAttribute]
     public partial class BuildItem
     {
         public BuildItem(string itemName, Microsoft.Build.Framework.ITaskItem taskItem) { }
@@ -26,7 +25,6 @@ namespace Microsoft.Build.BuildEngine
         public void SetMetadata(string metadataName, string metadataValue, bool treatMetadataValueAsLiteral) { }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("BuildItemGroup (Count = { Count }, Condition = { Condition })")]
-    [System.ObsoleteAttribute]
     public partial class BuildItemGroup : System.Collections.IEnumerable
     {
         public BuildItemGroup() { }
@@ -43,7 +41,6 @@ namespace Microsoft.Build.BuildEngine
         public void RemoveItemAt(int index) { }
         public Microsoft.Build.BuildEngine.BuildItem[] ToArray() { throw null; }
     }
-    [System.ObsoleteAttribute]
     public partial class BuildItemGroupCollection : System.Collections.ICollection, System.Collections.IEnumerable
     {
         internal BuildItemGroupCollection() { }
@@ -54,7 +51,6 @@ namespace Microsoft.Build.BuildEngine
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("BuildProperty (Name = { Name }, Value = { Value }, FinalValue = { FinalValue }, Condition = { Condition })")]
-    [System.ObsoleteAttribute]
     public partial class BuildProperty
     {
         public BuildProperty(string propertyName, string propertyValue) { }
@@ -68,7 +64,6 @@ namespace Microsoft.Build.BuildEngine
         public override string ToString() { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("BuildPropertyGroup (Count = { Count }, Condition = { Condition })")]
-    [System.ObsoleteAttribute]
     public partial class BuildPropertyGroup : System.Collections.IEnumerable
     {
         public BuildPropertyGroup() { }
@@ -88,7 +83,6 @@ namespace Microsoft.Build.BuildEngine
         public void SetProperty(string propertyName, string propertyValue) { }
         public void SetProperty(string propertyName, string propertyValue, bool treatPropertyValueAsLiteral) { }
     }
-    [System.ObsoleteAttribute]
     public partial class BuildPropertyGroupCollection : System.Collections.ICollection, System.Collections.IEnumerable
     {
         internal BuildPropertyGroupCollection() { }
@@ -99,13 +93,11 @@ namespace Microsoft.Build.BuildEngine
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
     }
     [System.FlagsAttribute]
-    [System.ObsoleteAttribute]
     public enum BuildSettings
     {
         DoNotResetPreviouslyBuiltTargets = 1,
         None = 0,
     }
-    [System.ObsoleteAttribute]
     public partial class BuildTask
     {
         internal BuildTask() { }
@@ -122,11 +114,8 @@ namespace Microsoft.Build.BuildEngine
         public void SetParameterValue(string parameterName, string parameterValue) { }
         public void SetParameterValue(string parameterName, string parameterValue, bool treatParameterValueAsLiteral) { }
     }
-    [System.ObsoleteAttribute]
     public delegate void ColorResetter();
-    [System.ObsoleteAttribute]
     public delegate void ColorSetter(System.ConsoleColor color);
-    [System.ObsoleteAttribute]
     public partial class ConfigurableForwardingLogger : Microsoft.Build.Framework.IForwardingLogger, Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
         public ConfigurableForwardingLogger() { }
@@ -139,7 +128,6 @@ namespace Microsoft.Build.BuildEngine
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource, int nodeCount) { }
         public virtual void Shutdown() { }
     }
-    [System.ObsoleteAttribute]
     public partial class ConsoleLogger : Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
         public ConsoleLogger() { }
@@ -167,7 +155,6 @@ namespace Microsoft.Build.BuildEngine
         public void TaskStartedHandler(object sender, Microsoft.Build.Framework.TaskStartedEventArgs e) { }
         public void WarningHandler(object sender, Microsoft.Build.Framework.BuildWarningEventArgs e) { }
     }
-    [System.ObsoleteAttribute]
     public partial class DistributedFileLogger : Microsoft.Build.Framework.IForwardingLogger, Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
         public DistributedFileLogger() { }
@@ -221,7 +208,6 @@ namespace Microsoft.Build.BuildEngine
         public void UnloadProject(Microsoft.Build.BuildEngine.Project project) { }
         public void UnregisterAllLoggers() { }
     }
-    [System.ObsoleteAttribute]
     public partial class FileLogger : Microsoft.Build.BuildEngine.ConsoleLogger
     {
         public FileLogger() { }
@@ -229,7 +215,6 @@ namespace Microsoft.Build.BuildEngine
         public override void Initialize(Microsoft.Build.Framework.IEventSource eventSource, int nodeCount) { }
         public override void Shutdown() { }
     }
-    [System.ObsoleteAttribute]
     public partial class Import
     {
         internal Import() { }
@@ -238,7 +223,6 @@ namespace Microsoft.Build.BuildEngine
         public bool IsImported { get { throw null; } }
         public string ProjectPath { get { throw null; } set { } }
     }
-    [System.ObsoleteAttribute]
     public partial class ImportCollection : System.Collections.ICollection, System.Collections.IEnumerable
     {
         internal ImportCollection() { }
@@ -251,7 +235,6 @@ namespace Microsoft.Build.BuildEngine
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public void RemoveImport(Microsoft.Build.BuildEngine.Import importToRemove) { }
     }
-    [System.ObsoleteAttribute]
     public sealed partial class InternalLoggerException : System.Exception
     {
         public InternalLoggerException() { }
@@ -264,7 +247,6 @@ namespace Microsoft.Build.BuildEngine
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
-    [System.ObsoleteAttribute]
     public sealed partial class InvalidProjectFileException : System.Exception
     {
         public InvalidProjectFileException() { }
@@ -285,7 +267,6 @@ namespace Microsoft.Build.BuildEngine
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
-    [System.ObsoleteAttribute]
     public partial class InvalidToolsetDefinitionException : System.Exception
     {
         public InvalidToolsetDefinitionException() { }
@@ -298,13 +279,11 @@ namespace Microsoft.Build.BuildEngine
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
-    [System.ObsoleteAttribute]
     public partial class LocalNode
     {
         internal LocalNode() { }
         public static void StartLocalNodeServer(int nodeNumber) { }
     }
-    [System.ObsoleteAttribute]
     public partial class LoggerDescription
     {
         public LoggerDescription(string loggerClassName, string loggerAssemblyName, string loggerAssemblyFile, string loggerSwitchParameters, Microsoft.Build.Framework.LoggerVerbosity verbosity) { }
@@ -388,32 +367,27 @@ namespace Microsoft.Build.BuildEngine
         public void SetProperty(string propertyName, string propertyValue, string condition, Microsoft.Build.BuildEngine.PropertyPosition position, bool treatPropertyValueAsLiteral) { }
     }
     [System.FlagsAttribute]
-    [System.ObsoleteAttribute]
     public enum ProjectLoadSettings
     {
         IgnoreMissingImports = 1,
         None = 0,
     }
-    [System.ObsoleteAttribute]
     public enum PropertyPosition
     {
         UseExistingOrCreateAfterLastImport = 1,
         UseExistingOrCreateAfterLastPropertyGroup = 0,
     }
-    [System.ObsoleteAttribute]
     public sealed partial class RemoteErrorException : System.Exception
     {
         internal RemoteErrorException() { }
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
-    [System.ObsoleteAttribute]
     public static partial class SolutionWrapperProject
     {
         public static string Generate(string solutionPath, string toolsVersionOverride, Microsoft.Build.Framework.BuildEventContext projectBuildEventContext) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("Target (Name = { Name }, Condition = { Condition })")]
-    [System.ObsoleteAttribute]
     public partial class Target : System.Collections.IEnumerable
     {
         internal Target() { }
@@ -427,7 +401,6 @@ namespace Microsoft.Build.BuildEngine
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public void RemoveTask(Microsoft.Build.BuildEngine.BuildTask taskElement) { }
     }
-    [System.ObsoleteAttribute]
     public partial class TargetCollection : System.Collections.ICollection, System.Collections.IEnumerable
     {
         internal TargetCollection() { }
@@ -441,7 +414,6 @@ namespace Microsoft.Build.BuildEngine
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public void RemoveTarget(Microsoft.Build.BuildEngine.Target targetToRemove) { }
     }
-    [System.ObsoleteAttribute]
     public partial class Toolset
     {
         public Toolset(string toolsVersion, string toolsPath) { }
@@ -451,7 +423,6 @@ namespace Microsoft.Build.BuildEngine
         public string ToolsVersion { get { throw null; } }
         public Microsoft.Build.BuildEngine.Toolset Clone() { throw null; }
     }
-    [System.ObsoleteAttribute]
     public partial class ToolsetCollection : System.Collections.Generic.ICollection<Microsoft.Build.BuildEngine.Toolset>, System.Collections.Generic.IEnumerable<Microsoft.Build.BuildEngine.Toolset>, System.Collections.IEnumerable
     {
         internal ToolsetCollection() { }
@@ -469,14 +440,12 @@ namespace Microsoft.Build.BuildEngine
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
     }
     [System.FlagsAttribute]
-    [System.ObsoleteAttribute]
     public enum ToolsetDefinitionLocations
     {
         ConfigurationFile = 1,
         None = 0,
         Registry = 2,
     }
-    [System.ObsoleteAttribute]
     public partial class UsingTask
     {
         internal UsingTask() { }
@@ -486,7 +455,6 @@ namespace Microsoft.Build.BuildEngine
         public bool IsImported { get { throw null; } }
         public string TaskName { get { throw null; } }
     }
-    [System.ObsoleteAttribute]
     public partial class UsingTaskCollection : System.Collections.ICollection, System.Collections.IEnumerable
     {
         internal UsingTaskCollection() { }
@@ -497,11 +465,9 @@ namespace Microsoft.Build.BuildEngine
         public void CopyTo(System.Array array, int index) { }
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
     }
-    [System.ObsoleteAttribute]
     public static partial class Utilities
     {
         public static string Escape(string unescapedExpression) { throw null; }
     }
-    [System.ObsoleteAttribute]
     public delegate void WriteHandler(string message);
 }

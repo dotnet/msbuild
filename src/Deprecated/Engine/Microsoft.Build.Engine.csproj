@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
-    <NoWarn>$(NoWarn);618;612</NoWarn>
+    <NoWarn>$(NoWarn);618</NoWarn>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDefaultItems>false</EnableDefaultItems>
     <CreateTlb>true</CreateTlb>
@@ -202,11 +202,14 @@
     <Compile Include="Shared\XMakeAttributes.cs" />
     <Compile Include="Shared\XMakeElements.cs" />
     <Compile Include="Shared\XmlUtilities.cs" />
+
     <!-- Resource Files -->
+
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+
     <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>

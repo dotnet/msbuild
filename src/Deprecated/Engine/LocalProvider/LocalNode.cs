@@ -19,7 +19,6 @@ namespace Microsoft.Build.BuildEngine
     /// with the local node provider.
     /// Wraps a Node.
     /// </summary>
-    [Obsolete]
     public class LocalNode
     {
         #region Static Constructors

@@ -20,20 +20,17 @@ namespace Microsoft.Build.BuildEngine
     /// the console window or the IDE build window.
     /// </summary>
     /// <param name="message"></param>
-    [Obsolete]
     public delegate void WriteHandler(string message);
 
     /// <summary>
     /// Type of delegate used to set console color.
     /// </summary>
     /// <param name="color">Text color</param>
-    [Obsolete]
     public delegate void ColorSetter(ConsoleColor color);
 
     /// <summary>
     /// Type of delegate used to reset console color.
     /// </summary>
-    [Obsolete]
     public delegate void ColorResetter();
 
     #endregion
@@ -45,7 +42,6 @@ namespace Microsoft.Build.BuildEngine
     /// either SerialConsoleLogger or ParallelConsoleLogger.
     /// </summary>
     /// <remarks>This class is not thread safe.</remarks>
-    [Obsolete]
     public class ConsoleLogger : INodeLogger
     {
         private BaseConsoleLogger consoleLogger;

@@ -119,7 +119,6 @@ namespace Microsoft.Build.Conversion
     /// .NET 2002 or 2003 to MSBuild format (for Whidbey).
     /// </summary>
     /// <owner>rgoel</owner>
-    [Obsolete("The ProjectFileConverter class is deprecated.")]
     public sealed class ProjectFileConverter
     {
         // The filename of the old VS7/Everett project file.
