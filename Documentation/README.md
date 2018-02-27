@@ -8,6 +8,7 @@ Documents Index
 - [.NET Core native pre-requisities document](https://github.com/dotnet/core/blob/master/Documentation/prereqs.md)
 - [Roadmap and OS support](https://github.com/dotnet/core/blob/master/roadmap.md)
 - [Comprehensive CLI documentation](https://docs.microsoft.com/en-us/dotnet/articles/core/preview3/tools/)
+- [ASP.NET Core Command Line Tools](general/aspnetcore-tools.md)
 
 ## Working with the CLI repo
 

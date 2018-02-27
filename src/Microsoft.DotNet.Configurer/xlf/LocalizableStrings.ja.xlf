@@ -64,9 +64,11 @@ Here are some options to fix this error:
 Successfully installed the ASP.NET Core HTTPS Development Certificate.
 To trust the certificate (Windows and macOS only) first install the dev-certs tool by running 'dotnet install tool dotnet-dev-certs -g --version 2.1.0-preview1-final' and then run 'dotnet-dev-certs https --trust'.
 For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="needs-review-translation">ASP.NET Core
+        <target state="translated">ASP.NET Core
 ------------
-ASP.NET Core HTTPS 開発証明書をインストールしました。詳しくは、https://go.microsoft.com/fwlink/?linkid=84805 をご覧ください</target>
+ASP.NET Core HTTPS 開発証明書が正常にインストールされました。
+証明書を信頼する (Windows および macOS のみ) には、まず 'dotnet install tool dotnet-dev-certs -g --version 2.1.0-preview1-final' を実行して dev-certs ツールをインストールし、次に 'dotnet-dev-certs https --trust' を実行します。
+HTTPS を構成する方法の詳細については、https://go.microsoft.com/fwlink/?linkid=848054 をご覧ください。</target>
         <note />
       </trans-unit>
     </body>

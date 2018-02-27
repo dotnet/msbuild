@@ -676,8 +676,7 @@
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidXml">
         <source>Invalid XML: {0}</source>
-        <target state="needs-review-translation">Plik ustawień narzędzia nie jest prawidłowym plikiem xml.
-{0}</target>
+        <target state="translated">Nieprawidłowy kod XML: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
@@ -707,32 +706,32 @@
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
-        <target state="new">Tool defines a command with a missing name setting.</target>
+        <target state="translated">Narzędzie definiuje polecenie z brakującym ustawieniem nazwy.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingEntryPoint">
         <source>Command '{0}' is missing an entry point setting.</source>
-        <target state="new">Command '{0}' is missing an entry point setting.</target>
+        <target state="translated">W poleceniu „{0}” brakuje ustawienia punktu wejścia.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidCommandName">
         <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
-        <target state="new">Command '{0}' contains one or more of the following invalid characters: {1}.</target>
+        <target state="translated">Polecenie „{0}” zawiera co najmniej jeden nieprawidłowy znak: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMoreThanOneCommand">
         <source>More than one command is defined for the tool.</source>
-        <target state="new">More than one command is defined for the tool.</target>
+        <target state="translated">Dla narzędzia zdefiniowano więcej niż jedno polecenie.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsUnsupportedRunner">
         <source>Command '{0}' uses unsupported runner '{1}'."</source>
-        <target state="new">Command '{0}' uses unsupported runner '{1}'."</target>
+        <target state="translated">Polecenie „{0}” używa nieobsługiwanego modułu uruchamiającego „{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' (version '{1}') is already installed.</source>
-        <target state="new">Tool '{0}' (version '{1}') is already installed.</target>
+        <target state="needs-review-translation">Narzędzie „{0}” jest już zainstalowane.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShellShimConflict">
@@ -753,31 +752,6 @@
       <trans-unit id="FailedToRetrieveToolConfiguration">
         <source>Failed to retrieve tool configuration: {0}</source>
         <target state="new">Failed to retrieve tool configuration: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToCreateShellShim">
-        <source>Failed to create tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToRemoveShellShim">
-        <source>Failed to remove tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedSettingShimPermissions">
-        <source>Failed to set user executable permissions for shell shim: {0}</source>
-        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToInstallToolPackage">
-        <source>Failed to install tool package '{0}': {1}</source>
-        <target state="new">Failed to install tool package '{0}': {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToUninstallToolPackage">
-        <source>Failed to uninstall tool package '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstructions">
@@ -847,6 +821,31 @@ You can add the directory to the PATH by running the following command:
 
 setx PATH "%PATH%;{0}"
 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="new">Failed to install tool package '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
         <note />
       </trans-unit>
     </body>
