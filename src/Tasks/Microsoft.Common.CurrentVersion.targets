@@ -725,11 +725,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     DeterministicSourcePaths
     ========================
     
-    Unless specified otherwise enable deterministic source root when building deterministically on CI server, but not for local builds.
+    Unless specified otherwise enable deterministic source paths when building deterministically on CI server, but not for local builds.
     In order for the debugger to find source files when debugging a locally built binary the PDB must contain original, unmapped local paths.
   -->
   <PropertyGroup>
-    <DeterministicSourcePaths Condition="'$(DeterministicSourcePaths)' == '' and '$(Deterministic)' == 'true' and '$(ContinuousIntegrationBuild)' != ''">true</DeterministicSourcePaths>
+    <DeterministicSourcePaths Condition="'$(DeterministicSourcePaths)' == '' and '$(Deterministic)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true'">true</DeterministicSourcePaths>
   </PropertyGroup>
 
   <!--
