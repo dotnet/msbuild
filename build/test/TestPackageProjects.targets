@@ -39,7 +39,7 @@
         <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
         <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <MsbuildArgs>/p:TargetFramework=netstandard1.5</MsbuildArgs>
+        <MsbuildArgs>/p:TargetFramework=netstandard2.0</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
         <Name>Microsoft.DotNet.InternalAbstractions</Name>
