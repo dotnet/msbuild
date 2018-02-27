@@ -18,9 +18,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     there is no dependency in nuspec. And add Microsoft.NETCore.Platforms, which is used to select correct RID assets.
     -->
   <PropertyGroup>
-    <NETCorePlatformsImplicitPackageVersion Condition="'$(NETCorePlatformsImplicitPackageVersion)' == ''">$(BundledNETCorePlatformsPackageVersion)</NETCorePlatformsImplicitPackageVersion>
-    <NETCorePlatformsImplicitPackageVersion Condition="'$(NETCorePlatformsImplicitPackageVersion)' == ''">2.0.1</NETCorePlatformsImplicitPackageVersion>
-
     <_ToolsSettingsFilePath>$(BaseIntermediateOutputPath)DotnetToolSettings.xml</_ToolsSettingsFilePath>
   </PropertyGroup>
 
@@ -30,11 +27,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Publish Condition=" '%(PackageReference.Publish)' != 'false' ">true</Publish>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="$(NETCorePlatformsImplicitPackageVersion)" />
   </ItemGroup>
 
   <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish" Condition=" '$(PackAsTool)' == 'true' ">
-    
+
     <NETSdkError Condition="'$(SelfContained)' == 'true'"
                  ResourceName="PackAsToolCannotSupportSelfContained" />
 

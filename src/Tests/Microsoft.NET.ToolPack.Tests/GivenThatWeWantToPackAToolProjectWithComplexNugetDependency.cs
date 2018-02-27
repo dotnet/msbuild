@@ -69,7 +69,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
                 nupkgReader
                     .GetPackageDependencies().First().Packages
-                    .Should().OnlyContain(p => p.Id == "Microsoft.NETCore.Platforms");
+                    .Should().BeEmpty();
             }
         }
 

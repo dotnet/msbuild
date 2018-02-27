@@ -95,14 +95,14 @@ namespace Microsoft.NET.ToolPack.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void It_adds_platform_package_to_dependency_and_remove_other_package_dependency(bool multiTarget)
+        public void It_remove_other_package_dependency(bool multiTarget)
         {
             var nugetPackage = SetupNuGetPackage(multiTarget);
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))
             {
                 nupkgReader
                     .GetPackageDependencies().First().Packages
-                    .Should().OnlyContain(p => p.Id == "Microsoft.NETCore.Platforms");
+                    .Should().BeEmpty();
             }
         }
 
