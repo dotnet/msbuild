@@ -733,7 +733,21 @@ namespace Microsoft.TemplateEngine.Cli
             get
             {
                 IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateListResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
-                HashSet<string> allShortNames = new HashSet<string>(allTemplates.Select(x => x.Info.ShortName));
+
+                HashSet<string> allShortNames = new HashSet<string>();
+
+                foreach (ITemplateMatchInfo templateMatchInfo in allTemplates)
+                {
+                    if (templateMatchInfo.Info is IShortNameList templateWithShortNameList)
+                    {
+                        allShortNames.UnionWith(templateWithShortNameList.ShortNameList);
+                    }
+                    else
+                    {
+                        allShortNames.Add(templateMatchInfo.Info.ShortName);
+                    }
+                }
+
                 return allShortNames;
             }
         }

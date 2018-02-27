@@ -142,9 +142,11 @@ namespace Microsoft.TemplateEngine.Cli
         // Lists all the templates, unfiltered - except the ones hidden by their host file.
         public static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader)
         {
+            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
+
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
             (
-                templateInfo,
+                filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
                 WellKnownSearchFilters.NameFilter(string.Empty)
             )
@@ -156,11 +158,13 @@ namespace Microsoft.TemplateEngine.Cli
         // Lists all the templates, filtered only by the context (item, project, etc) - and the host file.
         public static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, string context)
         {
+            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
+
             // If there is a context match, it must be exact. Other dispositions are irrelevant.
             Func<ITemplateMatchInfo, bool> contextFilter = x => x.MatchDisposition.All(d => d.Location != MatchLocation.Context || d.Kind == MatchKind.Exact);
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
             (
-                templateInfo,
+                filterableTemplateInfo,
                 contextFilter,
                 WellKnownSearchFilters.ContextFilter(context),
                 WellKnownSearchFilters.NameFilter(string.Empty)
@@ -180,9 +184,11 @@ namespace Microsoft.TemplateEngine.Cli
         // Query for template matches, filtered by everything available: name, language, context, parameters, and the host file.
         public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
+            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
+
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
             (
-                templateInfo,
+                filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
                 WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName),
@@ -219,6 +225,50 @@ namespace Microsoft.TemplateEngine.Cli
             AddParameterMatchingToTemplates(coreMatchedTemplates, hostDataLoader, commandInput);
 
             return coreMatchedTemplates;
+        }
+
+        private static IReadOnlyList<FilterableTemplateInfo> SetupFilterableTemplateInfoFromTemplateInfo(IReadOnlyList<ITemplateInfo> templateList)
+        {
+            Dictionary<string, HashSet<string>> shortNamesByGroup = new Dictionary<string, HashSet<string>>();
+
+            // get the short names lists for the groups
+            foreach (ITemplateInfo template in templateList)
+            {
+                string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
+                    ? template.GroupIdentity
+                    : template.Identity;
+
+                if (!shortNamesByGroup.TryGetValue(effectiveGroupIdentity, out HashSet<string> shortNames))
+                {
+                    shortNames = new HashSet<string>();
+                    shortNamesByGroup[effectiveGroupIdentity] = shortNames;
+                }
+
+                if (template is IShortNameList templateWithShortNameList)
+                {
+                    shortNames.UnionWith(templateWithShortNameList.ShortNameList);
+                }
+                else
+                {
+                    shortNames.Add(template.ShortName);
+                }
+            }
+
+            // create the FilterableTemplateInfo with the group short names
+            List<FilterableTemplateInfo> filterableTemplateList = new List<FilterableTemplateInfo>();
+
+            foreach (ITemplateInfo template in templateList)
+            {
+                string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
+                    ? template.GroupIdentity
+                    : template.Identity;
+
+                FilterableTemplateInfo filterableTemplate = FilterableTemplateInfo.FromITemplateInfo(template);
+                filterableTemplate.GroupShortNameList = shortNamesByGroup[effectiveGroupIdentity].ToList();
+                filterableTemplateList.Add(filterableTemplate);
+            }
+
+            return filterableTemplateList;
         }
 
         private static void AddDefaultLanguageMatchingToTemplates(IReadOnlyList<ITemplateMatchInfo> listToFilter, string language)
