@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>SLN file reader/writer</Description>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
@@ -22,7 +22,7 @@
   <ItemGroup>
     <PackageReference Include="System.Collections.Specialized" Version="4.0.1" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.1.0" />
-    <PackageReference Include="NETStandard.Library" Version="1.6.0" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 </Project>

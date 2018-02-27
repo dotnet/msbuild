@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
