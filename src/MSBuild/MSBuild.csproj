@@ -31,6 +31,7 @@
     <Description>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
@@ -269,7 +270,7 @@
 
   </Target>
 
-  <Target Name="GetCustomPackageFiles" BeforeTargets="_GetPackageFiles">
+  <Target Name="GetCustomPackageFiles" BeforeTargets="_GetPackageFiles" DependsOnTargets="RemoveSatelliteDllsFromBuildOutputInPackage">
 
     <ItemGroup>
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
@@ -306,7 +307,18 @@
     </ItemGroup>
 
     <ItemGroup>
-      <_PackageFiles Include="@(_OurFiles)" BuildAction="Content" PackagePath="contentFiles\any\%(_OurFiles.TargetFramework)\%(_OurFiles.Subdirectory)%(RecursiveDir)%(Filename)%(Extension)" />
+      <_PackageFiles Include="@(_OurFiles)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\%(_OurFiles.TargetFramework)\%(_OurFiles.Subdirectory)%(RecursiveDir)%(Filename)%(Extension)" />
+
+      <!--
+        The items in @(_BuildOutputInPackage) are passed to the Pack task as a separate parameter that does not accept metadata like BuildAction.  So we either
+        need to replicate the target that gets build output or just copy the items to _PackageFiles ourselves while setting the metadata.
+      -->
+      <_PackageFiles Include="@(_BuildOutputInPackage)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\%(_BuildOutputInPackage.TargetFramework)\%(RecursiveDir)%(Filename)%(Extension)" />
+
+      <!--
+        The build output was copied to _PackageFiles and must be cleared or we'll get package analysis warnings about duplicate files
+      -->
+      <_BuildOutputInPackage Remove="@(_BuildOutputInPackage)" />
     </ItemGroup>
 
   </Target>
