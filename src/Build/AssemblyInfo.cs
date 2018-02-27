@@ -44,6 +44,8 @@ using System.Security.Permissions;
 [assembly: NeutralResourcesLanguage("en")]
 #endif
 
+[assembly: ComVisible(false)]
+
 [assembly: CLSCompliant(true)]
 
 [assembly: AssemblyTitle("Microsoft.Build.dll")]
