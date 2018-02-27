@@ -319,6 +319,11 @@
         The build output was copied to _PackageFiles and must be cleared or we'll get package analysis warnings about duplicate files
       -->
       <_BuildOutputInPackage Remove="@(_BuildOutputInPackage)" />
+
+      <!--
+        Clear _TargetPathsToSymbols so that pdbs don't end up in the package
+      -->
+      <_TargetPathsToSymbols Remove="@(_TargetPathsToSymbols)" />
     </ItemGroup>
 
   </Target>
