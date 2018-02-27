@@ -20,6 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputType>Exe</OutputType>
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <GenerateDependencyFile Condition="'$(GenerateDependencyFile)' == ''">true</GenerateDependencyFile>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <IsPackable Condition="'$(IsPackable)' == ''">false</IsPackable>
   </PropertyGroup>
