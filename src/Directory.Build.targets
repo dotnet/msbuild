@@ -124,6 +124,18 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(CreateTlb)' == 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <ItemGroup>
+      <_TlbExpAssemblyPaths Include="$(TargetDir);$(TargetFrameworkDirectory)" />
+      <_TlbExpAssemblyPaths>
+        <SlashlessPath>$([System.String]::Copy('%(Identity)').TrimEnd('\'))</SlashlessPath>
+      </_TlbExpAssemblyPaths>
+      <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
+    </ItemGroup>
+
+    <Exec Command="tlbexp.exe /silent /NOLOGO /asmpath:@(TlbExpAssemblyPaths->'&quot;%(Identity)&quot;', ' /asmpath:') $(TargetPath) /out:$(TargetDir)$(TargetName).tlb" />
+  </Target>
+
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 

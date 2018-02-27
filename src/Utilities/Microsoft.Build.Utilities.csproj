@@ -6,6 +6,7 @@
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
     <EnableDocumentationFile>true</EnableDocumentationFile>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <!-- <CreateTlb>true</CreateTlb> --><!-- This was created in VS but not published, so I don't think it's needed -->
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to implement custom MSBuild tasks.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
