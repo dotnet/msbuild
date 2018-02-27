@@ -18,11 +18,12 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             bool redirectStandardOutput = true;
 
+            // By default, standard out is redirected.
+            // Only redirect when the configuration says "redirectStandardOutput = false"
             if (actionConfig.Args.TryGetValue("redirectStandardOutput", out string redirectStandardOutputString)
                     && string.Equals(redirectStandardOutputString, "false", StringComparison.OrdinalIgnoreCase))
             {
                 redirectStandardOutput = false;
-                // all other cases, use the built-in default, which is true
             }
 
             settings.Host.LogMessage(string.Format(LocalizableStrings.RunningCommand, actionConfig.Args["executable"] + " " + args));
