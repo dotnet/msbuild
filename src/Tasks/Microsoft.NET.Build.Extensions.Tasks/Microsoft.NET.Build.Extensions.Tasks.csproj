@@ -105,7 +105,7 @@
 
   <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
   <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
-  <Target Name="FilterCopyLocal" DependsOnTargets="RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
+  <Target Name="FilterCopyLocal" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
     <ItemGroup>
       <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
       <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
