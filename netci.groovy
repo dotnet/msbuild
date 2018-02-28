@@ -47,10 +47,10 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
 
                             //  Should the build be Release?  The default is Debug
                             if (runtime == "Full") {
-                                script += " && build\\cibuild.cmd"
+                                script += " && build.cmd -pack -sign -ci"
                             }
                             else if (runtime == "CoreCLR") {
-                                script += " && build\\cibuild.cmd -hostType Core"
+                                script += " && build.cmd -pack -sign -ci -hostType Core"
                             }
 
                             batchFile(script)
@@ -63,7 +63,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
                 case 'OSX10.13':
                     newJob.with{
                         steps{
-                            def buildCmd = "./build/cibuild.sh"
+                            def buildCmd = "./build.sh -ci -prepareMachine"
 
                             if (runtime == "Mono") {
                                 // tests are failing on mono right now
@@ -72,7 +72,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
 
                             if (runtime.startsWith("Mono")) {
                                 // Redundantly specify target to override
-                                // "MonoTest" which cibuild.sh doesn't know
+                                // "MonoTest" which build.sh doesn't know
                                 buildCmd += " --host Mono --target Mono"
                             }
 
@@ -84,7 +84,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
                 case { it.startsWith('Ubuntu') }:
                     newJob.with{
                         steps{
-                            def buildCmd = "./build/cibuild.sh"
+                            def buildCmd = "./build.sh -ci -prepareMachine"
 
                             if (runtime == "Mono") {
                                 // tests are failing on mono right now
@@ -93,7 +93,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
 
                             if (runtime.startsWith("Mono")) {
                                 // Redundantly specify target to override
-                                // "MonoTest" which cibuild.sh doesn't know
+                                // "MonoTest" which build.sh doesn't know
                                 buildCmd += " --host Mono --target Mono"
                             }
 
