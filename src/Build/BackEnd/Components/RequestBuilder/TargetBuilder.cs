@@ -477,7 +477,19 @@ namespace Microsoft.Build.BackEnd
                             var added = _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryAdd(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
                             if (!added)
                             {
-                                throw new NotImplementedException();
+                                var message= $"Apparent double building around {currentTargetEntry.Name}. ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
+
+                                _projectLoggingContext.LogErrorFromText(string.Empty, string.Empty, string.Empty, new BuildEventFileInfo(String.Empty), message);
+
+                                // I suspect a race condition. The lists read one second apart should always be identical
+                                // if we're running one thread at a time, like we should be.
+                                Thread.Sleep(1000);
+
+                                message = $"After a delay, ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
+
+                                _projectLoggingContext.LogErrorFromText(string.Empty, string.Empty, string.Empty, new BuildEventFileInfo(String.Empty), message);
+
+                                throw new ArgumentException();
                             }
 
                             // Execute all of the tasks on this target.
