@@ -102,11 +102,18 @@ namespace Microsoft.NET.TestFramework
                     repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Parent.Parent.Name;
                 }
             }
+
+            string artifactsDir = Environment.GetEnvironmentVariable("DOTNET_SDK_ARTIFACTS_DIR");
+            if (string.IsNullOrEmpty(artifactsDir))
+            {
+                artifactsDir = Path.Combine(repoRoot, "artifacts");
+            }
+
             if (repoRoot != null)
             {
-                testContext.NuGetFallbackFolder = Path.Combine(repoRoot, "artifacts", ".nuget", "NuGetFallbackFolder");
-                testContext.NuGetExePath = Path.Combine(repoRoot, "artifacts", ".nuget", $"nuget{Constants.ExeSuffix}");
-                testContext.NuGetCachePath = Path.Combine(repoRoot, "artifacts", ".nuget", "packages");
+                testContext.NuGetFallbackFolder = Path.Combine(artifactsDir, ".nuget", "NuGetFallbackFolder");
+                testContext.NuGetExePath = Path.Combine(artifactsDir, ".nuget", $"nuget{Constants.ExeSuffix}");
+                testContext.NuGetCachePath = Path.Combine(artifactsDir, ".nuget", "packages");
             }
             else
             {
@@ -127,7 +134,7 @@ namespace Microsoft.NET.TestFramework
                 testContext.BuildVersion = assemblyInformationalVersion.InformationalVersion;
             }
 
-            testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, repoConfiguration, commandLine);
+            testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, artifactsDir, repoConfiguration, commandLine);
 
             TestContext.Current = testContext;
         }

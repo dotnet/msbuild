@@ -1,17 +1,19 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27-BA35-44B2-AC57-E54551791C64}"
 	ProjectSection(SolutionItems) = preProject
-		build\Build.proj = build\Build.proj
 		build\build.ps1 = build\build.ps1
 		build\build.sh = build\build.sh
 		build\cibuild.cmd = build\cibuild.cmd
 		build\cibuild.sh = build\cibuild.sh
+		build\dogfood.cmd = build\dogfood.cmd
+		build\dogfood.sh = build\dogfood.sh
 		build\NuGet.props = build\NuGet.props
 		build\SignToolData.json = build\SignToolData.json
 		build\Toolset.proj = build\Toolset.proj
+		build\uploadperftobenchview.cmd = build\uploadperftobenchview.cmd
 		build\Versions.props = build\Versions.props
 	EndProjectSection
 EndProject
@@ -24,7 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 		LICENSE.TXT = LICENSE.TXT
 		netci.groovy = netci.groovy
-		NuGet.config = NuGet.config
+		perf.groovy = perf.groovy
 		README.md = README.md
 		restore.cmd = restore.cmd
 		restore.sh = restore.sh
@@ -110,6 +112,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Build.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Pack.Tests", "src\Tests\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj", "{8746DC05-3035-4F24-9F2C-BAAAB5B50FD3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.PerformanceTests", "src\Tests\Microsoft.NET.PerformanceTests\Microsoft.NET.PerformanceTests.csproj", "{AFB72217-54A0-4E76-870A-42718B8E0AE5}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Publish.Tests", "src\Tests\Microsoft.NET.Publish.Tests\Microsoft.NET.Publish.Tests.csproj", "{5B3E6EC9-AD8D-4F68-A9F8-C60CF11F4753}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Restore.Tests", "src\Tests\Microsoft.NET.Restore.Tests\Microsoft.NET.Restore.Tests.csproj", "{112668D7-322D-4F83-A6CE-B814C25AD3BF}"
@@ -151,6 +155,10 @@ Global
 		{8746DC05-3035-4F24-9F2C-BAAAB5B50FD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8746DC05-3035-4F24-9F2C-BAAAB5B50FD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8746DC05-3035-4F24-9F2C-BAAAB5B50FD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5B3E6EC9-AD8D-4F68-A9F8-C60CF11F4753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5B3E6EC9-AD8D-4F68-A9F8-C60CF11F4753}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B3E6EC9-AD8D-4F68-A9F8-C60CF11F4753}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -181,6 +189,7 @@ Global
 		{5293658E-96D2-421F-A789-D0B6BA129570} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{52CB4546-DD2D-4207-B6E1-494C9506D1C1} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{8746DC05-3035-4F24-9F2C-BAAAB5B50FD3} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{AFB72217-54A0-4E76-870A-42718B8E0AE5} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{5B3E6EC9-AD8D-4F68-A9F8-C60CF11F4753} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{112668D7-322D-4F83-A6CE-B814C25AD3BF} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{CAF71BDC-7B7D-4A43-AB8C-E440A1E4F108} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
