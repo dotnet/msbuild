@@ -13,6 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--
       Indicate to other targets that Microsoft.NET.Sdk.Web is being used.
     -->
+  <PropertyGroup>
     <UsingMicrosoftNETSdkWeb>true</UsingMicrosoftNETSdkWeb>
   </PropertyGroup>
 
