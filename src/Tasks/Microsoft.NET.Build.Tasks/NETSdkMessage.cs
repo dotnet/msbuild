@@ -13,36 +13,33 @@ namespace Microsoft.NET.Build.Tasks
     {
         public string Importance { get; set; } = "Normal";
 
-        private MessageImportance MessageImportance
+        private MessageImportance GetMessageImportance(string importance)
         {
-            get
+            MessageImportance messageImportance = MessageImportance.Normal;
+
+            if (string.Equals(Importance, "High", StringComparison.OrdinalIgnoreCase))
             {
-                MessageImportance importance = MessageImportance.Normal;
-
-                if (string.Equals(Importance, "High", StringComparison.OrdinalIgnoreCase))
-                {
-                    importance = MessageImportance.High;
-                }
-                else if (string.Equals(Importance, "Low", StringComparison.OrdinalIgnoreCase))
-                {
-                    importance = MessageImportance.Low;
-                }
-                else if (string.Equals(Importance, "Normal", StringComparison.OrdinalIgnoreCase))
-                {
-                    importance = MessageImportance.Normal;
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(nameof(importance));
-                }
-
-                return importance;
+                messageImportance = MessageImportance.High;
             }
+            else if (string.Equals(Importance, "Low", StringComparison.OrdinalIgnoreCase))
+            {
+                messageImportance = MessageImportance.Low;
+            }
+            else if (string.Equals(Importance, "Normal", StringComparison.OrdinalIgnoreCase))
+            {
+                messageImportance = MessageImportance.Normal;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(importance));
+            }
+
+            return messageImportance;
         }
 
         protected override void LogMessage(string message)
         {
-            Log.LogMessage(MessageImportance, message);
+            Log.LogMessage(GetMessageImportance(Importance), message);
         }
     }
 }
