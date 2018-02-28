@@ -416,7 +416,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void GivenAnInstalledPackageUninstallRollsbackWhenTransactionAborts(bool testMockBehaviorIsInSync)
+        public void GivenAnInstalledPackageUninstallRollsbackWhenTransactionFails(bool testMockBehaviorIsInSync)
         {
             var source = GetTestLocalFeedPath();
 
