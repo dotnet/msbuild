@@ -196,7 +196,7 @@ namespace Microsoft.Build.BackEnd
                 // If there are still targets left on the stack, they need to be removed from the 'active targets' list
                 foreach (TargetEntry target in _targetsToBuild)
                 {
-                    configuration.ActivelyBuildingTargets.Remove(target.Name);
+                    configuration.ActivelyBuildingTargets.TryRemove(target.Name, out int throwaway);
                 }
 
                 ((IBuildComponent)taskBuilder).ShutdownComponent();
@@ -474,7 +474,11 @@ namespace Microsoft.Build.BackEnd
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
                             // This target is now actively building.
-                            _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Add(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
+                            var added = _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryAdd(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
+                            if (!added)
+                            {
+                                throw new NotImplementedException();
+                            }
 
                             // Execute all of the tasks on this target.
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
@@ -495,12 +499,7 @@ namespace Microsoft.Build.BackEnd
                             }
                             catch
                             {
-                                if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(
-                                    currentTargetEntry.Name))
-                                {
-                                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry
-                                        .Name);
-                                }
+                                _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryRemove(currentTargetEntry.Name, out int _);
 
                                 throw;
                             }
@@ -518,7 +517,7 @@ namespace Microsoft.Build.BackEnd
                         targetResult.TargetFailureDoesntCauseBuildFailure = _legacyCallTargetContinueOnError;
 
                         // This target is no longer actively building.
-                        _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
+                        _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryRemove(currentTargetEntry.Name, out int throwaway);
 
                         _buildResult.AddResultsForTarget(currentTargetEntry.Name, targetResult);
 
@@ -608,7 +607,7 @@ namespace Microsoft.Build.BackEnd
                     entry.LeaveLegacyCallTargetScopes();
 
                     // This target is no longer actively building (if it was).
-                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(topEntry.Name);
+                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryRemove(topEntry.Name, out int throwaway);
 
                     // If we come across an entry which requires us to stop processing (for instance, an aftertarget of the original
                     // CallTarget target) then we need to use that flag, not the one from the top entry.

@@ -22,6 +22,7 @@ using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Utilities;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -118,12 +119,6 @@ namespace Microsoft.Build.BackEnd
         /// This is the lookup representing the current project items and properties 'state'.
         /// </summary>
         private Lookup _baseLookup;
-
-        /// <summary>
-        /// This is the set of targets which are currently building but which have not yet completed.
-        /// { targetName -> globalRequestId }
-        /// </summary>
-        private Dictionary<string, int> _activelyBuildingTargets;
 
         /// <summary>
         /// The node where this configuration's master results are stored.
@@ -288,7 +283,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return (_activelyBuildingTargets != null) && (_activelyBuildingTargets.Count > 0);
+                return (ActivelyBuildingTargets != null) && (ActivelyBuildingTargets.Count > 0);
             }
         }
 
@@ -569,18 +564,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the set of targets currently building, mapped to the request id building them.
         /// </summary>
-        public Dictionary<string, int> ActivelyBuildingTargets
-        {
-            get
-            {
-                if (null == _activelyBuildingTargets)
-                {
-                    _activelyBuildingTargets = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                }
-
-                return _activelyBuildingTargets;
-            }
-        }
+        public ConcurrentDictionary<string, int> ActivelyBuildingTargets { get; } = new ConcurrentDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
