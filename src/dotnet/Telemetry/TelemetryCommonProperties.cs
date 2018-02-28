@@ -6,10 +6,14 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
 using System.IO;
+using System.Security;
 using Microsoft.DotNet.Configurer;
+using Microsoft.Win32;
 using System.Linq;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using RuntimeInformation = System.Runtime.InteropServices.RuntimeInformation;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
@@ -43,6 +47,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private const string MachineId = "Machine ID";
         private const string DockerContainer = "Docker Container";
         private const string KernelVersion = "Kernel Version";
+        private const string InstallationType = "Installation Type";
+        private const string ProductType = "Product Type";
+        private const string LibcRelease = "Libc Release";
+        private const string LibcVersion = "Libc Version";
 
         private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
         private const string CannotFindMacAddress = "Unknown";
@@ -62,7 +70,11 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {DockerContainer, _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () => _dockerContainerDetector.IsDockerContainer().ToString("G") )},
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
                 {MachineId, _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, GetMachineId)},
-                {KernelVersion, GetKernelVersion()}
+                {KernelVersion, GetKernelVersion()},
+                {InstallationType, ExternalTelemetryProperties.GetInstallationType()},
+                {ProductType, ExternalTelemetryProperties.GetProductType()},
+                {LibcRelease, ExternalTelemetryProperties.GetLibcRelease()},
+                {LibcVersion, ExternalTelemetryProperties.GetLibcVersion()}
             };
         }
 
