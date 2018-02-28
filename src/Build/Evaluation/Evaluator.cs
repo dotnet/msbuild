@@ -2351,7 +2351,7 @@ namespace Microsoft.Build.Evaluation
                             imports.Add(importedProjectElement);
 
                             // Store a pointer to the newest project to be set later as MSBuildAllProjects
-                            if (importedProjectElement.TimeLastChanged > _newestProject.TimeLastChanged)
+                            if (importedProjectElement.LastWriteTimeWhenRead > _newestProject.LastWriteTimeWhenRead)
                             {
                                 _newestProject = importedProjectElement;
                             }
