@@ -112,7 +112,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForUnsupportedSelfContained"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
-    
+
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="CannotHaveSelfContainedWithoutRuntimeIdentifier" />
     
@@ -126,6 +126,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget"
                  FormatArguments="$(RuntimeIdentifier);$(PlatformTarget)" />
 
+  </Target>
+
+  <Target Name="_CheckForNETCoreSdkIsPreview"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+    <NETSdkMessage Condition=" '$(_NETCoreSdkIsPreview)' == 'true' "
+                   Importance="High"
+                   ResourceName="UsingPreviewSdkWarning" />
   </Target>
 
   <PropertyGroup>

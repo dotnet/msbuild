@@ -352,6 +352,11 @@
         <target state="translated">プロジェクトはランタイム '{0}' をターゲットとしていますが、ランタイム固有のパッケージを解決しませんでした。このランタイムはターゲットのフレームワークでサポートされていない可能性があります。</target>
         <note />
       </trans-unit>
+      <trans-unit id="UsingPreviewSdkWarning">
+        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://docs.microsoft.com/en-us/dotnet/core/tools/global-json</source>
+        <target state="new">You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://docs.microsoft.com/en-us/dotnet/core/tools/global-json</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
