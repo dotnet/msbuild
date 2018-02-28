@@ -457,7 +457,7 @@ namespace Microsoft.DotNet.Tests
         {
             //  When using the product, the ToolDepsJsonGeneratorProject property is used to get this path, but for testing
             //  we'll hard code the path inside the SDK since we don't have a project to evaluate here
-            return Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "Sdks", "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
+            return Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "Sdks", "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
         }
     }
 }
