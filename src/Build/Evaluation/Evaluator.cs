@@ -201,6 +201,16 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
+        /// Keeps track of the newest project to become the value of MSBuildAllProjects.
+        /// </summary>
+        private ProjectRootElement _newestProject;
+
+        /// <summary>
+        /// Stores a value indicating if the project set MSBuildAllProjects so that a message can be logged that the property was ignored.
+        /// </summary>
+        private bool _msbuildAllProjectsWasSet;
+
+        /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
         private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
@@ -680,10 +690,25 @@ namespace Microsoft.Build.Evaluation
         DataCollection.CommentMarkProfile(8816, endPass0);
 #endif
 
+                // By default, the "newest" project is the project itself.  As projects are imported, they will replace this pointer if they are newer than the project.
+                _newestProject = _projectRootElement;
+
                 // Pass1: evaluate properties, load imports, and gather everything else
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
+                }
+
+                if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects)
+                {
+                    if (_msbuildAllProjectsWasSet)
+                    {
+                        // Since the project or an import tried to set MSBuildAllProjects, log a message that it was ignored
+                        _evaluationLoggingContext.LogComment(MessageImportance.Low, "MSBuildAllProjectsIgnored");
+                    }
+
+                    // Set MSBuildAllProjects to be the project or import that is the newest
+                    _data.SetProperty(ReservedPropertyNames.allProjects, _newestProject.FullPath, false /* NOT global property */, true /* OK to be a reserved name */);
                 }
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
@@ -1383,6 +1408,15 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(propertyElement))
             {
+                if (propertyElement.Name.Equals(ReservedPropertyNames.allProjects, StringComparison.OrdinalIgnoreCase)
+                    && !Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects)
+                {
+                    // Ignore evaluating MSBuildAllProjects unless the escape hatch is enabled.  Also keep track of whether or not it was set
+                    // so a message can be logged indicating it was ignored.
+                    _msbuildAllProjectsWasSet = true;
+                    return;
+                }
+
                 // Global properties cannot be overridden.  We silently ignore them if we try.  Legacy behavior.
                 // That is, unless this global property has been explicitly labeled as one that we want to treat as overridable for the duration 
                 // of this project (or import). 
@@ -2315,6 +2349,12 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             imports.Add(importedProjectElement);
+
+                            // Store a pointer to the newest project to be set later as MSBuildAllProjects
+                            if (importedProjectElement.TimeLastChanged > _newestProject.TimeLastChanged)
+                            {
+                                _newestProject = importedProjectElement;
+                            }
 
                             if (_logProjectImportedEvents)
                             {

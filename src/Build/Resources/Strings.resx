@@ -1674,6 +1674,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
+  <data name="MSBuildAllProjectsIgnored" UESanitized="false" Visibility="Public">
+    <value>The property 'MSBuildAllProjects' was ignored and set automatically to be the newest project or import.  You can set the environment variable 'MSBUILDENABLEMSBUILDALLPROJECTS' to '1' to disable this feature.</value>
+    <comment>
+      LOCALIZATION:  Do not localize the word MSBuildAllProjects.
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 
