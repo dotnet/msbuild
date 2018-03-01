@@ -96,7 +96,7 @@ class Program
             DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant()));
 
             var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name)
-                .Restore(Log, toolProject.Name, "/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json");
+                .Restore(Log, toolProject.Name);
 
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
@@ -126,9 +126,8 @@ class Program
                         new XAttribute("Version", "1.0.0")));
                 });
 
+            NuGetConfigWriter.Write(toolReferencerInstance.TestRoot, nupkgPath);
             var restoreCommand = toolReferencerInstance.GetRestoreCommand(Log, toolReferencer.Name);
-            restoreCommand.AddSource(nupkgPath);
-            restoreCommand.AddSource("https://dotnet.myget.org/F/dotnet-core/api/v3/index.json");
             restoreCommand.Execute().Should().Pass();
 
             string toolAssetsFilePath = Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "1.0.0", toolProject.TargetFrameworks, "project.assets.json");

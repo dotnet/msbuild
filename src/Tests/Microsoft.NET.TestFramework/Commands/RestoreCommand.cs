@@ -19,35 +19,11 @@ namespace Microsoft.NET.TestFramework.Commands
         {
         }
 
-        public RestoreCommand AddSource(string source)
-        {
-            _sources.Add(source);
-            return this;
-        }
-
-        public RestoreCommand AddSourcesFromCurrentConfig()
-        {
-            var settings = Settings.LoadDefaultSettings(Directory.GetCurrentDirectory(), null, null);
-            var packageSourceProvider = new PackageSourceProvider(settings);
-
-            foreach (var packageSource in packageSourceProvider.LoadPackageSources())
-            {
-                _sources.Add(packageSource.Source);
-            }
-
-            return this;
-        }
-
         protected override SdkCommandSpec CreateCommand(params string[] args)
         {
             var newArgs = new List<string>();
 
             newArgs.Add(FullPathProjectFile);
-
-            if (_sources.Any())
-            {
-                newArgs.Add($"/p:RestoreSources={string.Join("%3B", _sources)}");
-            }
 
             newArgs.AddRange(args);
 

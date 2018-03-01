@@ -141,8 +141,9 @@ namespace Microsoft.NET.Publish.Tests
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
+
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeWorkingDir={WorkingDir}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeWorkingDir={WorkingDir}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true")
                 .Should()
                 .Pass();
 

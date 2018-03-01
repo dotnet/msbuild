@@ -83,6 +83,8 @@ namespace Microsoft.NET.TestFramework
             // * $(RepoRoot)/artifacts/$(Configuration)/bin/Tests/$(MSBuildProjectName)
             testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "tmp"));
 
+            NuGetConfigWriter.Write(testContext.TestExecutionDirectory, NuGetConfigWriter.PreviewFeeds);
+
             testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
 
             string repoRoot = null;

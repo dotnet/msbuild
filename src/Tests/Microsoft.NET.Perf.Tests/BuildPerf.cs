@@ -65,12 +65,15 @@ namespace Microsoft.NET.Perf.Tests
         public void BuildMVCApp(ProjectPerfOperation operation)
         {
             var testDir = _testAssetsManager.CreateTestDirectory(identifier: operation.ToString());
+
+            NuGetConfigWriter.Write(testDir.Path, NuGetConfigWriter.AspNetCoreDevFeed);
+
             var newCommand = new DotnetCommand(Log);
             newCommand.WorkingDirectory = testDir.Path;
 
             newCommand.Execute("new", "mvc", "--no-restore").Should().Pass();
 
-            TestProject(testDir.Path, "ASP.NET Core MVC app", operation, "https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;https://api.nuget.org/v3/index.json");
+            TestProject(testDir.Path, "ASP.NET Core MVC app", operation);
         }
 
         [CoreMSBuildOnlyTheory(Skip = "The code for these scenarios needs to be acquired during the test run (instead of relying on hard-coded local path)")]
