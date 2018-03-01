@@ -1,0 +1,20 @@
+<Project>
+    <PropertyGroup>
+        <TargetToGetItemsToCopy>GetNuGetBuildTasksItemsToCopy</TargetToGetItemsToCopy>
+        <DependencyNuPkgPath>$(NuGetPackagesDir)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion)</DependencyNuPkgPath>
+    </PropertyGroup>
+
+    <Target Name="GetNuGetBuildTasksItemsToCopy">
+		<ItemGroup>
+			<FilesToCopy
+                Include="$(DependencyNuPkgPath)/lib/netstandard1.3/*"
+                OutputDirectory="$(NuGetExtensionsPath)" />
+
+			<FilesToCopy
+                Include="$(DependencyNuPkgPath)/runtimes/any/native/*"
+                OutputDirectory="$(NuGetExtensionsPath)" />
+		</ItemGroup>
+    </Target>
+</Project>
+
+

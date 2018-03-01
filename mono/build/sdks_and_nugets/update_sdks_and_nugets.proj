@@ -1,0 +1,45 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)\..\common.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\DependencyVersions.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\BundledSdks.props" />
+
+    <PropertyGroup>
+        <SdkOutputDirectory>$(RepoRoot)\sdks</SdkOutputDirectory>
+        <MSBuildExtensionsPathOutputDirectory>$(RepoRoot)\mono\ExtensionsPath</MSBuildExtensionsPathOutputDirectory>
+        <MSBuildExtensionsPathToolsVersionOutputDirectory>$(RepoRoot)\mono\ExtensionsPath-ToolsVersion</MSBuildExtensionsPathToolsVersionOutputDirectory>
+
+        <NuGetExtensionsPath>$(RepoRoot)\nuget-support\tasks-targets</NuGetExtensionsPath>
+        <NuGetExtensionsPathToolsVersion>$(RepoRoot)\nuget-support\tv</NuGetExtensionsPathToolsVersion>
+    </PropertyGroup>
+
+    <Target Name="DeploySdksAndNuGets">
+        <Error Text="Run build.proj instead of this." Condition="'$(_RunningFromBuildProject)' != 'true'" />
+
+        <ItemGroup>
+            <SdksToBundle Include="deploy_from_nugets.proj">
+                <Properties>
+                    ProjectWithProperties=sdks_props.proj;
+                    DependencyPackageName=%(BundledSdk.Identity);
+                    DependencyPackageVersion=%(BundledSdk.Version);
+                    NuGetPackagesDir=$(NuGetPackagesDir);
+                    SdkLayoutDirectory=$(SdkOutputDirectory)/%(BundledSdk.Identity)
+                </Properties>
+            </SdksToBundle>
+
+            <NuGetsToBundle Include="deploy_from_nugets.proj">
+                <Properties>
+                    ProjectWithProperties=ms_extensions.proj;
+                    DependencyPackageName=Microsoft.NET.Build.Extensions;
+                    DependencyPackageVersion=$(MicrosoftNETBuildExtensionsPackageVersion);
+                    NuGetPackagesDir=$(NuGetPackagesDir);
+                    MSBuildExtensionsPathToolsVersionOutputDirectory=$(MSBuildExtensionsPathToolsVersionOutputDirectory);
+                    MSBuildExtensionsPathOutputDirectory=$(MSBuildExtensionsPathOutputDirectory)
+                </Properties>
+            </NuGetsToBundle>
+        </ItemGroup>
+
+        <MSBuild Projects="@(SdksToBundle);@(NuGetsToBundle)" />
+
+        <MSBuild Projects="$(MSBuildThisFileDirectory)\update_nuget_build_tasks.proj" Targets="UpdateNuGetBuildTasks" />
+    </Target>
+</Project>

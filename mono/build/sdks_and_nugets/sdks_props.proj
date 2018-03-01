@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+        <TargetToGetItemsToCopy>GetSdkItemsToCopy</TargetToGetItemsToCopy>
+        <DependencyNuPkgPath>$(NuGetPackagesDir)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion)</DependencyNuPkgPath>
+    </PropertyGroup>
+
+  <Target Name="GetSdkItemsToCopy">
+    <ItemGroup>
+      <FilesToCopy Include="$(DependencyNuPkgPath)/**/*" 
+                  Exclude="$(DependencyNuPkgPath)/$(DependencyPackageName).nuspec;
+                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg;
+                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg.sha512;
+                           $(DependencyNuPkgPath)/CoreCLR/**"
+                  OutputDirectory="$(SdkLayoutDirectory)" />
+    </ItemGroup>
+  </Target>
+</Project>
