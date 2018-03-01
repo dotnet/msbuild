@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -19,10 +16,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneItemNop()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt") };
+            t.Inputs = new[] { new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
             Assert.True(success);
@@ -37,10 +34,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TwoItemsTheSame()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt"), new TaskItem("MyFile.txt") };
+            t.Inputs = new[] { new TaskItem("MyFile.txt"), new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
             Assert.True(success);
@@ -55,12 +52,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OrderPreservedNoDups()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
             // intentionally not sorted to catch an invalid implementation that sorts before
             // de-duping.
-            t.Inputs = new ITaskItem[]
+            t.Inputs = new[]
             {
                 new TaskItem("MyFile2.txt"),
                 new TaskItem("MyFile1.txt"),
@@ -81,10 +78,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OrderPreservedDups()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[]
+            t.Inputs = new[]
             {
                 new TaskItem("MyFile2.txt"),
                 new TaskItem("MyFile1.txt"),
@@ -107,10 +104,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TwoItemsDifferent()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile1.txt"), new TaskItem("MyFile2.txt") };
+            t.Inputs = new[] { new TaskItem("MyFile1.txt"), new TaskItem("MyFile2.txt") };
 
             bool success = t.Execute();
             Assert.True(success);
@@ -126,10 +123,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CaseInsensitive()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt"), new TaskItem("MyFIle.tXt") };
+            t.Inputs = new[] { new TaskItem("MyFile.txt"), new TaskItem("MyFIle.tXt") };
 
             bool success = t.Execute();
             Assert.True(success);
@@ -144,7 +141,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MissingInputs()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
             bool success = t.Execute();
 

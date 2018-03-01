@@ -482,10 +482,10 @@ namespace Microsoft.Build.Tasks
     {
         public RemoveDuplicates() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] Filtered { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Filtered { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public bool HadAnyDuplicates { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] Inputs { get { throw null; } set { } }
+        public bool HadAnyDuplicates { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Inputs { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public partial class ResolveAssemblyReference : Microsoft.Build.Tasks.TaskExtension

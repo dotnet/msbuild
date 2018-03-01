@@ -6,7 +6,6 @@ using System.Collections;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -15,38 +14,22 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class RemoveDuplicates : TaskExtension
     {
-        private ITaskItem[] _inputs = Array.Empty<TaskItem>();
-        private ITaskItem[] _filtered = null;
-        private bool _hadAnyDuplicates = false;
-
         /// <summary>
         /// The left-hand set of items to be RemoveDuplicatesed from.
         /// </summary>
-        public ITaskItem[] Inputs
-        {
-            get { return _inputs; }
-            set { _inputs = value; }
-        }
+        public ITaskItem[] Inputs { get; set; } = Array.Empty<TaskItem>();
 
         /// <summary>
         /// List of unique items.
         /// </summary>
         [Output]
-        public ITaskItem[] Filtered
-        {
-            get { return _filtered; }
-            set { _filtered = value; }
-        }
+        public ITaskItem[] Filtered { get; set; } = null;
 
         /// <summary>
         /// True if any duplicate items were found. False otherwise.
         /// </summary>
         [Output]
-        public bool HadAnyDuplicates
-        {
-            get { return _hadAnyDuplicates; }
-            set { _hadAnyDuplicates = value; }
-        }
+        public bool HadAnyDuplicates { get; set; } = false;
 
         /// <summary>
         /// Execute the task.
@@ -54,8 +37,8 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            Hashtable alreadySeen = new Hashtable(Inputs.Length, StringComparer.OrdinalIgnoreCase);
-            ArrayList filteredList = new ArrayList();
+            var alreadySeen = new Hashtable(Inputs.Length, StringComparer.OrdinalIgnoreCase);
+            var filteredList = new ArrayList();
             foreach (ITaskItem item in Inputs)
             {
                 if (!alreadySeen.ContainsKey(item.ItemSpec))
