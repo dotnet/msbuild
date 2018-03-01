@@ -699,7 +699,7 @@ namespace Microsoft.Build.Evaluation
                     PerformDepthFirstPass(_projectRootElement);
                 }
 
-                if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects)
+                if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects && _newestProject?.FullPath != null)
                 {
                     if (_msbuildAllProjectsWasSet)
                     {
