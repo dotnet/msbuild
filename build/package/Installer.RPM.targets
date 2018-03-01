@@ -145,6 +145,8 @@
 
   <Target Name="SetupRpmProps">
     <PropertyGroup>
+      <RuntimeDepsPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeDepsPackageVersion>
+      <RuntimeDepsPackageName>dotnet-runtime-deps-$(RuntimeDepsPackageVersion)</RuntimeDepsPackageName>
       <RpmPackageVersion>$(SdkVersion)</RpmPackageVersion>
       <InputRoot>$(OutputDirectory)/sdk</InputRoot>
       <SdkInstallerFile>$(InstallerOutputDirectory)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkInstallerFile>
@@ -216,6 +218,7 @@
           Outputs="$(RpmTestResultsXmlFile)" >
 
     <!-- Install Dependencies and SDK Packages -->
+    <Exec Command="sudo yum -y install $(DownloadedRuntimeDepsInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedSharedHostInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedHostFxrInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedSharedFrameworkInstallerFile)" />
@@ -239,5 +242,6 @@
     <Exec Command="sudo yum remove -y $(SharedFxRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostRpmPackageName)" />
+    <Exec Command="sudo yum remove -y $(RuntimeDepsPackageName)" />
   </Target>
 </Project>
