@@ -818,7 +818,7 @@ namespace Microsoft.Build.BackEnd
                             result.ConfigurationId, result.GlobalRequestId, result.NodeRequestId, result.ParentGlobalRequestId, result.SubmissionId, _requestEntry.RequestConfiguration.ProjectFullPath);
                         message.AppendLine();
 
-                        message.AppendFormat("  Requested targets: {0}", string.Join(";", _requestEntry.RequestConfiguration.TargetNames));
+                        message.AppendFormat("  Requested targets: {0}", string.Join(";", _requestEntry.RequestConfiguration.TargetNames ?? new[] { "" }));
                         message.AppendLine();
 
                         message.AppendFormat("  Exception: {0}", result.Exception);

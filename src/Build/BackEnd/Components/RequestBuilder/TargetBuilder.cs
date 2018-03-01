@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 var message= $"Apparent double building around {currentTargetEntry.Name}. ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
 
-                                _projectLoggingContext.LogErrorFromText(string.Empty, string.Empty, string.Empty, new BuildEventFileInfo(String.Empty), message);
+                                _projectLoggingContext.LogErrorFromText(null,null, null, new BuildEventFileInfo(String.Empty), message);
 
                                 // I suspect a race condition. The lists read one second apart should always be identical
                                 // if we're running one thread at a time, like we should be.
@@ -487,7 +487,7 @@ namespace Microsoft.Build.BackEnd
 
                                 message = $"After a delay, ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
 
-                                _projectLoggingContext.LogErrorFromText(string.Empty, string.Empty, string.Empty, new BuildEventFileInfo(String.Empty), message);
+                                _projectLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(String.Empty), message);
 
                                 throw new ArgumentException();
                             }
