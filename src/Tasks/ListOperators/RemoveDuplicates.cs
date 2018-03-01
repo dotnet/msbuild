@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -37,20 +37,26 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            var alreadySeen = new Hashtable(Inputs.Length, StringComparer.OrdinalIgnoreCase);
-            var filteredList = new ArrayList();
+            if (Inputs == null || Inputs.Length == 0)
+            {
+                Filtered = Array.Empty<ITaskItem>();
+                HadAnyDuplicates = false;
+                return true;
+            }
+
+            var alreadySeen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var filteredList = new List<ITaskItem>(Inputs.Length);
+
             foreach (ITaskItem item in Inputs)
             {
-                if (!alreadySeen.ContainsKey(item.ItemSpec))
+                if (alreadySeen.Add(item.ItemSpec))
                 {
-                    alreadySeen[item.ItemSpec] = String.Empty;
                     filteredList.Add(item);
                 }
             }
 
-            Filtered = (ITaskItem[])filteredList.ToArray(typeof(ITaskItem));
+            Filtered = filteredList.ToArray();
             HadAnyDuplicates = Inputs.Length != Filtered.Length;
-
             return true;
         }
     }
