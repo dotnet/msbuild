@@ -47,8 +47,6 @@ namespace Microsoft.Build.UnitTests
                 env.WithInvariant(new BuildFailureLogInvariant());
             }
 
-            env.SetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS", "1");
-
             return env;
         }
 
