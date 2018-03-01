@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
         private Mock<INuGetPackagesArchiver> _nugetPackagesArchiverMock;
         private Mock<INuGetCacheSentinel> _nugetCacheSentinel;
-        private CliFallbackFolderPathCalculator _cliFallbackFolderPathCalculator;
+        private CliFolderPathCalculator _cliFolderPathCalculator;
 
         public GivenANuGetCachePrimer()
         {
@@ -40,12 +40,12 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             _nugetCacheSentinel = new Mock<INuGetCacheSentinel>();
 
-            _cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
+            _cliFolderPathCalculator = new CliFolderPathCalculator();
 
             var nugetCachePrimer = new NuGetCachePrimer(
                 _nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                _cliFallbackFolderPathCalculator,
+                _cliFolderPathCalculator,
                 _fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var nugetCachePrimer = new NuGetCachePrimer(
                 nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                _cliFallbackFolderPathCalculator,
+                _cliFolderPathCalculator,
                 fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void It_extracts_the_archive_to_the_fallback_folder()
         {
             _nugetPackagesArchiverMock.Verify(n =>
-                n.ExtractArchive(_cliFallbackFolderPathCalculator.CliFallbackFolderPath),
+                n.ExtractArchive(_cliFolderPathCalculator.CliFallbackFolderPath),
                 Times.Exactly(1));
         }
 
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var nugetCachePrimer = new NuGetCachePrimer(
                 nugetPackagesArchiveMock.Object,
                 nugetCacheSentinel.Object,
-                _cliFallbackFolderPathCalculator,
+                _cliFolderPathCalculator,
                 _fileSystemMock.File);
 
             Action action = () => nugetCachePrimer.PrimeCache();

@@ -15,6 +15,7 @@
       <ArtifactsForGeneratingChecksums Include="@(ForPublishing)">
         <DestinationPath>%(ForPublishing.FullPath).sha</DestinationPath>
         <RelativeBlobPath>%(ForPublishing.RelativeBlobPath).sha</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetclichecksums</ManifestArtifactData>
       </ArtifactsForGeneratingChecksums>
     </ItemGroup>
   </Target>

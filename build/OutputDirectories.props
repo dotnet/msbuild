@@ -1,23 +1,33 @@
-<Project>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-      <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
-      <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
-      <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/stage2WithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
+      <CliBuildStage Condition="'$(CliBuildStage)' == '' And '$(CliOuterBuildStage)' != ''">$([MSBuild]::Add($(CliOuterBuildStage), '1'))</CliBuildStage>
+      <CliBuildStage Condition="'$(CliBuildStage)' == ''">2</CliBuildStage>
+
+      <!-- BaseOutputDirectory is the root output path for this stage and RID
+           BaseOutputPath is the project-specific output folder that each project builds into.
+           This is not confusing at all. -->
+      <BaseOutputDirectory>$(RepoRoot)/bin/$(CliBuildStage)/$(Rid)</BaseOutputDirectory>
+      <BaseOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/bin/$(MSBuildProjectName)'))</BaseOutputPath>
+
+      <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/obj/$(MSBuildProjectName)'))</BaseIntermediateOutputPath>
+      <OutputDirectory>$(BaseOutputDirectory)/dotnet</OutputDirectory>
+      <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/dotnetWithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
       <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
-      <SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</SymbolsDirectory>
+      <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
       <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
       <FSharpDirectory>$(SdkOutputDirectory)/FSharp</FSharpDirectory>
-      <CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
+      <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
-      <!-- The 'AspNetRuntimePackageStorePublishDirectory' needs to be very short due to path length constraints on Win8.1 -->
-      <AspNetRuntimePackageStorePublishDirectory>$(BaseOutputDirectory)/AspRT</AspNetRuntimePackageStorePublishDirectory>
+      <AspNetCoreSharedFxPublishDirectory>$(IntermediateDirectory)/aspnetSharedFxPublish</AspNetCoreSharedFxPublishDirectory>
       <BackwardsCompatibleSharedFrameworksPublishDirectory>$(IntermediateDirectory)/backwardsCompatibleSharedFrameworksPublish</BackwardsCompatibleSharedFrameworksPublishDirectory>
-      <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
+      <TestOutputDir>$(BaseOutputDirectory)/test/</TestOutputDir>
       <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
       <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
       <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
+
+      <NextStagePropsPath>$(BaseOutputDirectory)/PreviousStage.props</NextStagePropsPath>
   </PropertyGroup>
 </Project>
