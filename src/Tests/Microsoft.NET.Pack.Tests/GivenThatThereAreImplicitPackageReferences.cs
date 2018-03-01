@@ -142,9 +142,7 @@ namespace Microsoft.NET.Pack.Tests
             dependencies.Single().Attribute("assemblyName").Value.Should().Be("System.Web");
         }
 
-        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-        //  See https://github.com/dotnet/sdk/issues/1077
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void Packing_a_netcoreapp_2_0_app_includes_the_implicit_dependency()
         {
             TestProject testProject = new TestProject()
