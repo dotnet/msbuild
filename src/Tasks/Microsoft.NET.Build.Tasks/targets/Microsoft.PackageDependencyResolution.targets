@@ -23,18 +23,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <!-- Project Assets File -->
   <PropertyGroup>
-    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == ''">$(BaseIntermediateOutputPath)/project.assets.json</ProjectAssetsFile>
-    <ProjectAssetsFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsFile)))</ProjectAssetsFile>
-
     <!-- Note that the assets.cache file has contents that are unique to the current TFM and configuration and therefore cannot
          be stored in a shared directory next to the assets.json file -->
     <ProjectAssetsCacheFile Condition="'$(ProjectAssetsCacheFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).assets.cache</ProjectAssetsCacheFile>
     <ProjectAssetsCacheFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsCacheFile)))</ProjectAssetsCacheFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
+    
     <ResolvePackageDependenciesForBuild Condition="'$(ResolvePackageDependenciesForBuild)' == ''">true</ResolvePackageDependenciesForBuild>
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
 
