@@ -46,6 +46,58 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Item order preserved
+        /// </summary>
+        [Fact]
+        public void OrderPreservedNoDups()
+        {
+            RemoveDuplicates t = new RemoveDuplicates();
+            t.BuildEngine = new MockEngine();
+
+            // intentionally not sorted to catch an invalid implementation that sorts before
+            // de-duping.
+            t.Inputs = new ITaskItem[]
+            {
+                new TaskItem("MyFile2.txt"),
+                new TaskItem("MyFile1.txt"),
+                new TaskItem("MyFile3.txt")
+            };
+
+            bool success = t.Execute();
+            Assert.True(success);
+            Assert.Equal(3, t.Filtered.Length);
+            Assert.Equal("MyFile2.txt", t.Filtered[0].ItemSpec);
+            Assert.Equal("MyFile1.txt", t.Filtered[1].ItemSpec);
+            Assert.Equal("MyFile3.txt", t.Filtered[2].ItemSpec);
+        }
+
+        /// <summary>
+        /// Item order preserved, keeping the first items seen when there are duplicates.
+        /// </summary>
+        [Fact]
+        public void OrderPreservedDups()
+        {
+            RemoveDuplicates t = new RemoveDuplicates();
+            t.BuildEngine = new MockEngine();
+
+            t.Inputs = new ITaskItem[]
+            {
+                new TaskItem("MyFile2.txt"),
+                new TaskItem("MyFile1.txt"),
+                new TaskItem("MyFile2.txt"),
+                new TaskItem("MyFile3.txt"),
+                new TaskItem("MyFile1.txt")
+            };
+
+            bool success = t.Execute();
+            Assert.True(success);
+            Assert.Equal(3, t.Filtered.Length);
+            Assert.Equal("MyFile2.txt", t.Filtered[0].ItemSpec);
+            Assert.Equal("MyFile1.txt", t.Filtered[1].ItemSpec);
+            Assert.Equal("MyFile3.txt", t.Filtered[2].ItemSpec);
+        }
+
+        /// <summary>
         /// Pass in two items that are different.
         /// </summary>
         [Fact]
