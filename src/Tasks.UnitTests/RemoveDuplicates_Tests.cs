@@ -26,7 +26,9 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(1, t.Filtered.Length);
             Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.False(t.HadAnyDuplicates);
         }
 
         /// <summary>
@@ -42,7 +44,9 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(1, t.Filtered.Length);
             Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.True(t.HadAnyDuplicates);
         }
 
         /// <summary>
@@ -110,8 +114,10 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(2, t.Filtered.Length);
             Assert.Equal("MyFile1.txt", t.Filtered[0].ItemSpec);
             Assert.Equal("MyFile2.txt", t.Filtered[1].ItemSpec);
+            Assert.False(t.HadAnyDuplicates);
         }
 
         /// <summary>
@@ -127,7 +133,9 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(1, t.Filtered.Length);
             Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.True(t.HadAnyDuplicates);
         }
 
         /// <summary>
@@ -142,9 +150,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success);
             Assert.Equal(0, t.Filtered.Length);
+            Assert.False(t.HadAnyDuplicates);
         }
     }
 }
-
-
-

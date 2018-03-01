@@ -17,6 +17,7 @@ namespace Microsoft.Build.Tasks
     {
         private ITaskItem[] _inputs = Array.Empty<TaskItem>();
         private ITaskItem[] _filtered = null;
+        private bool _hadAnyDuplicates = false;
 
         /// <summary>
         /// The left-hand set of items to be RemoveDuplicatesed from.
@@ -38,6 +39,16 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// True if any duplicate items were found. False otherwise.
+        /// </summary>
+        [Output]
+        public bool HadAnyDuplicates
+        {
+            get { return _hadAnyDuplicates; }
+            set { _hadAnyDuplicates = value; }
+        }
+
+        /// <summary>
         /// Execute the task.
         /// </summary>
         /// <returns></returns>
@@ -55,6 +66,7 @@ namespace Microsoft.Build.Tasks
             }
 
             Filtered = (ITaskItem[])filteredList.ToArray(typeof(ITaskItem));
+            HadAnyDuplicates = Inputs.Length != Filtered.Length;
 
             return true;
         }

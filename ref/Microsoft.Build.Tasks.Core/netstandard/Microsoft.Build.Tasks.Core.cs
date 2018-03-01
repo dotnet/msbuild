@@ -483,6 +483,8 @@ namespace Microsoft.Build.Tasks
         public RemoveDuplicates() { }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] Filtered { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public bool HadAnyDuplicates { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] Inputs { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
