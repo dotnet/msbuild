@@ -100,7 +100,7 @@ namespace Microsoft.Build.Shared
             // will be in the output path of the test project, which is what we want.
 
             string msbuildExePath;
-            if (s_runningTests)
+            if (s_runningTests())
             {
                 msbuildExePath = typeof(BuildEnvironmentHelper).Assembly.Location;
             }
@@ -112,7 +112,7 @@ namespace Microsoft.Build.Shared
             return new BuildEnvironment(
                 BuildEnvironmentMode.None,
                 msbuildExePath,
-                runningTests: s_runningTests,
+                runningTests: s_runningTests(),
                 runningInVisualStudio: false,
                 visualStudioPath: null);
         }
@@ -185,7 +185,7 @@ namespace Microsoft.Build.Shared
                     return new BuildEnvironment(
                         BuildEnvironmentMode.VisualStudio,
                         msBuildExe,
-                        runningTests: s_runningTests,
+                        runningTests: s_runningTests(),
                         runningInVisualStudio: false,
                         visualStudioPath: GetVsRootFromMSBuildAssembly(msBuildExe));
                 }
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Shared
                 return new BuildEnvironment(
                     BuildEnvironmentMode.Standalone,
                     msBuildPath,
-                    runningTests: s_runningTests,
+                    runningTests: s_runningTests(),
                     runningInVisualStudio: false,
                     visualStudioPath: null);
             }
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromDevConsole()
         {
-            if (s_runningTests)
+            if (s_runningTests())
             {
                 //  If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
                 //  (we should be using the locally built MSBuild instead)
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromSetupApi()
         {
-            if (s_runningTests)
+            if (s_runningTests())
             {
                 //  If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
                 //  (we should be using the locally built MSBuild instead)
@@ -288,7 +288,7 @@ namespace Microsoft.Build.Shared
                 return new BuildEnvironment(
                     BuildEnvironmentMode.Standalone,
                     msBuildExePath,
-                    runningTests: s_runningTests,
+                    runningTests: s_runningTests(),
                     runningInVisualStudio: false,
                     visualStudioPath: null);
             }
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Shared
             Func<string> getExecutingAssemblyPath = null, Func<string> getAppContextBaseDirectory = null,
             Func<IEnumerable<VisualStudioInstance>> getVisualStudioInstances = null,
             Func<string, string> getEnvironmentVariable = null,
-            bool runningTests = false)
+            Func<bool> runningTests = null)
         {
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssemblyPath = getExecutingAssemblyPath ?? GetExecutingAssemblyPath;
@@ -382,7 +382,7 @@ namespace Microsoft.Build.Shared
             s_getEnvironmentVariable = getEnvironmentVariable ?? GetEnvironmentVariable;
 
             //  Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
-            s_runningTests = runningTests;
+            s_runningTests = runningTests ?? CheckIfRunningTests;
 
             BuildEnvironmentHelperSingleton.s_instance = Initialize();
         }
@@ -392,7 +392,7 @@ namespace Microsoft.Build.Shared
         private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
         private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
-        private static bool s_runningTests = CheckIfRunningTests();
+        private static Func<bool> s_runningTests = CheckIfRunningTests;
 
 
         private static class BuildEnvironmentHelperSingleton
