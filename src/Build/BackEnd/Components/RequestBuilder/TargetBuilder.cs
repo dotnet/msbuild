@@ -353,7 +353,7 @@ namespace Microsoft.Build.BackEnd
 
         private void LogCurrentStackState(string message)
         {
-            _targetStackLog.AppendLine(message + $" [req id {_requestEntry.Request.GlobalRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}, config id {_requestEntry.RequestConfiguration.ConfigurationId}, thread {Thread.CurrentThread.ManagedThreadId} request builder {((RequestBuilder)_requestBuilderCallback).GetHashCode()}] -- {DateTimeOffset.UtcNow.UtcTicks}");
+            _targetStackLog.AppendLine(message + $" [req id {_requestEntry.Request.GlobalRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}, config id {_requestEntry.RequestConfiguration.ConfigurationId}, thread {Thread.CurrentThread.ManagedThreadId} request builder 0x{((RequestBuilder)_requestBuilderCallback).GetHashCode():x16}] -- {DateTimeOffset.UtcNow.UtcTicks}");
             _targetStackLog.AppendLine("   stack: " + string.Join(";", _targetsToBuild.Select(t => t.Name)));
             _targetStackLog.AppendLine("   activ: " + string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys));
         }
