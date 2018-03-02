@@ -497,18 +497,23 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     case TargetEntryState.Execution:
+                        // It's possible that our target got pushed onto the stack for one build and had dependencies process, then a re-entrant build started actively building
+                        // the target, encountered a legacy CallTarget, pushed new work onto the stack, and yielded back to here. Instead of starting the already-partially-
+                        // built target, wait for the other one to complete. Then CheckSkipTarget will skip it here.
+                        bool wasActivelyBuilding = await CompleteOutstandingActiveRequests(currentTargetEntry.Name);
 
                         // It's possible that our target got pushed onto the stack for one build and had its dependencies process, then a re-entrant build came in and
                         // actually built this target while we were waiting, so that by the time we get here, it's already been finished.  In this case, just blow it away.
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
+                            //ErrorUtilities.VerifyThrow(!wasActivelyBuilding, "Target {0} was actively building and waited on but we are attempting to build it again.", currentTargetEntry.Name);
 
                             // This target is now actively building.
                             var added = _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryAdd(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
                             LogCurrentStackState($"Marked {currentTargetEntry.Name} as Active");
-                            if (!added)
+                            if (!added || wasActivelyBuilding)
                             {
-                                var message= $"Apparent double building around {currentTargetEntry.Name}. ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
+                                var message = $"Apparent double building around {currentTargetEntry.Name}. It {(wasActivelyBuilding ? "was" : "was not")} building already. ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
 
                                 _projectLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(String.Empty), message);
 
@@ -802,6 +807,26 @@ namespace Microsoft.Build.BackEnd
 
             bool pushedTargets = (targetsToPush.Count > 0);
             return pushedTargets;
+        }
+
+        private async Task<bool> CompleteOutstandingActiveRequests(string targetName)
+        {
+            // See if this target is already building under a different build request.  If so, we need to wait.
+            int idOfAlreadyBuildingRequest = BuildRequest.InvalidGlobalRequestId;
+            if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryGetValue(targetName, out idOfAlreadyBuildingRequest))
+            {
+                if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
+                {
+                    LogCurrentStackState($"Instead of dealing with {targetName} which is actively building, waiting on request id {idOfAlreadyBuildingRequest}");
+
+                    // Another request elsewhere is building it.  We need to wait.
+                    await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetName);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
