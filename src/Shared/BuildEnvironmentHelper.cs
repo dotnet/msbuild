@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Microsoft.Build.Shared
 {
@@ -309,14 +310,33 @@ namespace Microsoft.Build.Shared
             return FileUtilities.CombinePaths(visualStudioRoot, "MSBuild", CurrentToolsVersion, "Bin", "MSBuild.exe");
         }
 
+        private static bool? _runningTests;
+        private static readonly object _runningTestsLock = new object();
+
         private static bool CheckIfRunningTests()
         {
-            //  Check if running tests via the TestInfo class in Microsoft.Build.Framework.
-            //  See the comments on the TestInfo class for an explanation of why it works this way.
-            var frameworkAssembly = typeof(Framework.ITask).Assembly;
-            var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
-            var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            return (bool) runningTestsField.GetValue(null);
+            if (_runningTests != null)
+            {
+                return _runningTests.Value;
+            }
+
+            lock (_runningTestsLock)
+            {
+                if (_runningTests != null)
+                {
+                    return _runningTests.Value;
+                }
+
+                //  Check if running tests via the TestInfo class in Microsoft.Build.Framework.
+                //  See the comments on the TestInfo class for an explanation of why it works this way.
+                var frameworkAssembly = typeof(Framework.ITask).Assembly;
+                var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
+                var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+
+                _runningTests = (bool)runningTestsField.GetValue(null);
+
+                return _runningTests.Value;
+            }
         }
 
         /// <summary>
