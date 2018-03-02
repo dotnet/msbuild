@@ -13,7 +13,8 @@
           Condition="!Exists('$(DotnetToolsNuPkgPath)/$(TemplateFillInPackageName.ToLower())')">
 
     <PropertyGroup>
-      <DotnetToolsRestoreAdditionalParameters>/p:TargetFramework=$(CliTargetFramework)</DotnetToolsRestoreAdditionalParameters>
+      <DotnetToolsRestoreAdditionalParameters>--runtime any</DotnetToolsRestoreAdditionalParameters>
+      <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:TargetFramework=$(CliTargetFramework)</DotnetToolsRestoreAdditionalParameters>
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:TemplateFillInPackageName=$(TemplateFillInPackageName)</DotnetToolsRestoreAdditionalParameters>
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:TemplateFillInPackageVersion=$(TemplateFillInPackageVersion)</DotnetToolsRestoreAdditionalParameters>
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:RestorePackagesPath=$(DotnetToolsLayoutDirectory)</DotnetToolsRestoreAdditionalParameters>
