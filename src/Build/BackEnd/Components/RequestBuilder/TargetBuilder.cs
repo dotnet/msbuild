@@ -93,7 +93,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _legacyCallTargetContinueOnError;
 
-        private StringBuilder _targetStackLog = new StringBuilder();
+        private StringBuilder _targetStackLog;
+
+        private static ConcurrentDictionary<int, StringBuilder> TargetStackLogs = new ConcurrentDictionary<int, StringBuilder>();
 
         /// <summary>
         /// Enum describing the type of targets we are pushing on the stack.
@@ -155,8 +157,11 @@ namespace Microsoft.Build.BackEnd
             configuration.RetrieveFromCache();
             _projectInstance = configuration.Project;
 
-            _targetStackLog = new StringBuilder($"Initializing stack for BuildTargets for {_projectInstance.FullPath} brq {_projectLoggingContext.BuildEventContext.BuildRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}");
-            _targetStackLog.AppendLine();
+            _targetStackLog = TargetStackLogs.GetOrAdd(_requestEntry.Request.ConfigurationId, (_) => new StringBuilder());
+
+            _projectLoggingContext.LogCommentFromText(Framework.MessageImportance.High, _targetStackLog.ToString());
+
+            LogCurrentStackState($"Initializing stack for BuildTargets for {_projectInstance.FullPath} brq {_projectLoggingContext.BuildEventContext.BuildRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}");
 
             // Now get the current results cache entry.
             ResultsCache resultsCache = (ResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
@@ -353,7 +358,7 @@ namespace Microsoft.Build.BackEnd
 
         private void LogCurrentStackState(string message)
         {
-            _targetStackLog.AppendLine(message + $" [req id {_requestEntry.Request.GlobalRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}, config id {_requestEntry.RequestConfiguration.ConfigurationId}, thread {Thread.CurrentThread.ManagedThreadId} request builder 0x{((RequestBuilder)_requestBuilderCallback).GetHashCode():x16}] -- {DateTimeOffset.UtcNow.UtcTicks}");
+            _targetStackLog.AppendLine(message + $" [req id {_requestEntry.Request.GlobalRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}, config id {_requestEntry.RequestConfiguration.ConfigurationId}, thread {Thread.CurrentThread.ManagedThreadId} request builder 0x{((RequestBuilder)_requestBuilderCallback).GetHashCode():x8}] -- {DateTimeOffset.UtcNow.UtcTicks}");
             _targetStackLog.AppendLine("   stack: " + string.Join(";", _targetsToBuild.Select(t => t.Name)));
             _targetStackLog.AppendLine("   activ: " + string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys));
         }
