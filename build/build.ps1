@@ -339,6 +339,12 @@ $log = -not $nolog
 $restore = -not $norestore
 $test = -not $skiptests
 
+if ($skiptests)
+{
+  #VS ASP intellisense server fails without this flag. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986
+  $properties += '/p:WORKAROUND_NOT_RUNNING_TESTS=true'
+}
+
 if ($hostType -eq '')
 {
   $hostType = 'full'
@@ -348,8 +354,6 @@ if ($hostType -eq '')
 
 $msbuildHost = $null
 $msbuildToUse = "msbuild"
-
-
 
 try {
   if ($ci) {

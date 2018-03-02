@@ -309,12 +309,17 @@ namespace Microsoft.Build.Shared
         {
             return FileUtilities.CombinePaths(visualStudioRoot, "MSBuild", CurrentToolsVersion, "Bin", "MSBuild.exe");
         }
-
+#if !WORKAROUND_NOT_RUNNING_TESTS
         private static bool? _runningTests;
         private static readonly object _runningTestsLock = new object();
+#endif
 
         private static bool CheckIfRunningTests()
         {
+        //VS ASP intellisense server fails without this flag. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986
+#if WORKAROUND_NOT_RUNNING_TESTS
+            return false;
+#else
             if (_runningTests != null)
             {
                 return _runningTests.Value;
@@ -337,6 +342,7 @@ namespace Microsoft.Build.Shared
 
                 return _runningTests.Value;
             }
+#endif
         }
 
         /// <summary>
