@@ -346,13 +346,14 @@ namespace Microsoft.Build.BackEnd
                 ((IBuildComponent)taskBuilder).ShutdownComponent();
             }
 
+            LogCurrentStackState($"LegacyCallTarget complete for {currentTargetEntry.Name}");
+
             return results;
         }
 
         private void LogCurrentStackState(string message)
         {
-            long utcTicks = DateTimeOffset.UtcNow.UtcTicks;
-            _targetStackLog.AppendLine(message + $" [project context {_projectLoggingContext.BuildEventContext.ProjectContextId}, config id {_requestEntry.RequestConfiguration.ConfigurationId}, thread {Thread.CurrentThread.ManagedThreadId} request builder {((RequestBuilder)_requestBuilderCallback).GetHashCode()}] -- {utcTicks}");
+            _targetStackLog.AppendLine(message + $" [req id {_requestEntry.Request.GlobalRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}, config id {_requestEntry.RequestConfiguration.ConfigurationId}, thread {Thread.CurrentThread.ManagedThreadId} request builder {((RequestBuilder)_requestBuilderCallback).GetHashCode()}] -- {DateTimeOffset.UtcNow.UtcTicks}");
             _targetStackLog.AppendLine("   stack: " + string.Join(";", _targetsToBuild.Select(t => t.Name)));
             _targetStackLog.AppendLine("   activ: " + string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys));
         }
@@ -501,10 +502,10 @@ namespace Microsoft.Build.BackEnd
                         // actually built this target while we were waiting, so that by the time we get here, it's already been finished.  In this case, just blow it away.
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
-                            LogCurrentStackState($"Marking {currentTargetEntry.Name} as Active");
 
                             // This target is now actively building.
                             var added = _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryAdd(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
+                            LogCurrentStackState($"Marked {currentTargetEntry.Name} as Active");
                             if (!added)
                             {
                                 var message= $"Apparent double building around {currentTargetEntry.Name}. ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
