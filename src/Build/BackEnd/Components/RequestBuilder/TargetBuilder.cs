@@ -510,7 +510,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 var message= $"Apparent double building around {currentTargetEntry.Name}. ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
 
-                                _projectLoggingContext.LogErrorFromText(null,null, null, new BuildEventFileInfo(String.Empty), message);
+                                _projectLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(String.Empty), message);
 
                                 _projectLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(String.Empty), _targetStackLog.ToString());
 
