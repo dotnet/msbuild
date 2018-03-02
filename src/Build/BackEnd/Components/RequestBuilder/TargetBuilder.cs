@@ -309,7 +309,7 @@ namespace Microsoft.Build.BackEnd
                         targetToPush.Add(new TargetSpecification(targets[i], taskLocation));
 
                         // We push the targets one at a time to emulate the original CallTarget behavior.
-                        bool pushed = await PushTargets(targetToPush, currentTargetEntry, callTargetLookup, false, true, TargetPushType.Normal);
+                        bool pushed = await PushTargets(targetToPush, currentTargetEntry, callTargetLookup, addAsErrorTarget: false, stopProcessingOnCompletion: true, pushType: TargetPushType.Normal);
                         ErrorUtilities.VerifyThrow(pushed, "Failed to push any targets onto the stack.  Target: {0} Current Target: {1}", targets[i], currentTargetEntry.Target.Name);
                         await ProcessTargetStack(taskBuilder);
 
