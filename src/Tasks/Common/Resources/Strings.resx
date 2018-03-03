@@ -346,4 +346,8 @@
 {1} - Restored version of platform package
 {2} - Current version of platform package</comment>
   </data>
+  <data name="AssetsFileNotSet" xml:space="preserve">
+    <value>ProjectAssetsFile was not set. Run a NuGet package restore to generate this file.</value>
+    <comment>"ProjectAssetsFile" is the name of a property and parameter to the task, so it should not be translated</comment>
+  </data>
 </root>

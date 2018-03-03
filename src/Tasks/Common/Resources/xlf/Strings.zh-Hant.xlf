@@ -379,6 +379,11 @@
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
       </trans-unit>
+      <trans-unit id="AssetsFileNotSet">
+        <source>ProjectAssetsFile was not set. Run a NuGet package restore to generate this file.</source>
+        <target state="new">ProjectAssetsFile was not set. Run a NuGet package restore to generate this file.</target>
+        <note>"ProjectAssetsFile" is the name of a property and parameter to the task, so it should not be translated</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
