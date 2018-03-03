@@ -29,7 +29,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectAssetsCacheFile Condition="'$(ProjectAssetsCacheFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).assets.cache</ProjectAssetsCacheFile>
     <ProjectAssetsCacheFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsCacheFile)))</ProjectAssetsCacheFile>
     
-    <ResolvePackageDependenciesForBuild Condition="'$(ResolvePackageDependenciesForBuild)' == ''">true</ResolvePackageDependenciesForBuild>
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
 
     <ContentPreprocessorOutputDirectory Condition="'$(ContentPreprocessorOutputDirectory)' == ''">$(IntermediateOutputPath)NuGet\</ContentPreprocessorOutputDirectory>
@@ -124,7 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"
-          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and Exists('$(ProjectAssetsFile)')"
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
           BeforeTargets="AssignProjectConfiguration"
           DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
 
@@ -364,6 +363,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.ReportAssetsLogMessages"
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.LoadAssetsFile"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!-- The condition on this target causes it to be skipped during design-time builds if
         the restore operation hasn't run yet.  This is to avoid displaying an error in
@@ -372,6 +373,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ReportAssetsLogMessages"
           Condition="'$(EmitAssetsLogMessages)' == 'true' And ('$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)'))">
 
+    <!-- Load the assets file in a separate task, so that if the file itself can't be loaded (or isn't set), we
+         can generate an error without continuing (since ReportAssetsLogMessages uses ContinueOnError="ErrorAndContinue" -->
+    <LoadAssetsFile ProjectAssetsFile="$(ProjectAssetsFile)" />
+    
     <ReportAssetsLogMessages
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ContinueOnError="ErrorAndContinue">

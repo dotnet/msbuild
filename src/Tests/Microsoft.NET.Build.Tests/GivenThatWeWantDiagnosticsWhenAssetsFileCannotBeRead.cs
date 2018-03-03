@@ -4,6 +4,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using FluentAssertions;
+using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -36,9 +37,8 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager.CopyTestAsset("HelloWorld").WithSource();
             var build = new BuildCommand(Log, testAsset.TestRoot);
-            var assetsFile = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
-            build.Execute().Should().Fail().And.HaveStdOutContaining(assetsFile);
+            build.Execute().Should().Fail().And.HaveStdOutContaining(Strings.AssetsFileNotSet);
         }
 
         [Fact]

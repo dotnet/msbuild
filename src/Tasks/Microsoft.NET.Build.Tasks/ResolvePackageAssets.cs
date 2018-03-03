@@ -28,7 +28,6 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// Path to assets.json.
         /// </summary>
-        [Required]
         public string ProjectAssetsFile { get; set; }
 
         /// <summary>
@@ -225,6 +224,11 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
+            if (string.IsNullOrEmpty(ProjectAssetsFile))
+            {
+                throw new BuildErrorException(Strings.AssetsFileNotSet);
+            }
+
             ReadItemGroups();
             SetImplicitMetadataForCompileTimeAssemblies();
             SetImplicitMetadataForFrameworkAssemblies();
