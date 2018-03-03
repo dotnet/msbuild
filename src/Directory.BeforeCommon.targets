@@ -106,9 +106,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_WORKINGSET</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
-
-    <!-- VS ASP intellisense server fails without this flag. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986 -->
-    <DefineConstants Condition="'$(WORKAROUND_NOT_RUNNING_TESTS)' == 'true'">$(DefineConstants);WORKAROUND_NOT_RUNNING_TESTS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
