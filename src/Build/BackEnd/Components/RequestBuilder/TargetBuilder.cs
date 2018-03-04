@@ -502,6 +502,8 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     case TargetEntryState.Execution:
+                        LogCurrentStackState($"Thinking about executing {currentTargetEntry.Name}");
+
                         // It's possible that our target got pushed onto the stack for one build and had dependencies process, then a re-entrant build started actively building
                         // the target, encountered a legacy CallTarget, pushed new work onto the stack, and yielded back to here. Instead of starting the already-partially-
                         // built target, wait for the other one to complete. Then CheckSkipTarget will skip it here.
