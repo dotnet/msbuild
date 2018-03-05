@@ -39,6 +39,14 @@
     <UpdateXlfOnBuild>true</UpdateXlfOnBuild>
     <ErrorOnOutOfDateXlf>true</ErrorOnOutOfDateXlf>
 
+    <UpdateXlfOnBuild Condition="'$(CIBuild)' != 'true'">true</UpdateXlfOnBuild>
+
+    <!-- Workaround that can be removed when we update machines to 15.6.
+         Use Satellite assembly generation task from Microsoft.NET.Sdk even when building with
+         full Framework MSBuild.  This will support public signing, is deterministic, and always
+         generates them as AnyCPU. -->
+    <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
+
     <!-- Work around issue where bootstrapped TaskHostTask seems to be loading the wrong assemblies.
          https://github.com/Microsoft/msbuild/issues/2865-->
     <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
