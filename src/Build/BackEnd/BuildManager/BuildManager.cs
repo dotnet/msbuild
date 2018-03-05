@@ -805,113 +805,130 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(submission, "submission");
             ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
 
-            ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
-            if (projectInstance != null)
+            lock (_syncLock)
             {
-                if (_acquiredProjectRootElementCacheFromProjectInstance)
+                ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
+                if (projectInstance != null)
                 {
-                    ErrorUtilities.VerifyThrowArgument(_buildParameters.ProjectRootElementCache == projectInstance.ProjectRootElementCache, "OM_BuildSubmissionsMultipleProjectCollections");
-                }
-                else
-                {
-                    _buildParameters.ProjectRootElementCache = projectInstance.ProjectRootElementCache;
-                    _acquiredProjectRootElementCacheFromProjectInstance = true;
-                }
-            }
-            else if (_buildParameters.ProjectRootElementCache == null)
-            {
-                // Create our own cache; if we subsequently get a build submission with a project instance attached,
-                // we'll dump our cache and use that one.
-                _buildParameters.ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload from disk */);
-            }
-
-            VerifyStateInternal(BuildManagerState.Building);
-
-            try
-            {
-                // If we have an unnamed project, assign it a temporary name.
-                if (String.IsNullOrEmpty(submission.BuildRequestData.ProjectFullPath))
-                {
-                    ErrorUtilities.VerifyThrow(submission.BuildRequestData.ProjectInstance != null, "Unexpected null path for a submission with no ProjectInstance.");
-
-                    string tempName;
-
-                    // If we have already named this instance when it was submitted previously during this build, use the same
-                    // name so that we get the same configuration (and thus don't cause it to rebuild.)
-                    if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance, out tempName))
+                    if (_acquiredProjectRootElementCacheFromProjectInstance)
                     {
-                        tempName = "Unnamed_" + _nextUnnamedProjectId++;
-                        _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance] = tempName;
+                        ErrorUtilities.VerifyThrowArgument(
+                            _buildParameters.ProjectRootElementCache == projectInstance.ProjectRootElementCache,
+                            "OM_BuildSubmissionsMultipleProjectCollections");
+                    }
+                    else
+                    {
+                        _buildParameters.ProjectRootElementCache = projectInstance.ProjectRootElementCache;
+                        _acquiredProjectRootElementCacheFromProjectInstance = true;
+                    }
+                }
+                else if (_buildParameters.ProjectRootElementCache == null)
+                {
+                    // Create our own cache; if we subsequently get a build submission with a project instance attached,
+                    // we'll dump our cache and use that one.
+                    _buildParameters.ProjectRootElementCache =
+                        new ProjectRootElementCache(false /* do not automatically reload from disk */);
+                }
+
+                VerifyStateInternal(BuildManagerState.Building);
+
+                try
+                {
+                    // If we have an unnamed project, assign it a temporary name.
+                    if (String.IsNullOrEmpty(submission.BuildRequestData.ProjectFullPath))
+                    {
+                        ErrorUtilities.VerifyThrow(submission.BuildRequestData.ProjectInstance != null,
+                            "Unexpected null path for a submission with no ProjectInstance.");
+
+                        string tempName;
+
+                        // If we have already named this instance when it was submitted previously during this build, use the same
+                        // name so that we get the same configuration (and thus don't cause it to rebuild.)
+                        if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance,
+                            out tempName))
+                        {
+                            tempName = "Unnamed_" + _nextUnnamedProjectId++;
+                            _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance] = tempName;
+                        }
+
+                        submission.BuildRequestData.ProjectFullPath = Path.Combine(
+                            submission.BuildRequestData.ProjectInstance
+                                .GetProperty(ReservedPropertyNames.projectDirectory).EvaluatedValue, tempName);
                     }
 
-                    submission.BuildRequestData.ProjectFullPath = Path.Combine(submission.BuildRequestData.ProjectInstance.GetProperty(ReservedPropertyNames.projectDirectory).EvaluatedValue, tempName);
-                }
+                    // Create/Retrieve a configuration for each request
+                    BuildRequestConfiguration buildRequestConfiguration =
+                        new BuildRequestConfiguration(submission.BuildRequestData,
+                            _buildParameters.DefaultToolsVersion);
+                    BuildRequestConfiguration matchingConfiguration =
+                        _configCache.GetMatchingConfiguration(buildRequestConfiguration);
+                    BuildRequestConfiguration newConfiguration = ResolveConfiguration(buildRequestConfiguration,
+                        matchingConfiguration,
+                        submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags
+                            .ReplaceExistingProjectInstance));
 
-                // Create/Retrieve a configuration for each request
-                BuildRequestConfiguration buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
-                BuildRequestConfiguration matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
-                BuildRequestConfiguration newConfiguration = ResolveConfiguration(buildRequestConfiguration, matchingConfiguration, submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
+                    newConfiguration.ExplicitlyLoaded = true;
 
-                newConfiguration.ExplicitlyLoaded = true;
+                    // Now create the build request
+                    submission.BuildRequest = new BuildRequest(
+                        submission.SubmissionId,
+                        Microsoft.Build.BackEnd.BuildRequest.InvalidNodeRequestId,
+                        newConfiguration.ConfigurationId,
+                        submission.BuildRequestData.TargetNames,
+                        submission.BuildRequestData.HostServices,
+                        BuildEventContext.Invalid,
+                        null,
+                        submission.BuildRequestData.Flags,
+                        submission.BuildRequestData.RequestedProjectState);
 
-                // Now create the build request
-                submission.BuildRequest = new BuildRequest(
-                    submission.SubmissionId,
-                    Microsoft.Build.BackEnd.BuildRequest.InvalidNodeRequestId,
-                    newConfiguration.ConfigurationId,
-                    submission.BuildRequestData.TargetNames,
-                    submission.BuildRequestData.HostServices,
-                    BuildEventContext.Invalid,
-                    null,
-                    submission.BuildRequestData.Flags,
-                    submission.BuildRequestData.RequestedProjectState);
-
-                if (_shuttingDown)
-                {
-                    // We were already canceled!
-                    BuildResult result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
-                    submission.CompleteResults(result);
-                    submission.CompleteLogging(true);
-                    CheckSubmissionCompletenessAndRemove(submission);
-                    return;
-                }
-
-                // Submit the build request.
-                BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new BuildRequest[] { submission.BuildRequest });
-                _workQueue.Post(() =>
-                {
-                    try
+                    if (_shuttingDown)
                     {
-                        IssueRequestToScheduler(submission, allowMainThreadBuild, blocker);
-                    }
-                    catch (BuildAbortedException bae)
-                    {
-                        // We were canceled before we got issued by the work queue.
-                        BuildResult result = new BuildResult(submission.BuildRequest, bae);
+                        // We were already canceled!
+                        BuildResult result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
                         submission.CompleteResults(result);
                         submission.CompleteLogging(true);
                         CheckSubmissionCompletenessAndRemove(submission);
+                        return;
                     }
-                    catch (Exception ex)
-                    {
-                        if (ExceptionHandling.IsCriticalException(ex))
-                        {
-                            throw;
-                        }
 
-                        HandleExecuteSubmissionException(submission, ex);
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                if (ExceptionHandling.IsCriticalException(ex))
+                    // Submit the build request.
+                    BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(),
+                        new BuildRequest[] {submission.BuildRequest});
+                    _workQueue.Post(() =>
+                    {
+                        try
+                        {
+                            IssueRequestToScheduler(submission, allowMainThreadBuild, blocker);
+                        }
+                        catch (BuildAbortedException bae)
+                        {
+                            // We were canceled before we got issued by the work queue.
+                            BuildResult result = new BuildResult(submission.BuildRequest, bae);
+                            submission.CompleteResults(result);
+                            submission.CompleteLogging(true);
+                            CheckSubmissionCompletenessAndRemove(submission);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ExceptionHandling.IsCriticalException(ex))
+                            {
+                                throw;
+                            }
+
+                            HandleExecuteSubmissionException(submission, ex);
+                        }
+                    });
+                }
+                catch (Exception ex)
                 {
+                    if (ExceptionHandling.IsCriticalException(ex))
+                    {
+                        throw;
+                    }
+
+                    HandleExecuteSubmissionException(submission, ex);
                     throw;
                 }
-
-                HandleExecuteSubmissionException(submission, ex);
-                throw;
             }
         }
 
