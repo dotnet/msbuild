@@ -124,6 +124,8 @@
     </PropertyGroup>
   </Target>
 
+  <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4'))" />
+
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 
