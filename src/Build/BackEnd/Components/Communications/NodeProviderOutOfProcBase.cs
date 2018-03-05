@@ -317,9 +317,10 @@ namespace Microsoft.Build.BackEnd
 
             PipeOptions pipeOptions = PipeOptions.Asynchronous;
 
-            // TODO: when https://github.com/dotnet/corefx/issues/25427 is available
-            // pipeOptions |= PipeOptions.CurrentUserOnly;
-
+#if RUNTIME_TYPE_NETCORE
+            // TODO: Use enum value PipeOptions.CurrentUserOnly when NETStandard.Library is updated (Added in https://github.com/dotnet/corefx/issues/25427)
+            pipeOptions |= (PipeOptions)0x20000000; // PipeOptions.CurrentUserOnly;
+#endif
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, pipeOptions);
             CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
