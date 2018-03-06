@@ -465,7 +465,7 @@ namespace Microsoft.Build.BackEnd
 
             // Null out the process handles so that the parent process does not wait for the child process
             // to exit before it can exit.
-            uint creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
+            uint creationFlags = 0;
             startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
 
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
