@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xs:schema targetNamespace="http://schemas.microsoft.com/developer/msbuild/2003" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msb="http://schemas.microsoft.com/developer/msbuild/2003"
 elementFormDefault="qualified">
 
@@ -2527,6 +2527,7 @@ elementFormDefault="qualified">
             <xs:complexContent>
                 <xs:extension base="msb:TaskType">
                     <xs:attribute name="Filtered" />
+                    <xs:attribute name="HadAnyDuplicates" type="msb:boolean" />
                     <xs:attribute name="Inputs" />
                 </xs:extension>
             </xs:complexContent>
