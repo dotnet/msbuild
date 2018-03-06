@@ -734,7 +734,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateListResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
 
-                HashSet<string> allShortNames = new HashSet<string>();
+                HashSet<string> allShortNames = new HashSet<string>(StringComparer.Ordinal);
 
                 foreach (ITemplateMatchInfo templateMatchInfo in allTemplates)
                 {
