@@ -50,21 +50,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
                 pathToInstall
             };
 
+            // install the test pack
             int firstInstallResult = New3Command.Run(CommandName, host, telemetryLogger, null, installArgs);
             Assert.Equal(0, firstInstallResult);
 
-            // dunno, this is craptastic
             EngineEnvironmentSettings environemnt = new EngineEnvironmentSettings(host, x => new SettingsLoader(x));
             SettingsLoader settingsLoader = (SettingsLoader)environemnt.SettingsLoader;
-
             IHostSpecificDataLoader hostDataLoader = new MockHostSpecificDataLoader();
+
+            // check that the template was installed from the first install.
             IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateListResolver.PerformAllTemplatesQuery(settingsLoader.UserTemplateCache.TemplateInfo, hostDataLoader);
             Assert.Contains(checkTemplateName, allTemplates.Select(t => t.Info.ShortName));
 
-            // install the same pack again
+            // install the same test pack again
             int secondInstallResult = New3Command.Run(CommandName, host, telemetryLogger, null, installArgs);
             Assert.Equal(0, secondInstallResult);
 
+            // check that the template is still installed after the second install.
             IReadOnlyCollection<ITemplateMatchInfo> allTemplatesAfterSecondInstall = TemplateListResolver.PerformAllTemplatesQuery(settingsLoader.UserTemplateCache.TemplateInfo, hostDataLoader);
             Assert.Contains(checkTemplateName, allTemplatesAfterSecondInstall.Select(t => t.Info.ShortName));
         }
