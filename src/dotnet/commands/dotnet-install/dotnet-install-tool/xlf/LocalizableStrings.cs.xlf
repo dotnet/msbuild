@@ -104,6 +104,11 @@ Instalace byla úspěšná. Pokud nejsou další pokyny, můžete přímo do já
         <target state="translated">Balíček nástroje nebylo možné obnovit.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

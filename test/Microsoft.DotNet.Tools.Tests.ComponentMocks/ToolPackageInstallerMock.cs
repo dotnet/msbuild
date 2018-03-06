@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
@@ -35,19 +36,19 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         }
 
         public IToolPackage InstallPackage(
-            string packageId,
-            string packageVersion = null,
+            PackageId packageId,
+            VersionRange versionRange = null,
             string targetFramework = null,
             FilePath? nugetConfig = null,
             string source = null,
             string verbosity = null)
         {
-            var packageRootDirectory = _store.Root.WithSubDirectories(packageId);
+            var packageRootDirectory = _store.GetRootPackageDirectory(packageId);
             string rollbackDirectory = null;
 
             return TransactionalAction.Run<IToolPackage>(
                 action: () => {
-                    var stageDirectory = _store.Root.WithSubDirectories(".stage", Path.GetRandomFileName());
+                    var stageDirectory = _store.GetRandomStagingDirectory();
                     _fileSystem.Directory.CreateDirectory(stageDirectory.Value);
                     rollbackDirectory = stageDirectory.Value;
 
@@ -56,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     // Write a fake project with the requested package id, version, and framework
                     _fileSystem.File.WriteAllText(
                         tempProject.Value,
-                        $"{packageId}:{packageVersion}:{targetFramework}");
+                        $"{packageId}:{versionRange?.ToString("S", new VersionRangeFormatter()) ?? "*"}:{targetFramework}");
 
                     // Perform a restore on the fake project
                     _projectRestorer.Restore(
@@ -71,29 +72,22 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                         _installCallback();
                     }
 
-                    packageVersion = Path.GetFileName(
-                        _fileSystem.Directory.EnumerateFileSystemEntries(
-                            stageDirectory.WithSubDirectories(packageId).Value).Single());
-
-                    var packageDirectory = packageRootDirectory.WithSubDirectories(packageVersion);
+                    var version = _store.GetStagedPackageVersion(stageDirectory, packageId);
+                    var packageDirectory = _store.GetPackageDirectory(packageId, version);
                     if (_fileSystem.Directory.Exists(packageDirectory.Value))
                     {
                         throw new ToolPackageException(
                             string.Format(
                                 CommonLocalizableStrings.ToolPackageConflictPackageId,
                                 packageId,
-                                packageVersion));
+                                version.ToNormalizedString()));
                     }
 
                     _fileSystem.Directory.CreateDirectory(packageRootDirectory.Value);
                     _fileSystem.Directory.Move(stageDirectory.Value, packageDirectory.Value);
                     rollbackDirectory = packageDirectory.Value;
 
-                    return new ToolPackageMock(
-                        _fileSystem,
-                        packageId,
-                        packageVersion,
-                        packageDirectory);
+                    return new ToolPackageMock(_fileSystem, packageId, version, packageDirectory);
                 },
                 rollback: () => {
                     if (rollbackDirectory != null && _fileSystem.Directory.Exists(rollbackDirectory))

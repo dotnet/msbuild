@@ -694,16 +694,6 @@
         <target state="translated">Dans la mesure où vous venez d'installer le kit SDK .NET Core, vous devez rouvrir la fenêtre d'invite de commandes avant d'exécuter l'outil que vous avez installé.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPackageMissingEntryPointFile">
-        <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="translated">Le package '{0}' ne contient pas le fichier de point d'entrée {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPackageMissingSettingsFile">
-        <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="translated">Le package '{0}' ne contient pas le fichier de paramètres d'outils DotnetToolSettings.xml.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
         <target state="translated">L'outil définit une commande avec un paramètre de nom manquant.</target>
@@ -846,6 +836,26 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToUninstallToolPackage">
         <source>Failed to uninstall tool package '{0}': {1}</source>
         <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="new">Column maximum width must be greater than zero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="new">Failed to find staged tool package '{0}'.</target>
         <note />
       </trans-unit>
     </body>

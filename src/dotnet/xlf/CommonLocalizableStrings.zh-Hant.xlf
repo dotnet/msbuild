@@ -694,16 +694,6 @@
         <target state="translated">因為您剛才安裝了 .NET Core SDK，您必須先重新開啟 [命令提示字元] 視窗，才能執行您安裝的工具。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPackageMissingEntryPointFile">
-        <source>Package '{0}' is missing entry point file {1}.</source>
-        <target state="translated">套件 '{0}' 缺少進入點檔案 {1}。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPackageMissingSettingsFile">
-        <source>Package '{0}' is missing tool settings file DotnetToolSettings.xml.</source>
-        <target state="translated">套件 '{0}' 缺少工具設定檔 DotnetToolSettings.xml。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
         <source>Tool defines a command with a missing name setting.</source>
         <target state="translated">工具使用了缺少的名稱設定定義命令。</target>
@@ -846,6 +836,26 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToUninstallToolPackage">
         <source>Failed to uninstall tool package '{0}': {1}</source>
         <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="new">Column maximum width must be greater than zero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="new">Failed to find staged tool package '{0}'.</target>
         <note />
       </trans-unit>
     </body>

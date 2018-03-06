@@ -16,6 +16,7 @@ using Microsoft.DotNet.Tools.Install.Tool;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 using Xunit;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
@@ -33,13 +34,13 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             Action a = () => installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
             a.ShouldThrow<ToolPackageException>().WithMessage(LocalizableStrings.ToolInstallationRestoreFailed);
 
             reporter.Lines.Count.Should().Be(1);
-            reporter.Lines[0].Should().Contain(TestPackageId);
+            reporter.Lines[0].Should().Contain(TestPackageId.ToString());
         }
 
         [Theory]
@@ -54,7 +55,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 nugetConfig: nugetConfigPath);
 
@@ -102,7 +103,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             {
                 package = installer.InstallPackage(
                     packageId: TestPackageId,
-                    packageVersion: TestPackageVersion,
+                    versionRange: VersionRange.Parse(TestPackageVersion),
                     targetFramework: _testTargetframework,
                     nugetConfig: nugetConfigPath);
 
@@ -127,7 +128,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 nugetConfig: nugetConfigPath);
 
@@ -166,7 +167,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
@@ -208,7 +209,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 nugetConfig: nugetConfigPath);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
@@ -229,7 +230,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 source: source);
 
@@ -251,7 +252,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    installer.InstallPackage("non.existent.package.id");
+                    installer.InstallPackage(new PackageId("non.existent.package.id"));
 
                     t.Complete();
                 }
@@ -282,7 +283,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 {
                     installer.InstallPackage(
                         packageId: TestPackageId,
-                        packageVersion: TestPackageVersion,
+                        versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework,
                         source: source);
 
@@ -314,7 +315,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 {
                     Action first = () => installer.InstallPackage(
                         packageId: TestPackageId,
-                        packageVersion: TestPackageVersion,
+                        versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework,
                         source: source);
 
@@ -322,7 +323,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
                     installer.InstallPackage(
                         packageId: TestPackageId,
-                        packageVersion: TestPackageVersion,
+                        versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework,
                         source: source);
 
@@ -353,7 +354,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 source: source);
 
@@ -361,7 +362,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             Action secondCall = () => installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 source: source);
 
@@ -376,7 +377,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             fileSystem
                 .Directory
-                .Exists(store.Root.WithSubDirectories(TestPackageId).Value)
+                .Exists(store.Root.WithSubDirectories(TestPackageId.ToString()).Value)
                 .Should()
                 .BeTrue();
 
@@ -384,7 +385,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             fileSystem
                 .Directory
-                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(".stage").Value)
+                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(ToolPackageStore.StagingDirectory).Value)
                 .Should()
                 .BeEmpty();
         }
@@ -402,7 +403,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 source: source);
 
@@ -410,7 +411,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             package.Uninstall();
 
-            store.GetInstalledPackages(TestPackageId).Should().BeEmpty();
+            store.EnumeratePackages().Should().BeEmpty();
         }
 
         [Theory]
@@ -426,7 +427,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 source: source);
 
@@ -438,10 +439,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             {
                 package.Uninstall();
 
-                store.GetInstalledPackages(TestPackageId).Should().BeEmpty();
+                store.EnumeratePackages().Should().BeEmpty();
             }
 
-            package = store.GetInstalledPackages(TestPackageId).First();
+            package = store.EnumeratePackageVersions(TestPackageId).First();
 
             AssertPackageInstall(reporter, fileSystem, package, store);
         }
@@ -459,7 +460,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                packageVersion: TestPackageVersion,
+                versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
                 source: source);
 
@@ -473,7 +474,28 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 scope.Complete();
             }
 
-            store.GetInstalledPackages(TestPackageId).Should().BeEmpty();
+            store.EnumeratePackages().Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GivenAPackageNameWithDifferentCaseItCanInstallThePackage(bool testMockBehaviorIsInSync)
+        {
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+
+            var (store, installer, reporter, fileSystem) = Setup(
+                useMock: testMockBehaviorIsInSync,
+                feeds: GetMockFeedsForConfigFile(nugetConfigPath));
+
+            var package = installer.InstallPackage(
+                packageId: new PackageId("GlObAl.TooL.coNsoLe.DemO"),
+                targetFramework: _testTargetframework,
+                nugetConfig: nugetConfigPath);
+
+            AssertPackageInstall(reporter, fileSystem, package, store);
+
+            package.Uninstall();
         }
 
         private static void AssertPackageInstall(
@@ -484,11 +506,14 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             reporter.Lines.Should().BeEmpty();
 
-            package.PackageId.Should().Be(TestPackageId);
-            package.PackageVersion.Should().Be(TestPackageVersion);
+            package.Id.Should().Be(TestPackageId);
+            package.Version.ToNormalizedString().Should().Be(TestPackageVersion);
             package.PackageDirectory.Value.Should().Contain(store.Root.Value);
 
-            store.GetInstalledPackages(TestPackageId).Select(p => p.PackageVersion).Should().Equal(TestPackageVersion);
+            store.EnumeratePackageVersions(TestPackageId)
+                .Select(p => p.Version.ToNormalizedString())
+                .Should()
+                .Equal(TestPackageVersion);
 
             package.Commands.Count.Should().Be(1);
             fileSystem.File.Exists(package.Commands[0].Executable.Value).Should().BeTrue($"{package.Commands[0].Executable.Value} should exist");
@@ -506,11 +531,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 .Directory
                 .EnumerateFileSystemEntries(store.Root.Value)
                 .Should()
-                .NotContain(e => Path.GetFileName(e) != ".stage");
+                .NotContain(e => Path.GetFileName(e) != ToolPackageStore.StagingDirectory);
 
             fileSystem
                 .Directory
-                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(".stage").Value)
+                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(ToolPackageStore.StagingDirectory).Value)
                 .Should()
                 .BeEmpty();
         }
@@ -536,7 +561,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     {
                         new MockFeedPackage
                         {
-                            PackageId = TestPackageId,
+                            PackageId = TestPackageId.ToString(),
                             Version = TestPackageVersion
                         }
                     }
@@ -556,7 +581,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     {
                         new MockFeedPackage
                         {
-                            PackageId = TestPackageId,
+                            PackageId = TestPackageId.ToString(),
                             Version = TestPackageVersion
                         }
                     }
@@ -576,7 +601,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     {
                         new MockFeedPackage
                         {
-                            PackageId = TestPackageId,
+                            PackageId = TestPackageId.ToString(),
                             Version = TestPackageVersion
                         }
                     }
@@ -642,6 +667,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         private static string GetTestLocalFeedPath() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestAssetLocalNugetFeed");
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
-        private const string TestPackageId = "global.tool.console.demo";
+        private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");
     }
 }

@@ -178,4 +178,7 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   <data name="FailedToCreateToolShim" xml:space="preserve">
     <value>Failed to create shell shim for tool '{0}': {1}</value>
   </data>
+  <data name="InvalidNuGetVersionRange" xml:space="preserve">
+    <value>Specified version '{0}' is not a valid NuGet version range.</value>
+  </data>
 </root>

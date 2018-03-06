@@ -104,6 +104,11 @@ Die Installation war erfolgreich. Sofern keine weiteren Anweisungen vorliegen, k
         <target state="translated">Das Toolpaket konnte nicht wiederhergestellt werden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

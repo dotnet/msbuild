@@ -104,6 +104,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">ツール パッケージを復元できませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

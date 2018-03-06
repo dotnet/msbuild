@@ -4,14 +4,15 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
     internal interface IToolPackage
     {
-        string PackageId { get; }
+        PackageId Id { get; }
 
-        string PackageVersion { get; }
+        NuGetVersion Version { get; }
 
         DirectoryPath PackageDirectory { get; }
 

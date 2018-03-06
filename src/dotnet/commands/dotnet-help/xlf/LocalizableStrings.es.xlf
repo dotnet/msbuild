@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List reference in the project.</source>
-        <target state="translated">Muestra referencias en el proyecto.</target>
+        <source>List project references or installed tools.</source>
+        <target state="needs-review-translation">Muestra referencias en el proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
@@ -258,8 +258,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UninstallDefinition">
-        <source>Uninstalls a tool from the development environment.</source>
-        <target state="new">Uninstalls a tool from the development environment.</target>
+        <source>Uninstalls an item from the development environment.</source>
+        <target state="new">Uninstalls an item from the development environment.</target>
         <note />
       </trans-unit>
     </body>
