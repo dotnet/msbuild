@@ -17,14 +17,16 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Install.Tool
 {
+    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate (IToolPackageStore, IToolPackageInstaller) CreateToolPackageStoreAndInstaller(DirectoryPath? nonGlobalLocation = null);
+
     internal class InstallToolCommand : CommandBase
     {
-        private readonly IToolPackageStore _toolPackageStore;
-        private readonly IToolPackageInstaller _toolPackageInstaller;
-        private readonly IShellShimRepository _shellShimRepository;
         private readonly IEnvironmentPathInstruction _environmentPathInstruction;
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
+        private CreateShellShimRepository _createShellShimRepository;
+        private CreateToolPackageStoreAndInstaller _createToolPackageStoreAndInstaller;
 
         private readonly PackageId _packageId;
         private readonly string _packageVersion;
@@ -33,13 +35,13 @@ namespace Microsoft.DotNet.Tools.Install.Tool
         private readonly string _source;
         private readonly bool _global;
         private readonly string _verbosity;
+        private readonly string _toolPath;
 
         public InstallToolCommand(
             AppliedOption appliedCommand,
             ParseResult parseResult,
-            IToolPackageStore toolPackageStore = null,
-            IToolPackageInstaller toolPackageInstaller = null,
-            IShellShimRepository shellShimRepository = null,
+            CreateToolPackageStoreAndInstaller createToolPackageStoreAndInstaller = null,
+            CreateShellShimRepository createShellShimRepository = null,
             IEnvironmentPathInstruction environmentPathInstruction = null,
             IReporter reporter = null)
             : base(parseResult)
@@ -56,22 +58,15 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             _source = appliedCommand.ValueOrDefault<string>("source");
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
+            _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
 
             var cliFolderPathCalculator = new CliFolderPathCalculator();
 
-            _toolPackageStore = toolPackageStore
-                ?? new ToolPackageStore(new DirectoryPath(cliFolderPathCalculator.ToolsPackagePath));
-
-            _toolPackageInstaller = toolPackageInstaller
-                ?? new ToolPackageInstaller(
-                    _toolPackageStore,
-                    new ProjectRestorer(_reporter));
+            _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoreAndInstaller;
 
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
-
-            _shellShimRepository = shellShimRepository
-                ?? new ShellShimRepository(new DirectoryPath(cliFolderPathCalculator.ToolsShimPath));
+            _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
 
             _reporter = (reporter ?? Reporter.Output);
             _errorReporter = (reporter ?? Reporter.Error);
@@ -79,9 +74,14 @@ namespace Microsoft.DotNet.Tools.Install.Tool
 
         public override int Execute()
         {
-            if (!_global)
+            if (string.IsNullOrWhiteSpace(_toolPath) && !_global)
             {
-                throw new GracefulException(LocalizableStrings.InstallToolCommandOnlySupportGlobal);
+                throw new GracefulException(LocalizableStrings.InstallToolCommandNeedGlobalOrToolPath);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_toolPath) && _global)
+            {
+                throw new GracefulException(LocalizableStrings.InstallToolCommandInvalidGlobalAndToolPath);
             }
 
             if (_configFilePath != null && !File.Exists(_configFilePath))
@@ -92,6 +92,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                         Path.GetFullPath(_configFilePath)));
             }
 
+
             VersionRange versionRange = null;
             if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
             {
@@ -101,7 +102,18 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                         _packageVersion));
             }
 
-            if (_toolPackageStore.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
+            DirectoryPath? toolPath = null;
+            if (_toolPath != null)
+            {
+                toolPath = new DirectoryPath(_toolPath);
+            }
+
+            (IToolPackageStore toolPackageStore, IToolPackageInstaller toolPackageInstaller) =
+                _createToolPackageStoreAndInstaller(toolPath);
+            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
+
+            // Prevent installation if any version of the package is installed
+            if (toolPackageStore.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
             {
                 _errorReporter.WriteLine(string.Format(LocalizableStrings.ToolAlreadyInstalled, _packageId).Red());
                 return 1;
@@ -120,7 +132,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    package = _toolPackageInstaller.InstallPackage(
+                    package = toolPackageInstaller.InstallPackage(
                         packageId: _packageId,
                         versionRange: versionRange,
                         targetFramework: _framework,
@@ -130,13 +142,16 @@ namespace Microsoft.DotNet.Tools.Install.Tool
 
                     foreach (var command in package.Commands)
                     {
-                        _shellShimRepository.CreateShim(command.Executable, command.Name);
+                        shellShimRepository.CreateShim(command.Executable, command.Name);
                     }
 
                     scope.Complete();
                 }
 
-                _environmentPathInstruction.PrintAddPathInstructionIfPathDoesNotExist();
+                if (_global)
+                {
+                    _environmentPathInstruction.PrintAddPathInstructionIfPathDoesNotExist();
+                }
 
                 _reporter.WriteLine(
                     string.Format(

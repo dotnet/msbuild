@@ -27,11 +27,6 @@
         <target state="new">Uninstall user wide.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandOnlySupportsGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="new">The --global switch (-g) is currently required because only user wide tools are supported.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
         <target state="new">Tool '{0}' (version '{1}') was successfully uninstalled.</target>
@@ -50,6 +45,21 @@
       <trans-unit id="FailedToUninstallTool">
         <source>Failed to uninstall tool '{0}': {1}</source>
         <target state="new">Failed to uninstall tool '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
+        <source>Need either global or tool-path provided.</source>
+        <target state="new">Need either global or tool-path provided.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location of shim to access tool</source>
+        <target state="new">Location of shim to access tool</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
+        <source>Cannot have global and tool-path as opinion at the same time."</source>
+        <target state="new">Cannot have global and tool-path as opinion at the same time."</target>
         <note />
       </trans-unit>
     </body>

@@ -64,11 +64,6 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Команда установки .NET</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallToolCommandOnlySupportGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="translated">Параметр "--global switch (-g)" сейчас обязателен, так как поддерживаются только инструменты уровня пользователя.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidToolConfiguration">
         <source>The settings file in the tool's NuGet package is invalid: {0}</source>
         <target state="translated">Недопустимый файл параметров в пакете NuGet инструмента: {0}</target>
@@ -107,6 +102,21 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
         <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
+        <source>Need either global or tool-path provided.</source>
+        <target state="new">Need either global or tool-path provided.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
+        <source>Cannot have global and tool-path as opinion at the same time.</source>
+        <target state="new">Cannot have global and tool-path as opinion at the same time.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location of shim to access tool</source>
+        <target state="new">Location of shim to access tool</target>
         <note />
       </trans-unit>
     </body>

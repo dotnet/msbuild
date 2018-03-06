@@ -34,6 +34,11 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             return $"\"{Value}\"";
         }
 
+        public string ToXmlEncodeString()
+        {
+            return System.Net.WebUtility.HtmlEncode(Value);
+        }
+
         public override string ToString()
         {
             return ToQuotedString();

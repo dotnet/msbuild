@@ -132,9 +132,6 @@
   <data name="GlobalOptionDescription" xml:space="preserve">
     <value>Uninstall user wide.</value>
   </data>
-  <data name="UninstallToolCommandOnlySupportsGlobal" xml:space="preserve">
-    <value>The --global switch (-g) is currently required because only user wide tools are supported.</value>
-  </data>
   <data name="UninstallSucceeded" xml:space="preserve">
     <value>Tool '{0}' (version '{1}') was successfully uninstalled.</value>
   </data>
@@ -146,5 +143,14 @@
   </data>
   <data name="FailedToUninstallTool" xml:space="preserve">
     <value>Failed to uninstall tool '{0}': {1}</value>
+  </data>
+  <data name="UninstallToolCommandNeedGlobalOrToolPath" xml:space="preserve">
+    <value>Need either global or tool-path provided.</value>
+  </data>
+  <data name="ToolPathDescription" xml:space="preserve">
+    <value>Location of shim to access tool</value>
+  </data>
+  <data name="UninstallToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
+    <value>Cannot have global and tool-path as opinion at the same time."</value>
   </data>
 </root>

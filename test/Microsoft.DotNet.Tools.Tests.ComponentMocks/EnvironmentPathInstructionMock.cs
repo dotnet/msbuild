@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         private readonly string _packageExecutablePath;
         private readonly bool _packageExecutablePathExists;
         private readonly IReporter _reporter;
+        public const string MockInstructionText = "MOCK INSTRUCTION";
 
         public EnvironmentPathInstructionMock(
             IReporter reporter,
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         {
             if (!PackageExecutablePathExists())
             {
-                _reporter.WriteLine("INSTRUCTION");
+                _reporter.WriteLine(MockInstructionText);
             }
         }
 

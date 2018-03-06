@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             {
                 "--runtime",
                 AnyRid,
-                $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToQuotedString()}"
+                $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToXmlEncodeString()}"
             });
 
             argsToPassToRestore.Add($"/verbosity:{verbosity ?? "quiet"}");

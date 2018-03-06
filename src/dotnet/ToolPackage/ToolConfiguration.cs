@@ -27,6 +27,7 @@ namespace Microsoft.DotNet.ToolPackage
                         commandName));
             }
 
+            EnsureNoLeadingDot(commandName);
             EnsureNoInvalidFilenameCharacters(commandName);
 
             CommandName = commandName;
@@ -43,6 +44,17 @@ namespace Microsoft.DotNet.ToolPackage
                         CommonLocalizableStrings.ToolSettingsInvalidCommandName,
                         commandName,
                         string.Join(", ", invalidCharacters.Select(c => $"'{c}'"))));
+            }
+        }
+
+        private void EnsureNoLeadingDot(string commandName)
+        {
+            if (commandName.StartsWith(".", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.ToolSettingsInvalidLeadingDotCommandName,
+                        commandName));
             }
         }
 

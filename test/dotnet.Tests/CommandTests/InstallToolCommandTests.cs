@@ -19,8 +19,9 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using Newtonsoft.Json;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
-using LocalizableStrings = Microsoft.DotNet.Tools.Install.Tool.LocalizableStrings;
 using System.Runtime.InteropServices;
+using LocalizableStrings = Microsoft.DotNet.Tools.Install.Tool.LocalizableStrings;
+using Microsoft.DotNet.ShellShim;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
@@ -28,7 +29,8 @@ namespace Microsoft.DotNet.Tests.Commands
     {
         private readonly IFileSystem _fileSystem;
         private readonly IToolPackageStore _toolPackageStore;
-        private readonly ShellShimRepositoryMock _shellShimRepositoryMock;
+        private readonly CreateShellShimRepository _createShellShimRepository;
+        private readonly CreateToolPackageStoreAndInstaller _createToolPackageStoreAndInstaller;
         private readonly EnvironmentPathInstructionMock _environmentPathInstructionMock;
         private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
@@ -43,9 +45,11 @@ namespace Microsoft.DotNet.Tests.Commands
             _reporter = new BufferedReporter();
             _fileSystem = new FileSystemMockBuilder().Build();
             _toolPackageStore = new ToolPackageStoreMock(new DirectoryPath(PathToPlacePackages), _fileSystem);
-            _shellShimRepositoryMock = new ShellShimRepositoryMock(new DirectoryPath(PathToPlaceShim), _fileSystem);
+            _createShellShimRepository =
+                (nonGlobalLocation) => new ShellShimRepositoryMock(new DirectoryPath(PathToPlaceShim), _fileSystem);
             _environmentPathInstructionMock =
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim);
+            _createToolPackageStoreAndInstaller = (_) => (_toolPackageStore, CreateToolPackageInstaller());
 
             ParseResult result = Parser.Instance.Parse($"dotnet install tool -g {PackageId}");
             _appliedCommand = result["dotnet"]["install"]["tool"];
@@ -58,9 +62,8 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             var installToolCommand = new InstallToolCommand(_appliedCommand,
                 _parseResult,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
 
@@ -83,26 +86,28 @@ namespace Microsoft.DotNet.Tests.Commands
             ParseResult parseResult =
                 Parser.Instance.ParseFrom("dotnet install", new[] { "tool", PackageId, "--source", sourcePath });
 
-            var installToolCommand = new InstallToolCommand(appliedCommand,
-                parseResult,
-                _toolPackageStore,
-                CreateToolPackageInstaller(
-                    feeds: new MockFeed[] {
-                        new MockFeed
+
+            var toolToolPackageInstaller = CreateToolPackageInstaller(
+            feeds: new MockFeed[] {
+                    new MockFeed
+                    {
+                        Type = MockFeedType.Source,
+                        Uri = sourcePath,
+                        Packages = new List<MockFeedPackage>
                         {
-                            Type = MockFeedType.Source,
-                            Uri = sourcePath,
-                            Packages = new List<MockFeedPackage>
+                            new MockFeedPackage
                             {
-                                new MockFeedPackage
-                                {
-                                    PackageId = PackageId,
-                                    Version = PackageVersion
-                                }
+                                PackageId = PackageId,
+                                Version = PackageVersion
                             }
                         }
-                    }),
-                _shellShimRepositoryMock,
+                    }
+            });
+
+            var installToolCommand = new InstallToolCommand(appliedCommand,
+                parseResult,
+                (_) => (_toolPackageStore, toolToolPackageInstaller),
+                _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
 
@@ -122,27 +127,28 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             var installToolCommand = new InstallToolCommand(_appliedCommand,
                 _parseResult,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
 
             installToolCommand.Execute().Should().Be(0);
 
-            _reporter.Lines.First().Should().Be("INSTRUCTION");
+            _reporter.Lines.First().Should().Be(EnvironmentPathInstructionMock.MockInstructionText);
         }
 
         [Fact]
         public void GivenFailedPackageInstallWhenRunWithPackageIdItShouldFail()
         {
+            var toolPackageInstaller =
+                CreateToolPackageInstaller(
+                    installCallback: () => throw new ToolPackageException("Simulated error"));
+
             var installToolCommand = new InstallToolCommand(
                 _appliedCommand,
                 _parseResult,
-                _toolPackageStore,
-                CreateToolPackageInstaller(
-                    installCallback: () => throw new ToolPackageException("Simulated error")),
-                _shellShimRepositoryMock,
+                (_) => (_toolPackageStore, toolPackageInstaller),
+                _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
 
@@ -166,9 +172,8 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new InstallToolCommand(
                 _appliedCommand,
                 _parseResult,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
 
@@ -188,13 +193,15 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenInCorrectToolConfigurationWhenRunWithPackageIdItShouldFail()
         {
+            var toolPackageInstaller =
+            CreateToolPackageInstaller(
+                installCallback: () => throw new ToolConfigurationException("Simulated error"));
+
             var installToolCommand = new InstallToolCommand(
                 _appliedCommand,
                 _parseResult,
-                _toolPackageStore,
-                CreateToolPackageInstaller(
-                    installCallback: () => throw new ToolConfigurationException("Simulated error")),
-                _shellShimRepositoryMock,
+                (_) => (_toolPackageStore, toolPackageInstaller),
+                _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
 
@@ -216,9 +223,8 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new InstallToolCommand(
                 _appliedCommand,
                 _parseResult,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
                 _reporter);
 
@@ -244,9 +250,8 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new InstallToolCommand(
                 appliedCommand,
                 result,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
                 _reporter);
 
@@ -268,9 +273,8 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new InstallToolCommand(
                 appliedCommand,
                 result,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
                 _reporter);
 
@@ -295,9 +299,8 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new InstallToolCommand(
                 appliedCommand,
                 result,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
                 _reporter);
 
@@ -322,9 +325,8 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new InstallToolCommand(
                 appliedCommand,
                 result,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
                 _reporter);
 
@@ -348,9 +350,8 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new InstallToolCommand(
                 appliedCommand,
                 result,
-                _toolPackageStore,
-                CreateToolPackageInstaller(),
-                _shellShimRepositoryMock,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
                 _reporter);
 
@@ -364,6 +365,70 @@ namespace Microsoft.DotNet.Tests.Commands
                     ProjectRestorerMock.FakeCommandName,
                     PackageId,
                     PackageVersion).Green());
+        }
+
+        [Fact]
+        public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
+        {
+            var result = Parser.Instance.Parse($"dotnet install tool -g --tool-path /tmp/folder {PackageId}");
+            var appliedCommand = result["dotnet"]["install"]["tool"];
+            var parser = Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet install", new[] {"tool", PackageId});
+
+            var installToolCommand = new InstallToolCommand(
+                appliedCommand,
+                parseResult,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
+                _reporter);
+
+            Action a = () => installToolCommand.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(LocalizableStrings.InstallToolCommandInvalidGlobalAndToolPath);
+        }
+
+        [Fact]
+        public void WhenRunWithNeitherOfGlobalNorToolPathShowErrorMessage()
+        {
+            var result = Parser.Instance.Parse($"dotnet install tool {PackageId}");
+            var appliedCommand = result["dotnet"]["install"]["tool"];
+            var parser = Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet install", new[] { "tool", PackageId });
+
+            var installToolCommand = new InstallToolCommand(
+                appliedCommand,
+                parseResult,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
+                _reporter);
+
+            Action a = () => installToolCommand.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(LocalizableStrings.InstallToolCommandNeedGlobalOrToolPath);
+        }
+
+        [Fact]
+        public void WhenRunWithPackageIdAndBinPathItShouldNoteHaveEnvironmentPathInstruction()
+        {
+            var result = Parser.Instance.Parse($"dotnet install tool --tool-path /tmp/folder {PackageId}");
+            var appliedCommand = result["dotnet"]["install"]["tool"];
+            var parser = Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet install", new[] {"tool", PackageId});
+
+            var installToolCommand = new InstallToolCommand(appliedCommand,
+                parseResult,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim),
+                _reporter);
+
+            installToolCommand.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().NotContain(l => l.Contains(EnvironmentPathInstructionMock.MockInstructionText));
         }
 
         private IToolPackageInstaller CreateToolPackageInstaller(

@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Tests.Commands
     {
         private readonly BufferedReporter _reporter;
         private readonly IFileSystem _fileSystem;
-        private readonly ShellShimRepositoryMock _shellShimRepositoryMock;
         private readonly EnvironmentPathInstructionMock _environmentPathInstructionMock;
 
         private const string PackageId = "global.tool.console.demo";
@@ -41,7 +40,6 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             _reporter = new BufferedReporter();
             _fileSystem = new FileSystemMockBuilder().Build();
-            _shellShimRepositoryMock = new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem);
             _environmentPathInstructionMock = new EnvironmentPathInstructionMock(_reporter, ShimsDirectory);
         }
 
@@ -60,22 +58,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Be(string.Format(
                     LocalizableStrings.ToolNotInstalled,
                     packageId).Red());
-        }
-
-        [Fact]
-        public void GivenAMissingGlobalOptionItErrors()
-        {
-            var command = CreateUninstallCommand("does.not.exist");
-
-            Action a = () => {
-                command.Execute();
-            };
-
-            a.ShouldThrow<GracefulException>()
-             .And
-             .Message
-             .Should()
-             .Be(LocalizableStrings.UninstallToolCommandOnlySupportsGlobal);
         }
 
         [Fact]
@@ -165,22 +147,45 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem.File.Exists(shimPath).Should().BeTrue();
         }
 
+        [Fact]
+        public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
+        {
+            var uninstallCommand = CreateUninstallCommand($"-g --tool-path /tmp/folder {PackageId}");
+
+            Action a = () => uninstallCommand.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
+        }
+
+        [Fact]
+        public void WhenRunWithNeitherOfGlobalNorToolPathShowErrorMessage()
+        {
+            var uninstallCommand = CreateUninstallCommand(PackageId);
+
+            Action a = () => uninstallCommand.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
+        }
+
         private InstallToolCommand CreateInstallCommand(string options)
         {
             ParseResult result = Parser.Instance.Parse("dotnet install tool " + options);
 
             var store = new ToolPackageStoreMock(new DirectoryPath(ToolsDirectory), _fileSystem);
+            var packageInstallerMock = new ToolPackageInstallerMock(
+                _fileSystem,
+                store,
+                new ProjectRestorerMock(
+                    _fileSystem,
+                    _reporter));
+
             return new InstallToolCommand(
                 result["dotnet"]["install"]["tool"],
                 result,
-                store,
-                new ToolPackageInstallerMock(
-                    _fileSystem,
-                    store,
-                    new ProjectRestorerMock(
-                        _fileSystem,
-                        _reporter)),
-                _shellShimRepositoryMock,
+                (_) => (store, packageInstallerMock),
+                (_) => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
                 _environmentPathInstructionMock,
                 _reporter);
         }
@@ -192,11 +197,11 @@ namespace Microsoft.DotNet.Tests.Commands
             return new UninstallToolCommand(
                 result["dotnet"]["uninstall"]["tool"],
                 result,
-                new ToolPackageStoreMock(
+                (_) => new ToolPackageStoreMock(
                     new DirectoryPath(ToolsDirectory),
                     _fileSystem,
                     uninstallCallback),
-                _shellShimRepositoryMock,
+                (_) => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
                 _reporter);
         }
     }

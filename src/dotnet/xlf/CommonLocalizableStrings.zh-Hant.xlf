@@ -858,6 +858,11 @@ setx PATH "%PATH%;{0}"
         <target state="new">Failed to find staged tool package '{0}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
+        <source>Command '{0}' has a leading dot.</source>
+        <target state="new">Command '{0}' has a leading dot.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

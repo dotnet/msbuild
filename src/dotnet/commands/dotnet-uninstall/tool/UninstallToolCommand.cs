@@ -15,45 +15,63 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Uninstall.Tool
 {
+    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IToolPackageStore CreateToolPackageStore(DirectoryPath? nonGlobalLocation = null);
     internal class UninstallToolCommand : CommandBase
     {
         private readonly AppliedOption _options;
-        private readonly IToolPackageStore _toolPackageStore;
-        private readonly IShellShimRepository _shellShimRepository;
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
+        private CreateShellShimRepository _createShellShimRepository;
+        private CreateToolPackageStore _createToolPackageStoreAndInstaller;
 
         public UninstallToolCommand(
             AppliedOption options,
             ParseResult result,
-            IToolPackageStore toolPackageStore = null,
-            IShellShimRepository shellShimRepository = null,
+            CreateToolPackageStore createToolPackageStoreAndInstaller = null,
+            CreateShellShimRepository createShellShimRepository = null,
             IReporter reporter = null)
             : base(result)
         {
             var pathCalculator = new CliFolderPathCalculator();
 
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _toolPackageStore = toolPackageStore ?? new ToolPackageStore(
-                new DirectoryPath(pathCalculator.ToolsPackagePath));
-            _shellShimRepository = shellShimRepository ?? new ShellShimRepository(
-                new DirectoryPath(pathCalculator.ToolsShimPath));
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
+
+            _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
+            _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStore;
         }
 
         public override int Execute()
         {
-            if (!_options.ValueOrDefault<bool>("global"))
+            var global = _options.ValueOrDefault<bool>("global");
+            var toolPath = _options.SingleArgumentOrDefault("tool-path");
+
+            if (string.IsNullOrWhiteSpace(toolPath) && !global)
             {
-                throw new GracefulException(LocalizableStrings.UninstallToolCommandOnlySupportsGlobal);
+                throw new GracefulException(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
             }
+
+            if (!string.IsNullOrWhiteSpace(toolPath) && global)
+            {
+                throw new GracefulException(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
+            }
+
+            DirectoryPath? toolDirectoryPath = null;
+            if (!string.IsNullOrWhiteSpace(toolPath))
+            {
+                toolDirectoryPath = new DirectoryPath(toolPath);
+            }
+
+            IToolPackageStore toolPackageStore = _createToolPackageStoreAndInstaller(toolDirectoryPath);
+            IShellShimRepository shellShimRepository = _createShellShimRepository(toolDirectoryPath);
 
             var packageId = new PackageId(_options.Arguments.Single());
             IToolPackage package = null;
             try
             {
-                package = _toolPackageStore.EnumeratePackageVersions(packageId).SingleOrDefault();
+                package = toolPackageStore.EnumeratePackageVersions(packageId).SingleOrDefault();
                 if (package == null)
                 {
                     _errorReporter.WriteLine(
@@ -80,7 +98,7 @@ namespace Microsoft.DotNet.Tools.Uninstall.Tool
                 {
                     foreach (var command in package.Commands)
                     {
-                        _shellShimRepository.RemoveShim(command.Name);
+                        shellShimRepository.RemoveShim(command.Name);
                     }
 
                     package.Uninstall();

@@ -157,9 +157,6 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   <data name="InstallFullCommandNameLocalized" xml:space="preserve">
     <value>.NET Install Command</value>
   </data>
-  <data name="InstallToolCommandOnlySupportGlobal" xml:space="preserve">
-    <value>The --global switch (-g) is currently required because only user wide tools are supported.</value>
-  </data>
   <data name="InvalidToolConfiguration" xml:space="preserve">
     <value>The settings file in the tool's NuGet package is invalid: {0}</value>
   </data>
@@ -180,5 +177,14 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   </data>
   <data name="InvalidNuGetVersionRange" xml:space="preserve">
     <value>Specified version '{0}' is not a valid NuGet version range.</value>
+  </data>
+  <data name="InstallToolCommandNeedGlobalOrToolPath" xml:space="preserve">
+    <value>Need either global or tool-path provided.</value>
+  </data>
+  <data name="InstallToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
+    <value>Cannot have global and tool-path as opinion at the same time.</value>
+  </data>
+  <data name="ToolPathDescription" xml:space="preserve">
+    <value>Location of shim to access tool</value>
   </data>
 </root>

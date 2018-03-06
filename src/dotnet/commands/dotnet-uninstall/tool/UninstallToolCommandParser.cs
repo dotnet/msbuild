@@ -19,6 +19,10 @@ namespace Microsoft.DotNet.Cli
                     "-g|--global",
                     LocalizableStrings.GlobalOptionDescription,
                     Accept.NoArguments()),
+                Create.Option(
+                    "--tool-path",
+                    LocalizableStrings.ToolPathDescription,
+                    Accept.ExactlyOneArgument()),
                 CommonOptions.HelpOption());
         }
     }
