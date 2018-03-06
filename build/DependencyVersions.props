@@ -4,7 +4,7 @@
     <MicrosoftAspNetCoreAppPackageVersion>2.1.0-preview2-30171</MicrosoftAspNetCoreAppPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.1.0-preview2-26227-01</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftBuildPackageVersion>15.7.0-preview-000063</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>15.7.0-preview-000066</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
