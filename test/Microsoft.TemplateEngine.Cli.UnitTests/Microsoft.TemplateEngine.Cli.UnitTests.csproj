@@ -7,7 +7,10 @@
 
   <ItemGroup>
     <None Update="**/*.json" CopyToOutputDirectory="Always" />
-    <None Update="TemplateInstallTests\TestTemplates\**\*" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TemplateInstallTests/TestTemplates/**/*" CopyToOutputDirectory="Always" />
   </ItemGroup>
   
   <ItemGroup>
