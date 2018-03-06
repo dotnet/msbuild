@@ -7,7 +7,7 @@ namespace Microsoft.Build.Definition
     /// <summary>
     ///     Common <see cref="Project" /> constructor arguments.
     /// </summary>
-    public class ProjectConstructionInfo
+    public class ProjectOptions
     {
         /// <summary>
         /// Global properties to evaluate with.

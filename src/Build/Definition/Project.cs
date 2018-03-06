@@ -550,54 +550,54 @@ namespace Microsoft.Build.Evaluation
         /// Create a file based project.
         /// </summary>
         /// <param name="file">The file to evaluate the project from.</param>
-        /// <param name="info">The <see cref="ProjectConstructionInfo"/> to use.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         /// <returns></returns>
-        public static Project FromFile(string file, ProjectConstructionInfo info)
+        public static Project FromFile(string file, ProjectOptions options)
         {
             return new Project(
                 file,
-                info.GlobalProperties,
-                info.ToolsVersion,
-                info.SubToolsetVersion,
-                info.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
-                info.LoadSettings,
-                info.EvaluationContext);
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
         }
 
         /// <summary>
         /// Create a <see cref="ProjectRootElement"/> based project.
         /// </summary>
         /// <param name="rootElement">The <see cref="ProjectRootElement"/> to evaluate the project from.</param>
-        /// <param name="info">The <see cref="ProjectConstructionInfo"/> to use.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         /// <returns></returns>
-        public static Project FromProjectRootElement(ProjectRootElement rootElement, ProjectConstructionInfo info)
+        public static Project FromProjectRootElement(ProjectRootElement rootElement, ProjectOptions options)
         {
             return new Project(
                 rootElement,
-                info.GlobalProperties,
-                info.ToolsVersion,
-                info.SubToolsetVersion,
-                info.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
-                info.LoadSettings,
-                info.EvaluationContext);
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
         }
 
         /// <summary>
         /// Create a <see cref="XmlReader"/> based project.
         /// </summary>
         /// <param name="rootElement">The <see cref="XmlReader"/> to evaluate the project from.</param>
-        /// <param name="info">The <see cref="ProjectConstructionInfo"/> to use.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         /// <returns></returns>
-        public static Project FromXmlReader(XmlReader reader, ProjectConstructionInfo info)
+        public static Project FromXmlReader(XmlReader reader, ProjectOptions options)
         {
             return new Project(
                 reader,
-                info.GlobalProperties,
-                info.ToolsVersion,
-                info.SubToolsetVersion,
-                info.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
-                info.LoadSettings,
-                info.EvaluationContext);
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
         }
 
         /// <summary>
@@ -2179,7 +2179,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="ReevaluateIfNecessary()"/>
         /// </summary>
-        /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="ProjectConstructionInfo.EvaluationContext"/></param>
+        /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="ProjectOptions.EvaluationContext"/></param>
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
         {
             var context = evaluationContext as EvaluationContextBase;

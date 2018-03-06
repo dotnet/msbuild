@@ -39,21 +39,21 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 var collection = env.CreateProjectCollection().Collection;
 
-                var project1 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")), new ProjectConstructionInfo
+                var project1 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")), new ProjectOptions
                 {
                     ProjectCollection = collection,
                     EvaluationContext = context,
                     LoadSettings = ProjectLoadSettings.IgnoreMissingImports
                 });
 
-                var project2 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"bar\"></Project>")), new ProjectConstructionInfo
+                var project2 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"bar\"></Project>")), new ProjectOptions
                 {
                     ProjectCollection = collection,
                     EvaluationContext = context,
                     LoadSettings = ProjectLoadSettings.IgnoreMissingImports
                 });
 
-                var project3 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")), new ProjectConstructionInfo
+                var project3 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")), new ProjectOptions
                 {
                     ProjectCollection = collection,
                     EvaluationContext = context,
