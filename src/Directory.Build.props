@@ -39,8 +39,6 @@
     <UpdateXlfOnBuild>true</UpdateXlfOnBuild>
     <ErrorOnOutOfDateXlf>true</ErrorOnOutOfDateXlf>
 
-    <UpdateXlfOnBuild Condition="'$(CIBuild)' != 'true'">true</UpdateXlfOnBuild>
-
     <!-- Workaround that can be removed when we update machines to 15.6.
          Use Satellite assembly generation task from Microsoft.NET.Sdk even when building with
          full Framework MSBuild.  This will support public signing, is deterministic, and always
