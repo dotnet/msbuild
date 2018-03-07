@@ -766,6 +766,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup Condition="'$(Prefer32Bit)' == 'true' and ('$(PlatformTarget)' == 'AnyCPU' or '$(PlatformTarget)' == '') and '$(PlatformTargetAsMSBuildArchitectureExplicitlySet)' != 'true'">
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
+
+    <!--
+      Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
+      if you set a value in the body, the value is not used by the top implicit import but is used by the bottom.
+      This can lead to non-deterministic behavior and builds can fail for obscure reasons.
+    -->
+    <Error Condition=" '$(_InitialMSBuildProjectExtensionsPath)' != '' And '$(MSBuildProjectExtensionsPath)' != '$(_InitialMSBuildProjectExtensionsPath)' "
+           Code="MSB3540"
+           Text="The value of the property &quot;MSBuildProjectExtensionsPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props."
+            />
   </Target>
 
   <!--
