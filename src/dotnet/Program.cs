@@ -17,6 +17,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
 using Command = Microsoft.DotNet.Cli.Utils.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
+using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -262,12 +263,11 @@ namespace Microsoft.DotNet.Cli
         {
             DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
             var commitSha = versionFile.CommitSha ?? "N/A";
-            Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine(".NET Core SDK (reflecting any global.json):");
+            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetSdkInfoLabel}");
             Reporter.Output.WriteLine($" Version:   {Product.Version}");
             Reporter.Output.WriteLine($" Commit:    {commitSha}");
             Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine("Runtime Environment:");
+            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetRuntimeInfoLabel}");
             Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
             Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
