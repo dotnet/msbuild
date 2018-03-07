@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.ToolPackage
             VersionRange versionRange = null,
             string targetFramework = null,
             FilePath? nugetConfig = null,
+            DirectoryPath? rootConfigDirectory = null,
             string source = null,
             string verbosity = null);
     }
