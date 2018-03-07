@@ -810,31 +810,6 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    if (result.OverallResult != BuildResultCode.Success)
-                    {
-                        StringBuilder message = new StringBuilder();
-
-                        message.AppendFormat("Failed OverallResult for ConfigurationId {0}, GlobalRequestId {1}, NodeRequestId {2}, ParentGlobalRequestId {3}, SubmissionId {4}: \"{5}\"",
-                            result.ConfigurationId, result.GlobalRequestId, result.NodeRequestId, result.ParentGlobalRequestId, result.SubmissionId, _requestEntry.RequestConfiguration.ProjectFullPath);
-                        message.AppendLine();
-
-                        message.AppendFormat("  Requested targets: {0}", string.Join(";", _requestEntry.RequestConfiguration.TargetNames ?? new[] { "" }));
-                        message.AppendLine();
-
-                        message.AppendFormat("  Exception: {0}", result.Exception);
-                        message.AppendLine();
-
-                        message.AppendFormat("  CircularDependency: {0}", result.CircularDependency);
-                        message.AppendLine();
-
-                        foreach (var resultByTarget in result.ResultsByTarget)
-                        {
-                            message.AppendFormat("  Target \"{0}\" : {1}", resultByTarget.Key, resultByTarget.Value.ResultCode);
-                            message.AppendLine();
-                        }
-
-                        _projectLoggingContext.LogCommentFromText(MessageImportance.High, message.ToString());
-                    }
                     _projectLoggingContext.LogProjectFinished(result.OverallResult == BuildResultCode.Success);
                 }
                 catch (Exception ex)

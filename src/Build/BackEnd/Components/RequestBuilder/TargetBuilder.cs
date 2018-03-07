@@ -20,7 +20,6 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -93,10 +92,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _legacyCallTargetContinueOnError;
 
-        private StringBuilder _targetStackLog;
-
-        private static ConcurrentDictionary<int, StringBuilder> TargetStackLogs = new ConcurrentDictionary<int, StringBuilder>();
-
         /// <summary>
         /// Enum describing the type of targets we are pushing on the stack.
         /// </summary>
@@ -157,12 +152,6 @@ namespace Microsoft.Build.BackEnd
             configuration.RetrieveFromCache();
             _projectInstance = configuration.Project;
 
-            _targetStackLog = TargetStackLogs.GetOrAdd(_requestEntry.Request.ConfigurationId, (_) => new StringBuilder());
-
-            _projectLoggingContext.LogCommentFromText(Framework.MessageImportance.High, _targetStackLog.ToString());
-
-            LogCurrentStackState($"Initializing stack for BuildTargets for {_projectInstance.FullPath} brq {_projectLoggingContext.BuildEventContext.BuildRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}");
-
             // Now get the current results cache entry.
             ResultsCache resultsCache = (ResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             BuildResult existingBuildResult = null;
@@ -204,8 +193,6 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                LogCurrentStackState("ProcessTargetStack completed; removing remaining targets from active");
-
                 // If there are still targets left on the stack, they need to be removed from the 'active targets' list
                 foreach (TargetEntry target in _targetsToBuild)
                 {
@@ -230,11 +217,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             configuration.IsCacheable = previousCacheableStatus;
-
-            if (_projectInstance.FullPath.EndsWith("Microsoft.VisualStudio.Shell.csproj"))
-            {
-                _projectLoggingContext.LogCommentFromText(Framework.MessageImportance.High, _targetStackLog.ToString());
-            }
 
             return resultsToReport;
         }
@@ -291,8 +273,6 @@ namespace Microsoft.Build.BackEnd
             // leave the scope just before it commits its own changes to the base lookup.
             TargetEntry currentTargetEntry = _targetsToBuild.Peek();
 
-            LogCurrentStackState($"LegacyCallTarget is about to mess with the stack. Current head: {currentTargetEntry.Name}");
-
             currentTargetEntry.EnterLegacyCallTargetScope(callTargetLookup);
 
             ITaskBuilder taskBuilder = _componentHost.GetComponent(BuildComponentType.TaskBuilder) as ITaskBuilder;
@@ -341,26 +321,14 @@ namespace Microsoft.Build.BackEnd
                 // If there was an exception, such as a circular dependency error, items may still be on the stack so we must clear them.
                 while (!Object.ReferenceEquals(_targetsToBuild.Peek(), currentTargetEntry))
                 {
-                    _targetStackLog.AppendLine($"Some kind of confusion In LegacyCallTarget. Removing {_targetsToBuild.Peek().Name}");
                     _targetsToBuild.Pop();
                 }
-
-                LogCurrentStackState("LegacyCallTarget cleanup complete");
 
                 _legacyCallTargetContinueOnError = originalLegacyCallTargetContinueOnError;
                 ((IBuildComponent)taskBuilder).ShutdownComponent();
             }
 
-            LogCurrentStackState($"LegacyCallTarget complete for {currentTargetEntry.Name}");
-
             return results;
-        }
-
-        private void LogCurrentStackState(string message)
-        {
-            _targetStackLog.AppendLine(message + $" [req id {_requestEntry.Request.GlobalRequestId} project context {_projectLoggingContext.BuildEventContext.ProjectContextId}, config id {_requestEntry.RequestConfiguration.ConfigurationId}, thread {Thread.CurrentThread.ManagedThreadId} request builder 0x{((RequestBuilder)_requestBuilderCallback).GetHashCode():x8}] -- {DateTimeOffset.UtcNow.UtcTicks}");
-            _targetStackLog.AppendLine("   stack: " + string.Join(";", _targetsToBuild.Select(t => t.Name)));
-            _targetStackLog.AppendLine("   activ: " + string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys));
         }
 
         #endregion
@@ -442,7 +410,6 @@ namespace Microsoft.Build.BackEnd
                 )
             {
                 TargetEntry currentTargetEntry = _targetsToBuild.Peek();
-                LogCurrentStackState($"Entering ProcessTargetStack loop for {currentTargetEntry.Name} state {currentTargetEntry.State}");
                 switch (currentTargetEntry.State)
                 {
                     case TargetEntryState.Dependencies:
@@ -502,7 +469,6 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     case TargetEntryState.Execution:
-                        LogCurrentStackState($"Thinking about executing {currentTargetEntry.Name}");
 
                         // It's possible that our target got pushed onto the stack for one build and had dependencies process, then a re-entrant build started actively building
                         // the target, encountered a legacy CallTarget, pushed new work onto the stack, and yielded back to here. Instead of starting the already-partially-
@@ -516,18 +482,7 @@ namespace Microsoft.Build.BackEnd
                             //ErrorUtilities.VerifyThrow(!wasActivelyBuilding, "Target {0} was actively building and waited on but we are attempting to build it again.", currentTargetEntry.Name);
 
                             // This target is now actively building.
-                            var added = _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryAdd(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
-                            LogCurrentStackState($"Marked {currentTargetEntry.Name} as Active");
-                            if (!added || wasActivelyBuilding)
-                            {
-                                var message = $"Apparent double building around {currentTargetEntry.Name}. It {(wasActivelyBuilding ? "was" : "was not")} building already. ActivelyBuildingTargets={string.Join(";", _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Keys)}";
-
-                                _projectLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(String.Empty), message);
-
-                                _projectLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(String.Empty), _targetStackLog.ToString());
-
-                                throw new ArgumentException();
-                            }
+                            _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryAdd(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
 
                             // Execute all of the tasks on this target.
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
@@ -548,7 +503,6 @@ namespace Microsoft.Build.BackEnd
                             }
                             catch
                             {
-                                LogCurrentStackState($"ErrorExecution failure, removing {currentTargetEntry.Name} from active");
                                 _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryRemove(currentTargetEntry.Name, out int _);
 
                                 throw;
@@ -585,8 +539,6 @@ namespace Microsoft.Build.BackEnd
                         ErrorUtilities.ThrowInternalError("Unexpected target state {0}", currentTargetEntry.State);
                         break;
                 }
-
-                LogCurrentStackState($"End of ProcessTargetStack for {currentTargetEntry.Name}. StopProcessing: {stopProcessingStack}");
             }
         }
 
@@ -598,8 +550,6 @@ namespace Microsoft.Build.BackEnd
         {
             if (_buildResult.HasResultsForTarget(currentTargetEntry.Name))
             {
-                LogCurrentStackState($"CheckSkipTarget found results for {currentTargetEntry.Name}");
-
                 TargetResult targetResult = _buildResult[currentTargetEntry.Name] as TargetResult;
                 ErrorUtilities.VerifyThrowInternalNull(targetResult, "targetResult");
 
@@ -636,8 +586,6 @@ namespace Microsoft.Build.BackEnd
                         PopDependencyTargetsOnTargetFailure(topEntry, targetResult, ref stopProcessingStack);
                     }
 
-                    LogCurrentStackState("Returning from CheckSkipTarget");
-
                     return true;
                 }
             }
@@ -654,7 +602,6 @@ namespace Microsoft.Build.BackEnd
         {
             if (targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Stop)
             {
-                LogCurrentStackState($"Target failed, top: {topEntry.Name} parented to {topEntry.ParentEntry.Name}");
                 // Pop down to our parent, since any other dependencies our parent had should no longer
                 // execute.  If we encounter an error target on the way down, also stop since the failure
                 // of one error target in a set declared in OnError should not cause the others to stop running.
@@ -685,8 +632,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     topEntry.ParentEntry.MarkForStop();
                 }
-
-                LogCurrentStackState("Returning from PopDependencyTargetsOnTargetFailure");
             }
         }
 
@@ -705,8 +650,6 @@ namespace Microsoft.Build.BackEnd
         {
             List<TargetEntry> targetsToPush = new List<TargetEntry>(targets.Count);
 
-            LogCurrentStackState($"Pushing targets {string.Join(";", targets.Select(t => t.TargetName))} as {pushType} in {_projectInstance.FullPath}");
-
             // Iterate the list in reverse order so that the first target in the list is the last pushed, and thus the first to be executed.
             for (int i = targets.Count - 1; i >= 0; i--)
             {
@@ -720,7 +663,6 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (_buildResult[targetSpecification.TargetName].ResultCode != TargetResultCode.Skipped)
                         {
-                            _targetStackLog.AppendLine($"Had results for {targetSpecification.TargetName}, not adding it");
                             continue;
                         }
                     }
@@ -734,8 +676,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
                     {
-                        LogCurrentStackState($"Instead of dealing with {targetSpecification.TargetName} which is actively building, waiting on request id {idOfAlreadyBuildingRequest}");
-
                         // Another request elsewhere is building it.  We need to wait.
                         await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetSpecification.TargetName);
 
@@ -810,8 +750,6 @@ namespace Microsoft.Build.BackEnd
                 _targetsToBuild.Push(targetToPush);
             }
 
-            LogCurrentStackState("Returning from PushTargets");
-
             bool pushedTargets = (targetsToPush.Count > 0);
             return pushedTargets;
         }
@@ -824,8 +762,6 @@ namespace Microsoft.Build.BackEnd
             {
                 if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
                 {
-                    LogCurrentStackState($"Instead of dealing with {targetName} which is actively building, waiting on request id {idOfAlreadyBuildingRequest}");
-
                     // Another request elsewhere is building it.  We need to wait.
                     await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetName);
 
