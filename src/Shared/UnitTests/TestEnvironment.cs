@@ -25,7 +25,11 @@ namespace Microsoft.Build.UnitTests
 
         private readonly ITestOutputHelper _output;
 
+        private readonly Lazy<TransientTestFolder> _defaultTestDirectory;
+
         private bool _disposed;
+
+        public TransientTestFolder DefaultTestDirectory => _defaultTestDirectory.Value;
 
         public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
         {
@@ -43,6 +47,7 @@ namespace Microsoft.Build.UnitTests
         private TestEnvironment(ITestOutputHelper output)
         {
             _output = output;
+            _defaultTestDirectory = new Lazy<TransientTestFolder>(() => CreateFolder());
             SetDefaultInvariant();
         }
 
@@ -176,6 +181,14 @@ namespace Microsoft.Build.UnitTests
         public TransientTestFile CreateFile(string extension = ".tmp")
         {
             return WithTransientTestState(new TransientTestFile(extension, createFile:true, expectedAsOutput:false));
+        }
+
+        public TransientTestFile CreateFile(string fileName, string contents = "")
+        {
+            var file = WithTransientTestState(new TransientTestFile(DefaultTestDirectory.FolderPath, Path.GetFileNameWithoutExtension(fileName), Path.GetExtension(fileName)));
+            File.WriteAllText(file.Path, contents);
+
+            return file;
         }
 
         /// <summary>
@@ -452,6 +465,13 @@ namespace Microsoft.Build.UnitTests
             _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(rootPath, extension, createFile);
+        }
+
+        public TransientTestFile(string rootPath, string fileNameWithoutExtension, string extension)
+        {
+            Path = System.IO.Path.Combine(rootPath, fileNameWithoutExtension + extension);
+
+            File.WriteAllText(Path, string.Empty);
         }
 
         public string Path { get; }

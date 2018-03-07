@@ -3722,5 +3722,84 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _buildManager.EndBuild();
             }
         }
-    }
+
+        /// <summary>
+        /// Regression test for https://github.com/Microsoft/msbuild/issues/3047
+        /// </summary>
+        [Fact]
+        public void MultiProcReentrantProjectWithCallTargetDoesNotFail()
+        {
+            var a =
+                @"<Project>
+                     <Target Name=`EntryTarget`>
+                         <MSBuild Projects=`b;c` BuildInParallel=`true` />
+                     </Target>
+                 </Project>".Cleanup();
+
+            var b =
+                @"<Project>
+                     <Target Name=`BTarget`>
+                         <MSBuild Projects=`reentrant` Targets=`BuildGenerateSources` BuildInParallel=`true` />
+                     </Target>
+                 </Project>".Cleanup();
+
+            var c =
+                $@"<Project>
+                     <Target Name=`CTarget`>
+                         <Exec Command=`{Helpers.GetSleepCommand(TimeSpan.FromSeconds(1))}` />
+                         <MSBuild Projects=`reentrant` Targets=`BuildGenerated` BuildInParallel=`true` />
+                     </Target>
+                 </Project>".Cleanup();
+
+            var delay =
+                $@"<Project>
+                     <Target Name=`Delay`>
+                         <Exec Command=`{Helpers.GetSleepCommand(TimeSpan.FromSeconds(2))}` />
+                     </Target>
+                 </Project>".Cleanup();
+
+            var reentrant =
+                $@"<Project DefaultTargets=`Build`>
+                     <Target Name=`BuildGenerateSources` DependsOnTargets=`_Get;Build`></Target>
+                     <Target Name=`BuildGenerated`>
+                         <CallTarget Targets=`Build` />
+                     </Target>
+                     <Target Name=`Build`>
+                         <CallTarget Targets=`_Get` />
+                     </Target>
+                     <Target Name=`_Get`>
+                         <MSBuild Projects=`delay` BuildInParallel=`true` />
+                         <Exec Command=`{Helpers.GetSleepCommand(TimeSpan.FromSeconds(5))}` YieldDuringToolExecution=`true` StandardOutputImportance=`low` />
+                     </Target>
+                 </Project>".Cleanup();
+
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var entryFile = env.CreateFile(nameof(a), a).Path;
+                env.CreateFile(nameof(b), b);
+                env.CreateFile(nameof(c), c);
+                env.CreateFile(nameof(delay), delay);
+                env.CreateFile(nameof(reentrant), reentrant);
+
+                var mockLogger = new MockLogger(_output);
+
+                var buildParameters = new BuildParameters()
+                {
+                    DisableInProcNode = true,
+                    MaxNodeCount = Environment.ProcessorCount,
+                    EnableNodeReuse = false,
+                    Loggers = new List<ILogger>()
+                    {
+                        mockLogger
+                    }
+                };
+
+                var buildRequestData = new BuildRequestData(entryFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[]{ "EntryTarget" }, null);
+
+                var result = _buildManager.Build(buildParameters, buildRequestData);
+
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+        }
+    }	
 }
