@@ -63,5 +63,31 @@ namespace Microsoft.NET.ToolPack.Tests
                 }
             }
         }
+
+        [Fact]
+        public void It_does_not_add_p2p_references_as_package_references_to_nuspec()
+        {
+            var nugetPackage = SetupNuGetPackage();
+            using (var nupkgReader = new PackageArchiveReader(nugetPackage))
+            {
+                nupkgReader
+                    .GetPackageDependencies().First().Packages
+                    .Should().BeEmpty();
+            }
+        }
+
+        [Fact]
+        public void It_contains_folder_structure_tfm_any()
+        {
+            var nugetPackage = SetupNuGetPackage();
+            using (var nupkgReader = new PackageArchiveReader(nugetPackage))
+            {
+                nupkgReader
+                    .GetToolItems()
+                    .Should().Contain(
+                        f => f.Items.
+                            Contains($"tools/{f.TargetFramework.GetShortFolderName()}/any/consoledemo.dll"));
+            }
+        }
     }
 }

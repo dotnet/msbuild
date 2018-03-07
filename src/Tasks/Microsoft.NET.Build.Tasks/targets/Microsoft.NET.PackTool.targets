@@ -27,6 +27,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Publish Condition=" '%(PackageReference.Publish)' != 'false' ">true</Publish>
     </PackageReference>
 
+    <ProjectReference Update="@(ProjectReference)">
+      <PrivateAssets>All</PrivateAssets>
+      <Publish Condition=" '%(ProjectReference.Publish)' != 'false' ">true</Publish>
+    </ProjectReference>
+
   </ItemGroup>
 
   <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish" Condition=" '$(PackAsTool)' == 'true' ">
