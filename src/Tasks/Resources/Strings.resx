@@ -2583,6 +2583,13 @@
     <comment>{StrBegin="MSB3798: "}</comment>
   </data>
 
+  <data name="MapSourceRoots.ContainsDuplicate">
+    <value>{0} contains a duplicate: '{1}'</value>
+  </data>
+  <data name="MapSourceRoots.ValueOfNotFoundInItems">
+    <value>The value of {0} not found in {1} items: '{2}'</value>
+  </data>
+
  <!--
         MSB3851 - MSB3860   Task: FindInvalidProjectReferences
         If this bucket overflows, pls. contact 'vsppbdev'.

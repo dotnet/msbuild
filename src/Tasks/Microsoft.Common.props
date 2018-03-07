@@ -12,6 +12,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <!-- 
+      ContinuousIntegrationBuild is set to true when building on a CI server. The variable is then used to enable settings that only 
+      apply to official builds, as opposed to local builds on developer machine.
+      
+      Build servers that comply with Standard CI specification set STANDARD_CI_REPOSITORY_URL and STANDARD_CI_SOURCE_REVISION_ID variables.
+      See https://github.com/dotnet/designs/blob/86f4ed0e39fc1b1ab5c4128990b17c4aead4420f/proposed/standard-ci-env-variables.md.
+    -->
+    <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' == '' and '$(DesignTimeBuild)' != 'true' and '$(STANDARD_CI_REPOSITORY_URL)' != ''">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <ImportByWildcardBeforeMicrosoftCommonProps Condition="'$(ImportByWildcardBeforeMicrosoftCommonProps)' == ''">true</ImportByWildcardBeforeMicrosoftCommonProps>
     <ImportByWildcardAfterMicrosoftCommonProps Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == ''">true</ImportByWildcardAfterMicrosoftCommonProps>
     <ImportUserLocationsByWildcardBeforeMicrosoftCommonProps Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == ''">true</ImportUserLocationsByWildcardBeforeMicrosoftCommonProps>

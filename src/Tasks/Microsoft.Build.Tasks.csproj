@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="MapSourceRoots.cs" />
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>EnvironmentUtilities.cs</Link>
     </Compile>

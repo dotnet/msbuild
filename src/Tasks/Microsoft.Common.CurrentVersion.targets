@@ -721,6 +721,120 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemDefinitionGroup>
 
   <!--
+    ========================
+    DeterministicSourcePaths
+    ========================
+    
+    Unless specified otherwise enable deterministic source paths when building deterministically on CI server, but not for local builds.
+    In order for the debugger to find source files when debugging a locally built binary the PDB must contain original, unmapped local paths.
+  -->
+  <PropertyGroup>
+    <DeterministicSourcePaths Condition="'$(DeterministicSourcePaths)' == '' and '$(Deterministic)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true'">true</DeterministicSourcePaths>
+  </PropertyGroup>
+
+  <!--
+    ==========
+    SourceRoot
+    ==========
+    
+    All source files of the project are expected to be located under one of the directories specified by SourceRoot item group.
+    This targets collects all SourceRoots from various sources (InitializeSourceRootDependsOn targets).
+    
+    If DeterministicSourcePaths is true it calculates deterministic mapped paths that can be used by CoreCompile targets
+    to initialize deterministic path mapping specific to the compiler.
+    
+    Include the final backslash in the path of each SourceRoot item.
+    
+    Extensibility: Add target to InitializeSourceRootDependsOn that populates SourceRoot item group.
+  -->
+
+  <Target Name="InitializeSourceRoot"
+          DependsOnTargets="$(InitializeSourceRootDependsOn)">
+    <ItemGroup>
+      <_InvalidSourceRoot Include="@(SourceRoot)" Condition="!HasTrailingSlash('%(SourceRoot.Identity)')" />
+    </ItemGroup>
+
+    <!--
+      The SourceRoot is required to have a trailing directory separator.
+      We do not append one implicitly as we do not know which separator to append on Windows.
+      The usage of SourceRoot might be sensitive to what kind of separator is used (e.g. in SourceLink where it needs
+      to match the corresponding separators used in paths given to the compiler).
+    -->
+    <Error Text="SourceRoot paths are required to end with a slash or backslash: @(_InvalidSourceRoot, ', ')"
+           Condition="'@(_InvalidSourceRoot)' != ''" />
+
+    <!--
+      Assign top-level source roots a deterministic path (MappedPath metadata).
+    -->
+
+    <ItemGroup Condition="'@(_MappedSourceRoot)' != ''">
+      <_MappedSourceRoot Remove="@(_MappedSourceRoot)" />
+    </ItemGroup>
+
+    <MapSourceRoots SourceRoots="@(SourceRoot)" Condition="'$(DeterministicSourcePaths)' == 'true'">
+      <Output TaskParameter="MappedSourceRoots" ItemName="_MappedSourceRoot" />
+    </MapSourceRoots>
+
+    <ItemGroup Condition="'$(DeterministicSourcePaths)' == 'true'">
+      <SourceRoot Remove="@(SourceRoot)" />
+      <SourceRoot Include="@(_MappedSourceRoot)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- 
+    ================
+    SourceRevisionId
+    ================
+    
+    SourceRevisionId is embedded in AssemblyInformationalVersion, nuspec files for NuGet packages produced by the project, etc., 
+    to associate assemblies, packages and other build outputs with a particular revision of the repository from which they were built.
+   
+    The format of the id is specific to the source control system the project is built from. A commit hash for GIT repositories, 
+    changeset number for TFVC repositories, etc. 
+   
+    Here, the id is set to the value supplied by the CI server building the project, provided that the server follows 
+    Standard CI specification: https://github.com/dotnet/designs/blob/86f4ed0e39fc1b1ab5c4128990b17c4aead4420f/proposed/standard-ci-env-variables.md.
+      
+    If the project references a package that provides source control information (such as Microsoft.Build.Tasks.Git, Microsoft.Build.Tasks.TFVC, etc.)
+    the revision id becomes available in local build environments as well.
+    
+    Extensibility: Add target to InitializeSourceRevisionIdDependsOn to initialize SourceRevisionId.
+  -->
+
+  <Target Name="InitializeSourceRevisionId"
+          DependsOnTargets="_InitializeSourceRevisionIdFromStandardCI;$(InitializeSourceRevisionIdDependsOn)">
+  </Target>
+
+  <Target Name="_InitializeSourceRevisionIdFromStandardCI">
+    <PropertyGroup>
+      <SourceRevisionId Condition="'$(SourceRevisionId)' == ''">$(STANDARD_CI_SOURCE_REVISION_ID)</SourceRevisionId>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+    ====================
+    PrivateRepositoryUrl
+    ====================
+  
+    PrivateRepositoryUrl is the URL of the repository supplied by the CI server or retrieved from source control manager.
+    This value is not directly embedded in build outputs to avoid inadvertently publishing links to private repositories.
+    Instead, PublishRepositoryUrl needs to be set by the project in order to publish the URL into RepositoryUrl property,
+    which is used e.g. in the nuspec file generated for NuGet package produced by the project.
+    
+    Extensibility: Add target to InitializePrivateRepositoryUrlDependsOn to initialize PrivateRepositoryUrl.
+  -->
+
+  <Target Name="InitializePrivateRepositoryUrl"
+          DependsOnTargets="_InitializePrivateRepositoryUrlFromStandardCI;$(InitializePrivateRepositoryUrlDependsOn)">
+  </Target>
+
+  <Target Name="_InitializePrivateRepositoryUrlFromStandardCI">
+    <PropertyGroup>
+      <PrivateRepositoryUrl Condition="'$(PrivateRepositoryUrl)' == ''">$(STANDARD_CI_REPOSITORY_URL)</PrivateRepositoryUrl>
+    </PropertyGroup>
+  </Target>
+
+  <!--
     ***********************************************************************************************
     ***********************************************************************************************
                                                                 Build Section
