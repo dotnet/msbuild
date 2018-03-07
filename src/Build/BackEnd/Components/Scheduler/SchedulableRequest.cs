@@ -196,6 +196,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// The target we are blocked on
+        /// </summary>
+        public string BlockingTarget { get; private set; }
+
+        /// <summary>
         /// Gets a count of the requests we are blocked by.
         /// </summary>
         public int RequestsWeAreBlockedByCount
@@ -324,11 +329,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="blockingRequest">The request which is blocking this one.</param>
         /// <param name="activeTargets">The list of targets this request was currently building at the time it became blocked.</param>
-        public void BlockByRequest(SchedulableRequest blockingRequest, string[] activeTargets)
+        /// <param name="blockerBlockingTarget">Target that we are blocked on which is being built by <paramref name="blockingRequest"/></param>
+        public void BlockByRequest(SchedulableRequest blockingRequest, string[] activeTargets, string blockingTarget = null)
         {
             VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Blocked, SchedulableRequestState.Executing });
             ErrorUtilities.VerifyThrowArgumentNull(blockingRequest, "blockingRequest");
             ErrorUtilities.VerifyThrowArgumentNull(activeTargets, "activeTargets");
+            ErrorUtilities.VerifyThrow(BlockingTarget == null, "Cannot block again if we're already blocked on a target");
 
             // Note that the blocking request will typically be our parent UNLESS it is a request we blocked on because it was executing a target we wanted to execute.
             // Thus, we do not assert the parent-child relationship here.
@@ -346,12 +353,28 @@ namespace Microsoft.Build.BackEnd
             // Update our list of active targets.  This has to be done before we detect circular dependencies because we use this information to detect
             // re-entrancy circular dependencies.
             _activeTargetsWhenBlocked = activeTargets;
+
+            BlockingTarget = blockingTarget;
+
             DetectCircularDependency(blockingRequest);
 
             _requestsWeAreBlockedBy[key] = blockingRequest;
             blockingRequest._requestsWeAreBlocking.Add(this);
 
             ChangeToState(SchedulableRequestState.Blocked);
+        }
+
+        /// <summary>
+        /// Indicates that there are partial results (project producing the result is still running) which can be used to unblock this request.  Updates the relationships between requests.
+        /// </summary>
+        public void UnblockWithPartialResultForBlockingTarget(BuildResult result)
+        {
+            VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Blocked, SchedulableRequestState.Unscheduled });
+            ErrorUtilities.VerifyThrowArgumentNull(result, "result");
+
+            BlockingRequestKey key = new BlockingRequestKey(result);
+            DisconnectRequestWeAreBlockedBy(key);
+            BlockingTarget = null;
         }
 
         /// <summary>
@@ -365,6 +388,7 @@ namespace Microsoft.Build.BackEnd
             BlockingRequestKey key = new BlockingRequestKey(result);
             DisconnectRequestWeAreBlockedBy(key);
             _activeTargetsWhenBlocked = null;
+            BlockingTarget = null;
         }
 
         /// <summary>
@@ -608,7 +632,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Removes the association between this request and the one we are blocked by.
         /// </summary>
-        private void DisconnectRequestWeAreBlockedBy(BlockingRequestKey blockingRequestKey)
+        internal void DisconnectRequestWeAreBlockedBy(BlockingRequestKey blockingRequestKey)
         {
             ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.ContainsKey(blockingRequestKey), "We are not blocked by the specified request.");
 
@@ -634,7 +658,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A key for blocking requests combining the global request and node request ids.
         /// </summary>
-        private class BlockingRequestKey
+        internal class BlockingRequestKey
         {
             /// <summary>
             /// The global request id.

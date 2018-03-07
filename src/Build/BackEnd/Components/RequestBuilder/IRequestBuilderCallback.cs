@@ -39,7 +39,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="blockingRequestId">The request on which we are blocked.</param>
         /// <param name="blockingTarget">The target on which we are blocked.</param>
-        Task BlockOnTargetInProgress(int blockingRequestId, string blockingTarget);
+        /// <param name="partialBuildResult">Results so far from the target builder that's blocking</param>
+        Task BlockOnTargetInProgress(int blockingRequestId, string blockingTarget, BuildResult partialBuildResult);
 
         /// <summary>
         /// Instructs the RequestBuilder that it may yield its control of the node.

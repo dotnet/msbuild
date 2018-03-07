@@ -590,7 +590,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        static internal INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        static internal BuildResult FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new BuildResult(translator);
         }
