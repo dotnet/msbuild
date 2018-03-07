@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void UsingDotnetForTheFirstTimeWithNonVerbsDoesNotPrintEula()
         {
-            string firstTimeNonVerbUseMessage = Cli.Utils.LocalizableStrings.DotNetCommandLineTools;
+            const string firstTimeNonVerbUseMessage = $"{string.NewLine}.NET Core SDK (reflecting any global.json):";
 
             _firstDotnetNonVerbUseCommandResult.StdOut
                 .Should()

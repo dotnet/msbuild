@@ -260,14 +260,12 @@ namespace Microsoft.DotNet.Cli
 
         private static void PrintInfo()
         {
-            HelpCommand.PrintVersionHeader();
-
             DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
             var commitSha = versionFile.CommitSha ?? "N/A";
             Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine("Product Information:");
-            Reporter.Output.WriteLine($" Version:            {Product.Version}");
-            Reporter.Output.WriteLine($" Commit SHA-1 hash:  {commitSha}");
+            Reporter.Output.WriteLine(".NET Core SDK (reflecting any global.json):");
+            Reporter.Output.WriteLine($" Version:   {Product.Version}");
+            Reporter.Output.WriteLine($" Commit:    {commitSha}");
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine("Runtime Environment:");
             Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
