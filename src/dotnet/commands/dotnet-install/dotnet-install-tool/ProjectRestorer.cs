@@ -16,10 +16,14 @@ namespace Microsoft.DotNet.Tools.Install.Tool
     {
         private const string AnyRid = "any";
         private readonly IReporter _reporter;
+        private readonly IReporter _errorReporter;
+        private readonly bool _forceOutputRedirection;
 
         public ProjectRestorer(IReporter reporter = null)
         {
-            _reporter = reporter;
+            _reporter = reporter ?? Reporter.Output;
+            _errorReporter = reporter ?? Reporter.Error;
+            _forceOutputRedirection = reporter != null;
         }
 
         public void Restore(
@@ -56,11 +60,11 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
                 .Create("restore", argsToPassToRestore);
 
-            if (_reporter != null)
+            if (verbosity == null || _forceOutputRedirection)
             {
                 command = command
-                    .OnOutputLine((line) => _reporter.WriteLine(line))
-                    .OnErrorLine((line) => _reporter.WriteLine(line));
+                    .OnOutputLine(line => WriteLine(_reporter, line, project))
+                    .OnErrorLine(line => WriteLine(_errorReporter, line, project));
             }
 
             var result = command.Execute();
@@ -68,6 +72,29 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             {
                 throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
+        }
+
+        private static void WriteLine(IReporter reporter, string line, FilePath project)
+        {
+            line = line ?? "";
+
+            // Remove the temp project prefix if present
+            if (line.StartsWith($"{project.Value} : ", StringComparison.OrdinalIgnoreCase))
+            {
+                line = line.Substring(project.Value.Length + 3);
+            }
+
+            // Note: MSBuild intentionally does not localize "warning" and "error" for diagnostic messages
+            if (line.StartsWith("warning ", StringComparison.Ordinal))
+            {
+                line = line.Yellow();
+            }
+            else if (line.StartsWith("error ", StringComparison.Ordinal))
+            {
+                line = line.Red();
+            }
+
+            reporter.WriteLine(line);
         }
     }
 }

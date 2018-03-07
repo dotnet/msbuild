@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ToolPackage
             IToolPackageStore toolPackageStore = CreateToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(
                 toolPackageStore,
-                new ProjectRestorer(Reporter.Output));
+                new ProjectRestorer());
 
             return (toolPackageStore, toolPackageInstaller);
         }

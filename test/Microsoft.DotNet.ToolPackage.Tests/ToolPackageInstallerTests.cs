@@ -498,6 +498,32 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             package.Uninstall();
         }
 
+        [Fact]
+        public void GivenANuGetDiagnosticMessageItShouldNotContainTheTempProject()
+        {
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+            var tempProject = GetUniqueTempProjectPathEachTest();
+
+            var (store, installer, reporter, fileSystem) = Setup(
+                useMock: false,
+                tempProject: tempProject);
+
+            var package = installer.InstallPackage(
+                packageId: TestPackageId,
+                versionRange: VersionRange.Parse("1.0.*"),
+                targetFramework: _testTargetframework,
+                nugetConfig: nugetConfigPath);
+
+            reporter.Lines.Should().NotBeEmpty();
+            reporter.Lines.Should().Contain(l => l.Contains("warning"));
+            reporter.Lines.Should().NotContain(l => l.Contains(tempProject.Value));
+            reporter.Lines.Clear();
+
+            AssertPackageInstall(reporter, fileSystem, package, store);
+
+            package.Uninstall();
+        }
+
         private static void AssertPackageInstall(
             BufferedReporter reporter,
             IFileSystem fileSystem,

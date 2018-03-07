@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.ToolPackage
         {
             var tempProject = _tempProject ?? new DirectoryPath(Path.GetTempPath())
                 .WithSubDirectories(Path.GetRandomFileName())
-                .WithFile(Path.GetRandomFileName() + ".csproj");
+                .WithFile("restore.csproj");
 
             if (Path.GetExtension(tempProject.Value) != "csproj")
             {
