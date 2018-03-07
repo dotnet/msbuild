@@ -241,7 +241,7 @@
     <value>Language</value>
   </data>
   <data name="LanguageParameter" xml:space="preserve">
-    <value>Specifies the language of the template to create.</value>
+    <value>Filters templates based on language and specifies the language of the template to create.</value>
   </data>
   <data name="ListsTemplates" xml:space="preserve">
     <value>Lists templates containing the specified name. If no name is specified, lists all templates.</value>
