@@ -370,14 +370,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="blockingGlobalRequestId">The id of the request on which we are blocked.</param>
         /// <param name="blockingTarget">The target on which we are blocked.</param>
-        public async Task BlockOnTargetInProgress(int blockingGlobalRequestId, string blockingTarget)
+        /// <param name="partialBuildResult"></param>
+        public async Task BlockOnTargetInProgress(int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
         {
             VerifyIsNotZombie();
             SaveOperatingEnvironment();
 
             _blockType = BlockType.BlockedOnTargetInProgress;
 
-            RaiseOnBlockedRequest(blockingGlobalRequestId, blockingTarget);
+            RaiseOnBlockedRequest(blockingGlobalRequestId, blockingTarget, partialBuildResult);
 
             WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
 
@@ -1021,13 +1022,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Invokes the OnBlockedRequest event
         /// </summary>
-        private void RaiseOnBlockedRequest(int blockingGlobalRequestId, string blockingTarget)
+        private void RaiseOnBlockedRequest(int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
         {
             BuildRequestBlockedDelegate blockedRequestDelegate = OnBuildRequestBlocked;
 
             if (null != blockedRequestDelegate)
             {
-                blockedRequestDelegate(_requestEntry, blockingGlobalRequestId, blockingTarget);
+                blockedRequestDelegate(_requestEntry, blockingGlobalRequestId, blockingTarget, partialBuildResult);
             }
         }
 

@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (null != OnBuildRequestBlocked)
                 {
-                    OnBuildRequestBlocked(entry, blockingId, blockingTarget);
+                    OnBuildRequestBlocked(entry, blockingId, blockingTarget, null);
                 }
             }
 

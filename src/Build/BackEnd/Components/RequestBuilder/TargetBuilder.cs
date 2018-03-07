@@ -346,7 +346,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Required for interface - this should never be called.
         /// </summary>
-        Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingGlobalBuildRequestId, string blockingTarget)
+        Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingGlobalBuildRequestId, string blockingTarget, BuildResult partialBuildResult)
         {
             ErrorUtilities.ThrowInternalError("This method should never be called by anyone except the TargetBuilder.");
             return Task.FromResult(false);
@@ -677,7 +677,7 @@ namespace Microsoft.Build.BackEnd
                     if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
                     {
                         // Another request elsewhere is building it.  We need to wait.
-                        await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetSpecification.TargetName);
+                        await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetSpecification.TargetName, null);
 
                         // If we come out of here and the target is *still* active, it means the scheduler detected a circular dependency and told us to
                         // continue so we could throw the exception.
@@ -763,7 +763,7 @@ namespace Microsoft.Build.BackEnd
                 if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
                 {
                     // Another request elsewhere is building it.  We need to wait.
-                    await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetName);
+                    await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetName, _buildResult);
 
                     return true;
                 }

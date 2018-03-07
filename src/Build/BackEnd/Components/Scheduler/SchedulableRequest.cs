@@ -608,7 +608,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Removes the association between this request and the one we are blocked by.
         /// </summary>
-        private void DisconnectRequestWeAreBlockedBy(BlockingRequestKey blockingRequestKey)
+        internal void DisconnectRequestWeAreBlockedBy(BlockingRequestKey blockingRequestKey)
         {
             ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.ContainsKey(blockingRequestKey), "We are not blocked by the specified request.");
 
@@ -634,7 +634,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A key for blocking requests combining the global request and node request ids.
         /// </summary>
-        private class BlockingRequestKey
+        internal class BlockingRequestKey
         {
             /// <summary>
             /// The global request id.

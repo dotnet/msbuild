@@ -1495,6 +1495,20 @@ namespace Microsoft.Build.BackEnd
             // it isn't modifying its own state, just running a background process), ready, or still blocked.
             blockingRequest.VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked });
 
+            if (blocker.PartialBuildResult !=null)
+            {
+                foreach (var target in blockingRequest.ActiveTargets)
+                {
+                    if (blocker.PartialBuildResult.HasResultsForTarget(target))
+                    {
+                        SchedulableRequest.BlockingRequestKey key = new SchedulableRequest.BlockingRequestKey(blockedRequest.BuildRequest);
+                        blockingRequest.DisconnectRequestWeAreBlockedBy(key);
+
+                        break;
+                    }
+                }
+            }
+
             blockedRequest.BlockByRequest(blockingRequest, blocker.TargetsInProgress);
         }
 
