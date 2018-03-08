@@ -4,6 +4,7 @@
 using System.Runtime.InteropServices;
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -87,16 +88,7 @@ namespace Microsoft.Build.Framework
         {
             base.WriteToStream(writer);
 
-            if (projectFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(projectFile);
-            }
-
+            writer.WriteOptionalString(projectFile);
             writer.Write(succeeded);
         }
 
@@ -109,15 +101,7 @@ namespace Microsoft.Build.Framework
         {
             base.CreateFromStream(reader, version);
 
-            if (reader.ReadByte() == 0)
-            {
-                projectFile = null;
-            }
-            else
-            {
-                projectFile = reader.ReadString();
-            }
-
+            projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
             succeeded = reader.ReadBoolean();
         }
         #endregion
@@ -126,23 +110,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Project name
         /// </summary>
-        public string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        public string ProjectFile => projectFile;
 
         /// <summary>
         /// True if project built successfully, false otherwise
         /// </summary>
-        public bool Succeeded
-        {
-            get
-            {
-                return succeeded;
-            }
-        }
+        public bool Succeeded => succeeded;
     }
 }

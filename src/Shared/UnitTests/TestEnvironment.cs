@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="extension">Extensions of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(extension));
+            return WithTransientTestState(new TransientTestFile(extension, createFile:true, expectedAsOutput:false));
         }
 
         /// <summary>
@@ -186,7 +186,52 @@ namespace Microsoft.Build.UnitTests
         /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension));
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension,
+                createFile: true, expectedAsOutput: false));
+        }
+
+
+        /// <summary>
+        ///     Gets a transient test file associated with a unique file name but does not create the file.
+        /// </summary>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile GetTempFile(string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: false));
+        }
+
+        /// <summary>
+        ///     Gets a transient test file under a specified folder associated with a unique file name but does not create the file.
+        /// </summary>
+        /// <param name="transientTestFolder">Temp folder</param>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile GetTempFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension,
+                createFile: false, expectedAsOutput: false));
+        }
+
+        /// <summary>
+        ///     Create a temp file name that is expected to exist when the test completes.
+        /// </summary>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile ExpectFile(string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: true));
+        }
+
+        /// <summary>
+        /// Create a temp file name under a specific temporary folder. The file is expected to exist when the test completes.
+        /// </summary>
+        /// <param name="transientTestFolder">Temp folder</param>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension, createFile: false, expectedAsOutput: true));
         }
 
         /// <summary>
@@ -392,21 +437,38 @@ namespace Microsoft.Build.UnitTests
 
     public class TransientTestFile : TransientTestState
     {
-        public TransientTestFile(string extension)
+        private readonly bool _createFile;
+        private readonly bool _expectedAsOutput;
+
+        public TransientTestFile(string extension, bool createFile, bool expectedAsOutput)
         {
-            Path = FileUtilities.GetTemporaryFile(extension);
+            _createFile = createFile;
+            _expectedAsOutput = expectedAsOutput;
+            Path = FileUtilities.GetTemporaryFile(null, extension, createFile);
         }
 
-        public TransientTestFile(string rootPath, string extension)
+        public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
-            Path = FileUtilities.GetTemporaryFile(rootPath, extension);
+            _createFile = createFile;
+            _expectedAsOutput = expectedAsOutput;
+            Path = FileUtilities.GetTemporaryFile(rootPath, extension, createFile);
         }
 
         public string Path { get; }
 
         public override void Revert()
         {
-            FileUtilities.DeleteNoThrow(Path);
+            try
+            {
+                if (_expectedAsOutput)
+                {
+                    Assert.True(File.Exists(Path), $"A file expected as an output does not exist: {Path}");
+                }
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(Path);
+            }
         }
     }
 
