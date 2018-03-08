@@ -241,6 +241,12 @@
   <data name="DotNetCommandLineTools" xml:space="preserve">
     <value>.NET Command Line Tools</value>
   </data>
+  <data name="DotNetSdkInfoLabel" xml:space="preserve">
+    <value>.NET Core SDK (reflecting any global.json):</value>
+  </data>
+  <data name="DotNetRuntimeInfoLabel" xml:space="preserve">
+    <value>Runtime Environment:</value>
+  </data>
   <data name="WriteLineForwarderSetPreviously" xml:space="preserve">
     <value>WriteLine forwarder set previously</value>
   </data>
