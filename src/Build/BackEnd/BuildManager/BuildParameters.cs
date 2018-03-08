@@ -139,11 +139,7 @@ namespace Microsoft.Build.Execution
         /// Flag indicating whether node reuse should be enabled.
         /// By default, it is enabled.
         /// </summary>
-#if FEATURE_NODE_REUSE
         private bool _enableNodeReuse = true;
-#else
-        private bool _enableNodeReuse = false;
-#endif
 
         /// <summary>
         /// The original process environment.
@@ -447,9 +443,7 @@ namespace Microsoft.Build.Execution
         {
             get { return _enableNodeReuse; }
             set {
-#if FEATURE_NODE_REUSE
                 _enableNodeReuse = value;
-#endif
                 }
         }
 

@@ -112,7 +112,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
         {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
@@ -147,9 +146,6 @@ namespace Microsoft.Build.BackEnd
                     nodeStream.Dispose();
                 }
             }
-#else
-            throw new PlatformNotSupportedException("Shutting down nodes by enumerating processes and connecting to them is not supported when using anonymous pipes.");
-#endif
         }
 
         /// <summary>
@@ -165,44 +161,11 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
-            }
-
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-
-                if (!String.IsNullOrEmpty(msbuildExeName))
-                {
-                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.  
-                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
-                }
-            }
-
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = "MSBuild.exe";
-            }
-
-#if FEATURE_NODE_REUSE
-            string msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
-
-            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(msbuildName));
-
-            // Trivial sort to try to prefer most recently used nodes
-            nodeProcesses.Sort
-                (
-                delegate (Process left, Process right)
-                {
-                    return left.Id - right.Id;
-                }
-
-                );
+            string msbuildName;
+            var candidateProcesses = GetPossibleRunningNodes(out msbuildName, ref msbuildLocation);
 
             CommunicationsUtilities.Trace("Attempting to connect to each existing msbuild.exe process in turn to establish node {0}...", nodeId);
-            foreach (Process nodeProcess in nodeProcesses)
+            foreach (Process nodeProcess in candidateProcesses)
             {
                 if (nodeProcess.Id == Process.GetCurrentProcess().Id)
                 {
@@ -228,7 +191,6 @@ namespace Microsoft.Build.BackEnd
                     return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
                 }
             }
-#endif
 
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
@@ -238,7 +200,7 @@ namespace Microsoft.Build.BackEnd
             int retries = NodeCreationRetries;
             while (retries-- > 0)
             {
-#if FEATURE_NODE_REUSE
+#if FEATURE_NET35_TASKHOST
                 // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
                 // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                 // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
@@ -260,18 +222,11 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 #endif
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-                var clientToServerStream = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
-                var serverToClientStream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
-
-                commandLineArgs += $" /clientToServerPipeHandle:{clientToServerStream.GetClientHandleAsString()} /serverToClientPipeHandle:{serverToClientStream.GetClientHandleAsString()}";
-#endif
 
                 // Create the node process
                 int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
                 _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
@@ -284,23 +239,47 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
                     return new NodeContext(nodeId, msbuildProcessId, nodeStream, factory, terminateNode);
                 }
-#else
-                if (WaitForConnectionFromProcess(clientToServerStream, serverToClientStream, msbuildProcessId, hostHandshake, clientHandshake))
-                {
-                    // Connection successful, use this node.
 
-                    clientToServerStream.DisposeLocalCopyOfClientHandle();
-                    serverToClientStream.DisposeLocalCopyOfClientHandle();
-
-                    CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
-                    return new NodeContext(nodeId, msbuildProcessId, clientToServerStream, serverToClientStream, factory, terminateNode);
-                }
-#endif
             }
 
             // We were unable to launch a node.
             CommunicationsUtilities.Trace("FAILED TO CONNECT TO A CHILD NODE");
             return null;
+        }
+
+        private List<Process> GetPossibleRunningNodes(out string msbuildName, ref string msbuildLocation)
+        {
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
+            }
+
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+
+                if (!String.IsNullOrEmpty(msbuildExeName))
+                {
+                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
+                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
+                }
+            }
+
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = "MSBuild.exe";
+            }
+
+            msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
+
+            var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost()) ?? msbuildName;
+
+            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(expectedProcessName));
+
+            // Trivial sort to try to prefer most recently used nodes
+            nodeProcesses.Sort((left, right) => left.Id - right.Id);
+
+            return nodeProcesses;
         }
 
         /// <summary>
@@ -312,26 +291,21 @@ namespace Microsoft.Build.BackEnd
             return hostHandshake.ToString(CultureInfo.InvariantCulture) + "|" + clientHandshake.ToString(CultureInfo.InvariantCulture) + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
         private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
 #if FEATURE_PIPE_SECURITY
+            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
             IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
             if (remoteOwner != identifier)
             {
                 CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
                 throw new UnauthorizedAccessException();
             }
+#endif
         }
-
 
         /// <summary>
         /// Attempts to connect to the specified process.
@@ -341,7 +315,13 @@ namespace Microsoft.Build.BackEnd
             // Try and connect to the process.
             string pipeName = "MSBuild" + nodeProcessId;
 
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            PipeOptions pipeOptions = PipeOptions.Asynchronous;
+
+#if RUNTIME_TYPE_NETCORE
+            // TODO: Use enum value PipeOptions.CurrentUserOnly when NETStandard.Library is updated (Added in https://github.com/dotnet/corefx/issues/25427)
+            pipeOptions |= (PipeOptions)0x20000000; // PipeOptions.CurrentUserOnly;
+#endif
+            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, pipeOptions);
             CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
             try
@@ -401,47 +381,6 @@ namespace Microsoft.Build.BackEnd
 
             return null;
         }
-#else
-        private bool WaitForConnectionFromProcess(AnonymousPipeServerStream clientToServerStream,
-                                                  AnonymousPipeServerStream serverToClientStream,
-                                                  int nodeProcessId, long hostHandshake, long clientHandshake)
-        {
-            try
-            {
-                CommunicationsUtilities.Trace("Attempting to handshake with PID {0}", nodeProcessId);
-
-                CommunicationsUtilities.Trace("Writing handshake to pipe");
-                serverToClientStream.WriteLongForHandshake(hostHandshake);
-
-                CommunicationsUtilities.Trace("Reading handshake from pipe");
-                long handshake = clientToServerStream.ReadLongForHandshake();
-
-                if (handshake != clientHandshake)
-                {
-                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from client not {1}. Probably the client is a different MSBuild build.", handshake, clientHandshake);
-                    throw new InvalidOperationException();
-                }
-
-                // We got a connection.
-                CommunicationsUtilities.Trace("Successfully connected got connection from PID {0}...!", nodeProcessId);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (ExceptionHandling.IsCriticalException(ex))
-                {
-                    throw;
-                }
-
-                CommunicationsUtilities.Trace("Failed to get connection from PID {0}. {1}", nodeProcessId, ex.ToString());
-
-                clientToServerStream.Dispose();
-                serverToClientStream.Dispose();
-
-                return false;
-            }
-        }
-#endif
 
         /// <summary>
         /// Creates a new MSBuild process
@@ -489,8 +428,7 @@ namespace Microsoft.Build.BackEnd
 
 #if RUNTIME_TYPE_NETCORE
             // Run the child process with the same host as the currently-running process.
-            string pathToHost;
-            using (Process currentProcess = Process.GetCurrentProcess()) pathToHost = currentProcess.MainModule.FileName;
+            var pathToHost = GetCurrentHost();
             commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
@@ -573,6 +511,22 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Identify the .NET host of the current process
+        /// </summary>
+        /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
+        private static string GetCurrentHost()
+        {
+#if RUNTIME_TYPE_NETCORE
+            using (Process currentProcess = Process.GetCurrentProcess())
+            {
+                return currentProcess.MainModule.FileName;
+            }
+#else
+            return null;
+#endif
+        }
+
+        /// <summary>
         /// Class which wraps up the communications infrastructure for a given node.
         /// </summary>
         internal class NodeContext
@@ -631,23 +585,13 @@ namespace Microsoft.Build.BackEnd
             /// Constructor.
             /// </summary>
             public NodeContext(int nodeId, int processId,
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 Stream nodePipe,
-#else
-                AnonymousPipeServerStream clientToServerStream,
-                AnonymousPipeServerStream serverToClientStream,
-#endif
                 INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
             {
                 _nodeId = nodeId;
                 _processId = processId;
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                 _clientToServerStream = nodePipe;
                 _serverToClientStream = nodePipe;
-#else
-                _clientToServerStream = clientToServerStream;
-                _serverToClientStream = serverToClientStream;
-#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _smallReadBuffer = new byte[1000]; // 1000 was just an average seen on one profile run.

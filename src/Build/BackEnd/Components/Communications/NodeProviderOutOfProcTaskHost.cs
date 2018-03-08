@@ -155,12 +155,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (s_msbuildTaskHostName == null)
                 {
-                    s_msbuildTaskHostName = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME");
-
-                    if (s_msbuildTaskHostName == null)
-                    {
-                        s_msbuildTaskHostName = "MSBuildTaskHost.exe";
-                    }
+                    s_msbuildTaskHostName = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME") ??
+                                            "MSBuildTaskHost.exe";
                 }
 
                 return s_msbuildTaskHostName;
@@ -386,25 +382,19 @@ namespace Microsoft.Build.BackEnd
             {
                 if (s_msbuildName == null)
                 {
-                    s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-
-                    if (s_msbuildName == null)
-                    {
-                        s_msbuildName = "MSBuild.exe";
-                    }
+                    s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME") ?? "MSBuild.exe";
                 }
 
                 return s_msbuildName;
             }
-            else if (hostContext == TaskHostContext.X32CLR2 || hostContext == TaskHostContext.X64CLR2)
+
+            if (hostContext == TaskHostContext.X32CLR2 || hostContext == TaskHostContext.X64CLR2)
             {
                 return TaskHostNameForClr2TaskHost;
             }
-            else
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+
+            ErrorUtilities.ThrowInternalErrorUnreachable();
+            return null;
         }
 
         /// <summary>
