@@ -139,7 +139,7 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Exec Command="tlbexp.exe $(TlbExpVerbosity) /NOLOGO /asmpath:@(TlbExpAssemblyPaths->'&quot;%(Identity)&quot;', ' /asmpath:') $(TargetPath) /out:$(TargetDir)$(TargetName).tlb" />
+    <Exec Command="tlbexp.exe $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') $(TargetPath) /out:$(TargetDir)$(TargetName).tlb" />
   </Target>
 
   <!-- Import parent targets -->
