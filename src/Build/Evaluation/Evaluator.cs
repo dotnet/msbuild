@@ -201,9 +201,9 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
-        /// Keeps track of the newest project to become the value of MSBuildAllProjects.
+        /// Keeps track of all imported projects with the newest first.
         /// </summary>
-        private ProjectRootElement _newestProject;
+        private SortedList<DateTime, ProjectRootElement> _allProjects;
 
         /// <summary>
         /// Stores a value indicating if the project set MSBuildAllProjects so that a message can be logged that the property was ignored.
@@ -690,8 +690,16 @@ namespace Microsoft.Build.Evaluation
         DataCollection.CommentMarkProfile(8816, endPass0);
 #endif
 
-                // By default, the "newest" project is the project itself.  As projects are imported, they will replace this pointer if they are newer than the project.
-                _newestProject = _projectRootElement;
+                if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects)
+                {
+                    _allProjects = new SortedList<DateTime, ProjectRootElement>(new ComparerDescendingAllowDuplicates<DateTime>());
+
+                    if (_projectRootElement.FullPath != null)
+                    {
+                        // By default, the "newest" project is the project itself.  As projects are imported, they will replace this pointer if they are newer than the project.
+                        _allProjects.Add(_projectRootElement.LastWriteTimeWhenRead, _projectRootElement);
+                    }
+                }
 
                 // Pass1: evaluate properties, load imports, and gather everything else
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
@@ -699,16 +707,18 @@ namespace Microsoft.Build.Evaluation
                     PerformDepthFirstPass(_projectRootElement);
                 }
 
-                if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects && _newestProject?.FullPath != null)
+                if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects && _allProjects.Any())
                 {
                     if (_msbuildAllProjectsWasSet)
                     {
                         // Since the project or an import tried to set MSBuildAllProjects, log a message that it was ignored
                         _evaluationLoggingContext.LogComment(MessageImportance.Low, "MSBuildAllProjectsIgnored");
                     }
+                    
+                    // Set MSBuildAllProjects to be the project and all imports which is sorted with the newest being first
+                    _data.SetProperty(ReservedPropertyNames.allProjects, String.Join(";", _allProjects.Select(i => i.Value.FullPath)), false /* NOT global property */, true /* OK to be a reserved name */);
 
-                    // Set MSBuildAllProjects to be the project or import that is the newest
-                    _data.SetProperty(ReservedPropertyNames.allProjects, _newestProject.FullPath, false /* NOT global property */, true /* OK to be a reserved name */);
+                    _allProjects = null;
                 }
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
@@ -2350,11 +2360,8 @@ namespace Microsoft.Build.Evaluation
                         {
                             imports.Add(importedProjectElement);
 
-                            // Store a pointer to the newest project to be set later as MSBuildAllProjects
-                            if (importedProjectElement.LastWriteTimeWhenRead > _newestProject.LastWriteTimeWhenRead)
-                            {
-                                _newestProject = importedProjectElement;
-                            }
+                            // Save the project to a list to be set later as MSBuildAllProjects
+                            _allProjects.Add(importedProjectElement.LastWriteTimeWhenRead, importedProjectElement);
 
                             if (_logProjectImportedEvents)
                             {
@@ -2726,6 +2733,22 @@ namespace Microsoft.Build.Evaluation
             sb.Append($"\"{strings[strings.Count - 1]}\"");
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// An IComparer that reverses the order and allows for duplicates by treating all items as greater or less than.
+        /// </summary>
+        /// <typeparam name="T">The type of the item to compare.</typeparam>
+        private class ComparerDescendingAllowDuplicates<T> : IComparer<T>
+        {
+            public int Compare(T x, T y)
+            {
+                // Reverse the comparison by passing y and x
+                int ret = Comparer<T>.Default.Compare(y, x);
+
+                // Do not zero because callers expect each item to be greater or less than
+                return ret == 0 ? -1 : ret;
+            }
         }
     }
 
