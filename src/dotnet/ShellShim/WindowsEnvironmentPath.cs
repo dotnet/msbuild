@@ -41,9 +41,18 @@ namespace Microsoft.DotNet.ShellShim
 
         private bool PackageExecutablePathExists()
         {
+            return PackageExecutablePathExistsForCurrentProcess() || PackageExecutablePathWillExistForFutureNewProcess();
+        }
+
+        private bool PackageExecutablePathWillExistForFutureNewProcess()
+        {
             return EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User))
-                || EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine))
-                || EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process));
+                   || EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine));
+        }
+
+        private bool PackageExecutablePathExistsForCurrentProcess()
+        {
+            return EnvironmentVariableConatinsPackageExecutablePath(Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process));
         }
 
         private bool EnvironmentVariableConatinsPackageExecutablePath(string environmentVariable)
@@ -58,21 +67,17 @@ namespace Microsoft.DotNet.ShellShim
 
         public void PrintAddPathInstructionIfPathDoesNotExist()
         {
-            if (!PackageExecutablePathExists())
+            if (!PackageExecutablePathExistsForCurrentProcess() && PackageExecutablePathWillExistForFutureNewProcess())
             {
-                if (Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User).Split(';')
-                    .Contains(_packageExecutablePath))
-                {
-                    _reporter.WriteLine(
-                        CommonLocalizableStrings.EnvironmentPathWindowsNeedReopen);
-                }
-                else
-                {
-                    _reporter.WriteLine(
-                        string.Format(
-                            CommonLocalizableStrings.EnvironmentPathWindowsManualInstructions,
-                            _packageExecutablePath));
-                }
+                _reporter.WriteLine(
+                    CommonLocalizableStrings.EnvironmentPathWindowsNeedReopen);
+            }
+            else if (!PackageExecutablePathWillExistForFutureNewProcess())
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        CommonLocalizableStrings.EnvironmentPathWindowsManualInstructions,
+                        _packageExecutablePath));
             }
         }
     }
