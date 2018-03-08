@@ -22,6 +22,7 @@ using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {
@@ -57,6 +58,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
     public class SimpleScenarios : IDisposable
     {
+        private readonly ITestOutputHelper _output;
+
+        public SimpleScenarios(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         /// Since we create a project with the same name in many of these tests, and two projects with 
         /// the same name cannot be loaded in a ProjectCollection at the same time, we should unload the
@@ -588,7 +596,9 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Trait("Category", "mono-osx-failing")]
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+            try
+            {
+                MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
 
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
@@ -605,7 +615,16 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 ");
 
-            logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
+                logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
+            }
+            finally
+            {
+                var errorFiles = Directory.GetFiles(Path.GetTempPath(), "*.*", SearchOption.AllDirectories);
+                foreach (var file in errorFiles)
+                {
+                    _output.WriteLine($"File in tmp: {file}");
+                }
+            }
         }
 #endif
 
