@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.ToolPackage
             VersionRange versionRange = null,
             string targetFramework = null,
             FilePath? nugetConfig = null,
+            DirectoryPath? rootConfigDirectory = null,
             string source = null,
             string verbosity = null)
         {
@@ -53,7 +54,8 @@ namespace Microsoft.DotNet.ToolPackage
                             packageId: packageId,
                             versionRange: versionRange,
                             targetFramework: targetFramework ?? BundledTargetFramework.GetTargetFrameworkMoniker(),
-                            restoreDirectory: stageDirectory);
+                            restoreDirectory: stageDirectory,
+                            rootConfigDirectory: rootConfigDirectory);
 
                         try
                         {
@@ -115,11 +117,12 @@ namespace Microsoft.DotNet.ToolPackage
             PackageId packageId,
             VersionRange versionRange,
             string targetFramework,
-            DirectoryPath restoreDirectory)
+            DirectoryPath restoreDirectory,
+            DirectoryPath? rootConfigDirectory)
         {
             var tempProject = _tempProject ?? new DirectoryPath(Path.GetTempPath())
                 .WithSubDirectories(Path.GetRandomFileName())
-                .WithFile(Path.GetRandomFileName() + ".csproj");
+                .WithFile("restore.csproj");
 
             if (Path.GetExtension(tempProject.Value) != "csproj")
             {
@@ -135,7 +138,7 @@ namespace Microsoft.DotNet.ToolPackage
                         new XElement("TargetFramework", targetFramework),
                         new XElement("RestorePackagesPath", restoreDirectory.Value),
                         new XElement("RestoreProjectStyle", "DotnetToolReference"), // without it, project cannot reference tool package
-                        new XElement("RestoreRootConfigDirectory", Directory.GetCurrentDirectory()), // config file probing start directory
+                        new XElement("RestoreRootConfigDirectory", rootConfigDirectory?.Value ?? Directory.GetCurrentDirectory()), // config file probing start directory
                         new XElement("DisableImplicitFrameworkReferences", "true"), // no Microsoft.NETCore.App in tool folder
                         new XElement("RestoreFallbackFolders", "clear"), // do not use fallbackfolder, tool package need to be copied to tool folder
                         new XElement("RestoreAdditionalProjectSources", // use fallbackfolder as feed to enable offline

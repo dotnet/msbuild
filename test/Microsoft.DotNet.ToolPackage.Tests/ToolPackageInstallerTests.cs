@@ -154,21 +154,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Fact]
-        public void GivenAConfigFileInCurrentDirectoryPackageInstallSucceeds()
+        public void GivenAConfigFileRootDirectoryPackageInstallSucceeds()
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
             var (store, installer, reporter, fileSystem) = Setup(useMock: false);
 
-            /*
-             * In test, we don't want NuGet to keep look up, so we point current directory to nugetconfig.
-             */
-            Directory.SetCurrentDirectory(nugetConfigPath.GetDirectoryPath().Value);
-
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework);
+                targetFramework: _testTargetframework,
+                rootConfigDirectory: nugetConfigPath.GetDirectoryPath());
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -498,6 +494,32 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             package.Uninstall();
         }
 
+        [Fact]
+        public void GivenANuGetDiagnosticMessageItShouldNotContainTheTempProject()
+        {
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+            var tempProject = GetUniqueTempProjectPathEachTest();
+
+            var (store, installer, reporter, fileSystem) = Setup(
+                useMock: false,
+                tempProject: tempProject);
+
+            var package = installer.InstallPackage(
+                packageId: TestPackageId,
+                versionRange: VersionRange.Parse("1.0.*"),
+                targetFramework: _testTargetframework,
+                nugetConfig: nugetConfigPath);
+
+            reporter.Lines.Should().NotBeEmpty();
+            reporter.Lines.Should().Contain(l => l.Contains("warning"));
+            reporter.Lines.Should().NotContain(l => l.Contains(tempProject.Value));
+            reporter.Lines.Clear();
+
+            AssertPackageInstall(reporter, fileSystem, package, store);
+
+            package.Uninstall();
+        }
+
         private static void AssertPackageInstall(
             BufferedReporter reporter,
             IFileSystem fileSystem,
@@ -615,7 +637,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             FilePath? tempProject = null,
             DirectoryPath? offlineFeed = null)
         {
-            var root = new DirectoryPath(Path.Combine(Directory.GetCurrentDirectory(), Path.GetRandomFileName()));
+            var root = new DirectoryPath(Path.Combine(Path.GetFullPath(TempRoot.Root), Path.GetRandomFileName()));
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;
