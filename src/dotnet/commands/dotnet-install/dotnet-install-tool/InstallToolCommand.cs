@@ -163,43 +163,41 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             }
             catch (ToolPackageException ex)
             {
-                if (Reporter.IsVerbose)
-                {
-                    Reporter.Verbose.WriteLine(ex.ToString().Red());
-                }
-
-                _errorReporter.WriteLine(ex.Message.Red());
-                _errorReporter.WriteLine(string.Format(LocalizableStrings.ToolInstallationFailed, _packageId).Red());
-                return 1;
+                throw new GracefulException(
+                    messages: new[]
+                    {
+                        ex.Message,
+                        string.Format(LocalizableStrings.ToolInstallationFailed, _packageId),
+                    },
+                    verboseMessages: new[] {ex.ToString()},
+                    isUserError: false);
             }
             catch (ToolConfigurationException ex)
             {
-                if (Reporter.IsVerbose)
-                {
-                    Reporter.Verbose.WriteLine(ex.ToString().Red());
-                }
-
-                _errorReporter.WriteLine(
-                    string.Format(
-                        LocalizableStrings.InvalidToolConfiguration,
-                        ex.Message).Red());
-                _errorReporter.WriteLine(string.Format(LocalizableStrings.ToolInstallationFailedContactAuthor, _packageId).Red());
-                return 1;
+                throw new GracefulException(
+                    messages: new[]
+                    {
+                        string.Format(
+                            LocalizableStrings.InvalidToolConfiguration,
+                            ex.Message),
+                        string.Format(LocalizableStrings.ToolInstallationFailedContactAuthor, _packageId)
+                    },
+                    verboseMessages: new[] {ex.ToString()},
+                    isUserError: false);
             }
             catch (ShellShimException ex)
             {
-                if (Reporter.IsVerbose)
-                {
-                    Reporter.Verbose.WriteLine(ex.ToString().Red());
-                }
-
-                _errorReporter.WriteLine(
-                    string.Format(
-                        LocalizableStrings.FailedToCreateToolShim,
-                        _packageId,
-                        ex.Message).Red());
-                _errorReporter.WriteLine(string.Format(LocalizableStrings.ToolInstallationFailed, _packageId).Red());
-                return 1;
+                throw new GracefulException(
+                    messages: new[]
+                    {
+                        string.Format(
+                            LocalizableStrings.FailedToCreateToolShim,
+                            _packageId,
+                            ex.Message),
+                        string.Format(LocalizableStrings.ToolInstallationFailed, _packageId)
+                    },
+                    verboseMessages: new[] {ex.ToString()},
+                    isUserError: false);
             }
         }
     }

@@ -152,14 +152,10 @@ namespace Microsoft.DotNet.Tests.Commands
                 _environmentPathInstructionMock,
                 _reporter);
 
-            installToolCommand.Execute().Should().Be(1);
+            Action a = () => installToolCommand.Execute();
 
-            _reporter
-                .Lines
-                .Should()
-                .Equal(
-                    "Simulated error".Red(),
-                    string.Format(LocalizableStrings.ToolInstallationFailed, PackageId).Red());
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
@@ -177,15 +173,12 @@ namespace Microsoft.DotNet.Tests.Commands
                 _environmentPathInstructionMock,
                 _reporter);
 
-            installToolCommand.Execute().Should().Be(1);
+            Action a = () => installToolCommand.Execute();
 
-            _reporter
-                .Lines[0]
-                .Should()
-                .Contain(
-                    string.Format(
-                        CommonLocalizableStrings.ShellShimConflict,
-                        ProjectRestorerMock.FakeCommandName));
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(string.Format(
+                    CommonLocalizableStrings.ShellShimConflict,
+                    ProjectRestorerMock.FakeCommandName));
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
@@ -205,16 +198,15 @@ namespace Microsoft.DotNet.Tests.Commands
                 _environmentPathInstructionMock,
                 _reporter);
 
-            installToolCommand.Execute().Should().Be(1);
+            Action a = () => installToolCommand.Execute();
 
-            _reporter
-                .Lines
-                .Should()
-                .Equal(
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(
                     string.Format(
                         LocalizableStrings.InvalidToolConfiguration,
-                        "Simulated error").Red(),
-                    string.Format(LocalizableStrings.ToolInstallationFailedContactAuthor, PackageId).Red());
+                        "Simulated error") + Environment.NewLine +
+                    string.Format(LocalizableStrings.ToolInstallationFailedContactAuthor, PackageId)
+                );
         }
 
         [Fact]
@@ -330,15 +322,14 @@ namespace Microsoft.DotNet.Tests.Commands
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim, true),
                 _reporter);
 
-            installToolCommand.Execute().Should().Be(1);
+            Action a = () => installToolCommand.Execute();
 
-            _reporter
-                .Lines
-                .Should()
-                .Equal(
-                    $"Error: failed to restore package {PackageId}.", // From mock implementation, not localized
-                    LocalizableStrings.ToolInstallationRestoreFailed.Red(),
-                    string.Format(LocalizableStrings.ToolInstallationFailed, PackageId).Red());
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(
+                    LocalizableStrings.ToolInstallationRestoreFailed +
+                    Environment.NewLine + string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
+
+            _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
 
          [Fact]

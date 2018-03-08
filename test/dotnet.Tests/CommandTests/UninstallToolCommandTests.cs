@@ -49,15 +49,13 @@ namespace Microsoft.DotNet.Tests.Commands
             var packageId = "does.not.exist";
             var command = CreateUninstallCommand($"-g {packageId}");
 
-            command.Execute().Should().Be(1);
-            _reporter.Lines.Count.Should().Be(1);
+            Action a = () => command.Execute();
 
-            _reporter
-                .Lines[0]
-                .Should()
-                .Be(string.Format(
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(
+                    string.Format(
                     LocalizableStrings.ToolNotInstalled,
-                    packageId).Red());
+                    packageId));
         }
 
         [Fact]
@@ -125,20 +123,15 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeTrue();
             _fileSystem.File.Exists(shimPath).Should().BeTrue();
 
-            _reporter.Lines.Clear();
-
-            CreateUninstallCommand(
+            Action a = () => CreateUninstallCommand(
                 options: $"-g {PackageId}",
                 uninstallCallback: () => throw new IOException("simulated error"))
-                .Execute()
-                .Should()
-                .Be(1);
+                .Execute();
 
-            _reporter
-                .Lines
-                .Single()
-                .Should()
-                .Contain(string.Format(
+            a.ShouldThrow<GracefulException>()
+                .And.Message
+                .Should().Contain(
+                    string.Format(
                     CommonLocalizableStrings.FailedToUninstallToolPackage,
                     PackageId,
                     "simulated error"));

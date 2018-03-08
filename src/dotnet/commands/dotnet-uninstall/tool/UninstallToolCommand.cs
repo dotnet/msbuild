@@ -74,20 +74,26 @@ namespace Microsoft.DotNet.Tools.Uninstall.Tool
                 package = toolPackageStore.EnumeratePackageVersions(packageId).SingleOrDefault();
                 if (package == null)
                 {
-                    _errorReporter.WriteLine(
-                        string.Format(
-                            LocalizableStrings.ToolNotInstalled,
-                            packageId).Red());
-                    return 1;
+                    throw new GracefulException(
+                        messages: new[]
+                        {
+                            string.Format(
+                                LocalizableStrings.ToolNotInstalled,
+                                packageId),
+                        },
+                    isUserError: false);
                 }
             }
             catch (InvalidOperationException)
             {
-                _errorReporter.WriteLine(
-                    string.Format(
+                throw new GracefulException(
+                        messages: new[]
+                        {
+                            string.Format(
                         LocalizableStrings.ToolHasMultipleVersionsInstalled,
-                        packageId).Red());
-                return 1;
+                        packageId),
+                        },
+                    isUserError: false);
             }
 
             try
@@ -115,27 +121,26 @@ namespace Microsoft.DotNet.Tools.Uninstall.Tool
             }
             catch (ToolPackageException ex)
             {
-                if (Reporter.IsVerbose)
-                {
-                    Reporter.Verbose.WriteLine(ex.ToString().Red());
-                }
-
-                _errorReporter.WriteLine(ex.Message.Red());
-                return 1;
+                throw new GracefulException(
+                    messages: new[]
+                    {
+                      ex.Message
+                    },
+                    verboseMessages: new[] { ex.ToString() },
+                    isUserError: false);
             }
             catch (Exception ex) when (ex is ToolConfigurationException || ex is ShellShimException)
             {
-                if (Reporter.IsVerbose)
-                {
-                    Reporter.Verbose.WriteLine(ex.ToString().Red());
-                }
-
-                _errorReporter.WriteLine(
-                    string.Format(
+                throw new GracefulException(
+                    messages: new[]
+                    {
+                      string.Format(
                         LocalizableStrings.FailedToUninstallTool,
                         packageId,
-                        ex.Message).Red());
-                return 1;
+                        ex.Message)
+                    },
+                    verboseMessages: new[] { ex.ToString() },
+                    isUserError: false);
             }
         }
     }
