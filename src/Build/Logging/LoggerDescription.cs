@@ -301,29 +301,9 @@ namespace Microsoft.Build.Logging
         #region CustomSerializationToStream
         internal void WriteToStream(BinaryWriter writer)
         {
-            #region LoggerClassName
-            if (_loggerClassName == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(_loggerClassName);
-            }
-            #endregion
-            #region LoggerSwitchParameters
-            if (_loggerSwitchParameters == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(_loggerSwitchParameters);
-            }
-            #endregion
-            #region LoggerAssembly
+            writer.WriteOptionalString(_loggerClassName);
+            writer.WriteOptionalString(_loggerSwitchParameters);
+
             if (_loggerAssembly == null)
             {
                 writer.Write((byte)0);
@@ -331,76 +311,32 @@ namespace Microsoft.Build.Logging
             else
             {
                 writer.Write((byte)1);
-                if (_loggerAssembly.AssemblyFile == null)
-                {
-                    writer.Write((byte)0);
-                }
-                else
-                {
-                    writer.Write((byte)1);
-                    writer.Write(_loggerAssembly.AssemblyFile);
-                }
 
-                if (_loggerAssembly.AssemblyName == null)
-                {
-                    writer.Write((byte)0);
-                }
-                else
-                {
-                    writer.Write((byte)1);
-                    writer.Write(_loggerAssembly.AssemblyName);
-                }
+                writer.WriteOptionalString(_loggerAssembly.AssemblyFile);
+                writer.WriteOptionalString(_loggerAssembly.AssemblyName);
             }
-            #endregion
+
             writer.Write((Int32)_verbosity);
             writer.Write((Int32)_loggerId);
         }
 
         internal void CreateFromStream(BinaryReader reader)
         {
-            #region LoggerClassName
-            if (reader.ReadByte() == 0)
-            {
-                _loggerClassName = null;
-            }
-            else
-            {
-                _loggerClassName = reader.ReadString();
-            }
-            #endregion 
-            #region LoggerSwitchParameters
-            if (reader.ReadByte() == 0)
-            {
-                _loggerSwitchParameters = null;
-            }
-            else
-            {
-                _loggerSwitchParameters = reader.ReadString();
-            }
-            #endregion
-            #region LoggerAssembly
+            _loggerClassName = reader.ReadByte() == 0 ? null : reader.ReadString();
+            _loggerSwitchParameters = reader.ReadByte() == 0 ? null : reader.ReadString();
+
             if (reader.ReadByte() == 0)
             {
                 _loggerAssembly = null;
             }
             else
             {
-                string assemblyName = null;
-                string assemblyFile = null;
-
-                if (reader.ReadByte() != 0)
-                {
-                    assemblyFile = reader.ReadString();
-                }
-
-                if (reader.ReadByte() != 0)
-                {
-                    assemblyName = reader.ReadString();
-                }
+                string assemblyFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+                string assemblyName = reader.ReadByte() == 0 ? null : reader.ReadString();
 
                 _loggerAssembly = AssemblyLoadInfo.Create(assemblyName, assemblyFile);
             }
-            #endregion
+
             _verbosity = (LoggerVerbosity)reader.ReadInt32();
             _loggerId = reader.ReadInt32();
         }

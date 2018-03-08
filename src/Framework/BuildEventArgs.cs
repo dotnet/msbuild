@@ -9,6 +9,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -160,38 +161,10 @@ namespace Microsoft.Build.Framework
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
         internal virtual void WriteToStream(BinaryWriter writer)
         {
-            if (message == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(message);
-            }
-
-            if (helpKeyword == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(helpKeyword);
-            }
-
-            if (senderName == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(senderName);
-            }
-
-            writer.Write((Int64)timestamp.Ticks);
-            writer.Write((Int32)timestamp.Kind);
+            writer.WriteOptionalString(message);
+            writer.WriteOptionalString(helpKeyword);
+            writer.WriteOptionalString(senderName);
+            writer.WriteTimestamp(timestamp);
 
             writer.Write((Int32)threadId);
 
