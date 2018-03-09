@@ -21,6 +21,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -2008,7 +2009,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // All those properties which aren't defined in any file. Examples are global properties, environment properties, etc.
                 IEnumerable<ProjectProperty> nonImportedProperties = project.Properties.Where(property => property.Xml == null);
 
-                Assert.Equal(allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count, nonImportedProperties.Count());
+                int expectedCount = allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count;
+
+                if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects)
+                {
+                    // Add an expected property for the magic MSBuildAllProjects
+                    expectedCount++;
+                }
+
+                Assert.Equal(expectedCount, nonImportedProperties.Count());
 
                 // Now check and make sure they all match.  If we get through the entire foreach without triggering an Assert.Fail(), then
                 // they do.
