@@ -8,7 +8,7 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionBase>2.1.100</VersionBase>
+    <VersionBase>2.1.200</VersionBase>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
   </PropertyGroup>
 
@@ -31,7 +31,7 @@
     <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <NuGetBuildTasksPackVersion>4.6.0-rtm-4918</NuGetBuildTasksPackVersion>
+    <NuGetBuildTasksPackVersion>4.7.0-preview1-4927</NuGetBuildTasksPackVersion>
     <NuGetPackagingVersion>4.5.0-preview2-4529</NuGetPackagingVersion>
     <NuGetProjectModelVersion>4.4.0-preview3-4475</NuGetProjectModelVersion>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
