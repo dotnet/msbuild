@@ -301,22 +301,26 @@ namespace Microsoft.Build.Shared
                 if (s_dumpFileName == null)
                 {
                     Guid guid = Guid.NewGuid();
-                    string tempPath = Path.GetTempPath();
+                    string dumpDirEnv = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                    string dumpDir = !string.IsNullOrEmpty(dumpDirEnv)
+                            ? dumpDirEnv
+                            : Path.GetTempPath();
 
                     // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
                     // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                    if (!Directory.Exists(tempPath))
+                    if (!Directory.Exists(dumpDir))
                     {
                         // If this throws, no sense catching it, we can't log it now, and we're here
                         // because we're a child node with no console to log to, so die
-                        Directory.CreateDirectory(tempPath);
+                        Directory.CreateDirectory(dumpDir);
                     }
 
-                    s_dumpFileName = Path.Combine(tempPath, "MSBuild_" + guid.ToString() + ".failure.txt");
+                    var pid = Process.GetCurrentProcess().Id;
+                    s_dumpFileName = Path.Combine(dumpDir, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
 
                     using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
                     {
-                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", Process.GetCurrentProcess().Id);
+                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
                         writer.WriteLine("=====================");
                     }
                 }
