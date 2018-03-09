@@ -114,7 +114,7 @@ def imageVersionMap = ['Windows_NT':'latest-dev15-5',
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add archiving of logs (even if the build failed)
             Utilities.addArchival(newJob,
-                                  'artifacts/**/log/*.binlog,artifacts/**/log/*.log,artifacts/**/TestResults/*', /* filesToArchive */
+                                  'artifacts/**/log/*.binlog,artifacts/**/log/*.log,artifacts/**/TestResults/*,artifacts/**/MSBuild_*.failure.txt', /* filesToArchive */
                                   '', /* filesToExclude */
                                   false, /* doNotFailIfNothingArchived */
                                   false, /* archiveOnlyIfSuccessful */)
