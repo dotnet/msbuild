@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.NET.TestFramework;
 
-class Program
+partial class Program
 {
     public static int Main(string[] args)
     {
@@ -20,13 +20,25 @@ class Program
             newArgs.Insert(0, typeof(Program).Assembly.Location);
         }
 
+        if (!showHelp)
+        {
+            BeforeTestRun(newArgs);
+        }
+
         int returnCode = Xunit.ConsoleClient.Program.Main(newArgs.ToArray());
 
         if (showHelp)
         {
             TestCommandLine.ShowHelp();
         }
+        else
+        {
+            AfterTestRun();
+        }
 
         return returnCode;
     }
+
+    static partial void BeforeTestRun(List<string> args);
+    static partial void AfterTestRun();
 }

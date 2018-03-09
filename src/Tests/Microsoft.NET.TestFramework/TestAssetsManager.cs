@@ -81,6 +81,12 @@ namespace Microsoft.NET.TestFramework
             return testAsset;
         }
 
+        public TestDirectory CreateTestDirectory([CallerMemberName] string testName = null, string identifier = null)
+        {
+            string dir = GetTestDestinationDirectoryPath(testName, testName, identifier ?? string.Empty);
+            return new TestDirectory(dir);
+        }
+
         public string GetAndValidateTestProjectDirectory(string testProjectName)
         {
             string testProjectDirectory = Path.Combine(ProjectsRoot, testProjectName);
