@@ -255,11 +255,16 @@
     </Compile>
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
+    <Compile Include="Definition\ProjectConstructionInfo.cs" />
     <Compile Include="Definition\NewProjectFileOptions.cs" />
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Definition\ProjectLoadSettings.cs" />
     <Compile Include="Definition\ToolsetLocalReader.cs" />
+    <Compile Include="Evaluation\Context\EvaluationContextFactory.cs" />
+    <Compile Include="Evaluation\Context\NullEvaluationContext.cs" />
+    <Compile Include="Evaluation\Context\EvaluationContextBase.cs" />
+    <Compile Include="Evaluation\Context\EvaluationContext.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationMarkdownPrettyPrinter.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationPrettyPrinterBase.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationTabSeparatedPrettyPrinter.cs" />

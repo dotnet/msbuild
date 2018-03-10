@@ -1467,6 +1467,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!-- #################################################################################################-->
   <!-- The OM_ prefix indicates at the point of use that there is no error code in the message;
        these should not be used in an InvalidProjectFileException -->
+  <data name="OM_IncorrectEvaluationContextType">
+    <value>The provided evaluation context of type {0} was not created using the API factory {1}.</value>
+  </data>
   <data name="OM_IncorrectObjectAssociation">
     <value>The "{0}" object specified does not belong to the correct "{1}" object.</value>
   </data>
