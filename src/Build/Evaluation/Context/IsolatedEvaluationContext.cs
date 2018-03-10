@@ -7,8 +7,8 @@ using Microsoft.Build.BackEnd.SdkResolution;
 
 namespace Microsoft.Build.Evaluation.Context
 {
-    internal sealed class NullEvaluationContext : EvaluationContextBase
+    internal sealed class IsolatedEvaluationContext : EvaluationContext
     {
-        public override ISdkResolverService SdkResolverService => BackEnd.SdkResolution.SdkResolverService.Instance;
+        internal override ISdkResolverService SdkResolverService { get; } = new SdkResolverService();
     }
 }

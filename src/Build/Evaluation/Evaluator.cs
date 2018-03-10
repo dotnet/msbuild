@@ -179,7 +179,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly int _submissionId;
         
-        private readonly EvaluationContextBase _evaluationContext;
+        private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
         /// The environment properties with which evaluation should take place.
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Evaluation
             ProjectInstance projectInstanceIfAnyForDebuggerOnly,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContextBase evaluationContext)
+            EvaluationContext evaluationContext)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -356,7 +356,7 @@ namespace Microsoft.Build.Evaluation
             ProjectInstance projectInstanceIfAnyForDebuggerOnly,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContextBase evaluationContext = null)
+            EvaluationContext evaluationContext = null)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))

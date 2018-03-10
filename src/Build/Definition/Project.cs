@@ -34,8 +34,6 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
-using EvaluationContext = Microsoft.Build.Framework.EvaluationContext.EvaluationContext;
-using EvaluationContextFactory = Microsoft.Build.Framework.EvaluationContext.EvaluationContextFactory;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -132,7 +130,7 @@ namespace Microsoft.Build.Evaluation
         /// - <see cref="GetAllGlobs()"/>
         /// - <see cref="GetItemProvenance(string)"/>
         /// </summary>
-        private EvaluationContextBase _lastEvaluationContext;
+        private EvaluationContext _lastEvaluationContext;
 
         /// <summary>
         /// Default project template options (include all features).
@@ -1164,8 +1162,6 @@ namespace Microsoft.Build.Evaluation
             return ((IItem)item).EvaluatedIncludeEscaped;
         }
 
-        public static EvaluationContextFactory EvaluationContextFactory { get; } = new Context.EvaluationContextFactory();
-
         /// <summary>
         /// Finds all the globs specified in item includes.
         /// </summary>
@@ -2179,12 +2175,10 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="ReevaluateIfNecessary()"/>
         /// </summary>
-        /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="ProjectOptions.EvaluationContext"/></param>
+        /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
         {
-            var context = evaluationContext as EvaluationContextBase;
-
-            ErrorUtilities.VerifyThrow(context != null, "OM_IncorrectEvaluationContextType", evaluationContext.GetType().FullName, typeof(EvaluationContextFactory).FullName);
+            var context = evaluationContext;
 
             _lastEvaluationContext = context;
             ReevaluateIfNecessary(LoggingService);
@@ -2790,7 +2784,7 @@ namespace Microsoft.Build.Evaluation
         {
             _xml.MarkAsExplicitlyLoaded();
 
-            evaluationContext = evaluationContext ?? EvaluationContextFactory.CreateNullContext();
+            evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             PropertyDictionary<ProjectPropertyInstance> globalPropertiesCollection = new PropertyDictionary<ProjectPropertyInstance>();
 

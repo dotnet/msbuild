@@ -19,10 +19,22 @@ using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
-    /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data. 
+    ///     Tests some manipulations of Project and ProjectCollection that require dealing with internal data.
     /// </summary>
     public class ProjectEvaluationContext_Tests
     {
+        private static EvaluationContext CreateMockContextWithResolver(EvaluationContext.SharingPolicy policy, SdkResolver resolver)
+        {
+            var context = EvaluationContext.Create(policy);
+
+            var cachingSdkService = (SdkResolverCachingWrapper) context.SdkResolverService;
+            var sdkService = (SdkResolverService) cachingSdkService.TestOnlyGetWrappedService;
+
+            sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
+
+            return context;
+        }
+
         [Fact]
         public void ContextSdkResolverIsUsed()
         {
@@ -35,47 +47,43 @@ namespace Microsoft.Build.UnitTests.Definition
                         {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null)}
                     });
 
-                var context = CreateMockContextWithResolver(resolver);
+                var context = CreateMockContextWithResolver(EvaluationContext.SharingPolicy.Shared, resolver);
 
-                var collection = env.CreateProjectCollection().Collection;
+                var collection = env.CreateProjectCollection()
+                    .Collection;
 
-                var project1 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")), new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
+                var project1 = Project.FromXmlReader(
+                    XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")),
+                    new ProjectOptions
+                    {
+                        ProjectCollection = collection,
+                        EvaluationContext = context,
+                        LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                    });
 
-                var project2 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"bar\"></Project>")), new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
+                var project2 = Project.FromXmlReader(
+                    XmlReader.Create(new StringReader("<Project Sdk=\"bar\"></Project>")),
+                    new ProjectOptions
+                    {
+                        ProjectCollection = collection,
+                        EvaluationContext = context,
+                        LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                    });
 
-                var project3 = Project.FromXmlReader(XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")), new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
+                var project3 = Project.FromXmlReader(
+                    XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")),
+                    new ProjectOptions
+                    {
+                        ProjectCollection = collection,
+                        EvaluationContext = context,
+                        LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                    });
 
                 // results are cached, so each sdk is resolved once
                 resolver.ResolvedCalls.Count.ShouldBe(2);
                 resolver.ResolvedCalls["foo"].ShouldBe(1);
                 resolver.ResolvedCalls["bar"].ShouldBe(1);
             }
-        }
-
-        private static EvaluationContextBase CreateMockContextWithResolver(ConfigurableMockSdkResolver resolver)
-        {
-            var context = (EvaluationContextBase)Project.EvaluationContextFactory.CreateContext();
-            var cachingSdkService = (SdkResolverCachingWrapper)context.SdkResolverService;
-            var sdkService = (SdkResolverService)cachingSdkService.TestOnlyGetWrappedService;
-
-            sdkService.InitializeForTests(null, new List<SdkResolver> { resolver });
-
-            return context;
         }
     }
 }

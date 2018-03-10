@@ -628,6 +628,7 @@ namespace Microsoft.Build.Evaluation
         public static string GetPropertyValueEscaped(Microsoft.Build.Evaluation.ProjectProperty property) { throw null; }
         public void MarkDirty() { }
         public void ReevaluateIfNecessary() { }
+        public void ReevaluateIfNecessary(Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext) { }
         public bool RemoveGlobalProperty(string name) { throw null; }
         public bool RemoveItem(Microsoft.Build.Evaluation.ProjectItem item) { throw null; }
         public void RemoveItems(System.Collections.Generic.IEnumerable<Microsoft.Build.Evaluation.ProjectItem> items) { }
@@ -870,6 +871,19 @@ namespace Microsoft.Build.Evaluation
         Local = 4,
         None = 0,
         Registry = 2,
+    }
+}
+namespace Microsoft.Build.Evaluation.Context
+{
+    public partial class EvaluationContext
+    {
+        internal EvaluationContext() { }
+        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
+        public enum SharingPolicy
+        {
+            Isolated = 1,
+            Shared = 0,
+        }
     }
 }
 namespace Microsoft.Build.Exceptions
