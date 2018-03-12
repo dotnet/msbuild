@@ -20,7 +20,7 @@ namespace Microsoft.Build.Evaluation.Context
             Isolated
         }
 
-        internal virtual ISdkResolverService SdkResolverService { get; } = new SdkResolverCachingWrapper(new SdkResolverService());
+        internal virtual ISdkResolverService SdkResolverService { get; } = new CachingSdkResolverService();
 
         internal EvaluationContext()
         {

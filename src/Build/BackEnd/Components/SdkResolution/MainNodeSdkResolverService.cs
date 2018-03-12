@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         private ConcurrentQueue<SdkResolverRequest> _requests;
 
-        private readonly ISdkResolverService _cachedSdkResolver = new SdkResolverCachingWrapper(new SdkResolverService());
+        private readonly ISdkResolverService _cachedSdkResolver = new CachingSdkResolverService();
 
         /// <summary>
         /// A factory which is registered to create an instance of this class.

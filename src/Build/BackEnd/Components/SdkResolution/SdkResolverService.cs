@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// The main implementation of <see cref="ISdkResolverService"/> which resolves SDKs.  This class is the central location for all SDK resolution and is used
     /// directly by the main node and non-build evaluations and is used indirectly by the out-of-proc node when it sends requests to the main node.
     /// </summary>
-    internal sealed class SdkResolverService : ISdkResolverService
+    internal class SdkResolverService : ISdkResolverService
     {
         /// <summary>
         /// Stores the singleton instance for a particular process.
@@ -76,13 +76,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
-        public void ClearCache(int submissionId)
+        public virtual void ClearCache(int submissionId)
         {
             _resolverStateBySubmission.TryRemove(submissionId, out _);
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             // Lazy initialize the SDK resolvers
             if (_resolvers == null)

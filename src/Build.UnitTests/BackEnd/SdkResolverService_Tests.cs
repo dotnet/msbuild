@@ -186,7 +186,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Enumerable.Empty<string>()
                     ));
 
-            var service = new SdkResolverService();
+            var service = new CachingSdkResolverService();
             service.InitializeForTests(
                 null,
                 new List<SdkResolver>
@@ -194,15 +194,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     resolver
                 });
 
-            var cachingWrapper = new SdkResolverCachingWrapper(service);
-
-            var result = cachingWrapper.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            var result = service.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
             resolver.ResolvedCalls.Count.ShouldBe(1);
             result.Path.ShouldBe("path");
             result.Version.ShouldBe("1.0.0");
             _logger.WarningCount.ShouldBe(0);
 
-            result = cachingWrapper.ResolveSdk(BuildEventContext.InvalidSubmissionId, new SdkReference("foo", "2.0.0", null), _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
+            result = service.ResolveSdk(BuildEventContext.InvalidSubmissionId, new SdkReference("foo", "2.0.0", null), _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
             resolver.ResolvedCalls.Count.ShouldBe(1);
             result.Path.ShouldBe("path");
             result.Version.ShouldBe("1.0.0");

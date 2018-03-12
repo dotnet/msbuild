@@ -27,8 +27,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             var context = EvaluationContext.Create(policy);
 
-            var cachingSdkService = (SdkResolverCachingWrapper) context.SdkResolverService;
-            var sdkService = (SdkResolverService) cachingSdkService.TestOnlyGetWrappedService;
+            var sdkService = (CachingSdkResolverService)context.SdkResolverService; ;
 
             sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
 
