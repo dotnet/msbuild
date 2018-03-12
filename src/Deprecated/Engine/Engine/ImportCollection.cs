@@ -15,7 +15,6 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a collection of all Import elements in a given project file
     /// </summary>
     /// <owner>LukaszG</owner>
-    [Obsolete]
     public class ImportCollection : IEnumerable, ICollection
     {
         #region Fields

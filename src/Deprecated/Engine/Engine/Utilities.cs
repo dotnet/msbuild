@@ -25,7 +25,6 @@ namespace Microsoft.Build.BuildEngine
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
     /// <owner>RGoel</owner>
-    [Obsolete]
     static public class Utilities
     {
         private readonly static Regex singlePropertyRegex = new Regex(@"^\$\(([^\$\(\)]*)\)$");

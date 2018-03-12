@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <NuspecFile>VS.ExternalAPIs.MSBuild.nuspec</NuspecFile>
@@ -7,9 +8,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj" />
+    <ProjectReference Include="..\..\Deprecated\Engine\Microsoft.Build.Engine.csproj" />
   </ItemGroup>
 
   <Import Project="..\NuspecProject.targets" />
 
   <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <AllowedReferenceRelatedFileExtensions>$(AllowedReferenceRelatedFileExtensions);.tlb</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
 </Project>

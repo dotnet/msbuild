@@ -124,6 +124,24 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(CreateTlb)' == 'true' and '$(OsEnvironment)' == 'windows' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
+    <PropertyGroup>
+      <TlbExpVerbosity Condition="'$(VerboseTlbExp)' == 'true'">/verbose</TlbExpVerbosity>
+      <TlbExpVerbosity Condition="'$(VerboseTlbExp)' != 'true'">/silent</TlbExpVerbosity>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_TlbExpAssemblyPaths Include="$(TargetDir);$(TargetFrameworkDirectory)" />
+      <_TlbExpAssemblyPaths>
+        <SlashlessPath>$([System.String]::Copy('%(Identity)').TrimEnd('\'))</SlashlessPath>
+      </_TlbExpAssemblyPaths>
+      <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
+    </ItemGroup>
+
+    <Exec Command="tlbexp.exe $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') $(TargetPath) /out:$(TargetDir)$(TargetName).tlb" />
+  </Target>
+
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4'))" />
 
   <!-- Import parent targets -->

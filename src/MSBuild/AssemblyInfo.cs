@@ -24,6 +24,8 @@ using System.Runtime.InteropServices;
 [assembly: NeutralResourcesLanguage("en")]
 #endif
 
+[assembly: ComVisible(false)]
+
 [assembly: CLSCompliant(true)]
 
 [assembly: AssemblyTitle("MSBuild.exe")]

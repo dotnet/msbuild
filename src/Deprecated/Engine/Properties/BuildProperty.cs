@@ -61,7 +61,6 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     /// <owner>rgoel</owner>
     [DebuggerDisplay("BuildProperty (Name = { Name }, Value = { Value }, FinalValue = { FinalValue }, Condition = { Condition })")]
-    [Obsolete]
     public class BuildProperty
     {
         #region Member Data
