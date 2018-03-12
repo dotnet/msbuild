@@ -22,7 +22,7 @@ verbosity="minimal"
 hostType="core"
 properties=""
 
-function Help() { 
+function Help() {
   echo "Common settings:"
   echo "  -configuration <value>  Build configuration Debug, Release"
   echo "  -verbosity <value>      Msbuild verbosity (q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic])"
@@ -147,7 +147,7 @@ function CallMSBuild {
     commandLine="$msbuildHost $msbuildToUse $*"
   fi
 
-  echo ============= MSBuild command ============= 
+  echo ============= MSBuild command =============
   echo "$commandLine"
   echo ===========================================
 
@@ -235,7 +235,7 @@ function ErrorHostType {
 
 function Build {
   InstallDotNetCli
-  
+
   # don't double quote this otherwise the csc tooltask will fail with double double-quotting
   export DOTNET_HOST_PATH="$DOTNET_INSTALL_DIR/dotnet"
 
@@ -370,6 +370,7 @@ then
 
   export TEMP="$TempDir"
   export TMP="$TempDir"
+  export MSBUILDDEBUGPATH="$TempDir"
 fi
 
 if [ -z $NUGET_PACKAGES ]

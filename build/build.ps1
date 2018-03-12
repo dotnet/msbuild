@@ -192,7 +192,7 @@ function Build {
   {
     # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
     # the C++ tools aren't installed, and we don't want this to fail the build
-    $commonMSBuildArgs = $commonMSBuildArgs + "/warnaserror" 
+    $commonMSBuildArgs = $commonMSBuildArgs + "/warnaserror"
   }
 
   if ($hostType -ne 'full')
@@ -201,7 +201,7 @@ function Build {
     $emptySignToolDataPath = [io.path]::combine($RepoRoot, 'build', 'EmptySignToolData.json')
     $commonMSBuildArgs = $commonMSBuildArgs + "/p:SignToolDataPath=`"$emptySignToolDataPath`""
   }
-  
+
   # Only test using stage 0 MSBuild if -bootstrapOnly is specified
   $testStage0 = $false
   if ($bootstrapOnly)
@@ -257,7 +257,7 @@ function Build {
         # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
         foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
         {
-          
+
           if ([string]::IsNullOrEmpty($process.Path))
           {
             Write-Host "Process $($process.Id) $($process.Name) does not have a Path. Skipping killing it."
@@ -358,6 +358,7 @@ try {
 
     $env:TEMP = $TempDir
     $env:TMP = $TempDir
+    $env:MSBUILDDEBUGPATH = $TempDir
   }
 
   if (!($env:NUGET_PACKAGES)) {
