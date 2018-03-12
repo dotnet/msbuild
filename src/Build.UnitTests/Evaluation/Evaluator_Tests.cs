@@ -22,6 +22,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -2023,6 +2024,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // they do.
                 foreach (ProjectProperty property in nonImportedProperties)
                 {
+                    if (!Traits.Instance.EscapeHatches.EnableLegacyMSBuildAllProjects && property.Name.Equals("MSBuildAllProjects"))
+                    {
+                        // Add an expected property for the magic MSBuildAllProjects
+                        continue;
+                    }
+
                     ProjectProperty propertyFromAllEvaluated = null;
 
                     if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
@@ -2036,12 +2043,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
 
                 // These are the properties which are defined in some file.
-                IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.SkipWhile(property => property.Xml == null);
+                string[] restOfAllEvaluatedProperties = project.AllEvaluatedProperties
+                                                                .Where(property => property.Xml != null)
+                                                                .Select(i => i.EvaluatedValue)
+                                                                .ToArray();
 
-                Assert.Equal(3, restOfAllEvaluatedProperties.Count());
-                Assert.Equal("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
-                Assert.Equal("2", restOfAllEvaluatedProperties.ElementAt(1).EvaluatedValue);
-                Assert.Equal("3", restOfAllEvaluatedProperties.ElementAt(2).EvaluatedValue);
+                restOfAllEvaluatedProperties.ShouldBe(new[]{"1", "2", "3"});
             }
             finally
             {
