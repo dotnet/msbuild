@@ -2118,8 +2118,8 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
     </note>
       </trans-unit>
       <trans-unit id="MSBuildAllProjectsIgnored">
-        <source>The property 'MSBuildAllProjects' was ignored and set automatically to be the newest project or import.  You can set the environment variable 'MSBUILDENABLEMSBUILDALLPROJECTS' to '1' to disable this feature.</source>
-        <target state="new">The property 'MSBuildAllProjects' was ignored and set automatically to be the newest project or import.  You can set the environment variable 'MSBUILDENABLEMSBUILDALLPROJECTS' to '1' to disable this feature.</target>
+        <source>The property 'MSBuildAllProjects' was ignored and set automatically to be this project and all imports.  You can set the environment variable 'MSBUILDENABLEMSBUILDALLPROJECTS' to '1' to disable this feature.</source>
+        <target state="new">The property 'MSBuildAllProjects' was ignored and set automatically to be this project and all imports.  You can set the environment variable 'MSBUILDENABLEMSBUILDALLPROJECTS' to '1' to disable this feature.</target>
         <note>
       LOCALIZATION:  Do not localize the word MSBuildAllProjects.
     </note>
