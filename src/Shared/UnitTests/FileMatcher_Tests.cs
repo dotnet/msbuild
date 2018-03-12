@@ -1,23 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Security;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Build.UnitTests;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -37,12 +28,22 @@ namespace Microsoft.Build.UnitTests
             _env.Dispose();
         }
 
-        [Fact]
-        public void GetFilesPatternMatching()
+        [Theory]
+        [InlineData("*.txt", 5)]
+        [InlineData("???.cs", 1)]
+        [InlineData("????.cs", 1)]
+        [InlineData("file?.txt", 1)]
+        [InlineData("fi?e?.txt", 2)]
+        [InlineData("???.*", 1)]
+        [InlineData("????.*", 4)]
+        [InlineData("*.???", 5)]
+        [InlineData("f??e1.txt", 2)]
+        [InlineData("file.*.txt", 1)]
+        public void GetFilesPatternMatching(string pattern, int expectedMatchCount)
         {
-            var workingPath = _env.CreateFolder().FolderPath;
+            TransientTestFolder testFolder = _env.CreateFolder();
 
-            var files = new[]
+            foreach (var file in new[]
             {
                 "Foo.cs",
                 "Foo2.cs",
@@ -52,181 +53,90 @@ namespace Microsoft.Build.UnitTests
                 "fie1.txt",
                 "fire1.txt",
                 "file.bak.txt"
-            };
-
-            foreach (var file in files)
+            })
             {
-                File.WriteAllBytes(Path.Combine(workingPath, file), new byte[5000]);
+                File.WriteAllBytes(Path.Combine(testFolder.FolderPath, file), new byte[1]);
             }
 
-            var patterns = new Dictionary<string, int>
-            {
-                {"*.txt", 5},
-                {"???.cs", 1},
-                {"????.cs", 1},
-                {"file?.txt", 1},
-                {"fi?e?.txt", 2},
-                {"???.*", 1},
-                {"????.*", 4},
-                {"*.???", 5},
-                {"f??e1.txt", 2},
-                {"file.*.txt", 1}
-            };
+            string[] fileMatches = FileMatcher.GetFiles(testFolder.FolderPath, pattern);
 
-            foreach (var pattern in patterns)
-            {
-                try
-                {
-                    Assert.Equal(pattern.Value, FileMatcher.GetFiles(workingPath, pattern.Key).Length);
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine($"Pattern {pattern} failed");
-                    throw;
-                }
-            }
+            fileMatches.Length.ShouldBe(expectedMatchCount, $"Matches: '{String.Join("', '", fileMatches)}'");
         }
 
         [Theory]
-        [InlineData(
-            @"src\**\inner\**\*.cs", // Include
-            new string[] { }, // Excludes
-            new[] // Expected matchings
-            {
-                @"src\foo\inner\foo.cs",
-                @"src\foo\inner\foo\foo.cs",
-                @"src\foo\inner\bar\bar.cs",
-                @"src\bar\inner\baz.cs",
-                @"src\bar\inner\baz\baz.cs",
-                @"src\bar\inner\foo\foo.cs"
-            }
-        )]
-        [InlineData(
-            @"src\**\inner\**\*.cs", // Include
-            new[] // Excludes
-            {
-                @"src\foo\inner\foo.*.cs"
-            },
-            new[] // Expected matchings
-            {
-                @"src\foo\inner\foo.cs",
-                @"src\foo\inner\foo\foo.cs",
-                @"src\foo\inner\bar\bar.cs",
-                @"src\bar\inner\baz.cs",
-                @"src\bar\inner\baz\baz.cs",
-                @"src\bar\inner\foo\foo.cs"
-            }
-        )]
-        [InlineData(
-            @"src\**\inner\**\*.cs", // Include
-            new[] // Excludes
-            {
-                @"**\foo\**"
-            },
-            new[] // Expected matchings
-            {
-                @"src\bar\inner\baz.cs",
-                @"src\bar\inner\baz\baz.cs"
-            }
-        )]
-        [InlineData(
-            @"src\**\inner\**\*.cs", // Include
-            new[] // Excludes
-            {
-                @"src\bar\inner\baz\**"
-            },
-            new[] // Expected matchings
-            {
-                @"src\foo\inner\foo.cs",
-                @"src\foo\inner\foo\foo.cs",
-                @"src\foo\inner\bar\bar.cs",
-                @"src\bar\inner\baz.cs",
-                @"src\bar\inner\foo\foo.cs"
-            }
-        )]
-        [InlineData(
-            @"src\foo\**\*.cs", // Include
-            new[] // Excludes
-            {
-                @"src\foo\**\foo\**"
-            },
-            new[] // Expected matchings
-            {
-                @"src\foo\foo.cs",
-                @"src\foo\inner\foo.cs",
-                @"src\foo\inner\bar\bar.cs"
-            }
-        )]
-        [InlineData(
-            @"src\foo\inner\**\*.cs", // Include
-            new[] // Excludes
-            {
-                @"src\foo\**\???\**"
-            },
-            new[] // Expected matchings
-            {
-                @"src\foo\inner\foo.cs"
-            }
-        )]
-        [InlineData(
-            @"**\???\**\*.cs", // Include
-            new string[] { }, // Excludes
-            new[] // Expected matchings
-            {
-                @"src\foo.cs",
-                @"src\bar.cs",
-                @"src\baz.cs",
-                @"src\foo\foo.cs",
-                @"src\bar\bar.cs",
-                @"src\baz\baz.cs",
-                @"src\foo\inner\foo.cs",
-                @"src\foo\inner\foo\foo.cs",
-                @"src\foo\inner\bar\bar.cs",
-                @"src\bar\inner\baz.cs",
-                @"src\bar\inner\baz\baz.cs",
-                @"src\bar\inner\foo\foo.cs",
-                @"build\baz\foo.cs"
-            }
-        )]
-        [InlineData(
-            @"**\*.*", // Include
-            new[] // Excludes
-            {
-                @"**\???\**\*.cs"
-            },
-            new[] // Expected matchings
-            {
-                @"readme.txt",
-                @"licence.md"
-            }
-        )]
-        [InlineData(
-            @"**\?a?\**\?a?\*.c?", // Include
-            new string[] { }, // Excludes
-            new[] // Expected matchings
-            {
-                @"src\bar\inner\baz\baz.cs"
-            }
-        )]
-        [InlineData(
-            @"**\?a?\**\?a?.c?", // Include
-            new[] // Excludes
-            {
-                @"**\?a?\**\?a?\*.c?"
-            },
-            new[] // Expected matchings
-            {
-                @"src\bar\bar.cs",
-                @"src\baz\baz.cs",
-                @"src\foo\inner\bar\bar.cs",
-                @"src\bar\inner\baz.cs"
-            }
-        )]
-        public void GetFilesComplexGlobbingMatching(string includePattern, string[] excludePatterns,
-            string[] expectedMatchings)
+        [MemberData(nameof(GetFilesComplexGlobbingMatchingInfo.GetTestData), MemberType = typeof(GetFilesComplexGlobbingMatchingInfo))]
+        public void GetFilesComplexGlobbingMatching(GetFilesComplexGlobbingMatchingInfo info)
         {
-            var workingPath = _env.CreateFolder().FolderPath;
-            var files = new[]
+            TransientTestFolder testFolder = _env.CreateFolder();
+
+            // Create directories and files
+            foreach (string fullPath in GetFilesComplexGlobbingMatchingInfo.FilesToCreate.Select(i => Path.Combine(testFolder.FolderPath, i.ToPlatformSlash())))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+                
+                File.WriteAllBytes(fullPath, new byte[1]);
+            }
+
+            void Verify(string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
+            {
+                string[] matchedFiles = FileMatcher.GetFiles(testFolder.FolderPath, include, excludes);
+
+                if (shouldHaveNoMatches)
+                {
+                    matchedFiles.ShouldBeEmpty(customMessage);
+                }
+                else
+                {
+                    // The matches are:
+                    // 1. Normalized ("\" regardless of OS and lowercase)
+                    // 2. Sorted
+                    // Are the same as the expected matches sorted
+                    matchedFiles
+                        .Select(i => i.Replace(Path.DirectorySeparatorChar, '\\'))
+                        .OrderBy(i => i)
+                        .ToArray()
+                        .ShouldBe(info.ExpectedMatches.OrderBy(i => i), caseSensitivity: Case.Insensitive, customMessage: customMessage);
+                }
+            }
+
+            // Normal matching
+            Verify(info.Include, info.Excludes);
+
+            // Include forward slash
+            Verify(info.Include.Replace('\\', '/'), info.Excludes, customMessage: "Include directory separator was changed to forward slash");
+
+            // Excludes forward slash
+            Verify(info.Include, info.Excludes?.Select(o => o.Replace('\\', '/')).ToArray(), customMessage: "Excludes directory separator was changed to forward slash");
+
+            // Uppercase includes
+            Verify(info.Include.ToUpperInvariant(), info.Excludes, info.ExpectNoMatches, "Include was changed to uppercase");
+
+            // Changing the case of the exclude break Linux
+            if (!NativeMethodsShared.IsLinux)
+            {
+                // Uppercase excludes
+                Verify(info.Include, info.Excludes?.Select(o => o.ToUpperInvariant()).ToArray(), false, "Excludes were changed to uppercase");
+            }
+
+            // Backward compatibilities:
+            // 1. When an include or exclude starts with a fixed directory part e.g. "src/foo/**",
+            //    then matching should be case-sensitive on Linux, as the directory was checked for its existance
+            //    by using Directory.Exists, which is case-sensitive on Linux (on OSX is not).
+            // 2. On Unix, when an include uses a simple ** wildcard e.g. "**\*.cs", the file pattern e.g. "*.cs",
+            //    should be matched case-sensitive, as files were retrieved by using the searchPattern parameter
+            //    of Directory.GetFiles, which is case-sensitive on Unix.
+        }
+
+
+        /// <summary>
+        /// A test data class for providing data to the <see cref="FileMatcherTest.GetFilesComplexGlobbingMatching"/> test.
+        /// </summary>
+        public class GetFilesComplexGlobbingMatchingInfo
+        {
+            /// <summary>
+            /// The list of known files to create.
+            /// </summary>
+            public static string[] FilesToCreate =
             {
                 @"src\foo.cs",
                 @"src\bar.cs",
@@ -244,106 +154,239 @@ namespace Microsoft.Build.UnitTests
                 @"readme.txt",
                 @"licence.md"
             };
-            Action<string, string[], bool> match = (include, excludes, hasNoMatches) =>
+
+            /// <summary>
+            /// Gets or sets the include pattern.
+            /// </summary>
+            public string Include { get; set; }
+
+            /// <summary>
+            /// Gets or sets a list of exclude patterns.
+            /// </summary>
+            public string[] Excludes { get; set; }
+
+            /// <summary>
+            /// Gets or sets the list of expected matches.
+            /// </summary>
+            public string[] ExpectedMatches { get; set; }
+
+            /// <summary>
+            /// Get or sets a value indicating to expect no matches if the include pattern is mutated to uppercase.
+            /// </summary>
+            public bool ExpectNoMatches { get; set; }
+
+            public override string ToString()
             {
-                string[] matchedFiles = null;
-                try
+                IEnumerable<string> GetParts()
                 {
-                    matchedFiles = FileMatcher.GetFiles(workingPath, include, excludes);
-                    if (hasNoMatches)
+                    yield return $"Include = {Include}";
+
+                    if (Excludes != null)
                     {
-                        Assert.Equal(0, matchedFiles.Length);
-                        return;
+                        yield return $"Excludes = {String.Join(";", Excludes)}";
                     }
 
-                    // We have to lower file paths as the result could be in uppercase e.g. "SRC\foo.cs"
-                    var normMatchedFiles = matchedFiles
-                        .Select(o => o.Replace(Path.DirectorySeparatorChar, '\\').ToLowerInvariant()).ToArray();
-                    foreach (var matchedFile in normMatchedFiles)
+                    if (ExpectNoMatches)
                     {
-                        Assert.Contains(matchedFile, expectedMatchings);
+                        yield return "ExpectNoMatches";
                     }
-
-                    Assert.Equal(expectedMatchings.Length, matchedFiles.Length);
                 }
-                catch (Exception)
+
+                return String.Join(", ", GetParts());
+            }
+
+            /// <summary>
+            /// Gets the test data
+            /// </summary>
+            public static IEnumerable<object> GetTestData()
+            {
+                yield return new object[]
                 {
-                    Console.WriteLine(
-                        $"Globbing failed for include {include} with excludes {string.Join(",", excludes)}, " +
-                        $"should have no matches: {hasNoMatches}, " +
-                        $"returned files: {(matchedFiles != null ? string.Join(",", matchedFiles) : null)}");
-                    throw;
-                }
-            };
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\**\inner\**\*.cs",
+                        ExpectedMatches = new[]
+                        {
+                            @"src\foo\inner\foo.cs",
+                            @"src\foo\inner\foo\foo.cs",
+                            @"src\foo\inner\bar\bar.cs",
+                            @"src\bar\inner\baz.cs",
+                            @"src\bar\inner\baz\baz.cs",
+                            @"src\bar\inner\foo\foo.cs"
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux
+                    }
+                };
 
-            // Create directories and files
-            foreach (var file in files)
-            {
-                var normFile = file.Replace('\\', Path.DirectorySeparatorChar);
-                var dirPath = Path.Combine(workingPath, Path.GetDirectoryName(normFile));
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\**\inner\**\*.cs",
+                        Excludes = new[]
+                        {
+                            @"src\foo\inner\foo.*.cs"
+                        },
+                        ExpectedMatches = new[]
+                            {
+                            @"src\foo\inner\foo.cs",
+                            @"src\foo\inner\foo\foo.cs",
+                            @"src\foo\inner\bar\bar.cs",
+                            @"src\bar\inner\baz.cs",
+                            @"src\bar\inner\baz\baz.cs",
+                            @"src\bar\inner\foo\foo.cs"
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
+                    }
+                };
 
-                Directory.CreateDirectory(dirPath);
-                File.WriteAllBytes(Path.Combine(dirPath, Path.GetFileName(normFile)), new byte[5000]);
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\**\inner\**\*.cs",
+                        Excludes = new[]
+                        {
+                            @"**\foo\**"
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"src\bar\inner\baz.cs",
+                            @"src\bar\inner\baz\baz.cs"
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\**\inner\**\*.cs",
+                        Excludes = new[]
+                        {
+                            @"src\bar\inner\baz\**"
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"src\foo\inner\foo.cs",
+                            @"src\foo\inner\foo\foo.cs",
+                            @"src\foo\inner\bar\bar.cs",
+                            @"src\bar\inner\baz.cs",
+                            @"src\bar\inner\foo\foo.cs"
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
+                    }
+                };
+                
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\foo\**\*.cs",
+                        Excludes = new[]
+                        {
+                            @"src\foo\**\foo\**"
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"src\foo\foo.cs",
+                            @"src\foo\inner\foo.cs",
+                            @"src\foo\inner\bar\bar.cs"
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\foo\inner\**\*.cs",
+                        Excludes = new[]
+                        {
+                            @"src\foo\**\???\**"
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"src\foo\inner\foo.cs"
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
+                    }
+                };
+
+                yield return new object[]
+                {
+                        new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"**\???\**\*.cs",
+                        ExpectedMatches = new[]
+                        {
+                            @"src\foo.cs",
+                            @"src\bar.cs",
+                            @"src\baz.cs",
+                            @"src\foo\foo.cs",
+                            @"src\bar\bar.cs",
+                            @"src\baz\baz.cs",
+                            @"src\foo\inner\foo.cs",
+                            @"src\foo\inner\foo\foo.cs",
+                            @"src\foo\inner\bar\bar.cs",
+                            @"src\bar\inner\baz.cs",
+                            @"src\bar\inner\baz\baz.cs",
+                            @"src\bar\inner\foo\foo.cs",
+                            @"build\baz\foo.cs"
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"**\*.*",
+                        Excludes = new[]
+                        {
+                            @"**\???\**\*.cs"
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"readme.txt",
+                            @"licence.md"
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"**\?a?\**\?a?\*.c?",
+                        ExpectedMatches = new[]
+                        {
+                            @"src\bar\inner\baz\baz.cs"
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"**\?a?\**\?a?.c?",
+                        Excludes = new[]
+                        {
+                            @"**\?a?\**\?a?\*.c?"
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"src\bar\bar.cs",
+                            @"src\baz\baz.cs",
+                            @"src\foo\inner\bar\bar.cs",
+                            @"src\bar\inner\baz.cs"
+                        }
+                    }
+                };
             }
-
-            // Normal matching
-            match(includePattern, excludePatterns, false);
-            // Include forward slash
-            match(includePattern.Replace('\\', '/'), excludePatterns, false);
-            // Excludes forward slash
-            match(includePattern, excludePatterns.Select(o => o.Replace('\\', '/')).ToArray(), false);
-
-            // Backward compatibilities:
-            // 1. When an include or exclude starts with a fixed directory part e.g. "src/foo/**",
-            //    then matching should be case-sensitive on Linux, as the directory was checked for its existance
-            //    by using Directory.Exists, which is case-sensitive on Linux (on OSX is not).
-            // 2. On Unix, when an include uses a simple ** wildcard e.g. "**\*.cs", the file pattern e.g. "*.cs",
-            //    should be matched case-sensitive, as files were retrieved by using the searchPattern parameter
-            //    of Directory.GetFiles, which is case-sensitive on Unix.
-            var shouldHaveNoMatches = false;
-
-            // Do not test uppercase excludes on Linux, as it is not simple to figure out which files shall
-            // be excluded
-            if (!NativeMethodsShared.IsLinux)
-            {
-                // Excludes uppercase
-                match(includePattern, excludePatterns.Select(o => o.ToUpperInvariant()).ToArray(), false);
-            }
-            else
-            {
-                // On Linux, we will have no matches for an uppercase include, when it starts with a fixed directory part
-                // e.g. "SRC/FOO"
-                shouldHaveNoMatches = !includePattern.StartsWith("**");
-            }
-
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                // On Unix, we will have no matches for an uppercase include, that has a simple ** wildcard and a file pattern
-                // e.g. "**\*.CS"
-                string fixedDirectoryPart;
-                string wildcardDirectoryPart;
-                string filenamePart;
-                string matchFileExpression;
-                bool needsRecursion;
-                bool isLegalFileSpec;
-                FileMatcher.GetFileSpecInfo(includePattern,
-                    out fixedDirectoryPart,
-                    out wildcardDirectoryPart,
-                    out filenamePart,
-                    out matchFileExpression,
-                    out needsRecursion,
-                    out isLegalFileSpec,
-                    FileMatcher.s_defaultGetFileSystemEntries);
-                bool matchWithRegex =
-                    // if we have a directory specification that uses wildcards, and
-                    (wildcardDirectoryPart.Length > 0) &&
-                    // the specification is not a simple "**"
-                    (wildcardDirectoryPart != ("**" + new string(Path.DirectorySeparatorChar, 1)));
-                shouldHaveNoMatches |= !matchWithRegex && filenamePart.Any(char.IsLetter);
-            }
-
-            // Include uppercase
-            match(includePattern.ToUpperInvariant(), excludePatterns, shouldHaveNoMatches);
         }
 
         [Fact]
