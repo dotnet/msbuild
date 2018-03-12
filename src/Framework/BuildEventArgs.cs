@@ -9,6 +9,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -24,9 +25,7 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public abstract class BuildEventArgs : EventArgs
     {
         /// <summary>
@@ -48,6 +47,9 @@ namespace Microsoft.Build.Framework
         /// Timestamp
         /// </summary>
         private DateTime timestamp;
+
+        [NonSerialized]
+        private DateTime? _localTimestamp;
 
         /// <summary>
         /// Thread id
@@ -107,127 +109,65 @@ namespace Microsoft.Build.Framework
                 // Rather than storing dates in Local time all the time, we store in UTC type, and only
                 // convert to Local when the user requests access to this field.  This lets us avoid the
                 // expensive conversion to Local time unless it's absolutely necessary.
-                if (timestamp.Kind == DateTimeKind.Utc)
+                if (!_localTimestamp.HasValue)
                 {
-                    timestamp = timestamp.ToLocalTime();
+                    _localTimestamp = timestamp.Kind == DateTimeKind.Utc || timestamp.Kind == DateTimeKind.Unspecified
+                        ? timestamp.ToLocalTime()
+                        : timestamp;
                 }
 
-                return timestamp;
+                return _localTimestamp.Value;
             }
         }
 
         /// <summary>
         /// The thread that raised event.  
         /// </summary>
-        public int ThreadId
-        {
-            get
-            {
-                return threadId;
-            }
-        }
+        public int ThreadId => threadId;
 
         /// <summary>
         /// Text of event. 
         /// </summary>
         public virtual string Message
         {
-            get
-            {
-                return message;
-            }
-
-            protected set
-            {
-                message = value;
-            }
+            get => message;
+            protected set => message = value;
         }
 
         /// <summary>
         /// Custom help keyword associated with event.
         /// </summary>
-        public string HelpKeyword
-        {
-            get
-            {
-                return helpKeyword;
-            }
-        }
+        public string HelpKeyword => helpKeyword;
 
         /// <summary>
         /// Name of the object sending this event.
         /// </summary>
-        public string SenderName
-        {
-            get
-            {
-                return senderName;
-            }
-        }
+        public string SenderName => senderName;
 
         /// <summary>
         /// Event contextual information for the build event argument
         /// </summary>
         public BuildEventContext BuildEventContext
         {
-            get
-            {
-                return buildEventContext;
-            }
-
-            set
-            {
-                buildEventContext = value;
-            }
+            get => buildEventContext;
+            set => buildEventContext = value;
         }
 
 #if FEATURE_BINARY_SERIALIZATION
-        #region CustomSerializationToStream
+#region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
         /// </summary>
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
         internal virtual void WriteToStream(BinaryWriter writer)
         {
-            #region Message
-            if (message == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(message);
-            }
-            #endregion
-            #region HelpKeyword
-            if (helpKeyword == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(helpKeyword);
-            }
-            #endregion
-            #region SenderName
-            if (senderName == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(senderName);
-            }
-            #endregion
-            #region TimeStamp
-            writer.Write((Int64)timestamp.Ticks);
-            writer.Write((Int32)timestamp.Kind);
-            #endregion
+            writer.WriteOptionalString(message);
+            writer.WriteOptionalString(helpKeyword);
+            writer.WriteOptionalString(senderName);
+            writer.WriteTimestamp(timestamp);
+
             writer.Write((Int32)threadId);
-            #region BuildEventContext
+
             if (buildEventContext == null)
             {
                 writer.Write((byte)0);
@@ -243,7 +183,6 @@ namespace Microsoft.Build.Framework
                 writer.Write((Int32)buildEventContext.ProjectInstanceId);
                 writer.Write((Int32)buildEventContext.EvaluationId);
             }
-            #endregion
         }
 
         /// <summary>
@@ -253,38 +192,12 @@ namespace Microsoft.Build.Framework
         /// <param name="version">The version of the runtime the message packet was created from</param>
         internal virtual void CreateFromStream(BinaryReader reader, int version)
         {
-            #region Message
-            if (reader.ReadByte() == 0)
-            {
-                message = null;
-            }
-            else
-            {
-                message = reader.ReadString();
-            }
-            #endregion
-            #region HelpKeyword
-            if (reader.ReadByte() == 0)
-            {
-                helpKeyword = null;
-            }
-            else
-            {
-                helpKeyword = reader.ReadString();
-            }
-            #endregion
-            #region SenderName
-            if (reader.ReadByte() == 0)
-            {
-                senderName = null;
-            }
-            else
-            {
-                senderName = reader.ReadString();
-            }
-            #endregion
-            #region TimeStamp
+            message = reader.ReadByte() == 0 ? null : reader.ReadString();
+            helpKeyword = reader.ReadByte() == 0 ? null : reader.ReadString();
+            senderName = reader.ReadByte() == 0 ? null : reader.ReadString();
+
             long timestampTicks = reader.ReadInt64();
+
             if (version > 20)
             {
                 DateTimeKind kind = (DateTimeKind)reader.ReadInt32();
@@ -294,9 +207,9 @@ namespace Microsoft.Build.Framework
             {
                 timestamp = new DateTime(timestampTicks);
             }
-            #endregion
+
             threadId = reader.ReadInt32();
-            #region BuildEventContext
+
             if (reader.ReadByte() == 0)
             {
                 buildEventContext = null;
@@ -320,13 +233,12 @@ namespace Microsoft.Build.Framework
                     buildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
                 }
             }
-            #endregion
         }
-        #endregion
+#endregion
 #endif
 
 #if FEATURE_BINARY_SERIALIZATION
-        #region SetSerializationDefaults
+#region SetSerializationDefaults
         /// <summary>
         /// Run before the object has been deserialized
         /// UNDONE (Logging.)  Can this and the next function go away, and instead return a BuildEventContext.Invalid from
@@ -357,7 +269,10 @@ namespace Microsoft.Build.Framework
                                        );
             }
         }
-        #endregion
+#endregion
+
+        //private BuildErrorEventArgs()
+
 #endif
     }
 }

@@ -498,6 +498,10 @@
     <Compile Include="XmlPoke.cs" />
     <Compile Include="CodeTaskFactory.cs" />
     <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
+    <Compile Include="StateFileBase.cs" />
+    <Compile Include="Dependencies.cs" />
+    <Compile Include="SystemState.cs" />
+    <Compile Include="DependencyFile.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">
@@ -550,12 +554,6 @@
     <Compile Include="ComReferenceWrapperInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Dependencies.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="DependencyFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="FindInvalidProjectReferences.cs" />
     <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -597,12 +595,8 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResGen.cs" />
-    <Compile Include="ResGenDependencies.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ResolveComReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="ResGenDependencies.cs" />
+    <Compile Include="ResolveComReference.cs" />
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -626,9 +620,6 @@
     <Compile Include="SignFile.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="StateFileBase.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="system.design\stronglytypedresourcebuilder.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -639,9 +630,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="System.Design.cs" />
-    <Compile Include="SystemState.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="TlbImp.cs" />
     <Compile Include="TlbReference.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

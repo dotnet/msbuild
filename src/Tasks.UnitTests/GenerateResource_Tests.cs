@@ -20,12 +20,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]
     [Trait("Category", "mono-windows-failing")]
-    sealed public class RequiredTransformations
+    public sealed class RequiredTransformations
     {
+        private readonly TestEnvironment _env;
         private readonly ITestOutputHelper _output;
 
         public RequiredTransformations(ITestOutputHelper output)
         {
+            _env = TestEnvironment.Create(output);
             _output = output;
         }
 
@@ -67,7 +69,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -155,7 +157,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -303,56 +305,41 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Trait("Category", "netcore-linux-failing")]
         public void ForceOutOfDate()
         {
-            string resxFile = Utilities.WriteTestResX(false, null, null);
+            var folder = _env.CreateFolder();
+            string resxFile = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
 
             GenerateResource t = Utilities.CreateTask(_output);
-            t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+            t.StateFile = new TaskItem(_env.GetTempFile(".cache").Path);
+            t.Sources = new ITaskItem[] {new TaskItem(resxFile)};
 
-            try
-            {
-                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+            Utilities.ExecuteTask(t);
 
-                Utilities.ExecuteTask(t);
+            string resourcesFile = t.OutputResources[0].ItemSpec;
+            Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+            resourcesFile = t.FilesWritten[0].ItemSpec;
+            Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-                string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
-                resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
-
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
-                GenerateResource t2 = Utilities.CreateTask(_output);
-                t2.StateFile = new TaskItem(t.StateFile);
-                t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+            GenerateResource t2 = Utilities.CreateTask(_output);
+            t2.StateFile = new TaskItem(t.StateFile);
+            t2.Sources = new ITaskItem[] {new TaskItem(resxFile)};
 
-                DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
+            DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
 
-                System.Threading.Thread.Sleep(200);
-                if (NativeMethodsShared.IsOSX)
-                {
-                    // Must be > 1 sec for HFS+ timestamp granularity
-                    System.Threading.Thread.Sleep(1100);
-                }
-
-                File.SetLastWriteTime(resxFile, DateTime.Now);
-
-                Utilities.ExecuteTask(t2);
-
-                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
-            }
-            finally
+            System.Threading.Thread.Sleep(200);
+            if (NativeMethodsShared.IsOSX)
             {
-                // Done, so clean up.
-                File.Delete(t.Sources[0].ItemSpec);
-                foreach (ITaskItem item in t.FilesWritten)
-                {
-                    if (File.Exists(item.ItemSpec))
-                    {
-                        File.Delete(item.ItemSpec);
-                    }
-                }
+                // Must be > 1 sec for HFS+ timestamp granularity
+                System.Threading.Thread.Sleep(1100);
             }
+
+            File.SetLastWriteTime(resxFile, DateTime.Now);
+
+            Utilities.ExecuteTask(t2);
+
+            Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
         }
 
         /// <summary>
@@ -382,7 +369,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -419,63 +406,50 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void ForceSomeOutOfDate()
         {
-            string firstResx = null;
-            string secondResx = null;
-            string cache = null;
+            var folder = _env.CreateFolder();
 
-            try
+            var firstResx = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
+            var secondResx = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
+            var cache = _env.GetTempFile(folder, ".cache").Path;
+
+            GenerateResource createResources = Utilities.CreateTask(_output);
+            createResources.StateFile = new TaskItem(cache);
+            createResources.Sources = new ITaskItem[] {new TaskItem(firstResx), new TaskItem(secondResx)};
+
+            _output.WriteLine("Transform both");
+            Utilities.ExecuteTask(createResources);
+
+            _output.WriteLine("Get current write times of outputs");
+            DateTime firstOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[0].ItemSpec);
+            DateTime secondOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[1].ItemSpec);
+
+            _output.WriteLine("Create a new task to transform them again");
+            GenerateResource t2 = Utilities.CreateTask(_output);
+            t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
+            t2.Sources = new ITaskItem[] {new TaskItem(firstResx), new TaskItem(secondResx)};
+
+            System.Threading.Thread.Sleep(200);
+            if (!NativeMethodsShared.IsWindows)
             {
-                firstResx = Utilities.WriteTestResX(false, null, null);
-                secondResx = Utilities.WriteTestResX(false, null, null);
-                cache = Utilities.GetTempFileName(".cache");
-
-                GenerateResource createResources = Utilities.CreateTask(_output);
-                createResources.StateFile = new TaskItem(cache);
-                createResources.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
-
-                _output.WriteLine("Transform both");
-                Utilities.ExecuteTask(createResources);
-
-                _output.WriteLine("Get current write times of outputs");
-                DateTime firstOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[0].ItemSpec);
-                DateTime secondOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[1].ItemSpec);
-
-                _output.WriteLine("Create a new task to transform them again");
-                GenerateResource t2 = Utilities.CreateTask(_output);
-                t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
-                t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
-
-                System.Threading.Thread.Sleep(200);
-                if (!NativeMethodsShared.IsWindows)
-                {
-                    // Must be > 1 sec on some file systems for proper timestamp granularity
-                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
-                    System.Threading.Thread.Sleep(1000);
-                }
-
-                _output.WriteLine("Touch one input");
-                File.SetLastWriteTime(firstResx, DateTime.Now);
-
-                Utilities.ExecuteTask(t2);
-
-                _output.WriteLine("Check only one output was updated");
-                File.GetLastWriteTime(t2.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstOutputCreationTime);
-                File.GetLastWriteTime(t2.OutputResources[1].ItemSpec).ShouldBe(secondOutputCreationTime);
-
-                // Although only one file was updated, both should be in OutputResources and FilesWritten
-                t2.OutputResources[0].ItemSpec.ShouldBe(createResources.OutputResources[0].ItemSpec);
-                t2.OutputResources[1].ItemSpec.ShouldBe(createResources.OutputResources[1].ItemSpec);
-                t2.FilesWritten[0].ItemSpec.ShouldBe(createResources.FilesWritten[0].ItemSpec);
-                t2.FilesWritten[1].ItemSpec.ShouldBe(createResources.FilesWritten[1].ItemSpec);
+                // Must be > 1 sec on some file systems for proper timestamp granularity
+                // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
+                System.Threading.Thread.Sleep(1000);
             }
-            finally
-            {
-                if (null != firstResx) File.Delete(firstResx);
-                if (null != secondResx) File.Delete(secondResx);
-                if (null != cache) File.Delete(cache);
-                if (null != firstResx) File.Delete(Path.ChangeExtension(firstResx, ".resources"));
-                if (null != secondResx) File.Delete(Path.ChangeExtension(secondResx, ".resources"));
-            }
+
+            _output.WriteLine("Touch one input");
+            File.SetLastWriteTime(firstResx, DateTime.Now);
+
+            Utilities.ExecuteTask(t2);
+
+            _output.WriteLine("Check only one output was updated");
+            File.GetLastWriteTime(t2.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstOutputCreationTime);
+            File.GetLastWriteTime(t2.OutputResources[1].ItemSpec).ShouldBe(secondOutputCreationTime);
+
+            // Although only one file was updated, both should be in OutputResources and FilesWritten
+            t2.OutputResources[0].ItemSpec.ShouldBe(createResources.OutputResources[0].ItemSpec);
+            t2.OutputResources[1].ItemSpec.ShouldBe(createResources.OutputResources[1].ItemSpec);
+            t2.FilesWritten[0].ItemSpec.ShouldBe(createResources.FilesWritten[0].ItemSpec);
+            t2.FilesWritten[1].ItemSpec.ShouldBe(createResources.FilesWritten[1].ItemSpec);
         }
 
         /// <summary>
@@ -563,7 +537,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t.FilesWritten[1].ItemSpec, resourcesFile2);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -584,7 +558,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t2.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t2.FilesWritten[1].ItemSpec, resourcesFile2);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t2);
 #endif
 
@@ -1417,7 +1391,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
                 // Should not have created an output for the invalid resx
@@ -1471,7 +1445,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -1836,7 +1810,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
             Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -1899,7 +1873,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
@@ -2129,7 +2103,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Read-only StateFile yields message
         /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
         [Fact]
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
@@ -3472,12 +3446,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null)
         {
-            string resgenFile = Utilities.GetTempFileName(".resx");
-            File.Delete(resgenFile);
-            File.WriteAllText(resgenFile, GetTestResXContent(useType, linkedBitmap, extraToken, false));
-            return resgenFile;
+            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite:resxFileToWrite);
         }
 
         /// <summary>
@@ -3486,10 +3457,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, string resxFileToWrite = null)
         {
-            string resgenFile = Utilities.GetTempFileName(".resx");
-            File.Delete(resgenFile);
+            string resgenFile = resxFileToWrite;
+            if (string.IsNullOrEmpty(resgenFile))
+            {
+                resgenFile = GetTempFileName(".resx");
+                File.Delete(resgenFile);
+            }
+
             File.WriteAllText(resgenFile, GetTestResXContent(useType, linkedBitmap, extraToken, useInvalidType));
             return resgenFile;
         }

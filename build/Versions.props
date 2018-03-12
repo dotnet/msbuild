@@ -26,17 +26,12 @@
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <!-- Tell repo toolset not to define the GetBuildVersion target, as it would conflict with NerdBank.GitVersioning -->
     <DefineGetBuildVersionTargetForVsix>false</DefineGetBuildVersionTargetForVsix>
-
-    <!-- Use later version of XliffTasks which has a fix for .resx files consumed by multiple projects.
-         See https://github.com/dotnet/xliff-tasks/pull/34 -->
-    <XliffTasksVersion>0.2.0-beta-000081</XliffTasksVersion>
-
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>2.1.300-preview2-008046</DotNetCliVersion>
-    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62512-02</RoslynToolsRepoToolsetVersion>
+    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62705-01</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
     <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>

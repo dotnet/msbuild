@@ -8,6 +8,7 @@ using System.Collections;
 using System.Globalization;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Configuration.Assemblies;
 #if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
 #endif
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Shared
     /// between the two is done lazily on demand.
     /// </summary>
     [Serializable]
-    internal sealed class AssemblyNameExtension
+    internal sealed class AssemblyNameExtension : ISerializable
     {
         private AssemblyName asAssemblyName = null;
         private string asString = null;
@@ -119,6 +120,54 @@ namespace Microsoft.Build.Shared
                 // This will throw...
                 CreateAssemblyName();
             }
+        }
+
+        /// <summary>
+        /// Ctor for deserializing from state file (binary serialization).
+        /// <remarks>This is required because AssemblyName is not Serializable on .NET Core.</remarks>
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
+        private AssemblyNameExtension(SerializationInfo info, StreamingContext context)
+        {
+            var hasAsAssemblyName = info.GetBoolean("an");
+            if (hasAsAssemblyName)
+            {
+                var name = info.GetString("name");
+                var publicKey = (byte[]) info.GetValue("pk", typeof(byte[]));
+                var publicKeyToken = (byte[]) info.GetValue("pkt", typeof(byte[]));
+                var version = (Version)info.GetValue("ver", typeof(Version));
+                var flags = (AssemblyNameFlags) info.GetInt32("flags");
+                var processorArchitecture = (ProcessorArchitecture) info.GetInt32("cpuarch");
+
+                var cultureInfoName = info.GetString("ciName");
+
+                var hashAlgorithm = (System.Configuration.Assemblies.AssemblyHashAlgorithm) info.GetInt32("hashAlg");
+                var versionCompatibility = (AssemblyVersionCompatibility) info.GetInt32("verCompat");
+                var codeBase = info.GetString("codebase");
+                var keyPair = (StrongNameKeyPair) info.GetValue("keypair", typeof(StrongNameKeyPair));
+
+                asAssemblyName = new AssemblyName
+                {
+                    Name = name,
+                    Version = version,
+                    Flags = flags,
+                    ProcessorArchitecture = processorArchitecture,
+                    CultureInfo = string.IsNullOrEmpty(cultureInfoName) ? null : new CultureInfo(cultureInfoName),
+                    HashAlgorithm = hashAlgorithm,
+                    VersionCompatibility = versionCompatibility,
+                    CodeBase = codeBase,
+                    KeyPair = keyPair
+                };
+
+                asAssemblyName.SetPublicKey(publicKey);
+                asAssemblyName.SetPublicKeyToken(publicKeyToken);
+            }
+
+            asString = info.GetString("asStr");
+            isSimpleName = info.GetBoolean("isSName");
+            hasProcessorArchitectureInFusionName = info.GetBoolean("hasCpuArch");
+            immutable = info.GetBoolean("immutable");
         }
 
         /// <summary>
@@ -957,6 +1006,31 @@ namespace Microsoft.Build.Shared
                 return false;
             }
             return true;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (asAssemblyName != null)
+            {
+                info.AddValue("an", true);
+                info.AddValue("name", asAssemblyName.Name);
+                info.AddValue("pk", asAssemblyName.GetPublicKey());
+                info.AddValue("pkt", asAssemblyName.GetPublicKeyToken());
+                info.AddValue("ver", asAssemblyName.Version);
+                info.AddValue("flags", (int)asAssemblyName.Flags);
+                info.AddValue("cpuarch", (int)asAssemblyName.ProcessorArchitecture);
+
+                info.AddValue("ciName", asAssemblyName?.CultureInfo?.Name);
+                info.AddValue("hashAlg", asAssemblyName.HashAlgorithm);
+                info.AddValue("verCompat", asAssemblyName.VersionCompatibility);
+                info.AddValue("codebase", asAssemblyName.CodeBase);
+                info.AddValue("keypair", asAssemblyName.KeyPair);
+            }
+
+            info.AddValue("asStr", asString);
+            info.AddValue("isSName", isSimpleName);
+            info.AddValue("hasCpuArch", hasProcessorArchitectureInFusionName);
+            info.AddValue("immutable", immutable);
         }
     }
 }

@@ -79,6 +79,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs" Link="BinaryWriterExtensions.cs" />
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>SharedUtilities\EncodingUtilities.cs</Link>
     </Compile>

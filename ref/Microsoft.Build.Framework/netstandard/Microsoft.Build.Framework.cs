@@ -311,11 +311,13 @@ namespace Microsoft.Build.Framework
     public partial class LoggerException : System.Exception
     {
         public LoggerException() { }
+        protected LoggerException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public LoggerException(string message) { }
         public LoggerException(string message, System.Exception innerException) { }
         public LoggerException(string message, System.Exception innerException, string errorCode, string helpKeyword) { }
         public string ErrorCode { get { throw null; } }
         public string HelpKeyword { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public enum LoggerVerbosity

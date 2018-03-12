@@ -7,6 +7,9 @@
     <Description>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="BinaryWriterExtensions.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
@@ -17,6 +20,9 @@
   <ItemGroup>
     <Compile Include="..\Shared\Constants.cs">
       <Link>Shared\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs">
+      <Link>Shared\BinaryWriterExtensions.cs</Link>
     </Compile>
   </ItemGroup>
 

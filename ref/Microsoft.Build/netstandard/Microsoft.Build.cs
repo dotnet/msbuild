@@ -861,9 +861,11 @@ namespace Microsoft.Build.Exceptions
     public partial class BuildAbortedException : System.Exception
     {
         public BuildAbortedException() { }
+        protected BuildAbortedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public BuildAbortedException(string message) { }
         public BuildAbortedException(string message, System.Exception innerException) { }
         public string ErrorCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public sealed partial class InternalLoggerException : System.Exception
     {
@@ -874,6 +876,7 @@ namespace Microsoft.Build.Exceptions
         public string ErrorCode { get { throw null; } }
         public string HelpKeyword { get { throw null; } }
         public bool InitializationException { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public sealed partial class InvalidProjectFileException : System.Exception
     {
@@ -892,15 +895,18 @@ namespace Microsoft.Build.Exceptions
         public int LineNumber { get { throw null; } }
         public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class InvalidToolsetDefinitionException : System.Exception
     {
         public InvalidToolsetDefinitionException() { }
+        protected InvalidToolsetDefinitionException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public InvalidToolsetDefinitionException(string message) { }
         public InvalidToolsetDefinitionException(string message, System.Exception innerException) { }
         public InvalidToolsetDefinitionException(string message, string errorCode) { }
         public InvalidToolsetDefinitionException(string message, string errorCode, System.Exception innerException) { }
         public string ErrorCode { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
 }
 namespace Microsoft.Build.Execution
