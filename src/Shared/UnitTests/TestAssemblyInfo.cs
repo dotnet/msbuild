@@ -47,6 +47,9 @@ public class MSBuildTestAssemblyFixture : IDisposable
         _testEnvironment.CreateFolder(newTempPath);
 
         _testEnvironment.SetTempPath(newTempPath);
+
+        // Most places that use this variable fallback to temp, but setting it here makes it explicit.
+        _testEnvironment.SetEnvironmentVariable("MSBUILDDEBUGPATH", newTempPath);
     }
 
     /// <summary>
