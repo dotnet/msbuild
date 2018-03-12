@@ -124,7 +124,7 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(CreateTlb)' == 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(CreateTlb)' == 'true' and '$(OsEnvironment)' == 'windows' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
     <PropertyGroup>
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' == 'true'">/verbose</TlbExpVerbosity>
