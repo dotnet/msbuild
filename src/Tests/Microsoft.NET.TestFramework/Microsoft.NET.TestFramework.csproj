@@ -40,12 +40,11 @@
     <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
   </ItemGroup>
 
-  <Target Name="_CopyDirectoryBuildTestDependencies"
-          AfterTargets="Build"
-          Inputs="@(_CopyDirectoryBuildTestDependenciesInput)"
-          Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
-    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)"
-          DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
+  <Target Name="_CopyDirectoryBuildTestDependencies" AfterTargets="Build" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
+    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
+  </Target>
+  <Target Name="_CopyTestNuGetConfig" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\..\Assets\NuGet.Config" DestinationFolder="$(ArtifactsTmpDir)" SkipUnchangedFiles="true" />
   </Target>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
