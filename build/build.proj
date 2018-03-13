@@ -1,6 +1,8 @@
 <!-- Build file -->
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="Version.props" />
+  
   <PropertyGroup>
     <DOTNET_EXE_PATH>&quot;$(DOTNET_INSTALL_DIR)/dotnet&quot;</DOTNET_EXE_PATH>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
@@ -36,6 +38,9 @@
     <ItemGroup>
       <ProjectFile Include="$(WebSdkRoot)/src/Publish/Microsoft.NET.Sdk.Publish.Tasks/Microsoft.NET.Sdk.Publish.Tasks.csproj" />
     </ItemGroup>
+	
+	<MakeDir Directories="$(ArtifactsDir)" />
+	<CallTarget Targets="CollectGitInfo" />
 
     <MSBuild Projects="@(ProjectFile)"
              Targets ="build"/>

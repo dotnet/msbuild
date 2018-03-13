@@ -1,32 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 #if NET46
 using System.Management;
 #endif
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
     public class ProcessWrapper
     {
-        public int? RunProcess(string fileName, string arguments, string workingDirectory, out int? processId, bool createDirectoryIfNotExists = true, bool waitForExit = true)
+        public int? RunProcess(string fileName, string arguments, string workingDirectory, out int? processId, bool createDirectoryIfNotExists = true, bool waitForExit = true, ITestOutputHelper testOutputHelper = null)
         {
             if (createDirectoryIfNotExists && !Directory.Exists(workingDirectory))
             {
                 Directory.CreateDirectory(workingDirectory);
             }
 
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = false;
-            startInfo.CreateNoWindow = false;
-            startInfo.WorkingDirectory = workingDirectory;
-            startInfo.FileName = fileName;
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                WorkingDirectory = workingDirectory,
+                FileName = fileName,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+            };
             if (!string.IsNullOrEmpty(arguments))
             {
                 startInfo.Arguments = arguments;
@@ -36,7 +35,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             processId = testProcess?.Id;
             if (waitForExit)
             {
-                testProcess.WaitForExit();
+                testProcess.WaitForExit(3 * 60 * 1000);
+                var standardOut = testProcess.StandardOutput.ReadToEnd();
+                var standardError = testProcess.StandardError.ReadToEnd();
+                testOutputHelper?.WriteLine(standardOut);
+                testOutputHelper?.WriteLine(standardError);
                 return testProcess?.ExitCode;
             }
 

@@ -11,7 +11,7 @@ done
 REPOROOT="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$REPOROOT/scripts/common/_prettyprint.sh"
-export DOTNET_VERSION=1.0.4
+export DOTNET_VERSION=2.1.300-preview2-008248
 export WebSdkRoot=$REPOROOT
 export WebSdkReferences=$WebSdkRoot/references/ 
 export WebSdkSource=$WebSdkRoot/src/ 
@@ -27,7 +27,7 @@ export WebSdkBuild=$WebSdkRoot/build/
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
-curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 1.1.0
+curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.1.300-preview2-008248
 
 curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
 [ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461

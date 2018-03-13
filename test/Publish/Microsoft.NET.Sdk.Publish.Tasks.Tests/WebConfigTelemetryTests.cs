@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             string projectGuid = WebConfigTelemetry.GetProjectGuidFromSolutionFile(solutionFileFullPath, projectFullPath);
 
             // Assert
-            Assert.Equal<string>("{66964EC2-712A-451A-AB4F-33F18D8F54F1}", projectGuid);
+            Assert.Equal("{66964EC2-712A-451A-AB4F-33F18D8F54F1}", projectGuid);
         }
 
         [Theory]
@@ -58,7 +58,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             string projectGuid = WebConfigTelemetry.GetProjectGuidFromSolutionFile(solutionFilePath, projectFullPath);
 
             // Assert
-            Assert.Equal<string>("{66964EC2-712A-451A-AB4F-33F18D8F54F1}", projectGuid);
+            Assert.Equal("{66964EC2-712A-451A-AB4F-33F18D8F54F1}", projectGuid);
         }
 #endif
         [Theory]
