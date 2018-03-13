@@ -35,8 +35,10 @@
     <ChecksumCloudDropURL Condition="'$(ChecksumCloudDropURL)' == ''">https://$(ChecksumCloudDropAccountName).blob.core.windows.net/$(ChecksumContainerName)/index.json</ChecksumCloudDropURL>
 
     <!-- Values related to the upload of NuPkgs to the blob feed -->
+    <BlobFeedContainerName>$(BLOBFEED_STORAGE_CONTAINER)</BlobFeedContainerName>
+    <BlobFeedContainerName Condition="'$(BlobFeedContainerName)' == ''">dotnet-core</BlobFeedContainerName>
     <BlobFeedExpectedURL>$(PB_PublishBlobFeedUrl)</BlobFeedExpectedURL>
-    <BlobFeedExpectedURL Condition="'$(BlobFeedExpectedURL)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</BlobFeedExpectedURL>
+    <BlobFeedExpectedURL Condition="'$(BlobFeedExpectedURL)' == ''">https://dotnetfeed.blob.core.windows.net/$(BlobFeedContainerName)/index.json</BlobFeedExpectedURL>
     <BlobFeedCloudDropAccessToken>$(PB_PublishBlobFeedKey)</BlobFeedCloudDropAccessToken>
     <BlobFeedCloudDropAccessToken Condition="'$(BlobFeedCloudDropAccessToken)' == ''">$(BLOBFEED_STORAGE_KEY)</BlobFeedCloudDropAccessToken>
   </PropertyGroup>

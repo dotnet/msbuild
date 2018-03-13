@@ -315,8 +315,7 @@
   </Target>
 
   <Target Name="SeparateSymbolsFromPublishDir"
-          AfterTargets="CrossgenPublishDir"
-          Condition="'$(SeparateSymbolsArchive)' != 'false'">
+          AfterTargets="CrossgenPublishDir">
     <ItemGroup>
       <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
       <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />

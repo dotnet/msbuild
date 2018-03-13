@@ -27,14 +27,11 @@
     <HostMonikerRidForFileName Condition=" '$(IsDebianBaseDistro)' == 'true' ">$(Architecture)</HostMonikerRidForFileName>
     
     <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
-    <ArtifactNameSdkSymbols>dotnet-sdk-symbols</ArtifactNameSdkSymbols>
     <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-sdk</ArtifactNameCombinedHostHostFxrFrameworkSdk>
     <ArtifactNameSdkLanguagePack>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-langpack</ArtifactNameSdkLanguagePack>
 
     <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdk>
     <ArtifactNameWithVersionMSBuildExtensions>dotnet-standard-support-vs2015-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionMSBuildExtensions>
-
-    <ArtifactNameWithVersionSdkSymbols>$(ArtifactNameSdkSymbols)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkSymbols>
     <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
     <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkLanguagePack>
     <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>
