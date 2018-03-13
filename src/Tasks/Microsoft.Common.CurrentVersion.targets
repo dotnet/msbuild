@@ -774,8 +774,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
     <Error Condition=" '$(_InitialMSBuildProjectExtensionsPath)' != '' And '$(MSBuildProjectExtensionsPath)' != '$(_InitialMSBuildProjectExtensionsPath)' "
            Code="MSB3540"
-           Text="The value of the property &quot;MSBuildProjectExtensionsPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props."
+           Text="The value of the property &quot;MSBuildProjectExtensionsPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"
             />
+
+    <!--
+      Log a warning if:
+        1. $(EnableBaseIntermediateOutputPathMismatchWarning) is 'true'
+        2. $(BaseIntermediateOutputPath) was set in the body of a project after its default value was set in Microsoft.Common.props
+        3. $(BaseIntermediateOutputPath) is not the same as $(MSBuildProjectExtensionsPath)
+
+      Similar to the error above, there are cases when users set $(BaseIntermediateOutputPath) in the body of their project and things build but only by coincedence.
+      MSBuild does not know if $(BaseIntermediateOutputPath) changing would cause problems so tools like NuGet must set $(EnableBaseIntermediateOutputPathMismatchWarning)
+      to 'true'.
+    -->
+    <Warning Condition=" '$(EnableBaseIntermediateOutputPathMismatchWarning)' == 'true' And '$(_InitialBaseIntermediateOutputPath)' != '$(BaseIntermediateOutputPath)' And '$(BaseIntermediateOutputPath)' != '$(MSBuildProjectExtensionsPath)' "
+             Code="MSB3539"
+             Text="The value of the property &quot;BaseIntermediateOutputPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the &quot;MSBuildProjectExtensionsPath&quot; instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"
+             />
   </Target>
 
   <!--
