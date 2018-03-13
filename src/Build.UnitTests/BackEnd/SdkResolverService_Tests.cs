@@ -59,7 +59,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 null,
                 new List<SdkResolver>
                 {
-                    new ConfigurableMockSdkResolver(
+                    new SdkUtilities.ConfigurableMockSdkResolver(
                         new SdkResultImpl(
                             sdk,
                             "path",
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             var sdk = new SdkReference("foo", "1.0.0", null);
 
-            var resolver = new ConfigurableMockSdkResolver(
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new SdkResultImpl(
                     sdk,
                     "path",

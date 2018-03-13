@@ -33,11 +33,6 @@ namespace Microsoft.Build.UnitTests
             return WithTransientTestState(
                 new TransientTestProjectWithFiles(projectContents, files, relativePathFromRootToProject));
         }
-
-        public TransientSdkResolution CustomSdkResolution(Dictionary<string, string> sdkToFolderMapping)
-        {
-            return WithTransientTestState(new TransientSdkResolution(sdkToFolderMapping));
-        }
     }
     
     public class TransientTestProjectWithFiles : TransientTestState
@@ -96,67 +91,6 @@ namespace Microsoft.Build.UnitTests
                 Project project = new Project(ProjectFile, globalProperties, toolsVersion, projectCollection);
 
                 return project.Build(logger);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Represents custom SDK resolution in the context of this test.
-    /// </summary>
-    public class TransientSdkResolution : TransientTestState
-    {
-        private readonly Dictionary<string, string> _mapping;
-
-        public TransientSdkResolution(Dictionary<string, string> mapping)
-        {
-            _mapping = mapping;
-
-            CallResetForTests(new List<SdkResolver> { new TestSdkResolver(_mapping) });
-        }
-
-        public override void Revert()
-        {
-            CallResetForTests(null);
-        }
-
-        /// <summary>
-        /// SdkResolution is internal (by design) and not all UnitTest projects are allowed to have
-        /// InternalsVisibleTo.
-        /// </summary>
-        /// <param name="resolvers"></param>
-        private static void CallResetForTests(IList<SdkResolver> resolvers)
-        {
-            Type sdkResolverServiceType = typeof(ProjectCollection).GetTypeInfo().Assembly.GetType("Microsoft.Build.BackEnd.SdkResolution.SdkResolverService");
-
-            PropertyInfo instancePropertyInfo = sdkResolverServiceType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-
-            object sdkResolverService = instancePropertyInfo.GetValue(null);
-
-            MethodInfo initializeForTestsMethodInfo = sdkResolverServiceType.GetMethod("InitializeForTests", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            initializeForTestsMethodInfo.Invoke(sdkResolverService, new object[] { null, resolvers });
-        }
-
-        private class TestSdkResolver : SdkResolver
-        {
-            private readonly Dictionary<string, string> _mapping;
-
-            public TestSdkResolver(Dictionary<string, string> mapping)
-            {
-                _mapping = mapping;
-            }
-            public override string Name => "TestSdkResolver";
-            public override int Priority => int.MinValue;
-
-            public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
-            {
-                resolverContext.Logger.LogMessage($"{nameof(resolverContext.ProjectFilePath)} = {resolverContext.ProjectFilePath}", MessageImportance.High);
-                resolverContext.Logger.LogMessage($"{nameof(resolverContext.SolutionFilePath)} = {resolverContext.SolutionFilePath}", MessageImportance.High);
-                resolverContext.Logger.LogMessage($"{nameof(resolverContext.MSBuildVersion)} = {resolverContext.MSBuildVersion}", MessageImportance.High);
-
-                return _mapping.ContainsKey(sdkReference.Name)
-                    ? factory.IndicateSuccess(_mapping[sdkReference.Name], null)
-                    : factory.IndicateFailure(new[] { $"Not in {nameof(_mapping)}" });
             }
         }
     }

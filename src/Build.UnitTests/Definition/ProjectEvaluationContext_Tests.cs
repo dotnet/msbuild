@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             using (var env = TestEnvironment.Create())
             {
-                var resolver = new ConfigurableMockSdkResolver(
+                var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                     new Dictionary<string, SdkResult>
                     {
                         {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null)},
