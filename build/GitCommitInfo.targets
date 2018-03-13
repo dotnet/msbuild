@@ -23,7 +23,7 @@
       <GitInfoCommitHash>%(GitInfoCommitHashLines.Identity)</GitInfoCommitHash>
 
       <GitCommitInfoPropsContent>
-&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
     &lt;PropertyGroup&gt;
         &lt;CommitCount&gt;$(GitInfoCommitCount)&lt;/CommitCount&gt;
         &lt;CommitHash&gt;$(GitInfoCommitHash)&lt;/CommitHash&gt;

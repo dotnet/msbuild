@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Targets .NET Framework 3.5 because .NET Framework 4.5 is not bundled in Windows 7. -->
+    <TargetFramework>net35</TargetFramework>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputType>exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Microsoft.DotNet.Tools.Launcher</AssemblyName>
+    <Title>dotnet-tool-launcher</Title>
+    <Description>
+      A simple Windows-only shim for launching new processes.
+    </Description>
+  </PropertyGroup>
+
+  <!-- This project must not have any package references. It must be a standalone .exe file -->
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <!-- Workaround https://github.com/Microsoft/msbuild/issues/1333 -->
+  <PropertyGroup>
+    <FrameworkPathOverride>$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.Cli.Utils\ArgumentEscaper.cs" />
+  </ItemGroup>
+</Project>

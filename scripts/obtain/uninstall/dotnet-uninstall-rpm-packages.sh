@@ -13,17 +13,20 @@ if [ $current_userid -ne 0 ]; then
 fi
 
 host_package_name="dotnet-host"
-aspnetcore_package_store_package_name="aspnetcore-store*"
+aspnetcore_runtime_package_name="aspnetcore-runtime*"
 
 remove_all(){
     yum remove -y $host_package_name
-    yum remove -y $aspnetcore_package_store_package_name
+    yum remove -y $aspnetcore_runtime_package_name
 }
 
 is_dotnet_host_installed(){
     local out="$(yum list installed | grep $host_package_name)"
     [ -z "$out" ]
 }
+
+dotnet_tool_path_file="/etc/profile.d/dotnet-cli-tools-bin-path.sh"
+rm -f "$dotnet_tool_path_file"
 
 is_dotnet_host_installed
 [ "$?" -eq 0 ] && echo "Unable to find dotnet installation to remove." >&2 \

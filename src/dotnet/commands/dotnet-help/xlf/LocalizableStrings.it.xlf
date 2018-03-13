@@ -197,6 +197,16 @@
         <target state="translated">Visualizza le informazioni su .NET Core.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="new">Display the installed SDKs.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="new">Display the installed runtimes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
         <source>Enable diagnostic output.</source>
         <target state="translated">Abilita l'output di diagnostica.</target>
@@ -233,8 +243,18 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
+        <source>Path to additional deps.json file.</source>
         <target state="translated">Percorso del file deps.json aggiuntivo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Stores the specified assemblies in the runtime store.</source>
+        <target state="translated">Memorizza gli assembly specificati nell'archivio di runtime.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallDefinition">
+        <source>Installs an item into the development environment.</source>
+        <target state="new">Installs an item into the development environment.</target>
         <note />
       </trans-unit>
     </body>

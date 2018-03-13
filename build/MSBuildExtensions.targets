@@ -75,7 +75,7 @@
           NuGetPackagesDir=$(NuGetPackagesDir);
           DependencyPackageName=%(ExtensionPackageToRestore.Identity);
           DependencyPackageVersion=%(ExtensionPackageToRestore.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </ExtensionRestore>
     </ItemGroup>
@@ -86,7 +86,7 @@
     </MSBuild>
   </Target>
 
-  <Target Name="GenerateBundledVersionsProps">
+  <Target Name="GenerateBundledVersionsProps" DependsOnTargets="RunResolvePackageDependencies">
     <PropertyGroup>
       <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
     </PropertyGroup>
@@ -99,6 +99,8 @@
     <ItemGroup>
       <_NETStandardLibraryVersions Include="@(PackageDefinitions->'%(Version)')"
                                    Condition="%(PackageDefinitions.Name) == 'NetStandard.Library'" />
+      <_NETCorePlatformsImplicitPackageVersion Include="@(PackageDefinitions->'%(Version)')"
+                                   Condition="%(PackageDefinitions.Name) == 'Microsoft.NETCore.Platforms'" />
     </ItemGroup>
 
     <Error Condition="@(_NETStandardLibraryVersions->Distinct()->Count()) != 1"
@@ -107,6 +109,7 @@
     <PropertyGroup>
       <_NETCoreAppPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</_NETCoreAppPackageVersion>
       <_NETStandardPackageVersion>@(_NETStandardLibraryVersions->Distinct())</_NETStandardPackageVersion>
+      <_NETCorePlatformsImplicitPackageVersion>@(_NETCorePlatformsImplicitPackageVersion->Distinct())</_NETCorePlatformsImplicitPackageVersion>
 
       <!-- Use only major and minor in target framework version -->
       <_NETCoreAppTargetFrameworkVersion>$(_NETCoreAppPackageVersion.Split('.')[0]).$(_NETCoreAppPackageVersion.Split('.')[1])</_NETCoreAppTargetFrameworkVersion>
@@ -131,6 +134,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <BundledNETCoreAppPackageVersion>$(_NETCoreAppPackageVersion)</BundledNETCoreAppPackageVersion>
     <BundledNETStandardTargetFrameworkVersion>$(_NETStandardTargetFrameworkVersion)</BundledNETStandardTargetFrameworkVersion>
     <BundledNETStandardPackageVersion>$(_NETStandardPackageVersion)</BundledNETStandardPackageVersion>
+    <NETCorePlatformsImplicitPackageVersion>$(_NETCorePlatformsImplicitPackageVersion)</NETCorePlatformsImplicitPackageVersion>
   </PropertyGroup>
 </Project>
 ]]>
