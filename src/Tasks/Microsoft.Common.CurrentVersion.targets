@@ -770,7 +770,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
       if you set a value in the body, the value is not used by the top implicit import but is used by the bottom.
-      This can lead to non-deterministic behavior and builds can fail for obscure reasons.
+      This can lead to confusing behavior and builds can fail for obscure reasons.
     -->
     <Error Condition=" '$(_InitialMSBuildProjectExtensionsPath)' != '' And '$(MSBuildProjectExtensionsPath)' != '$(_InitialMSBuildProjectExtensionsPath)' "
            Code="MSB3540"
@@ -783,7 +783,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         2. $(BaseIntermediateOutputPath) was set in the body of a project after its default value was set in Microsoft.Common.props
         3. $(BaseIntermediateOutputPath) is not the same as $(MSBuildProjectExtensionsPath)
 
-      Similar to the error above, there are cases when users set $(BaseIntermediateOutputPath) in the body of their project and things build but only by coincedence.
+      Similar to the error above, there are cases when users set $(BaseIntermediateOutputPath) in the body of their project and things build but only by coincidence.
       MSBuild does not know if $(BaseIntermediateOutputPath) changing would cause problems so tools like NuGet must set $(EnableBaseIntermediateOutputPathMismatchWarning)
       to 'true'.
     -->
