@@ -130,7 +130,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_CheckForNETCoreSdkIsPreview"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
-    <ShowPreviewMessage Condition=" '$(_NETCoreSdkIsPreview)' == 'true' " />
+    <ShowPreviewMessage Condition=" '$(_NETCoreSdkIsPreview)' == 'true' AND '$(SuppressNETCoreSdkPreviewMessage)' != 'true' " />
   </Target>
 
   <PropertyGroup>
