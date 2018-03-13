@@ -95,8 +95,11 @@ class Program
             DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, toolProject.Name.ToLowerInvariant()));
             DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant()));
 
-            var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name)
-                .Restore(Log, toolProject.Name);
+            var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name);
+
+            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreMyGetFeed);
+
+            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
 
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
@@ -126,9 +129,12 @@ class Program
                         new XAttribute("Version", "1.0.0")));
                 });
 
-            NuGetConfigWriter.Write(toolReferencerInstance.TestRoot, nupkgPath);
+            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreMyGetFeed };
+            sources.Add(nupkgPath);
+
+            NuGetConfigWriter.Write(toolReferencerInstance.TestRoot, sources);
             var restoreCommand = toolReferencerInstance.GetRestoreCommand(Log, toolReferencer.Name);
-            restoreCommand.Execute().Should().Pass();
+            restoreCommand.Execute("/v:n").Should().Pass();
 
             string toolAssetsFilePath = Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "1.0.0", toolProject.TargetFrameworks, "project.assets.json");
             var toolAssetsFile = new LockFileFormat().Read(toolAssetsFilePath);
@@ -174,6 +180,8 @@ class Program
                     }
                 }
             }
+
+            args.Add("/v:n");
 
             var generateDepsCommand = new MSBuildCommand(Log, "BuildDepsJson", generateDepsProjectPath);
 

@@ -142,6 +142,8 @@ namespace Microsoft.NET.Publish.Tests
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
 
+            NuGetConfigWriter.Write(simpleDependenciesAsset.TestRoot, NuGetConfigWriter.DotnetCoreMyGetFeed);
+
             storeCommand
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeWorkingDir={WorkingDir}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true")
                 .Should()
