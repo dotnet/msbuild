@@ -786,9 +786,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**;Collections\RetrievableEntryHashSet\Originals\*" />
-    <EmbeddedResource Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**" />
-    <None Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**" />
+    <Compile Remove="Collections\RetrievableEntryHashSet\Originals\*" />
   </ItemGroup>
 
 </Project>
