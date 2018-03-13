@@ -25,10 +25,6 @@
                 "bin/Microsoft.Build.Conversion/net46/Microsoft.Build.Conversion.Core.dll",
 
                 "bin/MSBuild/netcoreapp2.0/MSBuild.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Framework.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Tasks.Core.dll",
-                "bin/MSBuild/netcoreapp2.0/Microsoft.Build.Utilities.Core.dll",
 
                 "bin/MSBuild/netcoreapp2.1/MSBuild.dll",
                 "bin/MSBuild/netcoreapp2.1/Microsoft.Build.dll",
