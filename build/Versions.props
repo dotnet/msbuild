@@ -19,7 +19,7 @@
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.2.0-preview1-007997</DotNetCliVersion>
+    <DotNetCliVersion>2.1.300-preview2-008290</DotNetCliVersion>
     <RoslynToolsRepoToolsetVersion>1.0.0-beta-62615-02</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
