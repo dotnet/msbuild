@@ -259,6 +259,26 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
     </ResolvePublishAssemblies>
   </Target>
+
+  <Target Name="FilterPublishSatelliteResources" AfterTargets="RunResolvePublishAssemblies"
+          Condition="'$(SatelliteResourceLanguages)' != ''">
+
+    <ItemGroup>
+      <PublishSatelliteResources Include="@(ResolvedAssembliesToPublish)"
+                                 Condition="'%(ResolvedAssembliesToPublish.AssetType)' == 'resources'" />
+    </ItemGroup>
+    
+    <JoinItems Left="@(PublishSatelliteResources)" LeftKey="Culture" LeftMetadata="*"
+               Right="$(SatelliteResourceLanguages)" RightKey="" RightMetadata=""
+               ItemSpecToUse="Left">
+      <Output TaskParameter="JoinResult" ItemName="FilteredPublishSatelliteResources" />
+    </JoinItems>
+
+    <ItemGroup Condition="'@(PublishSatelliteResources)' != ''">
+      <ResolvedAssembliesToPublish Remove="@(PublishSatelliteResources)" />
+      <ResolvedAssembliesToPublish Include="@(FilteredPublishSatelliteResources)" />
+    </ItemGroup>
+  </Target>
   
   <!--
     ============================================================
