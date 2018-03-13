@@ -19,7 +19,7 @@ namespace Microsoft.Build.Logging
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         public void Replay(string sourceFilePath)
         {
-            using (var stream = new FileStream(sourceFilePath, FileMode.Open))
+            using (var stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
                 var binaryReader = new BinaryReader(gzipStream);
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Logging
                     throw new NotSupportedException(text);
                 }
 
-                var reader = new BuildEventArgsReader(binaryReader);
+                var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
                 while (true)
                 {
                     BuildEventArgs instance = null;

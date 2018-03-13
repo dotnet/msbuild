@@ -16,8 +16,8 @@ namespace Microsoft.Build.Evaluation
         {
             private readonly string _itemType;
             private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-            private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
 
+            protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
             protected readonly ProjectItemElement _itemElement;
             protected readonly ItemSpec<P, I> _itemSpec;
             protected readonly EvaluatorData _evaluatorData;
@@ -52,9 +52,12 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                ImmutableList<I> items = SelectItems(listBuilder, globsToIgnore);
-                MutateItems(items);
-                SaveItems(items, listBuilder);
+                using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
+                {
+                    var items = SelectItems(listBuilder, globsToIgnore);
+                    MutateItems(items);
+                    SaveItems(items, listBuilder);
+                }
             }
 
             /// <summary>
@@ -160,13 +163,6 @@ namespace Microsoft.Build.Evaluation
 
                             foreach (var metadataElement in metadata)
                             {
-#if FEATURE_MSBUILD_DEBUGGER
-                                //if (DebuggerManager.DebuggingEnabled)
-                                //{
-                                //    DebuggerManager.PulseState(metadataElementElement.Location, _itemPassLocals);
-                                //}
-#endif
-
                                 if (!EvaluateCondition(metadataElement.Condition, metadataElement, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
                                 {
                                     continue;
@@ -203,13 +199,6 @@ namespace Microsoft.Build.Evaluation
                             {
                                 continue;
                             }
-
-#if FEATURE_MSBUILD_DEBUGGER
-                            //if (DebuggerManager.DebuggingEnabled)
-                            //{
-                            //    DebuggerManager.PulseState(metadataElementElement.Location, _itemPassLocals);
-                            //}
-#endif
 
                             string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);

@@ -734,7 +734,32 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static void DeleteWithoutTrailingBackslash(string path, bool recursive = false)
         {
-            Directory.Delete(EnsureNoTrailingSlash(path), recursive);
+            //  Some tests (such as FileMatcher and Evaluation tests) were failing with an UnauthorizedAccessException or directory not empty.
+            //  This retry logic works around that issue.
+            const int NUM_TRIES = 3;
+            for (int i = 0; i < NUM_TRIES; i++)
+            {
+                try
+                {
+                    Directory.Delete(EnsureNoTrailingSlash(path), recursive);
+
+                    //  If we got here, the directory was successfully deleted
+                    return;
+                }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                {
+                    if (i == NUM_TRIES - 1)
+                    {
+                        //var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+                        //string fileString = string.Join(Environment.NewLine, files);
+                        //string message = $"Unable to delete directory '{path}'.  Contents:" + Environment.NewLine + fileString;
+                        //throw new IOException(message, ex);
+                        throw;
+                    }
+                }
+
+                Thread.Sleep(10);
+            }
         }
 
         /// <summary>
@@ -1253,6 +1278,13 @@ namespace Microsoft.Build.Shared
             string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
 
             return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
+        }
+
+        internal static bool TryGetPathOfFileAbove(string file, string startingDirectory, out string fullPath)
+        {
+            fullPath = GetPathOfFileAbove(file, startingDirectory);
+
+            return fullPath != String.Empty;
         }
 
         // Method is simple set of function calls and may inline;

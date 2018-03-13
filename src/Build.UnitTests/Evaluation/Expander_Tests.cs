@@ -589,7 +589,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "Cannot fail on path too long with Unix"
+        [PlatformSpecific(TestPlatforms.Windows)] // "Cannot fail on path too long with Unix"
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -873,7 +874,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -894,7 +895,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path with illegal windows chars when getting metadata through ->Metadata function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -934,7 +935,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -955,7 +956,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -995,7 +996,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1016,7 +1017,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidPathAndMetadataItemInvalidWindowsPathChars3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -2321,9 +2322,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/coreclr/issues/15662")]
         public void PropertyStaticFunctionAllEnabled()
         {
-
             using (var env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
@@ -3432,11 +3433,13 @@ $(
                 "()"
             };
 
+#if !RUNTIME_TYPE_NETCORE
             if (NativeMethodsShared.IsWindows)
             {
                 // '|' is only an invalid character in Windows filesystems
                 errorTests.Add("$([System.IO.Path]::Combine(`|`,`b`))");
             }
+#endif
 
 #if FEATURE_WIN32_REGISTRY
             if (NativeMethodsShared.IsWindows)
@@ -3538,6 +3541,166 @@ $(
             string result = expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             result.ShouldBe("6C854");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringArrayIndexerGetter()
+        {
+            TestPropertyFunction("$(prop.Split('-')[0])", "prop", "x-y-z", "x");
+        }
+
+        [Fact]
+        public void PropertyFunctionSubstring1()
+        {
+            TestPropertyFunction("$(prop.Substring(2))", "prop", "abcdef", "cdef");
+        }
+
+        [Fact]
+        public void PropertyFunctionSubstring2()
+        {
+            TestPropertyFunction("$(prop.Substring(2, 3))", "prop", "abcdef", "cde");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringGetChars()
+        {
+            TestPropertyFunction("$(prop[0])", "prop", "461", "4");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringGetCharsError()
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                TestPropertyFunction("$(prop[5])", "prop", "461", "4");
+            });
+        }
+
+        [Fact]
+        public void PropertyFunctionStringPadLeft1()
+        {
+            TestPropertyFunction("$(prop.PadLeft(2))", "prop", "x", " x");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringPadLeft2()
+        {
+            TestPropertyFunction("$(prop.PadLeft(2, '0'))", "prop", "x", "0x");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringPadRight1()
+        {
+            TestPropertyFunction("$(prop.PadRight(2))", "prop", "x", "x ");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringPadRight2()
+        {
+            TestPropertyFunction("$(prop.PadRight(2, '0'))", "prop", "x", "x0");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimEndCharArray()
+        {
+            TestPropertyFunction("$(prop.TrimEnd('.0123456789'))", "prop", "net461", "net");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimStart()
+        {
+            TestPropertyFunction("$(X.TrimStart('vV'))", "X", "v40", "40");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimStartNoQuotes()
+        {
+            TestPropertyFunction("$(X.TrimStart(vV))", "X", "v40", "40");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimEnd1()
+        {
+            TestPropertyFunction("$(prop.TrimEnd('a'))", "prop", "netaa", "net");
+        }
+
+        // https://github.com/Microsoft/msbuild/issues/2882
+        [Fact]
+        public void PropertyFunctionMathMaxOverflow()
+        {
+            TestPropertyFunction("$([System.Math]::Max($(X), 0))", "X", "-2010", "0");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringTrimEnd2()
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                TestPropertyFunction("$(prop.TrimEnd('a', 'b'))", "prop", "stringab", "string");
+            });
+        }
+
+        [Fact]
+        public void PropertyFunctionMathMin()
+        {
+            TestPropertyFunction("$([System.Math]::Min($(X), 20))", "X", "30", "20");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildAdd()
+        {
+            TestPropertyFunction("$([MSBuild]::Add($(X), 5))", "X", "7", "12");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildSubtract()
+        {
+            TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000))", "X", "20100042", "42");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildMultiply()
+        {
+            TestPropertyFunction("$([MSBuild]::Multiply($(X), 8800))", "X", "2", "17600");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildDivide()
+        {
+            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", "6.5536");
+        }
+
+        [Fact]
+        public void PropertyFunctionConvertToString()
+        {
+            TestPropertyFunction("$([System.Convert]::ToString(`.`))", "_", "_", ".");
+        }
+
+        [Fact]
+        public void PropertyFunctionConvertToInt32()
+        {
+            TestPropertyFunction("$([System.Convert]::ToInt32(42))", "_", "_", "42");
+        }
+
+        [Fact]
+        public void PropertyFunctionToCharArray()
+        {
+            TestPropertyFunction("$([System.Convert]::ToString(`.`).ToCharArray())", "_", "_", ".");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringArrayGetValue()
+        {
+            TestPropertyFunction("$(X.Split($([System.Convert]::ToString(`.`).ToCharArray())).GetValue($([System.Convert]::ToInt32(0))))", "X", "ab.cd", "ab");
+        }
+
+        private void TestPropertyFunction(string expression, string propertyName, string propertyValue, string expected)
+        {
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(ProjectPropertyInstance.Create(propertyName, propertyValue));
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(properties);
+            string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            result.ShouldBe(expected);
         }
     }
 }

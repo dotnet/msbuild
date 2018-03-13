@@ -210,10 +210,6 @@ namespace Microsoft.Build.Shared
             {
                 return CloseHandle(handle);
             }
-
-            [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-            [DllImport("KERNEL32.DLL")]
-            private static extern bool CloseHandle(IntPtr hObject);
         }
 
         /// <summary>
@@ -546,14 +542,25 @@ namespace Microsoft.Build.Shared
             get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); }
 #endif
         }
-
+        
+#if MONO
+        private static bool? _isOSX;
+#endif
         /// <summary>
         /// Gets a flag indicating if we are running under Mac OSX
         /// </summary>
         internal static bool IsOSX
         {
 #if MONO
-            get { return File.Exists("/usr/lib/libc.dylib"); }
+            get
+            {
+                if (!_isOSX.HasValue)
+                {
+                    _isOSX = File.Exists("/usr/lib/libc.dylib");
+                }
+
+                return _isOSX.Value;
+            }
 #elif CLR2COMPATIBILITY
             get { return false; }
 #else
@@ -1362,6 +1369,11 @@ namespace Microsoft.Build.Shared
             out FILETIME lpLastAccessTime,
             out FILETIME lpLastWriteTime
             );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+
+        internal static extern bool CloseHandle(IntPtr hObject);
 
 #endregion
 

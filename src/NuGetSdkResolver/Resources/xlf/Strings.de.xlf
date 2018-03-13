@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
+    <body>
+      <trans-unit id="FailedToParseGlobalJson">
+        <source>Failed to parse "{0}". {1}</source>
+        <target state="translated">Fehler beim Analysieren von "{0}". {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindInstalledPackage">
+        <source>Failed to resolve SDK '{0}'. A package was successfully restored but the package could not be located.</source>
+        <target state="translated">Fehler beim Auflösen von SDK "{0}". Ein Paket wurde erfolgreich wiederhergestellt, aber das Paket wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageWasNotInstalled">
+        <source>Failed to resolve SDK '{0}'. Package restore was successful but a package with the ID of "{1}" was not installed.</source>
+        <target state="translated">Fehler beim Auflösen von SDK "{0}". Die Paketwiederherstellung war erfolgreich, aber es wurde kein Paket mit der ID "{1}" installiert.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

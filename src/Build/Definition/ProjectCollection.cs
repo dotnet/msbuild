@@ -232,8 +232,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private ProjectRootElementCache _projectRootElementCache;
 
-        internal SdkResolution SdkResolution { get; }
-
         /// <summary>
         /// Hook up last minute dumping of any exceptions bringing down the process
         /// </summary>
@@ -315,8 +313,6 @@ namespace Microsoft.Build.Evaluation
 
                 RegisterLoggers(loggers);
                 RegisterForwardingLoggers(remoteLoggers);
-
-                SdkResolution = BackEnd.SdkResolution.Instance;
 
                 if (globalProperties != null)
                 {

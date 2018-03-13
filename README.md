@@ -13,14 +13,12 @@ The current development branch is `master`. It builds for .NET Core and the full
 |**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_OSX_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_OSX_CoreCLR)|
 |**Mono**|returning soon|
 
-We have entered stabilization for the 15.3 release (corresponding to Visual Studio 15.3) in the [`vs15.3`](https://github.com/Microsoft/msbuild/tree/vs15.3) branch.
+We have entered stabilization for the 15.6 release (corresponding to Visual Studio 15.6) in the [`vs15.6`](https://github.com/Microsoft/msbuild/tree/vs15.6) branch.
 
 | Runtime\OS | Windows | Ubuntu 14.04 | Ubuntu 16.04 |Mac OS X|
 |:------|:------:|:------:|:------:|:------:|
-| **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.3/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.3/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
-|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.3/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.3/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.3/innerloop_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.3/job/innerloop_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.3/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.3/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.3/innerloop_OSX_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.3/job/innerloop_OSX_CoreCLR)|
-
-[![Join the chat at https://gitter.im/Microsoft/msbuild](https://badges.gitter.im/Microsoft/msbuild.svg)](https://gitter.im/Microsoft/msbuild?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+| **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
+|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_OSX_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_OSX_CoreCLR)|
 
 ### Source code
 
@@ -34,13 +32,12 @@ To get started on **Visual Studio 2017**:
 
 1. [Install Visual Studio 2017](https://www.visualstudio.com/vs/).  Select the following Workloads:
   - _.NET desktop development_
-  - _Desktop development with C++_
-    - Optional, build warnings may occur without it.
   - _.NET Core cross-platform development_
     - Optional, not strictly required (yet) but used to develop .NET Core applications.
 2. Clone the source code (see above).
-3. Build the code using the `cibuild.cmd` script.
-5. Open src/MSBuild.sln solution in Visual Studio 2017.
+2. Open a `Developer Command Prompt for VS 2017` prompt.
+3. Build the code using the `build.cmd` script. This also restores packages needed to open the projects in Visual Studio.
+5. Open `src/MSBuild.sln` in Visual Studio 2017.
 
 ### Building MSBuild in Unix (Mac & Linux)
 MSBuild can be run on Unix systems that support .NET Core. Set-up instructions can be viewed on the wiki:   [Building Testing and Debugging on .Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
@@ -65,13 +62,13 @@ You are also encouraged to start a discussion by filing an issue or creating a g
 
 * **MSBuild**. [Microsoft.Build.CommandLine](https://docs.microsoft.com/visualstudio/msbuild/msbuild)  is the entrypoint for the Microsoft Build Engine (MSBuild.exe).
 
-* **Microsoft.Build**. The [Microsoft.Build](https://msdn.microsoft.com/library/gg145008.aspx) namespaces contain types that provide programmatic access to, and control of, the MSBuild engine.
+* **Microsoft.Build**. The [Microsoft.Build](https://docs.microsoft.com/dotnet/api/?term=Microsoft.Build) namespaces contain types that provide programmatic access to, and control of, the MSBuild engine.
 
-* **Microsoft.Build.Framework**. The [Microsoft.Build.Framework](https://msdn.microsoft.com/library/microsoft.build.framework.aspx) namespace contains the types that define how tasks and loggers interact with the MSBuild engine. For additional information on this component, see our [Microsoft.Build.Framework wiki page](https://github.com/Microsoft/msbuild/wiki/Microsoft.Build.Framework).
+* **Microsoft.Build.Framework**. The [Microsoft.Build.Framework](https://docs.microsoft.com/dotnet/api/microsoft.build.framework) namespace contains the types that define how tasks and loggers interact with the MSBuild engine. For additional information on this component, see our [Microsoft.Build.Framework wiki page](https://github.com/Microsoft/msbuild/wiki/Microsoft.Build.Framework).
 
-* **Microsoft.Build.Tasks**. The [Microsoft.Build.Tasks](https://msdn.microsoft.com/library/microsoft.build.tasks.aspx) namespace contains the implementation of all tasks shipping with MSBuild.
+* **Microsoft.Build.Tasks**. The [Microsoft.Build.Tasks](https://docs.microsoft.com/dotnet/api/microsoft.build.tasks) namespace contains the implementation of all tasks shipping with MSBuild.
 
-* **Microsoft.Build.Utilities**. The [Microsoft.Build.Utilities](https://msdn.microsoft.com/library/microsoft.build.utilities.aspx) namespace provides helper classes that you can use to create your own MSBuild loggers and tasks.
+* **Microsoft.Build.Utilities**. The [Microsoft.Build.Utilities](https://docs.microsoft.com/dotnet/api/microsoft.build.utilities) namespace provides helper classes that you can use to create your own MSBuild loggers and tasks.
 
 ### License
 

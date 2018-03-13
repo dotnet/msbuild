@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 
 namespace Microsoft.Build.Logging
 {
@@ -89,7 +90,9 @@ namespace Microsoft.Build.Logging
                     e.Message,
                     e.HelpKeyword,
                     e.SenderName,
-                    MessageImportance.Normal);
+                    MessageImportance.Normal,
+                    e.Timestamp);
+                buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
                 Write(buildMessageEventArgs);
             }
         }
@@ -125,8 +128,21 @@ namespace Microsoft.Build.Logging
         private void Write(ProjectEvaluationFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectEvaluationFinished);
+            
             WriteBuildEventArgsFields(e);
             Write(e.ProjectFile);
+
+            Write(e.ProfilerResult.HasValue);
+            if (e.ProfilerResult.HasValue)
+            {
+                Write(e.ProfilerResult.Value.ProfiledLocations.Count);
+
+                foreach (var item in e.ProfilerResult.Value.ProfiledLocations)
+                {
+                    Write(item.Key);
+                    Write(item.Value);
+                }
+            }
         }
 
         private void Write(ProjectStartedEventArgs e)
@@ -171,6 +187,7 @@ namespace Microsoft.Build.Logging
             WriteOptionalString(e.ProjectFile);
             WriteOptionalString(e.TargetFile);
             WriteOptionalString(e.ParentTarget);
+            Write((int) e.BuildReason);
         }
 
         private void Write(TargetFinishedEventArgs e)
@@ -251,6 +268,12 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
+            if (e is TargetSkippedEventArgs)
+            {
+                Write((TargetSkippedEventArgs)e);
+                return;
+            }
+
             Write(BinaryLogRecordKind.Message);
             WriteMessageFields(e);
         }
@@ -259,8 +282,19 @@ namespace Microsoft.Build.Logging
         {
             Write(BinaryLogRecordKind.ProjectImported);
             WriteMessageFields(e);
+            Write(e.ImportIgnored);
             WriteOptionalString(e.ImportedProjectFile);
             WriteOptionalString(e.UnexpandedProject);
+        }
+
+        private void Write(TargetSkippedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.TargetSkipped);
+            WriteMessageFields(e);
+            WriteOptionalString(e.TargetFile);
+            WriteOptionalString(e.TargetName);
+            WriteOptionalString(e.ParentTarget);
+            Write((int)e.BuildReason);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
@@ -572,6 +606,11 @@ namespace Microsoft.Build.Logging
             Write7BitEncodedInt(binaryWriter, value);
         }
 
+        private void Write(long value)
+        {
+            binaryWriter.Write(value);
+        }
+
         private void Write7BitEncodedInt(BinaryWriter writer, int value)
         {
             // Write out an int 7 bits at a time.  The high bit of the byte,
@@ -624,6 +663,41 @@ namespace Microsoft.Build.Logging
         {
             binaryWriter.Write(timestamp.Ticks);
             Write((int)timestamp.Kind);
+        }
+
+        private void Write(TimeSpan timeSpan)
+        {
+            binaryWriter.Write(timeSpan.Ticks);
+        }
+
+        private void Write(EvaluationLocation item)
+        {
+            WriteOptionalString(item.ElementName);
+            WriteOptionalString(item.ElementDescription);
+            WriteOptionalString(item.EvaluationPassDescription);
+            WriteOptionalString(item.File);
+            Write((int)item.Kind);
+            Write((int)item.EvaluationPass);
+
+            Write(item.Line.HasValue);
+            if (item.Line.HasValue)
+            {
+                Write(item.Line.Value);
+            }
+
+            Write(item.Id);
+            Write(item.ParentId.HasValue);
+            if (item.ParentId.HasValue)
+            {
+                Write(item.ParentId.Value);
+            }
+        }
+
+        private void Write(ProfiledLocation e)
+        {
+            Write(e.NumberOfHits);
+            Write(e.ExclusiveTime);
+            Write(e.InclusiveTime);
         }
     }
 }

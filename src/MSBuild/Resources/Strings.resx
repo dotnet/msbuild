@@ -579,13 +579,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      (Short form: /ds)
     </value>
   </data>
-  <data name="HelpMessage_27_DebuggerSwitch" UESanitized="false" Visibility="Public">
-   <value>  /debug
-                     Causes a debugger prompt to appear immediately so that
-                     Visual Studio can be attached for you to debug the
-                     MSBuild XML and any tasks and loggers it uses.
-   </value>
-  </data>
   <data name="HelpMessage_28_WarnAsErrorSwitch" UESanitized="false" Visibility="Public">
     <value>  /warnaserror[:code[;code2]]
                      List of warning codes to treats as errors.  Use a semicolon
@@ -684,6 +677,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </value>
     <comment>
       LOCALIZATION: "/restore" and "/r" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_32_ProfilerSwitch" xml:space="preserve">
+    <value>  /profileevaluation:&lt;file&gt;    
+                     Profiles MSBuild evaluation and writes the result 
+                     to the specified file. If the extension of the specified
+                     file is '.md', the result is generated in markdown
+                     format. Otherwise, a tab separated file is produced.
+    </value>
+  </data>
+  <data name="HelpMessage_33_RestorePropertySwitch" UESanitized="false" Visibility="Public">
+    <value>  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     Set or override these project-level properties only
+                     during restore and do not use properties specified
+                     with the /property argument. &lt;n&gt; is the property
+                     name, and &lt;v&gt; is the property value. Use a
+                     semicolon or a comma to separate multiple properties,
+                     or specify each property separately.
+                     (Short form: /rp)
+                     Example:
+                       /restoreProperty:IsRestore=true;MyProperty=value
+    </value>
+    <comment>
+      LOCALIZATION: "/restoreProperty" and "/rp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
@@ -1081,11 +1099,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
-
+  <data name="InvalidProfilerValue" xml:space="preserve">
+    <value>MSBUILD : error MSB1053: Provided filename is not valid. {0}</value>
+  </data>
+  <data name="MissingProfileParameterError" xml:space="preserve">
+    <value>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</value>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1053.
+        Next error code should be MSB1055.
 
         Don't forget to update this comment after using the new code.
   -->

@@ -48,6 +48,17 @@ namespace Microsoft.Build.Evaluation
         private readonly Stack<string> _filePaths = new Stack<string>();
 
         /// <summary>
+        /// Used to keep track of nodes that were added to the document from implicit imports which will be removed later.
+        /// At the time of adding this feature, cloning is buggy so it is easier to just edit the DOM in memory.
+        /// </summary>
+        private List<XmlNode> _addedNodes;
+
+        /// <summary>
+        /// Table of implicit imports by document.  The list per document contains both top and bottom imports.
+        /// </summary>
+        private readonly Dictionary<XmlDocument, List<ResolvedImport>> _implicitImportsByProject = new Dictionary<XmlDocument, List<ResolvedImport>>();
+
+        /// <summary>
         /// Constructor
         /// </summary>
         private Preprocessor(Project project)
@@ -84,47 +95,9 @@ namespace Microsoft.Build.Evaluation
         {
             XmlDocument outerDocument = _project.Xml.XmlDocument;
 
-            int implicitImportCount = _project.Imports.Count(i => i.ImportingElement.ImplicitImportLocation != ImplicitImportLocation.None);
-            // At the time of adding this feature, cloning is buggy.  The implicit imports are added to the XML document and removed after
-            // processing.  This variable keeps track of the nodes that were added
-            IList<XmlNode> addedNodes = new List<XmlNode>(implicitImportCount);
-            XmlElement documentElement = outerDocument.DocumentElement;
+            CreateImplicitImportTable();
 
-            if (implicitImportCount > 0 && documentElement != null)
-            {
-                // Top implicit imports need to be added in the correct order by adding the first one at the top and each one after the first
-                // one.  This variable keeps track of the last import that was added.
-                XmlNode lastImplicitImportAdded = null;
-
-                // Add the implicit top imports
-                //
-                foreach (var import in _project.Imports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Top))
-                {
-                    XmlElement xmlElement = (XmlElement)outerDocument.ImportNode(import.ImportingElement.XmlElement, false);
-                    if (lastImplicitImportAdded == null)
-                    {
-                        documentElement.InsertBefore(xmlElement, documentElement.FirstChild);
-                        lastImplicitImportAdded = xmlElement;
-                    }
-                    else
-                    {
-                        documentElement.InsertAfter(xmlElement, lastImplicitImportAdded);
-                    }
-                    addedNodes.Add(xmlElement);
-                    AddToImportTable(xmlElement, import.ImportedProject);
-                }
-
-                // Add the implicit bottom imports
-                //
-                foreach (var import in _project.Imports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Bottom))
-                {
-                    XmlElement xmlElement = (XmlElement)documentElement.InsertAfter(outerDocument.ImportNode(import.ImportingElement.XmlElement, false), documentElement.LastChild);
-
-                    AddToImportTable(xmlElement, import.ImportedProject);
-
-                    addedNodes.Add(xmlElement);
-                }
-            }
+            AddImplicitImportNodes(outerDocument.DocumentElement);
 
             XmlDocument destinationDocument = (XmlDocument)outerDocument.CloneNode(false /* shallow */);
 
@@ -139,9 +112,9 @@ namespace Microsoft.Build.Evaluation
 
             // Remove the nodes that were added as implicit imports
             //
-            foreach (XmlNode addedNode in addedNodes)
+            foreach (XmlNode node in _addedNodes)
             {
-                documentElement?.RemoveChild(addedNode);
+                node.ParentNode?.RemoveChild(node);
             }
 
             return destinationDocument;
@@ -157,6 +130,93 @@ namespace Microsoft.Build.Evaluation
             }
 
             list.Add(importedProject);
+        }
+
+        /// <summary>
+        /// Creates a table containing implicit imports by project document.
+        /// </summary>
+        private void CreateImplicitImportTable()
+        {
+            int implicitImportCount = 0;
+
+            // Loop through all implicit imports top and bottom
+            foreach (ResolvedImport resolvedImport in _project.Imports.Where(i => i.ImportingElement.ImplicitImportLocation != ImplicitImportLocation.None))
+            {
+                implicitImportCount++;
+                List<ResolvedImport> imports;
+
+                // Attempt to get an existing list from the dictionary
+                if (!_implicitImportsByProject.TryGetValue(resolvedImport.ImportingElement.XmlDocument, out imports))
+                {
+                    // Add a new list
+                    _implicitImportsByProject[resolvedImport.ImportingElement.XmlDocument] = new List<ResolvedImport>();
+
+                    // Get a pointer to the list
+                    imports = _implicitImportsByProject[resolvedImport.ImportingElement.XmlDocument];
+                }
+
+                imports.Add(resolvedImport);
+            }
+
+            // Create a list to store nodes which will be added.  Optimization here is that we now know how many items are going to be added.
+            _addedNodes = new List<XmlNode>(implicitImportCount);
+        }
+
+
+        /// <summary>
+        /// Adds all implicit import nodes to the specified document.
+        /// </summary>
+        /// <param name="documentElement">The document element to add nodes to.</param>
+        private void AddImplicitImportNodes(XmlElement documentElement)
+        {
+            List<ResolvedImport> implicitImports;
+
+            // Do nothing if this project has no implicit imports
+            if (!_implicitImportsByProject.TryGetValue(documentElement.OwnerDocument, out implicitImports))
+            {
+                return;
+            }
+
+            // Top implicit imports need to be added in the correct order by adding the first one at the top and each one after the first
+            // one.  This variable keeps track of the last import that was added.
+            XmlNode lastImplicitImportAdded = null;
+
+            // Add the implicit top imports
+            //
+            foreach (ResolvedImport import in implicitImports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Top))
+            {
+                XmlElement xmlElement = (XmlElement)documentElement.OwnerDocument.ImportNode(import.ImportingElement.XmlElement, false);
+                if (lastImplicitImportAdded == null)
+                {
+                    if (documentElement.FirstChild == null)
+                    {
+                        documentElement.AppendChild(xmlElement);
+                    }
+                    else
+                    {
+                        documentElement.InsertBefore(xmlElement, documentElement.FirstChild);
+                    }
+                    
+                    lastImplicitImportAdded = xmlElement;
+                }
+                else
+                {
+                    documentElement.InsertAfter(xmlElement, lastImplicitImportAdded);
+                }
+                _addedNodes.Add(xmlElement);
+                AddToImportTable(xmlElement, import.ImportedProject);
+            }
+
+            // Add the implicit bottom imports
+            //
+            foreach (var import in implicitImports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Bottom))
+            {
+                XmlElement xmlElement = (XmlElement)documentElement.InsertAfter(documentElement.OwnerDocument.ImportNode(import.ImportingElement.XmlElement, false), documentElement.LastChild);
+
+                _addedNodes.Add(xmlElement);
+
+                AddToImportTable(xmlElement, import.ImportedProject);
+            }
         }
 
         /// <summary>
@@ -211,6 +271,9 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
 
+                    // Add any implicit imports for an imported document
+                    AddImplicitImportNodes(child.OwnerDocument.DocumentElement);
+
                     CloneChildrenResolvingImports(child, destination);
                     continue;
                 }
@@ -221,9 +284,12 @@ namespace Microsoft.Build.Evaluation
                     // To display what the <Import> tag looked like
                     string importCondition = ((XmlElement)child).GetAttribute(XMakeAttributes.condition);
                     string condition = importCondition.Length > 0 ? $" Condition=\"{importCondition}\"" : String.Empty;
-                    string importProject = ((XmlElement)child).GetAttribute(XMakeAttributes.project);
+                    string importProject = ((XmlElement)child).GetAttribute(XMakeAttributes.project).Replace("--", "__");
                     string importSdk = ((XmlElement)child).GetAttribute(XMakeAttributes.sdk);
                     string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
+
+                    // Get the Sdk attribute of the Project element if specified
+                    string projectSdk = source.NodeType == XmlNodeType.Element && String.Equals(XMakeElements.project, source.Name, StringComparison.Ordinal) ? ((XmlElement) source).GetAttribute(XMakeAttributes.sdk) : String.Empty;
 
                     IList<ProjectRootElement> resolvedList;
                     if (!_importTable.TryGetValue((XmlElement)child, out resolvedList))
@@ -244,10 +310,10 @@ namespace Microsoft.Build.Evaluation
                         string importTag =
                             $"  <Import Project=\"{importProject}\"{sdk}{condition}>";
 
-                        if (!String.IsNullOrWhiteSpace(importSdk) && _project.Xml.Sdk.IndexOf(importSdk, StringComparison.OrdinalIgnoreCase) >= 0)
+                        if (!String.IsNullOrWhiteSpace(importSdk) && projectSdk.IndexOf(importSdk, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             importTag +=
-                                $"\r\n  This import was added implicitly because of the {XMakeElements.project} element's {XMakeAttributes.sdk} attribute specified \"{importSdk}\".";
+                                $"\r\n  This import was added implicitly because the {XMakeElements.project} element's {XMakeAttributes.sdk} attribute specified \"{importSdk}\".";
                         }
 
                         destination.AppendChild(destinationDocument.CreateComment(

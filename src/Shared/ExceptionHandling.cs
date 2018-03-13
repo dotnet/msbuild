@@ -31,6 +31,30 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
+        private static readonly string s_debugDumpPath;
+
+        static ExceptionHandling()
+        {
+            s_debugDumpPath = GetDebugDumpPath();
+        }
+
+        /// <summary>
+        /// Gets the location of the directory used for diagnostic log files.
+        /// </summary>
+        /// <returns></returns>
+        private static string GetDebugDumpPath()
+        {
+            string debugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            return !string.IsNullOrEmpty(debugPath)
+                    ? debugPath
+                    : Path.GetTempPath();
+        }
+
+        /// <summary>
+        /// The directory used for diagnostic log files.
+        /// </summary>
+        internal static string DebugDumpPath => s_debugDumpPath;
+
 #if !BUILDINGAPPXTASKS
         /// <summary>
         /// The filename that exceptions will be dumped to
@@ -65,7 +89,7 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-#if !CLR2COMPATIBILITY            
+#if !CLR2COMPATIBILITY
             // Check if any critical exceptions
             var aggregateException = e as AggregateException;
 
@@ -207,7 +231,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_VARIOUS_EXCEPTIONS
                 || e is CustomAttributeFormatException  // thrown if a custom attribute on a data type is formatted incorrectly
                 || e is InvalidFilterCriteriaException  // thrown in FindMembers when the filter criteria is not valid for the type of filter you are using
-                || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not 
+                || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not
                                                         //     have access to the member, or because the target does not define the member, and so on.
 #endif
                 || e is MissingFieldException           // thrown when code in a dependent assembly attempts to access a missing field in an assembly that was modified.
@@ -293,30 +317,30 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because 
-            //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when 
+            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+            //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
             //  applied to a static method.
             lock (typeof(ExceptionHandling))
             {
                 if (s_dumpFileName == null)
                 {
                     Guid guid = Guid.NewGuid();
-                    string tempPath = Path.GetTempPath();
 
                     // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
                     // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                    if (!Directory.Exists(tempPath))
+                    if (!Directory.Exists(DebugDumpPath))
                     {
                         // If this throws, no sense catching it, we can't log it now, and we're here
                         // because we're a child node with no console to log to, so die
-                        Directory.CreateDirectory(tempPath);
+                        Directory.CreateDirectory(DebugDumpPath);
                     }
 
-                    s_dumpFileName = Path.Combine(tempPath, "MSBuild_" + guid.ToString() + ".failure.txt");
+                    var pid = Process.GetCurrentProcess().Id;
+                    s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
 
                     using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
                     {
-                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", Process.GetCurrentProcess().Id);
+                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
                         writer.WriteLine("=====================");
                     }
                 }

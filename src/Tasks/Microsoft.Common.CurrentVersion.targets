@@ -324,6 +324,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <GenerateBindingRedirectsOutputType Condition="'$(OutputType)'=='exe' or '$(OutputType)'=='winexe'">true</GenerateBindingRedirectsOutputType>
+    <!-- It would be a breaking change to automatically turn on binding redirects for existing projects, so turn them on only when opting into a new framework. -->
+    <AutoGenerateBindingRedirects Condition="'$(AutoGenerateBindingRedirects)' == '' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetFrameworkVersion.TrimStart(vV))' >= '4.7.2'">true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(AutoUnifyAssemblyReferences)' == ''">
     <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
@@ -1800,6 +1802,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingProject)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
+        SkipNonexistentTargets="true"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
 
       <Output TaskParameter="TargetOutputs" ItemName="NativeReference" Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)' == 'true'"/>
@@ -1889,8 +1892,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
         <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
-        <TargetFrameworkVersion>$(TargetFrameworkVersion)</TargetFrameworkVersion>
-        <TargetFrameworkVersion Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</TargetFrameworkVersion>
+        <TargetFrameworkVersion>$(TargetFrameworkVersion.TrimStart('vV'))</TargetFrameworkVersion>
         <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
         <CopyUpToDateMarker>@(CopyUpToDateMarker)</CopyUpToDateMarker>
       </TargetPathWithTargetPlatformMoniker>
@@ -2012,7 +2014,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         expensive to write the newly created cache file.
         -->
     <PropertyGroup>
-      <ResolveAssemblyReferencesStateFile Condition="'$(BuildingProject)'=='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)ResolveAssemblyReference.cache</ResolveAssemblyReferencesStateFile>
+      <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesStateFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectFile)AssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
@@ -2037,6 +2039,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Implicit>true</Implicit>
       </Reference>
     </ItemGroup>
+
+    <!--
+      Normally, as an optimization, finding dependencies of references marked with ExternallyResolved=true metadata is skipped.
+      However, skipping that step breaks binding redirect generation when there are conflicting versions within the externally
+      resolved graph.
+    -->
+    <PropertyGroup Condition="'$(FindDependenciesOfExternallyResolvedReferences)' == ''">
+       <FindDependenciesOfExternallyResolvedReferences>false</FindDependenciesOfExternallyResolvedReferences>
+       <FindDependenciesOfExternallyResolvedReferences Condition="'$(AutoGenerateBindingRedirects)' == 'true'">true</FindDependenciesOfExternallyResolvedReferences>
+    </PropertyGroup>
 
     <ResolveAssemblyReference
         Assemblies="@(Reference)"
@@ -2076,6 +2088,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ResolvedSDKReferences="@(ResolvedSDKReference)"
         WarnOrErrorOnTargetArchitectureMismatch="$(ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch)"
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
+        FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
@@ -2544,7 +2557,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-      <DesignTimeResolveAssemblyReferencesStateFile Condition="'$(BuildingProject)'=='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)DesignTimeResolveAssemblyReferences.cache</DesignTimeResolveAssemblyReferencesStateFile>
+      <DesignTimeResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)DesignTimeResolveAssemblyReferences.cache</DesignTimeResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -2982,7 +2995,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         References="@(ReferencePathWithRefAssemblies)"
         AdditionalInputs="$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
-        StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.Cache"
+        StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.cache"
         StronglyTypedClassName="%(EmbeddedResource.StronglyTypedClassName)"
         StronglyTypedFileName="%(EmbeddedResource.StronglyTypedFileName)"
         StronglyTypedLanguage="%(EmbeddedResource.StronglyTypedLanguage)"
@@ -3012,7 +3025,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         References="@(ReferencePath)"
         AdditionalInputs="$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
-        StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.Cache"
+        StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.cache"
         StronglyTypedClassName="%(EmbeddedResource.StronglyTypedClassName)"
         StronglyTypedFileName="%(EmbeddedResource.StronglyTypedFileName)"
         StronglyTypedLanguage="%(EmbeddedResource.StronglyTypedLanguage)"
@@ -3550,7 +3563,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GenerateSatelliteAssemblies"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
-          Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(MSBuildRuntimeType)' != 'Core'">
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(GenerateSatelliteAssembliesForCore)' != 'true'">
 
     <MakeDir
         Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
@@ -4297,7 +4310,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          input to projects that reference this one. -->
     <Touch Files="@(CopyUpToDateMarker)"
            AlwaysCreate="true"
-           Condition="'@(ReferencesCopiedInThisBuild)' != ''" />
+           Condition="'@(ReferencesCopiedInThisBuild)' != ''">
+        <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
+    </Touch>
 
   </Target>
 
@@ -4359,6 +4374,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToOutputDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false' and '$(UseCommonOutputDirectory)' != 'true'"
         ContinueOnError="$(ContinueOnError)"
+        SkipNonexistentTargets="true"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectItemsWithTargetPath"/>

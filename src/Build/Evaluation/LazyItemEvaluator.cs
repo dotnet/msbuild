@@ -4,9 +4,6 @@
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-#if FEATURE_MSBUILD_DEBUGGER
-using Microsoft.Build.Debugging;
-#endif 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
@@ -32,6 +29,7 @@ namespace Microsoft.Build.Evaluation
         private readonly Expander<P, I> _expander;
         private readonly IItemFactory<I, I> _itemFactory;
         private readonly LoggingContext _loggingContext;
+        private readonly EvaluationProfiler _evaluationProfiler;
 
         private int _nextElementOrder = 0;
 
@@ -51,7 +49,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ConcurrentDictionary<string, ImmutableArray<string>> _entriesCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext)
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler)
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
@@ -59,6 +57,7 @@ namespace Microsoft.Build.Evaluation
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
+            _evaluationProfiler = evaluationProfiler;
         }
 
         private ImmutableList<I> GetItems(string itemType)
@@ -84,19 +83,22 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            bool result = ConditionEvaluator.EvaluateCondition
-                (
-                condition,
-                parserOptions,
-                expander,
-                expanderOptions,
-                GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
-                element.ConditionLocation,
-                lazyEvaluator._loggingContext.LoggingService,
-                lazyEvaluator._loggingContext.BuildEventContext
-                );
+            using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
+            {
+                bool result = ConditionEvaluator.EvaluateCondition
+                    (
+                    condition,
+                    parserOptions,
+                    expander,
+                    expanderOptions,
+                    GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
+                    element.ConditionLocation,
+                    lazyEvaluator._loggingContext.LoggingService,
+                    lazyEvaluator._loggingContext.BuildEventContext
+                    );
 
-            return result;
+                return result;
+            }
         }
 
         private static bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)

@@ -6,11 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -25,9 +28,20 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   {1}
 </Project>";
 
+        private const string ProjectTemplateSdkAsAttributeWithVersion = @"
+<Project Sdk=""{0}/{2}"">
+  {1}
+</Project>";
+
         private const string ProjectTemplateSdkAsElement = @"
 <Project>
   <Sdk Name=""{0}"" />
+  {1}
+</Project>";
+
+        private const string ProjectTemplateSdkAsElementWithVersion = @"
+<Project>
+  <Sdk Name=""{0}"" Version=""{2}"" MinimumVersion=""{3}""/>
   {1}
 </Project>";
 
@@ -36,6 +50,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   <Import Project=""Sdk.props"" Sdk=""{0}"" />
   {1}
   <Import Project=""Sdk.targets"" Sdk=""{0}"" />
+</Project>";
+
+        private const string ProjectTemplateSdkAsExplicitImportWithVersion = @"
+<Project>
+  <Import Project=""Sdk.props"" Sdk=""{0}"" Version=""{2}"" MinimumVersion=""{3}"" />
+  {1}
+  <Import Project=""Sdk.targets"" Sdk=""{0}"" Version=""{2}"" MinimumVersion=""{3}"" />
 </Project>";
 
         private const string SdkName = "MSBuildUnitTestSdk";
@@ -381,6 +402,80 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("MSB4229", exception.ErrorCode);
         }
 
+        [Theory]
+        // MinimumVersion & Version not supported in SDK attribute at the same time
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "1.0.0", null)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "min=1.0.0", "1.0.0")]
+
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, "1.0.0", "1.0.0")]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, "1.0.0", "1.0.0")]
+        public void SdkImportsSupportVersion(string projectFormatString, string sdkVersion, string minimumSdkVersion)
+        {
+            _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
+            string projectInnerContents = @"<PropertyGroup><UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation></PropertyGroup>";
+            File.WriteAllText(_sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
+            File.WriteAllText(_sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
+
+            string content = string.Format(projectFormatString, SdkName, projectInnerContents, sdkVersion, minimumSdkVersion);
+
+            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            var project = new Project(projectRootElement);
+            project.Imports.Count.ShouldBe(2);
+            var importElement = project.Imports[0].ImportingElement;
+            var sdk = GetParsedSdk(importElement);
+
+            if (sdkVersion.StartsWith("min="))
+            {
+                // Ignore version when min= string is specified
+                sdkVersion = null;
+            }
+
+            sdk.Name.ShouldBe(SdkName);
+            sdk.Version.ShouldBe(sdkVersion);
+            sdk.MinimumVersion.ShouldBe(minimumSdkVersion);
+        }
+
+        /// <summary>
+        /// Verifies that when <see cref="ProjectLoadSettings.IgnoreMissingImports"/> is set that we don't throw an <see cref="InvalidProjectFileException"/> when an SDK cannot be found.
+        /// </summary>
+        [Fact]
+        public void IgnoreMissingImportsSdkNotFoundDoesNotThrow()
+        {
+            const string projectContents = @"
+<Project Sdk=""Does.Not.Exist"">
+  <PropertyGroup>
+    <Success>true</Success>
+  </PropertyGroup>
+</Project>
+";
+            MockLogger logger = new MockLogger();
+            ProjectCollection projectCollection = new ProjectCollection();
+            projectCollection.RegisterLogger(logger);
+
+            ProjectRootElement rootElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(projectContents);
+
+            Project project = new Project(rootElement,
+                globalProperties: null,
+                toolsVersion: null,
+                projectCollection: projectCollection,
+                loadSettings: ProjectLoadSettings.IgnoreMissingImports);
+
+            project.GetPropertyValue("Success").ShouldBe("true");
+            
+            ProjectImportedEventArgs[] events = logger.BuildMessageEvents.OfType<ProjectImportedEventArgs>().ToArray();
+
+            // There are two implicit imports so there should be two logged ProjectImportedEventArgs
+            events.Length.ShouldBe(2);
+
+            events[0].Message.ShouldStartWith("MSB4236");
+            events[0].ImportIgnored.ShouldBeTrue();
+            events[0].ImportedProjectFile.ShouldBeNull();
+
+            events[1].Message.ShouldStartWith("MSB4236");
+            events[1].ImportIgnored.ShouldBeTrue();
+            events[1].ImportedProjectFile.ShouldBeNull();
+        }
+
         public void Dispose()
         {
             _env.Dispose();
@@ -397,6 +492,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.True(property.IsImported);
 
             Assert.Equal(expectedValue, property.EvaluatedValue);
+        }
+
+        private SdkReference GetParsedSdk(ProjectImportElement element)
+        {
+            PropertyInfo parsedSdkInfo = typeof(ProjectImportElement).GetProperty("ParsedSdkReference", BindingFlags.Instance | BindingFlags.NonPublic);
+            return (SdkReference)parsedSdkInfo.GetValue(element);
         }
     }
 }

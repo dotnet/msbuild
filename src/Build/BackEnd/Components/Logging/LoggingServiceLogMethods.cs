@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -396,7 +397,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 string subcategory = null;
 
-                if (subcategoryResourceName != null)
+                if (!string.IsNullOrWhiteSpace(subcategoryResourceName))
                 {
                     subcategory = AssemblyResources.GetString(subcategoryResourceName);
                 }
@@ -491,6 +492,51 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     WaitForThreadToProcessEvents();
                 }
+            }
+        }
+
+        /// <inheritdoc />
+        public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
+        {
+            return new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+        }
+
+        /// <inheritdoc />
+        public void LogProjectEvaluationStarted(BuildEventContext projectEvaluationEventContext, string projectFile)
+        {
+            lock (_lockObject)
+            {
+                ProjectEvaluationStartedEventArgs evaluationEvent =
+                    new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"),
+                        projectFile)
+                    {
+                        BuildEventContext = projectEvaluationEventContext,
+                        ProjectFile = projectFile
+                    };
+
+                ProcessLoggingEvent(evaluationEvent);
+            }
+        }
+
+        /// <summary>
+        /// Logs that a project evaluation has finished
+        /// </summary>
+        /// <param name="projectEvaluationEventContext">Event context for the project.</param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
+        public void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile)
+        {
+            lock (_lockObject)
+            {
+                ErrorUtilities.VerifyThrow(projectEvaluationEventContext != null, "projectBuildEventContext");
+
+                ProjectEvaluationFinishedEventArgs buildEvent =
+                    new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
+                    {
+                        BuildEventContext = projectEvaluationEventContext,
+                        ProjectFile = projectFile
+                    };
+                ProcessLoggingEvent(buildEvent);
             }
         }
 
@@ -606,9 +652,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFile">Project file being built</param>
         /// <param name="projectFileOfTargetElement">Project file which contains the target</param>
         /// <param name="parentTargetName">The name of the parent target.</param>
+        /// <param name="buildReason">The reason the parent target built the target.</param>
         /// <returns>The build event context for the target.</returns>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName)
+        public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason)
         {
             lock (_lockObject)
             {
@@ -657,6 +704,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             projectFile,
                             projectFileOfTargetElement,
                             parentTargetName,
+                            buildReason,
                             DateTime.UtcNow
                         );
                     buildEvent.BuildEventContext = targetBuildEventContext;

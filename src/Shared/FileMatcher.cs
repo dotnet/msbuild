@@ -177,11 +177,12 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static bool ShouldEnforceMatching(string searchPattern)
         {
-            if (!NativeMethodsShared.IsWindows || searchPattern == null)
+            if (searchPattern == null)
             {
                 return false;
             }
-            // NOTE: Windows matches loosely in three cases (in the absence of the * wildcard in the extension):
+            // https://github.com/Microsoft/msbuild/issues/3060
+            // NOTE: Corefx matches loosely in three cases (in the absence of the * wildcard in the extension):
             // 1) if the extension ends with the ? wildcard, it matches files with shorter extensions also e.g. "file.tx?" would
             //    match both "file.txt" and "file.tx"
             // 2) if the extension is three characters, and the filename contains the * wildcard, it matches files with longer
@@ -1516,7 +1517,7 @@ namespace Microsoft.Build.Shared
                             // and hope that there is no * wildcard in order to return earlier
                             int inputTailIndex = inputLength;
                             int patternTailIndex = patternLength;
-                            while (patternIndex < patternTailIndex && inputTailIndex > 0)
+                            while (patternIndex < patternTailIndex && inputTailIndex > inputIndex)
                             {
                                 patternTailIndex--;
                                 inputTailIndex--;

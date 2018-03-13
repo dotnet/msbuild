@@ -3,13 +3,15 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
-using PlatformID = Xunit.PlatformID;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -44,11 +46,11 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
-            using (var alternativeTemp = new Helpers.AlternativeTempPath())
+            using (var testEnvironment = TestEnvironment.Create())
             {
                 // This test counts files in TEMP. If it uses the system TEMP, some
                 // other process may interfere. Use a private TEMP instead.
-                var newTempPath = alternativeTemp.Path;
+                var newTempPath = testEnvironment.CreateNewTempPath().TempPath;
 
                 string tempPath = Path.GetTempPath();
                 Assert.StartsWith(newTempPath, tempPath);
@@ -108,7 +110,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void WindowsNewLineCharactersInCommandOnUnix()
         {
             var exec = PrepareExec("echo hello\r\n\r\n");
@@ -187,7 +189,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]   // UNC is Windows-Only
+        [PlatformSpecific(TestPlatforms.Windows)]   // UNC is Windows-Only
         public void UNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -430,6 +432,36 @@ namespace Microsoft.Build.UnitTests
         public void ExecTaskUtf8NeverWithAnsi()
         {
             RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never");
+        }
+
+        [Theory]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "nonlinuxtests")]
+        public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                testEnvironment.SetEnvironmentVariable(environmentVariableName, environmentVariableValue);
+
+                Exec exec = PrepareExec("exit 0");
+
+                Type execType = typeof(Exec);
+
+                MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
+
+                if (autoRunShouldBeDisabled)
+                {
+                    commandLine.ShouldContain("/D ");
+                }
+                else
+                {
+                    commandLine.ShouldNotContain("/D ");
+                }
+            }
         }
 
 

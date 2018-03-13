@@ -35,18 +35,8 @@ namespace Microsoft.Build.UnitTests
         private BinaryWriter _writer;
         private BinaryReader _reader;
 
-#if FEATURE_DOTNETVERSION
         private int _eventArgVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
-#else
-        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
 
-        private static int GetDefaultPacketVersion()
-        {
-            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
-            Version coreAssemblyVersion = coreAssembly.GetName().Version;
-            return 1000 + coreAssemblyVersion.Major * 10 + coreAssemblyVersion.Minor;
-        }
-#endif
 
         public CustomEventArgSerialization_Tests()
         {
@@ -692,7 +682,7 @@ namespace Microsoft.Build.UnitTests
         public void TestTargetStartedEventArgs()
         {
             // Test using reasonable values
-            TargetStartedEventArgs genericEvent = new TargetStartedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile", "ParentTargetStartedEvent", DateTime.UtcNow);
+            TargetStartedEventArgs genericEvent = new TargetStartedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile", "ParentTargetStartedEvent", TargetBuiltReason.AfterTargets, DateTime.UtcNow);
             genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
 
             // Serialize
@@ -710,7 +700,7 @@ namespace Microsoft.Build.UnitTests
             //Test using Empty strings
             _stream.Position = 0;
             // Make sure empty strings are passed correctly
-            genericEvent = new TargetStartedEventArgs(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, DateTime.Now);
+            genericEvent = new TargetStartedEventArgs(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, TargetBuiltReason.AfterTargets, DateTime.Now);
             genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
 
             // Serialize
@@ -728,14 +718,14 @@ namespace Microsoft.Build.UnitTests
             // Test using null strings
             _stream.Position = 0;
             // Make sure null string are passed correctly
-            genericEvent = new TargetStartedEventArgs(null, null, null, null, null, null, DateTime.Now);
+            genericEvent = new TargetStartedEventArgs(null, null, null, null, null, null, TargetBuiltReason.AfterTargets, DateTime.Now);
             genericEvent.BuildEventContext = null;
             //Serialize
             genericEvent.WriteToStream(_writer);
             streamWriteEndPosition = _stream.Position;
             //Deserialize and Verify
             _stream.Position = 0;
-            newGenericEvent = new TargetStartedEventArgs("Something", "Something", "Something", "Something", "Something", "Something", DateTime.Now);
+            newGenericEvent = new TargetStartedEventArgs("Something", "Something", "Something", "Something", "Something", "Something", TargetBuiltReason.AfterTargets, DateTime.Now);
             newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
             _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
             VerifyGenericEventArg(genericEvent, newGenericEvent);
@@ -751,6 +741,7 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent.ProjectFile.ShouldBe(genericEvent.ProjectFile, StringCompareShould.IgnoreCase); // "Expected ProjectFile to Match"
             newGenericEvent.TargetName.ShouldBe(genericEvent.TargetName, StringCompareShould.IgnoreCase); // "Expected TargetName to Match"
             newGenericEvent.ParentTarget.ShouldBe(genericEvent.ParentTarget, StringCompareShould.IgnoreCase); // "Expected ParentTarget to Match"
+            newGenericEvent.BuildReason.ShouldBe(genericEvent.BuildReason); // "Exepected BuildReason to Match"
         }
 
         [Fact]

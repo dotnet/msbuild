@@ -26,7 +26,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #elif MONO
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
-        [Theory]
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/2057")]
         [InlineData(8, false)]
 #endif
         public void ShutdownNodesAfterParallelBuild(int numberOfParallelProjectsToBuild, bool enbaleDebugComm)
@@ -338,6 +338,99 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int processId;
             Assert.True(int.TryParse(item[2].ItemSpec, out processId), $"Process ID passed from the 'test' target is not a valid integer (actual is '{item[2].ItemSpec}')");
             Assert.NotEqual(Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
+        }
+
+#if MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
+        [Fact]
+#endif
+        public void RequestedResultsAreSatisfied()
+        {
+            const string contents = @"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+<PropertyGroup>
+  <UnrequestedProperty>IsUnrequested</UnrequestedProperty>
+  <RequestedProperty>IsRequested</RequestedProperty>
+  <UpdatedProperty>Stale</UpdatedProperty>
+</PropertyGroup>
+<ItemGroup>
+  <AnItem Include='Item1' UnexpectedMetadatum='Unexpected' />
+  <AnItem Include='Item2'/>
+</ItemGroup>
+<Target Name='test' Returns='@(ItemWithMetadata)'>
+  <ItemGroup>
+    <AnItem Include='$([System.Diagnostics.Process]::GetCurrentProcess().Id)' />
+    <ItemWithMetadata Metadatum1='m1' Metadatum2='m2' Include='ItemFromTarget' />
+  </ItemGroup>
+  <PropertyGroup>
+    <NewProperty>FunValue</NewProperty>
+    <UpdatedProperty>Updated</UpdatedProperty>
+  </PropertyGroup>
+  <Message Text='[success]'/>
+</Target>
+
+<Target Name='other' Returns='@(ItemWithMetadata)' DependsOnTargets='test' />
+
+</Project>
+";
+
+            // Need to set this env variable to enable Process.GetCurrentProcess().Id in the project file.
+            _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+
+            Project project = CreateProject(CleanupFileContents(contents), MSBuildDefaultToolsVersion,
+                _projectCollection, false);
+
+            var requestedProjectState = new RequestedProjectState
+            {
+                ItemFilters = new Dictionary<string, List<string>>
+                {
+                    {"AnItem", null},
+                    {"ItemWithMetadata", new List<string> {"Metadatum1"}},
+                },
+                PropertyFilters = new List<string> {"NewProperty", "RequestedProperty"},
+            };
+
+            BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new [] {"test", "other"},
+                _projectCollection.HostServices, BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild, null,
+                requestedProjectState);
+            BuildParameters customparameters = new BuildParameters
+            {
+                EnableNodeReuse = false,
+                Loggers = new ILogger[] {_logger},
+                DisableInProcNode = true,
+            };
+
+            BuildResult result = _buildManager.Build(customparameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            result.ProjectStateAfterBuild.ShouldNotBeNull();
+
+            result.ProjectStateAfterBuild.Properties.ShouldNotContain(p => p.Name == "UnrequestedProperty");
+
+            result.ProjectStateAfterBuild.Properties.ShouldContain(p => p.Name == "NewProperty");
+            result.ProjectStateAfterBuild.GetPropertyValue("NewProperty").ShouldBe("FunValue");
+
+            result.ProjectStateAfterBuild.Properties.ShouldContain(p => p.Name == "RequestedProperty");
+            result.ProjectStateAfterBuild.GetPropertyValue("RequestedProperty").ShouldBe("IsRequested");
+
+            result.ProjectStateAfterBuild.Items.Count.ShouldBe(4);
+
+            result.ProjectStateAfterBuild.GetItems("ItemWithMetadata").ShouldHaveSingleItem();
+            result.ProjectStateAfterBuild.GetItems("ItemWithMetadata").First().DirectMetadataCount.ShouldBe(1);
+            result.ProjectStateAfterBuild.GetItems("ItemWithMetadata").First().GetMetadataValue("Metadatum1")
+                .ShouldBe("m1");
+            result.ProjectStateAfterBuild.GetItems("ItemWithMetadata").First().GetMetadataValue("Metadatum2")
+                .ShouldBeNullOrEmpty();
+
+            result.ProjectStateAfterBuild.GetItems("AnItem").Count.ShouldBe(3);
+            result.ProjectStateAfterBuild.GetItems("AnItem").ShouldContain(p => p.EvaluatedInclude == "Item2");
+
+            result.ProjectStateAfterBuild.GetItemsByItemTypeAndEvaluatedInclude("AnItem", "Item1")
+                .ShouldHaveSingleItem();
+            result.ProjectStateAfterBuild.GetItemsByItemTypeAndEvaluatedInclude("AnItem", "Item1").First()
+                .GetMetadataValue("UnexpectedMetadatum").ShouldBe("Unexpected");
         }
 
         /// <summary>
@@ -3558,6 +3651,71 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Contains("The target \"Foo\" does not exist in the project", _logger.FullLog,
                         StringComparison.OrdinalIgnoreCase);
                 }
+            }
+            finally
+            {
+                _buildManager.EndBuild();
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
+        public void OutOfProcEvaluationIdsUnique()
+        {
+            var mainProject =
+                @"<Project>
+
+  <Target Name=`MainTarget`>
+    <MSBuild Projects=`{0};{1}` Targets=`DummyTarget` />
+  </Target>
+
+</Project>";
+
+            var childProject =
+                @"<Project>
+
+  <Target Name=`DummyTarget`>
+    <Message Text=`Bar` Importance=`High` />
+  </Target>
+
+</Project>";
+
+            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1", "child2" }, string.Empty);
+
+            var buildParameters = new BuildParameters(_projectCollection)
+            {
+                DisableInProcNode = true,
+                Loggers = new ILogger[] { _logger }
+            };
+
+            _buildManager.BeginBuild(buildParameters);
+
+            try
+            {
+                var child1ProjectPath = testFiles.CreatedFiles[1];
+                var child2ProjectPath = testFiles.CreatedFiles[2];
+                var cleanedUpChildContents = CleanupFileContents(childProject);
+                File.WriteAllText(child1ProjectPath, cleanedUpChildContents);
+                File.WriteAllText(child2ProjectPath, cleanedUpChildContents);
+
+                var mainProjectPath = testFiles.CreatedFiles[0];
+                var cleanedUpMainContents = CleanupFileContents(string.Format(mainProject, child1ProjectPath, child2ProjectPath));
+                File.WriteAllText(mainProjectPath, cleanedUpMainContents);
+
+                var buildRequestData = new BuildRequestData(
+                    mainProjectPath,
+                    new Dictionary<string, string>(),
+                    MSBuildConstants.CurrentToolsVersion,
+                    new[] { "MainTarget" },
+                    null
+                );
+
+                var submission = _buildManager.PendBuildRequest(buildRequestData);
+
+                var result = submission.Execute();
+
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                Assert.True(_logger.AllBuildEvents.OfType<ProjectEvaluationStartedEventArgs>().GroupBy(args => args.BuildEventContext.EvaluationId).All(g => g.Count() == 1));
             }
             finally
             {

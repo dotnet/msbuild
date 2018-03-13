@@ -110,10 +110,11 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// <see cref="ProjectInstance"/> state after the build. This is only provided if <see cref="BuildRequest.BuildRequestDataFlags"/>
-        /// includes <see cref="BuildRequestDataFlags.ProvideProjectStateAfterBuild"/> for the build request which this object is a result of, 
-        /// and will be <c>null</c> otherwise.  In general, where available, it may be a non buildable-dummy object, and should only
+        /// includes <see cref="BuildRequestDataFlags.ProvideProjectStateAfterBuild"/> or
+        /// <see cref="BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild"/> for the build request which this object is a result of,
+        /// and will be <c>null</c> otherwise. Where available, it may be a non buildable-dummy object, and should only
         /// be used to retrieve <see cref="ProjectInstance.Properties"/>, <see cref="ProjectInstance.GlobalProperties"/> and
-        /// <see cref="ProjectInstance.Items"/> from it. Any other operation is not guaranteed to be supported.
+        /// <see cref="ProjectInstance.Items"/> from it. No other operation is guaranteed to be supported.
         /// </summary>
         private ProjectInstance _projectStateAfterBuild;
 

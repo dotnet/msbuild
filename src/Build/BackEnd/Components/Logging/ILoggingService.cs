@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -368,6 +369,30 @@ namespace Microsoft.Build.BackEnd.Logging
         void LogBuildFinished(bool success);
 
         /// <summary>
+        /// Create an evaluation context, by generating a new evaluation id.
+        /// </summary>
+        /// <param name="nodeId">The node id</param>
+        /// <param name="submissionId">The submission id</param>
+        /// <returns></returns>
+        BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId);
+
+        /// <summary>
+        /// Logs that a project evaluation has started
+        /// </summary>
+        /// <param name="eventContext">The event context to use for logging</param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <returns>The evaluation event context for the project.</returns>
+        void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile);
+
+        /// <summary>
+        /// Logs that a project evaluation has finished
+        /// </summary>
+        /// <param name="projectEvaluationEventContext">Event context for the project.</param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
+        void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile);
+
+        /// <summary>
         /// Log that a project has started
         /// </summary>
         /// <param name="nodeBuildEventContext">The logging context of the node which is building this project.</param>
@@ -397,8 +422,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFile">The project file which is being built</param>
         /// <param name="projectFileOfTargetElement">The file in which the target is defined - typically a .targets file</param>
         /// <param name="parentTargetName">The name of the parent target.</param>
+        /// <param name="buildReason">The reason the parent target built the target.</param>
         /// <returns>The target build event context</returns>
-        BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName);
+        BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason);
 
         /// <summary>
         /// Log that a target has finished

@@ -4,6 +4,7 @@
 using System.Runtime.InteropServices;
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -49,7 +50,7 @@ namespace Microsoft.Build.Framework
             string projectFile,
             string targetFile
         )
-            : this(message, helpKeyword, targetName, projectFile, targetFile, String.Empty, DateTime.UtcNow)
+            : this(message, helpKeyword, targetName, projectFile, targetFile, String.Empty, TargetBuiltReason.None, DateTime.UtcNow)
         {
         }
 
@@ -81,10 +82,42 @@ namespace Microsoft.Build.Framework
             this.parentTarget = parentTarget;
         }
 
+        /// <summary>
+        /// This constructor allows event data to be initialized.
+        /// </summary>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="targetName">target name</param>
+        /// <param name="projectFile">project file</param>
+        /// <param name="targetFile">file in which the target is defined</param>
+        /// <param name="parentTarget">The part of the target.</param>
+        /// <param name="buildReason">The reason the parent built this target.</param>
+        /// <param name="eventTimestamp">Timestamp when the event was created</param>
+        public TargetStartedEventArgs
+        (
+            string message,
+            string helpKeyword,
+            string targetName,
+            string projectFile,
+            string targetFile,
+            string parentTarget,
+            TargetBuiltReason buildReason,
+            DateTime eventTimestamp
+        )
+            : base(message, helpKeyword, "MSBuild", eventTimestamp)
+        {
+            this.targetName = targetName;
+            this.projectFile = projectFile;
+            this.targetFile = targetFile;
+            this.parentTarget = parentTarget;
+            this.buildReason = buildReason;
+        }
+
         private string targetName;
         private string projectFile;
         private string targetFile;
         private string parentTarget;
+        private TargetBuiltReason buildReason;
 
 #if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
@@ -95,50 +128,12 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            #region TargetName
-            if (targetName == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(targetName);
-            }
-            #endregion
-            #region ProjectFile
-            if (projectFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(projectFile);
-            }
-            #endregion
-            #region TargetFile
-            if (targetFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(targetFile);
-            }
-            #endregion
-            #region ParentTarget
-            if (parentTarget == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(parentTarget);
-            }
-            #endregion
+            writer.WriteOptionalString(targetName);
+            writer.WriteOptionalString(projectFile);
+            writer.WriteOptionalString(targetFile);
+            writer.WriteOptionalString(parentTarget);
+
+            writer.Write((int)buildReason);
         }
 
         /// <summary>
@@ -149,49 +144,16 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            #region TargetName
-            if (reader.ReadByte() == 0)
-            {
-                targetName = null;
-            }
-            else
-            {
-                targetName = reader.ReadString();
-            }
-            #endregion
-            #region ProjectFile
-            if (reader.ReadByte() == 0)
-            {
-                projectFile = null;
-            }
-            else
-            {
-                projectFile = reader.ReadString();
-            }
-            #endregion
-            #region TargetFile
-            if (reader.ReadByte() == 0)
-            {
-                targetFile = null;
-            }
-            else
-            {
-                targetFile = reader.ReadString();
-            }
-            #endregion
-            #region ParentTarget
+
+            targetName = reader.ReadByte() == 0 ? null : reader.ReadString();
+            projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+            targetFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+
             if (version > 20)
             {
-                if (reader.ReadByte() == 0)
-                {
-                    parentTarget = null;
-                }
-                else
-                {
-                    parentTarget = reader.ReadString();
-                }
+                parentTarget = reader.ReadByte() == 0 ? null : reader.ReadString();
+                buildReason = (TargetBuiltReason) reader.ReadInt32();
             }
-            #endregion
         }
         #endregion
 #endif
@@ -199,45 +161,26 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// target name
         /// </summary>
-        public string TargetName
-        {
-            get
-            {
-                return targetName;
-            }
-        }
+        public string TargetName => targetName;
 
         /// <summary>
         /// Target which caused this target to build
         /// </summary>
-        public string ParentTarget
-        {
-            get
-            {
-                return parentTarget;
-            }
-        }
+        public string ParentTarget => parentTarget;
 
         /// <summary>
         /// Project file associated with event.   
         /// </summary>
-        public string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        public string ProjectFile => projectFile;
 
         /// <summary>
         /// File where this target was declared.
         /// </summary>
-        public string TargetFile
-        {
-            get
-            {
-                return targetFile;
-            }
-        }
+        public string TargetFile => targetFile;
+
+        /// <summary>
+        /// Why this target was built by its parent.
+        /// </summary>
+        public TargetBuiltReason BuildReason => buildReason;
     }
 }

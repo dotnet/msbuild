@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests
             // Unmatched curly would crash if they did
             t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                             ? "/C echo hello world {"
-                                            : @"-c """"""echo hello world {""""""";
+                                            : @"-c ""echo hello world {""";
             t.Execute();
             engine.AssertLogContains("echo hello world {");
             engine.Errors.ShouldBe(0);
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : @"-c """"""echo Who made you king anyways 1>&2""""""";
+                                                : @"-c ""echo Who made you king anyways 1>&2""";
 
                 t.Execute().ShouldBeTrue();
 
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways'"
-                                                : @"-c """"""echo Who made you king anyways""""""";
+                                                : @"-c ""echo Who made you king anyways""";
 
                 t.Execute().ShouldBeTrue();
 
@@ -347,7 +347,7 @@ namespace Microsoft.Build.UnitTests
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : @"-c """"""echo 'Who made you king anyways' 1>&2""""""";
+                                                : @"-c ""echo 'Who made you king anyways' 1>&2""";
 
                 t.Execute().ShouldBeFalse();
 
@@ -794,6 +794,74 @@ namespace Microsoft.Build.UnitTests
             t.Execute();
             engine.AssertLogContains("echo \"hello \\\"world\\\"\"");
             engine.Errors.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Verifies that a ToolTask running under the command processor on Windows has autorun
+        /// disabled or enabled depending on an escape hatch.
+        /// </summary>
+        [Theory]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", "0", true)]
+        [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        [Trait("Category", "nonosxtests")]
+        [Trait("Category", "nonlinuxtests")]
+        public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                testEnvironment.SetEnvironmentVariable(environmentVariableName, environmentVariableValue);
+
+                ToolTaskThatGetsCommandLine task = new ToolTaskThatGetsCommandLine
+                {
+                    UseCommandProcessor = true
+                };
+
+                task.Execute();
+
+                if (autoRunShouldBeDisabled)
+                {
+                    task.CommandLineCommands.ShouldContain("/D ");
+                }
+                else
+                {
+                    task.CommandLineCommands.ShouldNotContain("/D ");
+                }
+            }
+        }
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> that allows tests to verify the command-line that was generated.
+        /// </summary>
+        internal sealed class ToolTaskThatGetsCommandLine : ToolTask
+        {
+            protected override string ToolName
+            {
+                get { return "cmd.exe"; }
+            }
+
+            protected override string GenerateFullPathToTool()
+            {
+                return null;
+            }
+
+            protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
+            {
+                PathToTool = pathToTool;
+                ResponseFileCommands = responseFileCommands;
+                CommandLineCommands = commandLineCommands;
+
+                return 0;
+            }
+            protected override void LogToolCommand(string message)
+            {
+            }
+
+            public string CommandLineCommands { get; private set; }
+
+            public string PathToTool { get; private set; }
+
+            public string ResponseFileCommands { get; private set; }
         }
     }
 }

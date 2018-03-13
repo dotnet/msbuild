@@ -21,7 +21,6 @@ namespace Microsoft.Build.BuildEngine
     /// </remarks>
     /// <owner>RGoel</owner>
     [Serializable]
-    [Obsolete]
     public sealed class InvalidProjectFileException : Exception
     {
         #region Basic constructors

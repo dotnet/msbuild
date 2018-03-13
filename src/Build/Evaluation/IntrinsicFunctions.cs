@@ -133,7 +133,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Perform a bitwise OR on the first and second (first | second) 
+        /// Perform a bitwise OR on the first and second (first | second)
         /// </summary>
         internal static int BitwiseOr(int first, int second)
         {
@@ -141,7 +141,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Perform a bitwise AND on the first and second (first &amp; second) 
+        /// Perform a bitwise AND on the first and second (first &amp; second)
         /// </summary>
         internal static int BitwiseAnd(int first, int second)
         {
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Perform a bitwise XOR on the first and second (first ^ second) 
+        /// Perform a bitwise XOR on the first and second (first ^ second)
         /// </summary>
         internal static int BitwiseXor(int first, int second)
         {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Perform a bitwise NOT on the first and second (~first) 
+        /// Perform a bitwise NOT on the first and second (~first)
         /// </summary>
         internal static int BitwiseNot(int first)
         {
@@ -258,14 +258,40 @@ namespace Microsoft.Build.Evaluation
             // We will have either found a result or defaultValue if one wasn't found at this point
             return result;
         }
+
+#else // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
+
+        /// <summary>
+        /// Get the value of the registry key and value, default value is null
+        /// </summary>
+        internal static object GetRegistryValue(string keyName, string valueName)
+        {
+            return null; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
+        }
+
+        /// <summary>
+        /// Get the value of the registry key and value
+        /// </summary>
+        internal static object GetRegistryValue(string keyName, string valueName, object defaultValue)
+        {
+            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
+        }
+
+        /// <summary>
+        /// Get the value of the registry key from one of the RegistryView's specified
+        /// </summary>
+        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
+        {
+            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
+        }
 #endif
 
         /// <summary>
-        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location. 
+        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location.
         /// Throws UriFormatException.
         /// </summary>
         /// <param name="basePath">
-        /// The base path we want to relativize to. Must be absolute.  
+        /// The base path we want to relativize to. Must be absolute.
         /// Should <i>not</i> include a filename as the last segment will be interpreted as a directory.
         /// </param>
         /// <param name="path">
@@ -321,7 +347,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Returns true if a task host exists that can service the requested runtime and architecture
-        /// values, and false otherwise. 
+        /// values, and false otherwise.
         /// </summary>
         internal static bool DoesTaskHostExist(string runtime, string architecture)
         {
@@ -412,6 +438,15 @@ namespace Microsoft.Build.Evaluation
         internal static bool IsOsUnixLike()
         {
             return NativeMethodsShared.IsUnixLike;
+        }
+
+        /// <summary>
+        /// True if current OS is a BSD system.
+        /// </summary>
+        /// <returns></returns>
+        internal static bool IsOsBsdLike()
+        {
+            return NativeMethodsShared.IsBSD;
         }
 
         public static string GetCurrentToolsDirectory()

@@ -12,7 +12,7 @@
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which is used to implement custom MSBuild tasks.</description>
     <tags>MSBuild</tags>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
       <group targetFramework="netstandard1.3">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />

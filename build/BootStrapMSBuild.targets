@@ -1,0 +1,110 @@
+<Project>
+
+  <!-- 
+  Copies the binaries of MSBuild to a bootstrap folder so we can rebuild msbuild with itself.
+  On netcore and mono it performs a directory copy.
+  On full framework it performs a more involved deployment.
+   -->
+
+  <PropertyGroup>
+    <BootstrapDestination>$(ArtifactsConfigurationDir)bootstrap\</BootstrapDestination>
+    <BootstrapDestination Condition="'$(Platform)' == 'x64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
+    <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
+
+    <!-- TODO: Mono build should use BootstrapNetCore logic -->
+    <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
+    <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
+   
+  </PropertyGroup>
+
+  <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
+          AfterTargets="AfterBuild"
+          Condition="'$(CreateBootstrap)' == 'true'"/>
+
+  <Target Name="CleanBootstrapFolder">
+    <!-- This sometimes fails so it might need be retried. -->
+    <RemoveDir
+            Directories="$(BootstrapDestination)"
+            ContinueOnError="true"/>    
+  </Target>
+
+  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder">
+
+    <ItemGroup>
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
+      <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\**\*.*" />
+      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
+      <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
+
+      <ShimTargets Include="Microsoft.Data.Entity.targets" />
+      <ShimTargets Include="Microsoft.ServiceModel.targets" />
+      <ShimTargets Include="Microsoft.WinFx.targets" />
+      <ShimTargets Include="Microsoft.WorkflowBuildExtensions.targets" />
+      <ShimTargets Include="Microsoft.Xaml.targets" />
+      <ShimTargets Include="Workflow.Targets" />
+      <ShimTargets Include="Workflow.VisualBasic.Targets" />
+
+      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*" />
+
+      <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
+
+      <NuGetCommonExtensions Include="$(VSInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*" />
+
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.pdb" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe.config" />
+
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*props" />
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*targets" />
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*tasks" />
+    </ItemGroup>
+
+    <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
+    <Copy SourceFiles="@(InstalledVersionedExtensions)"
+          DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(SdkResolverFiles)"
+          DestinationFiles="@(SdkResolverFiles->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
+          DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(InstalledSdks)"
+          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(InstalledStaticAnalysisTools)"
+          DestinationFiles="@(InstalledStaticAnalysisTools -> '$(BootstrapDestination)..\Team Tools\Static Analysis Tools\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(InstalledNuGetFiles)"
+          DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(NuGetCommonExtensions)"
+          DestinationFiles="@(NuGetCommonExtensions -> '$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\%(RecursiveDir)%(FileName)%(Extension)')" />
+
+    <!-- Delete shim projects, because they point where we can't follow. -->
+    <!-- It would be better to just not copy these. -->
+    <Delete Files="@(ShimTargets->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(FileName)%(Extension)')" />
+
+    <!-- Copy our binaries -->
+    <Copy SourceFiles="@(FreshlyBuiltBinaries)"
+          DestinationFiles="@(FreshlyBuiltBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
+    <Copy SourceFiles="@(FreshlyBuiltProjects)"
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
+
+    <!-- Publish the project first.  The more obvious way to do this would be to depend on the Publish target,
+         but that causes a target dependency cycle, even though it seems like AfterTargets="AfterBuild" should
+         probably not count as a link in the cycle. -->
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="Publish" BuildInParallel="$(BuildInParallel)" />
+
+    <!-- Copy all items from the publish folder to the bootstrap folder.  We might be able to just use the published
+         version as the bootstrapped version, but the extra separation here seems like it could be valuable. -->
+    <ItemGroup>
+      <DeployedItems Include="$(PublishDir)\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployedItems)"
+          DestinationFolder="$(BootstrapDestination)%(RecursiveDir)" />
+    
+  </Target>
+</Project>

@@ -124,10 +124,22 @@ namespace Microsoft.Build.BackEnd
         void Translate(ref int value);
 
         /// <summary>
+        /// Translates a long.
+        /// </summary>
+        /// <param name="value">The value to be translated.</param>
+        void Translate(ref long value);
+
+        /// <summary>
         /// Translates a string.
         /// </summary>
         /// <param name="value">The value to be translated.</param>
         void Translate(ref string value);
+
+        /// <summary>
+        /// Translates a double.
+        /// </summary>
+        /// <param name="value">The value to be translated.</param>
+        void Translate(ref double value);
 
         /// <summary>
         /// Translates a string array.
@@ -170,6 +182,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="value">The value to be translated.</param>
         void Translate(ref DateTime value);
+
+        /// <summary>
+        /// Translates a TimeSpan.
+        /// </summary>
+        /// <param name="value">The value to be translated.</param>
+        void Translate(ref TimeSpan value);
 
         // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext, 
         // which is what current implementations of this method use.  However, it also does not ever need to translate 

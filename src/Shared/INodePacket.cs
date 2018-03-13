@@ -176,7 +176,17 @@ namespace Microsoft.Build.BackEnd
         /// Contents:
         /// (nothing) 
         /// </summary>
-        TaskHostTaskCancelled
+        TaskHostTaskCancelled,
+
+        /// <summary>
+        /// Message sent from a node when it needs to have an SDK resolved.
+        /// </summary>
+        ResolveSdkRequest,
+
+        /// <summary>
+        /// Message sent from back to a node when an SDK has been resolved.
+        /// </summary>
+        ResolveSdkResponse,
     }
     #endregion
 

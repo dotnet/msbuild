@@ -11,43 +11,32 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.BackEnd.SdkResolution
 {
     internal class SdkResolverLoader
     {
+#if !FEATURE_ASSEMBLY_LOADFROM
+        private readonly CoreClrAssemblyLoader _loader = new CoreClrAssemblyLoader();
+#endif
+
         internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
             // Always add the default resolver
             var resolvers = new List<SdkResolver> {new DefaultSdkResolver()};
+
             var potentialResolvers = FindPotentialSdkResolvers(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"));
 
-            if (potentialResolvers.Count == 0) return resolvers;
-
-#if !FEATURE_ASSEMBLY_LOADFROM
-            var loader = new CoreClrAssemblyLoader();
-#endif
+            if (potentialResolvers.Count == 0)
+            {
+                return resolvers;
+            }
 
             foreach (var potentialResolver in potentialResolvers)
-                try
-                {
-#if FEATURE_ASSEMBLY_LOADFROM
-                    var assembly = Assembly.LoadFrom(potentialResolver);
-#else
-                    loader.AddDependencyLocation(Path.GetDirectoryName(potentialResolver));
-                    Assembly assembly = loader.LoadFromPath(potentialResolver);
-#endif
-
-                    resolvers.AddRange(assembly.ExportedTypes
-                        .Select(type => new {type, info = type.GetTypeInfo()})
-                        .Where(t => t.info.IsClass && t.info.IsPublic && typeof(SdkResolver).IsAssignableFrom(t.type))
-                        .Select(t => (SdkResolver) Activator.CreateInstance(t.type)));
-                }
-                catch (Exception e)
-                {
-                    loggingContext.LogWarning(string.Empty, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
-                }
+            {
+                LoadResolvers(potentialResolver, loggingContext, location, resolvers);
+            }
 
             return resolvers.OrderBy(t => t.Priority).ToList();
         }
@@ -67,6 +56,59 @@ namespace Microsoft.Build.BackEnd
                 .Select(subfolder => Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll"))
                 .Where(FileUtilities.FileExistsNoThrow)
                 .ToList();
+        }
+
+        protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)
+        {
+            return assembly.ExportedTypes
+                .Select(type => new {type, info = type.GetTypeInfo()})
+                .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
+                .Select(t => t.type);
+        }
+
+        protected virtual Assembly LoadResolverAssembly(string resolverPath, LoggingContext loggingContext, ElementLocation location)
+        {
+#if FEATURE_ASSEMBLY_LOADFROM
+            return Assembly.LoadFrom(resolverPath);
+#else
+            _loader.AddDependencyLocation(Path.GetDirectoryName(resolverPath));
+            return _loader.LoadFromPath(resolverPath);
+#endif
+        }
+
+        protected virtual void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
+        {
+            Assembly assembly;
+            try
+            {
+                assembly = LoadResolverAssembly(resolverPath, loggingContext, location);
+            }
+            catch (Exception e)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e, "CouldNotLoadSdkResolverAssembly", resolverPath, e.Message);
+
+                return;
+            }
+
+            foreach (Type type in GetResolverTypes(assembly))
+            {
+                try
+                {
+                    resolvers.Add((SdkResolver)Activator.CreateInstance(type));
+                }
+                catch (TargetInvocationException e)
+                {
+                    // .NET wraps the original exception inside of a TargetInvocationException which masks the original message
+                    // Attempt to get the inner exception in this case, but fall back to the top exception message
+                    string message = e.InnerException?.Message ?? e.Message;
+
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e.InnerException ?? e, "CouldNotLoadSdkResolver", type.Name, message);
+                }
+                catch (Exception e)
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e, "CouldNotLoadSdkResolver", type.Name, e.Message);
+                }
+            }
         }
     }
 }

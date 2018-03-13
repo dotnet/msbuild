@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,8 @@ using System.IO;
 using System.Threading;
 #if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization.Formatters.Binary;
+#else
+using Microsoft.Build.Framework.Profiler;
 #endif
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -150,6 +153,24 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref int value)
             {
                 value = _reader.ReadInt32();
+            }
+
+            /// <summary>
+            /// Translates a long.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref long value)
+            {
+                value = _reader.ReadInt64();
+            }
+
+            /// <summary>
+            /// Translates a double.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref double value)
+            {
+                value = _reader.ReadDouble();
             }
 
             /// <summary>
@@ -293,6 +314,17 @@ namespace Microsoft.Build.BackEnd
                 value = new DateTime(_reader.ReadInt64(), kind);
             }
 
+            /// <summary>
+            /// Translates a TimeSpan.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref TimeSpan value)
+            {
+                long ticks = 0;
+                Translate(ref ticks);
+                value = new System.TimeSpan(ticks);
+            }
+
             // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.  
             // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to 
             // compile this method out of that assembly. 
@@ -310,6 +342,7 @@ namespace Microsoft.Build.BackEnd
             {
                 value = new BuildEventContext
                     (
+                    _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
@@ -762,6 +795,24 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Translates a long.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref long value)
+            {
+                _writer.Write(value);
+            }
+
+            /// <summary>
+            /// Translates a double.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref double value)
+            {
+                _writer.Write(value);
+            }
+
+            /// <summary>
             /// Translates a string.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -892,6 +943,15 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.Ticks);
             }
 
+            /// <summary>
+            /// Translates a TimeSpan.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref TimeSpan value)
+            {
+                _writer.Write(value.Ticks);
+            }
+
             // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.  
             // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to 
             // compile this method out of that assembly. 
@@ -909,6 +969,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _writer.Write(value.SubmissionId);
                 _writer.Write(value.NodeId);
+                _writer.Write(value.EvaluationId);
                 _writer.Write(value.ProjectInstanceId);
                 _writer.Write(value.ProjectContextId);
                 _writer.Write(value.TargetId);
@@ -1360,6 +1421,17 @@ namespace Microsoft.Build.BackEnd
                     SerializedBuildEventArgs.TranslateBuildEventContext(translator, ref val);
                     FieldValue = val;
                 }
+                else if (fieldType == typeof(ProfilerResult?))
+                {
+                    var val = (ProfilerResult?)FieldValue;
+                    if (translator.TranslateNullable(val))
+                    {
+                        var profilerResult = val ?? default(ProfilerResult);
+                        ProfilerResultTranslator.Translate(translator, ref profilerResult);
+                        val = profilerResult;
+                    }
+                    FieldValue = val;
+                }
                 else if (fieldType == typeof(IDictionary<string, string>))
                 {
                     Dictionary<string, string> val = null;
@@ -1410,6 +1482,119 @@ namespace Microsoft.Build.BackEnd
                 foreach (var serializedField in serializedFields)
                 {
                     serializedField.Field.SetValue(obj, serializedField.FieldValue);
+                }
+            }
+        }
+
+        public static class ProfilerResultTranslator
+        {
+            public static void Translate(INodePacketTranslator translator, ref ProfilerResult profilerResult)
+            {
+                IDictionary<EvaluationLocation, ProfiledLocation> profiledLocations = new Dictionary<EvaluationLocation, ProfiledLocation>();
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    profiledLocations = profilerResult.ProfiledLocations.ToDictionary(kv => kv.Key, kv => kv.Value);
+                }
+
+                translator.TranslateDictionary(ref profiledLocations,
+                    TranslatorForEvaluationLocation, TranslatorForProfiledLocation,
+                    count => new Dictionary<EvaluationLocation, ProfiledLocation>());
+
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    profilerResult = new ProfilerResult(new ReadOnlyDictionary<EvaluationLocation, ProfiledLocation>(profiledLocations));
+                }
+            }
+
+            private static void TranslatorForEvaluationLocation(ref EvaluationLocation evaluationLocation,
+                INodePacketTranslator translator)
+            {
+                long id = 0;
+                long? parentId = null;
+                EvaluationPass evaluationPass = default(EvaluationPass);
+                string evaluationPassDescription = null;
+                string file = null;
+                int? line = null;
+                string elementName = null;
+                string description = null;
+                EvaluationLocationKind kind = default(EvaluationLocationKind);
+
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    id = evaluationLocation.Id;
+                    parentId = evaluationLocation.ParentId;
+                    evaluationPass = evaluationLocation.EvaluationPass;
+                    evaluationPassDescription = evaluationLocation.EvaluationPassDescription;
+                    file = evaluationLocation.File;
+                    line = evaluationLocation.Line;
+                    elementName = evaluationLocation.ElementName;
+                    description = evaluationLocation.ElementDescription;
+                    kind = evaluationLocation.Kind;
+                }
+
+                translator.Translate(ref id);
+                if (translator.TranslateNullable(parentId))
+                {
+                    long parentIdValue = 0;
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        parentIdValue = parentId.Value;
+                    }
+                    translator.Translate(ref parentIdValue);
+                    if (translator.Mode == TranslationDirection.ReadFromStream)
+                    {
+                        parentId = parentIdValue;
+                    }
+                }
+
+                translator.TranslateEnum(ref evaluationPass, (int)evaluationPass);
+                translator.Translate(ref evaluationPassDescription);
+                translator.Translate(ref file);
+
+                if (translator.TranslateNullable(line))
+                {
+                    var lineValue = 0;
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        lineValue = line.Value;
+                    }
+                    translator.Translate(ref lineValue);
+                    if (translator.Mode == TranslationDirection.ReadFromStream)
+                    {
+                        line = lineValue;
+                    }
+                }
+
+                translator.Translate(ref elementName);
+                translator.Translate(ref description);
+                translator.TranslateEnum(ref kind, (byte)kind);
+
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    evaluationLocation = new EvaluationLocation(id, parentId, evaluationPass, evaluationPassDescription, file, line, elementName, description, kind);
+                }
+            }
+
+            private static void TranslatorForProfiledLocation(ref ProfiledLocation profiledLocation, INodePacketTranslator translator)
+            {
+                var inclusiveTime = TimeSpan.Zero;
+                var exclusiveTime = TimeSpan.Zero;
+                var numberOfHits = 0;
+
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    inclusiveTime = profiledLocation.InclusiveTime;
+                    exclusiveTime = profiledLocation.ExclusiveTime;
+                    numberOfHits = profiledLocation.NumberOfHits;
+                }
+
+                translator.Translate(ref inclusiveTime);
+                translator.Translate(ref exclusiveTime);
+                translator.Translate(ref numberOfHits);
+
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    profiledLocation = new ProfiledLocation(inclusiveTime, exclusiveTime, numberOfHits);
                 }
             }
         }
@@ -1468,6 +1653,7 @@ namespace Microsoft.Build.BackEnd
                 if (translator.TranslateNullable(context))
                 {
                     int nodeId = 0;
+                    int evaluationId = 0;
                     int targetId = 0;
                     int projectContextId = 0;
                     int taskId = 0;
@@ -1477,6 +1663,7 @@ namespace Microsoft.Build.BackEnd
                     if (translator.Mode == TranslationDirection.WriteToStream)
                     {
                         nodeId = context.NodeId;
+                        evaluationId = context.EvaluationId;
                         targetId = context.TargetId;
                         projectContextId = context.ProjectContextId;
                         taskId = context.TaskId;
@@ -1485,6 +1672,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     translator.Translate(ref nodeId);
+                    translator.Translate(ref evaluationId);
                     translator.Translate(ref targetId);
                     translator.Translate(ref projectContextId);
                     translator.Translate(ref taskId);
@@ -1493,7 +1681,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (translator.Mode == TranslationDirection.ReadFromStream)
                     {
-                        context = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
+                        context = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
                     }
                 }
             }

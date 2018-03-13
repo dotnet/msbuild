@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _host = null;
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2926")]
         public void TestSimpleBuildRequest()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2926")]
         public void TestSimpleBuildRequestCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2926")]
         public void TestRequestWithReference()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2926")]
         public void TestRequestWithReferenceCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);

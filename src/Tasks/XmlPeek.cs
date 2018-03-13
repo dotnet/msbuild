@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -127,6 +127,16 @@ namespace Microsoft.Build.Tasks
                 _namespaces = value;
             }
         }
+
+        /// <summary>
+        /// Set to true to prohibit loading XML with embedded DTD and produce error MSB3733
+        /// if DTD is present. This was a pre-v15 behavior. By default, a DTD clause if any is ignored.
+        /// </summary>
+        public bool ProhibitDtd
+        {
+            get;
+            set;
+        }
         #endregion
 
         /// <summary>
@@ -157,7 +167,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Load the XPath Document
-                using (XmlReader xr = xmlinput.CreateReader())
+                using (XmlReader xr = xmlinput.CreateReader(ProhibitDtd))
                 {
                     xpathdoc = new XPathDocument(xr);
                     xr.Dispose();
@@ -381,16 +391,19 @@ namespace Microsoft.Build.Tasks
             /// Creates correct reader based on the input type.
             /// </summary>
             /// <returns>The XmlReader object</returns>
-            public XmlReader CreateReader()
+            public XmlReader CreateReader(bool prohibitDtd)
             {
+                var settings = new XmlReaderSettings() {
+                    DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore
+                };
                 if (_xmlMode == XmlModes.XmlFile)
                 {
                     _fs = new FileStream(_data, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                    return XmlReader.Create(_fs);
+                    return XmlReader.Create(_fs, settings: settings);
                 }
-                else // xmlModes.Xml 
+                else // xmlModes.Xml
                 {
-                    return XmlReader.Create(new StringReader(_data));
+                    return XmlReader.Create(new StringReader(_data), settings: settings);
                 }
             }
 

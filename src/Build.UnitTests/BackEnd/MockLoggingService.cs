@@ -422,6 +422,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+
+        /// <inheritdoc />
+        public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
+        {
+            return new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+        }
+
+        /// <inheritdoc />
+        public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile)
+        {
+        }
+
+        /// <summary>
+        /// Logs a project evaluation finished event
+        /// </summary>
+        public void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile)
+        {
+        }
+
         /// <summary>
         /// Logs a project started event
         /// </summary>
@@ -448,7 +467,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTargetElement">The project file containing the target element</param>
         /// <returns>The build event context for the target</returns>
-        public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName)
+        public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }

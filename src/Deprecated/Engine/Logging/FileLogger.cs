@@ -23,7 +23,6 @@ namespace Microsoft.Build.BuildEngine
     /// complex -- for example, there is parameter parsing in this class, plus in BaseConsoleLogger. However we have
     /// to derive FileLogger from ConsoleLogger because it shipped that way in Whidbey.
     /// </remarks>
-    [Obsolete]
     public class FileLogger : ConsoleLogger
     {
         #region Constructors

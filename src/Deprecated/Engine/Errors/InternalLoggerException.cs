@@ -21,7 +21,6 @@ namespace Microsoft.Build.BuildEngine
     /// </remarks>
     /// <owner>SumedhK</owner>
     [Serializable]
-    [Obsolete]
     public sealed class InternalLoggerException : Exception
     {
         #region Unusable constructors

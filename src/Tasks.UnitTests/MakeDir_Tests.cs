@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
         /// through the input.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "Under Unix all filenames are valid and this test is not useful"
+        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
         public void SomeInputsFailToCreate()
         {
             string temp = Path.GetTempPath();

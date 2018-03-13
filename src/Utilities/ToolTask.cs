@@ -1079,16 +1079,27 @@ namespace Microsoft.Build.Utilities
             // kill the process if it's not finished yet
             if (!proc.HasExited)
             {
+                string processName;
+                try
+                {
+                    processName = proc.ProcessName;
+                }
+                catch (InvalidOperationException)
+                {
+                    // Process exited in the small interval since we checked HasExited
+                    return;
+                }
+
                 if (!isBeingCancelled)
                 {
                     ErrorUtilities.VerifyThrow(Timeout != System.Threading.Timeout.Infinite,
                         "A time-out value must have been specified or the task must be cancelled.");
 
-                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcess", this.Timeout);
+                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcess", processName, this.Timeout);
                 }
                 else
                 {
-                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", proc.ProcessName);
+                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
                 }
 
                 int timeout = 5000;
@@ -1545,7 +1556,9 @@ namespace Microsoft.Build.Utilities
                             batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
                         }
 
-                        commandLineCommands = "/C \"" + batchFileForCommandLine + "\"";
+                        // /D: Do not load AutoRun configuration from the registry (perf)
+                        commandLineCommands = $"{(Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd ? String.Empty : "/D ")}/C \"{batchFileForCommandLine}\"";
+
                         if (EchoOff)
                         {
                             commandLineCommands = "/Q " + commandLineCommands;
