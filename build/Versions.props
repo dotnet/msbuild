@@ -35,7 +35,7 @@
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
     <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
-    <GitVersioningVersion>2.1.16</GitVersioningVersion>
+    <GitVersioningVersion>2.1.23</GitVersioningVersion>
     <LargeAddressAwareVersion>1.0.3</LargeAddressAwareVersion>
   </PropertyGroup>
 
