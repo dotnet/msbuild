@@ -50,8 +50,8 @@
   <String Id="FirstTimeWelcomeMessage">The installation was successful
 
 The following were installed at [DOTNETHOME]
-    • .NET Core SDK 2.1.100
-    • .NET Core Runtime 2.0.5
+    • .NET Core SDK 2.1.101
+    • .NET Core Runtime 2.0.6
     • Runtime Package Store
 
 This product collects usage data
