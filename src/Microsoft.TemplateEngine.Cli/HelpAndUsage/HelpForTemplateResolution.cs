@@ -182,32 +182,40 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Displays the list of templates in a table, one row per template group.
-        // 
-        // The columns displayed are as follows
-        // Note: Except language, the values are taken from one template in the group. The info could vary among the templates in the group, but shouldn't.
-        // There is no check that the info doesn't vary.
-        //  - Templates
-        //  - Short Name
-        //  - Language: All languages supported by the group are displayed, with the default language in brackets, e.g.: [C#]
-        //  - Tags
+        //
+        // The columns displayed are as follows:
+        // Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
+        // (There is no check that the info doesn't vary.)
+        // - Template Name
+        // - Short Name: displays the first short name from the highest precedence template in the group.
+        // - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
+        // - Tags
         private static void DisplayTemplateList(IReadOnlyList<ITemplateMatchInfo> templates, IEngineEnvironmentSettings environmentSettings, string language, string defaultLanguage)
         {
-            IReadOnlyDictionary<ITemplateInfo, string> templateGroupsLanguages = GetLanguagesForTemplateGroups(templates, language, defaultLanguage);
+            IReadOnlyList<TemplateGroupForListDisplay> groupsForDisplay = GetTemplateGroupsForListDisplay(templates, language, defaultLanguage);
 
-            HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = HelpFormatter.For(environmentSettings, templateGroupsLanguages, 6, '-', false)
-                .DefineColumn(t => t.Key.Name, LocalizableStrings.Templates)
-                .DefineColumn(t => t.Key.ShortName, LocalizableStrings.ShortName)
-                .DefineColumn(t => t.Value, out object languageColumn, LocalizableStrings.Language)
-                .DefineColumn(t => t.Key.Classifications != null ? string.Join("/", t.Key.Classifications) : null, out object tagsColumn, LocalizableStrings.Tags)
+            HelpFormatter<TemplateGroupForListDisplay> formatter = HelpFormatter.For(environmentSettings, groupsForDisplay, 6, '-', false)
+                .DefineColumn(t => t.Name, LocalizableStrings.Templates)
+                .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName)
+                .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.Language)
+                .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags)
                 .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())
                 .OrderBy(tagsColumn);
             Reporter.Output.WriteLine(formatter.Layout());
         }
 
-        private static IReadOnlyDictionary<ITemplateInfo, string> GetLanguagesForTemplateGroups(IReadOnlyList<ITemplateMatchInfo> templateList, string language, string defaultLanguage)
+        private class TemplateGroupForListDisplay
+        {
+            public string Name { get; set; }
+            public string ShortName { get; set; }
+            public string Languages { get; set; }
+            public string Classifications { get; set; }
+        }
+
+        private static IReadOnlyList<TemplateGroupForListDisplay> GetTemplateGroupsForListDisplay(IReadOnlyList<ITemplateMatchInfo> templateList, string language, string defaultLanguage)
         {
             IEnumerable<IGrouping<string, ITemplateMatchInfo>> grouped = templateList.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity));
-            Dictionary<ITemplateInfo, string> templateGroupsLanguages = new Dictionary<ITemplateInfo, string>();
+            List<TemplateGroupForListDisplay> templateGroupsForDisplay = new List<TemplateGroupForListDisplay>();
 
             foreach (IGrouping<string, ITemplateMatchInfo> grouping in grouped)
             {
@@ -242,10 +250,28 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     languageForDisplay.Insert(0, defaultLanguageDisplay);
                 }
 
-                templateGroupsLanguages[grouping.First().Info] = string.Join(", ", languageForDisplay);
+                ITemplateMatchInfo highestPrecedenceTemplate = grouping.OrderByDescending(x => x.Info.Precedence).First();
+                string shortName;
+                if (highestPrecedenceTemplate.Info is IShortNameList highestWithShortNameList)
+                {
+                    shortName = highestWithShortNameList.ShortNameList[0];
+                }
+                else
+                {
+                    shortName = highestPrecedenceTemplate.Info.ShortName;
+                }
+
+                TemplateGroupForListDisplay groupDisplayInfo = new TemplateGroupForListDisplay()
+                {
+                    Name = highestPrecedenceTemplate.Info.Name,
+                    ShortName = shortName,
+                    Languages = string.Join(", ", languageForDisplay),
+                    Classifications = highestPrecedenceTemplate.Info.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Info.Classifications) : null
+                };
+                templateGroupsForDisplay.Add(groupDisplayInfo);
             }
 
-            return templateGroupsLanguages;
+            return templateGroupsForDisplay;
         }
 
         public static void DisplayInvalidParameters(IReadOnlyList<string> invalidParams)
