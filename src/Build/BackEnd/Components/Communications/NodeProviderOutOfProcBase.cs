@@ -491,88 +491,104 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
-#if RUNTIME_TYPE_NETCORE
-            // Run the child process with the same host as the currently-running process.
-            var pathToHost = GetCurrentHost();
-            commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
-
-            ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = pathToHost;
-            processStartInfo.Arguments = commandLineArgs;
-            processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
-            processStartInfo.UseShellExecute = false;
-
-            Process process;
-            try
-            {
-                process = Process.Start(processStartInfo);
-            }
-            catch (Exception ex)
-            {
-                 CommunicationsUtilities.Trace
-                    (
-                        "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                        msbuildLocation,
-                        commandLineArgs,
-                        ex.ToString()
-                    );
-
-                throw new NodeFailedToLaunchException(ex);
-            }
-
-            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
-            return process.Id;
-#else
-            BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
-
             string exeName = msbuildLocation;
 
-            bool result = BackendNativeMethods.CreateProcess
-                (
-                    exeName,
-                    commandLineArgs,
-                    ref processSecurityAttributes,
-                    ref threadSecurityAttributes,
-                    false,
-                    creationFlags,
-                    BackendNativeMethods.NullPtr,
-                    null,
-                    ref startInfo,
-                    out processInfo
-                );
+#if RUNTIME_TYPE_NETCORE
+            // Run the child process with the same host as the currently-running process.
+            exeName = GetCurrentHost();
+            commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
 
-            if (!result)
+            if (NativeMethodsShared.IsWindows)
             {
-                // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
-                System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
+                // Repeat the executable name _again_ because Core MSBuild expects it
+                commandLineArgs = exeName + " " + commandLineArgs;
+            }
+#endif
 
-                CommunicationsUtilities.Trace
+            if (!NativeMethodsShared.IsWindows)
+            {
+
+                ProcessStartInfo processStartInfo = new ProcessStartInfo();
+                processStartInfo.FileName = exeName;
+                processStartInfo.Arguments = commandLineArgs;
+                processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
+                processStartInfo.UseShellExecute = false;
+
+                Process process;
+                try
+                {
+                    process = Process.Start(processStartInfo);
+                }
+                catch (Exception ex)
+                {
+                    CommunicationsUtilities.Trace
+                       (
+                           "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
+                           msbuildLocation,
+                           commandLineArgs,
+                           ex.ToString()
+                       );
+
+                    throw new NodeFailedToLaunchException(ex);
+                }
+
+                CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
+                return process.Id;
+            }
+            else
+            {
+                BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
+
+                bool result = BackendNativeMethods.CreateProcess
                     (
-                        "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                        msbuildLocation,
-                        e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                        e.Message,
-                        commandLineArgs
+                        exeName,
+                        commandLineArgs,
+                        ref processSecurityAttributes,
+                        ref threadSecurityAttributes,
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                        false,
+#else
+                        true, // Inherit handles for the anonymous pipes for IPC
+#endif
+                        creationFlags,
+                        BackendNativeMethods.NullPtr,
+                        null,
+                        ref startInfo,
+                        out processInfo
                     );
 
-                throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
+                if (!result)
+                {
+                    // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
+                    System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
+
+                    CommunicationsUtilities.Trace
+                        (
+                            "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
+                            msbuildLocation,
+                            e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
+                            e.Message,
+                            commandLineArgs
+                        );
+
+                    throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
+                }
+
+                int childProcessId = processInfo.dwProcessId;
+
+                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+                {
+                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
+                }
+
+                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+                {
+                    NativeMethodsShared.CloseHandle(processInfo.hThread);
+                }
+
+                CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", childProcessId);
+                return childProcessId;
             }
-
-            int childProcessId = processInfo.dwProcessId;
-
-            if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
-            {
-                NativeMethodsShared.CloseHandle(processInfo.hProcess);
-            }
-
-            if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
-            {
-                NativeMethodsShared.CloseHandle(processInfo.hThread);
-            }
-
-            CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", childProcessId);
-            return childProcessId;
-#endif
         }
 
         /// <summary>
