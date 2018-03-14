@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.New.Tests
         [Theory]
         [InlineData("console", "microsoft.netcore.app")]
         // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
-        //[InlineData("classlib", "netstandard.library")]
+        [InlineData("classlib", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
