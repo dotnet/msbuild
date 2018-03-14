@@ -80,11 +80,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public string AllowScriptsToRun { get; set; }
 
-        public IReadOnlyDictionary<string, string> InputTemplateParams { get; set; }
+        // When using this mock, set the inputs using constructor input.
+        // This property gets assigned based on the constructor input and the template being worked with.
+        public IReadOnlyDictionary<string, string> InputTemplateParams { get; private set; }
 
-        public List<string> RemainingArguments { get; set; }
+        // When using this mock, set the inputs using constructor input.
+        // This property gets assigned based on the constructor input and the template being worked with.
+        public List<string> RemainingArguments { get; private set; }
 
-        public IDictionary<string, IList<string>> RemainingParameters { get; set; }
+        // When using this mock, set the inputs using constructor input.
+        // This property gets assigned based on the constructor input and the template being worked with.
+        public IDictionary<string, IList<string>> RemainingParameters { get; private set; }
 
         public string HelpText { get; set; }
 

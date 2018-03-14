@@ -82,6 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(parameterDetails.AllParams.ParameterDefinitions, parameterDetails.ExplicitlyHiddenParams,
                                                                                     showImplicitlyHiddenParams, parameterDetails.HasPostActionScriptRunner, parameterDetails.ParametersToAlwaysShow);
+            bool anyParamsShowingDefaultForSwitchWithNoValue = false;
 
             if (filteredParams.Any())
             {
@@ -134,34 +135,63 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         displayValue.AppendLine(" - " + param.Priority.ToString());
                     }
 
-                    // display the configured value if there is one
+                    // determine the configured value
                     string configuredValue = null;
                     if (parameterDetails.AllParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
                     {
-                        string resolvedValue = resolvedValueObject as string;
+                        // Set the configured value as long as it's non-empty and not the default value.
+                        // If it's the default, we're not sure if it was explicitly entered or not.
+                        // Below, there's a check if the user entered a value. If so, set it.
+                        string resolvedValue = resolvedValueObject?.ToString() ?? string.Empty;
 
-                        if (!string.IsNullOrEmpty(resolvedValue)
-                            && !string.IsNullOrEmpty(param.DefaultValue)
-                            && !string.Equals(param.DefaultValue, resolvedValue))
+                        if (!string.IsNullOrEmpty(resolvedValue))
                         {
-                            configuredValue = resolvedValue;
+                            // bools get ToString() values of "True" & "False", but most templates use "true" & "false"
+                            // So do a case-insensitive comparison on bools, case-sensitive on other values.
+                            StringComparison comparisonType = string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                                ? StringComparison.OrdinalIgnoreCase
+                                : StringComparison.Ordinal;
+
+                            if (!string.Equals(param.DefaultValue, resolvedValue, comparisonType))
+                            {
+                                configuredValue = resolvedValue;
+                            }
                         }
                     }
 
+                    // If the resolved value is null/empty, or the default, only display the configured value if
+                    // the user explicitly specified it or if it can be resolved from the DefaultIfOptionWithoutValue (or bool='true' for backwards compat).
                     if (string.IsNullOrEmpty(configuredValue))
                     {
-                        // this will catch when the user inputs the default value. The above deliberately skips it on the resolved values.
-                        if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                            && parameterDetails.GroupUserParamsWithDefaultValues.Contains(param.Name))
+                        bool handled = false;
+
+                        if (parameterDetails.GroupUserParamsWithDefaultValues.Contains(param.Name))
                         {
-                            configuredValue = "true";
+                            if (param is IAllowDefaultIfOptionWithoutValue parameterWithNoValueDefault)
+                            {
+                                if (!string.IsNullOrEmpty(parameterWithNoValueDefault.DefaultIfOptionWithoutValue))
+                                {
+                                    configuredValue = parameterWithNoValueDefault.DefaultIfOptionWithoutValue;
+                                    handled = true;
+                                }
+                            }
+                            else if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Before the introduction of DefaultIfOptionWithoutValue, bool params were handled like this.
+                                // Other param types didn't have any analogous handling.
+                                configuredValue = "true";
+                                handled = true;
+                            }
                         }
-                        else
+
+                        if (!handled)
                         {
+                            // If the user explicitly specified the switch, the value is in the inputParams, so try to retrieve it here.
                             inputParams.TryGetValue(param.Name, out configuredValue);
                         }
                     }
 
+                    // display the configured value if there is one
                     if (!string.IsNullOrEmpty(configuredValue))
                     {
                         string realValue = configuredValue;
@@ -183,13 +213,30 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     // display the default value if there is one
                     if (!string.IsNullOrEmpty(param.DefaultValue))
                     {
-                        displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
+                        if (param is IAllowDefaultIfOptionWithoutValue paramWithNoValueDefault
+                            && !string.IsNullOrEmpty(paramWithNoValueDefault.DefaultIfOptionWithoutValue)
+                            && !string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, param.DefaultValue, StringComparison.Ordinal))
+                        {
+                            // the regular default, and the default if the switch is provided without a value
+                            displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValuePlusSwitchWithoutValueDefault, param.DefaultValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                            anyParamsShowingDefaultForSwitchWithNoValue = true;
+                        }
+                        else
+                        {
+                            // only the regular default
+                            displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
+                        }
                     }
 
                     return displayValue.ToString();
                 }, string.Empty);
 
                 Reporter.Output.WriteLine(formatter.Layout());
+
+                if (anyParamsShowingDefaultForSwitchWithNoValue)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.SwitchWithoutValueDefaultFootnote);
+                }
             }
             else
             {

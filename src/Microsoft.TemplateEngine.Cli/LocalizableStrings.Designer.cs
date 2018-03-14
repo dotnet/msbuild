@@ -655,6 +655,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default: {0} / (*) {1}.
+        /// </summary>
+        public static string DefaultValuePlusSwitchWithoutValueDefault {
+            get {
+                return ResourceManager.GetString("DefaultValuePlusSwitchWithoutValueDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string Delete {
@@ -1295,6 +1304,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string SingleUpdateApplyPrompt {
             get {
                 return ResourceManager.GetString("SingleUpdateApplyPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to * Indicates the value used if the switch is provided without a value..
+        /// </summary>
+        public static string SwitchWithoutValueDefaultFootnote {
+            get {
+                return ResourceManager.GetString("SwitchWithoutValueDefaultFootnote", resourceCulture);
             }
         }
         
