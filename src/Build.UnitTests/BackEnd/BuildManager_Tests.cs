@@ -3445,7 +3445,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     var parameters = new BuildParameters
                     {
-                        DisableInProcNode = true
+                        DisableInProcNode = true,
+                        EnableNodeReuse = false,
                     };
 
                     manager.BeginBuild(parameters);
@@ -3514,6 +3515,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var buildParameters = new BuildParameters(_projectCollection)
             {
                 DisableInProcNode = true,
+                EnableNodeReuse = false,
                 Loggers = new ILogger[] {_logger}
             };
 
@@ -3604,6 +3606,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var parameters = new BuildParameters(_projectCollection)
                 {
                     DisableInProcNode = true,
+                    EnableNodeReuse = false,
                     Loggers = new ILogger[] {_logger}
                 };
 
@@ -3685,6 +3688,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var buildParameters = new BuildParameters(_projectCollection)
             {
                 DisableInProcNode = true,
+                EnableNodeReuse = false,
                 Loggers = new ILogger[] { _logger }
             };
 
