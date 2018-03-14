@@ -241,7 +241,7 @@
     <value>Language</value>
   </data>
   <data name="LanguageParameter" xml:space="preserve">
-    <value>Specifies the language of the template to create.</value>
+    <value>Filters templates based on language and specifies the language of the template to create.</value>
   </data>
   <data name="ListsTemplates" xml:space="preserve">
     <value>Lists templates containing the specified name. If no name is specified, lists all templates.</value>
@@ -600,5 +600,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   </data>
   <data name="NuGetSourceHelp" xml:space="preserve">
     <value>Specifies a NuGet source to use during install.</value>
+  </data>
+  <data name="DefaultValuePlusSwitchWithoutValueDefault" xml:space="preserve">
+    <value>Default: {0} / (*) {1}</value>
+  </data>
+  <data name="SwitchWithoutValueDefaultFootnote" xml:space="preserve">
+    <value>* Indicates the value used if the switch is provided without a value.</value>
   </data>
 </root>

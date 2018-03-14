@@ -92,15 +92,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             {
                 Name = "Template1",
                 Identity = "Template1",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "type", ResolutionTestHelper.CreateTestCacheTag("project") }
-                }
+                },
             });
             templatesToSearch.Add(new TemplateInfo()
             {
                 Name = "Template2",
                 Identity = "Template2",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "type", ResolutionTestHelper.CreateTestCacheTag("item") }
@@ -110,6 +112,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             {
                 Name = "Template3",
                 Identity = "Template3",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "type", ResolutionTestHelper.CreateTestCacheTag("myType") }
@@ -119,6 +122,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             {
                 Name = "Template4",
                 Identity = "Template4",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "type",ResolutionTestHelper.CreateTestCacheTag("project") }
@@ -128,6 +132,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             {
                 Name = "Template5",
                 Identity = "Template5",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
                 Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "type", ResolutionTestHelper.CreateTestCacheTag("project") }

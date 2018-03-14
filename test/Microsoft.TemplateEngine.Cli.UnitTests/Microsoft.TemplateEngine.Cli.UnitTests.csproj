@@ -8,6 +8,10 @@
   <ItemGroup>
     <None Update="**/*.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TemplateInstallTests/TestTemplates/**/*" CopyToOutputDirectory="Always" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
@@ -26,5 +30,4 @@
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-
 </Project>

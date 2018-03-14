@@ -37,7 +37,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     }
                 };
 
-                filteredParams.Add(allowScriptsParam);
+                if (allowScriptsParam is IAllowDefaultIfOptionWithoutValue allowScriptsParamWithNoValueDefault)
+                {
+                    allowScriptsParamWithNoValueDefault.DefaultIfOptionWithoutValue = null;
+                    filteredParams.Add(allowScriptsParamWithNoValueDefault as TemplateParameter);
+                }
+                else
+                {
+                    filteredParams.Add(allowScriptsParam);
+                }
             }
 
             return filteredParams;
