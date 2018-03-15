@@ -8,7 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using Microsoft.Build.Execution;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
 namespace Microsoft.Build.BackEnd
@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
     /// <param name="sourceEntry">The build request entry which is being blocked.</param>
     /// <param name="blockingGlobalRequestId">The request on which we are blocked.</param>
     /// <param name="blockingTarget">The target on which we are blocked.</param>
-    internal delegate void BuildRequestBlockedDelegate(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget);
+    internal delegate void BuildRequestBlockedDelegate(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult);
 
     /// <summary>
     /// Represents a class which is capable of building BuildRequestEntries.

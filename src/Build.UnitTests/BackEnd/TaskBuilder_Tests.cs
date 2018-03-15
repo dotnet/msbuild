@@ -875,7 +875,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Not implemented.
         /// </summary>
-        Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingRequestId, string blockingTarget)
+        Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingRequestId, string blockingTarget, BuildResult partialBuildResult)
         {
             throw new NotImplementedException();
         }

@@ -332,7 +332,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Required for interface - this should never be called.
         /// </summary>
-        Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingGlobalBuildRequestId, string blockingTarget)
+        Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingGlobalBuildRequestId, string blockingTarget, BuildResult partialBuildResult)
         {
             ErrorUtilities.ThrowInternalError("This method should never be called by anyone except the TargetBuilder.");
             return Task.FromResult(false);
@@ -456,12 +456,19 @@ namespace Microsoft.Build.BackEnd
 
                     case TargetEntryState.Execution:
 
+                        // It's possible that our target got pushed onto the stack for one build and had dependencies process, then a re-entrant build started actively building
+                        // the target, encountered a legacy CallTarget, pushed new work onto the stack, and yielded back to here. Instead of starting the already-partially-
+                        // built target, wait for the other one to complete. Then CheckSkipTarget will skip it here.
+                        bool wasActivelyBuilding = await CompleteOutstandingActiveRequests(currentTargetEntry.Name);
+
                         // It's possible that our target got pushed onto the stack for one build and had its dependencies process, then a re-entrant build came in and
                         // actually built this target while we were waiting, so that by the time we get here, it's already been finished.  In this case, just blow it away.
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
+                            ErrorUtilities.VerifyThrow(!wasActivelyBuilding, "Target {0} was actively building and waited on but we are attempting to build it again.", currentTargetEntry.Name);
+
                             // This target is now actively building.
-                            _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Add(currentTargetEntry.Name, _requestEntry.Request.GlobalRequestId);
+                            _requestEntry.RequestConfiguration.ActivelyBuildingTargets[currentTargetEntry.Name] = _requestEntry.Request.GlobalRequestId;
 
                             // Execute all of the tasks on this target.
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
@@ -669,7 +676,7 @@ namespace Microsoft.Build.BackEnd
                     if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
                     {
                         // Another request elsewhere is building it.  We need to wait.
-                        await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetSpecification.TargetName);
+                        await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetSpecification.TargetName, null);
 
                         // If we come out of here and the target is *still* active, it means the scheduler detected a circular dependency and told us to
                         // continue so we could throw the exception.
@@ -744,6 +751,25 @@ namespace Microsoft.Build.BackEnd
 
             bool pushedTargets = (targetsToPush.Count > 0);
             return pushedTargets;
+        }
+
+        private async Task<bool> CompleteOutstandingActiveRequests(string targetName)
+        {
+            // See if this target is already building under a different build request.  If so, we need to wait.
+            int idOfAlreadyBuildingRequest = BuildRequest.InvalidGlobalRequestId;
+            if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryGetValue(targetName, out idOfAlreadyBuildingRequest))
+            {
+                if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
+                {
+                    // Another request is building the target. Wait for that, sending partial results
+                    // for this request, which may be required to unblock it.
+                    await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetName, _buildResult);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
