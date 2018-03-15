@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Abstractions for making code that uses file system and environment testable.</Description>
-    <VersionPrefix>2.0.0-beta</VersionPrefix>
+    <Version>$(SdkVersion)</Version>
     <TargetFramework>netstandard1.3</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
