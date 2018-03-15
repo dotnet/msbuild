@@ -144,14 +144,15 @@ namespace Microsoft.NET.Restore.Tests
             {
                 using (var fileStream = File.OpenRead(nupkg))
                 {
-                    PackageExtractor.InstallFromSourceAsync((stream) =>
-                        fileStream.CopyToAsync(stream, 4096, CancellationToken.None),
-                        new VersionFolderPathContext(
-                            identity,
-                            nugetCache,
-                            NullLogger.Instance,
+                    PackageExtractor.InstallFromSourceAsync(
+                        identity,
+                        stream => fileStream.CopyToAsync(stream, 4096, CancellationToken.None),
+                        pathResolver,
+                        new PackageExtractionContext(
                             PackageSaveMode.Defaultv3,
-                            XmlDocFileSaveMode.None),
+                            XmlDocFileSaveMode.None,
+                            NullLogger.Instance,
+                            signedPackageVerifier: null),
                         CancellationToken.None).Wait();
                 }
             }
