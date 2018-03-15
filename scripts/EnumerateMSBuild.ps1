@@ -35,7 +35,7 @@ foreach ($instance in $vsInstances)
     Write-Log "Found VS Instance: {$instanceName}"
     
     # Look at each dll/exe in the MSBuild bin folder and get their ProductVersion
-    ls -File -Recurse -Include ('*.dll', '*.exe') -Path "$instancePath\MSBuild\15.0\Bin" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
+    ls -File -Recurse -Include ('*.dll', '*.exe') -Path "$instancePath\MSBuild\15.0\Bin" | % VersionInfo | Format-Table -AutoSize InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
     Write-Log "********************" -LogToConsole $False
 }
 
@@ -44,7 +44,7 @@ Write-Log
 Write-Log "********************" -LogToConsole $False
 $legacyPath = ${env:ProgramFiles(x86)} + "\MSBuild\"
 Write-Log "Looking for legacy MSBuild versions: $legacyPath"
-Get-ChildItem -File -Path "$legacyPath" -Recurse "Microsoft.Build*.dll" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
+Get-ChildItem -File -Path "$legacyPath" -Recurse "Microsoft.Build*.dll" | % VersionInfo | Format-Table -AutoSize InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
 Write-Log "********************" -LogToConsole $False
 
 # Check in the .NET 4.5+ GAC
@@ -52,7 +52,7 @@ Write-Log
 Write-Log "********************" -LogToConsole $False
 $gacPath = ${env:windir} + "\Microsoft.NET\assembly"
 Write-Log "Looking for MSBuild in the GAC: $gacPath"
-Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
+Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Format-Table -AutoSize InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
 Write-Log "********************" -LogToConsole $False
 
 # Just for completeness look in c:\Windows\assembly as well.
@@ -60,7 +60,7 @@ Write-Log
 Write-Log "********************" -LogToConsole $False
 $gacPath = ${env:windir} + "\assembly"
 Write-Log "Looking for MSBuild in the GAC: $gacPath"
-Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
+Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Format-Table -AutoSize InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
 Write-Log "********************" -LogToConsole $False
 
 Write-Host
