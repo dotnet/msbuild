@@ -600,8 +600,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="translated">不支持的项目类型。请联系 SDK 提供商。</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <target state="needs-review-translation">不支持的项目类型。请联系 SDK 提供商。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">

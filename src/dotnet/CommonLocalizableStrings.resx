@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="UnsupportedProjectType" xml:space="preserve">
-    <value>Unsupported project type. Please check with your sdk provider.</value>
+    <value>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</value>
   </data>
   <data name="ProjectAlreadyHasAreference" xml:space="preserve">
     <value>Project already has a reference to `{0}`.</value>
