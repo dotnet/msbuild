@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.List.Tool
 {
     internal class ListToolCommand : CommandBase
     {
-        private const string CommandDelimiter = ", ";
+        public const string CommandDelimiter = ", ";
         private readonly AppliedOption _options;
         private readonly IToolPackageStore _toolPackageStore;
         private readonly IReporter _reporter;
@@ -66,20 +66,20 @@ namespace Microsoft.DotNet.Tools.List.Tool
                 .ToArray();
         }
 
-        private bool PackageHasCommands(IToolPackage p)
+        private bool PackageHasCommands(IToolPackage package)
         {
             try
             {
                 // Attempt to read the commands collection
                 // If it fails, print a warning and treat as no commands
-                return p.Commands.Count >= 0;
+                return package.Commands.Count >= 0;
             }
             catch (Exception ex) when (ex is ToolConfigurationException)
             {
                 _errorReporter.WriteLine(
                     string.Format(
                         LocalizableStrings.InvalidPackageWarning,
-                        p.Id,
+                        package.Id,
                         ex.Message).Yellow());
                 return false;
             }
