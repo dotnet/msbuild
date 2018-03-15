@@ -87,6 +87,7 @@
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Publish\**" SdkName="Microsoft.NET.Sdk.Publish" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web\**" SdkName="Microsoft.NET.Sdk.Web" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web.ProjectSystem\**" SdkName="Microsoft.NET.Sdk.Web.ProjectSystem" />
+      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Razor\**" SdkName="Microsoft.NET.Sdk.Razor" />
       <LayoutFile Include="@(Stage0SdkFile)">
         <TargetPath>..\%(Stage0SdkFile.SdkName)\%(Stage0SdkFile.RecursiveDir)%(Stage0SdkFile.Filename)%(Stage0SdkFile.Extension)</TargetPath>
       </LayoutFile>

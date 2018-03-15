@@ -251,7 +251,7 @@ public class NETFramework
             }
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/1803")]
+        [WindowsOnlyFact]
         public void It_resolves_assembly_conflicts_with_a_NETFramework_library()
         {
             TestProject project = new TestProject()
@@ -288,14 +288,14 @@ public static class {project.Name}
                     }
 
                 })
-                .Restore(Log, project.Name, "/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json");
+                .Restore(Log, project.Name);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
             var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
-                .Execute("/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json")
+                .Execute()
                 .Should()
                 .Pass()
                 .And
