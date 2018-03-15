@@ -55,7 +55,8 @@ namespace Microsoft.DotNet.Cli.Build
                 { "linux_x64", false },
                 { "rhel.6_x64", false },
                 { "alpine.3.6_x64", false },
-                { "all_linux_distros_native_installer", false}
+                { "all_linux_distros_native_installer", false},
+                { "linux_arm", false}
             };
 
             if (!badges.ContainsKey(VersionBadgeMoniker))

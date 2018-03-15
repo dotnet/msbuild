@@ -25,7 +25,7 @@
 
     <!-- Use the portable "linux-x64" Rid when downloading Linux shared framework compressed file. -->
     <SharedFrameworkRid>$(CoreSetupRid)</SharedFrameworkRid>
-    <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
+    <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-$(Architecture)</SharedFrameworkRid>
     <CombinedFrameworkHostCompressedFileName>dotnet-runtime-$(MicrosoftNETCoreAppPackageVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
 
     <AspNetCoreSharedFxInstallerRid>$(SharedFrameworkRid)</AspNetCoreSharedFxInstallerRid>
@@ -56,7 +56,7 @@
 
   <ItemGroup>
     <_DownloadAndExtractItem Include="AspNetCoreSharedFxArchiveFile"
-                             Condition="!Exists('$(AspNetCoreSharedFxArchiveFile)')">
+                             Condition="!Exists('$(AspNetCoreSharedFxArchiveFile)') And !$(Architecture.StartsWith('arm'))">
       <Url>$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(AspNetCoreSharedFxArchiveFile)</DownloadFileName>
       <ExtractDestination>$(AspNetCoreSharedFxPublishDirectory)</ExtractDestination>
@@ -70,42 +70,42 @@
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedRuntimeDepsInstallerFile"
-                         Condition="('$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true') And '$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedRuntimeDepsInstallerFile)') And '$(InstallerExtension)' != ''">
+                         Condition="('$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true') And '$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedRuntimeDepsInstallerFile)') And '$(InstallerExtension)' != '' And !$(Architecture.StartsWith('arm'))">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedRuntimeDepsInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
-                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != '' And !$(Architecture.StartsWith('arm'))">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
-                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != '' And !$(Architecture.StartsWith('arm'))">
       <Url>$(CoreSetupRootUrl)$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
-                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != '' And !$(Architecture.StartsWith('arm'))">
       <Url>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedAspNetCoreSharedFxInstallerFile"
-                            Condition="'$(SkipBuildingInstallers)' != 'true' AND '$(DownloadedAspNetCoreSharedFxInstallerFile)' != '' AND !Exists($(DownloadedAspNetCoreSharedFxInstallerFile)) And '$(InstallerExtension)' != ''">
+                            Condition="'$(SkipBuildingInstallers)' != 'true' AND '$(DownloadedAspNetCoreSharedFxInstallerFile)' != '' AND !Exists($(DownloadedAspNetCoreSharedFxInstallerFile)) And '$(InstallerExtension)' != '' And !$(Architecture.StartsWith('arm'))">
       <Url>$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(DownloadedAspNetCoreSharedFxInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedAspNetCoreSharedFxInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="AspNetCoreSharedFxBaseRuntimeVersionFile"
-                           Condition="!Exists('$(AspNetCoreSharedFxBaseRuntimeVersionFile)')">
+                           Condition="!Exists('$(AspNetCoreSharedFxBaseRuntimeVersionFile)') And !$(Architecture.StartsWith('arm'))">
       <Url>$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxBaseRuntimeVersionFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(AspNetCoreSharedFxBaseRuntimeVersionFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>

@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <Target Name="Test"
-          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
+          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' And !$(Architecture.StartsWith('arm')) "
           DependsOnTargets="TestsForBuildItself;BuildTests;">
 
     <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->

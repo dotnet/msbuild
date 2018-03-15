@@ -96,7 +96,7 @@ while [[ $# > 0 ]]; do
             ;;
         --linux-portable)
             LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
-            CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\" /p:IslinuxPortable=\"true\""
+            CUSTOM_BUILD_ARGS="/p:OSName=\"linux\" /p:IslinuxPortable=\"true\""
             ;;
         --stage0)
             STAGE0_SOURCE_DIR=$2
@@ -107,7 +107,7 @@ while [[ $# > 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-            echo "  --architecture <ARCHITECTURE>       Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
+            echo "  --architecture <ARCHITECTURE>       Build the specified architecture (x64 or arm , default: x64)"
             echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --nopackage                         Skip packaging targets"
             echo "  --nobuild                           Skip building, showing the command that would be used to build"
@@ -140,6 +140,7 @@ done
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$ARCHITECTURE
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
+# Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Enable verbose VS Test Console logging
@@ -151,8 +152,14 @@ export VSTEST_TRACE_BUILD=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 # Install a stage 0
+INSTALL_ARCHITECTURE=$ARCHITECTURE
+archlower="$(echo $ARCHITECTURE | awk '{print tolower($0)}')"
+if [[ $archlower == 'arm'* ]]; then
+    INSTALL_ARCHITECTURE="x64"
+fi
+
 if [ "$STAGE0_SOURCE_DIR" == "" ]; then
-    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.2.0-preview1-007799" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.2.0-preview1-007799" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$INSTALL_ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 else
     echo "Copying bootstrap cli from $STAGE0_SOURCE_DIR"
     cp -r $STAGE0_SOURCE_DIR/* "$DOTNET_INSTALL_DIR"

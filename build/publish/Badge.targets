@@ -17,7 +17,7 @@
 
   <Target Name="GenerateCoherentBadge"
           DependsOnTargets="Init; EvaluateRuntimeCoherence"
-          Condition=" '$(Coherent)' == 'true' ">
+          Condition=" '$(Coherent)' == 'true' And !$(Architecture.StartsWith('arm')) ">
     <Message Text="$(CoherentBadge)"  />
 
     <ReplaceFileContents

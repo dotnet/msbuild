@@ -20,7 +20,7 @@ if($Help)
     Write-Output ""
     Write-Output "Options:"
     Write-Output "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-    Write-Output "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
+    Write-Output "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64, x86, or arm , default: x64)"
     Write-Output "  -NoPackage                         Skip packaging targets"
     Write-Output "  -NoBuild                           Skip building the product"
     Write-Output "  -Help                              Display this help message"
@@ -82,8 +82,15 @@ $env:VSTEST_TRACE_BUILD=1
 # install a stage0
 $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
 
-Write-Output "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
-Invoke-Expression "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+$InstallArchitecture = $Architecture
+if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
+{
+    $InstallArchitecture = "x64"
+}
+
+Write-Output "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+Invoke-Expression "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+
 if ($LastExitCode -ne 0)
 {
     Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
