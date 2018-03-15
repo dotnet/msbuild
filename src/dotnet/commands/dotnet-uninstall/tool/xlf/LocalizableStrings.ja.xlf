@@ -4,62 +4,62 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to uninstall.</source>
-        <target state="new">NuGet Package Id of the tool to uninstall.</target>
+        <target state="translated">アンインストールするツールの NuGet パッケージ ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstalls a tool.</source>
-        <target state="new">Uninstalls a tool.</target>
+        <target state="translated">ツールをアンインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to uninstall.</source>
-        <target state="new">Please specify one tool Package Id to uninstall.</target>
+        <target state="translated">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall user wide.</source>
-        <target state="new">Uninstall user wide.</target>
+        <target state="translated">ユーザー全体でアンインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="new">Tool '{0}' (version '{1}') was successfully uninstalled.</target>
+        <target state="translated">ツール '{0}' (バージョン '{1}') は正常にアンインストールされました。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
         <source>Tool '{0}' is not currently installed.</source>
-        <target state="new">Tool '{0}' is not currently installed.</target>
+        <target state="translated">ツール '{0}' は現在、インストールされていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
         <source>Tool '{0}' has multiple versions installed and cannot be uninstalled.</source>
-        <target state="new">Tool '{0}' has multiple versions installed and cannot be uninstalled.</target>
+        <target state="translated">ツール '{0}' の複数のバージョンがインストールされており、アンインストールできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallTool">
         <source>Failed to uninstall tool '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool '{0}': {1}</target>
+        <target state="translated">ツール '{0}' をアンインストールできませんでした: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <source>Need either global or tool-path provided.</source>
+        <target state="translated">global か tool-path を指定する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location where the tool was previously installed.</source>
-        <target state="new">Location where the tool was previously installed.</target>
+        <source>Location of shim to access tool</source>
+        <target state="translated">ツールにアクセスする shim の場所</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <source>Cannot have global and tool-path as opinion at the same time."</source>
+        <target state="translated">global と tool-path を意見として同時に指定することはできません。"</target>
         <note />
       </trans-unit>
     </body>

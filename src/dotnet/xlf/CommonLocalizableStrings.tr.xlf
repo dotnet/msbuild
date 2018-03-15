@@ -721,27 +721,27 @@
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' (version '{1}') is already installed.</source>
-        <target state="needs-review-translation">'{0}' aracı zaten yüklü.</target>
+        <target state="translated">'{0}' aracı (sürüm '{1}') zaten yüklü.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShellShimConflict">
         <source>Command '{0}' conflicts with an existing command from another tool.</source>
-        <target state="new">Command '{0}' conflicts with an existing command from another tool.</target>
+        <target state="translated">'{0}' komutu, başka bir araçtaki mevcut bir komutla çakışıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyExecutablePath">
         <source>Cannot create shell shim for an empty executable path.</source>
-        <target state="new">Cannot create shell shim for an empty executable path.</target>
+        <target state="translated">Boş bir yürütülebilir yol için kabuk dolgusu oluşturulamaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyCommand">
         <source>Cannot create shell shim for an empty command.</source>
-        <target state="new">Cannot create shell shim for an empty command.</target>
+        <target state="translated">Boş bir komut için kabuk dolgusu oluşturulamaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRetrieveToolConfiguration">
         <source>Failed to retrieve tool configuration: {0}</source>
-        <target state="new">Failed to retrieve tool configuration: {0}</target>
+        <target state="translated">Araç yapılandırması alınamadı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstructions">
@@ -757,15 +757,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">'{0}' araç dizini şu anda PATH ortam değişkeni üzerinde değil.
+Bash kullanıyorsanız aşağıdaki komutu çalıştırarak bunu profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# .NET Core SDK araçlarını ekle
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Aşağıdaki komutu çalıştırarak geçerli oturuma ekleyebilirsiniz:
 
 export PATH="$PATH:{0}"
 </target>
@@ -784,15 +784,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">'{0}' araç dizini şu anda PATH ortam değişkeni üzerinde değil.
+Bash kullanıyorsanız aşağıdaki komutu çalıştırarak bunu profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# .NET Core SDK araçlarını ekle
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Aşağıdaki komutu çalıştırarak geçerli oturuma ekleyebilirsiniz:
 
 export PATH="$PATH:{0}"
 </target>
@@ -805,9 +805,9 @@ You can add the directory to the PATH by running the following command:
 
 setx PATH "%PATH%;{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+        <target state="translated">'{0}' araç dizini şu anda PATH ortam değişkeni üzerinde değil.
 
-You can add the directory to the PATH by running the following command:
+Aşağıdaki komutu çalıştırarak dizini PATH öğesine ekleyebilirsiniz:
 
 setx PATH "%PATH%;{0}"
 </target>
@@ -815,52 +815,52 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToCreateShellShim">
         <source>Failed to create tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
+        <target state="translated">'{0}' komutu için araç dolgusu oluşturulamadı: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRemoveShellShim">
         <source>Failed to remove tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
+        <target state="translated">'{0}' komutu için araç dolgusu kaldırılamadı: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedSettingShimPermissions">
         <source>Failed to set user executable permissions for shell shim: {0}</source>
-        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
+        <target state="translated">Kabuk dolgusu için kullanıcı yürütülebilir dosya izinleri ayarlanamadı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallToolPackage">
         <source>Failed to install tool package '{0}': {1}</source>
-        <target state="new">Failed to install tool package '{0}': {1}</target>
+        <target state="translated">'{0}' araç paketi başlatılamadı: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallToolPackage">
         <source>Failed to uninstall tool package '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <target state="translated">'{0}' araç paketi kaldırılamadı: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
         <source>Column maximum width must be greater than zero.</source>
-        <target state="new">Column maximum width must be greater than zero.</target>
+        <target state="translated">Maksimum sütun genişliği sıfırdan büyük olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolEntryPointFile">
         <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
-        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <target state="translated">'{1}' komutu için '{0}' giriş noktası dosyası pakette bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolSettingsFile">
         <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
-        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
+        <target state="translated">'DotnetToolSettings.xml' ayar dosyası pakette bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="new">Failed to find staged tool package '{0}'.</target>
+        <target state="translated">'{0}' adlı hazırlanmış araç paketi bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
-        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
-        <target state="new">The command name '{0}' cannot begin with a leading dot (.).</target>
+        <source>Command '{0}' has a leading dot.</source>
+        <target state="translated">'{0}' komutunun başında nokta var.</target>
         <note />
       </trans-unit>
     </body>

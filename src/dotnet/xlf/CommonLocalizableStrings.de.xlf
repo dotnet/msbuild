@@ -716,32 +716,32 @@
       </trans-unit>
       <trans-unit id="ToolSettingsUnsupportedRunner">
         <source>Command '{0}' uses unsupported runner '{1}'."</source>
-        <target state="translated">Der Befehl "{0}" verwendet die nicht unterstützte Ausführung"{1}".</target>
+        <target state="translated">Der Befehl "{0}" verwendet die nicht unterstützte Ausführung "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' (version '{1}') is already installed.</source>
-        <target state="needs-review-translation">Das Tool "{0}" ist bereits installiert.</target>
+        <target state="translated">Das Tool "{0}" (Version "{1}") ist bereits installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShellShimConflict">
         <source>Command '{0}' conflicts with an existing command from another tool.</source>
-        <target state="new">Command '{0}' conflicts with an existing command from another tool.</target>
+        <target state="translated">Der Befehl "{0}" steht in Konflikt zu einem vorhandenen Befehl aus einem anderen Tool.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyExecutablePath">
         <source>Cannot create shell shim for an empty executable path.</source>
-        <target state="new">Cannot create shell shim for an empty executable path.</target>
+        <target state="translated">Für einen leeren Pfad einer ausführbaren Datei kann kein Shell-Shim erstellt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyCommand">
         <source>Cannot create shell shim for an empty command.</source>
-        <target state="new">Cannot create shell shim for an empty command.</target>
+        <target state="translated">Für einen leeren Befehl kann kein Shell-Shim erstellt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRetrieveToolConfiguration">
         <source>Failed to retrieve tool configuration: {0}</source>
-        <target state="new">Failed to retrieve tool configuration: {0}</target>
+        <target state="translated">Fehler beim Abrufen der Toolkonfiguration: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstructions">
@@ -757,15 +757,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Das Toolverzeichnis "{0}" ist aktuell nicht in der PATH-Umgebungsvariable angegeben.
+Bei Verwendung von Bash können Sie hierzu den folgenden Befehl ausführen:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Um das Verzeichnis der aktuellen Sitzung hinzuzufügen, können Sie den folgenden Befehl ausführen:
 
 export PATH="$PATH:{0}"
 </target>
@@ -784,15 +784,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Das Toolverzeichnis "{0}" ist aktuell nicht in der PATH-Umgebungsvariable angegeben.
+Bei Verwendung von Bash können Sie hierzu den folgenden Befehl ausführen:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Um das Verzeichnis der aktuellen Sitzung hinzuzufügen, können Sie den folgenden Befehl ausführen:
 
 export PATH="$PATH:{0}"
 </target>
@@ -805,9 +805,9 @@ You can add the directory to the PATH by running the following command:
 
 setx PATH "%PATH%;{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+        <target state="translated">Das Toolverzeichnis "{0}" ist aktuell nicht in der PATH-Umgebungsvariable angegeben.
 
-You can add the directory to the PATH by running the following command:
+Um das Verzeichnis zu PATH hinzuzufügen, können Sie den folgenden Befehl ausführen:
 
 setx PATH "%PATH%;{0}"
 </target>
@@ -815,52 +815,52 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToCreateShellShim">
         <source>Failed to create tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
+        <target state="translated">Fehler beim Erstellen des Tool-Shims für den Befehl "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRemoveShellShim">
         <source>Failed to remove tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
+        <target state="translated">Fehler beim Entfernen des Tool-Shims für den Befehl "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedSettingShimPermissions">
         <source>Failed to set user executable permissions for shell shim: {0}</source>
-        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
+        <target state="translated">Fehler beim Festlegen der Benutzerberechtigungen der ausführbaren Datei für den Shell-Shim: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallToolPackage">
         <source>Failed to install tool package '{0}': {1}</source>
-        <target state="new">Failed to install tool package '{0}': {1}</target>
+        <target state="translated">Fehler beim Installieren des Toolpakets "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallToolPackage">
         <source>Failed to uninstall tool package '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <target state="translated">Fehler beim Deinstallieren des Toolpakets "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
         <source>Column maximum width must be greater than zero.</source>
-        <target state="new">Column maximum width must be greater than zero.</target>
+        <target state="translated">Die maximale Spaltenbreite muss größer als 0 sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolEntryPointFile">
         <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
-        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <target state="translated">Die Einstiegspunktdatei "{0}" für den Befehl "{1}" wurde nicht im Paket gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolSettingsFile">
         <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
-        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
+        <target state="translated">Die Einstellungsdatei "DotnetToolSettings.xml" wurde nicht im Paket gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="new">Failed to find staged tool package '{0}'.</target>
+        <target state="translated">Das bereitgestellte Toolpaket "{0}" wurde nicht gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
-        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
-        <target state="new">The command name '{0}' cannot begin with a leading dot (.).</target>
+        <source>Command '{0}' has a leading dot.</source>
+        <target state="translated">Der Befehl "{0}" weist einen vorangestellten Punkt auf.</target>
         <note />
       </trans-unit>
     </body>

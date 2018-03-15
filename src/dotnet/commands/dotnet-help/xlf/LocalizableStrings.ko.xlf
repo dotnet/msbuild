@@ -154,7 +154,7 @@
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references or installed tools.</source>
-        <target state="needs-review-translation">프로젝트의 참조를 나열합니다.</target>
+        <target state="translated">프로젝트 참조 또는 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="UninstallDefinition">
         <source>Uninstalls an item from the development environment.</source>
-        <target state="new">Uninstalls an item from the development environment.</target>
+        <target state="translated">개발 환경에서 항목을 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateDefinition">

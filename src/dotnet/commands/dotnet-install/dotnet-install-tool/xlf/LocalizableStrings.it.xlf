@@ -15,8 +15,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="needs-review-translation">
-L'installazione è riuscita. Se non ci sono altre istruzioni, è possibile digitare direttamente nella shell il comando seguente da richiamare: {0}</target>
+        <target state="translated">Se non sono presenti istruzioni aggiuntive, è possibile digitare il comando seguente per richiamare lo strumento: {0}
+Lo strumento '{1}' (versione '{2}') è stato installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -81,17 +81,17 @@ L'installazione è riuscita. Se non ci sono altre istruzioni, è possibile digit
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">Lo strumento '{0}' è già installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToCreateToolShim">
         <source>Failed to create shell shim for tool '{0}': {1}</source>
-        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <target state="translated">Non è stato possibile creare lo shim della shell per lo strumento '{0}': {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <target state="translated">Il file di configurazione NuGet '{0}' non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
@@ -101,22 +101,22 @@ L'installazione è riuscita. Se non ci sono altre istruzioni, è possibile digit
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">La versione specificata '{0}' non è un intervallo di versioni NuGet valido.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <source>Need either global or tool-path provided.</source>
+        <target state="translated">È necessario specificare global o tool-path.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <source>Cannot have global and tool-path as opinion at the same time.</source>
+        <target state="translated">Non è possibile specificare contemporaneamente global e tool-path come opzione.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="new">Location where the tool will be installed.</target>
+        <source>Location of shim to access tool</source>
+        <target state="translated">Percorso dello shim per accedere allo strumento</target>
         <note />
       </trans-unit>
     </body>

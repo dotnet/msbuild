@@ -236,12 +236,12 @@
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET Core SDK (reflecting any global.json):</source>
-        <target state="new">.NET Core SDK (reflecting any global.json):</target>
+        <target state="translated">SDK de .NET Core (reflejando cualquier global.json):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
         <source>Runtime Environment:</source>
-        <target state="new">Runtime Environment:</target>
+        <target state="translated">Entorno de tiempo de ejecución:</target>
         <note />
       </trans-unit>
     </body>

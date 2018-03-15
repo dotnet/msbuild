@@ -15,8 +15,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="needs-review-translation">
-Instalace byla úspěšná. Pokud nejsou další pokyny, můžete přímo do jádra napsat následující příkaz k vyvolání: {0}</target>
+        <target state="translated">Pokud nebyly dostupné žádné další pokyny, můžete zadáním následujícího příkazu nástroj vyvolat: {0}
+Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -81,17 +81,17 @@ Instalace byla úspěšná. Pokud nejsou další pokyny, můžete přímo do já
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">Nástroj {0} je už nainstalovaný.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToCreateToolShim">
         <source>Failed to create shell shim for tool '{0}': {1}</source>
-        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <target state="translated">Pro nástroj {0} se nepodařilo vytvořit překrytí prostředí: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <target state="translated">Konfigurační soubor NuGet {0} neexistuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
@@ -101,22 +101,22 @@ Instalace byla úspěšná. Pokud nejsou další pokyny, můžete přímo do já
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">Zadaná verze {0} není platným rozsahem verzí NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <source>Need either global or tool-path provided.</source>
+        <target state="translated">Je potřeba zadat buď globální cestu, nebo cestu k nástroji.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <source>Cannot have global and tool-path as opinion at the same time.</source>
+        <target state="translated">Globální cesta a cesta k nástroji nemůžou být zadané současně.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="new">Location where the tool will be installed.</target>
+        <source>Location of shim to access tool</source>
+        <target state="translated">Umístění překrytí pro přístup k nástroji</target>
         <note />
       </trans-unit>
     </body>
