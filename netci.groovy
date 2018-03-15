@@ -80,7 +80,10 @@ set DOTNET_CLI_UI_LANGUAGE=es
 
     Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, 'latest-or-auto')
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-    Utilities.addMSTestResults(newJob, '**/*.trx')
+    // ARM CI runs are build only.
+    if (architecture != 'arm') {
+        Utilities.addMSTestResults(newJob, '**/*.trx')
+    }
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${architecture} ${configuration} Build")
 }
 
