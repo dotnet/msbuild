@@ -1,45 +1,67 @@
-﻿# Write output to console and save log to send.
-Start-Transcript -Path msbuild_versions.txt
+﻿Function Write-Log
+{
+Param(
+    [parameter(Mandatory=$false)]
+    [string]$logString,
+    [parameter(Mandatory=$false)]
+    [bool]$LogToConsole = $True)
+
+    if ($LogToConsole -eq $true)
+    {
+        Write-Host $logString
+    }
+
+    Add-Content $logFile -value $logString -Encoding Unicode
+}
+
+# Set log file and delete if it exists.
+$logFile = "msbuild_versions.txt"
+If((Test-Path -Path $logFile))
+{
+    Remove-Item -Path $logFile
+}
 
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-Write-Host "Using vswhere from " + $vswhere
+Write-Log "Using vswhere from $vswhere"
 
 $vsInstances = & $vswhere -prerelease -all -format json | ConvertFrom-Json
+$vsInstances | Out-File $logFile -Append unicode
 
 foreach ($instance in $vsInstances)
 {
+    $instanceName = $instance.installationName
     $instancePath = $instance.installationPath
-    Write-Host "********************"
-    write-host "Found VS: " + $instance.installationName
+    Write-Log "********************" -LogToConsole $False
+    Write-Log "Found VS Instance: {$instanceName}"
     
     # Look at each dll/exe in the MSBuild bin folder and get their ProductVersion
-    Get-ChildItem -File -Recurse -Include ('*.dll', '*.exe') -Path "$instancePath\MSBuild\15.0\Bin" | % VersionInfo | Select-Object ProductVersion, FileName
-    Write-Host "********************"
-    Write-Host
+    ls -File -Recurse -Include ('*.dll', '*.exe') -Path "$instancePath\MSBuild\15.0\Bin" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Append unicode
+    Write-Log "********************" -LogToConsole $False
 }
 
 # Check in Program Files (x86)\MSBuild for old versions.
-Write-Host
-Write-Host "********************"
+Write-Log
+Write-Log "********************" -LogToConsole $False
 $legacyPath = ${env:ProgramFiles(x86)} + "\MSBuild\"
-Write-Host "Looking for legacy MSBuild versions: $legacyPath"
-Get-ChildItem -File -Path "$legacyPath" -Recurse "Microsoft.Build*.dll" | % VersionInfo | Select-Object ProductVersion, FileName
-Write-Host "********************"
+Write-Log "Looking for legacy MSBuild versions: $legacyPath"
+Get-ChildItem -File -Path "$legacyPath" -Recurse "Microsoft.Build*.dll" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Append unicode
+Write-Log "********************" -LogToConsole $False
 
 # Check in the .NET 4.5+ GAC
-Write-Host
-Write-Host "********************"
+Write-Log
+Write-Log "********************" -LogToConsole $False
 $gacPath = ${env:windir} + "\Microsoft.NET\assembly"
-Write-Host "Looking for MSBuild in the GAC: $gacPath"
-Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Select-Object ProductVersion, FileName
-Write-Host "********************"
+Write-Log "Looking for MSBuild in the GAC: $gacPath"
+Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Append unicode
+Write-Log "********************" -LogToConsole $False
 
 # Just for completeness look in c:\Windows\assembly as well.
-Write-Host
-Write-Host "********************"
+Write-Log
+Write-Log "********************" -LogToConsole $False
 $gacPath = ${env:windir} + "\assembly"
-Write-Host "Looking for MSBuild in the GAC: $gacPath"
-Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Select-Object ProductVersion, FileName
-Write-Host "********************"
+Write-Log "Looking for MSBuild in the GAC: $gacPath"
+Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Format-Table InternalName, ProductVersion, FileName | Out-File $logFile -Append unicode
+Write-Log "********************" -LogToConsole $False
 
-Stop-Transcript
+Write-Host
+Write-Host "Output saved to $logFile"
