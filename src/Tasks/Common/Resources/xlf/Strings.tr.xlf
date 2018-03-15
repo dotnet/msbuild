@@ -354,7 +354,7 @@
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
         <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
-        <target state="new">You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <target state="translated">.NET Core SDK’nın önizleme sürümüyle çalışıyorsunuz. SDK sürümünü geçerli projedeki bir global.json dosyası aracılığıyla tanımlayabilirsiniz. Daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
     </body>
