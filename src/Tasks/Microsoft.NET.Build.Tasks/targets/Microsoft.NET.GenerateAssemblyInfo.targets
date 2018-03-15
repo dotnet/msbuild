@@ -50,7 +50,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(GenerateAssemblyInfo)' == 'true'" />
 
   <Target Name="AddSourceRevisionToInformationalVersion"
-          DependsOnTargets="InitializeSourceControlInformation"
+          DependsOnTargets="GetAssemblyVersion;InitializeSourceControlInformation"
           Condition="'$(SourceControlInformationFeatureSupported)' == 'true' and '$(IncludeSourceRevisionInInformationalVersion)' == 'true'">
     <PropertyGroup Condition="'$(SourceRevisionId)' != ''">
       <!-- Follow SemVer 2.0 rules -->

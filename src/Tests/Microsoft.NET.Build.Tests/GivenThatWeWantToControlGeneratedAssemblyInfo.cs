@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_does_not_include_source_revision_id_if_not_available1()
+        public void It_does_not_include_source_revision_id_if_initialize_source_control_target_not_available()
         {
             TestProject testProject = new TestProject()
             {
@@ -105,14 +105,14 @@ namespace Microsoft.NET.Build.Tests
 
             testAsset.Restore(Log, testProject.Name);
 
-            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), "netcoreapp2.0", valueName: "InformationalVersion");
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
             command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
-        public void It_does_not_include_source_revision_id_if_not_available2()
+        public void It_does_not_include_source_revision_id_if_source_revision_id_not_set()
         {
             TestProject testProject = new TestProject()
             {
@@ -134,13 +134,12 @@ namespace Microsoft.NET.Build.Tests
 
                     project.Root.Add(
                         new XElement(ns + "PropertyGroup",
-                            new XElement("SourceControlInformationFeatureSupported", "true"),
-                            new XElement("IncludeSourceRevisionInInformationalVersion", "true")));
+                            new XElement("SourceControlInformationFeatureSupported", "true")));
                 });
 
             testAsset.Restore(Log, testProject.Name);
 
-            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), "netcoreapp2.0", valueName: "InformationalVersion");
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
             command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
@@ -175,7 +174,7 @@ namespace Microsoft.NET.Build.Tests
 
             testAsset.Restore(Log, testProject.Name);
 
-            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), "netcoreapp2.0", valueName: "InformationalVersion");
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
             command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
@@ -214,7 +213,7 @@ namespace Microsoft.NET.Build.Tests
 
             testAsset.Restore(Log, testProject.Name);
 
-            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), "netcoreapp2.0", valueName: "InformationalVersion");
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
             command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0+xyz" });
@@ -254,7 +253,7 @@ namespace Microsoft.NET.Build.Tests
 
             testAsset.Restore(Log, testProject.Name);
 
-            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), "netcoreapp2.0", valueName: "InformationalVersion");
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
             command.GetValues().ShouldBeEquivalentTo(new[] { "1.2.3+abc.xyz" });
