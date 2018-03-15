@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_does_not_include_source_revision_id_if_not_available()
+        public void It_does_not_include_source_revision_id_if_not_available1()
         {
             TestProject testProject = new TestProject()
             {
@@ -102,6 +102,41 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            testAsset.Restore(Log, testProject.Name);
+
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), "netcoreapp2.0", valueName: "InformationalVersion");
+            command.Execute().Should().Pass();
+
+            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+        }
+
+        [Fact]
+        public void It_does_not_include_source_revision_id_if_not_available2()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "ProjectWithSourceRevisionId",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.0",
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "Target",
+                            new XAttribute("Name", "InitializeSourceControlInformation"),
+                            new XElement(ns + "PropertyGroup",
+                                new XElement("SourceRevisionId", ""))));
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement("SourceControlInformationFeatureSupported", "true"),
+                            new XElement("IncludeSourceRevisionInInformationalVersion", "true")));
+                });
 
             testAsset.Restore(Log, testProject.Name);
 
