@@ -62,14 +62,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             command.Execute().Should().Be(0);
 
-            _reporter.Lines.Should().Equal(
-                string.Format(
-                    "{0}      {1}      {2}",
-                    LocalizableStrings.PackageIdColumn,
-                    LocalizableStrings.VersionColumn,
-                    LocalizableStrings.CommandsColumn
-                ),
-                "-------------------------------------");
+            _reporter.Lines.Should().Equal(EnumerateExpectedTableLines(store.Object));
         }
 
         [Fact]
@@ -92,15 +85,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             command.Execute().Should().Be(0);
 
-            _reporter.Lines.Should().Equal(
-                string.Format(
-                    "{0}      {1}            {2}",
-                    LocalizableStrings.PackageIdColumn,
-                    LocalizableStrings.VersionColumn,
-                    LocalizableStrings.CommandsColumn
-                ),
-                "-------------------------------------------",
-                "test.tool       1.3.5-preview      foo     ");
+            _reporter.Lines.Should().Equal(EnumerateExpectedTableLines(store.Object));
         }
 
         [Fact]
@@ -137,17 +122,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             command.Execute().Should().Be(0);
 
-            _reporter.Lines.Should().Equal(
-                string.Format(
-                    "{0}        {1}            {2} ",
-                    LocalizableStrings.PackageIdColumn,
-                    LocalizableStrings.VersionColumn,
-                    LocalizableStrings.CommandsColumn
-                ),
-                "----------------------------------------------",
-                "another.tool      2.7.3              bar      ",
-                "some.tool         1.0.0              fancy-foo",
-                "test.tool         1.3.5-preview      foo      ");
+            _reporter.Lines.Should().Equal(EnumerateExpectedTableLines(store.Object));
         }
 
         [Fact]
@@ -172,15 +147,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             command.Execute().Should().Be(0);
 
-            _reporter.Lines.Should().Equal(
-                string.Format(
-                    "{0}      {1}            {2}     ",
-                    LocalizableStrings.PackageIdColumn,
-                    LocalizableStrings.VersionColumn,
-                    LocalizableStrings.CommandsColumn
-                ),
-                "------------------------------------------------",
-                "test.tool       1.3.5-preview      foo, bar, baz");
+            _reporter.Lines.Should().Equal(EnumerateExpectedTableLines(store.Object));
         }
 
         [Fact]
@@ -212,20 +179,11 @@ namespace Microsoft.DotNet.Tests.Commands
             command.Execute().Should().Be(0);
 
             _reporter.Lines.Should().Equal(
-                string.Format(
-                    LocalizableStrings.InvalidPackageWarning,
-                    "another.tool",
-                    "broken"
-                ).Yellow(),
-                string.Format(
-                    "{0}      {1}            {2} ",
-                    LocalizableStrings.PackageIdColumn,
-                    LocalizableStrings.VersionColumn,
-                    LocalizableStrings.CommandsColumn
-                ),
-                "--------------------------------------------",
-                "some.tool       1.0.0              fancy-foo",
-                "test.tool       1.3.5-preview      foo      ");
+                EnumerateExpectedTableLines(store.Object).Prepend(
+                    string.Format(
+                        LocalizableStrings.InvalidPackageWarning,
+                        "another.tool",
+                        "broken").Yellow()));
         }
 
         private IToolPackage CreateMockToolPackage(string id, string version, IReadOnlyList<CommandSettings> commands)
@@ -256,6 +214,62 @@ namespace Microsoft.DotNet.Tests.Commands
                 result,
                 store,
                 _reporter);
+        }
+
+        private IEnumerable<string> EnumerateExpectedTableLines(IToolPackageStore store)
+        {
+            string GetCommandsString(IToolPackage package)
+            {
+                return string.Join(ListToolCommand.CommandDelimiter, package.Commands.Select(c => c.Name));
+            }
+
+            var packages = store.EnumeratePackages().Where(PackageHasCommands).OrderBy(package => package.Id);
+            var columnDelimiter = PrintableTable<IToolPackageStore>.ColumnDelimiter;
+
+            int packageIdColumnWidth = LocalizableStrings.PackageIdColumn.Length;
+            int versionColumnWidth = LocalizableStrings.VersionColumn.Length;
+            int commandsColumnWidth = LocalizableStrings.CommandsColumn.Length;
+            foreach (var package in packages)
+            {
+                packageIdColumnWidth = Math.Max(packageIdColumnWidth, package.Id.ToString().Length);
+                versionColumnWidth = Math.Max(versionColumnWidth, package.Version.ToNormalizedString().Length);
+                commandsColumnWidth = Math.Max(commandsColumnWidth, GetCommandsString(package).Length);
+            }
+
+            yield return string.Format(
+                "{0}{1}{2}{3}{4}",
+                LocalizableStrings.PackageIdColumn.PadRight(packageIdColumnWidth),
+                columnDelimiter,
+                LocalizableStrings.VersionColumn.PadRight(versionColumnWidth),
+                columnDelimiter,
+                LocalizableStrings.CommandsColumn.PadRight(commandsColumnWidth));
+
+            yield return new string(
+                '-',
+                packageIdColumnWidth + versionColumnWidth + commandsColumnWidth + (columnDelimiter.Length * 2));
+
+            foreach (var package in packages)
+            {
+                yield return string.Format(
+                    "{0}{1}{2}{3}{4}",
+                    package.Id.ToString().PadRight(packageIdColumnWidth),
+                    columnDelimiter,
+                    package.Version.ToNormalizedString().PadRight(versionColumnWidth),
+                    columnDelimiter,
+                    GetCommandsString(package).PadRight(commandsColumnWidth));
+            }
+        }
+
+        private static bool PackageHasCommands(IToolPackage package)
+        {
+            try
+            {
+                return package.Commands.Count >= 0;
+            }
+            catch (Exception ex) when (ex is ToolConfigurationException)
+            {
+                return false;
+            }
         }
     }
 }

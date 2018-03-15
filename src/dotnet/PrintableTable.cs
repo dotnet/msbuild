@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli
     // Represents a table (with rows of type T) that can be printed to a terminal.
     internal class PrintableTable<T>
     {
-        private const string ColumnDelimiter = "      ";
+        public const string ColumnDelimiter = "      ";
         private List<Column> _columns = new List<Column>();
 
         private class Column
