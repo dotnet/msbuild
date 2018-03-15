@@ -15,9 +15,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
-#endif
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
