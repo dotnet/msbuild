@@ -5,8 +5,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="needs-review-translation">
-安裝已成功。如果沒有進一步指示，您可以直接在命令介面中鍵入下列命令，以叫用: {0}</target>
+        <target state="translated">若無任何其他指示，您可以鍵入下列命令來叫用工具: {0}
+已成功安裝工具 '{1}' ('{2}' 版)。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -71,17 +71,17 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">工具 '{0}' 已安裝。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToCreateToolShim">
         <source>Failed to create shell shim for tool '{0}': {1}</source>
-        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <target state="translated">無法為工具 '{0}' 建立殼層填充碼: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <target state="translated">NuGet 組態檔 '{0}' 不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
@@ -91,22 +91,22 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">指定的版本 '{0}' 不是有效的 NuGet 版本範圍。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <source>Need either global or tool-path provided.</source>
+        <target state="translated">必須提供全域或工具路徑。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <source>Cannot have global and tool-path as opinion at the same time.</source>
+        <target state="translated">無法同時將全域與工具路徑作為選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="new">Location where the tool will be installed.</target>
+        <source>Location of shim to access tool</source>
+        <target state="translated">存取工具的填充碼位置</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">

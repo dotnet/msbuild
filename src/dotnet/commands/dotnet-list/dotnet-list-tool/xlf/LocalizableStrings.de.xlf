@@ -4,32 +4,37 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Lists installed tools in the current development environment.</source>
-        <target state="new">Lists installed tools in the current development environment.</target>
+        <target state="translated">Hiermit werden die in der aktuellen Entwicklungsumgebung installierten Tools aufgelistet.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List user wide tools.</source>
-        <target state="new">List user wide tools.</target>
+        <target state="translated">Hiermit werden benutzerweite Tools aufgelistet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListToolCommandOnlySupportsGlobal">
+        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
+        <target state="translated">Die Option --global (-g) ist aktuell erforderlich, weil nur benutzerweite Tools unterstützt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">Version</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">Befehle</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
         <source>Package Id</source>
-        <target state="new">Package Id</target>
+        <target state="translated">Paket-ID</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="new">Warning: tool package '{0}' is invalid: {1}</target>
+        <target state="translated">Warnung: Das Toolpaket "{0}" ist ungültig: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">

@@ -154,7 +154,7 @@
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references or installed tools.</source>
-        <target state="needs-review-translation">列出專案中的參考。</target>
+        <target state="translated">列出專案參考或安裝的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="UninstallDefinition">
         <source>Uninstalls an item from the development environment.</source>
-        <target state="new">Uninstalls an item from the development environment.</target>
+        <target state="translated">將開發環境的項目解除安裝。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateDefinition">

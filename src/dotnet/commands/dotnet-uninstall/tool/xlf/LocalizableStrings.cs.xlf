@@ -4,62 +4,62 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to uninstall.</source>
-        <target state="new">NuGet Package Id of the tool to uninstall.</target>
+        <target state="translated">ID balíčku NuGet nástroje, který se má odinstalovat</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstalls a tool.</source>
-        <target state="new">Uninstalls a tool.</target>
+        <target state="translated">Odinstaluje nástroj.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to uninstall.</source>
-        <target state="new">Please specify one tool Package Id to uninstall.</target>
+        <target state="translated">Zadejte prosím jedno ID balíčku nástroje, který se má odinstalovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall user wide.</source>
-        <target state="new">Uninstall user wide.</target>
+        <target state="translated">Odinstalovat pro všechny uživatele</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="new">Tool '{0}' (version '{1}') was successfully uninstalled.</target>
+        <target state="translated">Nástroj {0} (verze {1}) byl úspěšně odinstalován.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
         <source>Tool '{0}' is not currently installed.</source>
-        <target state="new">Tool '{0}' is not currently installed.</target>
+        <target state="translated">Nástroj {0} není momentálně nainstalovaný.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
         <source>Tool '{0}' has multiple versions installed and cannot be uninstalled.</source>
-        <target state="new">Tool '{0}' has multiple versions installed and cannot be uninstalled.</target>
+        <target state="translated">Nástroj {0} má několik nainstalovaných verzí a nelze ho odinstalovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallTool">
         <source>Failed to uninstall tool '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool '{0}': {1}</target>
+        <target state="translated">Nepodařilo se odinstalovat nástroj {0}: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <source>Need either global or tool-path provided.</source>
+        <target state="translated">Je potřeba zadat buď globální cestu, nebo cestu k nástroji.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location where the tool was previously installed.</source>
-        <target state="new">Location where the tool was previously installed.</target>
+        <source>Location of shim to access tool</source>
+        <target state="translated">Umístění překrytí pro přístup k nástroji</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <source>Cannot have global and tool-path as opinion at the same time."</source>
+        <target state="translated">Globální cesta a cesta k nástroji nemůžou být zadané současně.</target>
         <note />
       </trans-unit>
     </body>

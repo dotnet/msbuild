@@ -4,17 +4,17 @@
     <body>
       <trans-unit id="UninstallFullCommandName">
         <source>.NET Uninstall Command</source>
-        <target state="new">.NET Uninstall Command</target>
+        <target state="translated">Befehl zur Deinstallation von .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallArgumentDescription">
         <source>The NuGet package identifier of the tool to uninstall.</source>
-        <target state="new">The NuGet package identifier of the tool to uninstall.</target>
+        <target state="translated">NuGet-Paketbezeichner des Tools, das deinstalliert werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstalls an item from the development environment.</source>
-        <target state="new">Uninstalls an item from the development environment.</target>
+        <target state="translated">Deinstalliert ein Element aus der Entwicklungsumgebung.</target>
         <note />
       </trans-unit>
     </body>
