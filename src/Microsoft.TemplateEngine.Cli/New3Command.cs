@@ -414,7 +414,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             //No other cases specified, we've fallen through to "Usage help + List"
-            HelpForTemplateResolution.ShowUsageHelp(_commandInput);
             TemplateListResolutionResult templateResolutionResult = QueryForTemplateMatches();
             HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
 
