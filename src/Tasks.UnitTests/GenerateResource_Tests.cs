@@ -3098,6 +3098,80 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
         }
+
+        [Fact]
+        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        public void RebuildsInPresenceOfFileRefWithWindowsPath()
+        {
+            // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
+            // times out the object used for remoting console writes.  Adding a write in the middle of
+            // keeps remoting from timing out the object.
+            Console.WriteLine("Performing RebuildsInPresenceOfFileRefWithWindowsPath() test");
+
+            string originalCurrentDirectory = Directory.GetCurrentDirectory();
+            GenerateResource t = null;
+            string relPathToTextFile = null;
+
+            try
+            {
+                Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
+
+                relPathToTextFile = Path.Combine("tmp_dir", "test_file.txt");
+                string fileRef = "<data name=\"TextFile1\" type=\"System.Resources.ResXFileRef, System.Windows.Forms\">" +
+                                $"<value>.\\tmp_dir\\test_file.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value></data>";
+
+                string textFile = ObjectModelHelpers.CreateFileInTempProjectDirectory(relPathToTextFile, "xyz");
+
+                string resxFile = Utilities.WriteTestResX(false, null, fileRef, false);
+
+                Func<GenerateResource> executeTask = () => {
+                    GenerateResource task = Utilities.CreateTask(_output);
+                    task.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                    Utilities.ExecuteTask(task);
+
+                    string outputResourceFile = task.OutputResources[0].ItemSpec;
+                    Assert.Equal(Path.GetExtension(outputResourceFile), ".resources");
+                    outputResourceFile = task.FilesWritten[0].ItemSpec;
+                    Assert.Equal(Path.GetExtension(outputResourceFile), ".resources");
+
+                    return task;
+                };
+
+                t = executeTask();
+                string resourcesFile = t.OutputResources[0].ItemSpec;
+                DateTime initialWriteTime = File.GetLastWriteTime(resourcesFile);
+
+                // fs granularity on HFS is 1 sec!
+                System.Threading.Thread.Sleep(1000);
+
+                // Rebuild, it shouldn't regen .resources file since the sources
+                // haven't changed
+                t = executeTask();
+                resourcesFile = t.OutputResources[0].ItemSpec;
+
+                Assert.False(Utilities.FileUpdated(resourcesFile, initialWriteTime));
+            }
+            finally
+            {
+                // Done, so clean up.
+                File.Delete(t.Sources[0].ItemSpec);
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    if (File.Exists(item.ItemSpec))
+                    {
+                        File.Delete(item.ItemSpec);
+                    }
+                }
+                if (relPathToTextFile != null)
+                    File.Delete(relPathToTextFile);
+                Directory.Delete(Path.GetDirectoryName(relPathToTextFile));
+
+                Directory.SetCurrentDirectory(originalCurrentDirectory);
+            }
+        }
+
+
     }
 }
 
