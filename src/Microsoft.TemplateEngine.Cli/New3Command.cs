@@ -362,8 +362,8 @@ namespace Microsoft.TemplateEngine.Cli
                 HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
                 if (_commandInput.IsHelpFlagSpecified)
                 {
-                    _telemetryLogger.TrackEvent(CommandName + "-Help");
-                    HelpForTemplateResolution.ShowUsageHelp(_commandInput);
+                    // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
+                    HelpForTemplateResolution.ShowUsageHelp(_commandInput, _telemetryLogger);
                 }
                 else
                 {
@@ -414,7 +414,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             //No other cases specified, we've fallen through to "Usage help + List"
-            HelpForTemplateResolution.ShowUsageHelp(_commandInput);
             TemplateListResolutionResult templateResolutionResult = QueryForTemplateMatches();
             HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
 
