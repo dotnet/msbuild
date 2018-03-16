@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
             // this is needed to ensure the binary logger does not pollute the environment
             _env.WithEnvironmentInvariant();
 
-            _logFile = Path.Combine(_env.CreateFolder(false).FolderPath, "log.binlog");
+            _logFile = _env.ExpectFile(".binlog").Path;
         }
 
         [Fact]
@@ -61,28 +61,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void NonExistingDirectory()
-        {
-            string directory = Path.GetDirectoryName(_logFile);
-            Assert.False(Directory.Exists(directory));
-            Assert.False(File.Exists(_logFile));
-
-            var binaryLogger = new BinaryLogger { Parameters = _logFile };
-
-            ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
-            Assert.True(Directory.Exists(directory));
-            Assert.True(File.Exists(_logFile));
-        }
-
-        [Fact]
         public void BinaryLoggerShouldSupportFilePathExplicitParameter()
         {
             var binaryLogger = new BinaryLogger();
             binaryLogger.Parameters = $"LogFile={_logFile}";
 
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
-
-            Assert.True(File.Exists(_logFile));
         }
 
         public void Dispose()
