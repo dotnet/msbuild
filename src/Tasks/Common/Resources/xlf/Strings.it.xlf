@@ -357,6 +357,11 @@
         <target state="translated">Si sta usando una versione in anteprima di .NET Core SDK. È possibile definire la versione dell'SDK tramite un file global.json nel progetto corrente. Per altre informazioni, vedere https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidItemSpecToUse">
+        <source>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
+        <target state="new">Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</target>
+        <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
