@@ -60,6 +60,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             // Forward slashes currently work neither in AspNetCoreModule nor in dotnet so they need to be
             // replaced with backwards slashes when the application is published on a non-Windows machine
             var appPath = Path.Combine(".", appName).Replace("/", "\\");
+            var originalExtension = Path.GetExtension(appPath);
             RemoveLauncherArgs(aspNetCoreElement);
 
             if (!isPortable)
@@ -67,7 +68,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 appPath = Path.ChangeExtension(appPath, !string.IsNullOrWhiteSpace(extension) ? extension : null);
             }
 
-            if (!isPortable)
+            if (!isPortable || string.Equals(originalExtension, ".exe", StringComparison.OrdinalIgnoreCase))
             {
                 aspNetCoreElement.SetAttributeValue("processPath", appPath);
             }
