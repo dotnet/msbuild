@@ -431,7 +431,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         {
             if (commandInput.IsHelpFlagSpecified)
             {
-                // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
                 telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
             }
 
