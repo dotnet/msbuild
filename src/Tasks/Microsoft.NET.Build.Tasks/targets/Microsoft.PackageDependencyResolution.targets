@@ -26,6 +26,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Project Assets File -->
   <PropertyGroup>
     <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == ''">$(BaseIntermediateOutputPath)/project.assets.json</ProjectAssetsFile>
+
+    <!-- Note that the assets.cache file has contents that are unique to the current TFM and configuration and therefore cannot
+         be stored in a shared directory next to the assets.json file -->
+    <ProjectAssetsCacheFile Condition="'$(ProjectAssetsCacheFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).assets.cache</ProjectAssetsCacheFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -190,7 +194,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolvePackageAssets" 
           Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
-          DependsOnTargets="ReportAssetsLogMessages">
+          DependsOnTargets="PrepareForBuild">
 
     <PropertyGroup Condition="'$(EnsureRuntimePackageDependencies)' == ''
                           and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
@@ -200,8 +204,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ResolvePackageAssets 
       ProjectAssetsFile="$(ProjectAssetsFile)"
+      ProjectAssetsCacheFile="$(ProjectAssetsCacheFile)"
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectLanguage="$(Language)"
+      EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"

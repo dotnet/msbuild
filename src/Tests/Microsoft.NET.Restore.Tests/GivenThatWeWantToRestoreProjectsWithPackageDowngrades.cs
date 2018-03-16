@@ -45,6 +45,12 @@ namespace Microsoft.NET.Restore.Tests
                 .Execute($"/p:RestorePackagesPath={packagesFolder}")
                 .Should().Fail()
                 .And.HaveStdOutContaining("NU1605");
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProjectName));
+            buildCommand
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdOutContaining("NU1605");
         }
 
         [CoreMSBuildOnlyFact]

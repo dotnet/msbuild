@@ -9,9 +9,9 @@ using System.Linq;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Report Log Messages in the assets file to MSBuild and raise them as
-    /// DiagnosticMessage items that can be consumed downstream (e.g. by the
-    /// dependency node in the solution explorer)
+    /// Raise log messages in the assets file as DiagnosticMessage items
+    /// that can be consumed downstream (e.g. by the dependency node in
+    /// the solution explorer)
     /// </summary>
     public sealed class ReportAssetsLogMessages : TaskBase
     {
@@ -40,15 +40,14 @@ namespace Microsoft.NET.Build.Tasks
 
         public ReportAssetsLogMessages()
         {
-           _diagnostics = new DiagnosticsHelper(new MSBuildLog(Log));
+           _diagnostics = new DiagnosticsHelper();
         }
 
         #region Test Support
 
-        internal ReportAssetsLogMessages(LockFile lockFile, ILog logger)
+        internal ReportAssetsLogMessages(LockFile lockFile) : this()
         {
             _lockFile = lockFile;
-            _diagnostics = new DiagnosticsHelper(logger);
         }
 
         #endregion
@@ -76,7 +75,6 @@ namespace Microsoft.NET.Build.Tasks
 
         private void AddMessage(IAssetsLogMessage message)
         {
-            var logToMsBuild = true;
             var targetGraphs = message.GetTargetGraphs(LockFile);
 
             targetGraphs = targetGraphs.Any() ? targetGraphs : new LockFileTarget[] { null };
@@ -95,10 +93,7 @@ namespace Microsoft.NET.Build.Tasks
                     message.EndLineNumber,
                     message.EndColumnNumber,
                     target?.Name,
-                    targetLib == null ? null : $"{targetLib.Name}/{targetLib.Version.ToNormalizedString()}",
-                    logToMsBuild);
-
-                logToMsBuild = false; // only write first instance of this diagnostic to msbuild
+                    targetLib == null ? null : $"{targetLib.Name}/{targetLib.Version.ToNormalizedString()}");
             }
         }
 

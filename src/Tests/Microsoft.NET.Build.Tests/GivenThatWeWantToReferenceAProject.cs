@@ -122,6 +122,10 @@ namespace Microsoft.NET.Build.Tests
             {
                 result.Should().Pass();
             }
+            else if (referencerIsSdkProject)
+            {
+                result.Should().Fail().And.HaveStdOutContaining("NU1201");
+            }
             else
             {
                 result.Should().Fail()

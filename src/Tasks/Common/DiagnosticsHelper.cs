@@ -14,12 +14,6 @@ namespace Microsoft.NET.Build.Tasks
     internal sealed class DiagnosticsHelper
     {
         private readonly List<ITaskItem> _diagnosticMessages = new List<ITaskItem>();
-        private readonly ILog _log;
-
-        public DiagnosticsHelper(ILog log)
-        {
-            _log = log;
-        }
 
         public ITaskItem[] GetDiagnosticMessages() => _diagnosticMessages.ToArray();
 
@@ -33,8 +27,7 @@ namespace Microsoft.NET.Build.Tasks
             int endLine,
             int endColumn,
             string targetFrameworkMoniker,
-            string packageId,
-            bool logToMSBuild = true)
+            string packageId)
         {
             string itemspec =
                 (string.IsNullOrEmpty(targetFrameworkMoniker) ? string.Empty : $"{targetFrameworkMoniker}/") +
@@ -59,58 +52,7 @@ namespace Microsoft.NET.Build.Tasks
 
             _diagnosticMessages.Add(diagnostic);
 
-            if (logToMSBuild)
-            {
-                LogToMSBuild(diagnosticCode, message, filePath, severity, startLine, startColumn, endLine, endColumn);
-            }
-
             return diagnostic;
-        }
-
-        private void LogToMSBuild(string diagnosticCode, string message, string filePath, DiagnosticMessageSeverity severity, int startLine, int startColumn, int endLine, int endColumn)
-        {
-            switch (severity)
-            {
-                case DiagnosticMessageSeverity.Error:
-                    _log.LogError(
-                        subcategory: null,
-                        errorCode: diagnosticCode,
-                        helpKeyword: null,
-                        file: filePath,
-                        lineNumber: startLine,
-                        columnNumber: startColumn,
-                        endLineNumber: endLine,
-                        endColumnNumber: endColumn,
-                        message: message);
-                    break;
-
-                case DiagnosticMessageSeverity.Warning:
-                    _log.LogWarning(
-                        subcategory: null,
-                        warningCode: diagnosticCode,
-                        helpKeyword: null,
-                        file: filePath,
-                        lineNumber: startLine,
-                        columnNumber: startColumn,
-                        endLineNumber: endLine,
-                        endColumnNumber: endColumn,
-                        message: message);
-                    break;
-
-                case DiagnosticMessageSeverity.Info:
-                    _log.LogMessage(
-                        subcategory: null,
-                        code: diagnosticCode,
-                        helpKeyword: null,
-                        file: filePath,
-                        lineNumber: startLine,
-                        columnNumber: startColumn,
-                        endLineNumber: endLine,
-                        endColumnNumber: endColumn,
-                        importance: MessageImportance.Normal,
-                        message: message);
-                    break;
-            }
         }
     }
 }
