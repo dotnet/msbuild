@@ -41,6 +41,8 @@
     <EmbeddedResource Update="**\dotnet-test\*.resx" Namespace="Microsoft.DotNet.Tools.Test" />
     <EmbeddedResource Update="**\dotnet-uninstall\*.resx" Namespace="Microsoft.DotNet.Tools.Uninstall" />
     <EmbeddedResource Update="**\dotnet-uninstall\tool\*.resx" Namespace="Microsoft.DotNet.Tools.Uninstall.Tool" />
+    <EmbeddedResource Update="**\dotnet-update\*.resx" Namespace="Microsoft.DotNet.Tools.Update" />
+    <EmbeddedResource Update="**\dotnet-update\tool\*.resx" Namespace="Microsoft.DotNet.Tools.Update.Tool" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />

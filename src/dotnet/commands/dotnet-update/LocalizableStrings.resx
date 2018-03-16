@@ -117,10 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="InstallFullCommandNameLocalized" xml:space="preserve">
-    <value>.NET Install Command</value>
+  <data name="UpdateFullCommandName" xml:space="preserve">
+    <value>.NET Update Command</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Installs an item into the development environment.</value>
+    <value>Updates an item in the development environment.</value>
+  </data>
+  <data name="UpdateArgumentDescription" xml:space="preserve">
+    <value>The NuGet package identifier of the tool to update.</value>
   </data>
 </root>

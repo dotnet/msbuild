@@ -41,6 +41,7 @@ SDK commands:
   store            Stores the specified assemblies in the runtime store.
   install          Installs an item into the development environment.
   uninstall        Uninstalls an item from the development environment.
+  update           Updates an item in the development environment.
   help             Show help.
 
 Common options:

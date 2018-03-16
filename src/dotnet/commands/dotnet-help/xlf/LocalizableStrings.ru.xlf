@@ -262,6 +262,11 @@
         <target state="new">Uninstalls an item from the development environment.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateDefinition">
+        <source>Updates an item in the development environment.</source>
+        <target state="new">Updates an item in the development environment.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

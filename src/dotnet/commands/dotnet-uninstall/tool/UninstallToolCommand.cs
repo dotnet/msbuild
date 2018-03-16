@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Transactions;
@@ -119,27 +120,11 @@ namespace Microsoft.DotNet.Tools.Uninstall.Tool
                         package.Version.ToNormalizedString()).Green());
                 return 0;
             }
-            catch (ToolPackageException ex)
+            catch (Exception ex) when (UninstallToolCommandLowLevelErrorConverter.ShouldConvertToUserFacingError(ex))
             {
                 throw new GracefulException(
-                    messages: new[]
-                    {
-                      ex.Message
-                    },
-                    verboseMessages: new[] { ex.ToString() },
-                    isUserError: false);
-            }
-            catch (Exception ex) when (ex is ToolConfigurationException || ex is ShellShimException)
-            {
-                throw new GracefulException(
-                    messages: new[]
-                    {
-                      string.Format(
-                        LocalizableStrings.FailedToUninstallTool,
-                        packageId,
-                        ex.Message)
-                    },
-                    verboseMessages: new[] { ex.ToString() },
+                    messages: UninstallToolCommandLowLevelErrorConverter.GetUserFacingMessages(ex, packageId),
+                    verboseMessages: new[] {ex.ToString()},
                     isUserError: false);
             }
         }

@@ -30,6 +30,7 @@ path-to-application:
   store            {LocalizableStrings.StoreDefinition}
   install          {LocalizableStrings.InstallDefinition}
   uninstall        {LocalizableStrings.UninstallDefinition}
+  update           {LocalizableStrings.UpdateDefinition}
   help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:

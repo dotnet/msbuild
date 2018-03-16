@@ -161,41 +161,10 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                         package.Version.ToNormalizedString()).Green());
                 return 0;
             }
-            catch (ToolPackageException ex)
+            catch (Exception ex) when (InstallToolCommandLowLevelErrorConverter.ShouldConvertToUserFacingError(ex))
             {
                 throw new GracefulException(
-                    messages: new[]
-                    {
-                        ex.Message,
-                        string.Format(LocalizableStrings.ToolInstallationFailed, _packageId),
-                    },
-                    verboseMessages: new[] {ex.ToString()},
-                    isUserError: false);
-            }
-            catch (ToolConfigurationException ex)
-            {
-                throw new GracefulException(
-                    messages: new[]
-                    {
-                        string.Format(
-                            LocalizableStrings.InvalidToolConfiguration,
-                            ex.Message),
-                        string.Format(LocalizableStrings.ToolInstallationFailedContactAuthor, _packageId)
-                    },
-                    verboseMessages: new[] {ex.ToString()},
-                    isUserError: false);
-            }
-            catch (ShellShimException ex)
-            {
-                throw new GracefulException(
-                    messages: new[]
-                    {
-                        string.Format(
-                            LocalizableStrings.FailedToCreateToolShim,
-                            _packageId,
-                            ex.Message),
-                        string.Format(LocalizableStrings.ToolInstallationFailed, _packageId)
-                    },
+                    messages: InstallToolCommandLowLevelErrorConverter.GetUserFacingMessages(ex, _packageId),
                     verboseMessages: new[] {ex.ToString()},
                     isUserError: false);
             }

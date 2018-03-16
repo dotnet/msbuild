@@ -22,6 +22,7 @@ using Microsoft.DotNet.Tools.Uninstall;
 using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
 using Microsoft.DotNet.Tools.Install;
+using Microsoft.DotNet.Tools.Update;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -153,6 +154,10 @@ namespace Microsoft.DotNet.Cli
             ["uninstall"] = new BuiltInCommandMetadata
             {
                 Command = UninstallCommand.Run
+            },
+            ["update"] = new BuiltInCommandMetadata
+            {
+                Command = UpdateCommand.Run
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {

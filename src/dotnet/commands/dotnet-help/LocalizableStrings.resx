@@ -273,4 +273,7 @@
   <data name="UninstallDefinition" xml:space="preserve">
     <value>Uninstalls an item from the development environment.</value>
   </data>
+  <data name="UpdateDefinition" xml:space="preserve">
+    <value>Updates an item in the development environment.</value>
+  </data>
 </root>

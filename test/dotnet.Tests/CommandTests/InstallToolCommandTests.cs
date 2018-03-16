@@ -155,7 +155,9 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => installToolCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
+                .Should().Contain(
+                    "Simulated error" + Environment.NewLine
+                                      + string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
