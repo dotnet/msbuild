@@ -362,8 +362,8 @@ namespace Microsoft.TemplateEngine.Cli
                 HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
                 if (_commandInput.IsHelpFlagSpecified)
                 {
-                    _telemetryLogger.TrackEvent(CommandName + "-Help");
-                    HelpForTemplateResolution.ShowUsageHelp(_commandInput);
+                    // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
+                    HelpForTemplateResolution.ShowUsageHelp(_commandInput, _telemetryLogger);
                 }
                 else
                 {
