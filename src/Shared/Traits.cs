@@ -127,6 +127,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
 
+        public readonly bool EnableLegacyMSBuildAllProjects = Environment.GetEnvironmentVariable("MSBUILDENABLEMSBUILDALLPROJECTS") == "1";
+
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);

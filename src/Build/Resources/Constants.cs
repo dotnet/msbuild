@@ -54,6 +54,8 @@ namespace Microsoft.Build.Internal
         internal const string version = "MSBuildVersion";
         internal const string osName = "OS";
         internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
+        // This is not technically reserved but is set automatically
+        internal const string allProjects = "MSBuildAllProjects";
 
         /// <summary>
         /// Lookup for reserved property names
