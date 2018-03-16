@@ -14,8 +14,10 @@ Param(
     Add-Content $logFile -value $logString -Encoding Unicode
 }
 
-# Set log file and delete if it exists.
+# Set log file (and get the full path) and delete if it exists.
 $logFile = "msbuild_versions.txt"
+$logFile = Get-ChildItem -File -Path $logFile
+
 If((Test-Path -Path $logFile))
 {
     Remove-Item -Path $logFile
