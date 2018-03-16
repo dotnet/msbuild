@@ -13,8 +13,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class HelpForTemplateResolution
     {
-        public static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemeteryLogger, TemplateCreator templateCreator, string defaultLanguage)
+        public static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string defaultLanguage)
         {
+            ShowUsageHelp(commandInput, telemetryLogger);
+
             // this is just checking if there is an unambiguous group.
             // the called methods decide whether to get the default language filtered lists, based on what they're doing.
             //
@@ -29,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
             else
             {
-                return DisplayHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemeteryLogger, defaultLanguage);
+                return DisplayHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
             }
         }
 
@@ -73,8 +75,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         private static CreationResultStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyList<ITemplateMatchInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
         {
-            ShowUsageHelp(commandInput);
-
             // (scp 2017-09-06): parse errors probably can't happen in this context.
             foreach (string parseErrorMessage in unambiguousTemplateGroup.Where(x => x.HasParseError()).Select(x => x.GetParseError()).ToList())
             {
@@ -128,13 +128,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 hasInvalidParameters = true;
                 DisplayInvalidParameters(invalidForAllTemplates);
                 DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.PartialTemplateMatchSwitchesNotValidForAllMatches);
-            }
-
-            if (commandInput.IsHelpFlagSpecified)
-            {
-                // usage help should show first (if it's being shown at all).
-                telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
-                ShowUsageHelp(commandInput);
             }
 
             ShowContextAndTemplateNameMismatchHelp(templateResolutionResult, commandInput.TemplateName, commandInput.TypeFilter);
@@ -434,8 +427,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        public static void ShowUsageHelp(INewCommandInput commandInput)
+        public static void ShowUsageHelp(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
         {
+            if (commandInput.IsHelpFlagSpecified)
+            {
+                telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
+            }
+
             Reporter.Output.WriteLine(commandInput.HelpText);
             Reporter.Output.WriteLine();
         }
@@ -448,8 +446,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             // TODO: get a meaningful error message from the parser
             if (commandInput.IsHelpFlagSpecified)
             {
-                telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
-                ShowUsageHelp(commandInput);
+                // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
+                ShowUsageHelp(commandInput, telemetryLogger);
             }
             else
             {
