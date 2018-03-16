@@ -236,7 +236,7 @@ namespace Microsoft.Build.Logging
                         FilePath = FilePath.Substring("LogFile=".Length);
                     }
 
-                    FilePath = parameter.TrimStart('"').TrimEnd('"');
+                    FilePath = FilePath.Trim('"');
                 }
                 else
                 {

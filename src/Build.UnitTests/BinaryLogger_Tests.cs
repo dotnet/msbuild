@@ -2,10 +2,11 @@
 using System.IO;
 using Microsoft.Build.Logging;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    public class BinaryLoggerTests
+    public class BinaryLoggerTests : IDisposable
     {
         private const string MSBUILDTARGETOUTPUTLOGGING = nameof(MSBUILDTARGETOUTPUTLOGGING);
 
@@ -24,6 +25,14 @@ namespace Microsoft.Build.UnitTests
                <Exec Command='echo a'/>
             </Target>
          </Project>";
+        private TestEnvironment _env;
+
+        public BinaryLoggerTests(ITestOutputHelper output)
+        {
+            _env = TestEnvironment.Create(output);
+        }
+
+
 
         [Fact]
         public void TestBinaryLoggerRoundtrip()
@@ -85,6 +94,24 @@ namespace Microsoft.Build.UnitTests
             {
                 ObjectModelHelpers.DeleteDirectory(directory);
             }
+        }
+
+        [Fact]
+        public void BinaryLoggerShouldSupportFilePathExplicitParameter()
+        {
+            var logFile = Path.Combine(_env.CreateFolder().FolderPath, "log.binlog");
+
+            var binaryLogger = new BinaryLogger();
+            binaryLogger.Parameters = $"LogFile={logFile}";
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
+
+            Assert.True(File.Exists(logFile));
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
         }
     }
 }
