@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenAMissingGlobalOptionItErrors()
+        public void GivenAMissingGlobalOrToolPathOptionItErrors()
         {
             var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
 
@@ -47,7 +47,25 @@ namespace Microsoft.DotNet.Tests.Commands
              .And
              .Message
              .Should()
-             .Be(LocalizableStrings.ListToolCommandOnlySupportsGlobal);
+             .Be(LocalizableStrings.NeedGlobalOrToolPath);
+        }
+
+        [Fact]
+        public void GivenBothGlobalAndToolPathOptionsItErrors()
+        {
+            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+
+            var command = CreateCommand(store.Object, "-g --tool-path /tools", "/tools");
+
+            Action a = () => {
+                command.Execute();
+            };
+
+            a.ShouldThrow<GracefulException>()
+             .And
+             .Message
+             .Should()
+             .Be(LocalizableStrings.GlobalAndToolPathConflict);
         }
 
         [Fact]
@@ -59,6 +77,21 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Returns(new IToolPackage[0]);
 
             var command = CreateCommand(store.Object, "-g");
+
+            command.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().Equal(EnumerateExpectedTableLines(store.Object));
+        }
+
+        [Fact]
+        public void GivenAToolPathItPassesToolPathToStoreFactory()
+        {
+            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            store
+                .Setup(s => s.EnumeratePackages())
+                .Returns(new IToolPackage[0]);
+
+            var command = CreateCommand(store.Object, "--tool-path /tools", "/tools");
 
             command.Execute().Should().Be(0);
 
@@ -206,14 +239,27 @@ namespace Microsoft.DotNet.Tests.Commands
             return package.Object;
         }
 
-        private ListToolCommand CreateCommand(IToolPackageStore store, string options = "")
+        private ListToolCommand CreateCommand(IToolPackageStore store, string options = "", string expectedToolPath = null)
         {
             ParseResult result = Parser.Instance.Parse("dotnet list tool " + options);
             return new ListToolCommand(
                 result["dotnet"]["list"]["tool"],
                 result,
-                store,
+                toolPath => { AssertExpectedToolPath(toolPath, expectedToolPath); return store; },
                 _reporter);
+        }
+
+        private void AssertExpectedToolPath(DirectoryPath? toolPath, string expectedToolPath)
+        {
+            if (expectedToolPath != null)
+            {
+                toolPath.Should().NotBeNull();
+                toolPath.Value.Value.Should().Be(expectedToolPath);
+            }
+            else
+            {
+                toolPath.Should().BeNull();
+            }
         }
 
         private IEnumerable<string> EnumerateExpectedTableLines(IToolPackageStore store)

@@ -84,10 +84,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
         public void InstallToolParserCanParseToolPathOption()
         {
             var result =
-                Parser.Instance.Parse(@"dotnet install tool --tool-path C:\TestAssetLocalNugetFeed console.test.app");
+                Parser.Instance.Parse(@"dotnet install tool --tool-path C:\Tools console.test.app");
 
             var appliedOptions = result["dotnet"]["install"]["tool"];
-            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\TestAssetLocalNugetFeed");
+            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
         }
     }
 }
