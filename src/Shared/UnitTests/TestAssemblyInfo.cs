@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -44,6 +45,7 @@ public class MSBuildTestAssemblyFixture : IDisposable
         //  Use a project-specific temporary path
         //  This is so multiple test projects can be run in parallel without sharing the same temp directory
         string newTempPath = Path.Combine(AppContext.BaseDirectory, "TestTemp");
+
         _testEnvironment.CreateFolder(newTempPath);
 
         _testEnvironment.SetTempPath(newTempPath);

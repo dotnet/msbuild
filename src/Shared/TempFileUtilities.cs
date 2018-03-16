@@ -30,10 +30,15 @@ namespace Microsoft.Build.Shared
         /// Generates a unique directory name in the temporary folder.  
         /// Caller must delete when finished. 
         /// </summary>
-        internal static string GetTemporaryDirectory()
+        /// <param name="createDirectory"></param>
+        internal static string GetTemporaryDirectory(bool createDirectory = true)
         {
             string temporaryDirectory = Path.Combine(Path.GetTempPath(), "Temporary" + Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(temporaryDirectory);
+
+            if (createDirectory)
+            {
+                Directory.CreateDirectory(temporaryDirectory);
+            }
 
             return temporaryDirectory;
         }
