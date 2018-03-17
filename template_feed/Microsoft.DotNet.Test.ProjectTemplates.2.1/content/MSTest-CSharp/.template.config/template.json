@@ -51,15 +51,6 @@
       "datatype": "bool",
       "description": "If specified, skips the automatic restore of the project on create.",
       "defaultValue": "false"
-    },
-    "isRootNamespaceRequired": {
-      "type": "generated",
-      "generator": "regexMatch",
-      "dataType": "bool",
-      "parameters": {
-        "source": "name",
-        "pattern": "(((?<=\\.)|^)(?=\\d)|[^\\w\\.])"
-      }
     }
   },
   "primaryOutputs": [
