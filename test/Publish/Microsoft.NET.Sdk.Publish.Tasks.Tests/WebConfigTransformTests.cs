@@ -293,6 +293,19 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
                 aspNetCoreElement));
         }
 
+        [Fact]
+        public void WebConfigTransform_configures_full_framework_apps_correctly()
+        {
+            var aspNetCoreElement =
+                WebConfigTransform.Transform(WebConfigTemplate, "test.exe", configureForAzure: false, isPortable: true, extension: ".exe", aspNetCoreHostingModel: null)
+                    .Descendants("aspNetCore").Single();
+
+            Assert.True(XNode.DeepEquals(
+                XDocument.Parse(@"<aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false""
+                     stdoutLogFile="".\logs\stdout"" />").Root,
+                aspNetCoreElement));
+        }
+
         [Theory]
         [InlineData("%LAUNCHER_ARGS%", "")]
         [InlineData(" %launcher_ARGS%", "")]
