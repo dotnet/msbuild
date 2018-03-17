@@ -145,12 +145,12 @@
     <value>Failed to uninstall tool '{0}': {1}</value>
   </data>
   <data name="UninstallToolCommandNeedGlobalOrToolPath" xml:space="preserve">
-    <value>Need either global or tool-path provided.</value>
+    <value>Please specify either the global option (--global) or the tool path option (--tool-path).</value>
   </data>
   <data name="ToolPathDescription" xml:space="preserve">
-    <value>Location of shim to access tool</value>
+    <value>Location where the tool was previously installed.</value>
   </data>
   <data name="UninstallToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
-    <value>Cannot have global and tool-path as opinion at the same time."</value>
+    <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>
   </data>
 </root>
