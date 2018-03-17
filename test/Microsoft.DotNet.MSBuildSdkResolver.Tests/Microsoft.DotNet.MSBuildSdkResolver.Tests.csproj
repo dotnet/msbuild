@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <!-- https://github.com/dotnet/cli/issues/6672: Re-enable net461 as a TFM for tests. -->
-    <TargetFrameworks>$(CliTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>net461;$(CliTargetFramework)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(CliTargetFramework)</TargetFrameworks>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
@@ -28,7 +28,7 @@
     <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
     <Reference Include="System.Core" />
   </ItemGroup>
 

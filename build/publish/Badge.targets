@@ -17,7 +17,7 @@
 
   <Target Name="GenerateCoherentBadge"
           DependsOnTargets="Init; EvaluateRuntimeCoherence"
-          Condition=" '$(Coherent)' == 'true' ">
+          Condition=" '$(Coherent)' == 'true' And !$(Architecture.StartsWith('arm')) ">
     <Message Text="$(CoherentBadge)"  />
 
     <ReplaceFileContents
@@ -32,7 +32,7 @@
       <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(Rid)' == 'rhel.6-x64' ">rhel.6_x64</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(Rid)' == 'alpine.3.6-x64' ">alpine.3.6_x64</VersionBadgeMoniker>
-      <VersionBadgeMoniker Condition=" '$(IslinuxPortable)' == 'true' ">linux_x64</VersionBadgeMoniker>
+      <VersionBadgeMoniker Condition=" '$(IslinuxPortable)' == 'true' ">linux_$(Architecture)</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(IsBuildingAndPublishingAllLinuxDistrosNativeInstallers)' == 'true' ">all_linux_distros_native_installer</VersionBadgeMoniker>
 
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>

@@ -5,7 +5,7 @@
 // The netstandard1.5 adaptation here acts a proof-of-concept for cross-platform 
 // portability of the underlying hostfxr API and gives us build and test coverage 
 // on non-Windows machines. It also ships with msbuild on Mono.
-#if NETSTANDARD1_5
+#if NETSTANDARD2_0
 
 using System;
 using System.Runtime.InteropServices;
@@ -50,4 +50,4 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
     }
 }
 
-#endif // NETSTANDARD1_5
+#endif // NETSTANDARD2_0

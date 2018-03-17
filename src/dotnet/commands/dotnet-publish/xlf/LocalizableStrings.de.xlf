@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Veröffentlichen Sie die .NET Core-Laufzeit mit Ihrer Anwendung, damit die Laufzeit auf dem Zielcomputer nicht installiert werden muss. Der Standardwert ist "true", wenn ein Laufzeitbezeichner angegeben ist.</target>
+        <target state="translated">Veröffentlichen Sie die .NET Core-Runtime mit Ihrer Anwendung, damit die Runtime auf dem Zielcomputer nicht installiert werden muss. Der Standardwert ist "true", wenn ein Runtimebezeichner angegeben ist.</target>
         <note />
       </trans-unit>
     </body>

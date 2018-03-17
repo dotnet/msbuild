@@ -11,8 +11,13 @@
   <Import Project="$(MSBuildThisFileDirectory)/package/CopySandBoxPackageOut.targets" />
 
   <Target Name="GenerateInstallers"
-          Condition=" '$(SkipBuildingInstallers)' != 'true' "
-          DependsOnTargets="Prepare;Layout;GeneratePkgs;GenerateDebs;GenerateMsis;GenerateRpms" />
+          Condition=" '$(SkipBuildingInstallers)' != 'true' And !$(Architecture.StartsWith('arm')) "
+          DependsOnTargets="Prepare;
+                            Layout;
+                            GeneratePkgs;
+                            GenerateDebs;
+                            GenerateMsis;
+                            GenerateRpms" />
 
   <Target Name="Package"
           DependsOnTargets="BuildDotnetCliBuildFramework;
@@ -21,9 +26,13 @@
                             GenerateNugetPackages;
                             GenerateSymbolsNugetPackages;
                             GenerateArchives;
-                            GenerateInstallers"  />
+                            GenerateInstallers" />
 
   <Target Name="GenerateInstallersAndCopyOutOfSandBox"
-          DependsOnTargets="SandBoxPrepare;Layout;GenerateDebs;GenerateRpms;CopySandBoxPackageOut" />
+          DependsOnTargets="SandBoxPrepare;
+                            Layout;
+                            GenerateDebs;
+                            GenerateRpms;
+                            CopySandBoxPackageOut" />
 
 </Project>

@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Description>Microsoft.DotNet.Tools.Tests.Utilities Class Library</Description>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Microsoft.DotNet.Tools.Tests.Utilities</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

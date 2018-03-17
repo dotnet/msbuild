@@ -56,6 +56,8 @@ namespace Microsoft.DotNet.Cli
                                     CompleteCommandParser.Complete(),
                                     InternalReportinstallsuccessCommandParser.InternalReportinstallsuccess(),
                                     InstallCommandParser.Install(),
+                                    UninstallCommandParser.Uninstall(),
+                                    UpdateCommandParser.Update(),
                                     CommonOptions.HelpOption(),
                                     Create.Option("--info", ""),
                                     Create.Option("-d", ""),

@@ -8,9 +8,6 @@
         <packageTypes>
           <packageType name="DotnetTool" />
         </packageTypes>
-      <dependencies>
-        <dependency id="Microsoft.NETCore.Platforms" version="2.1.0-preview1-26115-04" />
-      </dependencies>
     </metadata>
     <files>
         <file src="bin\Release\netcoreapp2.1\publish\*.*" target="tools\netcoreapp2.1\any\" />

@@ -24,7 +24,7 @@
                                 '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
     <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
     <HostMonikerRidForFileName>$(HostMonikerRid)</HostMonikerRidForFileName>
-    <HostMonikerRidForFileName Condition=" '$(IsDebianBaseDistro)' == 'true' ">$(Architecture)</HostMonikerRidForFileName>
+    <HostMonikerRidForFileName Condition=" '$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true' ">$(Architecture)</HostMonikerRidForFileName>
     
     <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
     <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-sdk</ArtifactNameCombinedHostHostFxrFrameworkSdk>

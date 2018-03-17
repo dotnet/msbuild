@@ -20,6 +20,10 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.GlobalOptionDescription,
                     Accept.NoArguments()),
                 Create.Option(
+                    "--tool-path",
+                    LocalizableStrings.ToolPathDescription,
+                    Accept.ExactlyOneArgument()),
+                Create.Option(
                     "--version",
                     LocalizableStrings.VersionOptionDescription,
                     Accept.ExactlyOneArgument()),
@@ -36,7 +40,8 @@ namespace Microsoft.DotNet.Cli
                     "-f|--framework",
                     LocalizableStrings.FrameworkOptionDescription,
                     Accept.ExactlyOneArgument()),
-                CommonOptions.HelpOption());
+                CommonOptions.HelpOption(),
+                CommonOptions.VerbosityOption());
         }
     }
 }

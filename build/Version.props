@@ -3,7 +3,7 @@
     <VersionMajor>2</VersionMajor>
     <VersionMinor>1</VersionMinor>
     <VersionPatch>300</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview1</ReleaseSuffix>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview2</ReleaseSuffix>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
     <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 

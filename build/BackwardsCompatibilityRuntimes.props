@@ -25,7 +25,7 @@
 
   <ItemGroup Condition=" '$(IncludeSharedFrameworksForBackwardsCompatibilityTests)' == 'true' ">
     <_DownloadAndExtractItem Include="BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive"
-                             Condition="!Exists('$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)')">
+                             Condition="!Exists('$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)') And !$(Architecture.StartsWith('arm'))">
       <Url>$(BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl)/$(BackwardsCompatibility110CombinedFrameworkHostCompressedFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
       <ExtractDestination>$(BackwardsCompatibleSharedFrameworksPublishDirectory)</ExtractDestination>
@@ -34,21 +34,21 @@
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile"
-                             Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile)') And '$(OSName)' != 'linux'">
+                             Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile)') And '$(OSName)' != 'linux' And !$(Architecture.StartsWith('arm'))">
       <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedFrameworkVersion)/$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedSharedHostInstallerFile"
-                             Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedHostInstallerFile)') And '$(OSName)' != 'linux'">
+                             Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedHostInstallerFile)') And '$(OSName)' != 'linux' And !$(Architecture.StartsWith('arm'))">
       <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedHostVersion)/$(BackwardsCompatibility110DownloadedSharedHostInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110DownloadedSharedHostInstallerFile)</DownloadFileName>
       <ExtractDestintation></ExtractDestintation>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedHostFxrInstallerFile"
-                             Condition="!Exists('$(BackwardsCompatibility110DownloadedHostFxrInstallerFile)') And '$(OSName)' != 'linux'">
+                             Condition="!Exists('$(BackwardsCompatibility110DownloadedHostFxrInstallerFile)') And '$(OSName)' != 'linux' And !$(Architecture.StartsWith('arm'))">
       <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110HostFxrVersion)/$(BackwardsCompatibility110DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(BackwardsCompatibility110DownloadedHostFxrInstallerFile)</DownloadFileName>
       <ExtractDestintation></ExtractDestintation>

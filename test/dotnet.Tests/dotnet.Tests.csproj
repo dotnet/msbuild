@@ -71,6 +71,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
@@ -80,7 +81,9 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="Moq" Version="4.7.25" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
 </Project>

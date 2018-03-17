@@ -64,9 +64,11 @@ Ecco alcune opzioni per correggere questo errore:
 Successfully installed the ASP.NET Core HTTPS Development Certificate.
 To trust the certificate (Windows and macOS only) first install the dev-certs tool by running 'dotnet install tool dotnet-dev-certs -g --version 2.1.0-preview1-final' and then run 'dotnet-dev-certs https --trust'.
 For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="needs-review-translation">ASP.NET Core
+        <target state="translated">ASP.NET Core
 ------------
-Il certificato di sviluppo HTTPS di ASP.NET Core è stato installato. Per altre informazioni, vedere https://go.microsoft.com/fwlink/?linkid=84805</target>
+Il certificato di sviluppo HTTPS di ASP.NET Core è stato installato.
+Per considerare attendibile il certificato (solo Windows e macOS), installare prima lo strumento dev-certs eseguendo 'dotnet install tool dotnet-dev-certs -g --version 2.1.0-preview1-final' e quindi eseguire 'dotnet-dev-certs https --trust'.
+Per altre informazioni sulla configurazione di HTTPS, vedere https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
     </body>

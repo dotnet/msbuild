@@ -45,5 +45,15 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
         {
             File.WriteAllText(path, content);
         }
+
+        public void Move(string source, string destination)
+        {
+            File.Move(source, destination);
+        }
+
+        public void Delete(string path)
+        {
+            File.Delete(path);
+        }
     }
 }

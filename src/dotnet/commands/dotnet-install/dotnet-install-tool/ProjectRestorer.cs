@@ -14,19 +14,32 @@ namespace Microsoft.DotNet.Tools.Install.Tool
 {
     internal class ProjectRestorer : IProjectRestorer
     {
+        private const string AnyRid = "any";
+        private readonly IReporter _reporter;
+        private readonly IReporter _errorReporter;
+        private readonly bool _forceOutputRedirection;
+
+        public ProjectRestorer(IReporter reporter = null)
+        {
+            _reporter = reporter ?? Reporter.Output;
+            _errorReporter = reporter ?? Reporter.Error;
+            _forceOutputRedirection = reporter != null;
+        }
+
         public void Restore(
-            FilePath projectPath,
+            FilePath project,
             DirectoryPath assetJsonOutput,
-            FilePath? nugetconfig,
-            string source = null)
+            FilePath? nugetConfig = null,
+            string source = null,
+            string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
 
-            argsToPassToRestore.Add(projectPath.Value);
-            if (nugetconfig != null)
+            argsToPassToRestore.Add(project.Value);
+            if (nugetConfig != null)
             {
                 argsToPassToRestore.Add("--configfile");
-                argsToPassToRestore.Add(nugetconfig.Value.Value);
+                argsToPassToRestore.Add(nugetConfig.Value.Value);
             }
 
             if (source != null)
@@ -38,35 +51,50 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
-                GetRuntimeIdentifierWithMacOsHighSierraFallback(),
-                $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToQuotedString()}"
+                AnyRid,
+                $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToXmlEncodeString()}"
             });
 
+            argsToPassToRestore.Add($"/verbosity:{verbosity ?? "quiet"}");
+
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
-                .Create("restore", argsToPassToRestore)
-                .CaptureStdOut()
-                .CaptureStdErr();
+                .Create("restore", argsToPassToRestore);
+
+            if (verbosity == null || _forceOutputRedirection)
+            {
+                command = command
+                    .OnOutputLine(line => WriteLine(_reporter, line, project))
+                    .OnErrorLine(line => WriteLine(_errorReporter, line, project));
+            }
 
             var result = command.Execute();
             if (result.ExitCode != 0)
             {
-                throw new PackageObtainException(
-                    string.Format(
-                        LocalizableStrings.FailedToRestorePackage,
-                        result.StartInfo.WorkingDirectory, result.StartInfo.Arguments, result.StdErr, result.StdOut));
+                throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
         }
 
-        // walk around for https://github.com/dotnet/corefx/issues/26488
-        // fallback osx.10.13 to osx
-        private static string GetRuntimeIdentifierWithMacOsHighSierraFallback()
+        private static void WriteLine(IReporter reporter, string line, FilePath project)
         {
-            if (RuntimeEnvironment.GetRuntimeIdentifier() == "osx.10.13-x64")
+            line = line ?? "";
+
+            // Remove the temp project prefix if present
+            if (line.StartsWith($"{project.Value} : ", StringComparison.OrdinalIgnoreCase))
             {
-                return "osx-x64";
+                line = line.Substring(project.Value.Length + 3);
             }
 
-            return RuntimeEnvironment.GetRuntimeIdentifier();
+            // Note: MSBuild intentionally does not localize "warning" and "error" for diagnostic messages
+            if (line.StartsWith("warning ", StringComparison.Ordinal))
+            {
+                line = line.Yellow();
+            }
+            else if (line.StartsWith("error ", StringComparison.Ordinal))
+            {
+                line = line.Red();
+            }
+
+            reporter.WriteLine(line);
         }
     }
 }

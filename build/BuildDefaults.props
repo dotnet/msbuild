@@ -2,6 +2,9 @@
   <PropertyGroup>
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <!-- Currently, 'arm*' SDK's do not include the LZMA for performance upon extraction of the NuGet archive. -->
+    <!-- https://github.com/dotnet/cli/issues/8800 -->
+    <IncludeNuGetPackageArchive Condition=" $(Architecture.StartsWith('arm')) ">false</IncludeNuGetPackageArchive>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
     <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' AND ($(Rid.StartsWith('rhel.6')) OR $(Rid.StartsWith('alpine.3.6')))">true</SkipBuildingInstallers>
     <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>

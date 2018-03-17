@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Transactions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
@@ -11,21 +13,37 @@ using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Install.Tool
 {
-    public class InstallToolCommand : CommandBase
+    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate (IToolPackageStore, IToolPackageInstaller) CreateToolPackageStoreAndInstaller(DirectoryPath? nonGlobalLocation = null);
+
+    internal class InstallToolCommand : CommandBase
     {
-        private static string _packageId;
-        private static string _packageVersion;
-        private static string _configFilePath;
-        private static string _framework;
-        private static string _source;
-        private static bool _global;
+        private readonly IEnvironmentPathInstruction _environmentPathInstruction;
+        private readonly IReporter _reporter;
+        private readonly IReporter _errorReporter;
+        private CreateShellShimRepository _createShellShimRepository;
+        private CreateToolPackageStoreAndInstaller _createToolPackageStoreAndInstaller;
+
+        private readonly PackageId _packageId;
+        private readonly string _packageVersion;
+        private readonly string _configFilePath;
+        private readonly string _framework;
+        private readonly string _source;
+        private readonly bool _global;
+        private readonly string _verbosity;
+        private readonly string _toolPath;
 
         public InstallToolCommand(
             AppliedOption appliedCommand,
-            ParseResult parseResult)
+            ParseResult parseResult,
+            CreateToolPackageStoreAndInstaller createToolPackageStoreAndInstaller = null,
+            CreateShellShimRepository createShellShimRepository = null,
+            IEnvironmentPathInstruction environmentPathInstruction = null,
+            IReporter reporter = null)
             : base(parseResult)
         {
             if (appliedCommand == null)
@@ -33,93 +51,122 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                 throw new ArgumentNullException(nameof(appliedCommand));
             }
 
-            _packageId = appliedCommand.Arguments.Single();
+            _packageId = new PackageId(appliedCommand.Arguments.Single());
             _packageVersion = appliedCommand.ValueOrDefault<string>("version");
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
             _source = appliedCommand.ValueOrDefault<string>("source");
             _global = appliedCommand.ValueOrDefault<bool>("global");
+            _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
+            _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
+
+            var cliFolderPathCalculator = new CliFolderPathCalculator();
+
+            _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoreAndInstaller;
+
+            _environmentPathInstruction = environmentPathInstruction
+                ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
+            _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
+
+            _reporter = (reporter ?? Reporter.Output);
+            _errorReporter = (reporter ?? Reporter.Error);
         }
 
         public override int Execute()
         {
-            if (!_global)
+            if (string.IsNullOrWhiteSpace(_toolPath) && !_global)
             {
-                throw new GracefulException(LocalizableStrings.InstallToolCommandOnlySupportGlobal);
+                throw new GracefulException(LocalizableStrings.InstallToolCommandNeedGlobalOrToolPath);
             }
 
-            var cliFolderPathCalculator = new CliFolderPathCalculator();
-            var offlineFeedPath = new DirectoryPath(cliFolderPathCalculator.CliFallbackFolderPath);
+            if (!string.IsNullOrWhiteSpace(_toolPath) && _global)
+            {
+                throw new GracefulException(LocalizableStrings.InstallToolCommandInvalidGlobalAndToolPath);
+            }
 
-            var toolConfigurationAndExecutablePath = ObtainPackage(
-                executablePackagePath: new DirectoryPath(cliFolderPathCalculator.ToolsPackagePath),
-                offlineFeedPath: offlineFeedPath);
+            if (_configFilePath != null && !File.Exists(_configFilePath))
+            {
+                throw new GracefulException(
+                    string.Format(
+                        LocalizableStrings.NuGetConfigurationFileDoesNotExist,
+                        Path.GetFullPath(_configFilePath)));
+            }
 
-            var shellShimMaker = new ShellShimMaker(cliFolderPathCalculator.ToolsShimPath);
-            var commandName = toolConfigurationAndExecutablePath.Configuration.CommandName;
-            shellShimMaker.EnsureCommandNameUniqueness(commandName);
 
-            shellShimMaker.CreateShim(
-                toolConfigurationAndExecutablePath.Executable.Value,
-                commandName);
+            VersionRange versionRange = null;
+            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
+            {
+                throw new GracefulException(
+                    string.Format(
+                        LocalizableStrings.InvalidNuGetVersionRange,
+                        _packageVersion));
+            }
 
-            EnvironmentPathFactory
-                .CreateEnvironmentPathInstruction()
-                .PrintAddPathInstructionIfPathDoesNotExist();
+            DirectoryPath? toolPath = null;
+            if (_toolPath != null)
+            {
+                toolPath = new DirectoryPath(_toolPath);
+            }
 
-            Reporter.Output.WriteLine(
-                string.Format(LocalizableStrings.InstallationSucceeded, commandName));
+            (IToolPackageStore toolPackageStore, IToolPackageInstaller toolPackageInstaller) =
+                _createToolPackageStoreAndInstaller(toolPath);
+            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
-            return 0;
-        }
+            // Prevent installation if any version of the package is installed
+            if (toolPackageStore.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
+            {
+                _errorReporter.WriteLine(string.Format(LocalizableStrings.ToolAlreadyInstalled, _packageId).Red());
+                return 1;
+            }
 
-        private static ToolConfigurationAndExecutablePath ObtainPackage(
-            DirectoryPath executablePackagePath,
-            DirectoryPath offlineFeedPath)
-        {
+            FilePath? configFile = null;
+            if (_configFilePath != null)
+            {
+                configFile = new FilePath(_configFilePath);
+            }
+
             try
             {
-                FilePath? configFile = null;
-                if (_configFilePath != null)
+                IToolPackage package = null;
+                using (var scope = new TransactionScope(
+                    TransactionScopeOption.Required,
+                    TimeSpan.Zero))
                 {
-                    configFile = new FilePath(_configFilePath);
+                    package = toolPackageInstaller.InstallPackage(
+                        packageId: _packageId,
+                        versionRange: versionRange,
+                        targetFramework: _framework,
+                        nugetConfig: configFile,
+                        source: _source,
+                        verbosity: _verbosity);
+
+                    foreach (var command in package.Commands)
+                    {
+                        shellShimRepository.CreateShim(command.Executable, command.Name);
+                    }
+
+                    scope.Complete();
                 }
 
-                var toolPackageObtainer =
-                    new ToolPackageObtainer(
-                        executablePackagePath,
-                        offlineFeedPath,
-                        () => new DirectoryPath(Path.GetTempPath())
-                            .WithSubDirectories(Path.GetRandomFileName())
-                            .WithFile(Path.GetRandomFileName() + ".csproj"),
-                        new Lazy<string>(BundledTargetFramework.GetTargetFrameworkMoniker),
-                        new PackageToProjectFileAdder(),
-                        new ProjectRestorer());
+                if (_global)
+                {
+                    _environmentPathInstruction.PrintAddPathInstructionIfPathDoesNotExist();
+                }
 
-                return toolPackageObtainer.ObtainAndReturnExecutablePath(
-                    packageId: _packageId,
-                    packageVersion: _packageVersion,
-                    nugetconfig: configFile,
-                    targetframework: _framework,
-                    source: _source);
-            }
-
-            catch (PackageObtainException ex)
-            {
-                throw new GracefulException(
-                    message:
-                    string.Format(LocalizableStrings.InstallFailedNuget,
-                        ex.Message),
-                    innerException: ex);
-            }
-            catch (ToolConfigurationException ex)
-            {
-                throw new GracefulException(
-                    message:
+                _reporter.WriteLine(
                     string.Format(
-                        LocalizableStrings.InstallFailedPackage,
-                        ex.Message),
-                    innerException: ex);
+                        LocalizableStrings.InstallationSucceeded,
+                        string.Join(", ", package.Commands.Select(c => c.Name)),
+                        package.Id,
+                        package.Version.ToNormalizedString()).Green());
+                return 0;
+            }
+            catch (Exception ex) when (InstallToolCommandLowLevelErrorConverter.ShouldConvertToUserFacingError(ex))
+            {
+                throw new GracefulException(
+                    messages: InstallToolCommandLowLevelErrorConverter.GetUserFacingMessages(ex, _packageId),
+                    verboseMessages: new[] {ex.ToString()},
+                    isUserError: false);
             }
         }
     }

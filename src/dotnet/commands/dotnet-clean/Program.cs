@@ -19,7 +19,10 @@ namespace Microsoft.DotNet.Tools.Clean
 
         public static CleanCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var msbuildArgs = new List<string>();
+            var msbuildArgs = new List<string>
+            {
+                "/v:normal"
+            };
 
             var parser = Parser.Instance;
 

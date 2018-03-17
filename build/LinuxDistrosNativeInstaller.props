@@ -8,7 +8,7 @@
     <LinuxDistrosNeedNativeInstaller Include="rhel.7-x64">
       <DockerFolder>rhel</DockerFolder>
       <InstallerExtension>rpm</InstallerExtension>
-      <DistroNameInInstaller>rhel-x64</DistroNameInInstaller>
+      <DistroNameInInstaller>x64</DistroNameInInstaller>
     </LinuxDistrosNeedNativeInstaller>
   </ItemGroup>
 </Project>

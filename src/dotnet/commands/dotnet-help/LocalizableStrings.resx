@@ -193,7 +193,7 @@
     <value>Remove reference from the project.</value>
   </data>
   <data name="ListDefinition" xml:space="preserve">
-    <value>List reference in the project.</value>
+    <value>List project references or installed tools.</value>
   </data>
   <data name="AdvancedCommands" xml:space="preserve">
     <value>Advanced Commands</value>
@@ -269,5 +269,11 @@
   </data>
   <data name="InstallDefinition" xml:space="preserve">
     <value>Installs an item into the development environment.</value>
+  </data>
+  <data name="UninstallDefinition" xml:space="preserve">
+    <value>Uninstalls an item from the development environment.</value>
+  </data>
+  <data name="UpdateDefinition" xml:space="preserve">
+    <value>Updates an item in the development environment.</value>
   </data>
 </root>

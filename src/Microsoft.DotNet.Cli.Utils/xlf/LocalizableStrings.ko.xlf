@@ -234,6 +234,16 @@
         <target state="translated">"{0}"에 대해 실행 가능한 명령을 찾지 못했습니다. 프로젝트가 복원되지 않았거나 복원이 실패했을 수 있습니다. 'dotnet restore'를 실행하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="new">.NET Core SDK (reflecting any global.json):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="new">Runtime Environment:</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
