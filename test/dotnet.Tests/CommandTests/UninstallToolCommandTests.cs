@@ -73,7 +73,8 @@ namespace Microsoft.DotNet.Tests.Commands
                     PackageId,
                     PackageVersion));
 
-            var packageDirectory = new DirectoryPath(ToolsDirectory).WithSubDirectories(PackageId, PackageVersion);
+            var packageDirectory = new DirectoryPath(Path.GetFullPath(ToolsDirectory))
+                .WithSubDirectories(PackageId, PackageVersion);
             var shimPath = Path.Combine(
                 ShimsDirectory,
                 ProjectRestorerMock.FakeCommandName +
@@ -114,7 +115,8 @@ namespace Microsoft.DotNet.Tests.Commands
                     PackageId,
                     PackageVersion));
 
-            var packageDirectory = new DirectoryPath(ToolsDirectory).WithSubDirectories(PackageId, PackageVersion);
+            var packageDirectory = new DirectoryPath(Path.GetFullPath(ToolsDirectory))
+                .WithSubDirectories(PackageId, PackageVersion);
             var shimPath = Path.Combine(
                 ShimsDirectory,
                 ProjectRestorerMock.FakeCommandName +
