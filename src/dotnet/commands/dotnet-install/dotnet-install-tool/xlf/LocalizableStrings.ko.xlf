@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallationSucceeded">
-        <source>If there were no additional instructions, you can type the following command to invoke the tool: {0}
+        <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="needs-review-translation">
 설치했습니다. 추가 지침이 없는 경우 셸에 다음 명령을 직접 입력하여 {0}을(를) 호출할 수 있습니다.</target>
@@ -95,18 +95,18 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="new">Need either global or tool-path provided.</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time.</source>
-        <target state="new">Cannot have global and tool-path as opinion at the same time.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="new">Location of shim to access tool</target>
+        <source>Location where the tool will be installed.</source>
+        <target state="new">Location where the tool will be installed.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
