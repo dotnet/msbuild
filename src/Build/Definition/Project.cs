@@ -2178,9 +2178,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
         {
-            var context = evaluationContext;
-
-            _lastEvaluationContext = context;
+            _lastEvaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated); ;
             ReevaluateIfNecessary(LoggingService);
         }
 
@@ -2783,8 +2781,6 @@ namespace Microsoft.Build.Evaluation
         private void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
         {
             _xml.MarkAsExplicitlyLoaded();
-
-            evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             PropertyDictionary<ProjectPropertyInstance> globalPropertiesCollection = new PropertyDictionary<ProjectPropertyInstance>();
 
