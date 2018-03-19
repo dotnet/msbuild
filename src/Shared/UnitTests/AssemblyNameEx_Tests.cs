@@ -220,11 +220,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General equals comparison validator.
         /// </summary>
-#if FEATURE_ASSEMBLYNAME_CULTUREINFO
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/252")]
-#endif
         public void Equals()
         {
             // For each pair of assembly strings...
@@ -265,11 +261,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General equals comparison validator when we are ignoring the version numbers in the name.
         /// </summary>
-#if FEATURE_ASSEMBLYNAME_CULTUREINFO
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/252")]
-#endif
         public void EqualsIgnoreVersion()
         {
             // For each pair of assembly strings...

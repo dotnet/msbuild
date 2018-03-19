@@ -350,15 +350,7 @@ namespace Microsoft.Build.Shared
             {
                 // Is there a string?
                 CreateAssemblyName();
-#if FEATURE_ASSEMBLYNAME_CULTUREINFO
                 return asAssemblyName.CultureInfo;
-#else
-                if (asAssemblyName.CultureName == null)
-                {
-                    return null;
-                }
-                return new CultureInfo(asAssemblyName.CultureName);
-#endif
             }
         }
 
@@ -752,7 +744,6 @@ namespace Microsoft.Build.Shared
         internal static bool CompareCultures(AssemblyName a, AssemblyName b)
         {
             // Do the Cultures match?
-#if FEATURE_ASSEMBLYNAME_CULTUREINFO
             CultureInfo aCulture = a.CultureInfo;
             CultureInfo bCulture = b.CultureInfo;
             if (aCulture == null)
@@ -764,31 +755,7 @@ namespace Microsoft.Build.Shared
                 bCulture = CultureInfo.InvariantCulture;
             }
 
-            if (aCulture.LCID != bCulture.LCID)
-            {
-                return false;
-            }
-
-            return true;
-#else
-            string aCulture = a.CultureName;
-            string bCulture = b.CultureName;
-            if (aCulture == null)
-            {
-                aCulture = CultureInfo.InvariantCulture.Name;
-            }
-            if (bCulture == null)
-            {
-                bCulture = CultureInfo.InvariantCulture.Name;
-            }
-
-            if (aCulture != bCulture)
-            {
-                return false;
-            }
-
-            return true;
-#endif
+            return aCulture.LCID == bCulture.LCID;
         }
 
         /// <summary>
