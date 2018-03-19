@@ -2,11 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -15,27 +14,22 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class RemoveDuplicates : TaskExtension
     {
-        private ITaskItem[] _inputs = Array.Empty<TaskItem>();
-        private ITaskItem[] _filtered = null;
-
         /// <summary>
         /// The left-hand set of items to be RemoveDuplicatesed from.
         /// </summary>
-        public ITaskItem[] Inputs
-        {
-            get { return _inputs; }
-            set { _inputs = value; }
-        }
+        public ITaskItem[] Inputs { get; set; } = Array.Empty<TaskItem>();
 
         /// <summary>
         /// List of unique items.
         /// </summary>
         [Output]
-        public ITaskItem[] Filtered
-        {
-            get { return _filtered; }
-            set { _filtered = value; }
-        }
+        public ITaskItem[] Filtered { get; set; } = null;
+
+        /// <summary>
+        /// True if any duplicate items were found. False otherwise.
+        /// </summary>
+        [Output]
+        public bool HadAnyDuplicates { get; set; } = false;
 
         /// <summary>
         /// Execute the task.
@@ -43,19 +37,26 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            Hashtable alreadySeen = new Hashtable(Inputs.Length, StringComparer.OrdinalIgnoreCase);
-            ArrayList filteredList = new ArrayList();
+            if (Inputs == null || Inputs.Length == 0)
+            {
+                Filtered = Array.Empty<ITaskItem>();
+                HadAnyDuplicates = false;
+                return true;
+            }
+
+            var alreadySeen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var filteredList = new List<ITaskItem>(Inputs.Length);
+
             foreach (ITaskItem item in Inputs)
             {
-                if (!alreadySeen.ContainsKey(item.ItemSpec))
+                if (alreadySeen.Add(item.ItemSpec))
                 {
-                    alreadySeen[item.ItemSpec] = String.Empty;
                     filteredList.Add(item);
                 }
             }
 
-            Filtered = (ITaskItem[])filteredList.ToArray(typeof(ITaskItem));
-
+            Filtered = filteredList.ToArray();
+            HadAnyDuplicates = Inputs.Length != Filtered.Length;
             return true;
         }
     }

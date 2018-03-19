@@ -1,0 +1,15 @@
+<Project>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ThirdPartyNotice Condition=" '$(ThirdPartyNotice)' == '' ">$(RepoRoot)THIRDPARTYNOTICES.txt</ThirdPartyNotice>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" Condition=" '$(IsPackable)' == 'true' " />
+  </ItemGroup>
+
+</Project>

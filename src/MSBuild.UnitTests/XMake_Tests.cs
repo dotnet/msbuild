@@ -10,10 +10,10 @@ using System.Linq;
 using System.Threading;
 
 using Microsoft.Build.CommandLine;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Microsoft.Build.UnitTests;
 using Xunit;
 using Shouldly;
 
@@ -1959,12 +1959,18 @@ namespace Microsoft.Build.UnitTests
 
                 // Copy MSBuild.exe & dependent files (they will not be in the GAC so they must exist next to msbuild.exe)
                 var filesToCopy = Directory
-                    .EnumerateFiles(source)
-                    .Where(f=> f.EndsWith(".dll") || f.EndsWith(".tasks") || f.EndsWith(".exe") || f.EndsWith(".exe.config") || f.EndsWith(".dll.config") || f.EndsWith(".runtimeconfig.json"));
+                    .EnumerateFiles(source);
 
                 var directoriesToCopy = Directory
                     .EnumerateDirectories(source)
-                    .Where(d => Directory.EnumerateFiles(d).Any(f => f.EndsWith("resources.dll")));  // Copy satellite assemblies
+                    .Where(d =>
+                    {
+                        if (Path.GetFileName(d).Equals("TestTemp", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return false;
+                        }
+                        return true;
+                    });
 
                 foreach (var file in filesToCopy)
                 {
@@ -1973,15 +1979,9 @@ namespace Microsoft.Build.UnitTests
 
                 foreach (var directory in directoriesToCopy)
                 {
-                    foreach (var sourceFile in Directory.EnumerateFiles(directory, "*"))
-                    {
-                        var destinationFile = sourceFile.Replace(source, dest);
-
-                        var directoryName = Path.GetDirectoryName(destinationFile);
-                        Directory.CreateDirectory(directoryName);
-
-                        File.Copy(sourceFile, destinationFile);
-                    }
+                    string dirName = Path.GetFileName(directory);
+                    string destSubDir = Path.Combine(dest, dirName);
+                    FileUtilities.CopyDirectory(directory, destSubDir);
                 }
 
                 return dest;
@@ -1995,7 +1995,7 @@ namespace Microsoft.Build.UnitTests
 
         private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null, params string[] arguments)
         {
-            using (TestEnvironment testEnvironment = Engine.UnitTests.TestEnvironment.Create())
+            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
             {
                 TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents, new string[0]);
 

@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
-      <group id="MSBUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousProjectError">
         <source>MSBUILD : error MSB1011: Specify which project or solution file to use because this folder contains more than one project or solution file.</source>
         <target state="translated">MSBUILD : error MSB1011: 此文件夹中包含多个项目或解决方案文件，请指定要使用的项目或解决方案文件。</target>
@@ -755,19 +754,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </target>
         <note />
       </trans-unit>
-      <trans-unit id="HelpMessage_27_DebuggerSwitch">
-        <source>  /debug
-                     Causes a debugger prompt to appear immediately so that
-                     Visual Studio can be attached for you to debug the
-                     MSBuild XML and any tasks and loggers it uses.
-   </source>
-        <target state="translated">  /debug
-                    使调试器提示立即出现，以便
-                    可以附加 Visual Studio，供用户调试
-                    MSBuild XML 及其使用的任何任务和记录器。
-   </target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
         <target state="translated">MSBUILD : Configuration error MSB1043: 应用程序未能启动。{0}</target>
@@ -1056,7 +1042,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1026: Schema file '{0}' does not exist.</source>
         <target state="translated">MSBUILD : error MSB1026: 架构文件“{0}”不存在。</target>
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
-    that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.  
+    that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
@@ -1086,7 +1072,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>MSBUILD : error MSB1035: Specify the project extensions to ignore.</source>
         <target state="translated">MSBUILD : error MSB1035: 指定要忽略的项目扩展名。</target>
         <note>{StrBegin="MSBUILD : error MSB1035: "}
-      UE: This happens if the user does something like "msbuild.exe /IgnoreProjectextensions". The user must pass in one or more 
+      UE: This happens if the user does something like "msbuild.exe /IgnoreProjectextensions". The user must pass in one or more
       project extensions to ignore e.g. "msbuild.exe /IgnoreProjectExtensions:.sln".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>

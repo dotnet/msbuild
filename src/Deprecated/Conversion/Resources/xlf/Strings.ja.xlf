@@ -20,7 +20,6 @@
       </count-group>
     </header>
     <body>
-      <group id="XMAKECONVERSION/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="CouldNotFindCompleteSolutionFile">
         <source>MSB2013: The project-to-project reference with GUID {0} could not be converted because a valid .SLN file containing all projects could not be found.</source>
         <target state="translated">MSB2013: すべてのプロジェクトを含む有効な .SLN ファイルが見つからなかったため、GUID {0} を伴うプロジェクト間参照を変換できませんでした。</target>

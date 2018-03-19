@@ -14,7 +14,6 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a single Import element in a project file
     /// </summary>
     /// <owner>LukaszG</owner>
-    [Obsolete]
     public class Import : IItemPropertyGrouping
     {
         #region Properties

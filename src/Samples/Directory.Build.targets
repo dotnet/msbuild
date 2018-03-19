@@ -1,0 +1,6 @@
+﻿<Project>
+  
+  <!-- Import parent targets -->
+  <Import Project="..\Directory.Build.targets"/>
+
+</Project>

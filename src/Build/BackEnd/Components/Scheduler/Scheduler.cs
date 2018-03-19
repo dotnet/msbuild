@@ -281,10 +281,12 @@ namespace Microsoft.Build.BackEnd
                 if (blocker.YieldAction != YieldAction.None)
                 {
                     TraceScheduler("Request {0} on node {1} is performing yield action {2}.", blocker.BlockedRequestId, nodeId, blocker.YieldAction);
+                    ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     HandleYieldAction(parentRequest, blocker);
                 }
                 else if ((blocker.BlockingRequestId == blocker.BlockedRequestId) && blocker.BlockingRequestId != BuildRequest.InvalidGlobalRequestId)
                 {
+                    ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked waiting for a transfer of results.                    
                     HandleRequestBlockedOnResultsTransfer(parentRequest, responses);
                 }
@@ -293,6 +295,8 @@ namespace Microsoft.Build.BackEnd
                     // We are blocked by a request executing a target for which we need results.
                     try
                     {
+                        ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should exist");
+
                         HandleRequestBlockedOnInProgressTarget(parentRequest, blocker);
                     }
                     catch (SchedulerCircularDependencyException ex)
@@ -303,6 +307,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
+                    ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked by new requests, either top-level or MSBuild task.
                     HandleRequestBlockedByNewRequests(parentRequest, blocker, responses);
                 }
@@ -1495,7 +1500,20 @@ namespace Microsoft.Build.BackEnd
             // it isn't modifying its own state, just running a background process), ready, or still blocked.
             blockingRequest.VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked });
 
-            blockedRequest.BlockByRequest(blockingRequest, blocker.TargetsInProgress);
+            // detect the case for https://github.com/Microsoft/msbuild/issues/3047
+            // if we have partial results AND blocked and blocking share the same configuration AND are blocked on each other
+            if (blocker.PartialBuildResult !=null &&
+                blockingRequest.BuildRequest.ConfigurationId == blockedRequest.BuildRequest.ConfigurationId &&
+                blockingRequest.RequestsWeAreBlockedBy.Contains(blockedRequest))
+            {
+                // if the blocking request is waiting on a target we have partial results for, preemptively break its dependency
+                if (blocker.PartialBuildResult.HasResultsForTarget(blockingRequest.BlockingTarget))
+                {
+                    blockingRequest.UnblockWithPartialResultForBlockingTarget(blocker.PartialBuildResult);
+                }
+            }
+
+            blockedRequest.BlockByRequest(blockingRequest, blocker.TargetsInProgress, blocker.BlockingTarget);
         }
 
         /// <summary>

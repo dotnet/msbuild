@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
         /// Bad directory path
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)] // "No invalid characters on Unix"
+        [PlatformSpecific(TestPlatforms.Windows)] // "No invalid characters on Unix"
         public void InvalidDirectoryPath()
         {
             WriteCodeFragment task = new WriteCodeFragment();

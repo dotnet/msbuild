@@ -660,7 +660,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/**/*.cs",
             new[]

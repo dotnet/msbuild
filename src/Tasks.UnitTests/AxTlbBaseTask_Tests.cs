@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 }
                 else
                 {
-                    Assert.True(false, "Key container could not be created.");
+                    Assert.True(false, "Key container could not be created (perhaps you are not running as admin).");
                 }
             }
             finally

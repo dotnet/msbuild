@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    
+    <!-- Direct project references needed here to avoid NuGet version conflict errors -->
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Include SDKs from the Stage 0 .NET Core SDK -->
+    <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- This file is needed so the dotnet CLI knows how to map preview SDK versions to tfms (because tfms do not have preview information on them) -->
+    <!-- This is because according to semver, 2.1.0-preview is not >= 2.1.0 -->
+    <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Include NuGet build tasks -->
+    <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
+    <!-- Include NuGet.targets from NuGet.Build.Tasks package.  Ideally, this should probably be in contentFiles in the package so we don't have to do this. -->
+    <Content Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetBuildTasksPackageVersion)\runtimes\any\native\NuGet.targets" CopyToOutputDirectory="PreserveNewest" />
+    
+    <!-- Include DependencyModel libraries. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
+  </ItemGroup>
+
+  <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
+  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build">
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" />
+  </Target>
+  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish">
+    <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
+  </Target>
+
+  <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" />
+
+</Project>

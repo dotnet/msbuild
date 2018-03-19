@@ -22,7 +22,6 @@ namespace Microsoft.Build.BuildEngine
     /// doesn't maintain any BuildPropertyGroup state on its own.
     /// </summary>
     /// <owner>DavidLe</owner>
-    [Obsolete]
     public class BuildItemGroupCollection : IEnumerable, ICollection
     {
         #region Member Data

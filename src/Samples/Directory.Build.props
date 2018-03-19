@@ -1,0 +1,11 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <!-- Use Samples subdirectory for samples in output folder -->
+    <OutDirName>Samples\$(MSBuildProjectName)</OutDirName>
+  </PropertyGroup>
+
+  <!-- Import parent props -->
+  <Import Project="..\Directory.Build.props"/>
+
+</Project>

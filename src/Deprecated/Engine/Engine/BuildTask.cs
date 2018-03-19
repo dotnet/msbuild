@@ -21,7 +21,6 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a single task.
     /// </summary>
     /// <owner>rgoel</owner>
-    [Obsolete]
     public class BuildTask
     {
         #region Member Data

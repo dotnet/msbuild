@@ -10,7 +10,6 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// Aggregation of a toolset version (eg. "2.0"), tools path, and optional set of associated properties
     /// </summary>
-    [Obsolete]
     public class Toolset
     {
         // Name of the tools version

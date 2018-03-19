@@ -16,7 +16,6 @@ namespace Microsoft.Build.BuildEngine
     /// can be used to instantiate the logger and can be serialized to be passed between different
     /// processes.
     /// </summary>
-    [Obsolete]
     public class LoggerDescription
     {
         #region Constructor

@@ -16,9 +16,9 @@ namespace Microsoft.Build.UnitTests
 {
     public class TypeLoader_Tests
     {
-        private static readonly string ProjectFilePath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "portableTaskTest.proj");
+        private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "PortableTask");
+        private static readonly string ProjectFileName = "portableTaskTest.proj";
         private static readonly string DLLFileName = "PortableTask.dll";
-        private static readonly string OriginalDllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, DLLFileName);
 
         [Fact]
         public void Basic()
@@ -51,61 +51,84 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadNonExistingAssembly()
         {
-            string dllName = "NonExistent.dll";
+            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
+            {
+                string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
-            bool successfulExit;
-            string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit);
-            Assert.False(successfulExit);
+                string dllName = "NonExistent.dll";
 
-            string dllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, dllName);
-            CheckIfCorrectAssemblyLoaded(output, dllPath, false);
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit);
+                Assert.False(successfulExit);
+
+                string dllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, dllName);
+                CheckIfCorrectAssemblyLoaded(output, dllPath, false);
+            }
         }
 
         [Fact]
         public void LoadInsideAsssembly()
         {
-            bool successfulExit;
-            string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag", out successfulExit);
-            Assert.True(successfulExit);
+            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
+            {
+                string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
-            CheckIfCorrectAssemblyLoaded(output, OriginalDllPath);
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag", out successfulExit);
+                Assert.True(successfulExit);
+
+                string dllPath = Path.Combine(dir.Path, DLLFileName);
+
+                CheckIfCorrectAssemblyLoaded(output, dllPath);
+            }
         }
 
         [Fact]
         public void LoadOutsideAssembly()
         {
-            string movedDLLPath = MoveOrCopyDllToTempDir(copy : false);
-
-            try
+            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
             {
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag /p:AssemblyPath=" + movedDLLPath, out successfulExit);
-                Assert.True(successfulExit);
+                string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
+                string originalDLLPath = Path.Combine(dir.Path, DLLFileName);
 
-                CheckIfCorrectAssemblyLoaded(output, movedDLLPath);
-            }
-            finally
-            {
-                UndoDLLOperations(movedDLLPath, moveBack : true);
+                string movedDLLPath = MoveOrCopyDllToTempDir(originalDLLPath, copy: false);
+
+                try
+                {
+                    bool successfulExit;
+                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + movedDLLPath, out successfulExit);
+                    Assert.True(successfulExit);
+
+                    CheckIfCorrectAssemblyLoaded(output, movedDLLPath);
+                }
+                finally
+                {
+                    UndoDLLOperations(movedDLLPath);
+                }
             }
         }
 
         [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/325")]
         public void LoadInsideAssemblyWhenGivenOutsideAssemblyWithSameName()
         {
-            string copiedDllPath = MoveOrCopyDllToTempDir(copy : true);
-
-            try
+            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
             {
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag /p:AssemblyPath=" + copiedDllPath, out successfulExit);
-                Assert.True(successfulExit);
+                string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
+                string originalDLLPath = Path.Combine(dir.Path, DLLFileName);
+                string copiedDllPath = MoveOrCopyDllToTempDir(originalDLLPath, copy: true);
 
-                CheckIfCorrectAssemblyLoaded(output, OriginalDllPath);
-            }
-            finally
-            {
-                UndoDLLOperations(copiedDllPath, moveBack : false);
+                try
+                {
+                    bool successfulExit;
+                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + copiedDllPath, out successfulExit);
+                    Assert.True(successfulExit);
+
+                    CheckIfCorrectAssemblyLoaded(output, originalDLLPath);
+                }
+                finally
+                {
+                    UndoDLLOperations(copiedDllPath);
+                }
             }
         }
 
@@ -113,48 +136,40 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="copy"></param>
         /// <returns>Path to new DLL</returns>
-        private string MoveOrCopyDllToTempDir(bool copy)
+        private string MoveOrCopyDllToTempDir(string originalDllPath, bool copy)
         {
             var temporaryDirectory = FileUtilities.GetTemporaryDirectory();
             var newDllPath = Path.Combine(temporaryDirectory, DLLFileName);
 
-            Assert.True(File.Exists(OriginalDllPath));
+            Assert.True(File.Exists(originalDllPath));
 
             if (copy)
             {
-                File.Copy(OriginalDllPath, newDllPath);
+                File.Copy(originalDllPath, newDllPath);
 
                 Assert.True(File.Exists(newDllPath));
             }
             else
             {
-                File.Move(OriginalDllPath, newDllPath);
+                File.Move(originalDllPath, newDllPath);
 
                 Assert.True(File.Exists(newDllPath));
-                Assert.False(File.Exists(OriginalDllPath));
+                Assert.False(File.Exists(originalDllPath));
             }
             return newDllPath;
         }
 
         /// <summary>
-        /// Move / Delete newDllPath and delete temp directory
+        /// Delete newDllPath and delete temp directory
         /// </summary>
         /// <param name="newDllPath"></param>
         /// <param name="moveBack">If true, move newDllPath back to bin. If false, delete it</param>
-        private void UndoDLLOperations(string newDllPath, bool moveBack)
+        private void UndoDLLOperations(string newDllPath)
         {
             var tempDirectoryPath = Path.GetDirectoryName(newDllPath);
 
-            if (moveBack)
-            {
-                File.Move(newDllPath, OriginalDllPath);
-            }
-            else
-            {
-                File.Delete(newDllPath);
-            }
+            File.Delete(newDllPath);
 
-            Assert.True(File.Exists(OriginalDllPath));
             Assert.False(File.Exists(newDllPath));
             Assert.Empty(Directory.EnumerateFiles(tempDirectoryPath));
 

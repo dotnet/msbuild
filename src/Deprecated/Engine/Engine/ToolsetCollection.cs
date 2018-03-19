@@ -16,7 +16,6 @@ namespace Microsoft.Build.BuildEngine
     /// NOTE: This collection does not support ICollection&lt;Toolset&gt;'s
     /// Remove or Clear methods, and calls to these will generate exceptions.
     /// </summary>
-    [Obsolete]
     public class ToolsetCollection : ICollection<Toolset>
     {
         // the parent engine 

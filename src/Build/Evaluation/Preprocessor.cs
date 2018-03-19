@@ -284,7 +284,7 @@ namespace Microsoft.Build.Evaluation
                     // To display what the <Import> tag looked like
                     string importCondition = ((XmlElement)child).GetAttribute(XMakeAttributes.condition);
                     string condition = importCondition.Length > 0 ? $" Condition=\"{importCondition}\"" : String.Empty;
-                    string importProject = ((XmlElement)child).GetAttribute(XMakeAttributes.project);
+                    string importProject = ((XmlElement)child).GetAttribute(XMakeAttributes.project).Replace("--", "__");
                     string importSdk = ((XmlElement)child).GetAttribute(XMakeAttributes.sdk);
                     string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
 
