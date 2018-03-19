@@ -1657,7 +1657,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Done writing report.</value>
   </data>
   <data name="ReferencingMultipleVersionsOfTheSameSdk" UESanitized="false" Visibility="Public">
-    <value>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</value>
+    <value>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</value>
     <comment>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </comment>

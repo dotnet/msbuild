@@ -13,6 +13,7 @@ using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
 
@@ -329,7 +330,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             // Use custom SDK resolution to ensure resolver context is logged.
             var mapping = new Dictionary<string, string> { { SdkName, _testSdkDirectory } };
-            _env.CustomSdkResolution(mapping);
+            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolverFileMapping(mapping);
 
             // Create a normal project (p1) which imports an SDK style project (p2).
             var projectFolder = _env.CreateFolder().FolderPath;
@@ -344,10 +345,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             File.WriteAllText(p2Path, p2);
 
             var logger = new MockLogger();
-            var pc = new ProjectCollection();
+            var pc = _env.CreateProjectCollection().Collection;
             pc.RegisterLogger(logger);
             ProjectRootElement projectRootElement = ProjectRootElement.Open(p1Path, pc);
-            var project = new Project(projectRootElement, null, null, pc);
+
+            projectOptions.ProjectCollection = pc;
+
+            var project = Project.FromProjectRootElement(projectRootElement, projectOptions);
 
             // ProjectFilePath should be logged with the path to p1 and not the path to p2.
             logger.AssertLogContains($"ProjectFilePath = {p1Path}");
@@ -449,7 +453,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>
 ";
             MockLogger logger = new MockLogger();
-            ProjectCollection projectCollection = new ProjectCollection();
+            ProjectCollection projectCollection = _env.CreateProjectCollection().Collection;
             projectCollection.RegisterLogger(logger);
 
             ProjectRootElement rootElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(projectContents);

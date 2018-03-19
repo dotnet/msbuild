@@ -3,6 +3,8 @@
 using Microsoft.Build.Evaluation;
 using System;
 using System.IO;
+using System.Linq;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -57,10 +59,10 @@ namespace Microsoft.Build.UnitTests
 
             string projectExtensionsPath = project.GetPropertyValue("MSBuildProjectExtensionsPath");
 
-            Assert.True(!String.IsNullOrWhiteSpace(projectExtensionsPath), "The property 'MSBuildProjectExtensionsPath' should not be empty during project evaluation.");
-            Assert.True(!Directory.Exists(projectExtensionsPath), $"The project extension directory '{projectExtensionsPath}' should not exist.");
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
+            projectExtensionsPath.ShouldNotBeNullOrWhiteSpace();
+            Directory.Exists(projectExtensionsPath).ShouldBeFalse();
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("true");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBeEmpty();
         }
 
         /// <summary>
@@ -92,10 +94,10 @@ namespace Microsoft.Build.UnitTests
 
             string projectExtensionsDirectory = Path.Combine(ObjectModelHelpers.TempProjectDir, Path.GetDirectoryName(ImportProjectPath));
 
-            Assert.Equal("false", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
-            Assert.True(Directory.Exists(projectExtensionsDirectory), $"The directory '{projectExtensionsDirectory}' should exist but doesn't.");
-            Assert.Equal($@"{projectExtensionsDirectory}{Path.DirectorySeparatorChar}", project.GetPropertyValue("MSBuildProjectExtensionsPath"));
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("false");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBeEmpty();
+            Directory.Exists(projectExtensionsDirectory).ShouldBeTrue();
+            project.GetPropertyValue("MSBuildProjectExtensionsPath").ShouldBe($@"{projectExtensionsDirectory}{Path.DirectorySeparatorChar}");
         }
 
         /// <summary>
@@ -121,8 +123,8 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("true");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBe("true");
         }
 
         /// <summary>
@@ -145,8 +147,60 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("true");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBe("true");
+        }
+
+        /// <summary>
+        /// Ensures that an error is logged if MSBuildProjectExtensionsPath is modified after it was set by Microsoft.Common.props.
+        /// </summary>
+        [Fact]
+        public void ErrorIfChangedInBodyOfProject()
+        {
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
+
+                    <PropertyGroup>
+                        <MSBuildProjectExtensionsPath>foo</MSBuildProjectExtensionsPath>
+                    </PropertyGroup>
+
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
+                </Project>
+            "));
+
+            MockLogger logger = new MockLogger();
+
+            project.Build("_CheckForInvalidConfigurationAndPlatform", new[] {logger}).ShouldBeFalse();
+
+            logger.Errors.Select(i => i.Code).FirstOrDefault().ShouldBe("MSB3540");
+        }
+
+        /// <summary>
+        /// Ensures that an error is logged if BaseIntermediateOutputPath is modified after it was set by Microsoft.Common.props and 
+        /// EnableBaseIntermediateOutputPathMismatchWarning is 'true'.
+        /// </summary>
+        [Fact]
+        public void WarningIfBaseIntermediateOutputPathIsChangedInBodyOfProject()
+        {
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
+
+                    <PropertyGroup>
+                        <EnableBaseIntermediateOutputPathMismatchWarning>true</EnableBaseIntermediateOutputPathMismatchWarning>
+                        <BaseIntermediateOutputPath>foo</BaseIntermediateOutputPath>
+                    </PropertyGroup>
+
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
+                </Project>
+            "));
+
+            MockLogger logger = new MockLogger();
+
+            project.Build("_CheckForInvalidConfigurationAndPlatform", new[] { logger }).ShouldBeTrue();
+
+            logger.Warnings.Select(i => i.Code).FirstOrDefault().ShouldBe("MSB3539");
         }
     }
 }

@@ -2097,8 +2097,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
-        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: Několik verzí stejné sady SDK {0} nelze zadat. Bude použita verze {1} sady SDK, kterou už určuje {2}, verze {3} bude ignorována.</target>
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="needs-review-translation">MSB4240: Několik verzí stejné sady SDK {0} nelze zadat. Bude použita verze {1} sady SDK, kterou už určuje {2}, verze {3} bude ignorována.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>

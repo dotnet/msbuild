@@ -2092,8 +2092,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
-        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="new">MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</target>
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="new">MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
