@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd
     internal abstract class NodeProviderOutOfProcBase
     {
         /// <summary>
-        /// The maximum number of bytes to write 
+        /// The maximum number of bytes to write
         /// </summary>
         private const int MaxPacketWriteSize = 1048576;
 
@@ -64,7 +64,7 @@ namespace Microsoft.Build.BackEnd
         internal delegate void NodeContextTerminateDelegate(int nodeId);
 
         /// <summary>
-        /// The build component host. 
+        /// The build component host.
         /// </summary>
         protected IBuildComponentHost ComponentHost
         {
@@ -209,7 +209,7 @@ namespace Microsoft.Build.BackEnd
                 Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
                 if (nodeStream != null)
                 {
-                    // Connection successful, use this node.   
+                    // Connection successful, use this node.
                     CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
                     return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
                 }
@@ -311,6 +311,8 @@ namespace Microsoft.Build.BackEnd
         }
 
 #if FEATURE_NAMED_PIPES_FULL_DUPLEX
+
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
         private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
@@ -329,7 +331,7 @@ namespace Microsoft.Build.BackEnd
                 throw new UnauthorizedAccessException();
             }
         }
-
+#endif
 
         /// <summary>
         /// Attempts to connect to the specified process.
@@ -339,14 +341,18 @@ namespace Microsoft.Build.BackEnd
             // Try and connect to the process.
             string pipeName = "MSBuild" + nodeProcessId;
 
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                                                                         | PipeOptions.CurrentUserOnly
+#endif
+                                                                         );
             CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
             try
             {
                 nodeStream.Connect(timeout);
 
-#if !MONO
+#if !MONO && !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 if (NativeMethodsShared.IsWindows)
                 {
                     // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
@@ -446,7 +452,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int LaunchNode(string msbuildLocation, string commandLineArgs)
         {
-            // Should always have been set already. 
+            // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, "msbuildLocation");
 
             if (!File.Exists(msbuildLocation))
@@ -513,14 +519,14 @@ namespace Microsoft.Build.BackEnd
 
                 throw new NodeFailedToLaunchException(ex);
             }
-            
+
             CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
             return process.Id;
 #else
             BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
 
             string exeName = msbuildLocation;
-            
+
             bool result = BackendNativeMethods.CreateProcess
                 (
                     exeName,
