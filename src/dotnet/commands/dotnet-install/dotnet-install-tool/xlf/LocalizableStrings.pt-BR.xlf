@@ -95,18 +95,18 @@ A ferramenta '{1}' (versão '{2}') foi instalada com êxito.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="translated">É necessário o caminho de ferramenta ou global fornecido.</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">É necessário o caminho de ferramenta ou global fornecido.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time.</source>
-        <target state="translated">Não é possível ter o caminho de ferramenta e o global como opinião ao mesmo tempo.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="needs-review-translation">Não é possível ter o caminho de ferramenta e o global como opinião ao mesmo tempo.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="translated">Local do shim para acessar a ferramenta</target>
+        <source>Location where the tool will be installed.</source>
+        <target state="needs-review-translation">Local do shim para acessar a ferramenta</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">

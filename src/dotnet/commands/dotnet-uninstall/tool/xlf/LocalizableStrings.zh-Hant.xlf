@@ -48,18 +48,18 @@
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="translated">必須提供全域或工具路徑。</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">必須提供全域或工具路徑。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="translated">存取工具的填充碼位置</target>
+        <source>Location where the tool was previously installed.</source>
+        <target state="needs-review-translation">存取工具的填充碼位置</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time."</source>
-        <target state="translated">無法同時將全域與工具路徑作為選項。」</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="needs-review-translation">無法同時將全域與工具路徑作為選項。」</target>
         <note />
       </trans-unit>
     </body>

@@ -12,11 +12,6 @@
         <target state="translated">列出用户范围工具。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListToolCommandOnlySupportsGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="translated">目前需要 --global 开关 (-g)，因为仅支持用户范围工具。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
         <target state="translated">版本</target>

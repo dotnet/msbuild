@@ -859,8 +859,8 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
-        <source>Command '{0}' has a leading dot.</source>
-        <target state="translated">Il comando '{0}' presenta un punto iniziale.</target>
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="needs-review-translation">Il comando '{0}' presenta un punto iniziale.</target>
         <note />
       </trans-unit>
     </body>

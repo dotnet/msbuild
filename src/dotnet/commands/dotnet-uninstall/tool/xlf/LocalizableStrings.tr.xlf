@@ -48,18 +48,18 @@
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="translated">Genel yolun veya araç yolunun sağlanması gerekir.</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">Genel yolun veya araç yolunun sağlanması gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="translated">Araca erişmek için dolgu konumu</target>
+        <source>Location where the tool was previously installed.</source>
+        <target state="needs-review-translation">Araca erişmek için dolgu konumu</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time."</source>
-        <target state="translated">Fikir olarak aynı anda hem genel yol hem de araç yolu kullanılamaz.”</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="needs-review-translation">Fikir olarak aynı anda hem genel yol hem de araç yolu kullanılamaz.”</target>
         <note />
       </trans-unit>
     </body>
