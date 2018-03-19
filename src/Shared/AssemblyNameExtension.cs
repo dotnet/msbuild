@@ -58,7 +58,7 @@ namespace Microsoft.Build.Shared
     /// between the two is done lazily on demand.
     /// </summary>
     [Serializable]
-    internal sealed class AssemblyNameExtension : ISerializable
+    internal sealed class AssemblyNameExtension : ISerializable, IEquatable<AssemblyNameExtension>
     {
         private AssemblyName asAssemblyName = null;
         private string asString = null;
@@ -130,8 +130,9 @@ namespace Microsoft.Build.Shared
         /// <param name="context"></param>
         private AssemblyNameExtension(SerializationInfo info, StreamingContext context)
         {
-            var hasAsAssemblyName = info.GetBoolean("an");
-            if (hasAsAssemblyName)
+            var hasAssemblyName = info.GetBoolean("hasAN");
+
+            if (hasAssemblyName)
             {
                 var name = info.GetString("name");
                 var publicKey = (byte[]) info.GetValue("pk", typeof(byte[]));
@@ -140,7 +141,12 @@ namespace Microsoft.Build.Shared
                 var flags = (AssemblyNameFlags) info.GetInt32("flags");
                 var processorArchitecture = (ProcessorArchitecture) info.GetInt32("cpuarch");
 
-                var cultureInfoName = info.GetString("ciName");
+                CultureInfo cultureInfo = null;
+                var hasCultureInfo = info.GetBoolean("hasCI");
+                if (hasCultureInfo)
+                {
+                    cultureInfo = new CultureInfo(info.GetInt32("ci"));
+                }
 
                 var hashAlgorithm = (System.Configuration.Assemblies.AssemblyHashAlgorithm) info.GetInt32("hashAlg");
                 var versionCompatibility = (AssemblyVersionCompatibility) info.GetInt32("verCompat");
@@ -153,7 +159,7 @@ namespace Microsoft.Build.Shared
                     Version = version,
                     Flags = flags,
                     ProcessorArchitecture = processorArchitecture,
-                    CultureInfo = string.IsNullOrEmpty(cultureInfoName) ? null : new CultureInfo(cultureInfoName),
+                    CultureInfo = cultureInfo,
                     HashAlgorithm = hashAlgorithm,
                     VersionCompatibility = versionCompatibility,
                     CodeBase = codeBase,
@@ -168,6 +174,7 @@ namespace Microsoft.Build.Shared
             isSimpleName = info.GetBoolean("isSName");
             hasProcessorArchitectureInFusionName = info.GetBoolean("hasCpuArch");
             immutable = info.GetBoolean("immutable");
+            remappedFrom = (HashSet<AssemblyNameExtension>) info.GetValue("remapped", typeof(HashSet<AssemblyNameExtension>));
         }
 
         /// <summary>
@@ -653,6 +660,16 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Interface method for IEquatable&lt;AssemblyNameExtension&gt;
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        bool IEquatable<AssemblyNameExtension>.Equals(AssemblyNameExtension other)
+        {
+            return Equals(other);
+        }
+
+        /// <summary>
         /// Compare two assembly names for equality ignoring version.
         /// </summary>
         /// <param name="that"></param>
@@ -937,17 +954,22 @@ namespace Microsoft.Build.Shared
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
+            info.AddValue("hasAN", asAssemblyName != null);
             if (asAssemblyName != null)
             {
-                info.AddValue("an", true);
                 info.AddValue("name", asAssemblyName.Name);
                 info.AddValue("pk", asAssemblyName.GetPublicKey());
                 info.AddValue("pkt", asAssemblyName.GetPublicKeyToken());
                 info.AddValue("ver", asAssemblyName.Version);
-                info.AddValue("flags", (int)asAssemblyName.Flags);
-                info.AddValue("cpuarch", (int)asAssemblyName.ProcessorArchitecture);
+                info.AddValue("flags", (int) asAssemblyName.Flags);
+                info.AddValue("cpuarch", (int) asAssemblyName.ProcessorArchitecture);
 
-                info.AddValue("ciName", asAssemblyName?.CultureInfo?.Name);
+                info.AddValue("hasCI", asAssemblyName.CultureInfo != null);
+                if (asAssemblyName.CultureInfo != null)
+                {
+                    info.AddValue("ci", asAssemblyName.CultureInfo.LCID);
+                }
+
                 info.AddValue("hashAlg", asAssemblyName.HashAlgorithm);
                 info.AddValue("verCompat", asAssemblyName.VersionCompatibility);
                 info.AddValue("codebase", asAssemblyName.CodeBase);
@@ -958,6 +980,7 @@ namespace Microsoft.Build.Shared
             info.AddValue("isSName", isSimpleName);
             info.AddValue("hasCpuArch", hasProcessorArchitectureInFusionName);
             info.AddValue("immutable", immutable);
+            info.AddValue("remapped", remappedFrom);
         }
     }
 }
