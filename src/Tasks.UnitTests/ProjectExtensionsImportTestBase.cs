@@ -3,6 +3,8 @@
 using Microsoft.Build.Evaluation;
 using System;
 using System.IO;
+using System.Linq;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -147,6 +149,31 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal("true", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
             Assert.Equal("true", project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Ensures that an error is logged if MSBuildProjectExtensionsPath is modified after it was set by Microsoft.Common.props.
+        /// </summary>
+        [Fact]
+        public void ErrorIfChangedInBodyOfProject()
+        {
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
+
+                    <PropertyGroup>
+                        <MSBuildProjectExtensionsPath>foo</MSBuildProjectExtensionsPath>
+                    </PropertyGroup>
+
+                    <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
+                </Project>
+            "));
+
+            MockLogger logger = new MockLogger();
+
+            project.Build(new[] {logger}).ShouldBeFalse();
+
+            logger.Errors.Select(i => i.Code).FirstOrDefault().ShouldBe("MSB3540");
         }
     }
 }
