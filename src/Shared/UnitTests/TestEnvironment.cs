@@ -189,7 +189,12 @@ namespace Microsoft.Build.UnitTests
 
         public TransientTestFile CreateFile(string fileName, string contents = "")
         {
-            var file = WithTransientTestState(new TransientTestFile(DefaultTestDirectory.FolderPath, Path.GetFileNameWithoutExtension(fileName), Path.GetExtension(fileName)));
+            return CreateFile(DefaultTestDirectory, fileName, contents);
+        }
+
+        public TransientTestFile CreateFile(TransientTestFolder transientTestFolder, string fileName, string contents = "")
+        {
+            var file = WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, Path.GetFileNameWithoutExtension(fileName), Path.GetExtension(fileName)));
             File.WriteAllText(file.Path, contents);
 
             return file;
