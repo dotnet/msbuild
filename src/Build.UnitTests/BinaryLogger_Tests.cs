@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Logging;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    public class BinaryLoggerTests
+    public class BinaryLoggerTests : IDisposable
     {
-        private const string MSBUILDTARGETOUTPUTLOGGING = nameof(MSBUILDTARGETOUTPUTLOGGING);
-
         private static string s_testProject = @"
          <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
             <PropertyGroup>
@@ -24,67 +24,54 @@ namespace Microsoft.Build.UnitTests
                <Exec Command='echo a'/>
             </Target>
          </Project>";
+        private readonly TestEnvironment _env;
+        private string _logFile;
+
+        public BinaryLoggerTests(ITestOutputHelper output)
+        {
+            _env = TestEnvironment.Create(output);
+
+            // this is needed to ensure the binary logger does not pollute the environment
+            _env.WithEnvironmentInvariant();
+
+            _logFile = _env.ExpectFile(".binlog").Path;
+        }
 
         [Fact]
         public void TestBinaryLoggerRoundtrip()
         {
-            var originalTargetOutputLogging = Environment.GetEnvironmentVariable(MSBUILDTARGETOUTPUTLOGGING);
+            var binaryLogger = new BinaryLogger();
 
-            try
-            {
-                var binaryLogger = new BinaryLogger();
+            binaryLogger.Parameters = _logFile;
 
-                // with this file name, the file will be archived as build artifact so we can inspect it later
-                // this is needed to investigate an intermittent failure of this test on Ubuntu 14
-                var logFilePath = "Microsoft.Build.Engine.UnitTests.dll_TestBinaryLoggerRoundtrip.binlog";
-                binaryLogger.Parameters = logFilePath;
+            var mockLogger1 = new MockLogger();
 
-                var mockLogger1 = new MockLogger();
+            // build and log into binary logger and mockLogger1
+            ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger, mockLogger1);
 
-                // build and log into binary logger and mockLogger1
-                ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger, mockLogger1);
+            var mockLogger2 = new MockLogger();
 
-                var mockLogger2 = new MockLogger();
+            var binaryLogReader = new BinaryLogReplayEventSource();
+            mockLogger2.Initialize(binaryLogReader);
 
-                var binaryLogReader = new BinaryLogReplayEventSource();
-                mockLogger2.Initialize(binaryLogReader);
+            // read the binary log and replay into mockLogger2testassembly
+            binaryLogReader.Replay(_logFile);
 
-                // read the binary log and replay into mockLogger2
-                binaryLogReader.Replay(logFilePath);
-
-                if (File.Exists(logFilePath))
-                {
-                    File.Delete(logFilePath);
-                }
-
-                Assert.Equal(mockLogger1.FullLog, mockLogger2.FullLog);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(MSBUILDTARGETOUTPUTLOGGING, originalTargetOutputLogging);
-            }
+            Assert.Equal(mockLogger1.FullLog, mockLogger2.FullLog);
         }
 
         [Fact]
-        public void NonExistingDirectory()
+        public void BinaryLoggerShouldSupportFilePathExplicitParameter()
         {
-            string directory = Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"));
-            string log = Path.Combine(directory, "build.binlog");
-            Assert.False(Directory.Exists(directory));
-            Assert.False(File.Exists(log));
+            var binaryLogger = new BinaryLogger();
+            binaryLogger.Parameters = $"LogFile={_logFile}";
 
-            var binaryLogger = new BinaryLogger { Parameters = log };
+            ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
+        }
 
-            try
-            {
-                ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
-                Assert.True(Directory.Exists(directory));
-                Assert.True(File.Exists(log));
-            }
-            finally
-            {
-                ObjectModelHelpers.DeleteDirectory(directory);
-            }
+        public void Dispose()
+        {
+            _env.Dispose();
         }
     }
 }

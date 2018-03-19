@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -37,7 +39,9 @@ namespace Microsoft.Build.UnitTests
 
             // In most cases, if MSBuild wrote an MSBuild_*.txt to the temp path something went wrong.
             if (!ignoreBuildErrorFiles)
+            {
                 env.WithInvariant(new BuildFailureLogInvariant());
+            }
 
             env.SetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS", "1");
 
@@ -120,14 +124,7 @@ namespace Microsoft.Build.UnitTests
             // Temp folder should not change before and after a test
             WithInvariant(new StringInvariant("Directory.GetCurrentDirectory", Directory.GetCurrentDirectory));
 
-            // Common set of MSBuild environment variables that should remain the same before and after a test
-            // runs. If these differ it likely indicates an issue with the test.
-            WithEnvironmentVariableInvariant("MSBUILDNOINPROCNODE");
-            WithEnvironmentVariableInvariant("MSBUILDENABLEALLPROPERTYFUNCTIONS");
-            WithEnvironmentVariableInvariant("MSBuildForwardPropertiesFromChild");
-            WithEnvironmentVariableInvariant("MsBuildForwardAllPropertiesFromChild");
-            WithEnvironmentVariableInvariant("MSBUILDDEBUGFORCECACHING");
-            WithEnvironmentVariableInvariant("MSBUILDRELOADTRAITSONEACHACCESS");
+            WithEnvironmentInvariant();
         }
 
         /// <summary>
@@ -138,6 +135,13 @@ namespace Microsoft.Build.UnitTests
         {
             return WithInvariant(new StringInvariant(environmentVariableName,
                 () => Environment.GetEnvironmentVariable(environmentVariableName)));
+        }
+        /// <summary>
+        /// Creates a test invariant which asserts that the environment variables do not change
+        /// </summary>
+        public TestInvariant WithEnvironmentInvariant()
+        {
+            return WithInvariant(new EnvironmentInvariant());
         }
 
         /// <summary>
@@ -251,9 +255,22 @@ namespace Microsoft.Build.UnitTests
         ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
         ///     completes.
         /// </summary>
-        public TransientTestFolder CreateFolder(string folderPath = null)
+        public TransientTestFolder CreateFolder(string folderPath = null, bool createFolder = true)
         {
-            return WithTransientTestState(new TransientTestFolder(folderPath));
+            var folder = WithTransientTestState(new TransientTestFolder(folderPath, createFolder));
+
+            Assert.True(!(createFolder ^ Directory.Exists(folder.FolderPath)));
+
+            return folder;
+        }
+
+        /// <summary>
+        ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
+        ///     completes.
+        /// </summary>
+        public TransientTestFolder CreateFolder(bool createFolder)
+        {
+            return CreateFolder(null, createFolder);
         }
 
         /// <summary>
@@ -324,6 +341,34 @@ namespace Microsoft.Build.UnitTests
             //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
 
             Assert.True(currentValue == _originalValue, $"Expected {_name} to be '{_originalValue}', but it was '{currentValue}'");
+        }
+    }
+
+    public class EnvironmentInvariant : TestInvariant
+    {
+        private IDictionary _initialEnvironment;
+
+        public EnvironmentInvariant()
+        {
+            _initialEnvironment = Environment.GetEnvironmentVariables();
+        }
+
+        public override void AssertInvariant(ITestOutputHelper output)
+        {
+            var environment = Environment.GetEnvironmentVariables();
+
+            AssertDictionaryInclusion(_initialEnvironment, environment, "added");
+            AssertDictionaryInclusion(environment, _initialEnvironment, "removed");
+
+            // a includes b
+            void AssertDictionaryInclusion(IDictionary a, IDictionary b, string operation)
+            {
+                foreach (var key in b.Keys)
+                {
+                    a.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
+                    a[key].ShouldBe(b[key]);
+                }
+            }
         }
     }
 
@@ -494,11 +539,11 @@ namespace Microsoft.Build.UnitTests
 
     public class TransientTestFolder : TransientTestState
     {
-        public TransientTestFolder(string folderPath = null)
+        public TransientTestFolder(string folderPath = null, bool createFolder = true)
         {
-            FolderPath = folderPath ?? FileUtilities.GetTemporaryDirectory();
+            FolderPath = folderPath ?? FileUtilities.GetTemporaryDirectory(createFolder);
 
-            if (!Directory.Exists(FolderPath))
+            if (createFolder)
             {
                 Directory.CreateDirectory(FolderPath);
             }
