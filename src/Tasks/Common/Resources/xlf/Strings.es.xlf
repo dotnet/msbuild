@@ -328,8 +328,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
-        <target state="translated">Las plataformas RuntimeIdentifier y PlatformTarget deben coincidir.</target>
+        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="translated">Las plataformas RuntimeIdentifier "{0}" y PlatformTarget "{1}" deben ser compatibles.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -344,7 +344,17 @@
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>Pack as tool does not support self contained.</source>
-        <target state="new">Pack as tool does not support self contained.</target>
+        <target state="translated">El paquete como herramienta no admite la autocontención.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedRuntimeIdentifier">
+        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="translated">El proyecto se dirige al tiempo de ejecución "{0}" pero no resolvió ningún paquete específico del tiempo de ejecución. Es posible que este tiempo de ejecución no sea compatible con la plataforma de destino.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingPreviewSdkWarning">
+        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="translated">Está trabajando con una versión preliminar del SDK de .NET Core. Puede definir la versión del SDK mediante un archivo .json global en el proyecto actual. Más información en https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
     </body>

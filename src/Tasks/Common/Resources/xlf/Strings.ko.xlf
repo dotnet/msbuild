@@ -328,8 +328,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
-        <target state="translated">RuntimeIdentifier 플랫폼과 PlatformTarget은 일치해야 합니다.</target>
+        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="translated">RuntimeIdentifier 플랫폼 '{0}'과(와) PlatformTarget '{1}'은(는) 호환되어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -344,7 +344,17 @@
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>Pack as tool does not support self contained.</source>
-        <target state="new">Pack as tool does not support self contained.</target>
+        <target state="translated">도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedRuntimeIdentifier">
+        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="translated">프로젝트가 런타임 '{0}'을(를) 대상으로 하지만 런타임 관련 패키지를 확인하지 않았습니다. 이 런타임은 대상 프레임워크에서 지원되지 않을 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingPreviewSdkWarning">
+        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="translated">.NET Core SDK의 미리 보기 버전으로 작업하고 있습니다. 현재 프로젝트의 global.json 파일을 통해 SDK 버전을 정의할 수 있습니다. 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869452를 참조하세요.</target>
         <note />
       </trans-unit>
     </body>

@@ -104,12 +104,16 @@ namespace Microsoft.NET.Build.Tests
             var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.TestDirectoriesNamePrefix, referencerDirectoryNamePostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(Log, relativePath: referencerProject.Name);
 
+            List<string> referencerRestoreSources = new List<string>();
+
             //  Modify the restore command to refer to the created NuGet packages
             foreach (TestPackageReference packageReference in referencerProject.PackageReferences)
             {
                 var source = Path.Combine(packageReference.NupkgPath, packageReference.ID, "bin", "Debug");
-                referencerRestoreCommand.AddSource(source);
+                referencerRestoreSources.Add(source);
             }
+
+            NuGetConfigWriter.Write(referencerTestAsset.TestRoot, referencerRestoreSources);
 
             if (restoreSucceeds)
             {
@@ -145,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
 
             var source = Path.Combine(_net461PackageReference.NupkgPath, _net461PackageReference.ID, "bin", "Debug");
-            restoreCommand.AddSource(source);
+            NuGetConfigWriter.Write(testProjectTestAsset.TestRoot, source);
 
             restoreCommand.Execute().Should().Pass();
 
@@ -165,7 +169,7 @@ namespace Microsoft.NET.Build.Tests
             var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
-            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            NuGetConfigWriter.Write(testProjectTestAsset.TestRoot, Path.GetDirectoryName(_net461PackageReference.NupkgPath));
             restoreCommand.Execute().Should().Fail();
         }
 
@@ -180,7 +184,7 @@ namespace Microsoft.NET.Build.Tests
                 new Dictionary<string, string> { {"DisableImplicitAssetTargetFallback", "true" } });
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
-            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            NuGetConfigWriter.Write(testProjectTestAsset.TestRoot, Path.GetDirectoryName(_net461PackageReference.NupkgPath));
             restoreCommand.Execute().Should().Fail();
         }
 

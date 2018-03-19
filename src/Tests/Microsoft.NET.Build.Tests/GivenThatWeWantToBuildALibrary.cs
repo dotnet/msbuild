@@ -653,7 +653,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.2")]
-        [InlineData("netstandard2.3")]
+        [InlineData("netstandard2.1")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {
             var testProject = new TestProject()
@@ -754,7 +754,9 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
+                IsSdkProject = true,
+                // references from packages go through a different code path to be marked externally resolved.
+                PackageReferences = { new TestPackageReference("NewtonSoft.Json", "10.0.1") }
             };
 
             var asset = _testAssetsManager.CreateTestProject(
@@ -789,7 +791,7 @@ namespace Microsoft.NET.Build.Tests
 
             foreach (var (value, metadata) in references)
             {
-                metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true).ToString());
+                metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true) ? "true" : "");
             }
         }
     }

@@ -20,6 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <UsingTask TaskName="NETBuildExtensionsError" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+
   <Target Name="ImplicitlyExpandNETStandardFacades"
           Condition="'$(ImplicitlyExpandNETStandardFacades)' == 'true'"
           BeforeTargets="_HandlePackageFileConflicts;ResolveAssemblyReferences">

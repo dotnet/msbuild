@@ -72,6 +72,16 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
+        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
+        {
+            targetFramework = targetFramework ?? string.Empty;
+            configuration = configuration ?? string.Empty;
+            runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+
+            string output = Path.Combine(ProjectRootPath, "obj", configuration, targetFramework, runtimeIdentifier);
+            return new DirectoryInfo(output);
+        }
+
         public virtual DirectoryInfo GetNonSDKOutputDirectory(string configuration = "Debug")
         {
             configuration = configuration ?? string.Empty;

@@ -328,8 +328,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
-        <target state="translated">RuntimeIdentifier platformu ile PlatformTarget eşleşmelidir.</target>
+        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="translated">RuntimeIdentifier platformu '{0}' ile PlatformTarget '{1}' uyumlu olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -344,7 +344,17 @@
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>Pack as tool does not support self contained.</source>
-        <target state="new">Pack as tool does not support self contained.</target>
+        <target state="translated">Araç olarak paketleme kendi kendini kapsamayı desteklemiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedRuntimeIdentifier">
+        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="translated">Proje '{0}' çalışma zamanını hedefliyor ancak çalışma zamanına özgü herhangi bir paketi çözümlemedi. Bu çalışma zamanı hedef çerçeve tarafından desteklenmiyor olabilir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingPreviewSdkWarning">
+        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="translated">.NET Core SDK’nın önizleme sürümüyle çalışıyorsunuz. SDK sürümünü geçerli projedeki bir global.json dosyası aracılığıyla tanımlayabilirsiniz. Daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
     </body>

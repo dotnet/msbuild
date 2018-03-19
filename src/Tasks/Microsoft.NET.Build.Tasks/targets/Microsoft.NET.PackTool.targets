@@ -1,0 +1,71 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.PackTool.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GenerateToolsSettingsFile"
+              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <!--
+    Mark all dependecy as private assets. But keep them as Publish. So dependency DLLs will be included in NuGet package, while
+    there is no dependency in nuspec. And add Microsoft.NETCore.Platforms, which is used to select correct RID assets.
+    -->
+  <PropertyGroup>
+    <_ToolsSettingsFilePath>$(BaseIntermediateOutputPath)DotnetToolSettings.xml</_ToolsSettingsFilePath>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(PackAsTool)' == 'true' ">
+    <PackageReference Update="@(PackageReference)">
+      <PrivateAssets>All</PrivateAssets>
+      <Publish Condition=" '%(PackageReference.Publish)' != 'false' ">true</Publish>
+    </PackageReference>
+
+    <ProjectReference Update="@(ProjectReference)">
+      <PrivateAssets>All</PrivateAssets>
+      <Publish Condition=" '%(ProjectReference.Publish)' != 'false' ">true</Publish>
+    </ProjectReference>
+
+  </ItemGroup>
+
+  <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish" Condition=" '$(PackAsTool)' == 'true' ">
+
+    <NETSdkError Condition="'$(SelfContained)' == 'true'"
+                 ResourceName="PackAsToolCannotSupportSelfContained" />
+
+    <ItemGroup>
+        <_GeneratedFiles Include="$(PublishDepsFilePath)"/>
+        <_GeneratedFiles Include="$(PublishRuntimeConfigFilePath)"/>
+        <_GeneratedFiles Include="$(_ToolsSettingsFilePath)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(_GeneratedFiles)">
+        <PackagePath>tools/$(targetframework)/any/%(_GeneratedFiles.RecursiveDir)%(_GeneratedFiles.Filename)%(_GeneratedFiles.Extension)</PackagePath>
+      </TfmSpecificPackageFile>
+
+      <TfmSpecificPackageFile Include="@(ResolvedFileToPublish->'$([MSBuild]::NormalizeDirectory($(PublishDir)))%(RelativePath)')">
+        <PackagePath>tools/$(targetframework)/any/%(ResolvedFileToPublish.RelativePath)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <ToolCommandName Condition=" '$(ToolCommandName)' == '' ">$(TargetName)</ToolCommandName>
+    <ToolEntryPoint Condition=" '$(ToolEntryPoint)' == '' ">$(TargetFileName)</ToolEntryPoint>
+  </PropertyGroup>
+
+  <Target Name="GenerateToolsSettingsFileFromBuildProperty" >
+    <GenerateToolsSettingsFile
+       EntryPointRelativePath="$(ToolEntryPoint)"
+       CommandName="$(ToolCommandName)"
+       ToolsSettingsFilePath="$(_ToolsSettingsFilePath)" />
+  </Target>
+
+</Project>

@@ -3,11 +3,11 @@
 
 using System;
 using System.IO;
+using System.Threading;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void GenerateBuildRuntimeConfigurationFiles_runs_incrementaly()
+        public void GenerateBuildRuntimeConfigurationFiles_runs_incrementally()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
@@ -32,12 +32,63 @@ namespace Microsoft.NET.Build.Tests
             var runtimeConfigDevJsonPath = Path.Combine(outputDirectory, "HelloWorld.runtimeconfig.dev.json");
 
             buildCommand.Execute().Should().Pass();
-            DateTime runtimeConfigDevJsonFirstModifiedTime = new FileInfo(runtimeConfigDevJsonPath).LastWriteTime;
+            DateTime runtimeConfigDevJsonFirstModifiedTime = File.GetLastWriteTimeUtc(runtimeConfigDevJsonPath);
 
             buildCommand.Execute().Should().Pass();
-            DateTime runtimeConfigDevJsonSecondModifiedTime = new FileInfo(runtimeConfigDevJsonPath).LastWriteTime;
+            DateTime runtimeConfigDevJsonSecondModifiedTime = File.GetLastWriteTimeUtc(runtimeConfigDevJsonPath);
 
             runtimeConfigDevJsonSecondModifiedTime.Should().Be(runtimeConfigDevJsonFirstModifiedTime);
+        }
+
+        [Fact]
+        public void ResolvePackageAssets_runs_incrementally()
+        { 
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .Restore(Log);
+
+            var targetFramework = "netcoreapp1.1";
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
+            var baseIntermediateOutputDirectory = buildCommand.GetBaseIntermediateDirectory().FullName;
+            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework).FullName;
+
+            var assetsJsonPath = Path.Combine(baseIntermediateOutputDirectory, "project.assets.json");
+            var assetsCachePath = Path.Combine(intermediateDirectory, "HelloWorld.assets.cache");
+
+            // initial build
+            buildCommand.Execute().Should().Pass();
+            var cacheWriteTime1 = File.GetLastWriteTimeUtc(assetsCachePath);
+
+            // build with no change to project.assets.json
+            WaitForUtcNowToAdvance();
+            buildCommand.Execute().Should().Pass();
+            var cacheWriteTime2 = File.GetLastWriteTimeUtc(assetsCachePath);
+            cacheWriteTime2.Should().Be(cacheWriteTime1);
+
+            // build with modified project
+            WaitForUtcNowToAdvance();
+            File.SetLastWriteTimeUtc(assetsJsonPath, DateTime.UtcNow);
+            buildCommand.Execute().Should().Pass();
+            var cacheWriteTime3 = File.GetLastWriteTimeUtc(assetsCachePath);
+            cacheWriteTime3.Should().NotBe(cacheWriteTime2);
+
+            // build with modified settings
+            WaitForUtcNowToAdvance();
+            buildCommand.Execute("/p:DisableLockFileFrameworks=true").Should().Pass();
+            var cacheWriteTime4 = File.GetLastWriteTimeUtc(assetsCachePath);
+            cacheWriteTime4.Should().NotBe(cacheWriteTime3);
+        }
+
+        private static void WaitForUtcNowToAdvance()
+        {
+            var start = DateTime.UtcNow;
+
+            while (DateTime.UtcNow <= start)
+            {
+                Thread.Sleep(millisecondsTimeout: 1);
+            }
         }
     }
 }

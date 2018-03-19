@@ -18,8 +18,6 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ProduceContentAssets : TaskBase
     {
-        private const string PPOutputPathKey = "ppOutputPath";
-        private readonly Dictionary<string, string> _resolvedPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly List<ITaskItem> _contentItems = new List<ITaskItem>();
         private readonly List<ITaskItem> _fileWrites = new List<ITaskItem>();
         private readonly List<ITaskItem> _copyLocalItems = new List<ITaskItem>();
@@ -50,14 +48,7 @@ namespace Microsoft.NET.Build.Tasks
         #region Inputs
 
         /// <summary>
-        /// File Definitions, including metadata for the resolved path.
-        /// </summary>
-        [Required]
-        public ITaskItem[] ContentFileDefinitions { get; set; }
-
-        /// <summary>
-        /// Subset of File Dependencies that are content files, including metadata 
-        /// such as buildAction, ppOutputPath etc.
+        /// Resolved paths to content file assets with metadata such as BuildAction, PPOutputPath etc.
         /// </summary>
         [Required]
         public ITaskItem[] ContentFileDependencies { get; set; }
@@ -130,20 +121,6 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            MapContentFileDefinitions();
-            ProcessContentFileInputs();
-        }
-        
-        private void MapContentFileDefinitions()
-        {
-            foreach (var item in ContentFileDefinitions ?? Enumerable.Empty<ITaskItem>())
-            {
-                _resolvedPaths.Add(item.ItemSpec, item.GetMetadata(MetadataKeys.ResolvedPath));
-            }
-        }
-
-        private void ProcessContentFileInputs()
-        {
             var preprocessorValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // If a preprocessor directory isn't set, then we won't have a place to generate.
@@ -172,7 +149,7 @@ namespace Microsoft.NET.Build.Tasks
             var contentFileDeps = ContentFileDependencies ?? Enumerable.Empty<ITaskItem>();
             var contentFileGroups = contentFileDeps
                 .Where(f => !ProduceOnlyPreprocessorFiles || IsPreprocessorFile(f))
-                .GroupBy(t => t.GetMetadata(MetadataKeys.ParentPackage));
+                .GroupBy(t => t.GetMetadata(MetadataKeys.NuGetPackageId));
             foreach (var grouping in contentFileGroups)
             {
                 // Is there an asset with our exact language? If so, we use that. Otherwise we'll simply collect "any" assets.
@@ -185,7 +162,7 @@ namespace Microsoft.NET.Build.Tasks
                 else
                 {
                     string projectLanguage = NuGetUtils.GetLockFileLanguageName(ProjectLanguage);
-                    if (grouping.Any(t => t.GetMetadata("codeLanguage") == projectLanguage))
+                    if (grouping.Any(t => t.GetMetadata(MetadataKeys.CodeLanguage) == projectLanguage))
                     {
                         codeLanguageToSelect = projectLanguage;
                     }
@@ -205,7 +182,7 @@ namespace Microsoft.NET.Build.Tasks
                         continue;
                     }
 
-                    if (contentFile.GetMetadata("codeLanguage") == codeLanguageToSelect)
+                    if (contentFile.GetMetadata(MetadataKeys.CodeLanguage) == codeLanguageToSelect)
                     {
                         ProduceContentAsset(contentFile);
                     }
@@ -214,27 +191,15 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private bool IsPreprocessorFile(ITaskItem contentFile) =>
-            !string.IsNullOrEmpty(contentFile.GetMetadata(PPOutputPathKey));
+            !string.IsNullOrEmpty(contentFile.GetMetadata(MetadataKeys.PPOutputPath));
 
         private void ProduceContentAsset(ITaskItem contentFile)
         {
-            string resolvedPath;
-            if (!_resolvedPaths.TryGetValue(contentFile.ItemSpec, out resolvedPath))
-            {
-                Log.LogWarning(Strings.UnableToFindResolvedPath, contentFile.ItemSpec);
-                return;
-            }
-
+            string resolvedPath = contentFile.ItemSpec;
             string pathToFinalAsset = resolvedPath;
-            string ppOutputPath = contentFile.GetMetadata(PPOutputPathKey);
-            string parentPackage = contentFile.GetMetadata(MetadataKeys.ParentPackage);
-            string[] parts = parentPackage?.Split('/');
-            if (parts == null || parts.Length != 2)
-            {
-                throw new BuildErrorException(Strings.ContentFileDoesNotContainExpectedParentPackageInformation, contentFile.ItemSpec);
-            }
-            string packageName = parts[0];
-            string packageVersion = parts[1];
+            string ppOutputPath = contentFile.GetMetadata(MetadataKeys.PPOutputPath);
+            string packageName = contentFile.GetMetadata(MetadataKeys.NuGetPackageId);
+            string packageVersion = contentFile.GetMetadata(MetadataKeys.NuGetPackageVersion);
 
             if (!string.IsNullOrEmpty(ppOutputPath))
             {
@@ -251,35 +216,33 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            if (contentFile.GetBooleanMetadata("copyToOutput") == true)
+            if (contentFile.GetBooleanMetadata(MetadataKeys.CopyToOutput) == true)
             {
-                string outputPath = contentFile.GetMetadata("outputPath");
+                string outputPath = contentFile.GetMetadata(MetadataKeys.OutputPath);
                 outputPath = string.IsNullOrEmpty(outputPath) ? ppOutputPath : outputPath;
 
                 if (!string.IsNullOrEmpty(outputPath))
                 {
                     var item = new TaskItem(pathToFinalAsset);
                     item.SetMetadata("TargetPath", outputPath);
-                    item.SetMetadata(MetadataKeys.ParentPackage, parentPackage);
-                    item.SetMetadata(MetadataKeys.PackageName, packageName);
-                    item.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
+                    item.SetMetadata(MetadataKeys.NuGetPackageId, packageName);
+                    item.SetMetadata(MetadataKeys.NuGetPackageVersion, packageVersion);
 
                     _copyLocalItems.Add(item);
                 }
                 else
                 {
-                    Log.LogWarning(Strings.ContentItemDoesNotProvideOutputPath, pathToFinalAsset, "copyToOutput", "outputPath", PPOutputPathKey);
+                    Log.LogWarning(Strings.ContentItemDoesNotProvideOutputPath, pathToFinalAsset, MetadataKeys.CopyToOutput, MetadataKeys.OutputPath, MetadataKeys.PPOutputPath);
                 }
             }
 
             // TODO if build action is none do we even need to write the processed file above?
-            string buildAction = contentFile.GetMetadata("buildAction");
+            string buildAction = contentFile.GetMetadata(MetadataKeys.BuildAction);
             if (!string.Equals(buildAction, "none", StringComparison.OrdinalIgnoreCase))
             {
                 var item = new TaskItem(pathToFinalAsset);
-                item.SetMetadata(MetadataKeys.ParentPackage, parentPackage);
-                item.SetMetadata(MetadataKeys.PackageName, packageName);
-                item.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
+                item.SetMetadata(MetadataKeys.NuGetPackageId, packageName);
+                item.SetMetadata(MetadataKeys.NuGetPackageVersion, packageVersion);
 
                 // We'll put additional metadata on the item so we can convert it back to the real item group in our targets
                 item.SetMetadata("ProcessedItemType", buildAction);
@@ -288,7 +251,7 @@ namespace Microsoft.NET.Build.Tasks
                 // If this is XAML, the build targets expect Link metadata to construct the relative path
                 if (string.Equals(buildAction, "Page", StringComparison.OrdinalIgnoreCase))
                 {
-                    item.SetMetadata("Link", Path.Combine("NuGet", parentPackage, Path.GetFileName(resolvedPath)));
+                    item.SetMetadata("Link", Path.Combine("NuGet", packageName, packageVersion, Path.GetFileName(resolvedPath)));
                 }
 
                 _contentItems.Add(item);

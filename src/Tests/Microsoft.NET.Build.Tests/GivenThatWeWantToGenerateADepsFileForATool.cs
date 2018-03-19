@@ -95,8 +95,11 @@ class Program
             DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, toolProject.Name.ToLowerInvariant()));
             DeleteFolder(Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant()));
 
-            var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name)
-                .Restore(Log, toolProject.Name, "/p:RestoreSources=https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnet.myget.org/F/msbuild/api/v3/index.json;https://dotnet.myget.org/F/nuget-build/api/v3/index.json");
+            var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name);
+
+            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreMyGetFeed);
+
+            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
 
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
@@ -126,17 +129,19 @@ class Program
                         new XAttribute("Version", "1.0.0")));
                 });
 
+            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreMyGetFeed };
+            sources.Add(nupkgPath);
+
+            NuGetConfigWriter.Write(toolReferencerInstance.TestRoot, sources);
             var restoreCommand = toolReferencerInstance.GetRestoreCommand(Log, toolReferencer.Name);
-            restoreCommand.AddSource(nupkgPath);
-            restoreCommand.AddSource("https://dotnet.myget.org/F/dotnet-core/api/v3/index.json");
-            restoreCommand.Execute().Should().Pass();
+            restoreCommand.Execute("/v:n").Should().Pass();
 
             string toolAssetsFilePath = Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "1.0.0", toolProject.TargetFrameworks, "project.assets.json");
             var toolAssetsFile = new LockFileFormat().Read(toolAssetsFilePath);
 
             var args = new List<string>();
 
-            string generateDepsProjectPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
+            string generateDepsProjectPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
 
             args.Add($"/p:ProjectAssetsFile=\"{toolAssetsFilePath}\"");
 
@@ -175,6 +180,8 @@ class Program
                     }
                 }
             }
+
+            args.Add("/v:n");
 
             var generateDepsCommand = new MSBuildCommand(Log, "BuildDepsJson", generateDepsProjectPath);
 

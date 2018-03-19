@@ -9,17 +9,19 @@ using System.Linq;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Report Log Messages in the assets file to MSBuild and raise them as
-    /// DiagnosticMessage items that can be consumed downstream (e.g. by the
-    /// dependency node in the solution explorer)
+    /// Raise log messages in the assets file as DiagnosticMessage items
+    /// that can be consumed downstream (e.g. by the dependency node in
+    /// the solution explorer)
     /// </summary>
     public sealed class ReportAssetsLogMessages : TaskBase
     {
         private LockFile _lockFile;
+        private DiagnosticsHelper _diagnostics;
 
         #region Outputs
 
-        // Only output is 'DiagnosticMessages' which is in the base class TaskBase
+        [Output]
+        public ITaskItem[] DiagnosticMessages => _diagnostics.GetDiagnosticMessages();
 
         #endregion
 
@@ -38,12 +40,12 @@ namespace Microsoft.NET.Build.Tasks
 
         public ReportAssetsLogMessages()
         {
+           _diagnostics = new DiagnosticsHelper();
         }
 
         #region Test Support
 
-        public ReportAssetsLogMessages(LockFile lockFile, ILog logger)
-            : base(logger)
+        internal ReportAssetsLogMessages(LockFile lockFile) : this()
         {
             _lockFile = lockFile;
         }
@@ -73,7 +75,6 @@ namespace Microsoft.NET.Build.Tasks
 
         private void AddMessage(IAssetsLogMessage message)
         {
-            var logToMsBuild = true;
             var targetGraphs = message.GetTargetGraphs(LockFile);
 
             targetGraphs = targetGraphs.Any() ? targetGraphs : new LockFileTarget[] { null };
@@ -82,7 +83,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 var targetLib = message.LibraryId == null ? null : target?.GetTargetLibrary(message.LibraryId);
 
-                Diagnostics.Add(
+                _diagnostics.Add(
                     message.Code.ToString(),
                     message.Message,
                     message.FilePath,
@@ -92,10 +93,7 @@ namespace Microsoft.NET.Build.Tasks
                     message.EndLineNumber,
                     message.EndColumnNumber,
                     target?.Name,
-                    targetLib == null ? null : $"{targetLib.Name}/{targetLib.Version.ToNormalizedString()}",
-                    logToMsBuild);
-
-                logToMsBuild = false; // only write first instance of this diagnostic to msbuild
+                    targetLib == null ? null : $"{targetLib.Name}/{targetLib.Version.ToNormalizedString()}");
             }
         }
 

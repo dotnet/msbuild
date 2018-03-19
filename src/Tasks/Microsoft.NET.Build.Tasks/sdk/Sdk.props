@@ -27,5 +27,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-  <Import Project="$(MSBuildThisFileDirectory)..\build\Microsoft.NET.Sdk.props"  />  
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.props"  />  
 </Project>
