@@ -2097,8 +2097,8 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
-        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: Es können nicht mehrere Versionen für dasselbe SDK "{0}" angegeben werden. Die bereits von "{2}" angegebene SDK-Version "{1}" wird verwendet, die Version "{3}" wird ignoriert.</target>
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="needs-review-translation">MSB4240: Es können nicht mehrere Versionen für dasselbe SDK "{0}" angegeben werden. Die bereits von "{2}" angegebene SDK-Version "{1}" wird verwendet, die Version "{3}" wird ignoriert.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>

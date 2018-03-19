@@ -26,6 +26,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Execution
 {
@@ -205,8 +206,7 @@ namespace Microsoft.Build.Execution
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.BuildRequestUnblocker, BuildRequestUnblocker.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeConfiguration, NodeConfiguration.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
-
-            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ResolveSdkResponse, SdkResolverResponse.FactoryForDeserialization, _sdkResolverService as INodePacketHandler);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ResolveSdkResponse, SdkResult.FactoryForDeserialization, _sdkResolverService as INodePacketHandler);
         }
 
         /// <summary>

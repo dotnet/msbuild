@@ -25,15 +25,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         void ClearCache(int submissionId);
 
         /// <summary>
-        /// Resolves the full path to the specified SDK.
+        ///  Resolves the full path to the specified SDK.
         /// </summary>
         /// <param name="submissionId">The build submission ID that the resolution request is for.</param>
-        /// <param name="sdk">A <see cref="SdkReference"/> that contains information about the SDK to resolve.</param>
-        /// <param name="loggingContext">A <see cref="LoggingContext"/> to use when logging.</param>
-        /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> that specified the SDK.</param>
+        /// <param name="sdk">The <see cref="SdkReference"/> containing information about the referenced SDK.</param>
+        /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
+        /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element which referenced the SDK.</param>
         /// <param name="solutionPath">The full path to the solution file, if any, that is resolving the SDK.</param>
         /// <param name="projectPath">The full path to the project file that is resolving the SDK.</param>
-        /// <returns>The full path to the resolved SDK if found, otherwise <code>null</code>.</returns>
-        string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath);
+        /// <returns>An <see cref="SdkResult"/> containing information about the resolved SDK if it could be resolved, otherwise <code>null</code>.</returns>
+        SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath);
     }
 }

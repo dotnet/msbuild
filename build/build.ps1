@@ -155,6 +155,28 @@ function LocateVisualStudio {
   return $VSInstallDir
 }
 
+function KillProcessesFromRepo {
+  # Jenkins does not allow taskkill
+  if (-not $ci) {
+    # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
+    foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
+    {
+      
+      if ([string]::IsNullOrEmpty($process.Path))
+      {
+        Write-Host "Process $($process.Id) $($process.Name) does not have a Path. Skipping killing it."
+        continue
+      }
+
+      if ($process.Path.StartsWith($RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
+      {
+        Write-Host "Killing $($process.Name) from $($process.Path)"
+        taskkill /f /pid $process.Id
+      }
+    }
+  }
+}
+
 function Build {
   InstallDotNetCli
   $env:DOTNET_HOST_PATH = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
@@ -238,41 +260,15 @@ function Build {
 
     $msbuildArgs = AddLogCmd "BuildWithBootstrap" $commonMSBuildArgs
 
-    try
-    {
-      # When using bootstrapped MSBuild:
-      # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-      # - Don't sign
-      # - Don't pack
-      # - Do run tests (if not skipped)
-      # - Don't try to create a bootstrap deployment
-      CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
-    }
-    finally
-    {
-      # Jenkins does not allow taskkill
-      if (-not $ci) {
-
-        Write-Host "Killing processes"
-        # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
-        foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
-        {
-
-          if ([string]::IsNullOrEmpty($process.Path))
-          {
-            Write-Host "Process $($process.Id) $($process.Name) does not have a Path. Skipping killing it."
-            continue
-          }
-
-          if ($process.Path.StartsWith( $RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
-          {
-            taskkill /f /pid $process.Id
-          }
-        }
-      }
-    }
+    # When using bootstrapped MSBuild:
+    # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+    # - Don't sign
+    # - Don't pack
+    # - Do run tests (if not skipped)
+    # - Don't try to create a bootstrap deployment
+    CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
   }
-
+  
   if ($ci)
   {
 #    CallMSBuild $ToolsetProj /t:restore /m /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
@@ -287,17 +283,24 @@ function Build {
 }
 function CallMSBuild
 {
-  if ($msbuildHost)
+  try 
   {
-    & $msbuildHost $msbuildToUse $args
-  }
-  else
-  {
-    & $msbuildToUse $args
-  }
+    if ($msbuildHost)
+    {
+      & $msbuildHost $msbuildToUse $args
+    }
+    else
+    {
+      & $msbuildToUse $args
+    }
 
     if($LASTEXITCODE -ne 0) {
-      throw "Failed to build $args"
+        throw "Failed to build $args"
+    }
+  }
+  finally
+  {
+    KillProcessesFromRepo
   }
 }
 
@@ -349,9 +352,10 @@ if ($hostType -eq '')
 $msbuildHost = $null
 $msbuildToUse = "msbuild"
 
-
-
 try {
+
+  KillProcessesFromRepo
+
   if ($ci) {
     $TempDir = Join-Path $ArtifactsConfigurationDir "tmp"
     Create-Directory $TempDir

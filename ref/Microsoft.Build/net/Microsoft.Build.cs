@@ -497,6 +497,19 @@ namespace Microsoft.Build.Construction
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
     }
 }
+namespace Microsoft.Build.Definition
+{
+    public partial class ProjectOptions
+    {
+        public ProjectOptions() { }
+        public Microsoft.Build.Evaluation.Context.EvaluationContext EvaluationContext { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Collections.Generic.IDictionary<string, string> GlobalProperties { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Evaluation.ProjectLoadSettings LoadSettings { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Evaluation.ProjectCollection ProjectCollection { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string SubToolsetVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ToolsVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+}
 namespace Microsoft.Build.Evaluation
 {
     public partial class GlobResult
@@ -592,6 +605,9 @@ namespace Microsoft.Build.Evaluation
         public Microsoft.Build.Execution.ProjectInstance CreateProjectInstance() { throw null; }
         public Microsoft.Build.Execution.ProjectInstance CreateProjectInstance(Microsoft.Build.Execution.ProjectInstanceSettings settings) { throw null; }
         public string ExpandString(string unexpandedValue) { throw null; }
+        public static Microsoft.Build.Evaluation.Project FromFile(string file, Microsoft.Build.Definition.ProjectOptions options) { throw null; }
+        public static Microsoft.Build.Evaluation.Project FromProjectRootElement(Microsoft.Build.Construction.ProjectRootElement rootElement, Microsoft.Build.Definition.ProjectOptions options) { throw null; }
+        public static Microsoft.Build.Evaluation.Project FromXmlReader(System.Xml.XmlReader reader, Microsoft.Build.Definition.ProjectOptions options) { throw null; }
         public System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs() { throw null; }
         public System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs(string itemType) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Evaluation.ProjectItem item) { throw null; }
@@ -612,6 +628,7 @@ namespace Microsoft.Build.Evaluation
         public static string GetPropertyValueEscaped(Microsoft.Build.Evaluation.ProjectProperty property) { throw null; }
         public void MarkDirty() { }
         public void ReevaluateIfNecessary() { }
+        public void ReevaluateIfNecessary(Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext) { }
         public bool RemoveGlobalProperty(string name) { throw null; }
         public bool RemoveItem(Microsoft.Build.Evaluation.ProjectItem item) { throw null; }
         public void RemoveItems(System.Collections.Generic.IEnumerable<Microsoft.Build.Evaluation.ProjectItem> items) { }
@@ -854,6 +871,19 @@ namespace Microsoft.Build.Evaluation
         Local = 4,
         None = 0,
         Registry = 2,
+    }
+}
+namespace Microsoft.Build.Evaluation.Context
+{
+    public partial class EvaluationContext
+    {
+        internal EvaluationContext() { }
+        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
+        public enum SharingPolicy
+        {
+            Isolated = 1,
+            Shared = 0,
+        }
     }
 }
 namespace Microsoft.Build.Exceptions
