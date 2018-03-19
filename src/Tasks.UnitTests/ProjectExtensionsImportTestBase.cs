@@ -59,10 +59,10 @@ namespace Microsoft.Build.UnitTests
 
             string projectExtensionsPath = project.GetPropertyValue("MSBuildProjectExtensionsPath");
 
-            Assert.True(!String.IsNullOrWhiteSpace(projectExtensionsPath), "The property 'MSBuildProjectExtensionsPath' should not be empty during project evaluation.");
-            Assert.True(!Directory.Exists(projectExtensionsPath), $"The project extension directory '{projectExtensionsPath}' should not exist.");
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
+            projectExtensionsPath.ShouldNotBeNullOrWhiteSpace();
+            Directory.Exists(projectExtensionsPath).ShouldBeFalse();
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("true");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBeEmpty();
         }
 
         /// <summary>
@@ -94,10 +94,10 @@ namespace Microsoft.Build.UnitTests
 
             string projectExtensionsDirectory = Path.Combine(ObjectModelHelpers.TempProjectDir, Path.GetDirectoryName(ImportProjectPath));
 
-            Assert.Equal("false", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
-            Assert.True(Directory.Exists(projectExtensionsDirectory), $"The directory '{projectExtensionsDirectory}' should exist but doesn't.");
-            Assert.Equal($@"{projectExtensionsDirectory}{Path.DirectorySeparatorChar}", project.GetPropertyValue("MSBuildProjectExtensionsPath"));
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("false");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBeEmpty();
+            Directory.Exists(projectExtensionsDirectory).ShouldBeTrue();
+            project.GetPropertyValue("MSBuildProjectExtensionsPath").ShouldBe($@"{projectExtensionsDirectory}{Path.DirectorySeparatorChar}");
         }
 
         /// <summary>
@@ -123,8 +123,8 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("true");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBe("true");
         }
 
         /// <summary>
@@ -147,8 +147,8 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToEnableImport), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal("true", project.GetPropertyValue(PropertyNameToSignalImportSucceeded), StringComparer.OrdinalIgnoreCase);
+            project.GetPropertyValue(PropertyNameToEnableImport).ShouldBe("true");
+            project.GetPropertyValue(PropertyNameToSignalImportSucceeded).ShouldBe("true");
         }
 
         /// <summary>
