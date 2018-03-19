@@ -3008,6 +3008,21 @@
         <target state="translated">このファイルは "{0}" によってロックされています。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CheckConfigurationAndPlatformOutputPath">
+        <source>MSB3911: The OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'.  You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</source>
+        <target state="new">MSB3911: The OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'.  You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</target>
+        <note>{StrBegin="MSB3911: "}</note>
+      </trans-unit>
+      <trans-unit id="CheckConfigurationAndPlatformOutputPathInVisualStudio">
+        <source>MSB3911: The OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'.  This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</source>
+        <target state="new">MSB3911: The OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'.  This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</target>
+        <note>{StrBegin="MSB3911: "}</note>
+      </trans-unit>
+      <trans-unit id="CheckConfigurationAndPlatformPropertyMustHaveTrailingSlash">
+        <source>MSB3912: The '{0}' property must end with a trailing slash.</source>
+        <target state="new">MSB3912: The '{0}' property must end with a trailing slash.</target>
+        <note>{StrBegin="MSB3912: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
