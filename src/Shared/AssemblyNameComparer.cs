@@ -15,32 +15,32 @@ namespace Microsoft.Build.Shared
     /// IKeyComparer implementation that compares AssemblyNames for using in Hashtables.
     /// </summary>
     [Serializable]
-    sealed internal class AssemblyNameComparer : IComparer, IEqualityComparer, IEqualityComparer<AssemblyNameExtension>
+    internal sealed class AssemblyNameComparer : IComparer, IEqualityComparer, IEqualityComparer<AssemblyNameExtension>
     {
         /// <summary>
         /// Comparer for two assembly name extensions
         /// </summary>
-        internal readonly static IComparer Comparer = new AssemblyNameComparer(false);
+        internal static readonly IComparer Comparer = new AssemblyNameComparer(false);
 
         /// <summary>
         /// Comparer for two assembly name extensions
         /// </summary>
-        internal readonly static IComparer ComparerConsiderRetargetable = new AssemblyNameComparer(true);
+        internal static readonly IComparer ComparerConsiderRetargetable = new AssemblyNameComparer(true);
 
         /// <summary>
         /// Comparer for two assembly name extensions
         /// </summary>
-        internal readonly static IEqualityComparer<AssemblyNameExtension> GenericComparer = Comparer as IEqualityComparer<AssemblyNameExtension>;
+        internal static readonly IEqualityComparer<AssemblyNameExtension> GenericComparer = Comparer as IEqualityComparer<AssemblyNameExtension>;
 
         /// <summary>
         /// Comparer for two assembly name extensions
         /// </summary>
-        internal readonly static IEqualityComparer<AssemblyNameExtension> GenericComparerConsiderRetargetable = ComparerConsiderRetargetable as IEqualityComparer<AssemblyNameExtension>;
+        internal static readonly IEqualityComparer<AssemblyNameExtension> GenericComparerConsiderRetargetable = ComparerConsiderRetargetable as IEqualityComparer<AssemblyNameExtension>;
 
         /// <summary>
         /// Should the comparer consider the retargetable flag when doing comparisons
         /// </summary>
-        private bool considerRetargetableFlag;
+        private readonly bool considerRetargetableFlag;
 
         /// <summary>
         /// Private construct so there's only one instance.
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Treat o1 and o2 as AssemblyNames. Are they equal?
         /// </summary>
-        new public bool Equals(object o1, object o2)
+        public new bool Equals(object o1, object o2)
         {
             AssemblyNameExtension a1 = (AssemblyNameExtension)o1;
             AssemblyNameExtension a2 = (AssemblyNameExtension)o2;
