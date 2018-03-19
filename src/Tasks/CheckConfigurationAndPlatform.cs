@@ -62,7 +62,7 @@ namespace Microsoft.Build.Tasks
                 if (SkipInvalidConfigurations)
                 {
                     Log.LogWarningFromResources(
-                        BuildingInsideVisualStudio ? "CheckForInvalidConfigurationAndPlatformOutputPathInVisualStudio" : "CheckForInvalidConfigurationAndPlatformOutputPath",
+                        BuildingInsideVisualStudio ? "CheckConfigurationAndPlatformOutputPathInVisualStudio" : "CheckConfigurationAndPlatformOutputPath",
                         ProjectFile,
                         OriginalConfiguration,
                         OriginalPlatform);
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     Log.LogErrorFromResources(
-                        BuildingInsideVisualStudio ? "CheckForInvalidConfigurationAndPlatformOutputPathInVisualStudio" : "CheckForInvalidConfigurationAndPlatformOutputPath",
+                        BuildingInsideVisualStudio ? "CheckConfigurationAndPlatformOutputPathInVisualStudio" : "CheckConfigurationAndPlatformOutputPath",
                         ProjectFile,
                         OriginalConfiguration,
                         OriginalPlatform);
@@ -79,17 +79,17 @@ namespace Microsoft.Build.Tasks
 
             if (!String.IsNullOrWhiteSpace(OutDir) && !FileUtilities.EndsWithSlash(OutDir))
             {
-                Log.LogErrorFromResources("CheckForInvalidConfigurationAndPlatformPropertyMustHaveTrailingSlash", "OutDir");
+                Log.LogErrorFromResources("CheckConfigurationAndPlatformPropertyMustHaveTrailingSlash", "OutDir");
             }
 
             if (!String.IsNullOrWhiteSpace(BaseIntermediateOutputPath) && !FileUtilities.EndsWithSlash(BaseIntermediateOutputPath))
             {
-                Log.LogErrorFromResources("CheckForInvalidConfigurationAndPlatformPropertyMustHaveTrailingSlash", "BaseIntermediateOutputPath");
+                Log.LogErrorFromResources("CheckConfigurationAndPlatformPropertyMustHaveTrailingSlash", "BaseIntermediateOutputPath");
             }
 
             if (!String.IsNullOrWhiteSpace(IntermediateOutputPath) && !FileUtilities.EndsWithSlash(IntermediateOutputPath))
             {
-                Log.LogErrorFromResources("CheckForInvalidConfigurationAndPlatformPropertyMustHaveTrailingSlash", "IntermediateOutputPath");
+                Log.LogErrorFromResources("CheckConfigurationAndPlatformPropertyMustHaveTrailingSlash", "IntermediateOutputPath");
             }
 
             return !Log.HasLoggedErrors;
