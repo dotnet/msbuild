@@ -61,6 +61,7 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
+    <Compile Include="CheckConfigurationAndPlatform.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
