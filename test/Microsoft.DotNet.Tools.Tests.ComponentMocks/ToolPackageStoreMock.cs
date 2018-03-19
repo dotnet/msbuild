@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             IFileSystem fileSystem,
             Action uninstallCallback = null)
         {
-            Root = root;
+            Root = new DirectoryPath(Path.GetFullPath(root.Value));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _uninstallCallback = uninstallCallback;
         }

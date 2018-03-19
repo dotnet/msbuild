@@ -637,7 +637,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             FilePath? tempProject = null,
             DirectoryPath? offlineFeed = null)
         {
-            var root = new DirectoryPath(Path.Combine(Path.GetFullPath(TempRoot.Root), Path.GetRandomFileName()));
+            var root = new DirectoryPath(Path.Combine(TempRoot.Root, Path.GetRandomFileName()));
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;
@@ -665,6 +665,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
             }
+
+            store.Root.Value.Should().Be(Path.GetFullPath(root.Value));
 
             return (store, installer, reporter, fileSystem);
         }

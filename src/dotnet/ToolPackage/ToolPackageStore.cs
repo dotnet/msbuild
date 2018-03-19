@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ToolPackage
 
         public ToolPackageStore(DirectoryPath root)
         {
-            Root = root;
+            Root = new DirectoryPath(Path.GetFullPath(root.Value));
         }
 
         public DirectoryPath Root { get; private set; }
