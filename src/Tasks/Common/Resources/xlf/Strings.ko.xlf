@@ -357,6 +357,11 @@
         <target state="translated">.NET Core SDK의 미리 보기 버전으로 작업하고 있습니다. 현재 프로젝트의 global.json 파일을 통해 SDK 버전을 정의할 수 있습니다. 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869452를 참조하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
+        <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
+        <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

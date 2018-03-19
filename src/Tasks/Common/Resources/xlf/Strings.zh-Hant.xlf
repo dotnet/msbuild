@@ -357,6 +357,11 @@
         <target state="translated">您目前使用 .NET Core SDK 的預覽版本。您可透過目前專案中的 global.json 檔案定義 SDK 版本。如需更多項目，請前往 https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
+        <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
+        <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

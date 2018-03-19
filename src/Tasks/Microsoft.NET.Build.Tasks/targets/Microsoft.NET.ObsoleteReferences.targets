@@ -15,17 +15,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <Target Name="_WarnAboutObsoleteDotNetCliToolReferences" BeforeTargets="CollectPackageReferences">
-    <ItemGroup>
-      <_ReferenceToObsoleteDotNetCliTool Include="@(DotNetCliToolReference)" />
-      <DotNetCliToolReference Remove="@(BundledDotNetCliToolReference)" />
-      <_ReferenceToObsoleteDotNetCliTool Remove="@(DotNetCliToolReference)" />
-    </ItemGroup>
+  <PropertyGroup Condition="'$(NETCoreSdkBundledCliToolsProps)' == ''">
+    <NETCoreSdkBundledCliToolsProps>$(MSBuildThisFileDirectory)..\..\..\Microsoft.NETCoreSdk.BundledCliTools.props</NETCoreSdkBundledCliToolsProps>
+  </PropertyGroup>
 
-    <Warning
-      Code="DOTNET1018"
-      Text="Using DotNetCliToolReference to reference '%(_ReferenceToObsoleteDotNetCliTool.Identity)' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK."
-      Condition=" '%(_ReferenceToObsoleteDotNetCliTool.Identity)' != '' " />
+  <Import Project="$(NETCoreSdkBundledCliToolsProps)" Condition="Exists('$(NETCoreSdkBundledCliToolsProps)')" />
+
+  <ItemGroup>
+    <_ReferenceToObsoleteDotNetCliTool Include="@(DotNetCliToolReference)" />
+    <DotNetCliToolReference Remove="@(BundledDotNetCliToolReference)" />
+    <_ReferenceToObsoleteDotNetCliTool Remove="@(DotNetCliToolReference)" />
+  </ItemGroup>
+
+  <Target Name="_CheckForObsoleteDotNetCliToolReferences"
+          BeforeTargets="CollectPackageReferences"
+          Condition=" '$(SuppressObsoleteDotNetCliToolWarning)' != 'true' ">
+    <NETSdkWarning Condition=" '%(_ReferenceToObsoleteDotNetCliTool.Identity)' != '' "
+                   ResourceName="ProjectContainsObsoleteDotNetCliTool"
+                   FormatArguments="%(_ReferenceToObsoleteDotNetCliTool.Identity)" />
   </Target>
 
 </Project>
