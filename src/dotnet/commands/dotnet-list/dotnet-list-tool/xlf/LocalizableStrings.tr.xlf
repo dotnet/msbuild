@@ -12,11 +12,6 @@
         <target state="translated">Kullanıcıya yönelik araçları listeleyin.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListToolCommandOnlySupportsGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="translated">Yalnızca kullanıcı için araçlar desteklendiğinden --global anahtarı (-g) şu anda gereklidir.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
         <target state="translated">Sürüm</target>

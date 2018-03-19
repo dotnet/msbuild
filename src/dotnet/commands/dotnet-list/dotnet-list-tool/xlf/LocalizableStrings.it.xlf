@@ -12,11 +12,6 @@
         <target state="translated">Elenca gli strumenti a livello di utente.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListToolCommandOnlySupportsGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="translated">L'opzione --global (-g) è attualmente obbligatoria perché sono supportati solo gli strumenti a livello di utente.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
         <target state="translated">Versione</target>

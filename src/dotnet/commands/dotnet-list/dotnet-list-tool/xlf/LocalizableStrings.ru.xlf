@@ -12,11 +12,6 @@
         <target state="translated">Перечисление пользовательских инструментов.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListToolCommandOnlySupportsGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="translated">Параметр "--global switch (-g)" сейчас обязателен, так как поддерживаются только инструменты уровня пользователя.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
         <target state="translated">Версия</target>

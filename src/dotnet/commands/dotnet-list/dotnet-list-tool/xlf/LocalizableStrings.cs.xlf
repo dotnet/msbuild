@@ -12,11 +12,6 @@
         <target state="translated">Vypsat nástroje všech uživatelů</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListToolCommandOnlySupportsGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="translated">Přepínač --global (-g) se aktuálně vyžaduje, protože se podporují jenom nástroje pro všechny uživatele.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
         <target state="translated">Verze</target>

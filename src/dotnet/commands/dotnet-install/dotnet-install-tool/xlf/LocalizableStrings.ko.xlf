@@ -105,18 +105,18 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="translated">전역 또는 도구 경로를 제공해야 합니다.</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">전역 또는 도구 경로를 제공해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time.</source>
-        <target state="translated">전역 및 도구 경로를 의견으로 동시에 사용할 수 없습니다.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="needs-review-translation">전역 및 도구 경로를 의견으로 동시에 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="translated">도구에 액세스하는 shim 위치</target>
+        <source>Location where the tool will be installed.</source>
+        <target state="needs-review-translation">도구에 액세스하는 shim 위치</target>
         <note />
       </trans-unit>
     </body>

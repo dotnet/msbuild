@@ -105,18 +105,18 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="translated">Требуется указать глобальный параметр или параметр tool-path.</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">Требуется указать глобальный параметр или параметр tool-path.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time.</source>
-        <target state="translated">Невозможно указать глобальный параметр и параметр tool-path в качестве оценки одновременно.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="needs-review-translation">Невозможно указать глобальный параметр и параметр tool-path в качестве оценки одновременно.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="translated">Расположение оболочки совместимости для доступа к инструменту</target>
+        <source>Location where the tool will be installed.</source>
+        <target state="needs-review-translation">Расположение оболочки совместимости для доступа к инструменту</target>
         <note />
       </trans-unit>
     </body>

@@ -105,18 +105,18 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="translated">Należy podać ścieżkę globalną lub ścieżkę narzędzia.</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">Należy podać ścieżkę globalną lub ścieżkę narzędzia.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time.</source>
-        <target state="translated">Nie można jednocześnie używać ścieżki globalnej i ścieżki narzędzia jako opinii.</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="needs-review-translation">Nie można jednocześnie używać ścieżki globalnej i ścieżki narzędzia jako opinii.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="translated">Lokalizacja podkładki na potrzeby dostępu do narzędzia</target>
+        <source>Location where the tool will be installed.</source>
+        <target state="needs-review-translation">Lokalizacja podkładki na potrzeby dostępu do narzędzia</target>
         <note />
       </trans-unit>
     </body>
