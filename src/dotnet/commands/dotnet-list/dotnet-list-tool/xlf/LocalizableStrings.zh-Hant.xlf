@@ -4,32 +4,32 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Lists installed tools in the current development environment.</source>
-        <target state="new">Lists installed tools in the current development environment.</target>
+        <target state="translated">列出目前開發環境中安裝的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List user wide tools.</source>
-        <target state="new">List user wide tools.</target>
+        <target state="translated">列出全體使用者工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">版本</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">命令</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
         <source>Package Id</source>
-        <target state="new">Package Id</target>
+        <target state="translated">套件識別碼</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="new">Warning: tool package '{0}' is invalid: {1}</target>
+        <target state="translated">警告: 工具套件 '{0}' 無效: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">

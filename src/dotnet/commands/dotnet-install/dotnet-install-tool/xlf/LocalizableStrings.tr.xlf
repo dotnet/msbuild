@@ -15,8 +15,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="needs-review-translation">
-Yükleme başarılı oldu. Daha fazla yönerge yoksa, çağırmak için şu komutu doğrudan kabuğa yazabilirsiniz: {0}</target>
+        <target state="translated">Başka bir yönerge sağlanmadıysa şu komutu yazarak aracı çağırabilirsiniz: {0}
+'{1}' aracı (sürüm '{2}') başarıyla yüklendi.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -81,17 +81,17 @@ Yükleme başarılı oldu. Daha fazla yönerge yoksa, çağırmak için şu komu
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">'{0}' aracı zaten yüklü.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToCreateToolShim">
         <source>Failed to create shell shim for tool '{0}': {1}</source>
-        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <target state="translated">'{0}' aracı için kabuk dolgusu oluşturulamadı: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <target state="translated">NuGet yapılandırma dosyası '{0}' yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
@@ -101,22 +101,22 @@ Yükleme başarılı oldu. Daha fazla yönerge yoksa, çağırmak için şu komu
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">Belirtilen '{0}' sürümü geçerli bir NuGet sürüm aralığı değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="needs-review-translation">Genel yolun veya araç yolunun sağlanması gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="needs-review-translation">Fikir olarak aynı anda hem genel yol hem de araç yolu kullanılamaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="new">Location where the tool will be installed.</target>
+        <target state="needs-review-translation">Araca erişmek için dolgu konumu</target>
         <note />
       </trans-unit>
     </body>

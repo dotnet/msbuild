@@ -4,32 +4,32 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Lists installed tools in the current development environment.</source>
-        <target state="new">Lists installed tools in the current development environment.</target>
+        <target state="translated">現在の開発環境にインストールされているツールを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List user wide tools.</source>
-        <target state="new">List user wide tools.</target>
+        <target state="translated">ユーザー全体のツールを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">バージョン</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">コマンド</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
         <source>Package Id</source>
-        <target state="new">Package Id</target>
+        <target state="translated">パッケージ ID</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="new">Warning: tool package '{0}' is invalid: {1}</target>
+        <target state="translated">警告: ツール パッケージ '{0}' が無効です: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">

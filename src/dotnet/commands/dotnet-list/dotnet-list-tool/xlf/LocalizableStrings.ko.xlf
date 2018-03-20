@@ -4,32 +4,32 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Lists installed tools in the current development environment.</source>
-        <target state="new">Lists installed tools in the current development environment.</target>
+        <target state="translated">현재 개발 환경에 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List user wide tools.</source>
-        <target state="new">List user wide tools.</target>
+        <target state="translated">사용자 전체 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">버전</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">명령</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
         <source>Package Id</source>
-        <target state="new">Package Id</target>
+        <target state="translated">패키지 ID</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="new">Warning: tool package '{0}' is invalid: {1}</target>
+        <target state="translated">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">

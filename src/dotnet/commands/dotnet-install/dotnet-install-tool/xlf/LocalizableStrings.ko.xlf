@@ -15,8 +15,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="needs-review-translation">
-설치했습니다. 추가 지침이 없는 경우 셸에 다음 명령을 직접 입력하여 {0}을(를) 호출할 수 있습니다.</target>
+        <target state="translated">추가 지침이 없는 경우 다음 명령을 입력하여 도구를 호출할 수 있습니다. {0}
+도구 '{1}'(버전 '{2}')이(가) 설치되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -81,17 +81,17 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">'{0}' 도구가 이미 설치되어 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToCreateToolShim">
         <source>Failed to create shell shim for tool '{0}': {1}</source>
-        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <target state="translated">'{0}' 도구에 대해 셸 shim을 만들지 못했습니다. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <target state="translated">NuGet 구성 파일 '{0}'이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
@@ -101,22 +101,22 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">지정된 버전 '{0}'이(가) 유효한 NuGet 버전 범위가 아닙니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="needs-review-translation">전역 또는 도구 경로를 제공해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="needs-review-translation">전역 및 도구 경로를 의견으로 동시에 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="new">Location where the tool will be installed.</target>
+        <target state="needs-review-translation">도구에 액세스하는 shim 위치</target>
         <note />
       </trans-unit>
     </body>

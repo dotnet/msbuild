@@ -4,62 +4,62 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to uninstall.</source>
-        <target state="new">NuGet Package Id of the tool to uninstall.</target>
+        <target state="translated">要卸载的工具的 NuGet 包 ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstalls a tool.</source>
-        <target state="new">Uninstalls a tool.</target>
+        <target state="translated">卸载工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to uninstall.</source>
-        <target state="new">Please specify one tool Package Id to uninstall.</target>
+        <target state="translated">请指定一个要卸载的工具包 ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall user wide.</source>
-        <target state="new">Uninstall user wide.</target>
+        <target state="translated">卸载用户范围。</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="new">Tool '{0}' (version '{1}') was successfully uninstalled.</target>
+        <target state="translated">已成功卸载工具“{0}”（版本“{1}”）。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
         <source>Tool '{0}' is not currently installed.</source>
-        <target state="new">Tool '{0}' is not currently installed.</target>
+        <target state="translated">工具“{0}”目前尚未安装。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
         <source>Tool '{0}' has multiple versions installed and cannot be uninstalled.</source>
-        <target state="new">Tool '{0}' has multiple versions installed and cannot be uninstalled.</target>
+        <target state="translated">工具“{0}”已安装多个版本，无法卸载。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallTool">
         <source>Failed to uninstall tool '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool '{0}': {1}</target>
+        <target state="translated">无法卸载工具“{0}”: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="needs-review-translation">需要提供全局或工具路径。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool was previously installed.</source>
-        <target state="new">Location where the tool was previously installed.</target>
+        <target state="needs-review-translation">填充程序访问工具的位置</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="needs-review-translation">无法同时主张全局和工具路径。”</target>
         <note />
       </trans-unit>
     </body>

@@ -154,7 +154,7 @@
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references or installed tools.</source>
-        <target state="needs-review-translation">Projede başvuruyu listeleyin.</target>
+        <target state="translated">Proje başvurularını veya yüklü araçları listeleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="UninstallDefinition">
         <source>Uninstalls an item from the development environment.</source>
-        <target state="new">Uninstalls an item from the development environment.</target>
+        <target state="translated">Bir öğeyi geliştirme ortamından kaldırır.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateDefinition">

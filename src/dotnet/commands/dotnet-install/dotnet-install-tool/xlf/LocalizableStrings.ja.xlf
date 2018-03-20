@@ -15,8 +15,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="needs-review-translation">
-インストールは成功しました。追加の指示がなければ、シェルに次のコマンドを直接入力して呼び出すことができます: {0}</target>
+        <target state="translated">追加の指示がない場合、次のコマンドを入力してツールを呼び出すことができます: {0}
+ツール '{1}' (バージョン '{2}') は正常にインストールされました。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -81,17 +81,17 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
         <source>Tool '{0}' is already installed.</source>
-        <target state="new">Tool '{0}' is already installed.</target>
+        <target state="translated">ツール '{0}' は既にインストールされています。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToCreateToolShim">
         <source>Failed to create shell shim for tool '{0}': {1}</source>
-        <target state="new">Failed to create shell shim for tool '{0}': {1}</target>
+        <target state="translated">ツール '{0}' でシェル shim を作成できませんでした: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <target state="translated">NuGet 構成ファイル '{0}' は存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationRestoreFailed">
@@ -101,22 +101,22 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="new">Specified version '{0}' is not a valid NuGet version range.</target>
+        <target state="translated">指定されたバージョン '{0}' は、有効な NuGet バージョン範囲ではありません。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="needs-review-translation">global か tool-path を指定する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="needs-review-translation">global と tool-path を意見として同時に指定することはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="new">Location where the tool will be installed.</target>
+        <target state="needs-review-translation">ツールにアクセスする shim の場所</target>
         <note />
       </trans-unit>
     </body>

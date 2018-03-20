@@ -721,27 +721,27 @@
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' (version '{1}') is already installed.</source>
-        <target state="needs-review-translation">ツール '{0}' は既にインストールされています。</target>
+        <target state="translated">ツール '{0}' (バージョン '{1}') は既にインストールされています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ShellShimConflict">
         <source>Command '{0}' conflicts with an existing command from another tool.</source>
-        <target state="new">Command '{0}' conflicts with an existing command from another tool.</target>
+        <target state="translated">コマンド '{0}' は、別のツールからの既存のコマンドと競合します。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyExecutablePath">
         <source>Cannot create shell shim for an empty executable path.</source>
-        <target state="new">Cannot create shell shim for an empty executable path.</target>
+        <target state="translated">空の実行可能パスにシェル shim を作成できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyCommand">
         <source>Cannot create shell shim for an empty command.</source>
-        <target state="new">Cannot create shell shim for an empty command.</target>
+        <target state="translated">空のコマンドにシェル shim を作成できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRetrieveToolConfiguration">
         <source>Failed to retrieve tool configuration: {0}</source>
-        <target state="new">Failed to retrieve tool configuration: {0}</target>
+        <target state="translated">ツールの構成を取得できませんでした: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstructions">
@@ -757,15 +757,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Tools ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
+Bash を使用している場合、次のコマンドを実行して、このディレクトリをプロファイルに追加できます:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+次のコマンドを実行すると、このディレクトリを現在のセッションに追加できます:
 
 export PATH="$PATH:{0}"
 </target>
@@ -784,15 +784,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Tools ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
+Bash を使用している場合、次のコマンドを実行して、このディレクトリをプロファイルに追加できます:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+次のコマンドを実行すると、このディレクトリを現在のセッションに追加できます:
 
 export PATH="$PATH:{0}"
 </target>
@@ -805,9 +805,9 @@ You can add the directory to the PATH by running the following command:
 
 setx PATH "%PATH%;{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+        <target state="translated">Tools ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
 
-You can add the directory to the PATH by running the following command:
+次のコマンドを実行して、PATH にディレクトリを追加できます:
 
 setx PATH "%PATH%;{0}"
 </target>
@@ -815,52 +815,52 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToCreateShellShim">
         <source>Failed to create tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
+        <target state="translated">コマンド '{0}' でツール shim を作成できませんでした: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRemoveShellShim">
         <source>Failed to remove tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
+        <target state="translated">コマンド '{0}' でツール shim を削除できませんでした: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedSettingShimPermissions">
         <source>Failed to set user executable permissions for shell shim: {0}</source>
-        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
+        <target state="translated">シェル shim で実行可能なユーザー アクセス許可を設定できませんでした: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallToolPackage">
         <source>Failed to install tool package '{0}': {1}</source>
-        <target state="new">Failed to install tool package '{0}': {1}</target>
+        <target state="translated">ツール パッケージ '{0}' をインストールできませんでした: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallToolPackage">
         <source>Failed to uninstall tool package '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <target state="translated">ツール パッケージ '{0}' をアンインストールできませんでした: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
         <source>Column maximum width must be greater than zero.</source>
-        <target state="new">Column maximum width must be greater than zero.</target>
+        <target state="translated">列の最大幅はゼロより大きくなければなりません。</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolEntryPointFile">
         <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
-        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <target state="translated">コマンド '{1}' のエントリ ポイント ファイル '{0}' がパッケージで見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolSettingsFile">
         <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
-        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
+        <target state="translated">設定ファイル 'DotnetToolSettings.xml' がパッケージで見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="new">Failed to find staged tool package '{0}'.</target>
+        <target state="translated">ステージング済みのツール パッケージ '{0}' が見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
         <source>The command name '{0}' cannot begin with a leading dot (.).</source>
-        <target state="new">The command name '{0}' cannot begin with a leading dot (.).</target>
+        <target state="needs-review-translation">コマンド '{0}' の先頭にドットがあります。</target>
         <note />
       </trans-unit>
     </body>
