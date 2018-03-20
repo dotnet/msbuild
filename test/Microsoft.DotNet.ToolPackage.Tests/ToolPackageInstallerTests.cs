@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void GivenOfflineFeedInstallSuceeds(bool testMockBehaviorIsInSync)
+        public void GivenOfflineFeedInstallSucceeds(bool testMockBehaviorIsInSync)
         {
             var (store, installer, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
@@ -57,6 +57,30 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
+
+            AssertPackageInstall(reporter, fileSystem, package, store);
+
+            package.Uninstall();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GivenAEmptySourceAndOfflineFeedInstallSucceeds(bool testMockBehaviorIsInSync)
+        {
+            var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(emptySource);
+
+            var (store, installer, reporter, fileSystem) = Setup(
+                useMock: testMockBehaviorIsInSync,
+                offlineFeed: new DirectoryPath(GetTestLocalFeedPath()),
+                feeds: GetOfflineMockFeed());
+
+            var package = installer.InstallPackage(
+                packageId: TestPackageId,
+                versionRange: VersionRange.Parse(TestPackageVersion),
+                targetFramework: _testTargetframework,
+                additionalFeeds: new[] {emptySource});
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -228,7 +252,31 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
-                source: source);
+                additionalFeeds: new[] {source});
+
+            AssertPackageInstall(reporter, fileSystem, package, store);
+
+            package.Uninstall();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GivenAEmptySourceAndNugetConfigInstallSucceeds(bool testMockBehaviorIsInSync)
+        {
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+            var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(emptySource);
+
+            var (store, installer, reporter, fileSystem) = Setup(
+                useMock: testMockBehaviorIsInSync,
+                feeds: GetMockFeedsForSource(emptySource));
+
+            var package = installer.InstallPackage(
+                packageId: TestPackageId,
+                versionRange: VersionRange.Parse(TestPackageVersion),
+                targetFramework: _testTargetframework,
+                nugetConfig: nugetConfigPath, additionalFeeds: new[] {emptySource});
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -281,7 +329,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework,
-                        source: source);
+                        additionalFeeds: new[] {source});
 
                     FailedStepAfterSuccessRestore();
                     t.Complete();
@@ -313,7 +361,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework,
-                        source: source);
+                        additionalFeeds: new[] {source});
 
                     first.ShouldNotThrow();
 
@@ -321,7 +369,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework,
-                        source: source);
+                        additionalFeeds: new[] {source});
 
                     t.Complete();
                 }
@@ -352,7 +400,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
-                source: source);
+                additionalFeeds: new[] {source});
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -360,7 +408,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
-                source: source);
+                additionalFeeds: new[] {source});
 
             reporter.Lines.Should().BeEmpty();
 
@@ -401,7 +449,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
-                source: source);
+                additionalFeeds: new[] {source});
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -425,7 +473,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
-                source: source);
+                additionalFeeds: new[] {source});
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -458,7 +506,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework,
-                source: source);
+                additionalFeeds: new[] {source});
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -597,7 +645,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             {
                 new MockFeed
                 {
-                    Type = MockFeedType.Source,
+                    Type = MockFeedType.ImplicitAdditionalFeed,
                     Uri = source,
                     Packages = new List<MockFeedPackage>
                     {
@@ -617,7 +665,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             {
                 new MockFeed
                 {
-                    Type = MockFeedType.OfflineFeed,
+                    Type = MockFeedType.ImplicitAdditionalFeed,
                     Uri = GetTestLocalFeedPath(),
                     Packages = new List<MockFeedPackage>
                     {

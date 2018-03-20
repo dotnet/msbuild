@@ -30,13 +30,12 @@ namespace Microsoft.DotNet.ToolPackage
             _offlineFeed = offlineFeed ?? new DirectoryPath(new CliFolderPathCalculator().CliFallbackFolderPath);
         }
 
-        public IToolPackage InstallPackage(
-            PackageId packageId,
+        public IToolPackage InstallPackage(PackageId packageId,
             VersionRange versionRange = null,
             string targetFramework = null,
             FilePath? nugetConfig = null,
             DirectoryPath? rootConfigDirectory = null,
-            string source = null,
+            string[] additionalFeeds = null,
             string verbosity = null)
         {
             var packageRootDirectory = _store.GetRootPackageDirectory(packageId);
@@ -55,7 +54,8 @@ namespace Microsoft.DotNet.ToolPackage
                             versionRange: versionRange,
                             targetFramework: targetFramework ?? BundledTargetFramework.GetTargetFrameworkMoniker(),
                             restoreDirectory: stageDirectory,
-                            rootConfigDirectory: rootConfigDirectory);
+                            rootConfigDirectory: rootConfigDirectory,
+                            additionalFeeds: additionalFeeds);
 
                         try
                         {
@@ -63,8 +63,7 @@ namespace Microsoft.DotNet.ToolPackage
                                 tempProject,
                                 stageDirectory,
                                 nugetConfig,
-                                source,
-                                verbosity);
+                                verbosity: verbosity);
                         }
                         finally
                         {
@@ -113,12 +112,12 @@ namespace Microsoft.DotNet.ToolPackage
                 });
         }
 
-        private FilePath CreateTempProject(
-            PackageId packageId,
+        private FilePath CreateTempProject(PackageId packageId,
             VersionRange versionRange,
             string targetFramework,
             DirectoryPath restoreDirectory,
-            DirectoryPath? rootConfigDirectory)
+            DirectoryPath? rootConfigDirectory,
+            string[] additionalFeeds)
         {
             var tempProject = _tempProject ?? new DirectoryPath(Path.GetTempPath())
                 .WithSubDirectories(Path.GetRandomFileName())
@@ -141,8 +140,7 @@ namespace Microsoft.DotNet.ToolPackage
                         new XElement("RestoreRootConfigDirectory", rootConfigDirectory?.Value ?? Directory.GetCurrentDirectory()), // config file probing start directory
                         new XElement("DisableImplicitFrameworkReferences", "true"), // no Microsoft.NETCore.App in tool folder
                         new XElement("RestoreFallbackFolders", "clear"), // do not use fallbackfolder, tool package need to be copied to tool folder
-                        new XElement("RestoreAdditionalProjectSources", // use fallbackfolder as feed to enable offline
-                            Directory.Exists(_offlineFeed.Value) ? _offlineFeed.Value : string.Empty),
+                        new XElement("RestoreAdditionalProjectSources", JoinSourceAndOfflineCache(additionalFeeds)),
                         new XElement("RestoreAdditionalProjectFallbackFolders", string.Empty), // block other
                         new XElement("RestoreAdditionalProjectFallbackFoldersExcludes", string.Empty),  // block other
                         new XElement("DisableImplicitNuGetFallbackFolder", "true")),  // disable SDK side implicit NuGetFallbackFolder
@@ -156,6 +154,23 @@ namespace Microsoft.DotNet.ToolPackage
 
             File.WriteAllText(tempProject.Value, tempProjectContent.ToString());
             return tempProject;
+        }
+
+        private string JoinSourceAndOfflineCache(string[] additionalFeeds)
+        {
+            var feeds = new List<string>();
+            if (additionalFeeds != null)
+            {
+                feeds.AddRange(additionalFeeds);
+            }
+
+            // use fallbackfolder as feed to enable offline
+            if (Directory.Exists(_offlineFeed.Value))
+            {
+                feeds.Add(_offlineFeed.ToXmlEncodeString());
+            }
+
+            return string.Join(";", feeds);
         }
     }
 }

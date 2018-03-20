@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
         private readonly string _packageVersion;
         private readonly string _configFilePath;
         private readonly string _framework;
-        private readonly string _source;
+        private readonly string[] _source;
         private readonly bool _global;
         private readonly string _verbosity;
         private readonly string _toolPath;
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             _packageVersion = appliedCommand.ValueOrDefault<string>("version");
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
-            _source = appliedCommand.ValueOrDefault<string>("source");
+            _source = appliedCommand.ValueOrDefault<string[]>("source-feed");
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Install.Tool
                         versionRange: versionRange,
                         targetFramework: _framework,
                         nugetConfig: configFile,
-                        source: _source,
+                        additionalFeeds: _source,
                         verbosity: _verbosity);
 
                     foreach (var command in package.Commands)

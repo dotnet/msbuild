@@ -26,11 +26,9 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             _forceOutputRedirection = reporter != null;
         }
 
-        public void Restore(
-            FilePath project,
+        public void Restore(FilePath project,
             DirectoryPath assetJsonOutput,
             FilePath? nugetConfig = null,
-            string source = null,
             string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
@@ -40,12 +38,6 @@ namespace Microsoft.DotNet.Tools.Install.Tool
             {
                 argsToPassToRestore.Add("--configfile");
                 argsToPassToRestore.Add(nugetConfig.Value.Value);
-            }
-
-            if (source != null)
-            {
-                argsToPassToRestore.Add("--source");
-                argsToPassToRestore.Add(source);
             }
 
             argsToPassToRestore.AddRange(new List<string>

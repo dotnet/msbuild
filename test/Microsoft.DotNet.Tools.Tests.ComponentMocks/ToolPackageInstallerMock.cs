@@ -35,13 +35,12 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _installCallback = installCallback;
         }
 
-        public IToolPackage InstallPackage(
-            PackageId packageId,
+        public IToolPackage InstallPackage(PackageId packageId,
             VersionRange versionRange = null,
             string targetFramework = null,
             FilePath? nugetConfig = null,
             DirectoryPath? rootConfigDirectory = null,
-            string source = null,
+            string[] additionalFeeds = null,
             string verbosity = null)
         {
             var packageRootDirectory = _store.GetRootPackageDirectory(packageId);
@@ -65,7 +64,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                         tempProject,
                         stageDirectory,
                         nugetConfig,
-                        source,
                         verbosity);
 
                     if (_installCallback != null)

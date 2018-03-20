@@ -2,16 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
-      <trans-unit id="SourceOptionDescription">
-        <source>Specifies a NuGet package source to use during installation.</source>
-        <target state="translated">설치 중 사용할 NuGet 패키지 소스를 지정합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceOptionName">
-        <source>SOURCE</source>
-        <target state="translated">SOURCE</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>If there were no additional instructions, you can type the following command to invoke the tool: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
@@ -117,6 +107,16 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       <trans-unit id="ToolPathDescription">
         <source>Location of shim to access tool</source>
         <target state="new">Location of shim to access tool</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceFeedOptionDescription">
+        <source>Adds an additional NuGet package source to use during installation.</source>
+        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceFeedOptionName">
+        <source>SOURCE_FEED</source>
+        <target state="new">SOURCE_FEED</target>
         <note />
       </trans-unit>
     </body>

@@ -22,16 +22,6 @@
         <target state="new">Version of the tool package in NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceOptionDescription">
-        <source>Specifies a NuGet package source to use during update.</source>
-        <target state="new">Specifies a NuGet package source to use during update.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceOptionName">
-        <source>SOURCE</source>
-        <target state="new">SOURCE</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Updates a tool to the latest stable version for use.</source>
         <target state="new">Updates a tool to the latest stable version for use.</target>
@@ -100,6 +90,16 @@
       <trans-unit id="UpdateToolFailed">
         <source>Tool '{0}' failed to update due to the following:</source>
         <target state="new">Tool '{0}' failed to update due to the following:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceFeedOptionDescription">
+        <source>Adds an additional NuGet package source to use during update.</source>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceFeedOptionName">
+        <source>SOURCE_FEED</source>
+        <target state="new">SOURCE_FEED</target>
         <note />
       </trans-unit>
     </body>
