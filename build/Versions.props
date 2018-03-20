@@ -51,6 +51,7 @@
     <NuGetBuildTasksPackageVersion>4.7.0-preview1-4846</NuGetBuildTasksPackageVersion>
     <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
     <!--<NuGetVersion>4.6.0-rtm-4822</NuGetVersion>-->
+    <ShouldlyVersion>3.0.0</ShouldlyVersion>
   </PropertyGroup>
 
 </Project>
