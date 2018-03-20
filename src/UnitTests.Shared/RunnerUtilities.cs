@@ -2,6 +2,7 @@
 using Microsoft.Build.Utilities;
 using System;
 using System.Diagnostics;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.Shared
 {
@@ -67,7 +68,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
-        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false)
+        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
             if (shellExecute)
             {
@@ -104,6 +105,7 @@ namespace Microsoft.Build.UnitTests.Shared
                     }
                 };
 
+                outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
                 Console.WriteLine("Executing [{0} {1}]", process, parameters);
 
                 p.Start();
