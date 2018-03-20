@@ -185,12 +185,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         internal static bool ShouldSurroundWithQuotes(string argument)
         {
-            // Don't quote already quoted strings
-            if (IsSurroundedWithQuotes(argument))
-            {
-                return false;
-            }
-
             // Only quote if whitespace exists in the string
             return ArgumentContainsWhitespace(argument);
         }

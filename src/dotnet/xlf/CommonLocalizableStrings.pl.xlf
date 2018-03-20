@@ -721,27 +721,27 @@
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' (version '{1}') is already installed.</source>
-        <target state="needs-review-translation">Narzędzie „{0}” jest już zainstalowane.</target>
+        <target state="translated">Narzędzie „{0}” (wersja: „{1}”) jest już zainstalowane.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShellShimConflict">
         <source>Command '{0}' conflicts with an existing command from another tool.</source>
-        <target state="new">Command '{0}' conflicts with an existing command from another tool.</target>
+        <target state="translated">Wystąpił konflikt między poleceniem „{0}” i istniejącym poleceniem z innego narzędzia.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyExecutablePath">
         <source>Cannot create shell shim for an empty executable path.</source>
-        <target state="new">Cannot create shell shim for an empty executable path.</target>
+        <target state="translated">Nie można utworzyć podkładki powłoki dla pustej ścieżki pliku wykonywalnego.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyCommand">
         <source>Cannot create shell shim for an empty command.</source>
-        <target state="new">Cannot create shell shim for an empty command.</target>
+        <target state="translated">Nie można utworzyć podkładki powłoki dla pustego polecenia.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRetrieveToolConfiguration">
         <source>Failed to retrieve tool configuration: {0}</source>
-        <target state="new">Failed to retrieve tool configuration: {0}</target>
+        <target state="translated">Nie można pobrać konfiguracji narzędzia: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstructions">
@@ -757,15 +757,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Katalogu narzędzi „{0}” nie ma obecnie w zmiennej środowiskowej PATH.
+Jeśli używasz powłoki bash, możesz dodać go do profilu przez uruchomienie następującego polecenia:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Możesz dodać go do bieżącej sesji przez uruchomienie następującego polecenia:
 
 export PATH="$PATH:{0}"
 </target>
@@ -784,15 +784,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Katalogu narzędzi „{0}” nie ma obecnie w zmiennej środowiskowej PATH.
+Jeśli używasz powłoki bash, możesz dodać go do profilu przez uruchomienie następującego polecenia:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Możesz dodać go do bieżącej sesji przez uruchomienie następującego polecenia:
 
 export PATH="$PATH:{0}"
 </target>
@@ -805,9 +805,9 @@ You can add the directory to the PATH by running the following command:
 
 setx PATH "%PATH%;{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+        <target state="translated">Katalogu narzędzi „{0}” nie ma obecnie w zmiennej środowiskowej PATH.
 
-You can add the directory to the PATH by running the following command:
+Możesz dodać katalog do zmiennej PATH przez uruchomienie następującego polecenia:
 
 setx PATH "%PATH%;{0}"
 </target>
@@ -815,52 +815,52 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToCreateShellShim">
         <source>Failed to create tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
+        <target state="translated">Nie można utworzyć podkładki narzędzia dla polecenia „{0}”: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRemoveShellShim">
         <source>Failed to remove tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
+        <target state="translated">Nie można usunąć podkładki narzędzia dla polecenia „{0}”: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedSettingShimPermissions">
         <source>Failed to set user executable permissions for shell shim: {0}</source>
-        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
+        <target state="translated">Nie można ustawić uprawnień pliku wykonywalnego użytkownika dla podkładki powłoki: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallToolPackage">
         <source>Failed to install tool package '{0}': {1}</source>
-        <target state="new">Failed to install tool package '{0}': {1}</target>
+        <target state="translated">Nie można zainstalować pakietu narzędzia „{0}”: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallToolPackage">
         <source>Failed to uninstall tool package '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <target state="translated">Nie można odinstalować pakietu narzędzia „{0}”: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
         <source>Column maximum width must be greater than zero.</source>
-        <target state="new">Column maximum width must be greater than zero.</target>
+        <target state="translated">Maksymalna szerokość kolumny musi być większa niż zero.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolEntryPointFile">
         <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
-        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <target state="translated">Nie znaleziono pliku punktu wejścia „{0}” polecenia „{1}” w pakiecie.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolSettingsFile">
         <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
-        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
+        <target state="translated">Nie znaleziono pliku ustawień „DotnetToolSettings.xml” w pakiecie.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="new">Failed to find staged tool package '{0}'.</target>
+        <target state="translated">Nie można odnaleźć etapowego pakietu narzędzia „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
-        <source>Command '{0}' has a leading dot.</source>
-        <target state="new">Command '{0}' has a leading dot.</target>
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="needs-review-translation">Polecenie „{0}” zawiera kropkę na początku.</target>
         <note />
       </trans-unit>
     </body>

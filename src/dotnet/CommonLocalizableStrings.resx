@@ -626,6 +626,6 @@ setx PATH "%PATH%;{0}"
     <value>Column maximum width must be greater than zero.</value>
   </data>
   <data name="ToolSettingsInvalidLeadingDotCommandName" xml:space="preserve">
-    <value>Command '{0}' has a leading dot.</value>
+    <value>The command name '{0}' cannot begin with a leading dot (.).</value>
   </data>
 </root>

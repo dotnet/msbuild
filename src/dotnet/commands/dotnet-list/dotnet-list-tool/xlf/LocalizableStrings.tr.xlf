@@ -4,37 +4,47 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Lists installed tools in the current development environment.</source>
-        <target state="new">Lists installed tools in the current development environment.</target>
+        <target state="translated">Geçerli geliştirme ortamında yüklü araçları listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List user wide tools.</source>
-        <target state="new">List user wide tools.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ListToolCommandOnlySupportsGlobal">
-        <source>The --global switch (-g) is currently required because only user wide tools are supported.</source>
-        <target state="new">The --global switch (-g) is currently required because only user wide tools are supported.</target>
+        <target state="translated">Kullanıcıya yönelik araçları listeleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">Sürüm</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">Komutlar</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
         <source>Package Id</source>
-        <target state="new">Package Id</target>
+        <target state="translated">Paket Kimliği</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
         <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="new">Warning: tool package '{0}' is invalid: {1}</target>
+        <target state="translated">Uyarı: '{0}' araç paketi geçersiz: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tools are installed.</source>
+        <target state="new">Location where the tools are installed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalAndToolPathConflict">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
         <note />
       </trans-unit>
     </body>
