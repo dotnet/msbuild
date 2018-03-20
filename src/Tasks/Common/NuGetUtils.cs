@@ -36,6 +36,13 @@ namespace Microsoft.NET.Build.Tasks
             {
                 // this method is just a temporary heuristic until we flow the NuGet metadata through the right items
                 // https://github.com/dotnet/sdk/issues/1091
+
+                // Don't try to recurse a relative path.
+                if (!Path.IsPathRooted(fullPath))
+                {
+                    return;
+                }
+
                 for (var dir = Directory.GetParent(fullPath); dir != null; dir = dir.Parent)
                 {
                     var nuspecs = dir.GetFiles("*.nuspec");
