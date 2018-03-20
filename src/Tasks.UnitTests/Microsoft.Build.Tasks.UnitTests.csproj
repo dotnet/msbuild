@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" />
     <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
-    <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
+    <PackageReference Include="Shouldly" Version="3.0.0" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />

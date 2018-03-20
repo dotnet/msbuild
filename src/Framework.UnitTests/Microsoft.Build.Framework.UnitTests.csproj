@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
+    <PackageReference Include="Shouldly" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
