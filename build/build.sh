@@ -121,6 +121,31 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+function KillProcessWithName {
+  echo "Killing processes containing \"$1\""
+  kill $(ps ax | grep -i "$1" | awk '{ print $1 }')
+}
+
+function StopProcesses {
+  echo "Killing running build processes..."
+  KillProcessWithName "dotnet"
+  KillProcessWithName "vbcscompiler"
+}
+
+function ExitIfError {
+  if [ $1 != 0 ]
+  then
+    echo "$2"
+
+    if ! $ci # kill command not permitted on CI machines
+    then
+      StopProcesses
+    fi
+
+    exit $1
+  fi
+}
+
 function CreateDirectory {
   if [ ! -d "$1" ]
   then
@@ -167,13 +192,7 @@ function CallMSBuild {
 
   eval $commandLine
 
-  LASTEXITCODE=$?
-
-  if [ $LASTEXITCODE != 0 ]
-  then
-    echo "Failed to run MSBuild"
-    exit $LASTEXITCODE
-  fi
+  ExitIfError $? "Failed to run MSBuild: $commandLine"
 }
 
 function GetVersionsPropsVersion {
@@ -267,13 +286,8 @@ function Build {
   then
     CreateDirectory "$NuGetPackageRoot"
     eval "$(QQ $DOTNET_HOST_PATH) nuget locals all --clear"
-    LASTEXITCODE=$?
 
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to clear NuGet cache"
-      exit $LASTEXITCODE
-    fi
+    ExitIfError $? "Failed to clear NuGet cache"
   fi
 
   if [ "$hostType" = "core" ]
@@ -329,15 +343,16 @@ function Build {
   fi
 }
 
-function KillProcessWithName {
-  echo "Killing processes containing \"$1\""
-  kill $(ps ax | grep -i "$1" | awk '{ print $1 }')
-}
+function AssertNugetPackages {
+    packageCount=$(find $PackagesDir -type f | wc -l)
+  if $pack || $dotnetBuildFromSource
+  then
 
-function StopProcesses {
-  echo "Killing running build processes..."
-  KillProcessWithName "dotnet"
-  KillProcessWithName "vbcscompiler"
+    if [ $packageCount -ne 5 ]
+    then
+      ExitIfError 1 "Did not find 5 packages in $PackagesDir"
+    fi
+  fi
 }
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -351,11 +366,12 @@ ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 RepoRoot="$ScriptRoot/.."
 ArtifactsDir="$RepoRoot/artifacts"
 ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
+PackagesDir="$ArtifactsConfigurationDir/packages"
 LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
 
 #https://github.com/dotnet/source-build
-if $dotnetbuildfromsource
+if $dotnetBuildFromSource
 then
   MSBuildSolution="$RepoRoot/MSBuild.SourceBuild.sln"
 else
@@ -410,11 +426,14 @@ fi
 NuGetPackageRoot=$NUGET_PACKAGES
 
 Build
-LASTEXITCODE=$?
 
-if ! $ci # kill command not permitted on CI machines
+ExitIfError $? "Build failed"
+
+if $dotnetBuildFromSource
 then
-  StopProcesses
+  MSBuildSolution="$RepoRoot/MSBuild.SourceBuild.sln"
 fi
 
-exit $LASTEXITCODE
+AssertNugetPackages
+
+ExitIfError $? "AssertNugetPackages failed"
