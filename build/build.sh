@@ -21,6 +21,8 @@ bootstrapOnly=false
 verbosity="minimal"
 hostType="core"
 properties=""
+dotnetBuildFromSource=false
+dotnetCoreSdkDir=""
 
 function Help() { 
   echo "Common settings:"
@@ -45,9 +47,13 @@ function Help() {
   echo "Command line arguments not listed above are passed through to MSBuild."
 }
 
-while [[ $# > 0 ]]; do
+while [[ $# -gt 0 ]]; do
   lowerI="$(echo $1 | awk '{print tolower($0)}')"
   case $lowerI in
+    build)
+      build=true
+      shift 1
+      ;;
     -build)
       build=true
       shift 1
@@ -98,6 +104,14 @@ while [[ $# > 0 ]]; do
       ;;
     -verbosity)
       verbosity=$2
+      shift 2
+      ;;
+    -dotnetbuildfromsource)
+      dotnetBuildFromSource=$2
+      shift 2
+      ;;
+    -dotnetcoresdkdir)
+      dotnetCoreSdkDir=$2
       shift 2
       ;;
     *)
@@ -166,7 +180,7 @@ function GetVersionsPropsVersion {
   echo "$( awk -F'[<>]' "/<$1>/{print \$3}" "$VersionsProps" )"
 }
 
-function InstallDotNetCli {
+function DownloadDotnetCli {
   DotNetCliVersion="$( GetVersionsPropsVersion DotNetCliVersion )"
   DotNetInstallVerbosity=""
 
@@ -203,9 +217,21 @@ function InstallDotNetCli {
       return $LASTEXITCODE
     fi
   fi
+}
+
+function InstallDotNetCli {
+  if [ "$dotnetCoreSdkDir" = "" ]
+  then
+    DownloadDotnetCli
+  else
+    export DOTNET_INSTALL_DIR=$dotnetCoreSdkDir
+  fi
+
+  # don't double quote this otherwise the csc tooltask will fail with double double-quotting
+  export DOTNET_HOST_PATH="$DOTNET_INSTALL_DIR/dotnet"
 
   # Put the stage 0 on the path
-  export PATH="$DotNetRoot:$PATH"
+  export PATH="$DOTNET_INSTALL_DIR:$PATH"
 
   # Disable first run since we want to control all package sources
   export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
@@ -235,10 +261,8 @@ function ErrorHostType {
 
 function Build {
   InstallDotNetCli
-  
-  # don't double quote this otherwise the csc tooltask will fail with double double-quotting
-  export DOTNET_HOST_PATH="$DOTNET_INSTALL_DIR/dotnet"
 
+  echo "Using dotnet from: $DOTNET_INSTALL_DIR"
   if $prepareMachine
   then
     CreateDirectory "$NuGetPackageRoot"
@@ -263,9 +287,7 @@ function Build {
 
   local logCmd=$(GetLogCmd Build)
 
-  solution="$RepoRoot/MSBuild.sln"
-
-  commonMSBuildArgs="/m /nologo /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $solution) /p:CIBuild=$ci"
+  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $MSBuildSolution) /p:CIBuild=$ci"
 
   # Only enable warnaserror on CI runs.
   if $ci
@@ -331,6 +353,14 @@ ArtifactsDir="$RepoRoot/artifacts"
 ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
 LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
+
+#https://github.com/dotnet/source-build
+if $dotnetbuildfromsource
+then
+  MSBuildSolution="$RepoRoot/MSBuild.SourceBuild.sln"
+else
+  MSBuildSolution="$RepoRoot/MSBuild.sln"
+fi
 
 msbuildToUse="msbuild"
 
