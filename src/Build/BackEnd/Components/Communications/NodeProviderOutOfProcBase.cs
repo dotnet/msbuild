@@ -163,8 +163,29 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            string msbuildName;
-            var candidateProcesses = GetPossibleRunningNodes(out msbuildName, ref msbuildLocation);
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
+            }
+
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+
+                if (!String.IsNullOrEmpty(msbuildExeName))
+                {
+                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
+                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
+                }
+            }
+
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = "MSBuild.exe";
+            }
+
+#if FEATURE_NODE_REUSE
+            var candidateProcesses = GetPossibleRunningNodes(msbuildLocation);
 
             CommunicationsUtilities.Trace("Attempting to connect to each existing msbuild.exe process in turn to establish node {0}...", nodeId);
             foreach (Process nodeProcess in candidateProcesses)
@@ -193,6 +214,7 @@ namespace Microsoft.Build.BackEnd
                     return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
                 }
             }
+#endif
 
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
@@ -208,7 +230,7 @@ namespace Microsoft.Build.BackEnd
                 // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                 // nodes because we should never be able to connect in this case.
                 string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
-                if (msbuildName.Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
+                if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
                 {
                     if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                     {
@@ -267,32 +289,9 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
-        private List<Process> GetPossibleRunningNodes(out string msbuildName, ref string msbuildLocation)
+        private List<Process> GetPossibleRunningNodes(string msbuildLocation)
         {
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
-            }
-
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-
-                if (!String.IsNullOrEmpty(msbuildExeName))
-                {
-                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
-                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
-                }
-            }
-
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = "MSBuild.exe";
-            }
-
-            msbuildName = Path.GetFileNameWithoutExtension(msbuildLocation);
-
-            var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost()) ?? msbuildName;
+            var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost() ?? msbuildLocation);
 
             List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(expectedProcessName));
 
