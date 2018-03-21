@@ -238,7 +238,7 @@ namespace Microsoft.Build.BackEnd
             int retries = NodeCreationRetries;
             while (retries-- > 0)
             {
-#if FEATURE_NODE_REUSE
+#if FEATURE_NET35_TASKHOST
                 // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
                 // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                 // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
