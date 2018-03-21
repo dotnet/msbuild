@@ -4,62 +4,62 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to uninstall.</source>
-        <target state="new">NuGet Package Id of the tool to uninstall.</target>
+        <target state="translated">A ID do pacote NuGet da ferramenta a ser desinstalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstalls a tool.</source>
-        <target state="new">Uninstalls a tool.</target>
+        <target state="translated">Desinstala uma ferramenta.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to uninstall.</source>
-        <target state="new">Please specify one tool Package Id to uninstall.</target>
+        <target state="translated">Especifique uma ID de Pacote da ferramenta a ser desinstalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall user wide.</source>
-        <target state="new">Uninstall user wide.</target>
+        <target state="translated">Desinstale para todo o usuário.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="new">Tool '{0}' (version '{1}') was successfully uninstalled.</target>
+        <target state="translated">A ferramenta '{0}' (versão '{1}') foi desinstalada com êxito.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
         <source>Tool '{0}' is not currently installed.</source>
-        <target state="new">Tool '{0}' is not currently installed.</target>
+        <target state="translated">A ferramenta '{0}' não está instalada no momento.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
         <source>Tool '{0}' has multiple versions installed and cannot be uninstalled.</source>
-        <target state="new">Tool '{0}' has multiple versions installed and cannot be uninstalled.</target>
+        <target state="translated">A ferramenta '{0}' tem várias versões instaladas e não pode ser desinstalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallTool">
         <source>Failed to uninstall tool '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool '{0}': {1}</target>
+        <target state="translated">Falha ao desinstalar a ferramenta '{0}': {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Need either global or tool-path provided.</source>
-        <target state="new">Need either global or tool-path provided.</target>
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="needs-review-translation">É necessário o caminho de ferramenta ou global fornecido.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
-        <source>Location of shim to access tool</source>
-        <target state="new">Location of shim to access tool</target>
+        <source>Location where the tool was previously installed.</source>
+        <target state="needs-review-translation">Local do shim para acessar a ferramenta</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>Cannot have global and tool-path as opinion at the same time."</source>
-        <target state="new">Cannot have global and tool-path as opinion at the same time."</target>
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="needs-review-translation">Não é possível ter o caminho de ferramenta e o global como opinião ao mesmo tempo."</target>
         <note />
       </trans-unit>
     </body>

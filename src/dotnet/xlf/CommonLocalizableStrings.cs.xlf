@@ -721,27 +721,27 @@
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
         <source>Tool '{0}' (version '{1}') is already installed.</source>
-        <target state="needs-review-translation">Nástroj {0} je už nainstalovaný.</target>
+        <target state="translated">Nástroj {0} (verze {1}) je už nainstalovaný.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShellShimConflict">
         <source>Command '{0}' conflicts with an existing command from another tool.</source>
-        <target state="new">Command '{0}' conflicts with an existing command from another tool.</target>
+        <target state="translated">Příkaz {0} koliduje s existujícím příkazem jiného nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyExecutablePath">
         <source>Cannot create shell shim for an empty executable path.</source>
-        <target state="new">Cannot create shell shim for an empty executable path.</target>
+        <target state="translated">Pro prázdnou cestu ke spustitelnému souboru nelze vytvořit překrytí prostředí.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotCreateShimForEmptyCommand">
         <source>Cannot create shell shim for an empty command.</source>
-        <target state="new">Cannot create shell shim for an empty command.</target>
+        <target state="translated">Pro prázdný příkaz nelze vytvořit překrytí prostředí.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRetrieveToolConfiguration">
         <source>Failed to retrieve tool configuration: {0}</source>
-        <target state="new">Failed to retrieve tool configuration: {0}</target>
+        <target state="translated">Nepodařilo se načíst konfiguraci nástroje: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxManualInstructions">
@@ -757,15 +757,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
+Pokud používáte bash, přidáte ho do svého profilu spuštěním následujícího příkazu:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# Přidání nástrojů sady .NET Core SDK
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Do aktuální relace ho přidáte spuštěním následujícího příkazu:
 
 export PATH="$PATH:{0}"
 </target>
@@ -784,15 +784,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
+Pokud používáte bash, přidáte ho do svého profilu spuštěním následujícího příkazu:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# Přidání nástrojů sady .NET Core SDK
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Do aktuální relace ho přidáte spuštěním následujícího příkazu:
 
 export PATH="$PATH:{0}"
 </target>
@@ -805,9 +805,9 @@ You can add the directory to the PATH by running the following command:
 
 setx PATH "%PATH%;{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
+        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
 
-You can add the directory to the PATH by running the following command:
+Tento adresář přidáte do proměnné PATH spuštěním následujícího příkazu:
 
 setx PATH "%PATH%;{0}"
 </target>
@@ -815,52 +815,52 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToCreateShellShim">
         <source>Failed to create tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to create tool shim for command '{0}': {1}</target>
+        <target state="translated">Pro příkaz {0} se nepodařilo vytvořit překrytí nástroje: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRemoveShellShim">
         <source>Failed to remove tool shim for command '{0}': {1}</source>
-        <target state="new">Failed to remove tool shim for command '{0}': {1}</target>
+        <target state="translated">Pro příkaz {0} se nepodařilo odebrat překrytí nástroje: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedSettingShimPermissions">
         <source>Failed to set user executable permissions for shell shim: {0}</source>
-        <target state="new">Failed to set user executable permissions for shell shim: {0}</target>
+        <target state="translated">Pro překrytí prostředí se nepodařilo nastavit oprávnění uživatele ke spouštění: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallToolPackage">
         <source>Failed to install tool package '{0}': {1}</source>
-        <target state="new">Failed to install tool package '{0}': {1}</target>
+        <target state="translated">Nepodařilo se nainstalovat balíček nástroje {0}: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToUninstallToolPackage">
         <source>Failed to uninstall tool package '{0}': {1}</source>
-        <target state="new">Failed to uninstall tool package '{0}': {1}</target>
+        <target state="translated">Nepodařilo se odinstalovat balíček nástroje {0}: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
         <source>Column maximum width must be greater than zero.</source>
-        <target state="new">Column maximum width must be greater than zero.</target>
+        <target state="translated">Maximální šířka sloupce musí být větší než nula.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolEntryPointFile">
         <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
-        <target state="new">Entry point file '{0}' for command '{1}' was not found in the package.</target>
+        <target state="translated">Soubor vstupního bodu {0} pro příkaz {1} nebyl v balíčku nalezen.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingToolSettingsFile">
         <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
-        <target state="new">Settings file 'DotnetToolSettings.xml' was not found in the package.</target>
+        <target state="translated">Soubor s nastavením DotnetToolSettings.xml nebyl v balíčku nalezen.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="new">Failed to find staged tool package '{0}'.</target>
+        <target state="translated">Nepodařilo se najít připravený balíček nástroje {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
-        <source>Command '{0}' has a leading dot.</source>
-        <target state="new">Command '{0}' has a leading dot.</target>
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="needs-review-translation">Příkaz {0} obsahuje úvodní tečku.</target>
         <note />
       </trans-unit>
     </body>

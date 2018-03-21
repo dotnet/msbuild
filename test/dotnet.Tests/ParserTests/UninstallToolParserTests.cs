@@ -11,17 +11,17 @@ using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.ParserTests
 {
-    public class UninstallInstallToolParserTests
+    public class UninstallToolParserTests
     {
         private readonly ITestOutputHelper output;
 
-        public UninstallInstallToolParserTests(ITestOutputHelper output)
+        public UninstallToolParserTests(ITestOutputHelper output)
         {
             this.output = output;
         }
 
         [Fact]
-        public void UninstallGlobaltoolParserCanGetPackageId()
+        public void UninstallToolParserCanGetPackageId()
         {
             var command = Parser.Instance;
             var result = command.Parse("dotnet uninstall tool -g console.test.app");
@@ -46,10 +46,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
         public void UninstallToolParserCanParseToolPathOption()
         {
             var result =
-                Parser.Instance.Parse(@"dotnet uninstall tool --tool-path C:\TestAssetLocalNugetFeed console.test.app");
+                Parser.Instance.Parse(@"dotnet uninstall tool --tool-path C:\Tools console.test.app");
 
             var appliedOptions = result["dotnet"]["uninstall"]["tool"];
-            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\TestAssetLocalNugetFeed");
+            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
         }
     }
 }

@@ -123,8 +123,14 @@
   <data name="GlobalOptionDescription" xml:space="preserve">
     <value>List user wide tools.</value>
   </data>
-  <data name="ListToolCommandOnlySupportsGlobal" xml:space="preserve">
-    <value>The --global switch (-g) is currently required because only user wide tools are supported.</value>
+  <data name="ToolPathDescription" xml:space="preserve">
+    <value>Location where the tools are installed.</value>
+  </data>
+  <data name="NeedGlobalOrToolPath" xml:space="preserve">
+    <value>Please specify either the global option (--global) or the tool path option (--tool-path).</value>
+  </data>
+  <data name="GlobalAndToolPathConflict" xml:space="preserve">
+    <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>
   </data>
   <data name="InvalidPackageWarning" xml:space="preserve">
     <value>Warning: tool package '{0}' is invalid: {1}</value>
