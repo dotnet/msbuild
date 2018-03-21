@@ -306,6 +306,11 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Override IsReadOnly property to correctly indicate the mode to callers
+        /// </summary>
+        public override bool IsReadOnly => _loadAsReadOnly.GetValueOrDefault();
+
+        /// <summary>
         /// Reset state for unit tests that want to set the env var
         /// </summary>
         internal static void ClearReadOnlyFlags_UnitTestsOnly()

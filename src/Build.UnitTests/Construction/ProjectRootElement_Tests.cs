@@ -3,7 +3,6 @@
 
 
 using System;
-using System.IO;
 using System.Text;
 using Microsoft.Build.Construction;
 using Xunit;
@@ -51,6 +50,60 @@ bar", false)]
                 ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents);
 
             Assert.False(ProjectRootElement.IsEmptyXmlFile(path));
+        }
+
+        [Fact]
+        public void ProjectLoadedPreservingCommentsAndWhiteSpaceIsNotReadOnly()
+        {
+            var projectContents =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <!--Initial Comment-->
+                       
+                  <!--Ending Comment-->
+                </Project>
+                ";
+
+            using (var env = TestEnvironment.Create())
+            {
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
+                ProjectRootElement xml = ProjectRootElement.Open(testFiles.ProjectFile);
+
+                Assert.False(xml.XmlDocument.IsReadOnly);
+                var children = xml.XmlDocument.ChildNodes;
+                Assert.Equal(1, children.Count);
+                Assert.Equal("Project", children[0].Name);
+                Assert.Equal(2, children[0].ChildNodes.Count);
+                Assert.Equal("Initial Comment", children[0].ChildNodes[0].Value);
+                Assert.Equal("Ending Comment", children[0].ChildNodes[1].Value);
+            }
+        }
+
+        [Fact]
+        public void ProjectLoadedStrippingCommentsAndWhiteSpaceIsReadOnly()
+        {
+            var projectContents =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <!--Initial Comment-->
+                       
+                  <!--Ending Comment-->
+                </Project>
+                ";
+
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASREADONLY", "1");
+
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
+                ProjectRootElement xml = ProjectRootElement.Open(testFiles.ProjectFile);
+
+                Assert.True(xml.XmlDocument.IsReadOnly);
+                var children = xml.XmlDocument.ChildNodes;
+                Assert.Equal(1, children.Count);
+                Assert.Equal("Project", children[0].Name);
+                Assert.Equal(2, children[0].ChildNodes.Count);
+                Assert.Equal(string.Empty, children[0].ChildNodes[0].Value);
+                Assert.Equal(string.Empty, children[0].ChildNodes[1].Value);
+            }
         }
     }
 }

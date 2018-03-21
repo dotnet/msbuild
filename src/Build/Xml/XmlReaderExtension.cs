@@ -40,7 +40,10 @@ namespace Microsoft.Build.Internal
                 _stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                 _streamReader = new StreamReader(_stream, s_utf8NoBom, detectEncodingFromByteOrderMarks: true);
                 Encoding detectedEncoding;
-                Reader = GetXmlReader(_streamReader, out detectedEncoding);
+
+                // The XmlDocumentWithWithLocation class relies on the reader's BaseURI property to be set,
+                // thus we pass the document's file path to the appropriate xml reader constructor.
+                Reader = GetXmlReader(file, _streamReader, out detectedEncoding);
 
                 // Override detected encoding if an XML encoding attribute is specified and that encoding is sufficiently
                 // different from the detected encoding.
@@ -71,17 +74,17 @@ namespace Microsoft.Build.Internal
             _stream?.Dispose();
         }
 
-        private static XmlReader GetXmlReader(StreamReader input, out Encoding encoding)
+        private static XmlReader GetXmlReader(string file, StreamReader input, out Encoding encoding)
         {
 #if FEATURE_XMLTEXTREADER
-            var reader = new XmlTextReader(input) { DtdProcessing = DtdProcessing.Ignore };
+            var reader = new XmlTextReader(file, input) { DtdProcessing = DtdProcessing.Ignore };
 
             reader.Read();
             encoding = input.CurrentEncoding;
 
             return reader;
 #else
-            var xr = XmlReader.Create(input, new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore});
+            var xr = XmlReader.Create(input, new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore}, file);
 
             // Set Normalization = false if possible. Without this, certain line endings will be normalized
             // with \n (specifically in XML comments). Does not throw if if type or property is not found.
