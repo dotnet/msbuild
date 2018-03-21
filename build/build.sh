@@ -301,7 +301,7 @@ function Build {
 
   local logCmd=$(GetLogCmd Build)
 
-  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $MSBuildSolution) /p:CIBuild=$ci"
+  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $MSBuildSolution) /p:CIBuild=$ci /p:DisableNerdbankVersioning=$dotnetBuildFromSource"
 
   # Only enable warnaserror on CI runs.
   if $ci
@@ -352,6 +352,8 @@ function AssertNugetPackages {
     then
       ExitIfError 1 "Did not find 5 packages in $PackagesDir"
     fi
+
+    echo "Ensured that 5 nuget packages were created"
   fi
 }
 
