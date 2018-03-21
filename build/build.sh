@@ -107,8 +107,8 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -dotnetbuildfromsource)
-      dotnetBuildFromSource=$2
-      shift 2
+      dotnetBuildFromSource=true
+      shift 1
       ;;
     -dotnetcoresdkdir)
       dotnetCoreSdkDir=$2
