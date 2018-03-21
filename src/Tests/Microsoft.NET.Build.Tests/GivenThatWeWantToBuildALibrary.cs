@@ -456,20 +456,20 @@ namespace Microsoft.NET.Build.Tests
 
             var definedConstants = getValuesCommand.GetValues();
 
-            definedConstants.Should().BeEquivalentTo(new[] { expectedDefine, "TRACE", "NETSTANDARD1_5" });
+            definedConstants.Should().BeEquivalentTo(new[] { expectedDefine, "TRACE", "NETSTANDARD", "NETSTANDARD1_5" });
         }
 
         [Theory]
-        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD1_0" }, false)]
-        [InlineData("netstandard1.3", new[] { "NETSTANDARD1_3" }, false)]
-        [InlineData("netstandard1.6", new[] { "NETSTANDARD1_6" }, false)]
-        [InlineData("net45", new[] { "NET45" }, true)]
-        [InlineData("net461", new[] { "NET461" }, true)]
-        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP1_0" }, false)]
+        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD", "NETSTANDARD1_0" }, false)]
+        [InlineData("netstandard1.3", new[] { "NETSTANDARD", "NETSTANDARD1_3" }, false)]
+        [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6" }, false)]
+        [InlineData("net45", new[] { "NETFRAMEWORK", "NET45" }, true)]
+        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
+        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0" }, false)]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
-        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NET40" }, false)]
-        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS1_0" }, false)]
-        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK3_14" }, false)]
+        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40" }, false)]
+        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" }, false)]
+        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK", "UNKNOWNFRAMEWORK3_14" }, false)]
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows)
         {
             bool shouldCompile = true;

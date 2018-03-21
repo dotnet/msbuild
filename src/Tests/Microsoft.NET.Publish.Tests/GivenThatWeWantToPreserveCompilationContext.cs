@@ -69,11 +69,11 @@ namespace Microsoft.NET.Publish.Tests
                     string[] expectedDefines;
                     if (targetFramework == "net46")
                     {
-                        expectedDefines = new[] { "DEBUG", "TRACE", "NET46" };
+                        expectedDefines = new[] { "DEBUG", "TRACE", "NETFRAMEWORK", "NET46" };
                     }
                     else
                     {
-                        expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP1_1" };
+                        expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP", "NETCOREAPP1_1" };
                     }
 
                     dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
