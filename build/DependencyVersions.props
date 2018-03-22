@@ -10,7 +10,7 @@
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftFSharpCompilerPackageVersion>10.1.4-rtm-180213-0</MicrosoftFSharpCompilerPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0-beta2-62713-01</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0-beta2-62713-11</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
@@ -21,7 +21,7 @@
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.1-beta3-20180104-1263555</MicrosoftDotNetCommonItemTemplatesPackageVersion>
-    <MicrosoftDotNetCommonProjectTemplates20PackageVersion>1.0.1-beta3-20180104-1263555</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
+    <MicrosoftDotNetCommonProjectTemplates20PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
     <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.1-beta3-20180227-1423805</MicrosoftDotNetTestProjectTemplates20PackageVersion>
     <MicrosoftTemplateEngineCliPackageVersion>1.0.0-beta3-20171204-315</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
@@ -35,7 +35,7 @@
     <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
     <MicrosoftDotNetArchivePackageVersion>0.2.0-beta-62628-01</MicrosoftDotNetArchivePackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.6.0-beta2-25304</MicrosoftDiaSymReaderNativePackageVersion>
-    <NuGetBuildTasksPackageVersion>4.7.0-preview1-4927</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>4.7.0-preview1.4982</NuGetBuildTasksPackageVersion>
     <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
