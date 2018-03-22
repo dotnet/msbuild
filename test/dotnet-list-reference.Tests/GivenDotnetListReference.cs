@@ -33,7 +33,6 @@ Options:
 
 Commands:
   reference   .NET Core Project-to-Project dependency viewer
-  tool        Lists installed tools in the current development environment.
 ";
 
         const string FrameworkNet451Arg = "-f net451";

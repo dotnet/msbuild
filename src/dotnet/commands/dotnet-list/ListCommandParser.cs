@@ -4,7 +4,6 @@
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
-using Microsoft.DotNet.Tools.List.Tool;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -20,7 +19,6 @@ namespace Microsoft.DotNet.Cli
                     description: CommonLocalizableStrings.ArgumentsProjectDescription)
                 .DefaultToCurrentDirectory(),
             CommonOptions.HelpOption(),
-            ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences(),
-            ListToolCommandParser.ListTool());
+            ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences());
     }
 }

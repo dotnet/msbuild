@@ -252,19 +252,9 @@
         <target state="translated">Belirtilen bütünleştirilmiş kodları çalışma zamanı deposunda depolar.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallDefinition">
-        <source>Installs an item into the development environment.</source>
-        <target state="translated">Bir öğeyi geliştirme ortamına yükler.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallDefinition">
-        <source>Uninstalls an item from the development environment.</source>
-        <target state="translated">Bir öğeyi geliştirme ortamından kaldırır.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateDefinition">
-        <source>Updates an item in the development environment.</source>
-        <target state="new">Updates an item in the development environment.</target>
+      <trans-unit id="ToolDefinition">
+        <source>Modify tools.</source>
+        <target state="new">Modify tools.</target>
         <note />
       </trans-unit>
     </body>

@@ -252,19 +252,9 @@
         <target state="translated">將指定組件儲存到執行階段存放區中。</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallDefinition">
-        <source>Installs an item into the development environment.</source>
-        <target state="translated">將項目安裝至部署環境。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallDefinition">
-        <source>Uninstalls an item from the development environment.</source>
-        <target state="translated">將開發環境的項目解除安裝。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateDefinition">
-        <source>Updates an item in the development environment.</source>
-        <target state="new">Updates an item in the development environment.</target>
+      <trans-unit id="ToolDefinition">
+        <source>Modify tools.</source>
+        <target state="new">Modify tools.</target>
         <note />
       </trans-unit>
     </body>

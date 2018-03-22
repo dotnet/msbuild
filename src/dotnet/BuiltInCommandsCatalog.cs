@@ -18,11 +18,9 @@ using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Sln;
 using Microsoft.DotNet.Tools.Store;
 using Microsoft.DotNet.Tools.Test;
-using Microsoft.DotNet.Tools.Uninstall;
 using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
-using Microsoft.DotNet.Tools.Install;
-using Microsoft.DotNet.Tools.Update;
+using Microsoft.DotNet.Tools.Tool;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -147,17 +145,9 @@ namespace Microsoft.DotNet.Cli
             {
                 Command = ParseCommand.Run
             },
-            ["install"] = new BuiltInCommandMetadata
+            ["tool"] = new BuiltInCommandMetadata
             {
-                Command = InstallCommand.Run
-            },
-            ["uninstall"] = new BuiltInCommandMetadata
-            {
-                Command = UninstallCommand.Run
-            },
-            ["update"] = new BuiltInCommandMetadata
-            {
-                Command = UpdateCommand.Run
+                Command = ToolCommand.Run
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {
