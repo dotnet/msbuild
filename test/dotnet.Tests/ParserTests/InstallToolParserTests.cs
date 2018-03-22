@@ -54,10 +54,29 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             const string expectedSourceValue = "TestSourceValue";
 
-            var result = Parser.Instance.Parse($"dotnet install tool -g --source {expectedSourceValue} console.test.app");
+            var result =
+                Parser.Instance.Parse($"dotnet install tool -g --source-feed {expectedSourceValue} console.test.app");
 
             var appliedOptions = result["dotnet"]["install"]["tool"];
-            appliedOptions.ValueOrDefault<string>("source").Should().Be(expectedSourceValue);
+            appliedOptions.ValueOrDefault<string[]>("source-feed").First().Should().Be(expectedSourceValue);
+        }
+
+        [Fact]
+        public void InstallToolParserCanParseMultipleSourceOption()
+        {
+            const string expectedSourceValue1 = "TestSourceValue1";
+            const string expectedSourceValue2 = "TestSourceValue2";
+
+            var result =
+                Parser.Instance.Parse(
+                    $"dotnet install tool -g " +
+                    $"--source-feed {expectedSourceValue1} " +
+                    $"--source-feed {expectedSourceValue2} console.test.app");
+
+            var appliedOptions = result["dotnet"]["install"]["tool"];
+
+            appliedOptions.ValueOrDefault<string[]>("source-feed")[0].Should().Be(expectedSourceValue1);
+            appliedOptions.ValueOrDefault<string[]>("source-feed")[1].Should().Be(expectedSourceValue2);
         }
 
         [Fact]
