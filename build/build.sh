@@ -4,7 +4,6 @@ build=false
 ci=false
 configuration="Debug"
 dogfood=false
-help=false
 log=false
 pack=false
 prepareMachine=false
@@ -13,11 +12,12 @@ restore=false
 sign=false
 solution=""
 test=false
+perf=false
 verbosity="minimal"
-properties=""
+properties=()
 
-while [[ $# > 0 ]]; do
-  lowerI="$(echo $1 | awk '{print tolower($0)}')"
+while [[ $# -gt 0 ]]; do
+  lowerI="$(echo "$1" | awk '{print tolower($0)}')"
   case $lowerI in
     --build)
       build=true
@@ -46,6 +46,7 @@ while [[ $# > 0 ]]; do
       echo "  --build                  Build solution"
       echo "  --rebuild                Rebuild solution"
       echo "  --test                   Run all unit tests in the solution"
+      echo "  --perf                   Run all performance tests in the solution"
       echo "  --sign                   Sign build outputs"
       echo "  --pack                   Package build outputs into NuGet packages and Willow components"
       echo ""
@@ -94,12 +95,16 @@ while [[ $# > 0 ]]; do
       test=true
       shift 1
       ;;
+    --Perf)
+      perf=true
+      shift 1
+      ;;
     --verbosity)
       verbosity=$2
       shift 2
       ;;
     *)
-      properties="$properties $1"
+      properties+=("$1")
       shift 1
       ;;
   esac
@@ -145,7 +150,7 @@ function InstallDotNetCli {
     curl "https://dot.net/v1/dotnet-install.sh" -sSL -o "$DotNetInstallScript"
   fi
 
-  if [[ "$(echo $verbosity | awk '{print tolower($0)}')" == "diagnostic" ]]
+  if [[ "$(echo "$verbosity" | awk '{print tolower($0)}')" == "diagnostic" ]]
   then
     DotNetInstallVerbosity="--verbose"
   fi
@@ -155,7 +160,7 @@ function InstallDotNetCli {
 
   if [ ! -d "$SdkInstallDir" ]
   then
-    bash "$DotNetInstallScript" --version $DotNetCliVersion $DotNetInstallVerbosity
+    bash "$DotNetInstallScript" --version "$DotNetCliVersion" $DotNetInstallVerbosity
     LASTEXITCODE=$?
 
     if [ $LASTEXITCODE != 0 ]
@@ -230,7 +235,7 @@ function InstallRepoToolset {
 
   if $ci || $log
   then
-    CreateDirectory $LogDir
+    CreateDirectory "$LogDir"
     logCmd="/bl:$LogDir/Build.binlog"
   else
     logCmd=""
@@ -239,7 +244,7 @@ function InstallRepoToolset {
   if [ ! -d "$RepoToolsetBuildProj" ]
   then
     ToolsetProj="$ScriptRoot/Toolset.proj"
-    dotnet msbuild $ToolsetProj /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
+    dotnet msbuild "$ToolsetProj" /t:restore /m /nologo /clp:Summary /warnaserror "/v:$verbosity" $logCmd
     LASTEXITCODE=$?
 
     if [ $LASTEXITCODE != 0 ]
@@ -251,16 +256,12 @@ function InstallRepoToolset {
 }
 
 function Build {
-  InstallDotNetCli
-
-  if [ $? != 0 ]
+  if ! InstallDotNetCli
   then
     return $?
   fi
 
-  InstallRepoToolset
-
-  if [ $? != 0 ]
+  if ! InstallRepoToolset
   then
     return $?
   fi
@@ -282,18 +283,18 @@ function Build {
   then
     if $ci || $log
     then
-      CreateDirectory $LogDir
+      CreateDirectory "$LogDir"
       logCmd="/bl:$LogDir/Build.binlog"
     else
       logCmd=""
     fi
 
-    if [ -z $solution ]
+    if [ -z "$solution" ]
     then
       solution="$RepoRoot/sdk.sln"
     fi
 
-    dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd /p:Configuration=$configuration /p:SolutionPath=$solution /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci $properties
+    dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror "/v:$verbosity" $logCmd "/p:Configuration=$configuration" "/p:SolutionPath=$solution" /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:PerformanceTest=$perf /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci "${properties[@]}"
     LASTEXITCODE=$?
 
     if [ $LASTEXITCODE != 0 ]
@@ -332,7 +333,7 @@ LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
 
 # HOME may not be defined in some scenarios, but it is required by NuGet
-if [ -z $HOME ]
+if [ -z "$HOME" ]
 then
   export HOME="$ArtifactsDir/.home/"
   CreateDirectory "$HOME"
@@ -347,7 +348,7 @@ then
   export TMP="$TempDir"
 fi
 
-if [ -z $NUGET_PACKAGES ]
+if [ -z "$NUGET_PACKAGES" ]
 then
   export NUGET_PACKAGES="$HOME/.nuget/packages"
 fi
