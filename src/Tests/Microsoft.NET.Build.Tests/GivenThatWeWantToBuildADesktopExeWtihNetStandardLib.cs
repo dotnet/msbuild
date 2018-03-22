@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_includes_netstandard(bool isSdk, ReferenceScenario scenario)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset(GetTemplateName(isSdk), identifier: scenario.ToString())
+                .CopyTestAsset(GetTemplateName(isSdk), identifier: (isSdk ? "sdk_" : "") + scenario.ToString())
                 .WithSource()
                 .WithProjectChanges((projectPath, project) =>
                 {
@@ -194,7 +194,8 @@ namespace Microsoft.NET.Build.Tests
             var successMessage = "No conflicts found for support libs";
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset(GetTemplateName(isSdk, usePackagesConfig))
+                .CopyTestAsset(GetTemplateName(isSdk, usePackagesConfig),
+                               identifier: isSdk.ToString() + "_" + usePackagesConfig.ToString())
                 .WithSource()
                 .WithProjectChanges((projectPath, project) =>
                 {
@@ -276,7 +277,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_does_not_include_netstandard_when_inbox(bool isSdk)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset(GetTemplateName(isSdk))
+                .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())
                 .WithSource()
                 .WithProjectChanges((projectPath, project) =>
                 {
@@ -345,7 +346,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_does_not_include_netstandard_when_libary_targets_netstandard14(bool isSdk)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset(GetTemplateName(isSdk))
+                .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())
                 .WithSource()
                 .WithProjectChanges((projectPath, project) =>
                 {
@@ -385,7 +386,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_includes_netstandard_when_libary_targets_netstandard15(bool isSdk)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset(GetTemplateName(isSdk))
+                .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())
                 .WithSource()
                 .WithProjectChanges((projectPath, project) =>
                 {
