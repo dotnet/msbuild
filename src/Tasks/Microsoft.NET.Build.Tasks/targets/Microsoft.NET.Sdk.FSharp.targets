@@ -37,7 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefineConstants>$(DefineConstants);$(ImplicitConfigurationDefine)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup  Condition=" '$(UseBundledFSharpTargets)' == 'true' ">
-    <DefineConstants>$(DefineConstants);$(ImplicitFrameworkDefine)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine)</DefineConstants>
   </PropertyGroup>
 
   <!-- ***************************************************************************************************************
