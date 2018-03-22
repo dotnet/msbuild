@@ -89,6 +89,17 @@ namespace Microsoft.NET.Build.Tasks
         public bool EnsureRuntimePackageDependencies { get; set; }
 
         /// <summary>
+        /// Identifier for implicitly referenced platform package.  If set, then an error will be generated if the
+        /// version of that package from the assets file does not match the <see cref="ExpectedPlatformPackageVersion"/>
+        /// </summary>
+        public string ImplicitPlatformPackageIdentifier { get; set; }
+
+        /// <summary>
+        /// Expected version of the <see cref="ImplicitPlatformPackageIdentifier"/>
+        /// </summary>
+        public string ExpectedPlatformPackageVersion { get; set; }
+
+        /// <summary>
         /// Full paths to assemblies from packages to pass to compiler as analyzers.
         /// </summary>
         [Output]
@@ -288,7 +299,9 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(DisableTransitiveProjectReferences);
                     writer.Write(EmitAssetsLogMessages);
                     writer.Write(EnsureRuntimePackageDependencies);
+                    writer.Write(ExpectedPlatformPackageVersion ?? "");
                     writer.Write(MarkPackageReferencesAsExternallyResolved);
+                    writer.Write(ImplicitPlatformPackageIdentifier ?? "");
                     writer.Write(ProjectAssetsCacheFile);
                     writer.Write(ProjectAssetsFile);
                     writer.Write(ProjectLanguage ?? "");
@@ -660,12 +673,47 @@ namespace Microsoft.NET.Build.Tasks
                     WriteMetadata(MetadataKeys.Severity, GetSeverity(message.Level));
                 }
 
+                WriteAdditionalLogMessages();
+            }
+
+            private static readonly char [] _specialNuGetVersionChars = new char[]
+                {
+                    '*',
+                    '(', ')',
+                    '[', ']'
+                };
+
+            /// <summary>
+            /// Writes log messages which are not directly in the assets file, but are based on conditions
+            /// this task evaluates
+            /// </summary>
+            private void WriteAdditionalLogMessages()
+            {
                 if (_task.EnsureRuntimePackageDependencies && !string.IsNullOrEmpty(_task.RuntimeIdentifier))
                 {
                     if (_compileTimeTarget.Libraries.Count >= _runtimeTarget.Libraries.Count)
                     {
                         WriteItem(string.Format(Strings.UnsupportedRuntimeIdentifier, _task.RuntimeIdentifier));
                         WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
+                    }
+                }
+                
+                if (!string.IsNullOrEmpty(_task.ImplicitPlatformPackageIdentifier) &&
+                    !string.IsNullOrEmpty(_task.ExpectedPlatformPackageVersion) &&
+                    _task.ExpectedPlatformPackageVersion.IndexOfAny(_specialNuGetVersionChars) < 0)
+                {
+                    var platformLibrary = _runtimeTarget.GetLibrary(_task.ImplicitPlatformPackageIdentifier);
+                    if (platformLibrary != null)
+                    {
+                        string restoredPlatformLibraryVersion = platformLibrary.Version.ToNormalizedString();
+                        if (restoredPlatformLibraryVersion != _task.ExpectedPlatformPackageVersion)
+                        {
+                            WriteItem(string.Format(Strings.MismatchedPlatformPackageVersion,
+                                                    _task.ImplicitPlatformPackageIdentifier,
+                                                    restoredPlatformLibraryVersion,
+                                                    _task.ExpectedPlatformPackageVersion));
+                            WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
+                        }
                     }
                 }
             }

@@ -129,7 +129,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeFrameworkVersion Condition="'$(TargetLatestRuntimePatch)' == 'true' ">$(LatestNetCorePatchVersion)</RuntimeFrameworkVersion>
     <RuntimeFrameworkVersion Condition="'$(TargetLatestRuntimePatch)' != 'true' ">$(DefaultNetCorePatchVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- This property is different than MicrosoftNETPlatformLibrary.  MicrosoftNETPlatformLibrary is
+         used to trim the dependencies published with a framework-dependent app, and is overridden
+         by ASP.NET packages.
+         
+         The ImplicitPlatformPackageIdentifier is the package that is actually implicitly
+         referenced by the SDK, and is passed into the ResolvePackageAssets task
+         to verify that the restored version of the package matches the
+         RuntimeFrameworkVersion -->
+    <ImplicitPlatformPackageIdentifier>Microsoft.NETCore.App</ImplicitPlatformPackageIdentifier>
+  </PropertyGroup>
   
   <!--
     Automatically add Link metadata to items of specific types if they are outside of the project folder and don't already have the Link metadata set.
