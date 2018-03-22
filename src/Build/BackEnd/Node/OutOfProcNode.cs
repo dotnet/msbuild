@@ -710,7 +710,7 @@ namespace Microsoft.Build.Execution
             catch (DirectoryNotFoundException)
             {
                 // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
-                NativeMethodsShared.SetCurrentDirectory(Environment.SystemDirectory);
+                NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
             }
 
             // Replicate the environment.  First, unset any environment variables set by the previous configuration.
