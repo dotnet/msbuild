@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using System.Collections.Generic;
 using System;
 using Xunit.Abstractions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -55,32 +56,45 @@ namespace Microsoft.NET.Build.Tests
 
             var analyzers = command.GetValues();
 
-            IEnumerable<string> NuGetCachePaths(params string[] relativePaths)
-                => relativePaths.Select(
-                    r => Path.Combine(TestContext.Current.NuGetCachePath, r.Replace('/', Path.DirectorySeparatorChar)));
+            List<string> nugetRoots = new List<string>()
+            {
+                TestContext.Current.NuGetCachePath,
+                Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "NuGetFallbackFolder")
+            };
+
+            string RelativeNuGetPath(string absoluteNuGetPath)
+            {
+                foreach (var nugetRoot in nugetRoots)
+                {
+                    if (absoluteNuGetPath.StartsWith(nugetRoot + Path.DirectorySeparatorChar))
+                    {
+                        return absoluteNuGetPath.Substring(nugetRoot.Length + 1)
+                                    .Replace(Path.DirectorySeparatorChar, '/');
+                    }
+                }
+                throw new InvalidDataException("Expected path to be under a NuGet root: " + absoluteNuGetPath);
+            }
 
             switch (language)
             {
                 case "C#":
-                    analyzers.Should().BeEquivalentTo(
-                        NuGetCachePaths(
-                            "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
-                            "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
-                            "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll",
-                            "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.CSharp.Analyzers.dll",
-                            "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
-                            ));
+                    analyzers.Select(RelativeNuGetPath).Should().BeEquivalentTo(
+                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
+                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
+                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll",
+                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.CSharp.Analyzers.dll",
+                        "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
+                        );
                     break;
 
                 case "VB":
-                    analyzers.Should().BeEquivalentTo(
-                        NuGetCachePaths(
-                            "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/vb/Microsoft.CodeAnalysis.Analyzers.dll",
-                            "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll",
-                            "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll",
-                            "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll",
-                            "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
-                            ));
+                    analyzers.Select(RelativeNuGetPath).Should().BeEquivalentTo(
+                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/vb/Microsoft.CodeAnalysis.Analyzers.dll",
+                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll",
+                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll",
+                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll",
+                        "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
+                        );
                     break;
 
                 case "F#":

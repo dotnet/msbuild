@@ -127,7 +127,7 @@ namespace Microsoft.NET.Build.Tests
 
                 var additionalProbingPaths = ((JArray)devruntimeConfig["runtimeOptions"]["additionalProbingPaths"]).Values<string>();
                 // can't use Path.Combine on segments with an illegal `|` character
-                var expectedPath = $"{Path.Combine(GetUserProfile(), ".dotnet", "store")}{Path.DirectorySeparatorChar}|arch|{Path.DirectorySeparatorChar}|tfm|";
+                var expectedPath = $"{Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "store")}{Path.DirectorySeparatorChar}|arch|{Path.DirectorySeparatorChar}|tfm|";
                 additionalProbingPaths.Should().Contain(expectedPath);
             }
 
@@ -429,21 +429,6 @@ public static class Program
                 .Select(Path.GetFileName)
                 .Should()
                 .BeEquivalentTo("netcoreapp1.1");
-        }
-
-        private static string GetUserProfile()
-        {
-            string userDir;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                userDir = "USERPROFILE";
-            }
-            else
-            {
-                userDir = "HOME";
-            }
-
-            return Environment.GetEnvironmentVariable(userDir);
         }
     }
 }
