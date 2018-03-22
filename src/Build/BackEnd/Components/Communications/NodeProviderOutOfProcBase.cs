@@ -514,11 +514,6 @@ namespace Microsoft.Build.BackEnd
                 processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
                 processStartInfo.UseShellExecute = false;
 
-                if (commandLineArgs.Contains("euse:true"))
-                {
-                    throw new Exception();
-                }
-
                 Process process;
                 try
                 {
