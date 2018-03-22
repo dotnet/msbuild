@@ -21,6 +21,7 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -57,13 +58,27 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp1.1", true, true, "1.1.7")]
         [InlineData("netcoreapp1.1", false, false, "1.1.2")]
         [InlineData("netcoreapp2.0", false, true, "2.0.0")]
-        [InlineData("netcoreapp2.0", true, true, "2.0.6")]
+        [InlineData("netcoreapp2.0", true, true, TestContext.LatestRuntimePatchForNetCoreApp2_0)]
         [InlineData("netcoreapp2.0", false, false, "2.0.0")]
         public void It_targets_the_right_framework_depending_on_output_type(string targetFramework, bool selfContained, bool isExe, string expectedFrameworkVersion)
         {
             string testIdentifier = "Framework_targeting_" + targetFramework + "_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
 
             It_targets_the_right_framework(testIdentifier, targetFramework, null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion);
+        }
+
+        [Fact]
+        public void The_RuntimeFrameworkVersion_can_float()
+        {
+            It_targets_the_right_framework(
+                nameof(The_RuntimeFrameworkVersion_can_float),
+                "netcoreapp2.0",
+                "2.0.*",
+                false,
+                true,
+                TestContext.LatestRuntimePatchForNetCoreApp2_0,
+                TestContext.LatestRuntimePatchForNetCoreApp2_0
+                );
         }
 
         private void It_targets_the_right_framework(
@@ -136,6 +151,38 @@ namespace Microsoft.NET.Build.Tests
             var target = lockFile.GetTarget(NuGetFramework.Parse(targetFramework), null);
             var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
             netCoreAppLibrary.Version.ToString().Should().Be(expectedPackageVersion);
+        }
+
+        [Fact]
+        public void It_errors_if_restored_for_wrong_netcore_version()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MismatchFrameworkTest",
+                TargetFrameworks = "netcoreapp2.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            string runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+
+            testProject.AdditionalProperties["RuntimeIdentifiers"] = runtimeIdentifier;            
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var result = buildCommand.Execute($"/p:RuntimeIdentifier={runtimeIdentifier}");
+
+            result.Should().Fail();
+
+            //  Get everything after the {2} in the failure message so this test doesn't need to
+            //  depend on the exact version the app would be rolled forward to
+            string expectedFailureMessage = Strings.MismatchedPlatformPackageVersion
+                .Substring(Strings.MismatchedPlatformPackageVersion.IndexOf("{2}") + 3);
+
+            result.Should().HaveStdOutContaining(expectedFailureMessage);
         }
 
         [Fact]

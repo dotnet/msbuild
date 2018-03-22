@@ -45,6 +45,8 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
+        public const string LatestRuntimePatchForNetCoreApp2_0 = "2.0.6";
+
         public void AddTestEnvironmentVariables(SdkCommandSpec command)
         {
             command.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
