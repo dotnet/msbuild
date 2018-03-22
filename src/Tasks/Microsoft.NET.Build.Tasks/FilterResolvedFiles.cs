@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var lockFileCache = new LockFileCache(BuildEngine4);
+            var lockFileCache = new LockFileCache(this);
             LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(

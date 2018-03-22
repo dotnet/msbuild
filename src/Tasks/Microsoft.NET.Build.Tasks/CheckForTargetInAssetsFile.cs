@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
+            LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
 
             var nugetFramework = NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker);
 

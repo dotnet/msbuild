@@ -333,4 +333,7 @@
   <data name="ProjectContainsObsoleteDotNetCliTool" xml:space="preserve">
     <value>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</value>
   </data>
+  <data name="ErrorReadingAssetsFile" xml:space="preserve">
+    <value>Error reading assets file: {0}</value>
+  </data>
 </root>
