@@ -227,7 +227,7 @@ namespace Microsoft.Build.BackEnd
                 PipeOptions.Asynchronous | PipeOptions.WriteThrough,
                 PipeBufferSize, // Default input buffer
                 PipeBufferSize  // Default output buffer
-#if FEATURE_PIPE_SECURITY
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
                 , security,
                 HandleInheritability.None
 #endif
