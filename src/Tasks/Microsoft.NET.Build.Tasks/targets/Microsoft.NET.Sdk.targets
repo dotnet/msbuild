@@ -578,4 +578,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ConflictResolution.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.targets" Condition="'$(Language)' == 'F#'" />
 </Project>
