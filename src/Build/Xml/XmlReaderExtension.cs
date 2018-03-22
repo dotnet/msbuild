@@ -76,15 +76,16 @@ namespace Microsoft.Build.Internal
 
         private static XmlReader GetXmlReader(string file, StreamReader input, out Encoding encoding)
         {
+            var uri = new Uri(file);
 #if FEATURE_XMLTEXTREADER
-            var reader = new XmlTextReader(file, input) { DtdProcessing = DtdProcessing.Ignore };
+            var reader = new XmlTextReader(uri.AbsoluteUri, input) { DtdProcessing = DtdProcessing.Ignore };
 
             reader.Read();
             encoding = input.CurrentEncoding;
 
             return reader;
 #else
-            var xr = XmlReader.Create(input, new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore}, file);
+            var xr = XmlReader.Create(input, new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore}, uri.AbsoluteUri);
 
             // Set Normalization = false if possible. Without this, certain line endings will be normalized
             // with \n (specifically in XML comments). Does not throw if if type or property is not found.
