@@ -1,9 +1,11 @@
 <Project>
+  <Import Project="BundledDotnetTools.props" />
+
   <Target Name="GenerateMSBuildExtensions"
-          DependsOnTargets="GenerateBundledVersionsProps;RestoreMSBuildExtensionsPackages">
+          DependsOnTargets="GenerateBundledVersionsProps;GenerateBundledCliToolsProps;RestoreMSBuildExtensionsPackages">
 
     <ItemGroup>
-      
+
       <!-- The MSBuildExtensionsContent item is for the files that will be laid out in the CLI install -->
       <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
 
@@ -11,19 +13,19 @@
            from that package under the net461, net462, etc folders.  That is because they come from the NETStandard.Library.NETFramework
            package, and we want to insert them directly into the CLI from CoreFx instead of having to do a two-hop insertion (CoreFX -> SDK -> CLI)
            if we need to update them.
-           
+
            https://github.com/dotnet/sdk/issues/1324 has been filed to exclude these from the Microsoft.NET.Build.Extensions package when
            we generate it.
            -->
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
                                 Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**" />
-      
+
       <!-- Don't include .NET Framework MS.NET.Build.Extensions tasks in CLI layout -->
       <MSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net46\**" />
 
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
                                 DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
-      
+
       <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
                                 Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
                                 DeploymentSubpath="Microsoft/Microsoft.NET.Build.Extensions/" />
@@ -68,7 +70,7 @@
     <ItemGroup>
       <ExtensionPackageToRestore Include="$(MSBuildExtensionsPackageName)" Version="$(MicrosoftNETBuildExtensionsPackageVersion)"/>
       <ExtensionPackageToRestore Include="$(NETStandardLibraryNETFrameworkPackageName)" Version="$(CLI_NETStandardLibraryNETFrameworkVersion)"/>
-      
+
       <ExtensionRestore Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
@@ -91,7 +93,7 @@
       <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
     </PropertyGroup>
 
-    <!-- 
+    <!--
       The bundled version of Microsoft.NETCore.App is determined statically from DependencyVersions.props whereas the bundled version
       of NETStandard.Library is defined by what Microsoft.NETCore.App pulls in. This digs in to the package resolution items of
       of our build against Microsoft.NETCore.App to find the correct NETStandard.Library version
@@ -150,6 +152,40 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)" />
     <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFileName)"
                       Lines="$(BundledVersionsPropsContent)"
+                      Overwrite="true" />
+  </Target>
+
+  <Target Name="GenerateBundledCliToolsProps">
+    <PropertyGroup>
+      <BundledBundledCliToolsPropsFileName>Microsoft.NETCoreSdk.BundledCliTools.props</BundledBundledCliToolsPropsFileName>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <BundledBundledCliToolsPropsContent>
+<![CDATA[
+<!--
+***********************************************************************************************
+$(BundledBundledCliToolsPropsFileName)
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project>
+  <ItemGroup>
+@(BundledDotnetTools->HasMetadata('ObsoletesCliTool')->'    %3CBundledDotNetCliToolReference Include="%(ObsoletesCliTool)" /%3E','%0A')
+  </ItemGroup>
+</Project>
+]]>
+    </BundledBundledCliToolsPropsContent>
+  </PropertyGroup>
+
+    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)" />
+    <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledBundledCliToolsPropsFileName)"
+                      Lines="$(BundledBundledCliToolsPropsContent)"
                       Overwrite="true" />
   </Target>
 </Project>
