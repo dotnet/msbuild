@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", "SelfContained")
                 .WithSource()
-                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifiers={rid}");
+                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifier={rid}");
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}");

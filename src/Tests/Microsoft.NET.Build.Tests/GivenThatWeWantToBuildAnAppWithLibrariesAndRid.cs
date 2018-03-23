@@ -23,6 +23,12 @@ namespace Microsoft.NET.Build.Tests
         public void It_builds_a_RID_specific_runnable_output()
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+            string[] msbuildArgs = new[]
+            {
+                $"/p:RuntimeIdentifier={runtimeIdentifier}",
+                $"/p:TestRuntimeIdentifier={runtimeIdentifier}"
+            };
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryAndRid")
                 .WithSource();
@@ -31,14 +37,14 @@ namespace Microsoft.NET.Build.Tests
 
             var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
             restoreCommand
-                .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
+                .Execute(msbuildArgs)
                 .Should()
                 .Pass();
 
             var buildCommand = new BuildCommand(Log, projectPath);
 
             buildCommand
-                .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}", $"/p:TestRuntimeIdentifier={runtimeIdentifier}")
+                .Execute(msbuildArgs)
                 .Should()
                 .Pass();
 
