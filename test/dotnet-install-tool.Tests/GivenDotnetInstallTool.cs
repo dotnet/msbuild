@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.Cli.Install.Tests
         [Fact]
         public void ItRunsWithQuietVerbosityByDefault()
         {
-            var result = new InstallCommand()
-                .ExecuteWithCapturedOutput("tool -g nonexistent_tool_package");
+            var result = new ToolCommand()
+                .ExecuteWithCapturedOutput("install -g nonexistent_tool_package");
 
             result
                 .Should()
@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Cli.Install.Tests
         [Fact]
         public void ItRunsWithTheSpecifiedVerbosity()
         {
-            var result = new InstallCommand()
-                .ExecuteWithCapturedOutput("tool -g -v:m nonexistent_tool_package");
+            var result = new ToolCommand()
+                .ExecuteWithCapturedOutput("install -g -v:m nonexistent_tool_package");
 
             result
                 .Should()

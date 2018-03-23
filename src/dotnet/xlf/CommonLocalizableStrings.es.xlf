@@ -600,8 +600,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="translated">Tipo de proyecto no admitido. Consulte a su proveedor de SDK.</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <target state="needs-review-translation">Tipo de proyecto no admitido. Consulte a su proveedor de SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">

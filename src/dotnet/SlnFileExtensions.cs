@@ -37,10 +37,12 @@ namespace Microsoft.DotNet.Tools.Common
             }
             else
             {
+                ProjectRootElement rootElement = null;
                 ProjectInstance projectInstance = null;
                 try
                 {
-                    projectInstance = new ProjectInstance(fullProjectPath);
+                    rootElement = ProjectRootElement.Open(fullProjectPath);
+                    projectInstance = new ProjectInstance(rootElement);
                 }
                 catch (InvalidProjectFileException e)
                 {
@@ -54,10 +56,19 @@ namespace Microsoft.DotNet.Tools.Common
                 var slnProject = new SlnProject
                 {
                     Id = projectInstance.GetProjectId(),
-                    TypeGuid = projectInstance.GetProjectTypeGuid(),
+                    TypeGuid = rootElement.GetProjectTypeGuid() ?? projectInstance.GetDefaultProjectTypeGuid(),
                     Name = Path.GetFileNameWithoutExtension(relativeProjectPath),
                     FilePath = relativeProjectPath
                 };
+
+                if (string.IsNullOrEmpty(slnProject.TypeGuid))
+                {
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            CommonLocalizableStrings.UnsupportedProjectType,
+                            projectInstance.FullPath));
+                    return;
+                }
 
                 // NOTE: The order you create the sections determines the order they are written to the sln
                 // file. In the case of an empty sln file, in order to make sure the solution configurations

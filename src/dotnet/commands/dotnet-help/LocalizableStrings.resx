@@ -267,13 +267,7 @@
   <data name="AdditionalDeps" xml:space="preserve">
     <value>Path to additional deps.json file.</value>
   </data>
-  <data name="InstallDefinition" xml:space="preserve">
-    <value>Installs an item into the development environment.</value>
-  </data>
-  <data name="UninstallDefinition" xml:space="preserve">
-    <value>Uninstalls an item from the development environment.</value>
-  </data>
-  <data name="UpdateDefinition" xml:space="preserve">
-    <value>Updates an item in the development environment.</value>
+  <data name="ToolDefinition" xml:space="preserve">
+    <value>Modify tools.</value>
   </data>
 </root>

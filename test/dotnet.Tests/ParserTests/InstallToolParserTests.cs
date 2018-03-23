@@ -24,9 +24,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         public void InstallGlobaltoolParserCanGetPackageIdAndPackageVersion()
         {
             var command = Parser.Instance;
-            var result = command.Parse("dotnet install tool -g console.test.app --version 1.0.1");
+            var result = command.Parse("dotnet tool install -g console.test.app --version 1.0.1");
 
-            var parseResult = result["dotnet"]["install"]["tool"];
+            var parseResult = result["dotnet"]["tool"]["install"];
 
             var packageId = parseResult.Arguments.Single();
             var packageVersion = parseResult.ValueOrDefault<string>("version");
@@ -41,9 +41,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var command = Parser.Instance;
             var result =
                 command.Parse(
-                    @"dotnet install tool -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
+                    @"dotnet tool install -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
 
-            var parseResult = result["dotnet"]["install"]["tool"];
+            var parseResult = result["dotnet"]["tool"]["install"];
 
             parseResult.ValueOrDefault<string>("configfile").Should().Be(@"C:\TestAssetLocalNugetFeed");
             parseResult.ValueOrDefault<string>("framework").Should().Be("netcoreapp2.0");
@@ -55,9 +55,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
             const string expectedSourceValue = "TestSourceValue";
 
             var result =
-                Parser.Instance.Parse($"dotnet install tool -g --source-feed {expectedSourceValue} console.test.app");
+                Parser.Instance.Parse($"dotnet tool install -g --source-feed {expectedSourceValue} console.test.app");
 
-            var appliedOptions = result["dotnet"]["install"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["install"];
             appliedOptions.ValueOrDefault<string[]>("source-feed").First().Should().Be(expectedSourceValue);
         }
 
@@ -69,11 +69,11 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result =
                 Parser.Instance.Parse(
-                    $"dotnet install tool -g " +
+                    $"dotnet tool install -g " +
                     $"--source-feed {expectedSourceValue1} " +
                     $"--source-feed {expectedSourceValue2} console.test.app");
 
-            var appliedOptions = result["dotnet"]["install"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["install"];
 
             appliedOptions.ValueOrDefault<string[]>("source-feed")[0].Should().Be(expectedSourceValue1);
             appliedOptions.ValueOrDefault<string[]>("source-feed")[1].Should().Be(expectedSourceValue2);
@@ -82,9 +82,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void InstallToolParserCanGetGlobalOption()
         {
-            var result = Parser.Instance.Parse("dotnet install tool -g console.test.app");
+            var result = Parser.Instance.Parse("dotnet tool install -g console.test.app");
 
-            var appliedOptions = result["dotnet"]["install"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["install"];
             appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
         }
 
@@ -93,19 +93,19 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             const string expectedVerbosityLevel = "diag";
 
-            var result = Parser.Instance.Parse($"dotnet install tool -g --verbosity:{expectedVerbosityLevel} console.test.app");
+            var result = Parser.Instance.Parse($"dotnet tool install -g --verbosity:{expectedVerbosityLevel} console.test.app");
 
-            var appliedOptions = result["dotnet"]["install"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["install"];
             appliedOptions.SingleArgumentOrDefault("verbosity").Should().Be(expectedVerbosityLevel);
         }
-        
+
         [Fact]
         public void InstallToolParserCanParseToolPathOption()
         {
             var result =
-                Parser.Instance.Parse(@"dotnet install tool --tool-path C:\Tools console.test.app");
+                Parser.Instance.Parse(@"dotnet tool install --tool-path C:\Tools console.test.app");
 
-            var appliedOptions = result["dotnet"]["install"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["install"];
             appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
         }
     }

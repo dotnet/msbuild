@@ -28,9 +28,7 @@ path-to-application:
   msbuild          {LocalizableStrings.MsBuildDefinition}
   vstest           {LocalizableStrings.VsTestDefinition}
   store            {LocalizableStrings.StoreDefinition}
-  install          {LocalizableStrings.InstallDefinition}
-  uninstall        {LocalizableStrings.UninstallDefinition}
-  update           {LocalizableStrings.UpdateDefinition}
+  tool             {LocalizableStrings.ToolDefinition}
   help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:

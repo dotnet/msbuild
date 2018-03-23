@@ -365,6 +365,66 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItPrefersTheValueOfAppUrlFromEnvVarOverTheProp()
+        {
+            var testAppName = "AppWithApplicationUrlInLaunchSettings";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("/p:SkipInvalidConfigurations=true")
+                .Should().Pass();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
+            var cmd = new RunCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("--launch-profile First");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("http://localhost:12345/");
+                         
+            cmd.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ItUsesTheValueOfAppUrlIfTheEnvVarIsNotSet()
+        {
+            var testAppName = "AppWithApplicationUrlInLaunchSettings";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("/p:SkipInvalidConfigurations=true")
+                .Should().Pass();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
+            var cmd = new RunCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("--launch-profile Second");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("http://localhost:54321/");
+                         
+            cmd.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
         public void ItGivesAnErrorWhenTheLaunchProfileNotFound()
         {
             var testAppName = "AppWithLaunchSettings";
