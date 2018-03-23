@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Configurer
         private IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
         private IAspNetCertificateSentinel _aspNetCertificateSentinel;
         private IAspNetCoreCertificateGenerator _aspNetCoreCertificateGenerator;
+        private IFileSentinel _toolPathSentinel;
         private string _cliFallbackFolderPath;
         private readonly IEnvironmentPath _pathAdder;
 
@@ -27,6 +28,7 @@ namespace Microsoft.DotNet.Configurer
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IAspNetCoreCertificateGenerator aspNetCoreCertificateGenerator,
+            IFileSentinel toolPathSentinel,
             IEnvironmentProvider environmentProvider,
             IReporter reporter,
             string cliFallbackFolderPath,
@@ -37,6 +39,7 @@ namespace Microsoft.DotNet.Configurer
             _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
             _aspNetCertificateSentinel = aspNetCertificateSentinel;
             _aspNetCoreCertificateGenerator = aspNetCoreCertificateGenerator;
+            _toolPathSentinel = toolPathSentinel;
             _environmentProvider = environmentProvider;
             _reporter = reporter;
             _cliFallbackFolderPath = cliFallbackFolderPath;
@@ -45,7 +48,10 @@ namespace Microsoft.DotNet.Configurer
 
         public void Configure()
         {
-            AddPackageExecutablePath();
+            if (ShouldAddPackageExecutablePath())
+            {
+                AddPackageExecutablePath();
+            }
 
             if (ShouldPrintFirstTimeUseNotice())
             {
@@ -66,7 +72,7 @@ namespace Microsoft.DotNet.Configurer
                 }
             }
 
-            if(ShouldGenerateAspNetCertificate())
+            if (ShouldGenerateAspNetCertificate())
             {
                 GenerateAspNetCertificate();
             }
@@ -92,21 +98,16 @@ namespace Microsoft.DotNet.Configurer
                 !_aspNetCertificateSentinel.Exists();
         }
 
+        private bool ShouldAddPackageExecutablePath()
+        {
+            return ShouldRunFirstRunExperience() && !_toolPathSentinel.Exists();
+        }
+
         private void AddPackageExecutablePath()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (!_firstTimeUseNoticeSentinel.Exists())
-                { 
-                    // Invoke when Windows first run
-                    _pathAdder.AddPackageExecutablePathToUserPath();
-                }
-            }
-            else
-            {
-                // Invoke during installer, otherwise, _pathAdder will be no op object that this point
-                _pathAdder.AddPackageExecutablePathToUserPath();
-            }
+            _pathAdder.AddPackageExecutablePathToUserPath();
+
+            _toolPathSentinel.Create();
         }
 
         private bool ShouldPrintFirstTimeUseNotice()

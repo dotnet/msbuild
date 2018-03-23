@@ -595,6 +595,9 @@ setx PATH "%PATH%;{0}"
   <data name="EnvironmentPathWindowsNeedReopen" xml:space="preserve">
     <value>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</value>
   </data>
+  <data name="FailedToSetToolsPathEnvironmentVariable" xml:space="preserve">
+    <value>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</value>
+  </data>
   <data name="FailedToCreateShellShim" xml:space="preserve">
     <value>Failed to create tool shim for command '{0}': {1}</value>
   </data>

@@ -20,9 +20,10 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         private Mock<IFirstTimeUseNoticeSentinel> _firstTimeUseNoticeSentinelMock;
         private Mock<IAspNetCertificateSentinel> _aspNetCertificateSentinelMock;
         private Mock<IAspNetCoreCertificateGenerator> _aspNetCoreCertificateGeneratorMock;
+        private Mock<IFileSentinel> _toolPathSentinelMock;
         private Mock<IEnvironmentProvider> _environmentProviderMock;
         private Mock<IReporter> _reporterMock;
-        private Mock<IEnvironmentPath> _pathAdder;
+        private Mock<IEnvironmentPath> _pathAdderMock;
 
         public GivenADotnetFirstTimeUseConfigurer()
         {
@@ -31,9 +32,10 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _firstTimeUseNoticeSentinelMock = new Mock<IFirstTimeUseNoticeSentinel>();
             _aspNetCertificateSentinelMock = new Mock<IAspNetCertificateSentinel>();
             _aspNetCoreCertificateGeneratorMock = new Mock<IAspNetCoreCertificateGenerator>();
+            _toolPathSentinelMock = new Mock<IFileSentinel>();
             _environmentProviderMock = new Mock<IEnvironmentProvider>();
             _reporterMock = new Mock<IReporter>();
-            _pathAdder = new Mock<IEnvironmentPath>();
+            _pathAdderMock = new Mock<IEnvironmentPath>();
 
             _environmentProviderMock
                 .Setup(e => e.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false))
@@ -54,10 +56,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -79,10 +82,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -104,10 +108,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -126,10 +131,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -148,10 +154,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -169,10 +176,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -190,10 +198,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -214,10 +223,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -235,10 +245,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -257,10 +268,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -282,10 +294,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -298,25 +311,49 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
-        public void It_adds_executable_package_path_to_environment_path_when_the_first_notice_sentinel_does_not_exist()
+        public void It_adds_the_tool_path_to_the_environment_if_the_tool_path_sentinel_does_not_exist()
         {
-            _nugetCacheSentinelMock.Setup(n => n.Exists()).Returns(true);
-            _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(false);
+            _toolPathSentinelMock.Setup(s => s.Exists()).Returns(false);
 
             var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
                 _nugetCachePrimerMock.Object,
-                new FakeCreateWillExistNuGetCacheSentinel(false, true), 
-                new FakeCreateWillExistFirstTimeUseNoticeSentinel(false),
+                _nugetCacheSentinelMock.Object,
+                _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
             
-            _pathAdder.Verify(p => p.AddPackageExecutablePathToUserPath(), Times.AtLeastOnce);
+            _toolPathSentinelMock.Verify(s => s.Create(), Times.Once);
+            _pathAdderMock.Verify(p => p.AddPackageExecutablePathToUserPath(), Times.Once);
+        }
+
+        [Fact]
+        public void It_does_not_add_the_tool_path_to_the_environment_if_the_tool_path_sentinel_exists()
+        {
+            _toolPathSentinelMock.Setup(s => s.Exists()).Returns(true);
+
+            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
+                _nugetCachePrimerMock.Object,
+                _nugetCacheSentinelMock.Object,
+                _firstTimeUseNoticeSentinelMock.Object,
+                _aspNetCertificateSentinelMock.Object,
+                _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
+                _environmentProviderMock.Object,
+                _reporterMock.Object,
+                CliFallbackFolderPath,
+                _pathAdderMock.Object);
+
+            dotnetFirstTimeUseConfigurer.Configure();
+
+            _toolPathSentinelMock.Verify(s => s.Create(), Times.Never);
+            _pathAdderMock.Verify(p => p.AddPackageExecutablePathToUserPath(), Times.Never);
         }
 
         [Fact]
@@ -330,10 +367,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -359,10 +397,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -380,10 +419,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -405,10 +445,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -430,10 +471,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -454,10 +496,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
                 _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
                 _environmentProviderMock.Object,
                 _reporterMock.Object,
                 CliFallbackFolderPath,
-                _pathAdder.Object);
+                _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -467,61 +510,48 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _aspNetCoreCertificateGeneratorMock.Verify(s => s.GenerateAspNetCoreDevelopmentCertificate(), Times.Once);
         }
 
-        private class FakeCreateWillExistFirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
+        [Fact]
+        public void It_adds_the_tool_path_to_the_environment_if_the_first_run_experience_is_not_skipped()
         {
-            private bool _exists;
+            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
+                _nugetCachePrimerMock.Object,
+                _nugetCacheSentinelMock.Object,
+                _firstTimeUseNoticeSentinelMock.Object,
+                _aspNetCertificateSentinelMock.Object,
+                _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
+                _environmentProviderMock.Object,
+                _reporterMock.Object,
+                CliFallbackFolderPath,
+                _pathAdderMock.Object);
 
-            public FakeCreateWillExistFirstTimeUseNoticeSentinel(bool exists)
-            {
-                _exists = exists;
-            }
+            dotnetFirstTimeUseConfigurer.Configure();
 
-            public void Dispose()
-            {
-            }
-
-            public bool Exists()
-            {
-                return _exists;
-            }
-
-            public void CreateIfNotExists()
-            {
-                _exists = true;
-            }
+            _pathAdderMock.Verify(p => p.AddPackageExecutablePathToUserPath(), Times.Once);
         }
 
-        private class FakeCreateWillExistNuGetCacheSentinel : INuGetCacheSentinel
+        [Fact]
+        public void It_does_not_add_the_tool_path_to_the_environment_if_the_first_run_experience_is_skipped()
         {
-            private bool _inProgressSentinelAlreadyExists;
-            private bool _exists;
+            _environmentProviderMock
+                .Setup(e => e.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false))
+                .Returns(true);
 
-            public FakeCreateWillExistNuGetCacheSentinel(bool inProgressSentinelAlreadyExists, bool exists)
-            {
-                _inProgressSentinelAlreadyExists = inProgressSentinelAlreadyExists;
-                _exists = exists;
-            }
+            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
+                _nugetCachePrimerMock.Object,
+                _nugetCacheSentinelMock.Object,
+                _firstTimeUseNoticeSentinelMock.Object,
+                _aspNetCertificateSentinelMock.Object,
+                _aspNetCoreCertificateGeneratorMock.Object,
+                _toolPathSentinelMock.Object,
+                _environmentProviderMock.Object,
+                _reporterMock.Object,
+                CliFallbackFolderPath,
+                _pathAdderMock.Object);
 
-            public void Dispose()
-            {
-            }
+            dotnetFirstTimeUseConfigurer.Configure();
 
-            public bool InProgressSentinelAlreadyExists()
-            {
-                return _inProgressSentinelAlreadyExists;
-            }
-
-            public bool Exists()
-            {
-                return _exists;
-            }
-
-            public void CreateIfNotExists()
-            {
-                _exists = true;
-            }
-
-            public bool UnauthorizedAccess { get; set; }
+            _pathAdderMock.Verify(p => p.AddPackageExecutablePathToUserPath(), Times.Never);
         }
     }
 }
