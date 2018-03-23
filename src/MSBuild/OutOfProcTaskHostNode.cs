@@ -735,10 +735,9 @@ namespace Microsoft.Build.CommandLine
             _registeredTaskObjectCache = null;
 #endif
 
-#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
-            // Restore the original current directory.
-            NativeMethodsShared.SetCurrentDirectory(Environment.SystemDirectory);
-#endif
+            // On Windows, a process holds a handle to the current directory,
+            // so reset it away from a user-requested folder that may get deleted.
+            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
             // Restore the original environment.
             CommunicationsUtilities.SetEnvironment(_savedEnvironment);
