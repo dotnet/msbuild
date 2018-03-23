@@ -21,7 +21,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public string RuntimeFrameworkVersion { get; set; }
 
         public string RuntimeIdentifier { get; set; }
-        
+
         //  TargetFrameworkVersion applies to non-SDK projects
         public string TargetFrameworkVersion { get; set; }
 
@@ -32,6 +32,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public List<string> References { get; } = new List<string>();
 
         public List<TestPackageReference> PackageReferences { get; } = new List<TestPackageReference>();
+
+        public List<TestPackageReference> DotNetCliToolReferences { get; } = new List<TestPackageReference>();
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
@@ -129,11 +131,19 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 packageReferenceItemGroup = new XElement(ns + "ItemGroup");
                 projectXml.Root.Add(packageReferenceItemGroup);
             }
+
             foreach (TestPackageReference packageReference in PackageReferences)
             {
-                    packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", $"{packageReference.ID}"),
-                        new XAttribute("Version", $"{packageReference.Version}")));
+                packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
+                    new XAttribute("Include", $"{packageReference.ID}"),
+                    new XAttribute("Version", $"{packageReference.Version}")));
+            }
+
+            foreach (TestPackageReference dotnetCliToolReference in DotNetCliToolReferences)
+            {
+                packageReferenceItemGroup.Add(new XElement(ns + "DotNetCliToolReference",
+                    new XAttribute("Include", $"{dotnetCliToolReference.ID}"),
+                    new XAttribute("Version", $"{dotnetCliToolReference.Version}")));
             }
 
             var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };
@@ -161,7 +171,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
                 //  Update SDK reference to the version under test
                 targetTestAsset.SetSdkVersion(projectXml);
-                
+
             }
             else
             {
