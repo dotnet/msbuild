@@ -28,7 +28,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(LanguageTargets)' == ''">
     <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.csproj'">$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
     <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.vbproj'">$(MSBuildToolsPath)\Microsoft.VisualBasic.targets</LanguageTargets>
-    <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.fsproj'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.FSharp.targets</LanguageTargets>
+    <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.fsproj'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.FSharpTargetsShim.targets</LanguageTargets>
 
     <!-- If LanguageTargets isn't otherwise set, then just import the common targets.  This should allow the restore target to run,
          which could bring in NuGet packages that set the LanguageTargets to something else.  This means support for different
