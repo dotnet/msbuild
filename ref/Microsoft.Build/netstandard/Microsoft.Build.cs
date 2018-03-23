@@ -1093,7 +1093,7 @@ namespace Microsoft.Build.Execution
     }
     public partial class OutOfProcNode
     {
-        public OutOfProcNode() { }
+        public OutOfProcNode(string clientToServerPipeHandle, string serverToClientPipeHandle) { }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
     }
