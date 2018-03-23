@@ -700,18 +700,39 @@ namespace Microsoft.NET.Build.Tasks
                 
                 if (!string.IsNullOrEmpty(_task.ImplicitPlatformPackageIdentifier) &&
                     !string.IsNullOrEmpty(_task.ExpectedPlatformPackageVersion) &&
+                    //  If RuntimeFrameworkVersion was specified as a version range or a floating version,
+                    //  then we can't compare the versions directly, so just skip the check
                     _task.ExpectedPlatformPackageVersion.IndexOfAny(_specialNuGetVersionChars) < 0)
                 {
                     var platformLibrary = _runtimeTarget.GetLibrary(_task.ImplicitPlatformPackageIdentifier);
                     if (platformLibrary != null)
                     {
+                        bool HasTwoPeriods(string s)
+                        {
+                            int firstPeriodIndex = s.IndexOf('.');
+                            if (firstPeriodIndex < 0)
+                            {
+                                return false;
+                            }
+                            int secondPeriodIndex = s.IndexOf('.', firstPeriodIndex + 1);
+                            return secondPeriodIndex >= 0;
+                        }
+
                         string restoredPlatformLibraryVersion = platformLibrary.Version.ToNormalizedString();
-                        if (restoredPlatformLibraryVersion != _task.ExpectedPlatformPackageVersion)
+
+                        //  Normalize expected version.  For example, converts "2.0" to "2.0.0"
+                        string expectedPlatformPackageVersion = _task.ExpectedPlatformPackageVersion;
+                        if (!HasTwoPeriods(expectedPlatformPackageVersion))
+                        {
+                            expectedPlatformPackageVersion += ".0";
+                        }                        
+
+                        if (restoredPlatformLibraryVersion != expectedPlatformPackageVersion)
                         {
                             WriteItem(string.Format(Strings.MismatchedPlatformPackageVersion,
                                                     _task.ImplicitPlatformPackageIdentifier,
                                                     restoredPlatformLibraryVersion,
-                                                    _task.ExpectedPlatformPackageVersion));
+                                                    expectedPlatformPackageVersion));
                             WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
                         }
                     }
