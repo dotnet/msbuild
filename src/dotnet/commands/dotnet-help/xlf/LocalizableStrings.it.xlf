@@ -252,19 +252,9 @@
         <target state="translated">Memorizza gli assembly specificati nell'archivio di runtime.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallDefinition">
-        <source>Installs an item into the development environment.</source>
-        <target state="translated">Installa un elemento nell'ambiente di sviluppo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallDefinition">
-        <source>Uninstalls an item from the development environment.</source>
-        <target state="translated">Disinstalla un elemento dall'ambiente di sviluppo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateDefinition">
-        <source>Updates an item in the development environment.</source>
-        <target state="new">Updates an item in the development environment.</target>
+      <trans-unit id="ToolDefinition">
+        <source>Modify tools.</source>
+        <target state="new">Modify tools.</target>
         <note />
       </trans-unit>
     </body>

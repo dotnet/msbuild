@@ -24,9 +24,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         public void UpdateGlobaltoolParserCanGetPackageId()
         {
             var command = Parser.Instance;
-            var result = command.Parse("dotnet update tool -g console.test.app");
+            var result = command.Parse("dotnet tool update -g console.test.app");
 
-            var parseResult = result["dotnet"]["update"]["tool"];
+            var parseResult = result["dotnet"]["tool"]["update"];
 
             var packageId = parseResult.Arguments.Single();
 
@@ -36,9 +36,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void UpdateToolParserCanGetGlobalOption()
         {
-            var result = Parser.Instance.Parse("dotnet update tool -g console.test.app");
+            var result = Parser.Instance.Parse("dotnet tool update -g console.test.app");
 
-            var appliedOptions = result["dotnet"]["update"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
         }
 
@@ -48,9 +48,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var command = Parser.Instance;
             var result =
                 command.Parse(
-                    @"dotnet update tool -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
+                    @"dotnet tool update -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
 
-            var parseResult = result["dotnet"]["update"]["tool"];
+            var parseResult = result["dotnet"]["tool"]["update"];
 
             parseResult.ValueOrDefault<string>("configfile").Should().Be(@"C:\TestAssetLocalNugetFeed");
             parseResult.ValueOrDefault<string>("framework").Should().Be("netcoreapp2.0");
@@ -62,9 +62,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
             const string expectedSourceValue = "TestSourceValue";
 
             var result =
-                Parser.Instance.Parse($"dotnet update tool -g --source-feed {expectedSourceValue} console.test.app");
+                Parser.Instance.Parse($"dotnet tool update -g --source-feed {expectedSourceValue} console.test.app");
 
-            var appliedOptions = result["dotnet"]["update"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.ValueOrDefault<string[]>("source-feed").First().Should().Be(expectedSourceValue);
         }
 
@@ -76,11 +76,11 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result =
                 Parser.Instance.Parse(
-                    $"dotnet update tool -g " +
+                    $"dotnet tool update -g " +
                     $"--source-feed {expectedSourceValue1} " +
                     $"--source-feed {expectedSourceValue2} console.test.app");
 
-            var appliedOptions = result["dotnet"]["update"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["update"];
 
             appliedOptions.ValueOrDefault<string[]>("source-feed")[0].Should().Be(expectedSourceValue1);
             appliedOptions.ValueOrDefault<string[]>("source-feed")[1].Should().Be(expectedSourceValue2);
@@ -92,9 +92,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
             const string expectedVerbosityLevel = "diag";
 
             var result =
-                Parser.Instance.Parse($"dotnet update tool -g --verbosity:{expectedVerbosityLevel} console.test.app");
+                Parser.Instance.Parse($"dotnet tool update -g --verbosity:{expectedVerbosityLevel} console.test.app");
 
-            var appliedOptions = result["dotnet"]["update"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.SingleArgumentOrDefault("verbosity").Should().Be(expectedVerbosityLevel);
         }
 
@@ -102,9 +102,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         public void UpdateToolParserCanParseToolPathOption()
         {
             var result =
-                Parser.Instance.Parse(@"dotnet update tool --tool-path C:\TestAssetLocalNugetFeed console.test.app");
+                Parser.Instance.Parse(@"dotnet tool update --tool-path C:\TestAssetLocalNugetFeed console.test.app");
 
-            var appliedOptions = result["dotnet"]["update"]["tool"];
+            var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\TestAssetLocalNugetFeed");
         }
     }

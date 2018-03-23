@@ -252,19 +252,9 @@
         <target state="translated">Он сохраняет указанные сборки в хранилище среды выполнения.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallDefinition">
-        <source>Installs an item into the development environment.</source>
-        <target state="translated">Устанавливает элемент в среде разработки.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallDefinition">
-        <source>Uninstalls an item from the development environment.</source>
-        <target state="translated">Удаляет элемент из среды разработки.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateDefinition">
-        <source>Updates an item in the development environment.</source>
-        <target state="new">Updates an item in the development environment.</target>
+      <trans-unit id="ToolDefinition">
+        <source>Modify tools.</source>
+        <target state="new">Modify tools.</target>
         <note />
       </trans-unit>
     </body>

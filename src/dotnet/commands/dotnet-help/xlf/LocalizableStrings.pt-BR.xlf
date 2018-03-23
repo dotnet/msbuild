@@ -252,19 +252,9 @@
         <target state="translated">Armazena os assemblies especificados no repositório de tempo de execução.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallDefinition">
-        <source>Installs an item into the development environment.</source>
-        <target state="translated">Instala um item no ambiente de desenvolvimento.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallDefinition">
-        <source>Uninstalls an item from the development environment.</source>
-        <target state="translated">Desinstala um item do ambiente de desenvolvimento.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateDefinition">
-        <source>Updates an item in the development environment.</source>
-        <target state="new">Updates an item in the development environment.</target>
+      <trans-unit id="ToolDefinition">
+        <source>Modify tools.</source>
+        <target state="new">Modify tools.</target>
         <note />
       </trans-unit>
     </body>
