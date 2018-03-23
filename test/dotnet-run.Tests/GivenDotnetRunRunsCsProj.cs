@@ -365,7 +365,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
-        public void ItPrefersTheValueOfApplicationUrlFromEnvironmentVariablesOverTheProperty()
+        public void ItPrefersTheValueOfAppUrlFromEnvVarOverTheProp()
         {
             var testAppName = "AppWithApplicationUrlInLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
@@ -395,7 +395,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
-        public void ItUsesTheValueOfApplicationUrlIfTheEnvironmentVariableIsNotSet()
+        public void ItUsesTheValueOfAppUrlIfTheEnvVarIsNotSet()
         {
             var testAppName = "AppWithApplicationUrlInLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
