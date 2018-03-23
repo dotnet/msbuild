@@ -17,19 +17,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <!-- Using _VbcToolExeTmp instead of VbcToolExe directly here, as we don't want to override it
-             for !mono case -->
-        <_VbcToolExeTmp Condition="'$(VbcToolExe)' != ''">$(VbcToolExe)</_VbcToolExeTmp>
-        <_VbcToolExeTmp Condition="'$(_VbcToolExeTmp)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">vbnc.exe</_VbcToolExeTmp>
+        <VbcDebugFileExt Condition="'$(VbcDebugFileExt)' == '' and ('$(VbcToolExe)' == 'vbnc' or '$(VbcToolExe)' == 'vbnc2' or '$(VbcToolExe)' == 'vbnc.exe')">.mdb</VbcDebugFileExt>
 
-        <VbcDebugFileExt Condition="'$(VbcDebugFileExt)' == '' and ('$(_VbcToolExeTmp)' == 'vbnc' or '$(_VbcToolExeTmp)' == 'vbnc.exe')">.mdb</VbcDebugFileExt>
+        <!-- The default compiler now is roslyn's vbc.exe with .pdb debug extension, so no overrides
+             required -->
+
         <_DebugFileExt Condition="'$(VbcDebugFileExt)' != ''">$(VbcDebugFileExt)</_DebugFileExt>
-
-        <!-- Select a default VB compiler here, if unspecified, instead of in the Vbc task, so that we can also
-             decide on the debug extension to be used. Don't do this for the !mono case.
-             -->
-        <VbcToolExe Condition="'$(VbcToolExe)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">vbnc.exe</VbcToolExe>
-
-        <UseSharedCompilation Condition="'$(UseSharedCompilation)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">false</UseSharedCompilation>
     </PropertyGroup>
 </Project>
