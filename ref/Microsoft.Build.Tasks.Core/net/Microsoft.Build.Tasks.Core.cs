@@ -632,6 +632,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string[] ReferenceAssemblyPaths { get { throw null; } }
         public string RootPath { get { throw null; } set { } }
+        public bool SuppressNotFoundError { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string TargetFrameworkMoniker { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string TargetFrameworkMonikerDisplayName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }

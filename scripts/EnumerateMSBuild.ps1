@@ -16,8 +16,6 @@ Param(
 
 # Set log file (and get the full path) and delete if it exists.
 $logFile = "msbuild_versions.txt"
-$logFile = Get-ChildItem -File -Path $logFile
-
 If((Test-Path -Path $logFile))
 {
     Remove-Item -Path $logFile
@@ -64,6 +62,9 @@ $gacPath = ${env:windir} + "\assembly"
 Write-Log "Looking for MSBuild in the GAC: $gacPath"
 Get-ChildItem -File -Path "$gacPath" -Recurse "Microsoft.Build*.dll" -Exclude "*.ni.dll" | % VersionInfo | Format-Table -AutoSize InternalName, ProductVersion, FileName | Out-File $logFile -Width 1000 -Append unicode
 Write-Log "********************" -LogToConsole $False
+
+# Expand full path for the output message
+$logFile = Get-ChildItem -File -Path $logFile
 
 Write-Host
 Write-Host "Output saved to $logFile"

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
+    <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
     <PackageReference Include="System.IO.FileSystem.Primitives " Version="4.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftCodeAnalysisBuildTasksVersion)" />
 

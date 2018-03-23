@@ -171,6 +171,24 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("ERROR MSB3644: " + message);
         }
 
+        [Fact]
+        public void TestSuppressNotFoundError()
+        {
+            MockEngine engine = new MockEngine();
+            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+            getReferencePaths.BuildEngine = engine;
+            // Make a framework which does not exist, intentional misspelling of framework
+            getReferencePaths.TargetFrameworkMoniker = ".NetFramewok, Version=v99.0";
+            getReferencePaths.SuppressNotFoundError = true;
+            bool success = getReferencePaths.Execute();
+            Assert.True(success);
+            string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
+            Assert.Equal(0, returnedPaths.Length);
+            string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
+            Assert.Null(displayName);
+            Assert.Equal(0, engine.Errors);
+        }
+
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
