@@ -229,6 +229,22 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
     </ResolvePackageAssets>
 
+
+  </Target>
+
+  <Target Name="FilterSatelliteResources" AfterTargets="ResolvePackageAssets"
+          Condition="'$(SatelliteResourceLanguages)' != ''">
+
+    <JoinItems Left="@(ResourceCopyLocalItems)" LeftKey="Culture" LeftMetadata="*"
+               Right="$(SatelliteResourceLanguages)" RightKey="" RightMetadata=""
+               ItemSpecToUse="Left">
+      <Output TaskParameter="JoinResult" ItemName="FilteredResourceCopyLocalItems" />
+    </JoinItems>
+
+    <ItemGroup>
+      <ResourceCopyLocalItems Remove="@(ResourceCopyLocalItems)" />
+      <ResourceCopyLocalItems Include="@(FilteredResourceCopyLocalItems)" />
+    </ItemGroup>
   </Target>
 
   <!--
