@@ -97,8 +97,9 @@ namespace Microsoft.TemplateEngine.Cli
         public IEnumerable<string> Uninstall(IEnumerable<string> uninstallRequests)
         {
             List<string> uninstallFailures = new List<string>();
-            foreach (string uninstall in uninstallRequests)
+            foreach (string uninstallRequest in uninstallRequests)
             {
+                string uninstall = _environmentSettings.Environment.ExpandEnvironmentVariables(uninstallRequest);
                 string prefix = Path.Combine(_paths.User.Packages, uninstall);
                 IReadOnlyList<MountPointInfo> rootMountPoints = _environmentSettings.SettingsLoader.MountPoints.Where(x =>
                 {
