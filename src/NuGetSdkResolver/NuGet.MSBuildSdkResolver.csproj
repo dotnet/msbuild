@@ -10,8 +10,8 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" Private="false"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.Commands" Version="4.7.0-preview1.5027" />
-    <PackageReference Include="NuGet.Protocol" Version="4.7.0-preview1.5027" />
+    <PackageReference Include="NuGet.Commands" Version="$(NuGetPackageVersion)" />
+    <PackageReference Include="NuGet.Protocol" Version="$(NuGetPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
