@@ -19,7 +19,7 @@
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.0-beta3-20171117-314</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates20PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
-    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.1-beta3-20180227-1423805</MicrosoftDotNetTestProjectTemplates20PackageVersion>
+    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.1-beta3-20180326-1520591</MicrosoftDotNetTestProjectTemplates20PackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>1.0.0-beta3-20171117-314</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
