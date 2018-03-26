@@ -60,8 +60,10 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="translated">Nástroj {0} se nepodařilo nainstalovat.</target>
+        <source>Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g t-rex --version &lt;version&gt;</source>
+        <target state="needs-review-translation">Nástroj {0} se nepodařilo nainstalovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">

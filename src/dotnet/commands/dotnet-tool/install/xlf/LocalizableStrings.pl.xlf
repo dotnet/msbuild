@@ -60,8 +60,10 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="translated">Zainstalowanie narzędzia „{0}” nie powiodło się.</target>
+        <source>Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g t-rex --version &lt;version&gt;</source>
+        <target state="needs-review-translation">Zainstalowanie narzędzia „{0}” nie powiodło się.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">

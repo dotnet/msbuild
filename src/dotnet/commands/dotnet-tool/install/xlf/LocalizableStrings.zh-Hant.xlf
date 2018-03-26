@@ -60,8 +60,10 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="translated">工具 '{0}' 無法安裝。</target>
+        <source>Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g t-rex --version &lt;version&gt;</source>
+        <target state="needs-review-translation">工具 '{0}' 無法安裝。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
