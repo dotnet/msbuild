@@ -97,6 +97,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       TODO: Get feedback on these names and then delete this comment
   -->
 
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- These properties will allow the latest patch versions to be set in the CLI (via BundledVersions.props) or overridden by tests -->
+    <LatestPatchVersionForNetCore1_0 Condition="'$(LatestPatchVersionForNetCore1_0)' == ''">1.0.10</LatestPatchVersionForNetCore1_0>
+    <LatestPatchVersionForNetCore1_1 Condition="'$(LatestPatchVersionForNetCore1_1)' == ''">1.1.7</LatestPatchVersionForNetCore1_1>
+    <LatestPatchVersionForNetCore2_0 Condition="'$(LatestPatchVersionForNetCore2_0)' == ''">2.0.6</LatestPatchVersionForNetCore2_0>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DefaultNetCorePatchVersion)' == ''">
     <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.5</DefaultNetCorePatchVersion>
     <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.2</DefaultNetCorePatchVersion>
@@ -109,9 +116,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(LatestNetCorePatchVersion)' == ''">
-    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.10</LatestNetCorePatchVersion>
-    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.7</LatestNetCorePatchVersion>
-    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.0'">2.0.6</LatestNetCorePatchVersion>
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">$(LatestPatchVersionForNetCore1_0)</LatestNetCorePatchVersion>
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">$(LatestPatchVersionForNetCore1_1)</LatestNetCorePatchVersion>
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.0'">$(LatestPatchVersionForNetCore2_0)</LatestNetCorePatchVersion>
 
     <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version
          provided by Microsoft.NETCoreSdk.BundledVersions.props -->
