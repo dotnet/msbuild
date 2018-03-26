@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
             var dotnetExe = environmentProvider.GetCommandPath("dotnet");
 
-#if NETSTANDARD1_5
+#if NETSTANDARD2_0
             if (dotnetExe != null && !Interop.RunningOnWindows)
             {
                 // e.g. on Linux the 'dotnet' command from PATH is a symlink so we need to

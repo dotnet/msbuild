@@ -32,7 +32,7 @@
 <add key="symreader-native" value="https://dotnet.myget.org/F/symreader-native/api/v3/index.json" />
 <add key="AspNetMaster" value="https://dotnet.myget.org/F/aspnetcore-master/api/v3/index.json" />
 <add key="AspNetDev" value="https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json" />
-<add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" />
+<add key="dotnet-msbuild" value="https://dotnet.myget.org/F/msbuild/api/v3/index.json" />
         ]]>
       </NugetConfigCLIFeeds>
 
