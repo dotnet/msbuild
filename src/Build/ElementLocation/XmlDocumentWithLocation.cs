@@ -365,8 +365,8 @@ namespace Microsoft.Build.Construction
                             string windowsFolder = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.Windows);
 #endif
 
-                            if (directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase) ||
-                                (directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
+                            if ((!String.IsNullOrEmpty(windowsFolder) && directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase)) ||
+                                (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles32) && directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
                                 (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles64) && directory.StartsWith(FrameworkLocationHelper.programFiles64, StringComparison.OrdinalIgnoreCase)))
                             {
                                 _loadAsReadOnly = true;
