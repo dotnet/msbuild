@@ -1609,7 +1609,7 @@ namespace Microsoft.Build.UnitTests
         {
             return
                 NativeMethodsShared.IsWindows
-                ? $"@powershell -command &quot;Start-Sleep -Milliseconds {(int)timeSpan.TotalMilliseconds}&quot; &gt;nul"
+                ? $"@powershell -NoLogo -NoProfile -command &quot;Start-Sleep -Milliseconds {(int)timeSpan.TotalMilliseconds}&quot; &gt;nul"
                 : $"sleep {timeSpan.TotalSeconds}";
         }
 

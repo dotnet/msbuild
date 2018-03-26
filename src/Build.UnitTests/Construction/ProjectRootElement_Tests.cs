@@ -65,6 +65,11 @@ bar", false)]
 
             using (var env = TestEnvironment.Create())
             {
+                // reset all hooks
+                XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
+                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASREADONLY", null); //clear
+                env.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", null); // clear
+                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", null); // clear
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
                 ProjectRootElement xml = ProjectRootElement.Open(testFiles.ProjectFile);
 
@@ -91,7 +96,11 @@ bar", false)]
 
             using (var env = TestEnvironment.Create())
             {
+                // set the hook for the desired read-only mode and reset the hook for the other modes
+                XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
                 env.SetEnvironmentVariable("MSBUILDLOADALLFILESASREADONLY", "1");
+                env.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", null); // clear
+                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", null); // clear
 
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
                 ProjectRootElement xml = ProjectRootElement.Open(testFiles.ProjectFile);
