@@ -863,6 +863,21 @@ setx PATH "%PATH%;{0}"
         <target state="needs-review-translation">O comando '{0}' tem um ponto à esquerda.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
+        <target state="new">Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="new">Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="new">Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

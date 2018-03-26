@@ -13,23 +13,7 @@ namespace Microsoft.DotNet.ToolPackage
     // This is named "ToolPackageInstance" because "ToolPackage" would conflict with the namespace
     internal class ToolPackageInstance : IToolPackage
     {
-        private IToolPackageStore _store;
-        private Lazy<IReadOnlyList<CommandSettings>> _commands;
-
-        public ToolPackageInstance(
-            IToolPackageStore store,
-            PackageId id,
-            NuGetVersion version,
-            DirectoryPath packageDirectory)
-        {
-            _store = store ?? throw new ArgumentNullException(nameof(store));
-            _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
-
-            Id = id;
-            Version = version ?? throw new ArgumentNullException(nameof(version));
-            PackageDirectory = packageDirectory;
-        }
-
+        public IEnumerable<string> Warnings => _toolConfiguration.Value.Warnings;
         public PackageId Id { get; private set; }
 
         public NuGetVersion Version { get; private set; }
@@ -44,13 +28,36 @@ namespace Microsoft.DotNet.ToolPackage
             }
         }
 
+        private const string AssetsFileName = "project.assets.json";
+        private const string ToolSettingsFileName = "DotnetToolSettings.xml";
+
+        private IToolPackageStore _store;
+        private Lazy<IReadOnlyList<CommandSettings>> _commands;
+        private Lazy<ToolConfiguration> _toolConfiguration;
+
+        public ToolPackageInstance(
+            IToolPackageStore store,
+            PackageId id,
+            NuGetVersion version,
+            DirectoryPath packageDirectory)
+        {
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
+
+            Id = id;
+            Version = version ?? throw new ArgumentNullException(nameof(version));
+            PackageDirectory = packageDirectory;
+            _toolConfiguration = new Lazy<ToolConfiguration>(GetToolConfiguration);
+        }
+
         public void Uninstall()
         {
             var rootDirectory = PackageDirectory.GetParentPath();
             string tempPackageDirectory = null;
 
             TransactionalAction.Run(
-                action: () => {
+                action: () =>
+                {
                     try
                     {
                         if (Directory.Exists(PackageDirectory.Value))
@@ -78,13 +85,15 @@ namespace Microsoft.DotNet.ToolPackage
                             ex);
                     }
                 },
-                commit: () => {
+                commit: () =>
+                {
                     if (tempPackageDirectory != null)
                     {
                         Directory.Delete(tempPackageDirectory, true);
                     }
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     if (tempPackageDirectory != null)
                     {
                         Directory.CreateDirectory(rootDirectory.Value);
@@ -95,31 +104,13 @@ namespace Microsoft.DotNet.ToolPackage
 
         private IReadOnlyList<CommandSettings> GetCommands()
         {
-            const string AssetsFileName = "project.assets.json";
-            const string ToolSettingsFileName = "DotnetToolSettings.xml";
-
             try
             {
                 var commands = new List<CommandSettings>();
                 var lockFile = new LockFileFormat().Read(PackageDirectory.WithFile(AssetsFileName).Value);
-
                 var library = FindLibraryInLockFile(lockFile);
-                var dotnetToolSettings = FindItemInTargetLibrary(library, ToolSettingsFileName);
-                if (dotnetToolSettings == null)
-                {
-                    throw new ToolConfigurationException(
-                        CommonLocalizableStrings.MissingToolSettingsFile);
-                }
 
-                var toolConfigurationPath =
-                    PackageDirectory
-                        .WithSubDirectories(
-                            Id.ToString(),
-                            library.Version.ToNormalizedString())
-                        .WithFile(dotnetToolSettings.Path);
-
-                var configuration = ToolConfigurationDeserializer.Deserialize(toolConfigurationPath.Value);
-
+                ToolConfiguration configuration = _toolConfiguration.Value;
                 var entryPointFromLockFile = FindItemInTargetLibrary(library, configuration.ToolAssemblyEntryPoint);
                 if (entryPointFromLockFile == null)
                 {
@@ -152,6 +143,44 @@ namespace Microsoft.DotNet.ToolPackage
             }
         }
 
+        private ToolConfiguration GetToolConfiguration()
+        {
+            try
+            {
+                var lockFile = new LockFileFormat().Read(PackageDirectory.WithFile(AssetsFileName).Value);
+                var library = FindLibraryInLockFile(lockFile);
+                return DeserializeToolConfiguration(ToolSettingsFileName, library);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
+            {
+                throw new ToolConfigurationException(
+                    string.Format(
+                        CommonLocalizableStrings.FailedToRetrieveToolConfiguration,
+                        ex.Message),
+                    ex);
+            }
+        }
+
+        private ToolConfiguration DeserializeToolConfiguration(string ToolSettingsFileName, LockFileTargetLibrary library)
+        {
+            var dotnetToolSettings = FindItemInTargetLibrary(library, ToolSettingsFileName);
+            if (dotnetToolSettings == null)
+            {
+                throw new ToolConfigurationException(
+                    CommonLocalizableStrings.MissingToolSettingsFile);
+            }
+
+            var toolConfigurationPath =
+                PackageDirectory
+                    .WithSubDirectories(
+                        Id.ToString(),
+                        library.Version.ToNormalizedString())
+                    .WithFile(dotnetToolSettings.Path);
+
+            var configuration = ToolConfigurationDeserializer.Deserialize(toolConfigurationPath.Value);
+            return configuration;
+        }
+
         private LockFileTargetLibrary FindLibraryInLockFile(LockFile lockFile)
         {
             return lockFile
@@ -166,5 +195,6 @@ namespace Microsoft.DotNet.ToolPackage
                 ?.ToolsAssemblies
                 ?.SingleOrDefault(t => LockFileMatcher.MatchesFile(t, targetRelativeFilePath));
         }
+
     }
 }
