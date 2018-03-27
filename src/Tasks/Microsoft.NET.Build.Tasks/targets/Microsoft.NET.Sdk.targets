@@ -118,7 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeReferenceAssemblies"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
-          Inputs="$(ProjectAssetsFile)"
+          Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
 
     <!--
