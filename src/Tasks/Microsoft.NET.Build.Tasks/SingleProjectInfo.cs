@@ -51,7 +51,7 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ITaskItem> referencePaths,
             IEnumerable<ITaskItem> referenceSatellitePaths)
         {
-            Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>();
+            Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>(StringComparer.OrdinalIgnoreCase);
 
             IEnumerable<ITaskItem> projectReferencePaths = referencePaths
                 .Where(r => string.Equals(r.GetMetadata("ReferenceSourceTarget"), "ProjectReference", StringComparison.OrdinalIgnoreCase));
