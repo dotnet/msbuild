@@ -53,20 +53,6 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
     mkdir $env:DOTNET_INSTALL_DIR | Out-Null
 }
 
-# We also need to pull down a project.json based CLI that is used by some tests
-# so create another directory for that.
-if (!$env:DOTNET_INSTALL_DIR_PJ)
-{
-    $env:DOTNET_INSTALL_DIR_PJ="$RepoRoot\.dotnet_stage0PJ\$Architecture"
-}
-
-if (!(Test-Path $env:DOTNET_INSTALL_DIR_PJ))
-{
-    mkdir $env:DOTNET_INSTALL_DIR_PJ | Out-Null
-}
-
-
-
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
@@ -82,14 +68,6 @@ $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
 
 Write-Output "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
 Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Channel ""release/2.0.0"""
-if ($LastExitCode -ne 0)
-{
-    Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
-    exit $LastExitCode
-}
-
-Write-Output "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
-Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
 if ($LastExitCode -ne 0)
 {
     Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
