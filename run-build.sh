@@ -163,14 +163,6 @@ if [ $EXIT_CODE != 0 ]; then
     exit $EXIT_CODE
 fi
 
-# Install a project.json based CLI for use by tests
-(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --install-dir "$DOTNET_INSTALL_DIR_PJ" --architecture "$ARCHITECTURE" --version "1.0.0-preview2-1-003177")
-EXIT_CODE=$?
-if [ $EXIT_CODE != 0 ]; then
-    echo "run-build: Error: installing project-json based cli failed with exit code $EXIT_CODE." >&2
-    exit $EXIT_CODE
-fi
-
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
 
