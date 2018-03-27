@@ -25,7 +25,7 @@
 
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <!-- Tell repo toolset not to define the GetBuildVersion target, as it would conflict with NerdBank.GitVersioning -->
-    <DefineGetBuildVersionTargetForVsix>false</DefineGetBuildVersionTargetForVsix>
+    <DefineGetBuildVersionTargetForVsix Condition="'$(DisableNerdbankVersioning)' != 'true'">false</DefineGetBuildVersionTargetForVsix>
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->

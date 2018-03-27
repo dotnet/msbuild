@@ -15,6 +15,7 @@
 
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);STANDALONEBUILD;FEATURE_BINARY_SERIALIZATION;FEATURE_MEMORYSTREAM_GETBUFFER;</DefineConstants>
+    <DefineConstants Condition="'$(DisableNerdbankVersioning)' != 'true'">$(DefineConstants);THISASSEMBLY</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) Or $(TargetFramework.StartsWith('net3'))">
