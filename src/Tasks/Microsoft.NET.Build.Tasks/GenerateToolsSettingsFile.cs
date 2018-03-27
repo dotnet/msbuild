@@ -4,11 +4,15 @@
 using Microsoft.Build.Framework;
 using System.Xml.Linq;
 using System.IO;
+using System;
 
 namespace Microsoft.NET.Build.Tasks
 {
     public class GenerateToolsSettingsFile : TaskBase
     {
+        // bump whenever the format changes such that it will break old consumers
+        private static readonly int _formatVersion = 1;
+
         [Required]
         public string EntryPointRelativePath { get; set; }
 
@@ -31,6 +35,7 @@ namespace Microsoft.NET.Build.Tasks
             return new XDocument(
                 new XDeclaration(version: null, encoding: null, standalone: null),
                 new XElement("DotNetCliTool",
+                      new XAttribute("Version", _formatVersion),
                       new XElement("Commands",
                           new XElement("Command",
                           new XAttribute("Name", commandName),
