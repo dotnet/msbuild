@@ -51,10 +51,29 @@ namespace Microsoft.NET.Build.Tasks
                             r.HasMetadataValue("ReferenceSourceTarget", "ResolveAssemblyReference") &&
                             string.IsNullOrEmpty(r.GetMetadata("NuGetSourceType")));
 
+            return CreateFilteredReferenceInfos(directReferencePaths, referenceSatellitePaths);
+        }
+
+        public static IEnumerable<ReferenceInfo> CreateDependencyReferenceInfos(
+            IEnumerable<ITaskItem> referenceDependencyPaths,
+            IEnumerable<ITaskItem> referenceSatellitePaths)
+        {
+            IEnumerable<ITaskItem> indirectReferencePaths = referenceDependencyPaths
+                .Where(r => r.HasMetadataValue("CopyLocal", "true") &&
+                            string.IsNullOrEmpty(r.GetMetadata("NuGetSourceType")));
+
+            return CreateFilteredReferenceInfos(indirectReferencePaths, referenceSatellitePaths);
+        }
+
+        private static IEnumerable<ReferenceInfo> CreateFilteredReferenceInfos(
+            IEnumerable<ITaskItem> referencePaths,
+            IEnumerable<ITaskItem> referenceSatellitePaths)
+        {
             Dictionary<string, ReferenceInfo> directReferences = new Dictionary<string, ReferenceInfo>();
-            foreach (ITaskItem directReferencePath in directReferencePaths)
+
+            foreach (ITaskItem referencePath in referencePaths)
             {
-                ReferenceInfo referenceInfo = CreateReferenceInfo(directReferencePath);
+                ReferenceInfo referenceInfo = CreateReferenceInfo(referencePath);
                 directReferences.Add(referenceInfo.FullPath, referenceInfo);
             }
 
@@ -76,7 +95,7 @@ namespace Microsoft.NET.Build.Tasks
             return directReferences.Values;
         }
 
-        private static ReferenceInfo CreateReferenceInfo(ITaskItem referencePath)
+        internal static ReferenceInfo CreateReferenceInfo(ITaskItem referencePath)
         {
             string fullPath = referencePath.ItemSpec;
             string name = Path.GetFileNameWithoutExtension(fullPath);
