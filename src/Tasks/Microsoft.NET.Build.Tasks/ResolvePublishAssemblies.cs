@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var lockFileCache = new LockFileCache(BuildEngine4);
+            var lockFileCache = new LockFileCache(this);
             LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
             IEnumerable<string> excludeFromPublishPackageIds = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
             IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);

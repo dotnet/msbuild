@@ -64,7 +64,7 @@ namespace Microsoft.NET.Build.Tasks
                 Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
             }
 
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
+            LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
                 RuntimeIdentifier,

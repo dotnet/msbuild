@@ -444,7 +444,7 @@ namespace Microsoft.NET.Build.Tasks
                 var targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
 
                 _task = task;
-                _lockFile = new LockFileCache(task.BuildEngine4).GetLockFile(task.ProjectAssetsFile);
+                _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
                 _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile, _task.ProjectPath);
                 _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtime: null);
                 _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(targetFramework, _task.RuntimeIdentifier);
