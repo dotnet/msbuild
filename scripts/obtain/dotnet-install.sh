@@ -79,6 +79,10 @@ get_legacy_os_name_from_platform() {
             echo "fedora.23"
             return 0
             ;;
+        "fedora.27")
+            echo "fedora.27"
+            return 0
+            ;;
         "fedora.24")
             echo "fedora.24"
             return 0
@@ -89,6 +93,10 @@ get_legacy_os_name_from_platform() {
             ;;
         "opensuse.42.1")
             echo "opensuse.42.1"
+            return 0
+            ;;
+        "opensuse.42.3")
+            echo "opensuse.42.3"
             return 0
             ;;
         "rhel.7"*)
@@ -105,6 +113,10 @@ get_legacy_os_name_from_platform() {
             ;;
         "ubuntu.16.10")
             echo "ubuntu.16.10"
+            return 0
+            ;;
+        "ubuntu.18.04")
+            echo "ubuntu.18.04"
             return 0
             ;;
         "alpine.3.4.3")

@@ -42,6 +42,30 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Fact]
+        public void GivenMissingVersionItHasWarningReflectIt()
+        {
+            ToolConfiguration toolConfiguration = ToolConfigurationDeserializer.Deserialize("DotnetToolSettingsMissingVersion.xml");
+
+            toolConfiguration.Warnings.First().Should().Be(CommonLocalizableStrings.FormatVersionIsMissing);
+        }
+
+        [Fact]
+        public void GivenMajorHigherVersionItHasWarningReflectIt()
+        {
+            ToolConfiguration toolConfiguration = ToolConfigurationDeserializer.Deserialize("DotnetToolSettingsMajorHigherVersion.xml");
+
+            toolConfiguration.Warnings.First().Should().Be(CommonLocalizableStrings.FormatVersionIsHigher);
+        }
+
+        [Fact]
+        public void GivenMinorHigherVersionItHasNoWarning()
+        {
+            ToolConfiguration toolConfiguration = ToolConfigurationDeserializer.Deserialize("DotnetToolSettingsGolden.xml");
+
+            toolConfiguration.Warnings.Should().BeEmpty();
+        }
+
+        [Fact]
         public void GivenInvalidCharAsFileNameItThrows()
         {
             var invalidCommandName = "na\0me";

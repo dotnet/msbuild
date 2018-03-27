@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="UnsupportedProjectType" xml:space="preserve">
-    <value>Unsupported project type. Please check with your sdk provider.</value>
+    <value>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</value>
   </data>
   <data name="ProjectAlreadyHasAreference" xml:space="preserve">
     <value>Project already has a reference to `{0}`.</value>
@@ -627,5 +627,14 @@ setx PATH "%PATH%;{0}"
   </data>
   <data name="ToolSettingsInvalidLeadingDotCommandName" xml:space="preserve">
     <value>The command name '{0}' cannot begin with a leading dot (.).</value>
+  </data>
+  <data name="FormatVersionIsHigher" xml:space="preserve">
+    <value>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</value>
+  </data>
+  <data name="FormatVersionIsMalformed" xml:space="preserve">
+    <value>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</value>
+  </data>
+  <data name="FormatVersionIsMissing" xml:space="preserve">
+    <value>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</value>
   </data>
 </root>

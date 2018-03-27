@@ -600,8 +600,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="translated">Proje türü desteklenmiyor. Lütfen SDK sağlayıcınıza başvurun.</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <target state="needs-review-translation">Proje türü desteklenmiyor. Lütfen SDK sağlayıcınıza başvurun.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -861,6 +861,21 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
         <source>The command name '{0}' cannot begin with a leading dot (.).</source>
         <target state="needs-review-translation">'{0}' komutunun başında nokta var.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
+        <target state="new">Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="new">Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="new">Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
         <note />
       </trans-unit>
     </body>
