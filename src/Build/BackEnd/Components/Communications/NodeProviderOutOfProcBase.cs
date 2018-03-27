@@ -546,7 +546,7 @@ namespace Microsoft.Build.BackEnd
                 if (NativeMethodsShared.IsWindows)
                 {
                     // Repeat the executable name in the args to suit CreateProcess
-                    commandLineArgs = exeName + " " + commandLineArgs;
+                    commandLineArgs = "\"" + exeName + "\" " + commandLineArgs;
                 }
 #endif
 
