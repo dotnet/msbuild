@@ -157,13 +157,13 @@ get_linux_platform_name() {
 
 get_current_os_name() {
     eval $invocation
-    linux_platform_name="unknown"
 
     local uname=$(uname)
     if [ "$uname" = "Darwin" ]; then
         echo "osx"
         return 0
     elif [ "$uname" = "Linux" ]; then
+        local linux_platform_name
         linux_platform_name="$(get_linux_platform_name)" || { echo "linux" && return 0 ; }
 
         if [[ $linux_platform_name == "rhel.6" || $linux_platform_name == "alpine.3.6" ]]; then
@@ -582,9 +582,10 @@ copy_files_or_dirs_from_list() {
     local root_path="$(remove_trailing_slash "$1")"
     local out_path="$(remove_trailing_slash "$2")"
     local override="$3"
+    local osname="$(get_current_os_name)"
     local override_switch=$(
         if [ "$override" = false ]; then
-            if [[ $linux_platform_name == 'alpine'* ]]; then 
+            if [[ "$osname" == 'alpine'* ]]; then 
                 printf -- "-u";
             else
                 printf -- "-n";
