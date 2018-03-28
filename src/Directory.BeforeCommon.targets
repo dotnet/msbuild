@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);STANDALONEBUILD;FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
+    <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) Or $(TargetFramework.StartsWith('net3'))">
