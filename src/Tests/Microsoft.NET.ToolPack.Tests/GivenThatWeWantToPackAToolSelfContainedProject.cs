@@ -25,7 +25,7 @@ namespace Microsoft.NET.ToolPack.Tests
         public void It_should_fail_with_error_message()
         {
             TestAsset helloWorldAsset = _testAssetsManager
-                                        .CopyTestAsset("PortableTool", "PackPortableToolToolEntryPoint")
+                                        .CopyTestAsset("PortableTool", "PackSelfContainedTool")
                                         .WithSource()
                                         .WithProjectChanges(project =>
                                         {

@@ -66,7 +66,7 @@ namespace Microsoft.NET.Perf.Tests
         {
             var testDir = _testAssetsManager.CreateTestDirectory(identifier: operation.ToString());
 
-            NuGetConfigWriter.Write(testDir.Path, NuGetConfigWriter.AspNetCoreDevFeed);
+            NuGetConfigWriter.Write(testDir.Path, NuGetConfigWriter.AspNetCoreDevFeed, NuGetConfigWriter.DotnetCoreMyGetFeed);
 
             var newCommand = new DotnetCommand(Log);
             newCommand.WorkingDirectory = testDir.Path;

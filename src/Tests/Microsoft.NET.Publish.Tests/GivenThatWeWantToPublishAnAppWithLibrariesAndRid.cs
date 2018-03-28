@@ -92,19 +92,23 @@ namespace Microsoft.NET.Publish.Tests
 
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
 
+            var msbuildArgs = new[]
+            {
+                $"/p:RuntimeIdentifier={runtimeIdentifier}",
+                $"/p:TestRuntimeIdentifier={runtimeIdentifier}",
+                $"/p:SelfContained={selfContained}"
+            };
+
             var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
             restoreCommand
-                .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
+                .Execute(msbuildArgs)
                 .Should()
                 .Pass();
 
             var publishCommand = new PublishCommand(Log, projectPath);
 
             publishCommand
-                .Execute(
-                    $"/p:RuntimeIdentifier={runtimeIdentifier}", 
-                    $"/p:TestRuntimeIdentifier={runtimeIdentifier}", 
-                    $"/p:SelfContained={selfContained}")
+                .Execute(msbuildArgs)
                 .Should().Pass();
 
             publishDirectory = publishCommand.GetOutputDirectory("netcoreapp1.1", runtimeIdentifier: runtimeIdentifier);
