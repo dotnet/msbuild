@@ -135,7 +135,7 @@
 
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
-    <IBCMergeBranch>rel/d15.7</IBCMergeBranch>
+    <IBCMergeBranch>lab/vsumain</IBCMergeBranch>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' != 'true'">

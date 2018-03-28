@@ -17,6 +17,7 @@ using Microsoft.Build.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
@@ -1436,10 +1437,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectCollectionVersionIsCorrect()
         {
-            Version expectedVersion = new Version(MSBuildConstants.CurrentAssemblyFileVersion);
+            Version expectedVersion = new Version(ThisAssembly.AssemblyFileVersion);
 
-            Assert.Equal(expectedVersion.Major, ProjectCollection.Version.Major);
-            Assert.Equal(expectedVersion.Minor, ProjectCollection.Version.Minor);
+            ProjectCollection.Version.Major.ShouldBe(expectedVersion.Major);
+            ProjectCollection.Version.Minor.ShouldBe(expectedVersion.Minor);
         }
 
         /// <summary>
