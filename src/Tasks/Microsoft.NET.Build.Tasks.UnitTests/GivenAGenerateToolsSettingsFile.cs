@@ -50,5 +50,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 .Value
                 .Should().Be("dotnet");
         }
+
+        [Fact]
+        public void It_puts_format_version_in_correct_place_of_the_file()
+        {
+            _generatedDocument
+                .Element("DotNetCliTool")
+                .Attribute("Version")
+                .Value
+                .Should().Be("1");
+        }
     }
 }

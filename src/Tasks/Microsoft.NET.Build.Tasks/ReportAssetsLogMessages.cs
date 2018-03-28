@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_lockFile == null)
                 {
-                    _lockFile = new LockFileCache(BuildEngine4).GetLockFile(ProjectAssetsFile);
+                    _lockFile = new LockFileCache(this).GetLockFile(ProjectAssetsFile);
                 }
 
                 return _lockFile;

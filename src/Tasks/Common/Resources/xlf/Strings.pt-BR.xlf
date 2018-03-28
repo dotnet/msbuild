@@ -367,6 +367,11 @@
         <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorReadingAssetsFile">
+        <source>Error reading assets file: {0}</source>
+        <target state="new">Error reading assets file: {0}</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

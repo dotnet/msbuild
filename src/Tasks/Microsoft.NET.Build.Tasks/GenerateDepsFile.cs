@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             LoadFilesToSkip();
 
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
+            LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
             SingleProjectInfo mainProject = SingleProjectInfo.Create(
