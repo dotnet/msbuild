@@ -33,19 +33,11 @@ namespace Microsoft.Build.UnitTests
             var writeTranslator = TranslationHelpers.GetWriteTranslator();
             ProfilerResult deserializedResult;
 
-#if FEATURE_BINARY_SERIALIZATION
             writeTranslator.TranslateDotNet(ref profilerResult);
-#else
-            NodePacketTranslator.ProfilerResultTranslator.Translate(writeTranslator, ref profilerResult);
-#endif
 
             var readTranslator = TranslationHelpers.GetReadTranslator();
 
-#if FEATURE_BINARY_SERIALIZATION
             readTranslator.TranslateDotNet(ref deserializedResult);
-#else
-            NodePacketTranslator.ProfilerResultTranslator.Translate(readTranslator, ref deserializedResult);
-#endif
 
             Assert.Equal(deserializedResult, profilerResult);
         }

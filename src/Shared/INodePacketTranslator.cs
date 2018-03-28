@@ -222,7 +222,6 @@ namespace Microsoft.Build.BackEnd
         /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
         void TranslateEnum<T>(ref T value, int numericValue);
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Translates a value using the .Net binary formatter.
         /// </summary>
@@ -234,10 +233,6 @@ namespace Microsoft.Build.BackEnd
         /// methods.
         /// </remarks>
         void TranslateDotNet<T>(ref T value);
-#else
-        //  BuildEventArgs can't implement INodePacketTranslatable because it's in Microsoft.Build.Framework, which doesn't have that interface
-        void TranslateBuildEventArgs(ref BuildEventArgs value);
-#endif
 
         void TranslateException(ref Exception value);
 

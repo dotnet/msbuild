@@ -9,9 +9,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for telemetry events.
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public sealed class TelemetryEventArgs : BuildEventArgs
     {
         /// <summary>

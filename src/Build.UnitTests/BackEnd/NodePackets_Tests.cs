@@ -72,7 +72,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(externalStartedEvent, LoggingEventType.CustomEvent);
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Tests serialization of LogMessagePacket with each kind of event type.
         /// </summary>
@@ -115,7 +114,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", null);
         }
-#endif
 
         /// <summary>
         /// Verify the LoggingMessagePacket is properly created from a build event. 

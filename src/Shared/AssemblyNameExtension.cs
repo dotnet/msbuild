@@ -9,9 +9,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
-#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
-#endif
 using System.IO;
 #if !FEATURE_ASSEMBLY_LOADFROM
 using System.Reflection.PortableExecutable;
@@ -221,7 +219,6 @@ namespace Microsoft.Build.Shared
             return assemblyName == null ? null : new AssemblyNameExtension(assemblyName);
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Run after the object has been deserialized
         /// </summary>
@@ -230,7 +227,6 @@ namespace Microsoft.Build.Shared
         {
             InitializeRemappedFrom();
         }
-#endif
 
         /// <summary>
         /// Initialize the remapped from structure.

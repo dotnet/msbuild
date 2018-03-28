@@ -55,9 +55,7 @@ namespace Microsoft.Build.Framework.Profiler
     /// <summary>
     /// Represents a location for different evaluation elements tracked by the EvaluationProfiler.
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public struct EvaluationLocation
     {
         /// <summary>
