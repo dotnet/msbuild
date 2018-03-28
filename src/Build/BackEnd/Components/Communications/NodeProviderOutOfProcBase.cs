@@ -23,6 +23,7 @@ using Microsoft.Build.Internal;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using System.Threading.Tasks;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -470,14 +471,21 @@ namespace Microsoft.Build.BackEnd
             // Null out the process handles so that the parent process does not wait for the child process
             // to exit before it can exit.
             uint creationFlags = 0;
-            startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
+            if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+            {
+                creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
+            }
 
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
             {
-                startInfo.hStdError = BackendNativeMethods.InvalidHandle;
-                startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
-                startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
-                creationFlags = creationFlags | BackendNativeMethods.CREATENOWINDOW;
+                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+                {
+                    startInfo.hStdError = BackendNativeMethods.InvalidHandle;
+                    startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
+                    startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
+                    startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
+                    creationFlags = creationFlags | BackendNativeMethods.CREATENOWINDOW;
+                }
             }
             else
             {
@@ -497,12 +505,6 @@ namespace Microsoft.Build.BackEnd
             // Run the child process with the same host as the currently-running process.
             exeName = GetCurrentHost();
             commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
-
-            if (NativeMethodsShared.IsWindows)
-            {
-                // Repeat the executable name _again_ because Core MSBuild expects it
-                commandLineArgs = exeName + " " + commandLineArgs;
-            }
 #endif
 
             if (!NativeMethodsShared.IsWindows)
@@ -511,7 +513,10 @@ namespace Microsoft.Build.BackEnd
                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = exeName;
                 processStartInfo.Arguments = commandLineArgs;
-                processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
+                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+                {
+                    processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
+                }
                 processStartInfo.UseShellExecute = false;
 
                 Process process;
@@ -537,6 +542,14 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
+#if RUNTIME_TYPE_NETCORE
+                if (NativeMethodsShared.IsWindows)
+                {
+                    // Repeat the executable name in the args to suit CreateProcess
+                    commandLineArgs = "\"" + exeName + "\" " + commandLineArgs;
+                }
+#endif
+
                 BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
 
                 bool result = BackendNativeMethods.CreateProcess
