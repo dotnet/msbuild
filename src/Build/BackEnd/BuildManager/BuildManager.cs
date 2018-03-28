@@ -965,20 +965,12 @@ namespace Microsoft.Build.Execution
                 {
                     if (CultureInfo.CurrentCulture != _buildParameters.Culture)
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentCulture = _buildParameters.Culture;
-#else
-                        Thread.CurrentThread.CurrentCulture = _buildParameters.Culture;
-#endif
                     }
 
                     if (CultureInfo.CurrentUICulture != _buildParameters.UICulture)
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentUICulture = _buildParameters.UICulture;
-#else
-                        Thread.CurrentThread.CurrentUICulture = _buildParameters.UICulture;
-#endif
                     }
 
                     action();
@@ -994,20 +986,12 @@ namespace Microsoft.Build.Execution
                     // Set the culture back to the original one so that if something else reuses this thread then it will not have a culture which it was not expecting.
                     if (CultureInfo.CurrentCulture != oldCulture)
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentCulture = oldCulture;
-#else
-                        Thread.CurrentThread.CurrentCulture = oldCulture;
-#endif
                     }
 
                     if (CultureInfo.CurrentUICulture != oldUICulture)
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentUICulture = oldUICulture;
-#else
-                        Thread.CurrentThread.CurrentUICulture = oldUICulture;
-#endif
                     }
                 }
             }

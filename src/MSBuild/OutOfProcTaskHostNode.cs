@@ -821,14 +821,8 @@ namespace Microsoft.Build.CommandLine
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
 
                 // Set culture
-#if FEATURE_CULTUREINFO_SETTERS
-                CultureInfo.CurrentCulture = taskConfiguration.Culture;
-                CultureInfo.CurrentUICulture = taskConfiguration.UICulture;
-
-#else
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
                 Thread.CurrentThread.CurrentUICulture = taskConfiguration.UICulture;
-#endif
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
