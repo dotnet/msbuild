@@ -676,18 +676,17 @@ namespace Microsoft.NET.Build.Tasks
                 WriteAdditionalLogMessages();
             }
 
-            private static readonly char [] _specialNuGetVersionChars = new char[]
-                {
-                    '*',
-                    '(', ')',
-                    '[', ']'
-                };
-
             /// <summary>
             /// Writes log messages which are not directly in the assets file, but are based on conditions
             /// this task evaluates
             /// </summary>
             private void WriteAdditionalLogMessages()
+            {
+                WriteUnsupportedRuntimeIdentifierMessageIfNecessary();
+                WriteMismatchedPlatformPackageVersionMessageIfNecessary();
+            }
+
+            private void WriteUnsupportedRuntimeIdentifierMessageIfNecessary()
             {
                 if (_task.EnsureRuntimePackageDependencies && !string.IsNullOrEmpty(_task.RuntimeIdentifier))
                 {
@@ -697,7 +696,28 @@ namespace Microsoft.NET.Build.Tasks
                         WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
                     }
                 }
-                
+            }
+
+            private static readonly char[] _specialNuGetVersionChars = new char[]
+                {
+                    '*',
+                    '(', ')',
+                    '[', ']'
+                };
+
+            private void WriteMismatchedPlatformPackageVersionMessageIfNecessary()
+            {
+                bool hasTwoPeriods(string s)
+                {
+                    int firstPeriodIndex = s.IndexOf('.');
+                    if (firstPeriodIndex < 0)
+                    {
+                        return false;
+                    }
+                    int secondPeriodIndex = s.IndexOf('.', firstPeriodIndex + 1);
+                    return secondPeriodIndex >= 0;
+                }
+
                 if (!string.IsNullOrEmpty(_task.ImplicitPlatformPackageIdentifier) &&
                     !string.IsNullOrEmpty(_task.ExpectedPlatformPackageVersion) &&
                     //  If RuntimeFrameworkVersion was specified as a version range or a floating version,
@@ -707,22 +727,11 @@ namespace Microsoft.NET.Build.Tasks
                     var platformLibrary = _runtimeTarget.GetLibrary(_task.ImplicitPlatformPackageIdentifier);
                     if (platformLibrary != null)
                     {
-                        bool HasTwoPeriods(string s)
-                        {
-                            int firstPeriodIndex = s.IndexOf('.');
-                            if (firstPeriodIndex < 0)
-                            {
-                                return false;
-                            }
-                            int secondPeriodIndex = s.IndexOf('.', firstPeriodIndex + 1);
-                            return secondPeriodIndex >= 0;
-                        }
-
                         string restoredPlatformLibraryVersion = platformLibrary.Version.ToNormalizedString();
 
                         //  Normalize expected version.  For example, converts "2.0" to "2.0.0"
                         string expectedPlatformPackageVersion = _task.ExpectedPlatformPackageVersion;
-                        if (!HasTwoPeriods(expectedPlatformPackageVersion))
+                        if (!hasTwoPeriods(expectedPlatformPackageVersion))
                         {
                             expectedPlatformPackageVersion += ".0";
                         }                        
