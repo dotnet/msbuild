@@ -15,6 +15,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit;
+using Xunit.Abstractions;
 using Shouldly;
 
 namespace Microsoft.Build.UnitTests
@@ -26,6 +27,13 @@ namespace Microsoft.Build.UnitTests
 #else
         private const string MSBuildExeName = "MSBuild.exe";
 #endif
+
+        private readonly ITestOutputHelper _output;
+
+        public XMakeAppTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         private const string AutoResponseFileName = "MSBuild.rsp";
 
@@ -2009,7 +2017,7 @@ namespace Microsoft.Build.UnitTests
 
                 bool success;
 
-                string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success);
+                string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success, _output);
 
                 success.ShouldBeTrue();
 
