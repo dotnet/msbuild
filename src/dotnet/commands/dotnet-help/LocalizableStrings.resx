@@ -270,4 +270,7 @@
   <data name="ToolDefinition" xml:space="preserve">
     <value>Modify tools.</value>
   </data>
+  <data name="BuildServerDefinition" xml:space="preserve">
+    <value>Interact with servers started by a build.</value>
+  </data>
 </root>
