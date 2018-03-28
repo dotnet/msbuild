@@ -128,6 +128,9 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromVisualStudioProcess()
         {
+            if (!NativeMethodsShared.IsWindows)
+                return null;
+
             var vsProcess = s_getProcessFromRunningProcess();
             if (!IsProcessInList(vsProcess, s_visualStudioProcess)) return null;
 
