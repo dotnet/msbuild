@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Scripts
 
         Lazy<Dictionary<string, string>> _versionFragments = new Lazy<Dictionary<string, string>>(() =>
                  System.Environment.GetEnvironmentVariables().Cast<DictionaryEntry>().Where(entry => ((string)entry.Key).EndsWith("_VERSION_FRAGMENT")).ToDictionary<DictionaryEntry, string, string>(entry =>
-                    (string)entry.Key, entry => (string)entry.Value), );
+                    ((string)entry.Key).Replace("_VERSION_FRAGMENT","").ToLowerInvariant(), entry => (string)entry.Value, StringComparer.OrdinalIgnoreCase));
         private Config()
         {
         }
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Scripts
         public string Password => _password.Value;
         public string DotNetVersionUrl => _dotNetVersionUrl.Value;
         public Dictionary<string, string> VersionFragments => _versionFragments.Value;
-        public bool HasVersionFragment(string repoName) => _versionFragments.Value.ContainsKey($"{repoName}_VERSION_FRAGMENT");
+        public bool HasVersionFragment(string repoName) => _versionFragments.Value.ContainsKey(repoName);
         public string GitHubUpstreamOwner => _gitHubUpstreamOwner.Value;
         public string GitHubProject => _gitHubProject.Value;
         public string GitHubUpstreamBranch => _gitHubUpstreamBranch.Value;

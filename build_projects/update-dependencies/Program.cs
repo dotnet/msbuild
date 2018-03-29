@@ -26,7 +26,6 @@ namespace Microsoft.DotNet.Scripts
 
             List<BuildInfo> buildInfos = new List<BuildInfo>(s_config.VersionFragments.Select<KeyValuePair<string, string>, BuildInfo>(fragment => 
                     GetBuildInfo(fragment.Key, fragment.Value, fetchLatestReleaseFile: false)));
-
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
             var dependencyBuildInfos = buildInfos.Select(buildInfo =>
                 new BuildDependencyInfo(
