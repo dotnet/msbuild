@@ -595,17 +595,26 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+#if RUNTIME_TYPE_NETCORE
+        private static string CurrentHost;
+#endif
+
         /// <summary>
-        /// Identify the .NET host of the current process
+        /// Identify the .NET host of the current process.
         /// </summary>
         /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
         private static string GetCurrentHost()
         {
 #if RUNTIME_TYPE_NETCORE
-            using (Process currentProcess = Process.GetCurrentProcess())
+            if (CurrentHost == null)
             {
-                return currentProcess.MainModule.FileName;
+                using (Process currentProcess = Process.GetCurrentProcess())
+                {
+                    CurrentHost = currentProcess.MainModule.FileName;
+                }
             }
+
+            return CurrentHost;
 #else
             return null;
 #endif
