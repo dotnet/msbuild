@@ -8,6 +8,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">netstandard1.3</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
