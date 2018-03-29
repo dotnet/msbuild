@@ -163,7 +163,7 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   <data name="ToolInstallationFailed" xml:space="preserve">
     <value>Tool '{0}' failed to install. You may need to specify the version using
 
-   dotnet tool install -g t-rex --version &lt;version&gt;</value>
+   dotnet tool install -g {0} --version &lt;version&gt;</value>
   </data>
   <data name="ToolInstallationFailedContactAuthor" xml:space="preserve">
     <value>Tool '{0}' failed to install. Please contact the tool author for assistance.</value>
