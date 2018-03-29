@@ -115,16 +115,7 @@ namespace Microsoft.Build.BackEnd
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
-            // Find proper msbuild executable name
-            string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-
-            if (String.IsNullOrEmpty(msbuildExeName))
-            {
-                msbuildExeName = "MSBuild.exe";
-            }
-
-            // Search for all instances of the msbuild process and create a list of them
-            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildExeName)));
+            List<Process> nodeProcesses = GetPossibleRunningNodes();
 
             // Find proper MSBuildTaskHost executable name
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
