@@ -180,11 +180,6 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = "MSBuild.exe";
-            }
-
 #if FEATURE_NODE_REUSE
             var candidateProcesses = GetPossibleRunningNodes(msbuildLocation);
 
@@ -290,8 +285,13 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
-        private List<Process> GetPossibleRunningNodes(string msbuildLocation)
+        private List<Process> GetPossibleRunningNodes(string msbuildLocation = null)
         {
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = "MSBuild.exe";
+            }
+
             var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost() ?? msbuildLocation);
 
             List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(expectedProcessName));
