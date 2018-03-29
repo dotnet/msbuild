@@ -363,6 +363,7 @@ namespace Microsoft.Build.UnitTests.Construction
             {
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
                 doc.Load(_pathToCommonTargets);
+                Assert.True(doc.IsReadOnly);
                 doc.Save(FileUtilities.GetTemporaryFile());
             }
            );
@@ -389,6 +390,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(xmlReader);
             }
 #endif
+            Assert.True(doc.IsReadOnly);
             Assert.Throws<InvalidOperationException>(() => {
                 doc.Save(new MemoryStream());
             });
@@ -414,6 +416,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(xmlReader);
             }
 #endif
+            Assert.True(doc.IsReadOnly);
             Assert.Throws<InvalidOperationException>(() =>
             {
                 doc.Save(new StringWriter());
@@ -440,7 +443,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(xmlReader);
             }
 #endif
-
+            Assert.True(doc.IsReadOnly);
             using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFile(), FileMode.Create)))
             {
                 Assert.Throws<InvalidOperationException>(() =>
@@ -473,6 +476,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     doc.Load(xmlReader);
                 }
 #endif
+                Assert.Equal(readOnly, doc.IsReadOnly);
                 var allNodes = doc.SelectNodes("//*|//@*");
 
                 string locations = String.Empty;
