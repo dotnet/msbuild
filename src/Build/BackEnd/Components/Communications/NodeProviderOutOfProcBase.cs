@@ -115,16 +115,7 @@ namespace Microsoft.Build.BackEnd
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
-            // Find proper msbuild executable name
-            string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-
-            if (String.IsNullOrEmpty(msbuildExeName))
-            {
-                msbuildExeName = "MSBuild.exe";
-            }
-
-            // Search for all instances of the msbuild process and create a list of them
-            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildExeName)));
+            List<Process> nodeProcesses = GetPossibleRunningNodes();
 
             // Find proper MSBuildTaskHost executable name
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
@@ -178,11 +169,6 @@ namespace Microsoft.Build.BackEnd
                     // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
                     msbuildLocation = Path.Combine(msbuildExeName, ".exe");
                 }
-            }
-
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = "MSBuild.exe";
             }
 
 #if FEATURE_NODE_REUSE
@@ -290,8 +276,13 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
-        private List<Process> GetPossibleRunningNodes(string msbuildLocation)
+        private List<Process> GetPossibleRunningNodes(string msbuildLocation = null)
         {
+            if (String.IsNullOrEmpty(msbuildLocation))
+            {
+                msbuildLocation = "MSBuild.exe";
+            }
+
             var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost() ?? msbuildLocation);
 
             List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(expectedProcessName));
@@ -604,17 +595,26 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+#if RUNTIME_TYPE_NETCORE
+        private static string CurrentHost;
+#endif
+
         /// <summary>
-        /// Identify the .NET host of the current process
+        /// Identify the .NET host of the current process.
         /// </summary>
         /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
         private static string GetCurrentHost()
         {
 #if RUNTIME_TYPE_NETCORE
-            using (Process currentProcess = Process.GetCurrentProcess())
+            if (CurrentHost == null)
             {
-                return currentProcess.MainModule.FileName;
+                using (Process currentProcess = Process.GetCurrentProcess())
+                {
+                    CurrentHost = currentProcess.MainModule.FileName;
+                }
             }
+
+            return CurrentHost;
 #else
             return null;
 #endif
