@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -264,6 +265,42 @@ namespace Microsoft.Build.Tasks.Unittest
 
             // Assert
             redirectResults.Engine.AssertLogContains("MSB3835");
+        }
+
+        [Fact]
+        public void AppConfigFileNotSavedWhenIdentical()
+        {
+            string appConfigFile = WriteAppConfigRuntimeSection(string.Empty);
+            string outputAppConfigFile = _env.ExpectFile(".config").Path;
+
+            TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
+
+            var redirectResults = GenerateBindingRedirects(appConfigFile, outputAppConfigFile, redirect);
+
+            // Verify it ran correctly
+            redirectResults.ExecuteResult.ShouldBeTrue();
+            redirectResults.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
+            redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
+
+            var oldTimestamp = DateTime.Now.Subtract(TimeSpan.FromDays(30));
+            
+            File.SetCreationTime(outputAppConfigFile, oldTimestamp);
+            File.SetLastWriteTime(outputAppConfigFile, oldTimestamp);
+
+            // Make sure it's old
+            File.GetCreationTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+            File.GetLastWriteTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+
+            // Re-run the task
+            var redirectResults2 = GenerateBindingRedirects(appConfigFile, outputAppConfigFile, redirect);
+
+            // Verify it ran correctly and that it's still old
+            redirectResults2.ExecuteResult.ShouldBeTrue();
+            redirectResults2.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
+            redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
+
+            File.GetCreationTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+            File.GetLastWriteTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
         }
 
         private BindingRedirectsExecutionResult GenerateBindingRedirects(string appConfigFile, string targetAppConfigFile,
