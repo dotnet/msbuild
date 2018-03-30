@@ -63,9 +63,6 @@
     AspNetCoreRelease is only used if the value of this property is "timestamped" -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
 
-    <!-- The runtime store requires us to link each previously released version. Each time we update ASP.NET Core, add the previous verison to this list -->
-    <PreviousAspNetCoreRuntimeStoreVersions>2.0.0;2.0.3;2.0.5;2.0.6</PreviousAspNetCoreRuntimeStoreVersions>
-
     <!--BranchName and AspNetCoreVersion will not always be the same-->
     <AspNetCoreBranchName>2.0.7</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
@@ -80,8 +77,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AspNetCoreRuntimeStoreVersion Include="$(PreviousAspNetCoreRuntimeStoreVersions)" />
+    <!--
+      The runtime store requires us to link each previously released version. Each time we update ASP.NET Core, add the previous verison to this list.
+      This list should be sorted most recent version to oldest.
+    -->
     <AspNetCoreRuntimeStoreVersion Include="$(CurrentAspNetCoreRuntimeVersion)" />
+    <AspNetCoreRuntimeStoreVersion Include="2.0.6" />
+    <AspNetCoreRuntimeStoreVersion Include="2.0.5" />
+    <AspNetCoreRuntimeStoreVersion Include="2.0.3" />
+    <AspNetCoreRuntimeStoreVersion Include="2.0.0" />
   </ItemGroup>
 
   <!-- infrastructure and test only dependencies -->

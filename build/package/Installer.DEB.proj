@@ -21,11 +21,15 @@
       Inputs="@(CLISdkFiles)"
       Outputs="$(SdkInstallerFile)" >
 
+      <ItemGroup>
+        <AspNetCoreDebInstallerFileReversed Include="@(AspNetCoreDebInstallerFile->Reverse())" />
+      </ItemGroup>
+
       <!-- Install Shared Framework Packages -->
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFile.Identity)" />
+      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFileReversed.Identity)" />
 
       <!-- Create layout: Binaries -->
       <Copy
@@ -104,11 +108,15 @@
               $(SdkInstallerFile);"
       Outputs="$(DebianTestResultsXmlFile)" >
 
+      <ItemGroup>
+        <AspNetCoreDebInstallerFileReversed Include="@(AspNetCoreDebInstallerFile->Reverse())" />
+      </ItemGroup>
+
       <!-- Install Dependencies and SDK Packages -->
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFile.Identity)" />
+      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFileReversed.Identity)" />
 
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
