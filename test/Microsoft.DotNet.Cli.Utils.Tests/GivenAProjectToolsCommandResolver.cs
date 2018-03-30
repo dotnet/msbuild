@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.Tests
 
             result.Should().NotBeNull();
 
-            result.Args.Should().Contain("--fx-version 2.0.7-servicing-26322-01");
+            result.Args.Should().Contain("--fx-version 2.0.6");
         }
 
         [Fact]
