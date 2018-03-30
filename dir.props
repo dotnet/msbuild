@@ -43,7 +43,7 @@
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.6.35</GitVersioningVersion>
     <NuSpecReferenceGeneratorVersion>1.4.2</NuSpecReferenceGeneratorVersion>
-    <NuGetVersion>4.6.1-rtm-5019</NuGetVersion>
+    <NuGetVersion>4.6.2-rtm-5055</NuGetVersion>
   </PropertyGroup>
 
    <!-- Common repo directories -->
