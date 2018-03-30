@@ -244,6 +244,11 @@
         <target state="translated">运行时环境:</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildArgs">
+        <source>MSBuild arguments: {0}</source>
+        <target state="new">MSBuild arguments: {0}</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

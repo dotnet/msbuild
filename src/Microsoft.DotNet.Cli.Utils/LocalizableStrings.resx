@@ -262,4 +262,7 @@
   <data name="UnableToInvokeMemberNameAfterCommand" xml:space="preserve">
     <value>Unable to invoke {0} after the command has been run</value>
   </data>
+  <data name="MSBuildArgs" xml:space="preserve">
+    <value>MSBuild arguments: {0}</value>
+  </data>
 </root>
