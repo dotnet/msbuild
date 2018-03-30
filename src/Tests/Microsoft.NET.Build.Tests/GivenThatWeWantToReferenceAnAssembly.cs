@@ -91,6 +91,92 @@ public static class Program
         }
 
         [Theory]
+        [InlineData("netcoreapp2.0", "net40")]
+        [InlineData("netcoreapp2.0", "netstandard1.5")]
+        [InlineData("netcoreapp2.0", "netcoreapp1.0")]
+        public void ItRunsAppsDirectlyReferencingAssembliesWhichReferenceAssemblies(
+            string referencerTarget,
+            string dllDependencyTarget)
+        {
+            string identifier = referencerTarget.ToString() + "_" + dllDependencyTarget.ToString();
+
+            TestProject dllDependencyProjectDependency = new TestProject()
+            {
+                Name = "DllDependencyDependency",
+                IsSdkProject = true,
+                TargetFrameworks = dllDependencyTarget,
+            };
+
+            dllDependencyProjectDependency.SourceFiles["Class2.cs"] = @"
+public class Class2
+{
+    public static string GetMessage()
+    {
+        return ""Hello from a reference of an indirect reference."";
+    }
+}
+";
+
+            //  Skip running test if not running on Windows
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !dllDependencyProjectDependency.BuildsOnNonWindows)
+            {
+                return;
+            }
+
+            TestProject dllDependencyProject = new TestProject()
+            {
+                Name = "DllDependency",
+                IsSdkProject = true,
+                TargetFrameworks = dllDependencyTarget,
+            };
+            dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
+
+            dllDependencyProject.SourceFiles["Class1.cs"] = @"
+public class Class1
+{
+    public static string GetMessage()
+    {
+        return Class2.GetMessage();
+    }
+}
+";
+
+            var dllDependencyAsset = _testAssetsManager.CreateTestProject(dllDependencyProject, identifier: identifier);
+            string dllDependencyAssemblyPath = RestoreAndBuild(dllDependencyAsset, dllDependencyProject);
+
+            TestProject referencerProject = new TestProject()
+            {
+                Name = "Referencer",
+                IsSdkProject = true,
+                TargetFrameworks = referencerTarget,
+                // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
+                IsExe = true,
+            };
+            referencerProject.References.Add(dllDependencyAssemblyPath);
+
+            referencerProject.SourceFiles["Program.cs"] = @"
+using System;
+public static class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine(Class1.GetMessage());
+    }
+}
+";
+
+            var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
+            string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
+
+            Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { applicationPath })
+                .CaptureStdOut()
+                .Execute()
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello from a reference of an indirect reference.");
+        }
+
+        [Theory]
         [InlineData("netcoreapp2.0", "netstandard2.0", "net40")]
         [InlineData("netcoreapp2.0", "netstandard2.0", "netstandard1.5")]
         [InlineData("netcoreapp2.0", "netstandard2.0", "netcoreapp1.0")]

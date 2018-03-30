@@ -63,8 +63,11 @@ namespace Microsoft.NET.Build.Tasks
         // References
         public const string ExternallyResolved = "ExternallyResolved";
         public const string HintPath = "HintPath";
+        public const string MSBuildSourceProjectFile = "MSBuildSourceProjectFile";
         public const string Private = "Private";
         public const string Pack = "Pack";
+        public const string ReferenceSourceTarget = "ReferenceSourceTarget";
+        public const string TargetPath = "TargetPath";
 
         // Content files
         public const string PPOutputPath = "PPOutputPath";

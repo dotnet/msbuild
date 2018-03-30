@@ -44,14 +44,14 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (ITaskItem satelliteAssembly in satelliteAssemblies)
             {
-                string culture = satelliteAssembly.GetMetadata("Culture");
-                string relativePath = satelliteAssembly.GetMetadata("TargetPath");
+                string culture = satelliteAssembly.GetMetadata(MetadataKeys.Culture);
+                string relativePath = satelliteAssembly.GetMetadata(MetadataKeys.TargetPath);
 
                 resourceAssemblies.Add(new ResourceAssemblyInfo(culture, relativePath));
             }
 
             string outputName = name + fileExtension;
-            return new SingleProjectInfo(projectPath, name, version, outputName, null, resourceAssemblies);
+            return new SingleProjectInfo(projectPath, name, version, outputName, dependencyReferences: null, resourceAssemblies: resourceAssemblies);
         }
 
         public static Dictionary<string, SingleProjectInfo> CreateProjectReferenceInfos(
@@ -62,15 +62,15 @@ namespace Microsoft.NET.Build.Tasks
             Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>();
 
             IEnumerable<ITaskItem> projectReferencePaths = referencePaths
-                .Where(r => string.Equals(r.GetMetadata("ReferenceSourceTarget"), "ProjectReference", StringComparison.OrdinalIgnoreCase));
+                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase));
 
             foreach (ITaskItem projectReferencePath in projectReferencePaths)
             {
-                string sourceProjectFile = projectReferencePath.GetMetadata("MSBuildSourceProjectFile");
+                string sourceProjectFile = projectReferencePath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
 
                 if (string.IsNullOrEmpty(sourceProjectFile))
                 {
-                    throw new BuildErrorException(Strings.MissingItemMetadata, "MSBuildSourceProjectFile", "ReferencePath", projectReferencePath.ItemSpec);
+                    throw new BuildErrorException(Strings.MissingItemMetadata, MetadataKeys.MSBuildSourceProjectFile, "ReferencePath", projectReferencePath.ItemSpec);
                 }
 
                 string outputName = Path.GetFileName(projectReferencePath.ItemSpec);
@@ -80,19 +80,19 @@ namespace Microsoft.NET.Build.Tasks
 
                 projectReferences.Add(
                     sourceProjectFile,
-                    new SingleProjectInfo(sourceProjectFile, name, version, outputName, null, null));
+                    new SingleProjectInfo(sourceProjectFile, name, version, outputName, dependencyReferences: null, resourceAssemblies: null));
             }
 
             IEnumerable<ITaskItem> projectReferenceDependencyPaths = referenceDependencyPaths
-                .Where(r => string.Equals(r.GetMetadata("ReferenceSourceTarget"), "ProjectReference", StringComparison.OrdinalIgnoreCase));
+                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase));
 
             foreach (ITaskItem projectReferenceDependencyPath in projectReferenceDependencyPaths)
             {
-                string sourceProjectFile = projectReferenceDependencyPath.GetMetadata("MSBuildSourceProjectFile");
+                string sourceProjectFile = projectReferenceDependencyPath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
 
                 if (string.IsNullOrEmpty(sourceProjectFile))
                 {
-                    throw new BuildErrorException(Strings.MissingItemMetadata, "MSBuildSourceProjectFile", "ReferenceDependencyPath", projectReferenceDependencyPath.ItemSpec);
+                    throw new BuildErrorException(Strings.MissingItemMetadata, MetadataKeys.MSBuildSourceProjectFile, "ReferenceDependencyPath", projectReferenceDependencyPath.ItemSpec);
                 }
 
                 SingleProjectInfo referenceProjectInfo;
@@ -104,21 +104,21 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             IEnumerable<ITaskItem> projectReferenceSatellitePaths = referenceSatellitePaths
-                .Where(r => string.Equals(r.GetMetadata("ReferenceSourceTarget"), "ProjectReference", StringComparison.OrdinalIgnoreCase));
+                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase));
 
             foreach (ITaskItem projectReferenceSatellitePath in projectReferenceSatellitePaths)
             {
-                string sourceProjectFile = projectReferenceSatellitePath.GetMetadata("MSBuildSourceProjectFile");
+                string sourceProjectFile = projectReferenceSatellitePath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
 
                 if (string.IsNullOrEmpty(sourceProjectFile))
                 {
-                    throw new BuildErrorException(Strings.MissingItemMetadata, "MSBuildSourceProjectFile", "ReferenceSatellitePath", projectReferenceSatellitePath.ItemSpec);
+                    throw new BuildErrorException(Strings.MissingItemMetadata, MetadataKeys.MSBuildSourceProjectFile, "ReferenceSatellitePath", projectReferenceSatellitePath.ItemSpec);
                 }
 
                 SingleProjectInfo referenceProjectInfo;
                 if (projectReferences.TryGetValue(sourceProjectFile, out referenceProjectInfo))
                 {
-                    string originalItemSpec = projectReferenceSatellitePath.GetMetadata("OriginalItemSpec");
+                    string originalItemSpec = projectReferenceSatellitePath.GetMetadata(MetadataKeys.OriginalItemSpec);
 
                     if (!string.IsNullOrEmpty(originalItemSpec))
                     {
