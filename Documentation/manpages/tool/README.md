@@ -24,5 +24,5 @@ sudo apt install -y pandoc python python-pip wget unzip < /dev/null
 sudo pip install pandocfilters
 
 git clone https://github.com/dotnet/cli
-./Documentation/manpage/tool/update-man-pages.sh
+./cli/Documentation/manpage/tool/update-man-pages.sh
 ```
