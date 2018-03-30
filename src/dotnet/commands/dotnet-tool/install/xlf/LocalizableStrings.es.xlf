@@ -59,11 +59,6 @@ La herramienta "{1}" (versión "{2}") se instaló correctamente.</target>
         <target state="translated">El archivo de configuración del paquete NuGet de la herramienta no es válido: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="needs-review-translation">No se pudo instalar la herramienta “{0}”.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">No se pudo instalar la herramienta “{0}”. Póngase en contacto con su creador para obtener asistencia.</target>
@@ -117,6 +112,11 @@ La herramienta "{1}" (versión "{2}") se instaló correctamente.</target>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">

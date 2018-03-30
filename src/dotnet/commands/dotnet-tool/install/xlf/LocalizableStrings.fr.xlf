@@ -59,11 +59,6 @@ L'outil '{1}' (version '{2}') a été installé.</target>
         <target state="translated">Le fichier de paramètres dans le package NuGet de l'outil n'est pas valide : {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="needs-review-translation">Impossible d'installer l'outil '{0}'.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">Impossible d'installer l'outil '{0}'. Contactez le créateur de l'outil pour obtenir de l'aide.</target>
@@ -117,6 +112,11 @@ L'outil '{1}' (version '{2}') a été installé.</target>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">

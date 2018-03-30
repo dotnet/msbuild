@@ -59,11 +59,6 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
         <target state="translated">Plik ustawień w pakiecie NuGet narzędzia jest nieprawidłowy: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="needs-review-translation">Zainstalowanie narzędzia „{0}” nie powiodło się.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">Zainstalowanie narzędzia „{0}” nie powiodło się. Skontaktuj się z autorem narzędzia w celu uzyskania pomocy.</target>
@@ -117,6 +112,11 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">

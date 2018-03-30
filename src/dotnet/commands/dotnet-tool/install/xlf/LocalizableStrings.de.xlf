@@ -59,11 +59,6 @@ Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert.</target>
         <target state="translated">Die Einstellungsdatei im NuGet-Paket des Tools ist ungültig: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="needs-review-translation">Fehler bei der Installation des Tools "{0}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">Fehler bei der Installation des Tools "{0}". Wenden Sie sich an den Verfasser des Tools, um Unterstützung zu erhalten.</target>
@@ -117,6 +112,11 @@ Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert.</target>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">

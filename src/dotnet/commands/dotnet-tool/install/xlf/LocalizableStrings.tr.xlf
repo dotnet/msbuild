@@ -59,11 +59,6 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Aracın NuGet paketindeki ayar dosyası geçersiz: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="needs-review-translation">'{0}' aracı yüklenemedi.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">'{0}' aracı yüklenemedi. Lütfen yardım için araç sahibiyle iletişime geçin.</target>
@@ -117,6 +112,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">

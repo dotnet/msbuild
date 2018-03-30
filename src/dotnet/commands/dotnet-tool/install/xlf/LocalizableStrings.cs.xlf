@@ -59,11 +59,6 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <target state="translated">Soubor nastavení v balíčku NuGet nástroje je neplatný: {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="needs-review-translation">Nástroj {0} se nepodařilo nainstalovat.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">Nástroj {0} se nepodařilo nainstalovat. Obraťte se prosím s žádostí o pomoc na autora nástroje.</target>
@@ -117,6 +112,11 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
