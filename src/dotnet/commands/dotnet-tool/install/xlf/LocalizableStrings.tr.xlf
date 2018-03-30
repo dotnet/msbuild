@@ -60,9 +60,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install. You may need to specify the version using
-
-   dotnet tool install -g {0} --version &lt;version&gt;</source>
+        <source>Tool '{0}' failed to install.</source>
         <target state="needs-review-translation">'{0}' aracı yüklenemedi.</target>
         <note />
       </trans-unit>
@@ -119,6 +117,15 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
+        <source>Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g {0} --version &lt;version&gt;</source>
+        <target state="new">Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g {0} --version &lt;version&gt;</target>
         <note />
       </trans-unit>
     </body>
