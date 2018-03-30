@@ -214,6 +214,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
+      VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
       ImplicitPlatformPackageIdentifier="$(ImplicitPlatformPackageIdentifier)"
       ExpectedPlatformPackageVersion="$(RuntimeFrameworkVersion)"      
       >

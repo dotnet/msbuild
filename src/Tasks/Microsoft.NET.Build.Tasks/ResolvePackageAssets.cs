@@ -89,6 +89,12 @@ namespace Microsoft.NET.Build.Tasks
         public bool EnsureRuntimePackageDependencies { get; set; }
 
         /// <summary>
+        /// Specifies whether to validate that the version of the implicit platform package in the assets
+        /// file matches the version specified by <see cref="ExpectedPlatformPackageVersion"/>
+        /// </summary>
+        public bool VerifyMatchingImplicitPackageVersion { get; set; }
+
+        /// <summary>
         /// Identifier for implicitly referenced platform package.  If set, then an error will be generated if the
         /// version of that package from the assets file does not match the <see cref="ExpectedPlatformPackageVersion"/>
         /// </summary>
@@ -308,6 +314,7 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(ProjectPath);
                     writer.Write(RuntimeIdentifier ?? "");
                     writer.Write(TargetFrameworkMoniker);
+                    writer.Write(VerifyMatchingImplicitPackageVersion);
                 }
 
                 stream.Position = 0;
@@ -718,7 +725,8 @@ namespace Microsoft.NET.Build.Tasks
                     return secondPeriodIndex >= 0;
                 }
 
-                if (!string.IsNullOrEmpty(_task.ImplicitPlatformPackageIdentifier) &&
+                if (_task.VerifyMatchingImplicitPackageVersion &&
+                    !string.IsNullOrEmpty(_task.ImplicitPlatformPackageIdentifier) &&
                     !string.IsNullOrEmpty(_task.ExpectedPlatformPackageVersion) &&
                     //  If RuntimeFrameworkVersion was specified as a version range or a floating version,
                     //  then we can't compare the versions directly, so just skip the check

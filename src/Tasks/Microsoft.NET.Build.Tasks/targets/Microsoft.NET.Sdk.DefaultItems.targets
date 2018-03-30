@@ -147,6 +147,8 @@ Copyright (c) .NET Foundation. All rights reserved.
          to verify that the restored version of the package matches the
          RuntimeFrameworkVersion -->
     <ImplicitPlatformPackageIdentifier>Microsoft.NETCore.App</ImplicitPlatformPackageIdentifier>
+
+    <VerifyMatchingImplicitPackageVersion Condition="'$(VerifyMatchingImplicitPackageVersion)' == ''">true</VerifyMatchingImplicitPackageVersion>
   </PropertyGroup>
   
   <!--

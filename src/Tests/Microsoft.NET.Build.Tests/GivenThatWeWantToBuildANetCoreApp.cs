@@ -176,8 +176,10 @@ namespace Microsoft.NET.Build.Tests
             netCoreAppLibrary.Version.ToString().Should().Be(expectedPackageVersion);
         }
 
-        [Fact]
-        public void It_errors_if_restored_for_wrong_netcore_version()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_handles_mismatched_implicit_package_versions(bool allowMismatch)
         {
             var testProject = new TestProject()
             {
@@ -186,6 +188,10 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 IsExe = true,
             };
+            if (allowMismatch)
+            {
+                testProject.AdditionalProperties["VerifyMatchingImplicitPackageVersion"] = "false";
+            }
 
             string runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
@@ -198,14 +204,22 @@ namespace Microsoft.NET.Build.Tests
 
             var result = buildCommand.Execute($"/p:RuntimeIdentifier={runtimeIdentifier}");
 
-            result.Should().Fail();
+            if (allowMismatch)
+            {
+                result.Should().Pass();
+            }
+            else
+            {
 
-            //  Get everything after the {2} in the failure message so this test doesn't need to
-            //  depend on the exact version the app would be rolled forward to
-            string expectedFailureMessage = Strings.MismatchedPlatformPackageVersion
-                .Substring(Strings.MismatchedPlatformPackageVersion.IndexOf("{2}") + 3);
+                result.Should().Fail();
 
-            result.Should().HaveStdOutContaining(expectedFailureMessage);
+                //  Get everything after the {2} in the failure message so this test doesn't need to
+                //  depend on the exact version the app would be rolled forward to
+                string expectedFailureMessage = Strings.MismatchedPlatformPackageVersion
+                    .Substring(Strings.MismatchedPlatformPackageVersion.IndexOf("{2}") + 3);
+
+                result.Should().HaveStdOutContaining(expectedFailureMessage);
+            }
         }
 
         [Fact]
