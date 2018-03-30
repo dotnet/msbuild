@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
-    "NuGet.Commands": "4.6.1-rtm-5019",
-    "NuGet.Protocol": "4.6.1-rtm-5019",
+    "NuGet.Commands": "4.6.2-rtm-5055",
+    "NuGet.Protocol": "4.6.2-rtm-5055",
     "Shouldly": "3.0.0-beta0003",
     "xunit": "2.1.0"
   },
