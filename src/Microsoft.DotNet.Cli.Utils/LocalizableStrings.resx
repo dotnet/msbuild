@@ -206,7 +206,7 @@
     <value>Generating deps.json at: {0}</value>
   </data>
   <data name="UnableToGenerateDepsJson" xml:space="preserve">
-    <value>unable to generate deps.json, it may have been already generated: {0}</value>
+    <value>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</value>
   </data>
   <data name="DepsJsonGeneratorProjectNotSet" xml:space="preserve">
     <value>Unable to find deps.json generator project.</value>
@@ -261,5 +261,8 @@
   </data>
   <data name="UnableToInvokeMemberNameAfterCommand" xml:space="preserve">
     <value>Unable to invoke {0} after the command has been run</value>
+  </data>
+  <data name="MSBuildArgs" xml:space="preserve">
+    <value>MSBuild arguments: {0}</value>
   </data>
 </root>
