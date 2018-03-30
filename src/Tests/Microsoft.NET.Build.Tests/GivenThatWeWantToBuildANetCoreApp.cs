@@ -22,6 +22,7 @@ using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.Build.Tasks;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -70,15 +71,37 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void The_RuntimeFrameworkVersion_can_float()
         {
-            It_targets_the_right_framework(
-                nameof(The_RuntimeFrameworkVersion_can_float),
-                "netcoreapp2.0",
-                "2.0.*",
-                false,
-                true,
-                TestContext.LatestRuntimePatchForNetCoreApp2_0,
-                TestContext.LatestRuntimePatchForNetCoreApp2_0
-                );
+            var testProject = new TestProject()
+            {
+                Name = "RuntimeFrameworkVersionFloat",
+                TargetFrameworks = "netcoreapp2.0",
+                RuntimeFrameworkVersion = "2.0.*",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);
+
+            var target = lockFile.GetTarget(NuGetFramework.Parse(testProject.TargetFrameworks), null);
+            var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
+
+            //  Test that the resolved version is greater than or equal to the latest runtime patch
+            //  we know about, so that when a new runtime patch is released the test doesn't
+            //  immediately start failing
+            var minimumExpectedVersion = new NuGetVersion(TestContext.LatestRuntimePatchForNetCoreApp2_0);
+            netCoreAppLibrary.Version.CompareTo(minimumExpectedVersion).Should().BeGreaterOrEqualTo(0,
+                "the version resolved from a RuntimeFrameworkVersion of '{0}' should be at least {1}",
+                testProject.RuntimeFrameworkVersion, TestContext.LatestRuntimePatchForNetCoreApp2_0);
         }
 
         private void It_targets_the_right_framework(
