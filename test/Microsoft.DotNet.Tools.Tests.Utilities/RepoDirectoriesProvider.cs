@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _testPackages = Environment.GetEnvironmentVariable("TEST_PACKAGES");
             if (string.IsNullOrEmpty(_testPackages))
             {
-                throw new InvalidOperationException("TEST_PACKAGES environment variable not set");
+                _testPackages = Path.Combine(_artifacts, "test", "packages");
             }
 
             _testWorkingFolder = Path.Combine(RepoRoot,
