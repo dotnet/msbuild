@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Build;
+using Microsoft.DotNet.Tools.BuildServer;
 using Microsoft.DotNet.Tools.Clean;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.List;
@@ -148,6 +149,10 @@ namespace Microsoft.DotNet.Cli
             ["tool"] = new BuiltInCommandMetadata
             {
                 Command = ToolCommand.Run
+            },
+            ["buildserver"] = new BuiltInCommandMetadata
+            {
+                Command = BuildServerCommand.Run
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {
