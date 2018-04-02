@@ -11,13 +11,30 @@ using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.Unittest
 {
-    public class GenerateBindingRedirectsTests
+    public class GenerateBindingRedirectsTests : IDisposable
     {
+        private readonly ITestOutputHelper _output;
+        private readonly TestEnvironment _env;
+
+        public GenerateBindingRedirectsTests(ITestOutputHelper output)
+        {
+            _output = output;
+            _env = TestEnvironment.Create(output);
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
+
         /// <summary>
         /// In this case,
         /// - A valid redirect information is provided for <see cref="GenerateBindingRedirects"/> task.
@@ -36,12 +53,12 @@ namespace Microsoft.Build.Tasks.Unittest
             TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
             // Act
-            var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
+            var redirectResults = GenerateBindingRedirects(appConfigFile, null, redirect);
 
             // Assert
-            Assert.True(redirectResults.ExecuteResult);
-            Assert.Contains("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />", redirectResults.TargetAppConfigContent);
-            Assert.Contains("newVersion=\"40.0.0.0\"", redirectResults.TargetAppConfigContent);
+            redirectResults.ExecuteResult.ShouldBeTrue();
+            redirectResults.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
+            redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
         }
 
         /// <summary>
@@ -71,11 +88,11 @@ namespace Microsoft.Build.Tasks.Unittest
             TaskItemMock redirect = new TaskItemMock("MyAssembly, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='14a739be0244c389'", "40.0.0.0");
 
             // Act
-            var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
+            var redirectResults = GenerateBindingRedirects(appConfigFile, null, redirect);
 
             // Assert
-            Assert.Contains("MyAssembly", redirectResults.TargetAppConfigContent);
-            Assert.Contains("<bindingRedirect oldVersion=\"0.0.0.0-40.0.0.0\" newVersion=\"40.0.0.0\"", redirectResults.TargetAppConfigContent);
+            redirectResults.TargetAppConfigContent.ShouldContain("MyAssembly");
+            redirectResults.TargetAppConfigContent.ShouldContain("<bindingRedirect oldVersion=\"0.0.0.0-40.0.0.0\" newVersion=\"40.0.0.0\"");
         }
 
         /// <summary>
@@ -115,22 +132,22 @@ namespace Microsoft.Build.Tasks.Unittest
             TaskItemMock webHttpRedirect = new TaskItemMock("System.Web.Http, Version=4.0.0.0, Culture=Neutral, PublicKeyToken='31bf3856ad364e35'", "40.0.0.0");
 
             // Act
-            var redirectResults = GenerateBindingRedirects(appConfigFile, serviceBusRedirect, webHttpRedirect);
+            var redirectResults = GenerateBindingRedirects(appConfigFile, null, serviceBusRedirect, webHttpRedirect);
 
             // Assert
-            Assert.True(redirectResults.ExecuteResult);
+            redirectResults.ExecuteResult.ShouldBeTrue();
             // Naive check that target app.config contains custom redirects.
             // Output config should have max versions for both serviceBus and webhttp assemblies.
-            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "oldVersion=\"0.0.0.0-{0}\"", serviceBusRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
-            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", serviceBusRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
+            redirectResults.TargetAppConfigContent.ShouldContain($"oldVersion=\"0.0.0.0-{serviceBusRedirect.MaxVersion}\"");
+            redirectResults.TargetAppConfigContent.ShouldContain($"newVersion=\"{serviceBusRedirect.MaxVersion}\"");
 
-            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "oldVersion=\"0.0.0.0-{0}\"", webHttpRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
-            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", webHttpRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
+            redirectResults.TargetAppConfigContent.ShouldContain($"oldVersion=\"0.0.0.0-{webHttpRedirect.MaxVersion}\"");
+            redirectResults.TargetAppConfigContent.ShouldContain($"newVersion=\"{webHttpRedirect.MaxVersion}\"");
 
             XElement targetAppConfig = XElement.Parse(redirectResults.TargetAppConfigContent);
-            Assert.Equal(1,
-                targetAppConfig.Descendants()
-                    .Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.OrdinalIgnoreCase)));
+            targetAppConfig.Descendants()
+                .Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.OrdinalIgnoreCase))
+                .ShouldBe(1);
             // "Binding redirects should not add additional assemblyBinding sections into the target app.config: " + targetAppConfig
 
             // Log file should contains a warning when GenerateBindingRedirects updates existing app.config entries
@@ -159,11 +176,11 @@ namespace Microsoft.Build.Tasks.Unittest
             TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
             // Act
-            var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
+            var redirectResults = GenerateBindingRedirects(appConfigFile, null, redirect);
 
             // Assert
-            Assert.Equal(0, redirectResults.Engine.Errors); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
-            Assert.Equal(0, redirectResults.Engine.Warnings); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
+            redirectResults.Engine.Errors.ShouldBe(0); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
+            redirectResults.Engine.Warnings.ShouldBe(0); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
         }
 
         /// <summary>
@@ -186,11 +203,11 @@ namespace Microsoft.Build.Tasks.Unittest
             TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
             // Act
-            var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
+            var redirectResults = GenerateBindingRedirects(appConfigFile, null, redirect);
 
             // Assert
-            Assert.Equal(0, redirectResults.Engine.Errors); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.Equal(0, redirectResults.Engine.Warnings); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
+            redirectResults.Engine.Errors.ShouldBe(0);
+            redirectResults.Engine.Warnings.ShouldBe(0);
         }
 
         /// <summary>
@@ -217,11 +234,11 @@ namespace Microsoft.Build.Tasks.Unittest
             TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
             // Act
-            var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
+            var redirectResults = GenerateBindingRedirects(appConfigFile, null, redirect);
 
             // Assert
-            Assert.Equal(0, redirectResults.Engine.Errors); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.Equal(0, redirectResults.Engine.Warnings); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            redirectResults.Engine.Errors.ShouldBe(0);
+            redirectResults.Engine.Warnings.ShouldBe(0);
         }
 
         /// <summary>
@@ -244,58 +261,78 @@ namespace Microsoft.Build.Tasks.Unittest
             TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
             // Act
-            var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
+            var redirectResults = GenerateBindingRedirects(appConfigFile, null, redirect);
 
             // Assert
             redirectResults.Engine.AssertLogContains("MSB3835");
         }
 
-        private static BindingRedirectsExecutionResult GenerateBindingRedirects(string appConfigFile,
-            params TaskItemMock[] suggestedRedirects)
+        [Fact]
+        public void AppConfigFileNotSavedWhenIdentical()
+        {
+            string appConfigFile = WriteAppConfigRuntimeSection(string.Empty);
+            string outputAppConfigFile = _env.ExpectFile(".config").Path;
+
+            TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
+
+            var redirectResults = GenerateBindingRedirects(appConfigFile, outputAppConfigFile, redirect);
+
+            // Verify it ran correctly
+            redirectResults.ExecuteResult.ShouldBeTrue();
+            redirectResults.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
+            redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
+
+            var oldTimestamp = DateTime.Now.Subtract(TimeSpan.FromDays(30));
+            
+            File.SetCreationTime(outputAppConfigFile, oldTimestamp);
+            File.SetLastWriteTime(outputAppConfigFile, oldTimestamp);
+
+            // Make sure it's old
+            File.GetCreationTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+            File.GetLastWriteTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+
+            // Re-run the task
+            var redirectResults2 = GenerateBindingRedirects(appConfigFile, outputAppConfigFile, redirect);
+
+            // Verify it ran correctly and that it's still old
+            redirectResults2.ExecuteResult.ShouldBeTrue();
+            redirectResults2.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
+            redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
+
+            File.GetCreationTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+            File.GetLastWriteTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+        }
+
+        private BindingRedirectsExecutionResult GenerateBindingRedirects(string appConfigFile, string targetAppConfigFile,
+            params ITaskItem[] suggestedRedirects)
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
-            string outputAppConfig = FileUtilities.GetTemporaryFile();
+            string outputAppConfig = string.IsNullOrEmpty(targetAppConfigFile) ? _env.ExpectFile(".config").Path : targetAppConfigFile;
 
-            GenerateBindingRedirects bindingRedirects = new GenerateBindingRedirects();
-            bindingRedirects.BuildEngine = engine;
-
-            bindingRedirects.SuggestedRedirects = suggestedRedirects ?? new ITaskItem[] { };
-            bindingRedirects.AppConfigFile = new TaskItem(appConfigFile);
-            bindingRedirects.OutputAppConfigFile = new TaskItem(outputAppConfig);
-
-            try
+            GenerateBindingRedirects bindingRedirects = new GenerateBindingRedirects
             {
-                bool executionResult = bindingRedirects.Execute();
-                return new BindingRedirectsExecutionResult
-                {
-                    ExecuteResult = executionResult,
-                    Engine = engine,
-                    SourceAppConfigContent = File.ReadAllText(appConfigFile),
-                    TargetAppConfigContent = File.ReadAllText(outputAppConfig),
-                };
-            }
-            finally
+                BuildEngine = engine,
+                SuggestedRedirects = suggestedRedirects ?? new ITaskItem[] { },
+                AppConfigFile = new TaskItem(appConfigFile),
+                OutputAppConfigFile = new TaskItem(outputAppConfig)
+            };
+
+
+            bool executionResult = bindingRedirects.Execute();
+
+            return new BindingRedirectsExecutionResult
             {
-                CleanupNoThrow(bindingRedirects);
-            }
+                ExecuteResult = executionResult,
+                Engine = engine,
+                SourceAppConfigContent = File.ReadAllText(appConfigFile),
+                TargetAppConfigContent = File.ReadAllText(outputAppConfig),
+                TargetAppConfigFilePath = outputAppConfig
+            };
         }
 
-        private static void CleanupNoThrow(GenerateBindingRedirects redirects)
-        {
-            if (redirects.AppConfigFile != null && redirects.AppConfigFile.ItemSpec != null)
-            {
-                FileUtilities.DeleteNoThrow(redirects.AppConfigFile.ItemSpec);
-            }
-
-            if (redirects.OutputAppConfigFile != null && redirects.OutputAppConfigFile.ItemSpec != null)
-            {
-                FileUtilities.DeleteNoThrow(redirects.OutputAppConfigFile.ItemSpec);
-            }
-        }
-
-        private static string WriteAppConfigRuntimeSection(string runtimeSection)
+        private string WriteAppConfigRuntimeSection(string runtimeSection)
         {
             string formatString =
 @"<configuration>
@@ -303,9 +340,9 @@ namespace Microsoft.Build.Tasks.Unittest
      {0}
   </runtime>
 </configuration>";
-            string appConfigContents = string.Format(CultureInfo.InvariantCulture, formatString, runtimeSection);
+            string appConfigContents = string.Format(formatString, runtimeSection);
 
-            string appConfigFile = FileUtilities.GetTemporaryFile();
+            string appConfigFile = _env.CreateFile(".config").Path;
             File.WriteAllText(appConfigFile, appConfigContents);
             return appConfigFile;
         }
@@ -322,6 +359,8 @@ namespace Microsoft.Build.Tasks.Unittest
             public string TargetAppConfigContent { get; set; }
 
             public bool ExecuteResult { get; set; }
+
+            public string TargetAppConfigFilePath { get; set; }
         }
 
         /// <summary>
@@ -329,17 +368,13 @@ namespace Microsoft.Build.Tasks.Unittest
         /// </summary>
         private class TaskItemMock : ITaskItem
         {
-            private readonly string _maxVersion;
-
             public TaskItemMock(string assemblyName, string maxVersion)
             {
                 ((ITaskItem)this).ItemSpec = assemblyName;
-                _maxVersion = maxVersion;
+                MaxVersion = maxVersion;
             }
 
-            public string AssemblyName { get; private set; }
-
-            public string MaxVersion { get { return _maxVersion; } }
+            public string MaxVersion { get; }
 
             string ITaskItem.ItemSpec { get; set; }
 
@@ -349,27 +384,27 @@ namespace Microsoft.Build.Tasks.Unittest
 
             string ITaskItem.GetMetadata(string metadataName)
             {
-                return _maxVersion;
+                return MaxVersion;
             }
 
             void ITaskItem.SetMetadata(string metadataName, string metadataValue)
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             void ITaskItem.RemoveMetadata(string metadataName)
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             void ITaskItem.CopyMetadataTo(ITaskItem destinationItem)
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             IDictionary ITaskItem.CloneCustomMetadata()
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
         }
     }
