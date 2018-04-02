@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
                     .With(name: "FRAMEWORK")
-                    .ForwardAsSingle(o => $"-p:TargetFramework={o.Arguments.Single()}"));
+                    .ForwardAsSingle(o => $"-property:TargetFramework={o.Arguments.Single()}"));
         
         public static Option RuntimeOption() =>
             Create.Option(
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
                     .With(name: "RUNTIME_IDENTIFIER")
-                    .ForwardAsSingle(o => $"-p:RuntimeIdentifier={o.Arguments.Single()}"));
+                    .ForwardAsSingle(o => $"-property:RuntimeIdentifier={o.Arguments.Single()}"));
                 
         public static Option ConfigurationOption() =>
             Create.Option(
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                 Accept.ExactlyOneArgument()
                     .With(name: "CONFIGURATION")
                     .WithSuggestionsFrom("DEBUG", "RELEASE")
-                    .ForwardAsSingle(o => $"-p:Configuration={o.Arguments.Single()}"));
+                    .ForwardAsSingle(o => $"-property:Configuration={o.Arguments.Single()}"));
 
         public static Option VersionSuffixOption() =>
             Create.Option(
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.CmdVersionSuffixDescription,
                 Accept.ExactlyOneArgument()
                     .With(name: "VERSION_SUFFIX")
-                    .ForwardAsSingle(o => $"-p:VersionSuffix={o.Arguments.Single()}"));
+                    .ForwardAsSingle(o => $"-property:VersionSuffix={o.Arguments.Single()}"));
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));

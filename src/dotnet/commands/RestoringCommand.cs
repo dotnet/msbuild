@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools
             => arguments.Any(a => IsExcludedFromRestore(a));
 
         private static bool IsExcludedFromRestore(string argument) 
-            => argument.StartsWith("-p:TargetFramework=", StringComparison.Ordinal);
+            => argument.StartsWith("-property:TargetFramework=", StringComparison.Ordinal);
 
         public override int Execute()
         {

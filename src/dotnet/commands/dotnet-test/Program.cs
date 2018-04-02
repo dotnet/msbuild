@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Tools.Test
         {
             var msbuildArgs = new List<string>()
             {
-                "-t:VSTest",
-                "-v:quiet",
+                "-target:VSTest",
+                "-verbosity:quiet",
                 "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
                 "-nologo"
             };
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 var runSettingsArg = string.Join(";", runSettingsOptions);
 
-                msbuildArgs.Add($"-p:VSTestCLIRunSettings=\"{runSettingsArg}\"");
+                msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
             var verbosityArg = msbuildArgs.LastOrDefault(arg => arg.StartsWith("-verbosity"));
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Tools.Test
                 var verbosity = verbosityArg.Split(':');
                 if (verbosity.Length == 2)
                 {
-                    msbuildArgs.Add($"-p:VSTestVerbosity={verbosity[1]}");
+                    msbuildArgs.Add($"-property:VSTestVerbosity={verbosity[1]}");
                 }
             }
 

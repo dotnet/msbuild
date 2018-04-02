@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Restore
                 msbuildArgs.Add("-nologo");
             }
 
-            msbuildArgs.Add("-t:Restore");
+            msbuildArgs.Add("-target:Restore");
 
             msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
 

@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Clean
         {
             var msbuildArgs = new List<string>
             {
-                "-v:normal"
+                "-verbosity:normal"
             };
 
             var parser = Parser.Instance;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Clean
 
             msbuildArgs.AddRange(parsedClean.Arguments);
                 
-            msbuildArgs.Add("-t:Clean");
+            msbuildArgs.Add("-target:Clean");
 
             msbuildArgs.AddRange(parsedClean.OptionValuesToBeForwarded());
 

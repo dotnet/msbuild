@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Store
                 throw new GracefulException(LocalizableStrings.SpecifyManifests);
             }
 
-            msbuildArgs.Add("-t:ComposeStore");
+            msbuildArgs.Add("-target:ComposeStore");
 
             msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
 

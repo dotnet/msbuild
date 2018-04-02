@@ -37,15 +37,15 @@ namespace Microsoft.DotNet.Tools.Build
 
             var appliedBuildOptions = result["dotnet"]["build"];
 
-            msbuildArgs.Add($"-clp:Summary");
+            msbuildArgs.Add($"-consoleloggerparameters:Summary");
 
             if (appliedBuildOptions.HasOption("--no-incremental"))
             {
-                msbuildArgs.Add("-t:Rebuild");
+                msbuildArgs.Add("-target:Rebuild");
             }
             else
             {
-                msbuildArgs.Add("-t:Build");
+                msbuildArgs.Add("-target:Build");
             }
 
             msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());

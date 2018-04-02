@@ -10,24 +10,24 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetCleanInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> -m -v:m -v:normal -t:Clean";
+        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -verbosity:normal -target:Clean";
 
         [Fact]
         public void ItAddsProjectToMsbuildInvocation()
         {
             var msbuildPath = "<msbuildpath>";
             CleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be("exec <msbuildpath> -m -v:m -v:normal <project> -t:Clean");
+                .GetProcessStartInfo().Arguments.Should().Be("exec <msbuildpath> -maxcpucount -verbosity:m -verbosity:normal <project> -target:Clean");
         }
 
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-o", "<output>" }, "-p:OutputPath=<output>")]
-        [InlineData(new string[] { "--output", "<output>" }, "-p:OutputPath=<output>")]
-        [InlineData(new string[] { "-f", "<framework>" }, "-p:TargetFramework=<framework>")]
-        [InlineData(new string[] { "--framework", "<framework>" }, "-p:TargetFramework=<framework>")]
-        [InlineData(new string[] { "-c", "<configuration>" }, "-p:Configuration=<configuration>")]
-        [InlineData(new string[] { "--configuration", "<configuration>" }, "-p:Configuration=<configuration>")]
+        [InlineData(new string[] { "-o", "<output>" }, "-property:OutputPath=<output>")]
+        [InlineData(new string[] { "--output", "<output>" }, "-property:OutputPath=<output>")]
+        [InlineData(new string[] { "-f", "<framework>" }, "-property:TargetFramework=<framework>")]
+        [InlineData(new string[] { "--framework", "<framework>" }, "-property:TargetFramework=<framework>")]
+        [InlineData(new string[] { "-c", "<configuration>" }, "-property:Configuration=<configuration>")]
+        [InlineData(new string[] { "--configuration", "<configuration>" }, "-property:Configuration=<configuration>")]
         [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)

@@ -86,8 +86,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             result.StdOut.Should().Contain(MSBuildHelpText);
         }
 
-        [Fact]
-        public void WhenRestoreSourcesStartsWithUnixPathThenHttpsSourceIsParsedCorrectly()
+        [Theory]
+        [InlineData("/p")]
+        [InlineData("/property")]
+        [InlineData("-p")]
+        [InlineData("-property")]
+        public void WhenRestoreSourcesStartsWithUnixPathThenHttpsSourceIsParsedCorrectly(string propertyFormat)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -104,7 +108,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             var result = new DotnetCommand()
                 .WithWorkingDirectory(root)
-                .Execute($"msbuild /p:RestoreSources={somePathThatExists};https://api.nuget.org/v3/index.json /t:restore LibraryWithUnresolvablePackageReference.csproj");
+                .Execute($"msbuild {propertyFormat}:RestoreSources={somePathThatExists};https://api.nuget.org/v3/index.json /t:restore LibraryWithUnresolvablePackageReference.csproj");
 
             _output.WriteLine($"[STDOUT]\n{result.StdOut}\n[STDERR]\n{result.StdErr}");
 
