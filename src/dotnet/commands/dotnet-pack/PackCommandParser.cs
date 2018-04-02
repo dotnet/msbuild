@@ -22,25 +22,25 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdOutputDirDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
-                        .ForwardAsSingle(o => $"/p:PackageOutputPath={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"-p:PackageOutputPath={o.Arguments.Single()}")),
                 Create.Option(
                     "--no-build",
                     LocalizableStrings.CmdNoBuildOptionDescription,
-                    Accept.NoArguments().ForwardAs("/p:NoBuild=true")),
+                    Accept.NoArguments().ForwardAs("-p:NoBuild=true")),
                 Create.Option(
                     "--include-symbols",
                     LocalizableStrings.CmdIncludeSymbolsDescription,
-                    Accept.NoArguments().ForwardAs("/p:IncludeSymbols=true")),
+                    Accept.NoArguments().ForwardAs("-p:IncludeSymbols=true")),
                 Create.Option(
                     "--include-source",
                     LocalizableStrings.CmdIncludeSourceDescription,
-                    Accept.NoArguments().ForwardAs("/p:IncludeSource=true")),
+                    Accept.NoArguments().ForwardAs("-p:IncludeSource=true")),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "-s|--serviceable",
                     LocalizableStrings.CmdServiceableDescription,
-                    Accept.NoArguments().ForwardAs("/p:Serviceable=true")),
+                    Accept.NoArguments().ForwardAs("-p:Serviceable=true")),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }

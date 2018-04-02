@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.OutputOptionName)
-                          .ForwardAsSingle(o => $"/p:OutputPath={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"-p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                     "--no-dependencies",
                     LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments()
-                          .ForwardAs("/p:BuildProjectReferences=false")),
+                          .ForwardAs("-p:BuildProjectReferences=false")),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }

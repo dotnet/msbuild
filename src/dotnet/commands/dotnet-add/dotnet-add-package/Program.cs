@@ -99,19 +99,19 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             args.Add(projectFilePath);
 
             // Pass the task as generate restore Dependency Graph file
-            args.Add("/t:GenerateRestoreGraphFile");
+            args.Add("-t:GenerateRestoreGraphFile");
 
             // Pass Dependency Graph file output path
-            args.Add($"/p:RestoreGraphOutputPath=\"{dgFilePath}\"");
+            args.Add($"-p:RestoreGraphOutputPath=\"{dgFilePath}\"");
 
             // Turn off recursive restore
-            args.Add($"/p:RestoreRecursive=false");
+            args.Add($"-p:RestoreRecursive=false");
 
             // Turn off restore for Dotnet cli tool references so that we do not generate extra dg specs
-            args.Add($"/p:RestoreDotnetCliToolReferences=false");
+            args.Add($"-p:RestoreDotnetCliToolReferences=false");
 
             // Output should not include MSBuild version header
-            args.Add("/nologo");
+            args.Add("-nologo");
 
             var result = new MSBuildForwardingApp(args).Execute();
 

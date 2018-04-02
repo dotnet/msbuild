@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            msbuildArgs.Add("/t:Publish");
+            msbuildArgs.Add("-t:Publish");
 
             var appliedPublishOption = result["dotnet"]["publish"];
 

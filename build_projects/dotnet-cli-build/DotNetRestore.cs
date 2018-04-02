@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (SkipInvalidConfigurations)
             {
-                return "/p:SkipInvalidConfigurations=true";
+                return "-p:SkipInvalidConfigurations=true";
             }
 
             return null;
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (!string.IsNullOrEmpty(Runtime))
             {
-                return $"/p:RuntimeIdentifier={Runtime}";
+                return $"-p:RuntimeIdentifier={Runtime}";
             }
 
             return null;

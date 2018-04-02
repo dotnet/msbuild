@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Pack
           
             var msbuildArgs = new List<string>()
             {
-                "/t:pack"
+                "-t:pack"
             };
 
             msbuildArgs.AddRange(parsedPack.OptionValuesToBeForwarded());

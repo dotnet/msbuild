@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                                   return new[]
                                   {
                                       materializedString,
-                                      $"/p:AdditionalProjects={string.Join("%3B", o.Arguments.Skip(1))}"
+                                      $"-p:AdditionalProjects={string.Join("%3B", o.Arguments.Skip(1))}"
                                   };
                               }
                           })),
@@ -47,30 +47,30 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.FrameworkVersionOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.FrameworkVersionOption)
-                        .ForwardAsSingle(o => $"/p:RuntimeFrameworkVersion={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"-p:RuntimeFrameworkVersion={o.Arguments.Single()}")),
                 CommonOptions.RuntimeOption(),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"/p:ComposeDir={Path.GetFullPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-p:ComposeDir={Path.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "-w|--working-dir",
                     LocalizableStrings.IntermediateWorkingDirOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.IntermediateWorkingDirOption)
-                        .ForwardAsSingle(o => $"/p:ComposeWorkingDir={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"-p:ComposeWorkingDir={o.Arguments.Single()}")),
                 Create.Option(
                     "--skip-optimization",
                     LocalizableStrings.SkipOptimizationOptionDescription,
                     Accept.NoArguments()
-                          .ForwardAs("/p:SkipOptimization=true")),
+                          .ForwardAs("-p:SkipOptimization=true")),
                 Create.Option(
                     "--skip-symbols",
                     LocalizableStrings.SkipSymbolsOptionDescription,
                     Accept.NoArguments()
-                          .ForwardAs("/p:CreateProfilingSymbols=false")),
+                          .ForwardAs("-p:CreateProfilingSymbols=false")),
                 CommonOptions.VerbosityOption());
     }
 }

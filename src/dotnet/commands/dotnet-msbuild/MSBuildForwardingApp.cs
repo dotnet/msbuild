@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
                     return argsToForward
                         .Concat(new[]
                         {
-                            $"/distributedlogger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}*{forwardingLoggerType.FullName},{forwardingLoggerType.GetTypeInfo().Assembly.Location}"
+                            $"-distributedlogger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}*{forwardingLoggerType.FullName},{forwardingLoggerType.GetTypeInfo().Assembly.Location}"
                         });
                 }
                 catch (Exception)

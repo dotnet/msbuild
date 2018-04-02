@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return null;
             }
 
-            return $"/p:RuntimeIdentifier={_runtime}";
+            return $"-p:RuntimeIdentifier={_runtime}";
         }
     }
 }

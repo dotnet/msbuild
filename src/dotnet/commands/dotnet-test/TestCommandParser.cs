@@ -25,24 +25,24 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdSettingsDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdSettingsFile)
-                              .ForwardAsSingle(o => $"/p:VSTestSetting={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-p:VSTestSetting={o.Arguments.Single()}")),
                   Create.Option(
                         "-t|--list-tests",
                         LocalizableStrings.CmdListTestsDescription,
                         Accept.NoArguments()
-                              .ForwardAsSingle(o => "/p:VSTestListTests=true")),
+                              .ForwardAsSingle(o => "-p:VSTestListTests=true")),
                   Create.Option(
                         "--filter",
                         LocalizableStrings.CmdTestCaseFilterDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdTestCaseFilterExpression)
-                              .ForwardAsSingle(o => $"/p:VSTestTestCaseFilter={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-p:VSTestTestCaseFilter={o.Arguments.Single()}")),
                   Create.Option(
                         "-a|--test-adapter-path",
                         LocalizableStrings.CmdTestAdapterPathDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdTestAdapterPath)
-                              .ForwardAsSingle(o => $"/p:VSTestTestAdapterPath={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-p:VSTestTestAdapterPath={o.Arguments.Single()}")),
                   Create.Option(
                         "-l|--logger",
                         LocalizableStrings.CmdLoggerDescription,
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                                     {
                                           var loggersString = string.Join(";", GetSemiColonEscapedArgs(o.Arguments));
 
-                                          return $"/p:VSTestLogger={loggersString}";
+                                          return $"-p:VSTestLogger={loggersString}";
                                     })),
                   CommonOptions.ConfigurationOption(),
                   CommonOptions.FrameworkOption(),
@@ -61,35 +61,35 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdOutputDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdOutputDir)
-                              .ForwardAsSingle(o => $"/p:OutputPath={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-p:OutputPath={o.Arguments.Single()}")),
                   Create.Option(
                         "-d|--diag",
                         LocalizableStrings.CmdPathTologFileDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToLogFile)
-                              .ForwardAsSingle(o => $"/p:VSTestDiag={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-p:VSTestDiag={o.Arguments.Single()}")),
                   Create.Option(
                         "--no-build",
                         LocalizableStrings.CmdNoBuildDescription,
                         Accept.NoArguments()
-                              .ForwardAsSingle(o => "/p:VSTestNoBuild=true")),
+                              .ForwardAsSingle(o => "-p:VSTestNoBuild=true")),
                   Create.Option(
                         "-r|--results-directory",
                         LocalizableStrings.CmdResultsDirectoryDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToResultsDirectory)
-                              .ForwardAsSingle(o => $"/p:VSTestResultsDirectory={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-p:VSTestResultsDirectory={o.Arguments.Single()}")),
                   Create.Option(
                         "--collect",
                         LocalizableStrings.cmdCollectDescription,
                         Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.cmdCollectFriendlyName)
-                              .ForwardAsSingle(o => $"/p:VSTestCollect=\"{string.Join(";", o.Arguments)}\"")),
+                              .ForwardAsSingle(o => $"-p:VSTestCollect=\"{string.Join(";", o.Arguments)}\"")),
                   Create.Option(
                         "--blame",
                         LocalizableStrings.CmdBlameDescription,
                         Accept.NoArguments()
-                              .ForwardAsSingle(o => "/p:VSTestBlame=true")),
+                              .ForwardAsSingle(o => "-p:VSTestBlame=true")),
                   CommonOptions.NoRestoreOption(),
                   CommonOptions.VerbosityOption());
 

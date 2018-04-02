@@ -30,10 +30,10 @@ namespace Microsoft.DotNet.Tools.Test
         {
             var msbuildArgs = new List<string>()
             {
-                "/t:VSTest",
-                "/v:quiet",
-                "/nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
-                "/nologo"
+                "-t:VSTest",
+                "-v:quiet",
+                "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
+                "-nologo"
             };
 
             var parser = Parser.Instance;
@@ -57,17 +57,17 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 var runSettingsArg = string.Join(";", runSettingsOptions);
 
-                msbuildArgs.Add($"/p:VSTestCLIRunSettings=\"{runSettingsArg}\"");
+                msbuildArgs.Add($"-p:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
-            var verbosityArg = msbuildArgs.LastOrDefault(arg => arg.StartsWith("/verbosity"));
+            var verbosityArg = msbuildArgs.LastOrDefault(arg => arg.StartsWith("-verbosity"));
 
             if (!string.IsNullOrEmpty(verbosityArg))
             {
                 var verbosity = verbosityArg.Split(':');
                 if (verbosity.Length == 2)
                 {
-                    msbuildArgs.Add($"/p:VSTestVerbosity={verbosity[1]}");
+                    msbuildArgs.Add($"-p:VSTestVerbosity={verbosity[1]}");
                 }
             }
 

@@ -35,10 +35,10 @@ namespace Microsoft.DotNet.Tools.Restore
 
             if (noLogo)
             {
-                msbuildArgs.Add("/nologo");
+                msbuildArgs.Add("-nologo");
             }
 
-            msbuildArgs.Add("/t:Restore");
+            msbuildArgs.Add("-t:Restore");
 
             msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
 

@@ -354,12 +354,12 @@ namespace Microsoft.DotNet.Cli.Utils
             var args = new List<string>();
 
             args.Add(toolDepsJsonGeneratorProject);
-            args.Add($"/p:ProjectAssetsFile=\"{toolLockFile.Path}\"");
-            args.Add($"/p:ToolName={toolLibrary.Name}");
-            args.Add($"/p:ProjectDepsFilePath={tempDepsFile}");
+            args.Add($"-p:ProjectAssetsFile=\"{toolLockFile.Path}\"");
+            args.Add($"-p:ToolName={toolLibrary.Name}");
+            args.Add($"-p:ProjectDepsFilePath={tempDepsFile}");
 
             var toolTargetFramework = toolLockFile.Targets.First().TargetFramework.GetShortFolderName();
-            args.Add($"/p:TargetFramework={toolTargetFramework}");
+            args.Add($"-p:TargetFramework={toolTargetFramework}");
 
 
             //  Look for the .props file in the Microsoft.NETCore.App package, until NuGet
@@ -384,7 +384,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
                     if (platformLibraryPropsFile != null)
                     {
-                        args.Add($"/p:AdditionalImport={platformLibraryPropsFile}");
+                        args.Add($"-p:AdditionalImport={platformLibraryPropsFile}");
                     }
                 }
             }
