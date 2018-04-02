@@ -137,7 +137,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeFrameworkVersion Condition="'$(TargetLatestRuntimePatch)' != 'true' ">$(DefaultNetCorePatchVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
     <!-- This property is different than MicrosoftNETPlatformLibrary.  MicrosoftNETPlatformLibrary is
          used to trim the dependencies published with a framework-dependent app, and is overridden
          by ASP.NET packages.
@@ -217,6 +217,11 @@ Copyright (c) .NET Foundation. All rights reserved.
            that had duplicates, instead of leaving the ones without IsImplicitlyDefined set to true. -->
       <PackageReference Remove="@(_PackageReferenceToRemove)" Condition="'%(PackageReference.IsImplicitlyDefined)' == 'true' "/>
     </ItemGroup>
+    
+    <!-- If any implicit package references were overridden, then don't check that RuntimeFrameworkVersion matches the package version -->
+    <PropertyGroup Condition="'@(_PackageReferenceToRemove)' != ''">
+      <VerifyMatchingImplicitPackageVersion>false</VerifyMatchingImplicitPackageVersion>
+    </PropertyGroup>
 
   </Target>
 
