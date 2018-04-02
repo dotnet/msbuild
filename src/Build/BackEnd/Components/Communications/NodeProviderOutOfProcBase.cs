@@ -172,33 +172,37 @@ namespace Microsoft.Build.BackEnd
             }
 
 #if FEATURE_NODE_REUSE
-            var candidateProcesses = GetPossibleRunningNodes(msbuildLocation);
-
-            CommunicationsUtilities.Trace("Attempting to connect to each existing msbuild.exe process in turn to establish node {0}...", nodeId);
-            foreach (Process nodeProcess in candidateProcesses)
+            // Try to connect to idle nodes if node reuse is enabled.
+            if (_componentHost.BuildParameters.EnableNodeReuse)
             {
-                if (nodeProcess.Id == Process.GetCurrentProcess().Id)
-                {
-                    continue;
-                }
+                var candidateProcesses = GetPossibleRunningNodes(msbuildLocation);
 
-                // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, clientHandshake, nodeProcess.Id);
-                if (_processesToIgnore.Contains(nodeLookupKey))
+                CommunicationsUtilities.Trace("Attempting to connect to each existing msbuild.exe process in turn to establish node {0}...", nodeId);
+                foreach (Process nodeProcess in candidateProcesses)
                 {
-                    continue;
-                }
+                    if (nodeProcess.Id == Process.GetCurrentProcess().Id)
+                    {
+                        continue;
+                    }
 
-                // We don't need to check this again
-                _processesToIgnore.Add(nodeLookupKey);
+                    // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
+                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, clientHandshake, nodeProcess.Id);
+                    if (_processesToIgnore.Contains(nodeLookupKey))
+                    {
+                        continue;
+                    }
 
-                // Attempt to connect to each process in turn.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
-                if (nodeStream != null)
-                {
-                    // Connection successful, use this node.
-                    CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
-                    return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
+                    // We don't need to check this again
+                    _processesToIgnore.Add(nodeLookupKey);
+
+                    // Attempt to connect to each process in turn.
+                    Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
+                    if (nodeStream != null)
+                    {
+                        // Connection successful, use this node.
+                        CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
+                        return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
+                    }
                 }
             }
 #endif
