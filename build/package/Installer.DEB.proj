@@ -21,14 +21,15 @@
       Inputs="@(CLISdkFiles)"
       Outputs="$(SdkInstallerFile)" >
 
+      <ItemGroup>
+        <AspNetCoreDebInstallerFileReversed Include="@(AspNetCoreDebInstallerFile->Reverse())" />
+      </ItemGroup>
+
       <!-- Install Shared Framework Packages -->
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime200)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime203)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime205)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
+      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFileReversed.Identity)" />
 
       <!-- Create layout: Binaries -->
       <Copy
@@ -90,10 +91,7 @@
 
       <!-- Remove Shared Framework and Debian Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName205)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName203)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName200)" />
+      <Exec Command="sudo dpkg -r %(AspNetCoreDebInstallerFile.PackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
 
@@ -106,17 +104,19 @@
       Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);
+              @(AspNetCoreDebInstallerFile);
               $(SdkInstallerFile);"
       Outputs="$(DebianTestResultsXmlFile)" >
+
+      <ItemGroup>
+        <AspNetCoreDebInstallerFileReversed Include="@(AspNetCoreDebInstallerFile->Reverse())" />
+      </ItemGroup>
 
       <!-- Install Dependencies and SDK Packages -->
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime200)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime203)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime205)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedAspNetCoreRuntime)" />
+      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFileReversed.Identity)" />
 
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
@@ -130,10 +130,7 @@
 
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName205)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName203)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreRuntimePackageName200)" />
+      <Exec Command="sudo dpkg -r %(AspNetCoreDebInstallerFile.PackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
 

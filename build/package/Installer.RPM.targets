@@ -50,16 +50,10 @@
       <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
       <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
       <HostRpmPackageName>dotnet-host</HostRpmPackageName>
-      <HostRidInAspNetCoreRuntimeRpmInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeRpmInstallerFileName>
       <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
       <AspNetCoreRuntimePackageName Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
       <AspNetCoreRuntimePackageName200>$(AspNetCoreRuntimePackageBrandName)-2.0.0</AspNetCoreRuntimePackageName200>
       <AspNetCoreRuntimePackageName203>$(AspNetCoreRuntimePackageBrandName)-2.0.3</AspNetCoreRuntimePackageName203>
-      <AspNetCoreRuntimePackageName205>$(AspNetCoreRuntimePackageBrandName)-2.0.5</AspNetCoreRuntimePackageName205>
-      <AspNetCoreRuntimePackageVersion>$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageVersion>
-      <AspNetCoreRuntimePackageVersion Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreVersion)</AspNetCoreRuntimePackageVersion>
-      <AspNetCoreRuntimeRpmInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
-      <AspNetCoreRuntimeRpmInstallerFileName Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
       <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
       <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
     </PropertyGroup>
@@ -187,27 +181,15 @@
 
   <Target Name="DownloadAspNetCoreRuntimeRpmInstaller"
         DependsOnTargets="SetupDebProps">
-    <PropertyGroup>
-      <AspNetCoreRuntimeRpmInstallerFileName200>$(AspNetCoreRuntimePackageBrandName)-2.0.0-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName200>
-      <AspNetCoreRuntimeRpmInstallerFileName203>$(AspNetCoreRuntimePackageBrandName)-2.0.3-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName203>
-      <AspNetCoreRuntimeRpmInstallerFileName205>$(AspNetCoreRuntimePackageBrandName)-2.0.5-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName205>
-      <DownloadedSharedAspNetCoreRuntime200>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName200)</DownloadedSharedAspNetCoreRuntime200>
-      <DownloadedSharedAspNetCoreRuntime203>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName203)</DownloadedSharedAspNetCoreRuntime203>
-      <DownloadedSharedAspNetCoreRuntime205>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName205)</DownloadedSharedAspNetCoreRuntime205>
-      <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
-    </PropertyGroup>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName200)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime200)"/>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName203)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime203)"/>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName205)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime205)"/>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
+    <ItemGroup>
+      <AspNetCoreRpmInstallerFile Include="$(PackagesDirectory)/$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)-$(HostRid).rpm">
+        <Source>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)-$(HostRid).rpm$(CoreSetupBlobAccessTokenParam)</Source>
+        <PackageName>$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)</PackageName>
+      </AspNetCoreRpmInstallerFile>
+    </ItemGroup>
+
+    <DownloadFile Uri="%(AspNetCoreRpmInstallerFiles.Source)"
+                  DestinationPath="%(AspNetCoreRpmInstallerFiles.Identity)"/>
   </Target>
 
   <Target Name="TestFPMTool">
@@ -235,18 +217,19 @@
           Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);
-              $(DownloadedSharedAspNetCoreRuntime);
+              @(AspNetCoreRpmInstallerFile);
               $(RpmTestResultsXmlFile);"
           Outputs="$(RpmTestResultsXmlFile)" >
+
+    <ItemGroup>
+      <AspNetCoreRpmInstallerFileReversed Include="@(AspNetCoreRpmInstallerFile->Reverse())" />
+    </ItemGroup>
 
     <!-- Install Dependencies and SDK Packages -->
     <Exec Command="sudo yum -y install $(DownloadedSharedHostInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedHostFxrInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedSharedFrameworkInstallerFile)" />
-    <Exec Command="sudo yum -y install $(DownloadedSharedAspNetCoreRuntime200)" />
-    <Exec Command="sudo yum -y install $(DownloadedSharedAspNetCoreRuntime203)" />
-    <Exec Command="sudo yum -y install $(DownloadedSharedAspNetCoreRuntime205)" />
-    <Exec Command="sudo yum -y install $(DownloadedSharedAspNetCoreRuntime)" />
+    <Exec Command="sudo yum -y install %(AspNetCoreRpmInstallerFileReversed.Identity)" />
 
     <Exec Command="sudo yum -y install $(SdkInstallerFile)" />
 
@@ -261,10 +244,7 @@
     <!-- Clean up Packages -->
     <Exec Command="sudo yum remove -y $(SdkRpmPackageName)" />
 
-    <Exec Command="sudo yum remove -y $(AspNetCoreRuntimePackageName)" />
-    <Exec Command="sudo yum remove -y $(AspNetCoreRuntimePackageName205)" />
-    <Exec Command="sudo yum remove -y $(AspNetCoreRuntimePackageName203)" />
-    <Exec Command="sudo yum remove -y $(AspNetCoreRuntimePackageName200)" />
+    <Exec Command="sudo yum remove -y %(AspNetCoreRpmInstallerFile.PackageName)" />
     <Exec Command="sudo yum remove -y $(SharedFxRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostRpmPackageName)" />

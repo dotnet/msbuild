@@ -35,14 +35,6 @@
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
-      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageName200>$(AspNetCoreRuntimePackageBrandName)-2.0.0</AspNetCoreRuntimePackageName200>
-      <AspNetCoreRuntimePackageName203>$(AspNetCoreRuntimePackageBrandName)-2.0.3</AspNetCoreRuntimePackageName203>
-      <AspNetCoreRuntimePackageName205>$(AspNetCoreRuntimePackageBrandName)-2.0.5</AspNetCoreRuntimePackageName205>
-      <AspNetCoreRuntimePackageName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
-      <HostRidInAspNetCoreRuntimeDebInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeDebInstallerFileName>
-      <AspNetCoreRuntimeDebInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
-      <AspNetCoreRuntimeDebInstallerFileName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
     </PropertyGroup>
 
     <!-- Inputs -->
@@ -125,26 +117,15 @@
 
   <Target Name="DownloadAspNetCoreRuntimeDebInstaller"
         DependsOnTargets="SetupDebProps">
-    <PropertyGroup>
-      <AspNetCoreRuntimeDebInstallerFileName200>$(AspNetCoreRuntimePackageBrandName)-2.0.0-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName200>
-      <AspNetCoreRuntimeDebInstallerFileName203>$(AspNetCoreRuntimePackageBrandName)-2.0.3-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName203>
-      <AspNetCoreRuntimeDebInstallerFileName205>$(AspNetCoreRuntimePackageBrandName)-2.0.5-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName205>
-      <DownloadedSharedAspNetCoreRuntime200>$(PackagesDirectory)/$(AspNetCoreRuntimeDebInstallerFileName200)</DownloadedSharedAspNetCoreRuntime200>
-      <DownloadedSharedAspNetCoreRuntime203>$(PackagesDirectory)/$(AspNetCoreRuntimeDebInstallerFileName203)</DownloadedSharedAspNetCoreRuntime203>
-      <DownloadedSharedAspNetCoreRuntime205>$(PackagesDirectory)/$(AspNetCoreRuntimeDebInstallerFileName205)</DownloadedSharedAspNetCoreRuntime205>
-      <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeDebInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
-    </PropertyGroup>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName200)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime200)"/>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName203)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime203)"/>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName205)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime205)"/>
-    <DownloadFile
-               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeDebInstallerFileName)$(CoreSetupBlobAccessTokenParam)"
-               DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
+
+    <ItemGroup>
+      <AspNetCoreDebInstallerFile Include="$(PackagesDirectory)/$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)-$(HostRid).deb">
+        <Source>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)-$(HostRid).deb$(CoreSetupBlobAccessTokenParam)</Source>
+        <PackageName>$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)</PackageName>
+      </AspNetCoreDebInstallerFile>
+    </ItemGroup>
+
+    <DownloadFile Uri="%(AspNetCoreDebInstallerFile.Source)"
+                  DestinationPath="%(AspNetCoreDebInstallerFile.Identity)"/>
   </Target>
 </Project>
