@@ -31,7 +31,7 @@
     <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.2.1-alpha-002133</MicrosoftDotNetProjectJsonMigrationPackageVersion>
     <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.6.0-beta2-25304</MicrosoftDiaSymReaderNativePackageVersion>
-    <NuGetBuildTasksPackageVersion>4.7.0-preview3.5052</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>4.7.0-preview3.5059</NuGetBuildTasksPackageVersion>
     <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
