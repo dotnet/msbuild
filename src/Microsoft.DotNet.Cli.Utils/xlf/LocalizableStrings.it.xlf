@@ -249,6 +249,16 @@
         <target state="new">MSBuild arguments: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

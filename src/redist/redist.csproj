@@ -211,6 +211,44 @@
     </MSBuild>
   </Target>
 
+  <Target Name="PublishAppHostTemplate"
+          AfterTargets="Publish">
+
+    <PropertyGroup>
+      <NETCoreDotNetAppHostPackageName>Microsoft.NETCore.DotNetAppHost</NETCoreDotNetAppHostPackageName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <NETCoreDotNetAppHostPackageVersions Include="@(PackageDefinitions->'%(Version)')"
+                                           Condition="%(PackageDefinitions.Name) == $(NETCoreDotNetAppHostPackageName)" />
+    </ItemGroup>
+
+    <Error Condition="@(NETCoreDotNetAppHostPackageVersions->Distinct()->Count()) != 1"
+           Text="Failed to determine the $(NETCoreDotNetAppHostPackageName) version pulled in Microsoft.NETCore.App" />
+
+    <PropertyGroup>
+      <_NETCoreDotNetAppHostPackageVersion>@(NETCoreDotNetAppHostPackageVersions->Distinct())</_NETCoreDotNetAppHostPackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AppHostTemplate Include="$(RepoRoot)/build/AppHostTemplate.proj">
+        <Properties>
+          AppHostTemplatePath=$(SdkOutputDirectory)/AppHostTemplate;
+          TemplateFillInPackageName=$(NETCoreDotNetAppHostPackageName);
+          TemplateFillInPackageVersion=$(_NETCoreDotNetAppHostPackageVersion);
+          PreviousStageDirectory=$(PreviousStageDirectory);
+          AppHostIntermediateDirectory=$(IntermediateDirectory)/AppHostIntermediate
+        </Properties>
+      </AppHostTemplate>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(AppHostTemplate)">
+    </MSBuild>
+
+  </Target>
+
   <Target Name="PublishLzmaArchive"
           Condition="'$(CLIBUILD_SKIP_LZMA)' != 'true'"
           DependsOnTargets="GetNuGetPackagesArchive"

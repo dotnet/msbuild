@@ -22,12 +22,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestPackages", "TestPackage
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4-BC0F-443B-8ADF-691321F10108}"
 	ProjectSection(SolutionItems) = preProject
+		build\AppHostTemplate.proj = build\AppHostTemplate.proj
 		build\AzureInfo.props = build\AzureInfo.props
 		build\BackwardsCompatibilityRuntimes.props = build\BackwardsCompatibilityRuntimes.props
 		build\BranchInfo.props = build\BranchInfo.props
 		build\Branding.props = build\Branding.props
 		build\BuildDefaults.props = build\BuildDefaults.props
 		build\BuildInfo.targets = build\BuildInfo.targets
+		build\BundledDotnetTools.proj = build\BundledDotnetTools.proj
+		build\BundledDotnetTools.props = build\BundledDotnetTools.props
 		build\BundledRuntimes.props = build\BundledRuntimes.props
 		build\BundledSdks.props = build\BundledSdks.props
 		build\BundledTemplates.proj = build\BundledTemplates.proj
