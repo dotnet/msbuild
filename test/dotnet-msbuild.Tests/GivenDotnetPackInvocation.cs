@@ -11,8 +11,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetPackInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /restore /t:pack";
-        const string ExpectedNoBuildPrefix = "exec <msbuildpath> /m /v:m /t:pack";
+        const string ExpectedPrefix = "exec <msbuildpath> -m -v:m /restore /t:pack";
+        const string ExpectedNoBuildPrefix = "exec <msbuildpath> -m -v:m /t:pack";
 
         [Theory]
         [InlineData(new string[] { }, "")]

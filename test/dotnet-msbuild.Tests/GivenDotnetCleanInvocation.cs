@@ -10,14 +10,14 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetCleanInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /v:normal /t:Clean";
+        const string ExpectedPrefix = "exec <msbuildpath> -m -v:m /v:normal /t:Clean";
 
         [Fact]
         public void ItAddsProjectToMsbuildInvocation()
         {
             var msbuildPath = "<msbuildpath>";
             CleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be("exec <msbuildpath> /m /v:m /v:normal <project> /t:Clean");
+                .GetProcessStartInfo().Arguments.Should().Be("exec <msbuildpath> -m -v:m /v:normal <project> /t:Clean");
         }
 
         [Theory]

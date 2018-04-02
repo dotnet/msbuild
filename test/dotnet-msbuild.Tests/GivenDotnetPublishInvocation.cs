@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             this.output = output;
         }
 
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m";
+        const string ExpectedPrefix = "exec <msbuildpath> -m -v:m";
 
         [Theory]
         [InlineData(new string[] { }, "")]

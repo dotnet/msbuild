@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetBuildInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m";
+        const string ExpectedPrefix = "exec <msbuildpath> -m -v:m";
 
         [Theory]
         [InlineData(new string[] { }, "/t:Build")]

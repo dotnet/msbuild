@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Utils
             };
 
         private readonly IEnumerable<string> _msbuildRequiredParameters =
-            new List<string> { "/m", "/v:m" };
+            new List<string> { "-m", "-v:m" };
 
         public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null)
         {

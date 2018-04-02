@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetStoreInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /t:ComposeStore <project>";
+        const string ExpectedPrefix = "exec <msbuildpath> -m -v:m /t:ComposeStore <project>";
         static readonly string[] ArgsPrefix = { "-m", "<project>" };
 
         [Theory]
