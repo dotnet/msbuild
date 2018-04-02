@@ -34,7 +34,7 @@
 
   <PropertyGroup>
     <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeAzureblobStoresSubfolderName)</AspNetCoreRuntimeInstallerBlobRootUrl>
-    <AspNetCoreRuntimeBuildDropFeed>$(DotnetBlobRootUrl)/aspnetcore/store/$(AspNetCoreRuntimeAzureblobStoresSubfolderName)/packages/index.json</AspNetCoreRuntimeBuildDropFeed>
+    <AspNetCoreRuntimeBuildDropFeed>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeAzureblobStoresSubfolderName)/packages/index.json</AspNetCoreRuntimeBuildDropFeed>
     <AspNetCoreSharedRuntimeVersionFileName>runtime.version</AspNetCoreSharedRuntimeVersionFileName>
     <AspNetCoreSharedRuntimeVersionFile Condition=" '$(AspNetCoreSharedRuntimeVersionFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreSharedRuntimeVersionFileName)</AspNetCoreSharedRuntimeVersionFile>
 
