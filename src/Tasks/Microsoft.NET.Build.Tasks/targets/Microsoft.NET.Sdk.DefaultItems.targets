@@ -59,85 +59,96 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Default to use the latest stable release. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">2.0.2</NETStandardImplicitPackageVersion>
   </PropertyGroup>
-  
-  <!--  
-    Determine the RuntimeFrameworkVersion when targeting .NET Core
+
+  <!--
+    Determine the version (including patch) of .NET Core to target.
     
-    When targeting .NET Core, the TargetFramework is generally used to specify which version of the runtime to use.
+    When targeting .NET Core, the TargetFramework is used to specify the major and minor version of the runtime to use.  By default,
+    the patch version is inferred.  The general logic is that self-contained apps will target the latest patch that the SDK
+    knows about, while framework-dependent apps will target the ".0" patch (and roll forward to the latest patch installed at
+    runtime).
     
-    In order to target a specific patch version, or to float the version number (2.0-*), the RuntimeFrameworkVersion
-    property can be used.
+    When targeting .NET Core 1.0 and 1.1, framework-dependent apps use 1.0.5 and 1.1.2, respectively.  This is done for compatibility
+    with previous releases that bumped the self-contained and framework-dependent versions together.
+    
+    The TargetLatestRuntimePatch property can be set to true or false to explicitly opt in or out of the logic to roll forward
+    to the latest patch, regardless of whether the app is self-contained or framework-dependent.
+    
+    The RuntimeFrameworkVersion is where the actual version of the .NET Core runtime to target is stored.  It is the version that is
+    used in the implicit PackageReference to Microsoft.NETCore.App.  The RuntimeFrameworkVersion can also be set explicitly, which
+    will disable all the other logic that automatically selects the version of .NET Core to target.
     
     The framework version that is written to the runtimeconfig.json file is based on the actual resolved package version
-    of Microsoft.NETCore.App.  This is to allow floating the verion number.
-    
-    If RuntimeFrameworkVersion is not specified, the following logic applies:
-    
-    - Self-contained apps use the latest corrsesponding patch version (from when the SDK shipped)
-
-    - When targeting .NET Core 2.0 or higher:
-      - Framework-dependent apps use the target framework version with a ".0" patch version
-
-    - When targeting .NET Core 1.0 and 1.1
-      - Framework-dependent apps use 1.0.5 and 1.1.2, respectively.
-      - This is done for compatibility with previous releases that bumped the self-contained and framework-dependent versions together.
+    of Microsoft.NETCore.App.  This is to allow floating the verion number (ie the RuntimeFrameworkVersion could be set to
+    "2.0-*".
+  
   -->
 
-  <!-- These properties are here as a test hook so that we can test with the versions bumped before the actual framework
-       builds are available. -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' == ''"> 
-    <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0
-      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)' == ''">1.0.5</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0>
-    <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1
-      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)' == ''">1.1.2</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1>
-    <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0
-      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)' == ''">2.0.0</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0>
+  <!--
+      Possible property names to enable roll-forward:
+      - TargetLatestRuntimePatch
+      - TargetLatestNetCoreRuntimePatch
+      - RollForwardRuntime
+      - RollForwardNetCoreRuntime
+      
+     Possible property names for roll-forward/not roll-forward versions
+      - LatestNetCorePatchVersion / DefaultNetCorePatchVersion
+      
+      TODO: Get feedback on these names and then delete this comment
+  -->
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- These properties will allow the latest patch versions to be set in the CLI (via BundledVersions.props) or overridden by tests -->
+    <LatestPatchVersionForNetCore1_0 Condition="'$(LatestPatchVersionForNetCore1_0)' == ''">1.0.10</LatestPatchVersionForNetCore1_0>
+    <LatestPatchVersionForNetCore1_1 Condition="'$(LatestPatchVersionForNetCore1_1)' == ''">1.1.7</LatestPatchVersionForNetCore1_1>
+    <LatestPatchVersionForNetCore2_0 Condition="'$(LatestPatchVersionForNetCore2_0)' == ''">2.0.6</LatestPatchVersionForNetCore2_0>
   </PropertyGroup>
 
-  <!-- Select implicit runtime framework versions -->
-  <Choose>
-    <!-- If not targeting .NET Core, or if RuntimeFrameworkVersion is already set, do nothing -->
-    <When Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp' Or '$(RuntimeFrameworkVersion)' != ''" />
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DefaultNetCorePatchVersion)' == ''">
+    <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.5</DefaultNetCorePatchVersion>
+    <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.2</DefaultNetCorePatchVersion>
 
-    <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">
-      <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>1.0.5</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
-        <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
-      </PropertyGroup>
-    </When>
-    <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">
-      <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>1.1.2</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
-        <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
-      </PropertyGroup>
-    </When>
-    <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.0'">
-      <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>2.0.0</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
-        <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
-      </PropertyGroup>
-    </When>
+    <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version
+         provided by Microsoft.NETCoreSdk.BundledVersions.props -->
+    <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">$(BundledNETCoreAppPackageVersion)</DefaultNetCorePatchVersion>
+    <!-- If not covered by the previous cases use the target framework version for the default patch version -->
+    <DefaultNetCorePatchVersion Condition="'$(DefaultNetCorePatchVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</DefaultNetCorePatchVersion>
+  </PropertyGroup>
 
-    <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
-    <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">
-      <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(BundledNETCoreAppPackageVersion)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
-        <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(BundledNETCoreAppPackageVersion)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
-      </PropertyGroup>
-    </When>
-    
-    <!-- If not covered by the previous cases, use the target framework version for the implicit RuntimeFrameworkVersions -->
-    <Otherwise>
-      <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(_TargetFrameworkVersionWithoutV)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
-        <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(_TargetFrameworkVersionWithoutV)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(LatestNetCorePatchVersion)' == ''">
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">$(LatestPatchVersionForNetCore1_0)</LatestNetCorePatchVersion>
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">$(LatestPatchVersionForNetCore1_1)</LatestNetCorePatchVersion>
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.0'">$(LatestPatchVersionForNetCore2_0)</LatestNetCorePatchVersion>
+
+    <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version
+         provided by Microsoft.NETCoreSdk.BundledVersions.props -->
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">$(BundledNETCoreAppPackageVersion)</LatestNetCorePatchVersion>
+    <!-- If not covered by the previous cases use the target framework version for the latest patch version -->
+    <LatestNetCorePatchVersion Condition="'$(LatestNetCorePatchVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</LatestNetCorePatchVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetLatestRuntimePatch)' == ''">
+    <TargetLatestRuntimePatch Condition="'$(SelfContained)' == 'true' ">true</TargetLatestRuntimePatch>
+    <TargetLatestRuntimePatch Condition="'$(SelfContained)' != 'true' ">false</TargetLatestRuntimePatch>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' == ''">
-    <RuntimeFrameworkVersion Condition="'$(SelfContained)' == 'true' ">$(ImplicitRuntimeFrameworkVersionForSelfContainedApp)</RuntimeFrameworkVersion>
-    <RuntimeFrameworkVersion Condition="'$(SelfContained)' != 'true' ">$(ImplicitRuntimeFrameworkVersionForFrameworkDependentApp)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(TargetLatestRuntimePatch)' == 'true' ">$(LatestNetCorePatchVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(TargetLatestRuntimePatch)' != 'true' ">$(DefaultNetCorePatchVersion)</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
+    <!-- This property is different than MicrosoftNETPlatformLibrary.  MicrosoftNETPlatformLibrary is
+         used to trim the dependencies published with a framework-dependent app, and is overridden
+         by ASP.NET packages.
+         
+         The ImplicitPlatformPackageIdentifier is the package that is actually implicitly
+         referenced by the SDK, and is passed into the ResolvePackageAssets task
+         to verify that the restored version of the package matches the
+         RuntimeFrameworkVersion -->
+    <ImplicitPlatformPackageIdentifier>Microsoft.NETCore.App</ImplicitPlatformPackageIdentifier>
+
+    <VerifyMatchingImplicitPackageVersion Condition="'$(VerifyMatchingImplicitPackageVersion)' == ''">true</VerifyMatchingImplicitPackageVersion>
   </PropertyGroup>
   
   <!--
@@ -206,6 +217,11 @@ Copyright (c) .NET Foundation. All rights reserved.
            that had duplicates, instead of leaving the ones without IsImplicitlyDefined set to true. -->
       <PackageReference Remove="@(_PackageReferenceToRemove)" Condition="'%(PackageReference.IsImplicitlyDefined)' == 'true' "/>
     </ItemGroup>
+    
+    <!-- If any implicit package references were overridden, then don't check that RuntimeFrameworkVersion matches the package version -->
+    <PropertyGroup Condition="'@(_PackageReferenceToRemove)' != ''">
+      <VerifyMatchingImplicitPackageVersion>false</VerifyMatchingImplicitPackageVersion>
+    </PropertyGroup>
 
   </Target>
 

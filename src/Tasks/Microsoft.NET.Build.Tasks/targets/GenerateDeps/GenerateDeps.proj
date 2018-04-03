@@ -31,6 +31,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <OutputType>Exe</OutputType>
     <IncludeMainProjectInDepsFile>false</IncludeMainProjectInDepsFile>
+
+    <!-- The tool asets file is restored as a separate graph and doesn't get an implicit reference to Microsoft.NETCore.App.  So
+         the version of that package will be determined by the version the tool package references.  However, when building
+         GenerateDeps.proj, the CLI sets the TargetFramework to match the target it finds in the assets file, which is
+         based on what the project with the DotNetCliToolReference was targeting, not what the tool itself was targeting.
+         
+         So we need to disable the logic which checks that the version of Microsoft.NETCore.App from the assets file
+         matches the one that would be resolved based on the TargetFramework that was passed in. -->
+    <VerifyMatchingImplicitPackageVersion>false</VerifyMatchingImplicitPackageVersion>
   </PropertyGroup>
 
   <Target Name="BuildDepsJson" DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn);GenerateBuildDependencyFile" />

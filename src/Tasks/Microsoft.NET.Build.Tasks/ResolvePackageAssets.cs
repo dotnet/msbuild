@@ -89,6 +89,23 @@ namespace Microsoft.NET.Build.Tasks
         public bool EnsureRuntimePackageDependencies { get; set; }
 
         /// <summary>
+        /// Specifies whether to validate that the version of the implicit platform package in the assets
+        /// file matches the version specified by <see cref="ExpectedPlatformPackageVersion"/>
+        /// </summary>
+        public bool VerifyMatchingImplicitPackageVersion { get; set; }
+
+        /// <summary>
+        /// Identifier for implicitly referenced platform package.  If set, then an error will be generated if the
+        /// version of that package from the assets file does not match the <see cref="ExpectedPlatformPackageVersion"/>
+        /// </summary>
+        public string ImplicitPlatformPackageIdentifier { get; set; }
+
+        /// <summary>
+        /// Expected version of the <see cref="ImplicitPlatformPackageIdentifier"/>
+        /// </summary>
+        public string ExpectedPlatformPackageVersion { get; set; }
+
+        /// <summary>
         /// Full paths to assemblies from packages to pass to compiler as analyzers.
         /// </summary>
         [Output]
@@ -288,13 +305,16 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(DisableTransitiveProjectReferences);
                     writer.Write(EmitAssetsLogMessages);
                     writer.Write(EnsureRuntimePackageDependencies);
+                    writer.Write(ExpectedPlatformPackageVersion ?? "");
                     writer.Write(MarkPackageReferencesAsExternallyResolved);
+                    writer.Write(ImplicitPlatformPackageIdentifier ?? "");
                     writer.Write(ProjectAssetsCacheFile);
                     writer.Write(ProjectAssetsFile);
                     writer.Write(ProjectLanguage ?? "");
                     writer.Write(ProjectPath);
                     writer.Write(RuntimeIdentifier ?? "");
                     writer.Write(TargetFrameworkMoniker);
+                    writer.Write(VerifyMatchingImplicitPackageVersion);
                 }
 
                 stream.Position = 0;
@@ -660,12 +680,78 @@ namespace Microsoft.NET.Build.Tasks
                     WriteMetadata(MetadataKeys.Severity, GetSeverity(message.Level));
                 }
 
+                WriteAdditionalLogMessages();
+            }
+
+            /// <summary>
+            /// Writes log messages which are not directly in the assets file, but are based on conditions
+            /// this task evaluates
+            /// </summary>
+            private void WriteAdditionalLogMessages()
+            {
+                WriteUnsupportedRuntimeIdentifierMessageIfNecessary();
+                WriteMismatchedPlatformPackageVersionMessageIfNecessary();
+            }
+
+            private void WriteUnsupportedRuntimeIdentifierMessageIfNecessary()
+            {
                 if (_task.EnsureRuntimePackageDependencies && !string.IsNullOrEmpty(_task.RuntimeIdentifier))
                 {
                     if (_compileTimeTarget.Libraries.Count >= _runtimeTarget.Libraries.Count)
                     {
                         WriteItem(string.Format(Strings.UnsupportedRuntimeIdentifier, _task.RuntimeIdentifier));
                         WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
+                    }
+                }
+            }
+
+            private static readonly char[] _specialNuGetVersionChars = new char[]
+                {
+                    '*',
+                    '(', ')',
+                    '[', ']'
+                };
+
+            private void WriteMismatchedPlatformPackageVersionMessageIfNecessary()
+            {
+                bool hasTwoPeriods(string s)
+                {
+                    int firstPeriodIndex = s.IndexOf('.');
+                    if (firstPeriodIndex < 0)
+                    {
+                        return false;
+                    }
+                    int secondPeriodIndex = s.IndexOf('.', firstPeriodIndex + 1);
+                    return secondPeriodIndex >= 0;
+                }
+
+                if (_task.VerifyMatchingImplicitPackageVersion &&
+                    !string.IsNullOrEmpty(_task.ImplicitPlatformPackageIdentifier) &&
+                    !string.IsNullOrEmpty(_task.ExpectedPlatformPackageVersion) &&
+                    //  If RuntimeFrameworkVersion was specified as a version range or a floating version,
+                    //  then we can't compare the versions directly, so just skip the check
+                    _task.ExpectedPlatformPackageVersion.IndexOfAny(_specialNuGetVersionChars) < 0)
+                {
+                    var platformLibrary = _runtimeTarget.GetLibrary(_task.ImplicitPlatformPackageIdentifier);
+                    if (platformLibrary != null)
+                    {
+                        string restoredPlatformLibraryVersion = platformLibrary.Version.ToNormalizedString();
+
+                        //  Normalize expected version.  For example, converts "2.0" to "2.0.0"
+                        string expectedPlatformPackageVersion = _task.ExpectedPlatformPackageVersion;
+                        if (!hasTwoPeriods(expectedPlatformPackageVersion))
+                        {
+                            expectedPlatformPackageVersion += ".0";
+                        }                        
+
+                        if (restoredPlatformLibraryVersion != expectedPlatformPackageVersion)
+                        {
+                            WriteItem(string.Format(Strings.MismatchedPlatformPackageVersion,
+                                                    _task.ImplicitPlatformPackageIdentifier,
+                                                    restoredPlatformLibraryVersion,
+                                                    expectedPlatformPackageVersion));
+                            WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
+                        }
                     }
                 }
             }

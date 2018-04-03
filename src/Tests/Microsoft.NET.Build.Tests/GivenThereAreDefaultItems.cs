@@ -15,6 +15,9 @@ using System.Xml.Linq;
 using Xunit;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit.Abstractions;
+using NuGet.ProjectModel;
+using NuGet.Common;
+using NuGet.Frameworks;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -551,6 +554,44 @@ namespace Microsoft.NET.Build.Tests
                 .Pass()
                 .And.HaveStdOutContaining("PackageReference")
                 .And.HaveStdOutContaining("'NETStandard.Library'");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Implicit_NetCoreApp_reference_can_be_overridden(bool disableImplicitFrameworkReferences)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "OverrideNetCoreApp",
+                TargetFrameworks = "netcoreapp2.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            if (disableImplicitFrameworkReferences)
+            {
+                testProject.AdditionalProperties["DisableImplicitFrameworkReferences"] = "true";
+            }
+
+            string explicitPackageVersion = "2.0.3";
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NETCore.App", explicitPackageVersion));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: disableImplicitFrameworkReferences.ToString())
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);
+
+            var target = lockFile.GetTarget(NuGetFramework.Parse(testProject.TargetFrameworks), null);
+            var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
+            netCoreAppLibrary.Version.ToString().Should().Be(explicitPackageVersion);
         }
         
         void RemoveGeneratedCompileItems(List<string> compileItems)
