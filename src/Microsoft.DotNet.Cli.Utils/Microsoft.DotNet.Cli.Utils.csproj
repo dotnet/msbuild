@@ -30,7 +30,6 @@
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETStandard' ">
     <PackageReference Include="NETStandard.Library" Version="2.0.0" />
-    <PackageReference Include="System.Diagnostics.Process" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
