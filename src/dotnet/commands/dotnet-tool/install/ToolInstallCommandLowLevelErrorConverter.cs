@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 userFacingMessages = new[]
                 {
                     ex.Message,
-                    string.Format(LocalizableStrings.ToolInstallationFailed, packageId),
+                    string.Format(LocalizableStrings.ToolInstallationFailedWithExplicitVersionGuide, packageId),
                 };
             }
             else if (ex is ToolConfigurationException)

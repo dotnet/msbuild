@@ -59,13 +59,6 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">도구의 NuGet 패키지에 있는 설정 파일이 잘못되었습니다. {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install. You may need to specify the version using
-
-   dotnet tool install -g {0} --version &lt;version&gt;</source>
-        <target state="needs-review-translation">'{0}' 도구를 설치하지 못했습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">'{0}' 도구를 설치하지 못했습니다. 도구 작성자에게 문의하세요.</target>
@@ -119,6 +112,20 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
+        <source>Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g {0} --version &lt;version&gt;</source>
+        <target state="new">Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g {0} --version &lt;version&gt;</target>
         <note />
       </trans-unit>
     </body>

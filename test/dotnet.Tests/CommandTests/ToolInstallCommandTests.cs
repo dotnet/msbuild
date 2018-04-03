@@ -360,7 +360,7 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(
                     LocalizableStrings.ToolInstallationRestoreFailed +
-                    Environment.NewLine + string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
+                    Environment.NewLine + string.Format(LocalizableStrings.ToolInstallationFailedWithExplicitVersionGuide, PackageId));
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
