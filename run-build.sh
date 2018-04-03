@@ -151,6 +151,9 @@ export VSTEST_TRACE_BUILD=1
 # Don't resolve shared frameworks from user or global locations
 export DOTNET_MULTILEVEL_LOOKUP=0
 
+# Turn off MSBuild Node re-use
+export MSBUILDDISABLENODEREUSE=1
+
 # Install a stage 0
 INSTALL_ARCHITECTURE=$ARCHITECTURE
 archlower="$(echo $ARCHITECTURE | awk '{print tolower($0)}')"
