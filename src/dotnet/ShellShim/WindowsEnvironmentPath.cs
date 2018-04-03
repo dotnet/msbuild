@@ -33,15 +33,26 @@ namespace Microsoft.DotNet.ShellShim
 
             var existingUserEnvPath = Environment.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User);
 
-            if (existingUserEnvPath.EndsWith(';'))
+            if (existingUserEnvPath == null)
             {
-                existingUserEnvPath = existingUserEnvPath.Substring(0, (existingUserEnvPath.Length - 1));
+                Environment.SetEnvironmentVariable(
+                    PathName,
+                    _packageExecutablePath,
+                    EnvironmentVariableTarget.User);
             }
+            else
+            {
+                if (existingUserEnvPath.EndsWith(';'))
+                {
+                    existingUserEnvPath = existingUserEnvPath.Substring(0, (existingUserEnvPath.Length - 1));
+                }
 
-            Environment.SetEnvironmentVariable(
-                PathName,
-                $"{existingUserEnvPath};{_packageExecutablePath}",
-                EnvironmentVariableTarget.User);
+                Environment.SetEnvironmentVariable(
+                    PathName,
+                    $"{existingUserEnvPath};{_packageExecutablePath}",
+                    EnvironmentVariableTarget.User);
+
+            }
         }
 
         private bool PackageExecutablePathExists()
