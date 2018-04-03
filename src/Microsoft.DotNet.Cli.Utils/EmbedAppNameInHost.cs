@@ -13,14 +13,21 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         private static string _placeHolder = "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2"; //hash value embedded in default apphost executable
         private static byte[] _bytesToSearch = Encoding.UTF8.GetBytes(_placeHolder);
+
+        /// <summary>
+        /// Create an AppHost with embedded configuration of app binary location
+        /// </summary>
+        /// <param name="appHostSourceFilePath">The path of AppHost template, which has the place holder</param>
+        /// <param name="appHostDestinationFilePath">The destination path for desired location to place, including the file name</param>
+        /// <param name="appBinaryFilePath">Full path to app binary or relative path to appHostDestinationFilePath</param>
         public static void EmbedAndReturnModifiedAppHostPath(
             string appHostSourceFilePath,
             string appHostDestinationFilePath,
-            string appBinaryName)
+            string appBinaryFilePath)
         {
             var hostExtension = Path.GetExtension(appHostSourceFilePath);
-            var appbaseName = Path.GetFileNameWithoutExtension(appBinaryName);
-            var bytesToWrite = Encoding.UTF8.GetBytes(appBinaryName);
+            var appbaseName = Path.GetFileNameWithoutExtension(appBinaryFilePath);
+            var bytesToWrite = Encoding.UTF8.GetBytes(appBinaryFilePath);
             var destinationDirectory = new FileInfo(appHostDestinationFilePath).Directory.FullName;
 
             if (File.Exists(appHostDestinationFilePath))
@@ -31,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (bytesToWrite.Length > 1024)
             {
-                throw new EmbedAppNameInHostException(string.Format(LocalizableStrings.EmbedAppNameInHostFileNameIsTooLong, appBinaryName));
+                throw new EmbedAppNameInHostException(string.Format(LocalizableStrings.EmbedAppNameInHostFileNameIsTooLong, appBinaryFilePath));
             }
 
             var array = File.ReadAllBytes(appHostSourceFilePath);
