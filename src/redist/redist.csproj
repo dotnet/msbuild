@@ -193,6 +193,7 @@
   </Target>
 
   <Target Name="PublishDotnetTools"
+          Condition="'$(CLIBUILD_SKIP_BUNDLEDDOTNETTOOLS)' != 'true'"
           AfterTargets="Publish">
     <ItemGroup>
       <DotnetToolsToBundle Include="$(RepoRoot)/build/BundledDotnetTools.proj">
