@@ -55,7 +55,8 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
 
-            var command = CreateCommand(store.Object, "-g --tool-path /tools", "/tools");
+            var toolPath = Path.GetTempPath();
+            var command = CreateCommand(store.Object, $"-g --tool-path {toolPath}", toolPath);
 
             Action a = () => {
                 command.Execute();
@@ -84,6 +85,26 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
+        public void GivenAnInvalidToolPathItThrowsException()
+        {
+            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            store
+                .Setup(s => s.EnumeratePackages())
+                .Returns(new IToolPackage[0]);
+
+            var toolPath = "tool-path-does-not-exist";
+            var command = CreateCommand(store.Object, $"--tool-path {toolPath}", toolPath);
+
+            Action a = () => command.Execute();
+
+            a.ShouldThrow<GracefulException>()
+             .And
+             .Message
+             .Should()
+             .Be(string.Format(LocalizableStrings.InvalidToolPathOption, toolPath));
+        }
+
+        [Fact]
         public void GivenAToolPathItPassesToolPathToStoreFactory()
         {
             var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
@@ -91,7 +112,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new IToolPackage[0]);
 
-            var command = CreateCommand(store.Object, "--tool-path /tools", "/tools");
+            var toolPath = Path.GetTempPath();
+            var command = CreateCommand(store.Object, $"--tool-path {toolPath}", toolPath);
 
             command.Execute().Should().Be(0);
 

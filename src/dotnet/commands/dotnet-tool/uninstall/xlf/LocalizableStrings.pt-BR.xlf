@@ -62,6 +62,11 @@
         <target state="needs-review-translation">Não é possível ter o caminho de ferramenta e o global como opinião ao mesmo tempo."</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
