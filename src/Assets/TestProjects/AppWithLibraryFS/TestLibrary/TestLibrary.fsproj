@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <FSharpCoreImplicitPackageVersion>4.2.3</FSharpCoreImplicitPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

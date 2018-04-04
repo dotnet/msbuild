@@ -10,8 +10,4 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\TestLibrary\TestLibrary.fsproj" />
-  </ItemGroup>
-
 </Project>
