@@ -73,6 +73,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsSelfContained { get; set; }
 
+        public bool IsPublish { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -138,7 +140,13 @@ namespace Microsoft.NET.Build.Tasks
                 PlatformLibraryName,
                 IsSelfContained);
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+            //  If publishing a framework-dependent app, then include the assembly and file versions of files in the
+            //  deps.json to support rolling forward to a newer shared framework.  See https://github.com/dotnet/core-setup/pull/3704
+            //  Reading these versions could impact build perf, so we avoid doing it if we aren't publishing or if we are
+            //  publishing a self-contained app.
+            bool includeRuntimeFileVersions = IsPublish && !IsSelfContained;
+
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions)
                 .WithMainProjectInDepsFile(IncludeMainProject)
                 .WithReferenceAssemblies(referenceAssemblyInfos)
                 .WithDirectReferences(directReferences)
@@ -229,7 +237,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var assetGroup in assetGroups)
             {
-                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimAssemblies(assetGroup.AssetPaths, filesToTrim));
+                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimRuntimeFiles(assetGroup.RuntimeFiles, filesToTrim));
             }
         }
 
@@ -273,6 +281,18 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var assembly in assemblies)
             {
                 if (!filesToTrim.Contains(assembly))
+                {
+                    yield return assembly;
+                }
+            }
+        }
+
+
+        private IEnumerable<RuntimeFile> TrimRuntimeFiles(IEnumerable<RuntimeFile> assemblies, ISet<string> filesToTrim)
+        {
+            foreach (var assembly in assemblies)
+            {
+                if (!filesToTrim.Contains(assembly.Path))
                 {
                     yield return assembly;
                 }
