@@ -42,6 +42,11 @@
         <target state="translated">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build project before publishing.  Implies --no-restore.</source>
+        <target state="new">Do not build project before publishing.  Implies --no-restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

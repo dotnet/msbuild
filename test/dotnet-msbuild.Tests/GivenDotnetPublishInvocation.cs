@@ -72,6 +72,23 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                    .Be($"{ExpectedPrefix} -nologo -target:Publish{expectedAdditionalArgs}");
         }
 
+        [Fact]
+        public void MsbuildInvocationIsCorrectForNoBuild()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var command = PublishCommand.FromArgs(new[] { "--no-build" }, msbuildPath);
+
+            command.SeparateRestoreCommand
+                   .Should()
+                   .BeNull();
+
+            // NOTE --no-build implies no-restore hence no -restore argument to msbuild below.
+            command.GetProcessStartInfo()
+                   .Arguments
+                   .Should()
+                   .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
+        }
+
         [Theory]
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-f", "<tfm>" }, "-property:TargetFramework=<tfm>")]
@@ -86,6 +103,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--manifest", "<manifestfiles>" }, "-property:TargetManifestFiles=<manifestfiles>")]
         [InlineData(new string[] { "-v", "minimal" }, "-verbosity:minimal")]
         [InlineData(new string[] { "--verbosity", "minimal" }, "-verbosity:minimal")]
+        [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
         public void OptionForwardingIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             var expectedArgs = expectedAdditionalArgs.Split(' ', StringSplitOptions.RemoveEmptyEntries);

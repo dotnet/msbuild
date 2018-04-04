@@ -235,5 +235,61 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
         }
+
+        [Fact]
+        public void ItFailsToPublishWithNoBuildIfNotPreviouslyBuilt()
+        {
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
+
+            string newArgs = $"console -o \"{rootPath}\"";
+            new NewCommandShim()
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should().Pass();
+
+            new PublishCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput("--no-build")
+                .Should().Fail()
+                .And.HaveStdOutContaining("MSB3030"); // "Could not copy ___ because it was not found.
+        }
+
+        [Fact]
+        public void ItPublishesSuccessfullyWithNoBuildIfPreviouslyBuilt()
+        {
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var rootDir = new DirectoryInfo(rootPath);
+
+            string newArgs = $"console -o \"{rootPath}\" --no-restore";
+            new NewCommandShim()
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
+
+            new BuildCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass();
+
+            new PublishCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput("--no-build")
+                .Should()
+                .Pass();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            var outputProgram = rootDir
+                .GetDirectory("bin", configuration, "netcoreapp2.1", "publish", $"{rootDir.Name}.dll")
+                .FullName;
+
+            new TestCommand(outputProgram)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("Hello World");
+        }
     }
 }

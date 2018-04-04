@@ -141,4 +141,7 @@
   <data name="SelfContainedOptionDescription" xml:space="preserve">
     <value>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</value>
   </data>
+  <data name="NoBuildOptionDescription" xml:space="preserve">
+    <value>Do not build project before publishing.  Implies --no-restore.</value>
+  </data>
 </root>

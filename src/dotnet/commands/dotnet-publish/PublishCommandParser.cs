@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
@@ -33,6 +32,10 @@ namespace Microsoft.DotNet.Cli
                     Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.ManifestOption)
                         .ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Arguments)}")),
+                Create.Option(
+                    "--no-build",
+                    LocalizableStrings.NoBuildOptionDescription,
+                    Accept.NoArguments().ForwardAs("-property:NoBuild=true")),
                 Create.Option(
                     "--self-contained",
                     LocalizableStrings.SelfContainedOptionDescription,
