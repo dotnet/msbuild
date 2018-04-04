@@ -49,7 +49,7 @@ Common options:
 Run 'dotnet COMMAND --help' for more information on a command.
 
 sdk-options:
-  --version        Display .NET Core SDK version.
+  --version        Display .NET Core SDK version in use.
   --info           Display .NET Core information.
   --list-sdks      Display the installed SDKs.
   --list-runtimes  Display the installed runtimes.

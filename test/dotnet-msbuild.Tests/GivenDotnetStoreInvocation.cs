@@ -11,8 +11,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetStoreInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /t:ComposeStore <project>";
-        static readonly string[] ArgsPrefix = { "-m", "<project>" };
+        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -target:ComposeStore <project>";
+        static readonly string[] ArgsPrefix = { "--manifest", "<project>" };
 
         [Theory]
         [InlineData("-m")]
@@ -26,11 +26,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Theory]
-        [InlineData(new string[] { "-f", "<tfm>" }, @"/p:TargetFramework=<tfm>")]
-        [InlineData(new string[] { "--framework", "<tfm>" }, @"/p:TargetFramework=<tfm>")]
-        [InlineData(new string[] { "-r", "<rid>" }, @"/p:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "--runtime", "<rid>" }, @"/p:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "--manifest", "one.xml", "--manifest", "two.xml", "--manifest", "three.xml" }, @"/p:AdditionalProjects=one.xml%3Btwo.xml%3Bthree.xml")]
+        [InlineData(new string[] { "-f", "<tfm>" }, @"-property:TargetFramework=<tfm>")]
+        [InlineData(new string[] { "--framework", "<tfm>" }, @"-property:TargetFramework=<tfm>")]
+        [InlineData(new string[] { "-r", "<rid>" }, @"-property:RuntimeIdentifier=<rid>")]
+        [InlineData(new string[] { "--runtime", "<rid>" }, @"-property:RuntimeIdentifier=<rid>")]
+        [InlineData(new string[] { "--manifest", "one.xml", "--manifest", "two.xml", "--manifest", "three.xml" }, @"-property:AdditionalProjects=one.xml%3Btwo.xml%3Bthree.xml")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             args = ArgsPrefix.Concat(args).ToArray();
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             var msbuildPath = "<msbuildpath>";
             StoreCommand.FromArgs(args, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix} /p:ComposeDir={Path.GetFullPath(path)}");
+                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix} -property:ComposeDir={Path.GetFullPath(path)}");
         }
     }
 }

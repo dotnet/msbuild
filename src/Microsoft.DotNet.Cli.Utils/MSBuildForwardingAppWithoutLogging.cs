@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Utils
             };
 
         private readonly IEnumerable<string> _msbuildRequiredParameters =
-            new List<string> { "/m", "/v:m" };
+            new List<string> { "-maxcpucount", "-verbosity:m" };
 
         public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null)
         {
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static string Escape(string arg) =>
              // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
-             (arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase)) ?
+             IsRestoreSources(arg) ?
                 arg.Replace(";", "%3B")
                    .Replace("://", ":%2F%2F") :
                 arg;
@@ -80,6 +80,14 @@ namespace Microsoft.DotNet.Cli.Utils
         private static string GetDotnetPath()
         {
             return new Muxer().MuxerPath;
+        }
+
+        private static bool IsRestoreSources(string arg)
+        {
+            return arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("/property:RestoreSources=", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("-p:RestoreSources=", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("-property:RestoreSources=", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

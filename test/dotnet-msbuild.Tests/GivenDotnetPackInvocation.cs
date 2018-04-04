@@ -11,23 +11,23 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetPackInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /restore /t:pack";
-        const string ExpectedNoBuildPrefix = "exec <msbuildpath> /m /v:m /t:pack";
+        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -restore -target:pack";
+        const string ExpectedNoBuildPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -target:pack";
 
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-o", "<packageoutputpath>" }, "/p:PackageOutputPath=<packageoutputpath>")]
-        [InlineData(new string[] { "--output", "<packageoutputpath>" }, "/p:PackageOutputPath=<packageoutputpath>")]
-        [InlineData(new string[] { "--no-build" }, "/p:NoBuild=true")]
-        [InlineData(new string[] { "--include-symbols" }, "/p:IncludeSymbols=true")]
-        [InlineData(new string[] { "--include-source" }, "/p:IncludeSource=true")]
-        [InlineData(new string[] { "-c", "<config>" }, "/p:Configuration=<config>")]
-        [InlineData(new string[] { "--configuration", "<config>" }, "/p:Configuration=<config>")]
-        [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "/p:VersionSuffix=<versionsuffix>")]
-        [InlineData(new string[] { "-s" }, "/p:Serviceable=true")]
-        [InlineData(new string[] { "--serviceable" }, "/p:Serviceable=true")]
-        [InlineData(new string[] { "-v", "diag" }, "/verbosity:diag")]
-        [InlineData(new string[] { "--verbosity", "diag" }, "/verbosity:diag")]
+        [InlineData(new string[] { "-o", "<packageoutputpath>" }, "-property:PackageOutputPath=<packageoutputpath>")]
+        [InlineData(new string[] { "--output", "<packageoutputpath>" }, "-property:PackageOutputPath=<packageoutputpath>")]
+        [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
+        [InlineData(new string[] { "--include-symbols" }, "-property:IncludeSymbols=true")]
+        [InlineData(new string[] { "--include-source" }, "-property:IncludeSource=true")]
+        [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config>")]
+        [InlineData(new string[] { "--configuration", "<config>" }, "-property:Configuration=<config>")]
+        [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "-property:VersionSuffix=<versionsuffix>")]
+        [InlineData(new string[] { "-s" }, "-property:Serviceable=true")]
+        [InlineData(new string[] { "--serviceable" }, "-property:Serviceable=true")]
+        [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
+        [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "<project>" }, "<project>")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
