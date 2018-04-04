@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_implicitly_defines_compilation_constants_for_the_configuration(string configuration, string expectedDefine)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibraryFS", "ImplicitConfigurationConstants", configuration)
+                .CopyTestAsset("AppWithLibraryFS", "ImplicitConfigurationConstantsFS", configuration)
                 .WithSource()
                 .Restore(Log, relativePath: "TestLibrary");
 
@@ -198,7 +198,7 @@ namespace Microsoft.NET.Build.Tests
             bool shouldCompile = true;
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibraryFS", "ImplicitFrameworkConstants", targetFramework)
+                .CopyTestAsset("AppWithLibraryFS", "ImplicitFrameworkConstantsFS", targetFramework)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
