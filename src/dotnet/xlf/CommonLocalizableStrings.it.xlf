@@ -878,6 +878,11 @@ setx PATH "%PATH%;{0}"
         <target state="new">Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
+        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="new">Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
