@@ -1,5 +1,4 @@
 <Project>
-  <Import Project="BundledDotnetTools.props" />
 
   <Target Name="GenerateMSBuildExtensions"
           DependsOnTargets="GenerateBundledVersionsProps;GenerateBundledCliToolsProps;RestoreMSBuildExtensionsPackages">
