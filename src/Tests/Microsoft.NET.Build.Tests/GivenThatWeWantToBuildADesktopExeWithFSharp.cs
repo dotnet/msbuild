@@ -55,20 +55,6 @@ namespace Microsoft.NET.Build.Tests
                 "TestApp.pdb",
                 "FSharp.Core.dll",
                 "System.ValueTuple.dll",
-                "cs/FSharp.Core.resources.dll",
-                "de/FSharp.Core.resources.dll",
-                "en/FSharp.Core.resources.dll",
-                "es/FSharp.Core.resources.dll",
-                "fr/FSharp.Core.resources.dll",
-                "it/FSharp.Core.resources.dll",
-                "ja/FSharp.Core.resources.dll",
-                "ko/FSharp.Core.resources.dll",
-                "pl/FSharp.Core.resources.dll",
-                "pt-BR/FSharp.Core.resources.dll",
-                "ru/FSharp.Core.resources.dll",
-                "tr/FSharp.Core.resources.dll",
-                "zh-Hans/FSharp.Core.resources.dll",
-                "zh-Hant/FSharp.Core.resources.dll"
             });
         }
     }
