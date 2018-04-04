@@ -3,8 +3,8 @@
 
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFrameworks>netstandard1.5;net46</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.5</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <RuntimeIdentifiers>win-x86;win-x64</RuntimeIdentifiers>
     <WarningsAsErrors>true</WarningsAsErrors>
@@ -20,11 +20,16 @@
     <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
-    <PackageReference Include="NETStandard.Library" Version="1.6.0" />
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
   </ItemGroup>
 
-  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFramework)' == 'net46'" DependsOnTargets="ResolvePackageDependenciesForBuild" BeforeTargets="AssignTargetPaths">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
       <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-x86/native/hostfxr.dll'">
         <Link>x86/hostfxr.dll</Link>
