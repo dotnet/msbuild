@@ -140,7 +140,11 @@ namespace Microsoft.Build.Execution
         /// By default, it is enabled.
         /// </summary>
 #if FEATURE_NODE_REUSE
-        private bool _enableNodeReuse = true;
+        /// <remarks>
+        /// Enable node reuse by default only on Windows for now
+        /// due to https://github.com/Microsoft/msbuild/issues/3161
+        /// </remarks>
+        private bool _enableNodeReuse = NativeMethodsShared.IsWindows;
 #else
         private bool _enableNodeReuse = false;
 #endif
