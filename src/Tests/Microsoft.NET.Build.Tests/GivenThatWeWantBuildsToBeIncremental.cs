@@ -80,15 +80,5 @@ namespace Microsoft.NET.Build.Tests
             var cacheWriteTime4 = File.GetLastWriteTimeUtc(assetsCachePath);
             cacheWriteTime4.Should().NotBe(cacheWriteTime3);
         }
-
-        private static void WaitForUtcNowToAdvance()
-        {
-            var start = DateTime.UtcNow;
-
-            while (DateTime.UtcNow <= start)
-            {
-                Thread.Sleep(millisecondsTimeout: 1);
-            }
-        }
     }
 }
