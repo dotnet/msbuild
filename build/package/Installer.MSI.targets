@@ -154,7 +154,9 @@
                       '$(SimpleVersion)'
                       '$(NugetVersion)'
                       '$(CombinedFrameworkSDKHostInstallerUpgradeCode)'
-                      '$(Architecture)'" />
+                      '$(Architecture)'
+                      '$(SharedFrameworkVersion)'
+                      '$(AspNetCoreRuntimePackageVersion)'" />
     </Target>
 
     <Target Name="GenerateSdkNupkg"
