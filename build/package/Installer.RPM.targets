@@ -188,8 +188,8 @@
       </AspNetCoreRpmInstallerFile>
     </ItemGroup>
 
-    <DownloadFile Uri="%(AspNetCoreRpmInstallerFiles.Source)"
-                  DestinationPath="%(AspNetCoreRpmInstallerFiles.Identity)"/>
+    <DownloadFile Uri="%(AspNetCoreRpmInstallerFile.Source)"
+                  DestinationPath="%(AspNetCoreRpmInstallerFile.Identity)"/>
   </Target>
 
   <Target Name="TestFPMTool">
