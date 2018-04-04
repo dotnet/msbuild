@@ -7,7 +7,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
-    <PackageReference Include="xunit.console" Version="$(XUnitConsoleVersion)" Private="true" />
+    <PackageReference Include="xunit.console" Version="$(XUnitVersion)" Private="true" />
   </ItemGroup>
 
   <Import Project="$(RepoToolsetDir)Imports.targets" />

@@ -45,7 +45,6 @@
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
     <MicrosoftDotNetCliUtilsVersion>2.0.0</MicrosoftDotNetCliUtilsVersion>
     <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
-    <XUnitConsoleVersion>2.3.1</XUnitConsoleVersion>
   </PropertyGroup>
 
 </Project>

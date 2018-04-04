@@ -111,17 +111,31 @@ namespace Microsoft.NET.TestFramework
             repoRoot = commandLine.SDKRepoPath ?? repoRoot;
             configuration = commandLine.SDKRepoConfiguration ?? configuration;
 
-            if (repoRoot != null)
+            string dotnetInstallDirFromEnvironment = Environment.GetEnvironmentVariable("DOTNET_INSTALL_DIR");
+
+            if (!string.IsNullOrEmpty(commandLine.DotnetHostPath))
+            {
+                ret.DotNetHostPath = commandLine.DotnetHostPath;
+            }
+            else if (!string.IsNullOrEmpty(dotnetInstallDirFromEnvironment))
+            {
+                ret.DotNetHostPath = Path.Combine(dotnetInstallDirFromEnvironment, $"dotnet{Constants.ExeSuffix}");
+            }
+            else if (repoRoot != null)
             {
                 var dotnetCliVersion = GetDotNetCliVersion(repoRoot);
 
-                ret.CliVersionForBundledVersions = dotnetCliVersion;
                 ret.DotNetHostPath = Path.Combine(repoArtifactsDir, ".dotnet", dotnetCliVersion, $"dotnet{Constants.ExeSuffix}");
-                ret.SdksPath = Path.Combine(repoArtifactsDir, configuration, "bin", "Sdks");
             }
             else
             {
                 ret.DotNetHostPath = ResolveCommand("dotnet");
+            }
+
+            if (repoRoot != null)
+            {
+                ret.CliVersionForBundledVersions = GetDotNetCliVersion(repoRoot);
+                ret.SdksPath = Path.Combine(repoArtifactsDir, configuration, "bin", "Sdks");
             }
 
             if (!string.IsNullOrEmpty(commandLine.FullFrameworkMSBuildPath))
