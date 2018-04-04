@@ -59,13 +59,6 @@ A ferramenta '{1}' (versão '{2}') foi instalada com êxito.</target>
         <target state="translated">O arquivo de configurações no pacote NuGet da ferramenta é inválido: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install. You may need to specify the version using
-
-   dotnet tool install -g {0} --version &lt;version&gt;</source>
-        <target state="needs-review-translation">Não foi possível instalar a ferramenta '{0}'.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
         <target state="translated">Não foi possível instalar a ferramenta '{0}'. Entre em contato com o autor da ferramenta para obter assistência.</target>
@@ -119,6 +112,20 @@ A ferramenta '{1}' (versão '{2}') foi instalada com êxito.</target>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
         <target state="new">SOURCE_FEED</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="new">Tool '{0}' failed to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
+        <source>Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g {0} --version &lt;version&gt;</source>
+        <target state="new">Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g {0} --version &lt;version&gt;</target>
         <note />
       </trans-unit>
     </body>

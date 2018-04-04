@@ -265,4 +265,10 @@
   <data name="MSBuildArgs" xml:space="preserve">
     <value>MSBuild arguments: {0}</value>
   </data>
+  <data name="EmbedAppNameInHostAppHostHasBeenModified" xml:space="preserve">
+    <value>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</value>
+  </data>
+  <data name="EmbedAppNameInHostFileNameIsTooLong" xml:space="preserve">
+    <value>Given file name '{0}' is longer than 1024 bytes</value>
+  </data>
 </root>
