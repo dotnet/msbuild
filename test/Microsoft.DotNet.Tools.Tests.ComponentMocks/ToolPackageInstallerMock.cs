@@ -22,17 +22,20 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         private readonly IProjectRestorer _projectRestorer;
         private readonly IFileSystem _fileSystem;
         private readonly Action _installCallback;
+        private readonly Dictionary<PackageId, IEnumerable<string>> _warningsMap;
 
         public ToolPackageInstallerMock(
             IFileSystem fileSystem,
             IToolPackageStore store,
             IProjectRestorer projectRestorer,
-            Action installCallback = null)
+            Action installCallback = null,
+            Dictionary<PackageId, IEnumerable<string>> warningsMap = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _projectRestorer = projectRestorer ?? throw new ArgumentNullException(nameof(projectRestorer));
             _installCallback = installCallback;
+            _warningsMap = warningsMap ?? new Dictionary<PackageId, IEnumerable<string>>();
         }
 
         public IToolPackage InstallPackage(PackageId packageId,
@@ -86,7 +89,10 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     _fileSystem.Directory.Move(stageDirectory.Value, packageDirectory.Value);
                     rollbackDirectory = packageDirectory.Value;
 
-                    return new ToolPackageMock(_fileSystem, packageId, version, packageDirectory);
+                    IEnumerable<string> warnings = null;
+                    _warningsMap.TryGetValue(packageId, out warnings);
+
+                    return new ToolPackageMock(_fileSystem, packageId, version, packageDirectory, warnings: warnings);
                 },
                 rollback: () => {
                     if (rollbackDirectory != null && _fileSystem.Directory.Exists(rollbackDirectory))

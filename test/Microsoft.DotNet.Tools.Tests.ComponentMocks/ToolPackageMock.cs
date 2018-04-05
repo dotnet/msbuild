@@ -17,13 +17,15 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         private IFileSystem _fileSystem;
         private Lazy<IReadOnlyList<CommandSettings>> _commands;
         private Action _uninstallCallback;
+        private IEnumerable<string> _warnings;
 
         public ToolPackageMock(
             IFileSystem fileSystem,
             PackageId id,
             NuGetVersion version,
             DirectoryPath packageDirectory,
-            Action uninstallCallback = null)
+            Action uninstallCallback = null,
+            IEnumerable<string> warnings = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             Id = id;
@@ -31,6 +33,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             PackageDirectory = packageDirectory;
             _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
             _uninstallCallback = uninstallCallback;
+            _warnings = warnings ?? new List<string>();
         }
 
         public PackageId Id { get; private set; }
@@ -46,6 +49,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 return _commands.Value;
             }
         }
+
+        public IEnumerable<string> Warnings => _warnings;
 
         public void Uninstall()
         {
