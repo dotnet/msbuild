@@ -62,6 +62,11 @@
         <target state="needs-review-translation">無法同時將全域與工具路徑作為選項。」</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -144,4 +144,7 @@
   <data name="CommandsColumn" xml:space="preserve">
     <value>Commands</value>
   </data>
+  <data name="InvalidToolPathOption" xml:space="preserve">
+    <value>Tool path '{0}' does not exist.</value>
+  </data>
 </root>

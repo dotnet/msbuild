@@ -62,6 +62,11 @@
         <target state="needs-review-translation">전역 및 도구 경로를 의견으로 동시에 사용할 수 없습니다."</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
