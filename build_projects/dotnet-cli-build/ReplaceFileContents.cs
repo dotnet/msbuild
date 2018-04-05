@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
@@ -28,10 +29,10 @@ namespace Microsoft.DotNet.Cli.Build
     public class ReplaceFileContents : Task
     {
         [Required]
-        public string InputFile { get; set; }
+        public ITaskItem[] InputFiles { get; set; }
 
         [Required]
-        public string DestinationFile { get; set; }
+        public ITaskItem[] DestinationFiles { get; set; }
 
         public ITaskItem[] ReplacementItems { get; set; }
 
@@ -55,17 +56,34 @@ namespace Microsoft.DotNet.Cli.Build
                 throw new Exception($"Expected {nameof(ReplacementPatterns)}  (length {ReplacementPatterns.Length}) and {nameof(ReplacementStrings)} (length {ReplacementStrings.Length}) to have the same length.");
             }
 
-            if (!File.Exists(InputFile))
+            if (InputFiles.Length != DestinationFiles.Length)
             {
-                throw new FileNotFoundException($"Expected file {InputFile} was not found.");
+                throw new Exception($"Expected {nameof(InputFiles)}  (length {InputFiles.Length}) and {nameof(DestinationFiles)} (length {DestinationFiles.Length}) to have the same length.");
             }
 
-            string inputFileText = File.ReadAllText(InputFile);
-            string outputFileText = ReplacePatterns(inputFileText);
+            var filesNotFound = InputFiles.Where(i => !File.Exists(i.ItemSpec)).Select(i => i.ItemSpec);
+            if (filesNotFound.Any())
+            {
+                var filesNotFoundString = string.Join(",", filesNotFound);
+                throw new FileNotFoundException($"Expected files where not found: {filesNotFoundString}");
+            }
 
-            WriteOutputFile(outputFileText);
+            Log.LogMessage(MessageImportance.High, $"ReplacingContents for `{InputFiles.Length}` files.");
+
+            for (var i = 0; i < InputFiles.Length; i++)
+            {
+                ReplaceContents(InputFiles[i].ItemSpec, DestinationFiles[i].ItemSpec);
+            }
 
             return true;
+        }
+
+        public void ReplaceContents(string inputFile, string destinationFile)
+        {
+            string inputFileText = File.ReadAllText(inputFile);
+            string outputFileText = ReplacePatterns(inputFileText);
+
+            WriteOutputFile(destinationFile, outputFileText);
         }
 
         public string ReplacePatterns(string inputFileText)
@@ -92,15 +110,18 @@ namespace Microsoft.DotNet.Cli.Build
             return outText;
         }
 
-        public void WriteOutputFile(string outputFileText)
+        public void WriteOutputFile(string destinationFile, string outputFileText)
         {
-            var destinationDirectory = Path.GetDirectoryName(DestinationFile);
+            var destinationDirectory = Path.GetDirectoryName(destinationFile);
+            Log.LogMessage(MessageImportance.High, $"Destination Directory: {destinationDirectory}");
             if (!Directory.Exists(destinationDirectory))
             {
+                Log.LogMessage(MessageImportance.High, $"Destination Directory `{destinationDirectory}` does not exist. Creating...");
                 Directory.CreateDirectory(destinationDirectory);
             }
 
-            File.WriteAllText(DestinationFile, outputFileText);
+            Log.LogMessage(MessageImportance.High, $"Writing file: {destinationFile}");
+            File.WriteAllText(destinationFile, outputFileText);
         }
     }
 }

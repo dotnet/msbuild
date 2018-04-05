@@ -1,7 +1,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <BuildName>cli</BuildName>
-    <SdkBrandName>Microsoft .NET Core SDK 2.1.300 - Preview</SdkBrandName>
+    <SdkBrandName>Microsoft .NET Core SDK $(CliBrandingVersion)</SdkBrandName>
     <MSBuildExtensionsBrandName>.NET Standard Support for Visual Studio 2015</MSBuildExtensionsBrandName>
     <SharedFrameworkBrandName>Microsoft .NET Core Runtime 2.1.0 - Preview</SharedFrameworkBrandName>
     <SharedHostBrandName>Microsoft .NET Core Host 2.1.0 - Preview</SharedHostBrandName>

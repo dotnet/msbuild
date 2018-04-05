@@ -53,8 +53,8 @@
 
       <!-- Create layout: Generate and Place postinst -->
       <ReplaceFileContents
-        InputFile="$(DebianPostinstTemplateFile)"
-        DestinationFile="$(DebianPostinstFile)"
+        InputFiles="$(DebianPostinstTemplateFile)"
+        DestinationFiles="$(DebianPostinstFile)"
         ReplacementItems="@(DebianPostInstTokenValues)" />
 
       <Chmod
@@ -63,8 +63,8 @@
 
       <!-- Create layout: Generate and Place debian_config.json -->
       <ReplaceFileContents
-        InputFile="$(DebianConfigTemplateFile)"
-        DestinationFile="$(DebianConfigJsonFile)"
+        InputFiles="$(DebianConfigTemplateFile)"
+        DestinationFiles="$(DebianConfigJsonFile)"
         ReplacementItems="@(DebianConfigTokenValues)" />
 
       <Chmod
