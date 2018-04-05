@@ -130,7 +130,7 @@
     <value>Directory in which to place built packages.</value>
   </data>
   <data name="CmdNoBuildOptionDescription" xml:space="preserve">
-    <value>Do not build project before packing.  Implies --no-restore.</value>
+    <value>Do not build the project before packing. Implies --no-restore.</value>
   </data>
   <data name="CmdIncludeSymbolsDescription" xml:space="preserve">
     <value>Include packages with symbols in addition to regular packages in output directory.</value>
