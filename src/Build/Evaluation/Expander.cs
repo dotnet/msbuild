@@ -261,11 +261,14 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
-            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties);
-            result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
-            result = FileUtilities.MaybeAdjustFilePath(result);
+            Func<string, string> expandPropertiesFunc = (str) =>
+                PropertyExpander<P>.ExpandPropertiesLeaveEscaped(str, _properties, options, elementLocation, _usedUninitializedProperties);
 
+            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, expandPropertiesFunc);
+            result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
+            result = expandPropertiesFunc(result);
+            result = FileUtilities.MaybeAdjustFilePath(result);
+            
             return result;
         }
 
@@ -699,16 +702,16 @@ namespace Microsoft.Build.Evaluation
             /// <param name="metadata"></param>
             /// <param name="options"></param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
-            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options)
+            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, Func<string, string> expandPropertiesFunc = null)
             {
                 if (((options & ExpanderOptions.ExpandMetadata) == 0))
                 {
-                    return expression;
+                    return expandPropertiesFunc?.Invoke(expression) ?? expression;
                 }
 
                 if (expression.Length == 0)
                 {
-                    return expression;
+                    return expandPropertiesFunc?.Invoke(expression) ?? expression;
                 }
 
                 ErrorUtilities.VerifyThrow(metadata != null, "Cannot expand metadata without providing metadata");
@@ -717,7 +720,7 @@ namespace Microsoft.Build.Evaluation
                 // out -- pre-scanning the string is actually cheaper than running the Regex, even when there are no matches!
                 if (s_invariantCompareInfo.IndexOf(expression, "%(", CompareOptions.Ordinal) == -1)
                 {
-                    return expression;
+                    return expandPropertiesFunc?.Invoke(expression) ?? expression;
                 }
 
                 string result = null;
@@ -760,6 +763,9 @@ namespace Microsoft.Build.Evaluation
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
                                 string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+
+                                // we also expand properties at this point, if relevant
+                                replacementResult = expandPropertiesFunc?.Invoke(replacementResult) ?? replacementResult;
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
