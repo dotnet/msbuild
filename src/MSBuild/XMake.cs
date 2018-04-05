@@ -545,7 +545,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
 #if FEATURE_NODE_REUSE
-                bool enableNodeReuse = true;
+                bool enableNodeReuse = NativeMethodsShared.IsWindows;
 #else
                 bool enableNodeReuse = false;
 #endif
@@ -2110,7 +2110,7 @@ namespace Microsoft.Build.CommandLine
         {
             bool enableNodeReuse;
 #if FEATURE_NODE_REUSE
-            enableNodeReuse = true;
+            enableNodeReuse = NativeMethodsShared.IsWindows;
 #else
             enableNodeReuse = false;
 #endif
