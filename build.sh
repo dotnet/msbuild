@@ -12,6 +12,10 @@ REPOROOT="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 export DOTNET_VERSION=2.1.300-preview2-008248
+if [ -n "$DotNetCoreSdkDir" ]
+then
+    export DOTNET_VERSION=$( ${DotNetCoreSdkDir}/dotnet --version )
+fi
 export WebSdkRoot=$REPOROOT
 export WebSdkReferences=$WebSdkRoot/references/ 
 export WebSdkSource=$WebSdkRoot/src/ 
@@ -19,23 +23,29 @@ export WebSdkBuild=$WebSdkRoot/build/
 
 [ -z "$BuildConfiguration" ] && export BuildConfiguration=Release
 
-# Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
-[ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet
-[ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
-
 [ -z $NUGET_PACKAGES ] && export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
-curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.1.300-preview2-008248
+if [ -z "${DotNetCoreSdkDir}" ]
+then
+    # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
+    [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet
+    [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
-curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
-[ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461
-tar -zxf $DOTNET_INSTALL_DIR/buildtools.tar.gz -C $DOTNET_INSTALL_DIR/buildtools/net461
+    DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
+    curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.1.300-preview2-008248
 
-# Put stage 0 on the PATH (for this shell only)
-PATH="$DOTNET_INSTALL_DIR:$PATH"
-export ReferenceAssemblyRoot=$DOTNET_INSTALL_DIR/buildtools/net461
+    curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
+    [ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461
+    tar -zxf $DOTNET_INSTALL_DIR/buildtools.tar.gz -C $DOTNET_INSTALL_DIR/buildtools/net461
+
+    # Put stage 0 on the PATH (for this shell only)
+    PATH="$DOTNET_INSTALL_DIR:$PATH"
+    export ReferenceAssemblyRoot=$DOTNET_INSTALL_DIR/buildtools/net461
+else
+    DOTNET_INSTALL_DIR=$DotNetCoreSdkDir
+    PATH="$DotNetCoreSdkDir:$PATH"
+fi
 
 
 # Increases the file descriptors limit for this bash. It prevents an issue we were hitting during restore
