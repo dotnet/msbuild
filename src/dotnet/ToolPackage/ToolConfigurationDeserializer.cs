@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -12,6 +13,10 @@ namespace Microsoft.DotNet.ToolPackage
 {
     internal static class ToolConfigurationDeserializer
     {
+        // The supported tool configuration schema version.
+        // This should match the schema version in the GenerateToolsSettingsFile task from the SDK.
+        private const int SupportedVersion = 1;
+
         public static ToolConfiguration Deserialize(string pathToXml)
         {
             var serializer = new XmlSerializer(typeof(DotNetCliTool));
@@ -43,6 +48,8 @@ namespace Microsoft.DotNet.ToolPackage
                     ex);
             }
 
+            List<string> warnings = GenerateWarningAccordingToVersionAttribute(dotNetCliTool);
+
             if (dotNetCliTool.Commands.Length != 1)
             {
                 throw new ToolConfigurationException(CommonLocalizableStrings.ToolSettingsMoreThanOneCommand);
@@ -59,7 +66,33 @@ namespace Microsoft.DotNet.ToolPackage
 
             return new ToolConfiguration(
                 dotNetCliTool.Commands[0].Name,
-                dotNetCliTool.Commands[0].EntryPoint);
+                dotNetCliTool.Commands[0].EntryPoint,
+                warnings);
+        }
+
+        private static List<string> GenerateWarningAccordingToVersionAttribute(DotNetCliTool dotNetCliTool)
+        {
+            List<string> warnings = new List<string>();
+            if (string.IsNullOrWhiteSpace(dotNetCliTool.Version))
+            {
+                warnings.Add(CommonLocalizableStrings.FormatVersionIsMissing);
+            }
+            else
+            {
+                if (!int.TryParse(dotNetCliTool.Version, out int version))
+                {
+                    warnings.Add(CommonLocalizableStrings.FormatVersionIsMalformed);
+                }
+                else
+                {
+                    if (version > SupportedVersion)
+                    {
+                        warnings.Add(CommonLocalizableStrings.FormatVersionIsHigher);
+                    }
+                }
+            }
+
+            return warnings;
         }
     }
 }

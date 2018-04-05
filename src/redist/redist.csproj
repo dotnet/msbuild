@@ -356,8 +356,8 @@
       <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
-      InputFile="$(VSTestRuntimeConfigPath)"
-      DestinationFile="$(VSTestRuntimeConfigPath)"
+      InputFiles="$(VSTestRuntimeConfigPath)"
+      DestinationFiles="$(VSTestRuntimeConfigPath)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
   </Target>

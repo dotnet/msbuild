@@ -9,5 +9,8 @@ namespace Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization
     {
         [XmlArrayItem("Command", IsNullable = false)]
         public DotNetCliToolCommand[] Commands { get; set; }
+
+        [XmlAttribute(AttributeName = "Version")]
+        public string Version { get; set; }
     }
 }

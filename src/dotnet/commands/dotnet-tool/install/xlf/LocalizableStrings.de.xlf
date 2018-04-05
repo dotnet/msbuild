@@ -60,8 +60,10 @@ Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
-        <source>Tool '{0}' failed to install.</source>
-        <target state="translated">Fehler bei der Installation des Tools "{0}".</target>
+        <source>Tool '{0}' failed to install. You may need to specify the version using
+
+   dotnet tool install -g {0} --version &lt;version&gt;</source>
+        <target state="needs-review-translation">Fehler bei der Installation des Tools "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">

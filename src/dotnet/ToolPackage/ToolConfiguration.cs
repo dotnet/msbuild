@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Tools;
@@ -12,7 +13,8 @@ namespace Microsoft.DotNet.ToolPackage
     {
         public ToolConfiguration(
             string commandName,
-            string toolAssemblyEntryPoint)
+            string toolAssemblyEntryPoint,
+            IEnumerable<string> warnings = null)
         {
             if (string.IsNullOrWhiteSpace(commandName))
             {
@@ -32,6 +34,7 @@ namespace Microsoft.DotNet.ToolPackage
 
             CommandName = commandName;
             ToolAssemblyEntryPoint = toolAssemblyEntryPoint;
+            Warnings = warnings ?? new List<string>();
         }
 
         private void EnsureNoInvalidFilenameCharacters(string commandName)
@@ -60,5 +63,6 @@ namespace Microsoft.DotNet.ToolPackage
 
         public string CommandName { get; }
         public string ToolAssemblyEntryPoint { get; }
+        public IEnumerable<string> Warnings { get; }
     }
 }

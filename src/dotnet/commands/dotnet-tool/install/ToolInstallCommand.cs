@@ -148,6 +148,11 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                     scope.Complete();
                 }
 
+                foreach (string w in package.Warnings)
+                {
+                    _reporter.WriteLine(w.Yellow());
+                }
+
                 if (_global)
                 {
                     _environmentPathInstruction.PrintAddPathInstructionIfPathDoesNotExist();

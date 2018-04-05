@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.ToolPackage
 
         IReadOnlyList<CommandSettings> Commands { get; }
 
+        IEnumerable<string> Warnings { get; }
+
         void Uninstall();
     }
 }
