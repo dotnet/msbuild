@@ -177,7 +177,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
+            // if no BuildParameters were specified for this build,
+            // we must be trying to shut down idle nodes from some
+            // other, completed build. If they're still around,
+            // they must have been started with node reuse.
+            bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
+
+            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(nodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
         }
 
         #endregion
