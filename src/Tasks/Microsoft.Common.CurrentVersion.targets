@@ -160,16 +160,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == ''">false</ProduceReferenceAssembly>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(OutputPath)' == '' ">
-    <!--
-        A blank OutputPath at this point means that the user passed in an invalid Configuration/Platform
-        combination.  Whether this is considered an error or a warning depends on the value of
-        $(SkipInvalidConfigurations).
-        -->
-    <_InvalidConfigurationError Condition=" '$(SkipInvalidConfigurations)' != 'true' ">true</_InvalidConfigurationError>
-    <_InvalidConfigurationWarning Condition=" '$(SkipInvalidConfigurations)' == 'true' ">true</_InvalidConfigurationWarning>
-  </PropertyGroup>
-
   <!--
     IDE Macros available from both integrated builds and from command line builds.
     The following properties are 'macros' that are available via IDE for
@@ -771,22 +761,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="_CheckForInvalidConfigurationAndPlatform"
       BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
 
-    <PropertyGroup>
-      <_InvalidConfigurationMessageText>The OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
-      <_InvalidConfigurationMessageText Condition="'$(BuildingInsideVisualStudio)' == 'true'">$(_InvalidConfigurationMessageText)  This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</_InvalidConfigurationMessageText>
-      <_InvalidConfigurationMessageText Condition="'$(BuildingInsideVisualStudio)' != 'true'">$(_InvalidConfigurationMessageText)  You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</_InvalidConfigurationMessageText>
-    </PropertyGroup>
-
-    <Error Condition=" '$(_InvalidConfigurationError)' == 'true' " Text="$(_InvalidConfigurationMessageText)"/>
-    <Warning Condition=" '$(_InvalidConfigurationWarning)' == 'true' " Text="$(_InvalidConfigurationMessageText)"/>
+    <CheckConfigurationAndPlatform
+      BaseIntermediateOutputPath="$(BaseIntermediateOutputPath)"
+      BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)"
+      IntermediateOutputPath="$(IntermediateOutputPath)"
+      OriginalConfiguration="$(_OriginalConfiguration)"
+      OriginalPlatform="$(_OriginalPlatform)"
+      OutDir="$(OutDir)"
+      OutputPath="$(OutputPath)"
+      ProjectFile="$(MSBuildProjectFile)"
+      SkipInvalidConfigurations="$(SkipInvalidConfigurations)"
+      />
 
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Configuration=$(Configuration)" Importance="Low" />
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Platform=$(Platform)" Importance="Low" />
-
-    <!-- Although we try to ensure a trailing slash, it's possible to circumvent this if the property is set on the command line -->
-    <Error Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')" Text="The OutDir property must end with a trailing slash." />
-    <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
-    <Error Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" Text="The IntermediateOutputPath must end with a trailing slash." />
 
     <!-- Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing
          this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the
