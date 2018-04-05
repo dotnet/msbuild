@@ -104,8 +104,8 @@
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
 
-    <ReplaceFileContents InputFile="$(AfterInstallHostScriptTemplateFile)"
-                         DestinationFile="$(AfterInstallHostScriptDestinationFile)"
+    <ReplaceFileContents InputFiles="$(AfterInstallHostScriptTemplateFile)"
+                         DestinationFiles="$(AfterInstallHostScriptDestinationFile)"
                          ReplacementItems="@(AfterInstallHostTokenValue)"/>
 
     <Chmod
