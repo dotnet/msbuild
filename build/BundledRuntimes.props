@@ -5,7 +5,7 @@
 
     <!-- only the runtime OSX .pkgs have a `-internal` suffix -->
     <InstallerStartSuffix Condition="'$(HostOSName)' == 'osx'">-internal</InstallerStartSuffix>
-    
+
     <!-- Downloaded Installers + Archives -->
     <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
     <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
@@ -34,9 +34,10 @@
 
   <PropertyGroup>
     <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeAzureblobStoresSubfolderName)</AspNetCoreRuntimeInstallerBlobRootUrl>
+    <AspNetCoreRuntimeBuildDropFeed>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeAzureblobStoresSubfolderName)/packages/index.json</AspNetCoreRuntimeBuildDropFeed>
     <AspNetCoreSharedRuntimeVersionFileName>runtime.version</AspNetCoreSharedRuntimeVersionFileName>
     <AspNetCoreSharedRuntimeVersionFile Condition=" '$(AspNetCoreSharedRuntimeVersionFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreSharedRuntimeVersionFileName)</AspNetCoreSharedRuntimeVersionFile>
-    
+
     <!-- Examples:    Build.RS.linux.zip    Build.RS.winx86.zip    AspNetCorePackageStoreLibx64.wixlib   -->
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'win' ">$(HostOSName)$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
