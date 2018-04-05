@@ -74,6 +74,8 @@
       Projects="@(ProjectsToTest)">
     </MSBuild>
 
+    <Exec Command="$(DotnetInOutputDirectory) exec $(RoslynDirectory)/bincore/VBCSCompiler.dll -shutdown" />
+
     <Message Text="Finished test execution" Importance="High" />
 
     <!-- Begin Workaround lack of a stable package version for depedencies; remove simulated stable version folder. -->

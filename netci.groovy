@@ -9,7 +9,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Linux:x64:Release', 'Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug']
+def platformList = ['Linux:x64:Release', 'Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug', 'ubuntu.18.04:x64:Debug', 'fedora.27:x64:Debug', 'opensuse.43.2:x64:Debug']
 
 def static getBuildJobName(def configuration, def os, def architecture) {
     return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
@@ -20,6 +20,7 @@ platformList.each { platform ->
     // Calculate names
     def (os, architecture, configuration) = platform.tokenize(':')
     def osUsedForMachineAffinity = os;
+    def osVersionUsedForMachineAffinity = 'latest-or-auto';
 
     // Calculate job name
     def jobName = getBuildJobName(configuration, os, architecture)
@@ -38,6 +39,11 @@ platformList.each { platform ->
     else if (os == 'Linux') {
         osUsedForMachineAffinity = 'Ubuntu16.04';
         buildCommand = "./build.sh --linux-portable --skip-prereqs --configuration ${configuration} --targets Default"
+    }
+    else if (os == 'ubuntu.18.04' || os == 'fedora.27' || os == 'opensuse.43.2') {
+        osUsedForMachineAffinity = 'Ubuntu16.04'
+        osVersionUsedForMachineAffinity = 'latest-docker'
+        buildCommand = "./build.sh --linux-portable --skip-prereqs --configuration ${configuration} --docker ${os} --targets Default"
     }
     else {
         // Jenkins non-Ubuntu CI machines don't have docker
@@ -58,7 +64,7 @@ platformList.each { platform ->
         }
     }
 
-    Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, 'latest-or-auto')
+    Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, osVersionUsedForMachineAffinity)
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     Utilities.addMSTestResults(newJob, '**/*.trx')
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${architecture} ${configuration} Build")
