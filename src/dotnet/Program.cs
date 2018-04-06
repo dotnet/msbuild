@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -23,6 +24,8 @@ namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
+        private static readonly string ToolPathSentinelFileName = $"{Product.Version}.toolpath.sentinel";
+
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -94,6 +97,12 @@ namespace Microsoft.DotNet.Cli
             {
                 IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = disposableFirstTimeUseNoticeSentinel;
                 IAspNetCertificateSentinel aspNetCertificateSentinel = new AspNetCertificateSentinel(cliFallbackFolderPathCalculator);
+                IFileSentinel toolPathSentinel = new FileSentinel(
+                    new FilePath(
+                        Path.Combine(
+                            CliFolderPathCalculator.DotnetUserProfileFolderPath,
+                            ToolPathSentinelFileName)));
+
                 for (; lastArg < args.Length; lastArg++)
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
@@ -138,6 +147,7 @@ namespace Microsoft.DotNet.Cli
                         {
                             aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
+                            toolPathSentinel = new NoOpFileSentinel();
                             hasSuperUserAccess = true;
                         }
 
@@ -145,6 +155,7 @@ namespace Microsoft.DotNet.Cli
                             nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
+                            toolPathSentinel,
                             cliFallbackFolderPathCalculator,
                             hasSuperUserAccess);
 
@@ -209,6 +220,7 @@ namespace Microsoft.DotNet.Cli
             INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
+            IFileSentinel toolPathSentinel,
             CliFolderPathCalculator cliFolderPathCalculator,
             bool hasSuperUserAccess)
         {
@@ -231,6 +243,7 @@ namespace Microsoft.DotNet.Cli
                     firstTimeUseNoticeSentinel,
                     aspNetCertificateSentinel,
                     aspnetCertificateGenerator,
+                    toolPathSentinel,
                     environmentProvider,
                     Reporter.Output,
                     cliFolderPathCalculator.CliFallbackFolderPath,

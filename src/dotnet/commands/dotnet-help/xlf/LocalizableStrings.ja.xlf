@@ -257,6 +257,11 @@
         <target state="new">Modify tools.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildServerDefinition">
+        <source>Interact with servers started by a build.</source>
+        <target state="new">Interact with servers started by a build.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

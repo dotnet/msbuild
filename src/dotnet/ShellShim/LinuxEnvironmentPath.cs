@@ -18,9 +18,9 @@ namespace Microsoft.DotNet.ShellShim
         private const string PathName = "PATH";
         private readonly BashPathUnderHomeDirectory _packageExecutablePath;
 
-        private readonly string _profiledDotnetCliToolsPath
-            = Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_LINUX_PROFILED_PATH")
-              ?? @"/etc/profile.d/dotnet-cli-tools-bin-path.sh";
+        internal static readonly string DotnetCliToolsProfilePath =
+            Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_LINUX_PROFILED_PATH") ??
+            @"/etc/profile.d/dotnet-cli-tools-bin-path.sh";
 
         internal LinuxEnvironmentPath(
             BashPathUnderHomeDirectory packageExecutablePath,
@@ -44,28 +44,27 @@ namespace Microsoft.DotNet.ShellShim
             }
 
             var script = $"export PATH=\"$PATH:{_packageExecutablePath.PathWithDollar}\"";
-            _fileSystem.WriteAllText(_profiledDotnetCliToolsPath, script);
+            _fileSystem.WriteAllText(DotnetCliToolsProfilePath, script);
         }
 
         private bool PackageExecutablePathExists()
         {
-            var environmentVariable = _environmentProvider
-                .GetEnvironmentVariable(PathName);
-
-            if (environmentVariable == null)
+            var value = _environmentProvider.GetEnvironmentVariable(PathName);
+            if (value == null)
             {
                 return false;
             }
 
-            return environmentVariable
-                .Split(':').Contains(_packageExecutablePath.Path);
+            return value
+                .Split(':')
+                .Any(p => p == _packageExecutablePath.Path || p == _packageExecutablePath.PathWithTilde);
         }
 
         public void PrintAddPathInstructionIfPathDoesNotExist()
         {
             if (!PackageExecutablePathExists())
             {
-                if (_fileSystem.Exists(_profiledDotnetCliToolsPath))
+                if (_fileSystem.Exists(DotnetCliToolsProfilePath))
                 {
                     _reporter.WriteLine(
                         CommonLocalizableStrings.EnvironmentPathLinuxNeedLogout);

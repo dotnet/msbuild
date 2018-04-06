@@ -150,6 +150,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 return _temporaryDirectory;
             }
 
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+            {
+                throw new NotImplementedException();
+            }
+
             public IEnumerable<string> EnumerateFileSystemEntries(string path)
             {
                 foreach (var entry in _files.Keys.Where(k => Path.GetDirectoryName(k) == path))

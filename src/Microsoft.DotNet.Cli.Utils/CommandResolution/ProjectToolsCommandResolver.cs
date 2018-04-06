@@ -399,6 +399,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 Path.Combine(AppContext.BaseDirectory, "MSBuild.dll") :
                 msBuildExePath;
 
+            Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.MSBuildArgs,
+                ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args)));
+
             var result = new MSBuildForwardingAppWithoutLogging(args, msBuildExePath)
                 .GetProcessStartInfo()
                 .ExecuteAndCaptureOutput(out string stdOut, out string stdErr);
