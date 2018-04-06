@@ -75,6 +75,9 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 # Don't resolve shared frameworks from user or global locations
 $env:DOTNET_MULTILEVEL_LOOKUP=0
 
+# Turn off MSBuild Node re-use
+$env:MSBUILDDISABLENODEREUSE=1
+
 # Enable vs test console logging
 $env:VSTEST_BUILD_TRACE=1
 $env:VSTEST_TRACE_BUILD=1
