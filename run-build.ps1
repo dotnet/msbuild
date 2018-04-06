@@ -20,7 +20,7 @@ if($Help)
     Write-Output ""
     Write-Output "Options:"
     Write-Output "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-    Write-Output "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64, x86, or arm , default: x64)"
+    Write-Output "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64, x86, arm, or arm64 , default: x64)"
     Write-Output "  -NoPackage                         Skip packaging targets"
     Write-Output "  -NoBuild                           Skip building the product"
     Write-Output "  -Help                              Display this help message"

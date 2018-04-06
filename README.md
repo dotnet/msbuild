@@ -23,9 +23,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux arm Archive|Linux Native Installers|RHEL 6 Archive|Alpine 3.6 Archive|
-|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linux-arm-build-badge]][linux-arm-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][alpine3.6-build-badge]][alpine3.6-build]|
+|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux arm Archive|Linux arm64 Archive|Linux Native Installers|RHEL 6 Archive|Alpine 3.6 Archive|
+|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linux-arm-build-badge]][linux-arm-build]|[![][linux-arm64-build-badge]][linux-arm64-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][alpine3.6-build-badge]][alpine3.6-build]|
 
 [win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6902/badge
 [win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6902
@@ -41,6 +41,9 @@ Build Status
 
 [linux-arm-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/8721/badge
 [linux-arm-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=8721
+
+[linux-arm64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/8817/badge
+[linux-arm64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=8817
 
 [linuxnative-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7254/badge
 [linuxnative-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7254
@@ -69,6 +72,7 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **macOS** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
 | **Linux x64** | [DEB Installer][linux-DEB-installer] - [Checksum][linux-DEB-installer-checksum]<br>[RPM Installer][linux-RPM-installer] - [Checksum][linux-RPM-installer-checksum]<br>_see installer note below_<sup>1</sup><br>[tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
 | **Linux arm** | [tar.gz][linux-arm-targz] - [Checksum][linux-arm-targz-checksum] |
+| **Linux arm64** | [tar.gz][linux-arm64-targz] - [Checksum][linux-arm64-targz-checksum] |
 | **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
 | **Alpine 3.6** | [tar.gz][alpine-3.6-targz] - [Checksum][alpine-3.6-targz-checksum] |
 
@@ -106,6 +110,9 @@ Reference notes:
 
 [linux-arm-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-arm.tar.gz
 [linux-arm-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-arm.tar.gz.sha
+
+[linux-arm64-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-arm64.tar.gz
+[linux-arm64-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-arm64.tar.gz.sha
 
 [linux-DEB-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-x64.deb
 [linux-DEB-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-x64.deb.sha

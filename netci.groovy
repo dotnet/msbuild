@@ -9,7 +9,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Linux:x64:Release', 'Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT_ES:x64:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug', 'RHEL6:x64:Debug', 'Alpine3.6:x64:Debug', 'Linux:arm:Debug']
+def platformList = ['Linux:x64:Release', 'Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT_ES:x64:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug', 'RHEL6:x64:Debug', 'Alpine3.6:x64:Debug', 'Linux:arm:Debug', 'Linux:arm64:Debug']
 
 def static getBuildJobName(def configuration, def os, def architecture) {
     return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
@@ -44,7 +44,7 @@ set DOTNET_CLI_UI_LANGUAGE=es
     }
     else if (os == 'Linux') {
         osUsedForMachineAffinity = 'Ubuntu16.04';
-        if (architecture == 'arm') {
+        if ((architecture == 'arm') || (architecture == 'arm64')) {
             buildCommand = "./build.sh --linux-portable --skip-prereqs --architecture ${architecture} --configuration ${configuration} --targets Default /p:CLIBUILD_SKIP_TESTS=true"
         }
         else {
@@ -81,7 +81,7 @@ set DOTNET_CLI_UI_LANGUAGE=es
     Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, 'latest-or-auto')
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     // ARM CI runs are build only.
-    if (architecture != 'arm') {
+    if ((architecture != 'arm') && (architecture != 'arm64')) {
         Utilities.addMSTestResults(newJob, '**/*.trx')
     }
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${architecture} ${configuration} Build")
