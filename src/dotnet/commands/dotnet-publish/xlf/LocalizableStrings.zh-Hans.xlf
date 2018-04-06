@@ -42,6 +42,11 @@
         <target state="translated">随附应用程序发布 .NET Core 运行时，免除在目标计算机上安装运行时的需求。如果指定了运行时标识符，则默认为 “true”。</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="new">Do not build the project before publishing. Implies --no-restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
