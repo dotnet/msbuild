@@ -65,6 +65,8 @@ namespace Microsoft.NET.TestFramework
 
         public static void Initialize(TestCommandLine commandLine)
         {
+            Environment.SetEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
+
             TestContext testContext = new TestContext();
 
             // This is dependent on the current artifacts layout:
