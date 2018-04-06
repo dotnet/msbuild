@@ -9,8 +9,8 @@
     <Message Text="$(VersionBadge)"  />
 
     <ReplaceFileContents
-      InputFile="$(VersionSvgTemplate)"
-      DestinationFile="$(VersionBadge)"
+      InputFiles="$(VersionSvgTemplate)"
+      DestinationFiles="$(VersionBadge)"
       ReplacementPatterns="ver_number"
       ReplacementStrings="$(SdkVersion)" />
   </Target>
@@ -21,8 +21,8 @@
     <Message Text="$(CoherentBadge)"  />
 
     <ReplaceFileContents
-      InputFile="$(VersionSvgTemplate)"
-      DestinationFile="$(CoherentBadge)"
+      InputFiles="$(VersionSvgTemplate)"
+      DestinationFiles="$(CoherentBadge)"
       ReplacementPatterns="ver_number"
       ReplacementStrings="$(SdkVersion)" />
   </Target>

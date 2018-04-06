@@ -47,6 +47,11 @@
         <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

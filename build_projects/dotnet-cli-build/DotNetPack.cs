@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (!string.IsNullOrEmpty(Runtime))
             {
-                return $"/p:RuntimeIdentifier={Runtime}";
+                return $"-property:RuntimeIdentifier={Runtime}";
             }
 
             return null;

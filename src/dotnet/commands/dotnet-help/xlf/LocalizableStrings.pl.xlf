@@ -188,8 +188,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
-        <source>Display .NET Core SDK version.</source>
-        <target state="translated">Wyświetl wersję zestawu SDK programu .NET Core.</target>
+        <source>Display .NET Core SDK version in use.</source>
+        <target state="needs-review-translation">Wyświetl wersję zestawu SDK programu .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
