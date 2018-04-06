@@ -64,6 +64,10 @@
 
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
+    <PackageReference Include="PdbGit" Version="3.0.41" PrivateAssets="All"
+                      Condition="'$(DebugType)' == 'full' And '$(IsUnitTestProject)' != 'true'" />
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.7.6" PrivateAssets="All"
+                      Condition="'$(DebugType)' != 'full' And '$(IsUnitTestProject)' != 'true'" />    
   </ItemGroup>
   
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
