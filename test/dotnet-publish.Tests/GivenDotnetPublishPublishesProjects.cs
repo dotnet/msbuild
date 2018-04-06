@@ -242,20 +242,65 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var rootPath = TestAssets.CreateTestDirectory().FullName;
 
             string newArgs = $"console -o \"{rootPath}\"";
-            new NewCommandShim()
+            new NewCommandShim() // note implicit restore here
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
-                .Should().Pass();
+                .Should()
+                .Pass();
 
             new PublishCommand()
                 .WithWorkingDirectory(rootPath)
                 .ExecuteWithCapturedOutput("--no-build")
-                .Should().Fail()
-                .And.HaveStdOutContaining("MSB3030"); // "Could not copy ___ because it was not found.
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("MSB3030"); // "Could not copy ___ because it was not found."
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItPublishesSuccessfullyWithNoBuildIfPreviouslyBuilt(bool selfContained)
+        {
+            var rootPath = TestAssets.CreateTestDirectory(identifier: selfContained ? "_sc" : "").FullName;
+            var rootDir = new DirectoryInfo(rootPath);
+
+            string newArgs = $"console -o \"{rootPath}\" --no-restore";
+            new NewCommandShim()
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
+
+            var rid = selfContained ? DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier() : "";
+            var ridArg = selfContained ? $"-r {rid}" : "";
+
+            new BuildCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput(ridArg)
+                .Should()
+                .Pass();
+
+            new PublishCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput($"{ridArg} --no-build")
+                .Should()
+                .Pass();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            var outputProgram = rootDir
+                .GetDirectory("bin", configuration, "netcoreapp2.1", rid, "publish", $"{rootDir.Name}.dll")
+                .FullName;
+
+            new TestCommand(outputProgram)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
 
         [Fact]
-        public void ItPublishesSuccessfullyWithNoBuildIfPreviouslyBuilt()
+        public void ItFailsToPublishWithNoBuildIfPreviouslyBuiltWithoutRid()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
             var rootDir = new DirectoryInfo(rootPath);
@@ -275,21 +320,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput("--no-build")
+                .ExecuteWithCapturedOutput("-r win-x64 --no-build")
                 .Should()
-                .Pass();
-
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-
-            var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp2.1", "publish", $"{rootDir.Name}.dll")
-                .FullName;
-
-            new TestCommand(outputProgram)
-                .ExecuteWithCapturedOutput()
-                .Should()
-                .Pass()
-                .And.HaveStdOutContaining("Hello World");
+                .Fail();
         }
     }
 }
