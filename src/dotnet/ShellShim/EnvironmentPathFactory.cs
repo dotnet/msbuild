@@ -33,14 +33,16 @@ namespace Microsoft.DotNet.ShellShim
             {
                 environmentPath = new WindowsEnvironmentPath(
                     cliFolderPathCalculator.ToolsShimPath,
-                    Reporter.Output);
+                    Reporter.Output,
+                    environmentProvider);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && hasSuperUserAccess)
             {
                 environmentPath = new LinuxEnvironmentPath(
                     cliFolderPathCalculator.ToolsShimPathInUnix,
                     Reporter.Output,
-                    environmentProvider, new FileWrapper());
+                    environmentProvider,
+                    new FileWrapper());
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && hasSuperUserAccess)
             {

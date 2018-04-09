@@ -144,6 +144,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+            {
+                throw new NotImplementedException();
+            }
+
             public IEnumerable<string> EnumerateFileSystemEntries(string path)
             {
                 throw new UnauthorizedAccessException();

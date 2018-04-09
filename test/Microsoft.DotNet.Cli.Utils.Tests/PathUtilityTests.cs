@@ -21,6 +21,32 @@ namespace Microsoft.DotNet.Cli.Utils
             Assert.Equal(@"d:\foo\", PathUtility.GetRelativePath(@"C:\foo\", @"d:\foo\"));
         }
 
+        [WindowsOnlyFact]
+        public void GetRelativePathForFilePath()
+        {
+            Assert.Equal(
+                @"mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll",
+                PathUtility.GetRelativePath(
+                    @"C:\Users\myuser\.dotnet\tools\mytool.exe",
+                    @"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll"));
+        }
+
+        [WindowsOnlyFact]
+        public void GetRelativePathRequireTrailingSlashForDirectoryPath()
+        {
+            Assert.NotEqual(
+                @"mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll",
+                PathUtility.GetRelativePath(
+                    @"C:\Users\myuser\.dotnet\tools",
+                    @"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll"));
+
+            Assert.Equal(
+                @"mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll",
+                PathUtility.GetRelativePath(
+                    @"C:\Users\myuser\.dotnet\tools\",
+                    @"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll"));
+        }
+
         /// <summary>
         /// Tests that PathUtility.RemoveExtraPathSeparators works correctly with drive references on Windows.
         /// </summary>

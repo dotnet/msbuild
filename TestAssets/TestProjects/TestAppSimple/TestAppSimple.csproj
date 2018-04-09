@@ -4,7 +4,5 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputType>Exe</OutputType>
-    <!-- Issue: https://github.com/dotnet/sdk/issues/1150 -->
-    <DisableImplicitAssetTargetFallback>true</DisableImplicitAssetTargetFallback>
   </PropertyGroup>
 </Project>

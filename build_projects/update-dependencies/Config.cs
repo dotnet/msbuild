@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Scripts
 {
@@ -38,9 +40,7 @@ namespace Microsoft.DotNet.Scripts
         private Lazy<string> _password = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PASSWORD"));
 
         private Lazy<string> _dotNetVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("DOTNET_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info"));
-        private Lazy<string> _coreSetupVersionFragment = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_FRAGMENT", GetDefaultCoreSetupVersionFragment()));
 
-        private Lazy<string> _roslynVersionFragment = new Lazy<string>(() => GetEnvironmentVariable("ROSLYN_VERSION_FRAGMENT"));
         private Lazy<string> _gitHubUpstreamOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"));
         private Lazy<string> _gitHubProject = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PROJECT", "cli"));
         private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", GetDefaultUpstreamBranch()));
@@ -48,6 +48,9 @@ namespace Microsoft.DotNet.Scripts
                                                 GetEnvironmentVariable("GITHUB_PULL_REQUEST_NOTIFICATIONS", "")
                                                     .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
 
+        Lazy<Dictionary<string, string>> _versionFragments = new Lazy<Dictionary<string, string>>(() =>
+                 System.Environment.GetEnvironmentVariables().Cast<DictionaryEntry>().Where(entry => ((string)entry.Key).EndsWith("_VERSION_FRAGMENT")).ToDictionary<DictionaryEntry, string, string>(entry =>
+                    ((string)entry.Key).Replace("_VERSION_FRAGMENT","").ToLowerInvariant(), entry => (string)entry.Value, StringComparer.OrdinalIgnoreCase));
         private Config()
         {
         }
@@ -56,9 +59,8 @@ namespace Microsoft.DotNet.Scripts
         public string Email => _email.Value;
         public string Password => _password.Value;
         public string DotNetVersionUrl => _dotNetVersionUrl.Value;
-        public string CoreSetupVersionFragment => _coreSetupVersionFragment.Value;
-        public string RoslynVersionFragment => _roslynVersionFragment.Value;
-        public bool HasRoslynVersionFragment => !string.IsNullOrEmpty(RoslynVersionFragment);
+        public Dictionary<string, string> VersionFragments => _versionFragments.Value;
+        public bool HasVersionFragment(string repoName) => _versionFragments.Value.ContainsKey(repoName);
         public string GitHubUpstreamOwner => _gitHubUpstreamOwner.Value;
         public string GitHubProject => _gitHubProject.Value;
         public string GitHubUpstreamBranch => _gitHubUpstreamBranch.Value;

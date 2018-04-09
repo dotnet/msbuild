@@ -182,7 +182,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         private ICommand GetRunCommand()
         {
-            var globalProperties = new Dictionary<string, string>
+            var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 // This property disables default item globbing to improve performance
                 // This should be safe because we are not evaluating items, only properties

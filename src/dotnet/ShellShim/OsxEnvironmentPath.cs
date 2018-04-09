@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ShellShim
         private readonly IEnvironmentProvider _environmentProvider;
         private readonly IReporter _reporter;
 
-        private static readonly string PathDDotnetCliToolsPath
+        internal static readonly string DotnetCliToolsPathsDPath
             = Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_OSX_PATHSD_PATH")
               ?? @"/etc/paths.d/dotnet-cli-tools";
 
@@ -44,28 +44,27 @@ namespace Microsoft.DotNet.ShellShim
                 return;
             }
 
-            var script = $"{_packageExecutablePath.PathWithTilde}";
-            _fileSystem.WriteAllText(PathDDotnetCliToolsPath, script);
+            _fileSystem.WriteAllText(DotnetCliToolsPathsDPath, _packageExecutablePath.PathWithTilde);
         }
 
         private bool PackageExecutablePathExists()
         {
-            var environmentVariable = _environmentProvider.GetEnvironmentVariable(PathName);
-
-            if (environmentVariable == null)
+            var value = _environmentProvider.GetEnvironmentVariable(PathName);
+            if (value == null)
             {
                 return false;
             }
 
-            return environmentVariable.Split(':').Contains(_packageExecutablePath.PathWithTilde)
-                || environmentVariable.Split(':').Contains(_packageExecutablePath.Path);
+            return value
+                .Split(':')
+                .Any(p => p == _packageExecutablePath.Path || p == _packageExecutablePath.PathWithTilde);
         }
 
         public void PrintAddPathInstructionIfPathDoesNotExist()
         {
             if (!PackageExecutablePathExists())
             {
-                if (_fileSystem.Exists(PathDDotnetCliToolsPath))
+                if (_fileSystem.Exists(DotnetCliToolsPathsDPath))
                 {
                     _reporter.WriteLine(
                         CommonLocalizableStrings.EnvironmentPathOSXNeedReopen);

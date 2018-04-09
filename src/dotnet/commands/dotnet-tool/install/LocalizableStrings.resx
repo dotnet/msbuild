@@ -161,6 +161,9 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
     <value>The settings file in the tool's NuGet package is invalid: {0}</value>
   </data>
   <data name="ToolInstallationFailed" xml:space="preserve">
+    <value>Tool '{0}' failed to install.</value>
+  </data>
+  <data name="ToolInstallationFailedWithExplicitVersionGuide" xml:space="preserve">
     <value>Tool '{0}' failed to install. You may need to specify the version using
 
    dotnet tool install -g {0} --version &lt;version&gt;</value>

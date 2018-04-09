@@ -29,6 +29,7 @@ path-to-application:
   vstest           {LocalizableStrings.VsTestDefinition}
   store            {LocalizableStrings.StoreDefinition}
   tool             {LocalizableStrings.ToolDefinition}
+  buildserver      {LocalizableStrings.BuildServerDefinition}
   help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:
