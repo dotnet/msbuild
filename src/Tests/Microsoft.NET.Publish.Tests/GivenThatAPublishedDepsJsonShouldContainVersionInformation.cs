@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -134,8 +135,45 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Host deps.json doesn't have runtime file version info yet: https://github.com/dotnet/sdk/issues/2124")]
         public void Inbox_version_of_assembly_is_loaded_over_applocal_version()
+        {
+            var (coreDir, publishDir, immutableDir) = TestConflictResult();
+            immutableDir.Should().BeEquivalentTo(coreDir, "immutable collections library from Framework should win");
+        }
+
+        [Fact]
+        public void Inbox_version_is_loaded_if_runtime_file_versions_arent_in_deps()
+        {
+            void testProjectChanges(TestProject testProject)
+            {
+                testProject.AdditionalProperties["IncludeRuntimeFileVersions"] = "false";
+            }
+
+            var (coreDir, publishDir, immutableDir) = TestConflictResult(testProjectChanges);
+            immutableDir.Should().BeEquivalentTo(publishDir, "published immutable collections library from should win");
+        }
+
+        [Fact]
+        public void Local_version_of_assembly_with_higher_version_is_loaded_over_inbox_version()
+        {
+            void publishFolderChanges(string publishFolder)
+            {
+                var depsJsonPath = Path.Combine(publishFolder, "DepsJsonVersions.deps.json");
+                var depsJson = JObject.Parse(File.ReadAllText(depsJsonPath));
+                var target = ((JProperty)depsJson["targets"].First).Value;
+                var file = target["System.Collections.Immutable/1.5.0-preview1-26216-02"]["runtime"]["lib/netstandard2.0/System.Collections.Immutable.dll"];
+                //  Set fileVersion in deps.json to 4.7.0.0, which should be bigger than in box 4.6.x version
+                file["fileVersion"] = "4.7.0.0";
+                File.WriteAllText(depsJsonPath, depsJson.ToString());
+            }
+
+            var (coreDir, publishDir, immutableDir) = TestConflictResult(publishFolderChanges: publishFolderChanges);
+            immutableDir.Should().BeEquivalentTo(publishDir, "published immutable collections library from should win");
+        }
+
+        private (string coreDir, string publishDir, string immutableDir) TestConflictResult(
+            Action<TestProject> testProjectChanges = null, Action<string> publishFolderChanges = null)
         {
             var testProject = GetTestProject();
 
@@ -151,6 +189,11 @@ static class Program
     }
 }
 ";
+            if (testProjectChanges != null)
+            {
+                testProjectChanges(testProject);
+            }
+
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -163,6 +206,10 @@ static class Program
 
             var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks, runtimeIdentifier: testProject.RuntimeIdentifier);
 
+            if (publishFolderChanges != null)
+            {
+                publishFolderChanges(publishDirectory.FullName);
+            }
 
             //  Assembly from package should be deployed, as it is newer than the in-box version for netcoreapp2.0,
             //  which is what the app targets
@@ -195,7 +242,7 @@ static class Program
             string coreDir = Path.GetDirectoryName(stdOutLines[0]);
             string immutableDir = Path.GetDirectoryName(stdOutLines[1]);
 
-            immutableDir.Should().BeEquivalentTo(coreDir, "immutable collections library from Framework should win");
+            return (coreDir, publishDirectory.FullName, immutableDir);
 
         }
 
