@@ -4,102 +4,102 @@
     <body>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>NuGet Package Id of the tool to update.</source>
-        <target state="new">NuGet Package Id of the tool to update.</target>
+        <target state="translated">ID balíčku NuGet nástroje, který se má aktualizovat</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Please specify one tool Package Id to update.</source>
-        <target state="new">Please specify one tool Package Id to update.</target>
+        <target state="translated">Zadejte prosím jedno ID balíčku nástroje, který se má aktualizovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>Version of the tool package in NuGet.</source>
-        <target state="new">Version of the tool package in NuGet.</target>
+        <target state="translated">Verze balíčku nástroje v NuGetu</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Updates a tool to the latest stable version for use.</source>
-        <target state="new">Updates a tool to the latest stable version for use.</target>
+        <target state="translated">Aktualizuje nástroj na nejnovější používanou stabilní verzi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
+        <target state="translated">Konfigurační soubor NuGet, který se použije.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to update the tool for.</source>
-        <target state="new">The target framework to update the tool for.</target>
+        <target state="translated">Cílová architektura, pro kterou se má nástroj aktualizovat</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="new">NuGet configuration file '{0}' does not exist.</target>
+        <target state="translated">Konfigurační soubor NuGet {0} neexistuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceeded">
         <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
-        <target state="new">Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</target>
+        <target state="translated">Nástroj {0} byl úspěšně aktualizován z verze {1} na verzi {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Update user wide.</source>
-        <target state="new">Update user wide.</target>
+        <target state="translated">Aktualizujte pro všechny uživatele.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFullCommandNameLocalized">
         <source>.NET update Command</source>
-        <target state="new">.NET update Command</target>
+        <target state="translated">Příkaz Aktualizovat rozhraní .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="translated">Zadejte prosím globální parametr (--global) nebo parametr cesty nástroje (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="translated">(--global) je v konfliktu s parametrem cesty nástroje (--tool-path). Zadejte prosím pouze jeden z parametrů.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="new">Location where the tool will be installed.</target>
+        <target state="translated">Umístění, do kterého se nástroj nainstaluje</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
         <source>Tool '{0}' has multiple versions installed and cannot be updated.</source>
-        <target state="new">Tool '{0}' has multiple versions installed and cannot be updated.</target>
+        <target state="translated">Nástroj {0} má několik nainstalovaných verzí a nelze ho aktualizovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
         <source>Tool '{0}' is not currently installed.</source>
-        <target state="new">Tool '{0}' is not currently installed.</target>
+        <target state="translated">Nástroj {0} není momentálně nainstalovaný.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <target state="translated">Nástroj {0} byl přeinstalován nejnovější stabilní verzí (verze {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">
         <source>Tool '{0}' failed to update due to the following:</source>
-        <target state="new">Tool '{0}' failed to update due to the following:</target>
+        <target state="translated">Aktualizace nástroje {0} se nezdařila z následujícího důvodu:</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <target state="translated">Přidá další zdroj balíčku NuGet, který se použije při aktualizaci.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
     </body>

@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tools are installed.</source>
-        <target state="new">Location where the tools are installed.</target>
+        <target state="translated">Расположение для установки средств.</target>
         <note />
       </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalAndToolPathConflict">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
         <note />
       </trans-unit>
     </body>

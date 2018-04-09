@@ -601,7 +601,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="needs-review-translation">サポートされていないプロジェクトの種類です。SDK プロバイダーに確認してください。</target>
+        <target state="translated">プロジェクト '{0}' のプロジェクト タイプは不明であるため、ソリューション ファイルに追加することができません。サポートが必要な場合は、SDK プロバイダーにお問い合わせください。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -860,7 +860,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
         <source>The command name '{0}' cannot begin with a leading dot (.).</source>
-        <target state="needs-review-translation">コマンド '{0}' の先頭にドットがあります。</target>
+        <target state="translated">コマンド名 '{0}' の先頭にドット (.) を使用することはできません。</target>
         <note />
       </trans-unit>
     </body>

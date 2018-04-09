@@ -5,7 +5,7 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="translated">Se não houver nenhuma instrução adicional, você poderá digitar o seguinte comando para invocar a ferramenta: {0}
+        <target state="translated">Você pode invocar a ferramenta usando o comando a seguir: {0}
 A ferramenta '{1}' (versão '{2}') foi instalada com êxito.</target>
         <note />
       </trans-unit>
@@ -96,27 +96,27 @@ A ferramenta '{1}' (versão '{2}') foi instalada com êxito.</target>
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">É necessário o caminho de ferramenta ou global fornecido.</target>
+        <target state="translated">Especifique a opção global (--global) ou a opção do caminho da ferramenta (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Não é possível ter o caminho de ferramenta e o global como opinião ao mesmo tempo.</target>
+        <target state="translated">(--global) está em conflito com a opção do caminho da ferramenta (--tool-path). Especifique apenas uma das opções.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="needs-review-translation">Local do shim para acessar a ferramenta</target>
+        <target state="translated">Localização em que a ferramenta será instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <target state="translated">Adiciona uma origem adicional do pacote NuGet a ser usada durante a instalação.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
     </body>

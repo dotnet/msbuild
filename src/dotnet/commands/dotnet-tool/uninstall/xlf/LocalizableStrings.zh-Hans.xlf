@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">需要提供全局或工具路径。</target>
+        <target state="translated">请指定全局选项(--global)或工具路径选项(--tool-path)。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool was previously installed.</source>
-        <target state="needs-review-translation">填充程序访问工具的位置</target>
+        <target state="translated">以前安装工具的位置。</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">无法同时主张全局和工具路径。”</target>
+        <target state="translated">(--global)与工具路径选项(--tool-path)冲突。请仅指定其中一种选项。</target>
         <note />
       </trans-unit>
     </body>
