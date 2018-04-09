@@ -55,9 +55,11 @@
         }
     ],
     "exclude": [
+        "mscorlib.dll",
+        "netstandard.dll",
+        "System.Collections.Immutable.dll",
         "System.IO.Compression.dll",
         "System.Runtime.InteropServices.RuntimeInformation.dll",
-        "System.Threading.Tasks.Dataflow.dll",
-        "System.Collections.Immutable.dll"
+        "System.Threading.Tasks.Dataflow.dll"
       ]
 }
