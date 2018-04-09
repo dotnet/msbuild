@@ -142,7 +142,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       FilesToSkip="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      IsSelfContained="$(SelfContained)">
+                      IsSelfContained="$(SelfContained)"
+                      IncludeRuntimeFileVersions="$(IncludeRuntimeFileVersions)">
     </GenerateDepsFile>
 
     <ItemGroup>

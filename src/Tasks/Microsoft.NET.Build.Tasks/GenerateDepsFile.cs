@@ -73,7 +73,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsSelfContained { get; set; }
 
-        public bool IsPublish { get; set; }
+        public bool IncludeRuntimeFileVersions { get; set; }
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
@@ -140,13 +140,7 @@ namespace Microsoft.NET.Build.Tasks
                 PlatformLibraryName,
                 IsSelfContained);
 
-            //  If publishing a framework-dependent app, then include the assembly and file versions of files in the
-            //  deps.json to support rolling forward to a newer shared framework.  See https://github.com/dotnet/core-setup/pull/3704
-            //  Reading these versions could impact build perf, so we avoid doing it if we aren't publishing or if we are
-            //  publishing a self-contained app.
-            bool includeRuntimeFileVersions = IsPublish && !IsSelfContained;
-
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions)
                 .WithMainProjectInDepsFile(IncludeMainProject)
                 .WithReferenceAssemblies(referenceAssemblyInfos)
                 .WithDirectReferences(directReferences)
