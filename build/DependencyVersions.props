@@ -68,7 +68,7 @@
     <AspNetCoreBranchName>2.0.7</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
     <AspNetCoreVersion>2.0.7</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>230</AspNetCoreRuntimePackageTimestamp>
+    <AspNetCoreRuntimePackageTimestamp>231</AspNetCoreRuntimePackageTimestamp>
     <CurrentAspNetCoreRuntimeVersion Condition="'$(AspNetCoreRuntimePackageFlavor)'=='notimestamp'">$(AspNetCoreVersion)</CurrentAspNetCoreRuntimeVersion>
     <CurrentAspNetCoreRuntimeVersion Condition="'$(AspNetCoreRuntimePackageFlavor)'!='notimestamp'">$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</CurrentAspNetCoreRuntimeVersion>
 
