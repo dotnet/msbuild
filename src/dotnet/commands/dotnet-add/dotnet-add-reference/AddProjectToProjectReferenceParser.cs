@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
                 "reference",
                 LocalizableStrings.AppFullName,
                 Accept.OneOrMoreArguments()
-                      .With(name: "args",
+                      .With(name: "PROJECT_PATH",
                             description: LocalizableStrings.AppHelpText),
                 CommonOptions.HelpOption(),
                 Create.Option("-f|--framework", LocalizableStrings.CmdFrameworkDescription,

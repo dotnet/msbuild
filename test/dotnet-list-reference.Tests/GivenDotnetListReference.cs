@@ -32,7 +32,7 @@ Options:
   -h, --help   Show help information.
 
 Commands:
-  reference   .NET Core Project-to-Project dependency viewer
+  reference   List all project-to-project references of the project.
 ";
 
         const string FrameworkNet451Arg = "-f net451";

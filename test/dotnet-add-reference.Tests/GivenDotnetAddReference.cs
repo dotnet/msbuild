@@ -15,11 +15,11 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
 {
     public class GivenDotnetAddReference : TestBase
     {
-        private const string HelpText = @"Usage: dotnet add <PROJECT> reference [options] <args>
+        private const string HelpText = @"Usage: dotnet add <PROJECT> reference [options] <PROJECT_PATH>
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <args>      Project to project references to add
+  <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT_PATH>   Project to project references to add
 
 Options:
   -h, --help                    Show help information.
@@ -35,8 +35,8 @@ Options:
   -h, --help   Show help information.
 
 Commands:
-  package <PACKAGE_NAME>   .NET Add Package reference Command
-  reference <args>         .NET Add Project to Project reference Command
+  package <PACKAGE_NAME>     Add a NuGet package reference to the project.
+  reference <PROJECT_PATH>   Add a project-to-project reference to the project.
 ";
 
         const string FrameworkNet451Arg = "-f net451";
