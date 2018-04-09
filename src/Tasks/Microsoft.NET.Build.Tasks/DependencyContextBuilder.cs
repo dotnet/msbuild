@@ -391,7 +391,7 @@ namespace Microsoft.NET.Build.Tasks
                     if (runtime)
                     {
                         // DependencyReferences do not get passed to the compilation, so we should only
-                        // process them will getting the runtime libraries.
+                        // process them when getting the runtime libraries.
 
                         foreach (var dependencyReference in referenceProjectInfo.DependencyReferences)
                         {
