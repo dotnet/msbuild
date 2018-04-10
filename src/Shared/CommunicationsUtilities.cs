@@ -18,6 +18,9 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
@@ -122,7 +125,21 @@ namespace Microsoft.Build.Internal
                     // them, so just check COMPLUS_InstallRoot.
                     string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
 
-                    s_fileVersionHash = GetHandshakeHashCode(complusInstallRoot ?? ThisAssembly.AssemblyInformationalVersion);
+#if THISASSEMBLY
+                    var fileIdentity = ThisAssembly.AssemblyInformationalVersion;
+#else
+                    var fileIdentity = string.Empty;
+
+                    using (var sha1 = SHA1.Create())
+                    {
+                        var hashBytes = sha1.ComputeHash(File.ReadAllBytes(AssemblyUtilities.GetAssemblyLocation(typeof(CommunicationsUtilities).Assembly)));
+                        fileIdentity = Encoding.UTF8.GetString(hashBytes);
+                    }
+
+                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(fileIdentity), "file hashing failed");
+#endif
+
+                    s_fileVersionHash = GetHandshakeHashCode(complusInstallRoot ?? fileIdentity);
                     s_fileVersionChecked = true;
                 }
 
