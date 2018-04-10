@@ -48,7 +48,7 @@
     <MicrosoftNetCompilersVersion>2.4.0</MicrosoftNetCompilersVersion>
     <MicrosoftNetCoreCompilersVersion>2.6.0-beta3-62309-01</MicrosoftNetCoreCompilersVersion>
     <MicrosoftCodeAnalysisBuildTasksVersion>3.0.0-beta1-61516-01</MicrosoftCodeAnalysisBuildTasksVersion>
-    <NuGetPackageVersion>4.7.0-preview3.5039</NuGetPackageVersion>
+    <NuGetPackageVersion>4.7.0-rtm.5081</NuGetPackageVersion>
     <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
     <!--<NuGetVersion>4.6.0-rtm-4822</NuGetVersion>-->
     <ShouldlyVersion>3.0.0</ShouldlyVersion>
