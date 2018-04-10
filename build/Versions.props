@@ -30,7 +30,9 @@
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.300-preview2-008293</DotNetCliVersion>
+    <DotNetCliVersion>2.1.300-preview2-008530</DotNetCliVersion>
+    <!-- We are pretty much always on a preview SDK. No need to warn about it. -->
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <RoslynToolsRepoToolsetVersion>1.0.0-beta-62705-01</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
