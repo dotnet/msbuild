@@ -8,8 +8,8 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionBase>2.1.200</VersionBase>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <VersionBase>2.1.300</VersionBase>
+    <PreReleaseVersionLabel>preview2</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <!-- Repo Toolset Features -->
@@ -19,7 +19,7 @@
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.200-preview-007515</DotNetCliVersion>
+    <DotNetCliVersion>2.1.300-preview3-008414</DotNetCliVersion>
     <RoslynToolsRepoToolsetVersion>1.0.0-beta-62615-02</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
@@ -45,7 +45,6 @@
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
     <MicrosoftDotNetCliUtilsVersion>2.0.0</MicrosoftDotNetCliUtilsVersion>
     <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
-    <XUnitConsoleVersion>2.3.0</XUnitConsoleVersion>
   </PropertyGroup>
 
 </Project>

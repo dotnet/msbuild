@@ -13,6 +13,8 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using System.Xml.Linq;
 using Xunit.Abstractions;
+using System.Collections.Generic;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -22,106 +24,128 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [Fact]
-        public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file()
+        [Theory]
+        [InlineData("net46", "netstandard1.3")]
+        [InlineData("netcoreapp1.1", "netstandard1.3")]
+        [InlineData("netcoreapp2.0", "netstandard2.0")]
+        public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file(string appTargetFramework, string libraryTargetFramework)
         {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("CompilationContext", "PreserveCompilationContext")
-                .WithSource();
+            if (appTargetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testLibraryProject = new TestProject()
+            {
+                Name = "TestLibrary",
+                IsSdkProject = true,
+                TargetFrameworks = libraryTargetFramework
+            };
+
+            var testProject = new TestProject()
+            {
+                Name = "TestApp",
+                IsSdkProject = true,
+                IsExe = true,
+                TargetFrameworks = appTargetFramework,
+                RuntimeIdentifier = "win7-x86"
+            };
+
+            testProject.AdditionalProperties["PreserveCompilationContext"] = "true";
+            testProject.ReferencedProjects.Add(testLibraryProject);
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "9.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("System.Data.SqlClient", "4.4.3"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework);
 
             testAsset.Restore(Log, "TestApp");
-            testAsset.Restore(Log, "TestLibrary");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+            var publishCommand = new PublishCommand(Log, appProjectDirectory);
 
-            foreach (var targetFramework in new[] { "net46", "netcoreapp1.1" })
+            publishCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(appTargetFramework, runtimeIdentifier: "win7-x86");
+
+            publishDirectory.Should().HaveFiles(new[] {
+                appTargetFramework == "net46" ? "TestApp.exe" : "TestApp.dll",
+                "TestLibrary.dll",
+                "Newtonsoft.Json.dll"});
+
+            var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
+            // Should have compilation time assemblies
+            refsDirectory.Should().HaveFile("System.IO.dll");
+            // Libraries in which lib==ref should be deduped
+            refsDirectory.Should().NotHaveFile("TestLibrary.dll");
+            refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+
+            using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
             {
-                var publishCommand = new PublishCommand(Log, appProjectDirectory);
+                var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
 
-                if (targetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                string[] expectedDefines;
+                if (appTargetFramework == "net46")
                 {
-                    continue;
+                    expectedDefines = new[] { "DEBUG", "TRACE", "NETFRAMEWORK", "NET46" };
+                }
+                else if (appTargetFramework == "netcoreapp1.1")
+                {
+                    expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP", "NETCOREAPP1_1" };
+                }
+                else
+                {
+                    expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP", "NETCOREAPP2_0" };
                 }
 
-                publishCommand
-                    .Execute($"/p:TargetFramework={targetFramework}")
-                    .Should()
-                    .Pass();
+                dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
+                dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
+                dependencyContext.CompilationOptions.Platform.Should().Be("x86");
+                dependencyContext.CompilationOptions.Optimize.Should().Be(false);
+                dependencyContext.CompilationOptions.KeyFile.Should().Be("");
+                dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
+                dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: "win7-x86");
+                var compileLibraryAssemblyNames = dependencyContext.CompileLibraries.SelectMany(cl => cl.Assemblies)
+                    .Select(a => a.Split('/').Last())
+                    .Distinct().ToList();
+                var expectedCompileLibraryNames = CompileLibraryNames[appTargetFramework].Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-                publishDirectory.Should().HaveFiles(new[] {
-                    targetFramework == "net46" ? "TestApp.exe" : "TestApp.dll",
-                    "TestLibrary.dll",
-                    "Newtonsoft.Json.dll"});
+                var extraCompileLibraryNames = compileLibraryAssemblyNames.Except(expectedCompileLibraryNames).ToList();
+                var missingCompileLibraryNames = expectedCompileLibraryNames.Except(compileLibraryAssemblyNames).ToList();
 
-                var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
-                // Should have compilation time assemblies
-                refsDirectory.Should().HaveFile("System.IO.dll");
-                // Libraries in which lib==ref should be deduped
-                refsDirectory.Should().NotHaveFile("TestLibrary.dll");
-                refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+                compileLibraryAssemblyNames.Should().BeEquivalentTo(expectedCompileLibraryNames);
 
-                using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
+                // Ensure P2P references are specified correctly
+                var testLibrary = dependencyContext
+                    .CompileLibraries
+                    .FirstOrDefault(l => string.Equals(l.Name, "testlibrary", StringComparison.OrdinalIgnoreCase));
+
+                testLibrary.Assemblies.Count.Should().Be(1);
+                testLibrary.Assemblies[0].Should().Be("TestLibrary.dll");
+
+                // Ensure framework references are specified correctly
+                if (appTargetFramework == "net46")
                 {
-                    var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
-
-                    string[] expectedDefines;
-                    if (targetFramework == "net46")
-                    {
-                        expectedDefines = new[] { "DEBUG", "TRACE", "NET46" };
-                    }
-                    else
-                    {
-                        expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP1_1" };
-                    }
-
-                    dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
-                    dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
-                    dependencyContext.CompilationOptions.Platform.Should().Be("x86");
-                    dependencyContext.CompilationOptions.Optimize.Should().Be(false);
-                    dependencyContext.CompilationOptions.KeyFile.Should().Be("");
-                    dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
-                    dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
-
-                    var compileLibraryAssemblyNames = dependencyContext.CompileLibraries.SelectMany(cl => cl.Assemblies)
-                        .Select(a => a.Split('/').Last())
-                        .Distinct().ToList();
-                    var expectedCompileLibraryNames = targetFramework == "net46" ? Net46CompileLibraryNames.Distinct() : NetCoreAppCompileLibraryNames.Distinct();
-
-                    var extraCompileLibraryNames = compileLibraryAssemblyNames.Except(expectedCompileLibraryNames).ToList();
-
-                    compileLibraryAssemblyNames.Should().BeEquivalentTo(expectedCompileLibraryNames);
-
-                    // Ensure P2P references are specified correctly
-                    var testLibrary = dependencyContext
+                    var mscorlibLibrary = dependencyContext
                         .CompileLibraries
-                        .FirstOrDefault(l => string.Equals(l.Name, "testlibrary", StringComparison.OrdinalIgnoreCase));
+                        .FirstOrDefault(l => string.Equals(l.Name, "mscorlib", StringComparison.OrdinalIgnoreCase));
+                    mscorlibLibrary.Assemblies.Count.Should().Be(1);
+                    mscorlibLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/mscorlib.dll");
 
-                    testLibrary.Assemblies.Count.Should().Be(1);
-                    testLibrary.Assemblies[0].Should().Be("TestLibrary.dll");
+                    var systemCoreLibrary = dependencyContext
+                        .CompileLibraries
+                        .FirstOrDefault(l => string.Equals(l.Name, "system.core", StringComparison.OrdinalIgnoreCase));
+                    systemCoreLibrary.Assemblies.Count.Should().Be(1);
+                    systemCoreLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/System.Core.dll");
 
-                    // Ensure framework references are specified correctly
-                    if (targetFramework == "net46")
-                    {
-                        var mscorlibLibrary = dependencyContext
-                            .CompileLibraries
-                            .FirstOrDefault(l => string.Equals(l.Name, "mscorlib", StringComparison.OrdinalIgnoreCase));
-                        mscorlibLibrary.Assemblies.Count.Should().Be(1);
-                        mscorlibLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/mscorlib.dll");
-
-                        var systemCoreLibrary = dependencyContext
-                            .CompileLibraries
-                            .FirstOrDefault(l => string.Equals(l.Name, "system.core", StringComparison.OrdinalIgnoreCase));
-                        systemCoreLibrary.Assemblies.Count.Should().Be(1);
-                        systemCoreLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/System.Core.dll");
-
-                        var systemCollectionsLibrary = dependencyContext
-                            .CompileLibraries
-                            .FirstOrDefault(l => string.Equals(l.Name, "system.collections.reference", StringComparison.OrdinalIgnoreCase));
-                        systemCollectionsLibrary.Assemblies.Count.Should().Be(1);
-                        systemCollectionsLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/Facades/System.Collections.dll");
-                    }
+                    var systemCollectionsLibrary = dependencyContext
+                        .CompileLibraries
+                        .FirstOrDefault(l => string.Equals(l.Name, "system.collections.reference", StringComparison.OrdinalIgnoreCase));
+                    systemCollectionsLibrary.Assemblies.Count.Should().Be(1);
+                    systemCollectionsLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/Facades/System.Collections.dll");
                 }
             }
         }
@@ -186,7 +210,10 @@ namespace Microsoft.NET.Publish.Tests
             refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
         }
 
-        string[] Net46CompileLibraryNames = @"TestApp.exe
+        Dictionary<string, string> CompileLibraryNames = new Dictionary<string, string>()
+        {
+            { "net46",
+@"TestApp.exe
 mscorlib.dll
 System.ComponentModel.Composition.dll
 System.Core.dll
@@ -269,9 +296,11 @@ System.Security.Cryptography.Encoding.dll
 System.Security.Cryptography.Primitives.dll
 System.Security.Cryptography.X509Certificates.dll
 System.Xml.ReaderWriter.dll
-TestLibrary.dll".Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-        string[] NetCoreAppCompileLibraryNames = @"TestApp.dll
+TestLibrary.dll"
+            },
+            {
+                "netcoreapp1.1",
+@"TestApp.dll
 Microsoft.CSharp.dll
 Microsoft.VisualBasic.dll
 Microsoft.Win32.Primitives.dll
@@ -334,6 +363,7 @@ System.Runtime.Serialization.Primitives.dll
 System.Security.Claims.dll
 System.Security.Cryptography.Algorithms.dll
 System.Security.Cryptography.Encoding.dll
+System.Security.Cryptography.OpenSsl.dll
 System.Security.Cryptography.Primitives.dll
 System.Security.Cryptography.X509Certificates.dll
 System.Security.Principal.dll
@@ -352,6 +382,157 @@ System.Threading.ThreadPool.dll
 System.Threading.Timer.dll
 System.Xml.ReaderWriter.dll
 System.Xml.XDocument.dll
-TestLibrary.dll".Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+TestLibrary.dll"
+            },
+            {
+                "netcoreapp2.0",
+@"TestApp.dll
+Microsoft.CSharp.dll
+Microsoft.VisualBasic.dll
+Microsoft.Win32.Primitives.dll
+mscorlib.dll
+netstandard.dll
+Newtonsoft.Json.dll
+System.AppContext.dll
+System.Buffers.dll
+System.Collections.Concurrent.dll
+System.Collections.dll
+System.Collections.Immutable.dll
+System.Collections.NonGeneric.dll
+System.Collections.Specialized.dll
+System.ComponentModel.Annotations.dll
+System.ComponentModel.Composition.dll
+System.ComponentModel.DataAnnotations.dll
+System.ComponentModel.dll
+System.ComponentModel.EventBasedAsync.dll
+System.ComponentModel.Primitives.dll
+System.ComponentModel.TypeConverter.dll
+System.Configuration.dll
+System.Console.dll
+System.Core.dll
+System.Data.Common.dll
+System.Data.dll
+System.Data.SqlClient.dll
+System.Diagnostics.Contracts.dll
+System.Diagnostics.Debug.dll
+System.Diagnostics.DiagnosticSource.dll
+System.Diagnostics.FileVersionInfo.dll
+System.Diagnostics.Process.dll
+System.Diagnostics.StackTrace.dll
+System.Diagnostics.TextWriterTraceListener.dll
+System.Diagnostics.Tools.dll
+System.Diagnostics.TraceSource.dll
+System.Diagnostics.Tracing.dll
+System.dll
+System.Drawing.dll
+System.Drawing.Primitives.dll
+System.Dynamic.Runtime.dll
+System.Globalization.Calendars.dll
+System.Globalization.dll
+System.Globalization.Extensions.dll
+System.IO.Compression.dll
+System.IO.Compression.FileSystem.dll
+System.IO.Compression.ZipFile.dll
+System.IO.dll
+System.IO.FileSystem.dll
+System.IO.FileSystem.DriveInfo.dll
+System.IO.FileSystem.Primitives.dll
+System.IO.FileSystem.Watcher.dll
+System.IO.IsolatedStorage.dll
+System.IO.MemoryMappedFiles.dll
+System.IO.Pipes.dll
+System.IO.UnmanagedMemoryStream.dll
+System.Linq.dll
+System.Linq.Expressions.dll
+System.Linq.Parallel.dll
+System.Linq.Queryable.dll
+System.Net.dll
+System.Net.Http.dll
+System.Net.HttpListener.dll
+System.Net.Mail.dll
+System.Net.NameResolution.dll
+System.Net.NetworkInformation.dll
+System.Net.Ping.dll
+System.Net.Primitives.dll
+System.Net.Requests.dll
+System.Net.Security.dll
+System.Net.ServicePoint.dll
+System.Net.Sockets.dll
+System.Net.WebClient.dll
+System.Net.WebHeaderCollection.dll
+System.Net.WebProxy.dll
+System.Net.WebSockets.Client.dll
+System.Net.WebSockets.dll
+System.Numerics.dll
+System.Numerics.Vectors.dll
+System.ObjectModel.dll
+System.Reflection.DispatchProxy.dll
+System.Reflection.dll
+System.Reflection.Emit.dll
+System.Reflection.Emit.ILGeneration.dll
+System.Reflection.Emit.Lightweight.dll
+System.Reflection.Extensions.dll
+System.Reflection.Metadata.dll
+System.Reflection.Primitives.dll
+System.Reflection.TypeExtensions.dll
+System.Resources.Reader.dll
+System.Resources.ResourceManager.dll
+System.Resources.Writer.dll
+System.Runtime.CompilerServices.VisualC.dll
+System.Runtime.dll
+System.Runtime.Extensions.dll
+System.Runtime.Handles.dll
+System.Runtime.InteropServices.dll
+System.Runtime.InteropServices.RuntimeInformation.dll
+System.Runtime.InteropServices.WindowsRuntime.dll
+System.Runtime.Loader.dll
+System.Runtime.Numerics.dll
+System.Runtime.Serialization.dll
+System.Runtime.Serialization.Formatters.dll
+System.Runtime.Serialization.Json.dll
+System.Runtime.Serialization.Primitives.dll
+System.Runtime.Serialization.Xml.dll
+System.Security.Claims.dll
+System.Security.Cryptography.Algorithms.dll
+System.Security.Cryptography.Csp.dll
+System.Security.Cryptography.Encoding.dll
+System.Security.Cryptography.Primitives.dll
+System.Security.Cryptography.X509Certificates.dll
+System.Security.dll
+System.Security.Principal.dll
+System.Security.SecureString.dll
+System.ServiceModel.Web.dll
+System.ServiceProcess.dll
+System.Text.Encoding.dll
+System.Text.Encoding.Extensions.dll
+System.Text.RegularExpressions.dll
+System.Threading.dll
+System.Threading.Overlapped.dll
+System.Threading.Tasks.Dataflow.dll
+System.Threading.Tasks.dll
+System.Threading.Tasks.Extensions.dll
+System.Threading.Tasks.Parallel.dll
+System.Threading.Thread.dll
+System.Threading.ThreadPool.dll
+System.Threading.Timer.dll
+System.Transactions.dll
+System.Transactions.Local.dll
+System.ValueTuple.dll
+System.Web.dll
+System.Web.HttpUtility.dll
+System.Windows.dll
+System.Xml.dll
+System.Xml.Linq.dll
+System.Xml.ReaderWriter.dll
+System.Xml.Serialization.dll
+System.Xml.XDocument.dll
+System.Xml.XmlDocument.dll
+System.Xml.XmlSerializer.dll
+System.Xml.XPath.dll
+System.Xml.XPath.XDocument.dll
+WindowsBase.dll
+TestLibrary.dll"
+            }
+        };
     }
 }

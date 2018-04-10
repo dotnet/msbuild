@@ -25,11 +25,15 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         //  TargetFrameworkVersion applies to non-SDK projects
         public string TargetFrameworkVersion { get; set; }
 
+        public string TargetFrameworkProfile { get; set; }
+
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
         public List<string> References { get; } = new List<string>();
 
         public List<TestPackageReference> PackageReferences { get; } = new List<TestPackageReference>();
+
+        public List<TestPackageReference> DotNetCliToolReferences { get; } = new List<TestPackageReference>();
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
@@ -127,11 +131,19 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 packageReferenceItemGroup = new XElement(ns + "ItemGroup");
                 projectXml.Root.Add(packageReferenceItemGroup);
             }
+
             foreach (TestPackageReference packageReference in PackageReferences)
             {
-                    packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", $"{packageReference.ID}"),
-                        new XAttribute("Version", $"{packageReference.Version}")));
+                packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
+                    new XAttribute("Include", $"{packageReference.ID}"),
+                    new XAttribute("Version", $"{packageReference.Version}")));
+            }
+
+            foreach (TestPackageReference dotnetCliToolReference in DotNetCliToolReferences)
+            {
+                packageReferenceItemGroup.Add(new XElement(ns + "DotNetCliToolReference",
+                    new XAttribute("Include", $"{dotnetCliToolReference.ID}"),
+                    new XAttribute("Version", $"{dotnetCliToolReference.Version}")));
             }
 
             var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };
@@ -159,12 +171,21 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
                 //  Update SDK reference to the version under test
                 targetTestAsset.SetSdkVersion(projectXml);
-                
+
             }
             else
             {
-                var targetFrameworkVersionElement = propertyGroup.Element(ns + "TargetFrameworkVersion");
-                targetFrameworkVersionElement.SetValue(this.TargetFrameworkVersion);
+                if (!string.IsNullOrEmpty(this.TargetFrameworkProfile))
+                {
+                    propertyGroup.Add(new XElement(ns + "TargetFrameworkProfile", this.TargetFrameworkProfile));
+
+                    //  To construct an accurate PCL project file, we must modify the import of the CSharp targets;
+                    //    building/testing the SDK requires a VSDev command prompt which sets 'VSINSTALLDIR'
+                    var importGroup = projectXml.Root.Elements(ns + "Import").Last();
+                    importGroup.Attribute("Project").Value = "$(VSINSTALLDIR)\\MSBuild\\Microsoft\\Portable\\$(TargetFrameworkVersion)\\Microsoft.Portable.CSharp.targets";
+                }
+
+                propertyGroup.Element(ns + "TargetFrameworkVersion").SetValue(this.TargetFrameworkVersion);
             }
 
             foreach (var additionalProperty in AdditionalProperties)
@@ -301,7 +322,11 @@ namespace {this.Name}
             {
                 ret.Append(TargetFrameworks);
             }
-            if (!string.IsNullOrEmpty(TargetFrameworkVersion))
+            if (!string.IsNullOrEmpty(TargetFrameworkProfile))
+            {
+                ret.Append(TargetFrameworkProfile);
+            }
+            else if (!string.IsNullOrEmpty(TargetFrameworkVersion))
             {
                 ret.Append(TargetFrameworkVersion);
             }

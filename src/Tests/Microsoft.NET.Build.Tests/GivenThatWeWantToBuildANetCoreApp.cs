@@ -1,4 +1,7 @@
-﻿using FluentAssertions;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
@@ -18,6 +21,8 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.NET.Build.Tasks;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -48,19 +53,55 @@ namespace Microsoft.NET.Build.Tests
         //  Test behavior when implicit version differs for framework-dependent and self-contained apps
         [Theory]
         [InlineData("netcoreapp1.0", false, true, "1.0.5")]
-        [InlineData("netcoreapp1.0", true, true, TestContext.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)]
+        [InlineData("netcoreapp1.0", true, true, "1.0.10")]
         [InlineData("netcoreapp1.0", false, false, "1.0.5")]
         [InlineData("netcoreapp1.1", false, true, "1.1.2")]
-        [InlineData("netcoreapp1.1", true, true, TestContext.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)]
+        [InlineData("netcoreapp1.1", true, true, "1.1.7")]
         [InlineData("netcoreapp1.1", false, false, "1.1.2")]
         [InlineData("netcoreapp2.0", false, true, "2.0.0")]
-        [InlineData("netcoreapp2.0", true, true, TestContext.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)]
+        [InlineData("netcoreapp2.0", true, true, TestContext.LatestRuntimePatchForNetCoreApp2_0)]
         [InlineData("netcoreapp2.0", false, false, "2.0.0")]
         public void It_targets_the_right_framework_depending_on_output_type(string targetFramework, bool selfContained, bool isExe, string expectedFrameworkVersion)
         {
             string testIdentifier = "Framework_targeting_" + targetFramework + "_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
 
             It_targets_the_right_framework(testIdentifier, targetFramework, null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion);
+        }
+
+        [Fact]
+        public void The_RuntimeFrameworkVersion_can_float()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "RuntimeFrameworkVersionFloat",
+                TargetFrameworks = "netcoreapp2.0",
+                RuntimeFrameworkVersion = "2.0.*",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);
+
+            var target = lockFile.GetTarget(NuGetFramework.Parse(testProject.TargetFrameworks), null);
+            var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
+
+            //  Test that the resolved version is greater than or equal to the latest runtime patch
+            //  we know about, so that when a new runtime patch is released the test doesn't
+            //  immediately start failing
+            var minimumExpectedVersion = new NuGetVersion(TestContext.LatestRuntimePatchForNetCoreApp2_0);
+            netCoreAppLibrary.Version.CompareTo(minimumExpectedVersion).Should().BeGreaterOrEqualTo(0,
+                "the version resolved from a RuntimeFrameworkVersion of '{0}' should be at least {1}",
+                testProject.RuntimeFrameworkVersion, TestContext.LatestRuntimePatchForNetCoreApp2_0);
         }
 
         private void It_targets_the_right_framework(
@@ -124,7 +165,7 @@ namespace Microsoft.NET.Build.Tests
 
                 var additionalProbingPaths = ((JArray)devruntimeConfig["runtimeOptions"]["additionalProbingPaths"]).Values<string>();
                 // can't use Path.Combine on segments with an illegal `|` character
-                var expectedPath = $"{Path.Combine(GetUserProfile(), ".dotnet", "store")}{Path.DirectorySeparatorChar}|arch|{Path.DirectorySeparatorChar}|tfm|";
+                var expectedPath = $"{Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "store")}{Path.DirectorySeparatorChar}|arch|{Path.DirectorySeparatorChar}|tfm|";
                 additionalProbingPaths.Should().Contain(expectedPath);
             }
 
@@ -133,6 +174,52 @@ namespace Microsoft.NET.Build.Tests
             var target = lockFile.GetTarget(NuGetFramework.Parse(targetFramework), null);
             var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
             netCoreAppLibrary.Version.ToString().Should().Be(expectedPackageVersion);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_handles_mismatched_implicit_package_versions(bool allowMismatch)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MismatchFrameworkTest",
+                TargetFrameworks = "netcoreapp2.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            if (allowMismatch)
+            {
+                testProject.AdditionalProperties["VerifyMatchingImplicitPackageVersion"] = "false";
+            }
+
+            string runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+
+            testProject.AdditionalProperties["RuntimeIdentifiers"] = runtimeIdentifier;            
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var result = buildCommand.Execute($"/p:RuntimeIdentifier={runtimeIdentifier}");
+
+            if (allowMismatch)
+            {
+                result.Should().Pass();
+            }
+            else
+            {
+
+                result.Should().Fail();
+
+                //  Get everything after the {2} in the failure message so this test doesn't need to
+                //  depend on the exact version the app would be rolled forward to
+                string expectedFailureMessage = Strings.MismatchedPlatformPackageVersion
+                    .Substring(Strings.MismatchedPlatformPackageVersion.IndexOf("{2}") + 3);
+
+                result.Should().HaveStdOutContaining(expectedFailureMessage);
+            }
         }
 
         [Fact]
@@ -144,7 +231,10 @@ namespace Microsoft.NET.Build.Tests
                 .Restore(Log);
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
-                "netcoreapp1.1", "TargetDefinitions", GetValuesCommand.ValueType.Item);
+                "netcoreapp1.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "RunResolvePackageDependencies",
+            };
 
             getValuesCommand
                 .Execute()
@@ -423,21 +513,6 @@ public static class Program
                 .Select(Path.GetFileName)
                 .Should()
                 .BeEquivalentTo("netcoreapp1.1");
-        }
-
-        private static string GetUserProfile()
-        {
-            string userDir;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                userDir = "USERPROFILE";
-            }
-            else
-            {
-                userDir = "HOME";
-            }
-
-            return Environment.GetEnvironmentVariable(userDir);
         }
     }
 }

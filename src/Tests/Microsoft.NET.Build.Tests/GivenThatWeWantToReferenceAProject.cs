@@ -1,4 +1,7 @@
-﻿using Microsoft.NET.TestFramework;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
@@ -118,6 +121,10 @@ namespace Microsoft.NET.Build.Tests
             if (buildSucceeds)
             {
                 result.Should().Pass();
+            }
+            else if (referencerIsSdkProject)
+            {
+                result.Should().Fail().And.HaveStdOutContaining("NU1201");
             }
             else
             {

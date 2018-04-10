@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -259,7 +259,7 @@
     <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
   </data>
   <data name="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" xml:space="preserve">
-    <value>The RuntimeIdentifier platform and the PlatformTarget must match.</value>
+    <value>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</value>
   </data>
   <data name="ChoosingAssemblyVersion" xml:space="preserve">
     <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
@@ -310,7 +310,7 @@
     <value>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</value>
   </data>
   <data name="GetDependsOnNETStandardFailedWithException" xml:space="preserve">
-    <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</value>
+    <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</value>
   </data>
   <data name="UnsupportedSDKVersionForNetStandard20" xml:space="preserve">
     <value>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</value>
@@ -320,5 +320,26 @@
   </data>
   <data name="FrameworkListPathNotRooted" xml:space="preserve">
     <value>Framework list file path '{0}' is not rooted. Only full paths are supported.</value>
+  </data>
+  <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
+    <value>Pack as tool does not support self contained.</value>
+  </data>
+  <data name="UnsupportedRuntimeIdentifier" xml:space="preserve">
+    <value>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</value>
+  </data>
+  <data name="UsingPreviewSdkWarning" xml:space="preserve">
+    <value>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</value>
+  </data>
+  <data name="ProjectContainsObsoleteDotNetCliTool" xml:space="preserve">
+    <value>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</value>
+  </data>
+  <data name="ErrorReadingAssetsFile" xml:space="preserve">
+    <value>Error reading assets file: {0}</value>
+  </data>
+  <data name="MismatchedPlatformPackageVersion" xml:space="preserve">
+    <value>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</value>
+    <comment>{0} - Package Identifier for platform package
+{1} - Restored version of platform package
+{2} - Current version of platform package</comment>
   </data>
 </root>

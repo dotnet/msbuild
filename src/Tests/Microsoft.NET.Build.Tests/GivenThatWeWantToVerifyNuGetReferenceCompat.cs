@@ -1,4 +1,7 @@
-﻿using Microsoft.NET.TestFramework;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
@@ -22,33 +25,12 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        // https://github.com/dotnet/sdk/issues/1327
-        [CoreMSBuildOnlyTheory]
-        [InlineData("netstandard2.0", "OptIn", "net45 net451 net46 net461", true, true)]
-        [InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
-        public void Nuget_reference_compat_core_only(
-            string referencerTarget,
-            string testDescription,
-            string rawDependencyTargets,
-            bool restoreSucceeds,
-            bool buildSucceeds)
-        {
-            Nuget_reference_compat(
-                referencerTarget,
-                testDescription,
-                rawDependencyTargets,
-                restoreSucceeds,
-                buildSucceeds);
-        }
-
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
         [InlineData("net451", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true, true)]
         [InlineData("net46", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 net45 net451 net46", true, true)]
-        [InlineData("net461", "PartM3", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 net45 net451 net46 net461", true, true)]
-        [InlineData("net462", "PartM2", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 net45 net451 net46 net461", true, true)]
         [InlineData("net461", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
-        [InlineData("net462", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
+        [InlineData("net462", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461 net462", true, true)]
         [InlineData("netstandard1.0", "Full", "netstandard1.0", true, true)]
         [InlineData("netstandard1.1", "Full", "netstandard1.0 netstandard1.1", true, true)]
         [InlineData("netstandard1.2", "Full", "netstandard1.0 netstandard1.1 netstandard1.2", true, true)]
@@ -59,8 +41,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netstandard2.0", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0", true, true)]
         [InlineData("netcoreapp1.0", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0", true, true)]
         [InlineData("netcoreapp1.1", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1", true, true)]
-        [InlineData("netcoreapp2.0", "PartM1", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
         [InlineData("netcoreapp2.0", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
+
+        [InlineData("netstandard2.0", "OptIn", "net45 net451 net46 net461", true, true)]
+        [InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
+
         public void Nuget_reference_compat(string referencerTarget, string testDescription, string rawDependencyTargets,
                 bool restoreSucceeds, bool buildSucceeds)
         {
@@ -119,12 +104,16 @@ namespace Microsoft.NET.Build.Tests
             var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.TestDirectoriesNamePrefix, referencerDirectoryNamePostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(Log, relativePath: referencerProject.Name);
 
+            List<string> referencerRestoreSources = new List<string>();
+
             //  Modify the restore command to refer to the created NuGet packages
             foreach (TestPackageReference packageReference in referencerProject.PackageReferences)
             {
                 var source = Path.Combine(packageReference.NupkgPath, packageReference.ID, "bin", "Debug");
-                referencerRestoreCommand.AddSource(source);
+                referencerRestoreSources.Add(source);
             }
+
+            NuGetConfigWriter.Write(referencerTestAsset.TestRoot, referencerRestoreSources);
 
             if (restoreSucceeds)
             {
@@ -148,8 +137,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        // https://github.com/dotnet/sdk/issues/1327
-        [CoreMSBuildAndWindowsOnlyTheory]
+        [WindowsOnlyTheory]
         [InlineData("netstandard2.0")]
         [InlineData("netcoreapp2.0")]
         public void Net461_is_implicit_for_Netstandard_and_Netcore_20(string targetFramework)
@@ -161,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
 
             var source = Path.Combine(_net461PackageReference.NupkgPath, _net461PackageReference.ID, "bin", "Debug");
-            restoreCommand.AddSource(source);
+            NuGetConfigWriter.Write(testProjectTestAsset.TestRoot, source);
 
             restoreCommand.Execute().Should().Pass();
 
@@ -181,7 +169,7 @@ namespace Microsoft.NET.Build.Tests
             var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
-            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            NuGetConfigWriter.Write(testProjectTestAsset.TestRoot, Path.GetDirectoryName(_net461PackageReference.NupkgPath));
             restoreCommand.Execute().Should().Fail();
         }
 
@@ -196,7 +184,7 @@ namespace Microsoft.NET.Build.Tests
                 new Dictionary<string, string> { {"DisableImplicitAssetTargetFallback", "true" } });
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
-            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            NuGetConfigWriter.Write(testProjectTestAsset.TestRoot, Path.GetDirectoryName(_net461PackageReference.NupkgPath));
             restoreCommand.Execute().Should().Fail();
         }
 

@@ -11,6 +11,8 @@ using Xunit;
 using FluentAssertions;
 using System.Runtime.InteropServices;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.ProjectConstruction;
+using System.Xml.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -89,6 +91,174 @@ namespace Microsoft.NET.Build.Tests
             actualInfo.Should().Equal(expectedInfo);
         }
 
+        [Fact]
+        public void It_does_not_include_source_revision_id_if_initialize_source_control_target_not_available()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "ProjectWithSourceRevisionId",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.0",
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            testAsset.Restore(Log, testProject.Name);
+
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
+            command.Execute().Should().Pass();
+
+            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+        }
+
+        [Fact]
+        public void It_does_not_include_source_revision_id_if_source_revision_id_not_set()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "ProjectWithSourceRevisionId",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.0",
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "Target",
+                            new XAttribute("Name", "InitializeSourceControlInformation"),
+                            new XElement(ns + "PropertyGroup",
+                                new XElement("SourceRevisionId", ""))));
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement("SourceControlInformationFeatureSupported", "true")));
+                });
+
+            testAsset.Restore(Log, testProject.Name);
+
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
+            command.Execute().Should().Pass();
+
+            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+        }
+
+        [Fact]
+        public void It_does_not_include_source_revision_id_if_disabled()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "ProjectWithSourceRevisionId",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.0",
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "Target",
+                            new XAttribute("Name", "InitializeSourceControlInformation"),
+                            new XElement(ns + "PropertyGroup",
+                                new XElement("SourceRevisionId", "xyz"))));
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement("SourceControlInformationFeatureSupported", "true"),
+                            new XElement("IncludeSourceRevisionInInformationalVersion", "false")));
+                });
+
+            testAsset.Restore(Log, testProject.Name);
+
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
+            command.Execute().Should().Pass();
+
+            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+        }
+
+        [Fact]
+        public void It_includes_source_revision_id_if_available__version_without_plus()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "ProjectWithSourceRevisionId",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.0",
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "Target",
+                            new XAttribute("Name", "_SetSourceRevisionId"),
+                            new XAttribute("BeforeTargets", "InitializeSourceControlInformation"),
+                            new XElement(ns + "PropertyGroup",
+                                new XElement("SourceRevisionId", "xyz"))));
+
+                    project.Root.Add(
+                        new XElement(ns + "Target",
+                            new XAttribute("Name", "InitializeSourceControlInformation")));
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement("SourceControlInformationFeatureSupported", "true")));
+                });
+
+            testAsset.Restore(Log, testProject.Name);
+
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
+            command.Execute().Should().Pass();
+
+            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0+xyz" });
+        }
+
+        [Fact]
+        public void It_includes_source_revision_id_if_available__version_with_plus()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "ProjectWithSourceRevisionId",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.0",
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "Target",
+                            new XAttribute("Name", "_SetSourceRevisionId"),
+                            new XAttribute("BeforeTargets", "InitializeSourceControlInformation"),
+                            new XElement(ns + "PropertyGroup",
+                                new XElement("SourceRevisionId", "xyz"))));
+
+                    project.Root.Add(
+                        new XElement(ns + "Target",
+                            new XAttribute("Name", "InitializeSourceControlInformation")));
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement("SourceControlInformationFeatureSupported", "true"),
+                            new XElement("InformationalVersion", "1.2.3+abc")));
+                });
+
+            testAsset.Restore(Log, testProject.Name);
+
+            var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
+            command.Execute().Should().Pass();
+
+            command.GetValues().ShouldBeEquivalentTo(new[] { "1.2.3+abc.xyz" });
+        }
+
         [WindowsOnlyTheory]
         [InlineData("netcoreapp1.1")]
         [InlineData("net45")]
@@ -147,6 +317,46 @@ namespace Microsoft.NET.Build.Tests
             {
                 var command = new BuildCommand(Log, testAsset.TestRoot);
                 command.Execute($"/p:OutputType=Library;TargetFramework={targetFramework};VersionPrefix={versionPrefix}")
+                       .Should()
+                       .Pass();
+                return command;
+            }
+        }
+
+        [Fact]
+        public void It_respects_custom_assembly_atrribute_items_on_incremental_build()
+        {
+            var targetFramework = "netstandard1.5";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("KitchenSink", identifier: targetFramework)
+                .WithSource()
+                .Restore(Log, "TestLibrary");
+
+            var firstBuildCommand = BuildProject(buildNumber: "1");
+            var assemblyPath = Path.Combine(firstBuildCommand.GetOutputDirectory(targetFramework).FullName, "TestLibrary.dll");
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("BuildNumber:1");
+
+            var firstWriteTime = File.GetLastWriteTimeUtc(assemblyPath);
+
+            // When rebuilding with the same value
+            BuildProject(buildNumber: "1");
+
+            // the build should no-op.
+            File.GetLastWriteTimeUtc(assemblyPath).Should().Be(firstWriteTime);
+
+            // When the same project is built again using a different build number
+            BuildProject(buildNumber: "2");
+
+            // the file should change
+            File.GetLastWriteTimeUtc(assemblyPath).Should().NotBe(firstWriteTime);
+
+            // and the custom assembly should be generated with the updated value.
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("BuildNumber:2");
+
+            BuildCommand BuildProject(string buildNumber)
+            {
+                var command = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "TestLibrary"));
+                command.Execute($"/p:BuildNumber={buildNumber}")
                        .Should()
                        .Pass();
                 return command;

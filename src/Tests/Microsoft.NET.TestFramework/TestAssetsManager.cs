@@ -68,7 +68,7 @@ namespace Microsoft.NET.TestFramework
                 var project = projectStack.Pop();
                 if (!createdProjects.Contains(project))
                 {
-                    project.Create(testAsset, ProjectsRoot);
+                   project.Create(testAsset, ProjectsRoot);
                     createdProjects.Add(project);
 
                     foreach (var referencedProject in project.ReferencedProjects)

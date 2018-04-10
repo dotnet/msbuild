@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -60,7 +61,6 @@ namespace Microsoft.NET.Build.Tests
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
@@ -72,15 +72,18 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_errors_out_when_RuntimeIdentifier_architecture_and_PlatformTarget_do_not_match()
         {
-			var testAsset = _testAssetsManager
+            const string RuntimeIdentifier = "win10-x64";
+            const string PlatformTarget = "x86";
+
+            var testAsset = _testAssetsManager
 				.CopyTestAsset("HelloWorld")
 				.WithSource()
 				.WithProjectChanges(project =>
 				{
 					var ns = project.Root.Name.Namespace;
 					var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-					propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", "win10-x64"));
-                    propertyGroup.Add(new XElement(ns + "PlatformTarget", "x86"));
+					propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", RuntimeIdentifier));
+                    propertyGroup.Add(new XElement(ns + "PlatformTarget", PlatformTarget));
 				})
 				.Restore(Log);
 
@@ -89,7 +92,11 @@ namespace Microsoft.NET.Build.Tests
 			buildCommand
 				.Execute()
 				.Should()
-                .Fail();
+                .Fail()
+                .And.HaveStdOutContaining(string.Format(
+                    Strings.CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget,
+                    RuntimeIdentifier,
+                    PlatformTarget));
         }
 
 		[Fact]
@@ -122,7 +129,6 @@ namespace Microsoft.NET.Build.Tests
 			string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
 			Command.Create(selfContainedExecutableFullPath, new string[] { })
-				.EnsureExecutable()
 				.CaptureStdOut()
 				.Execute()
 				.Should()

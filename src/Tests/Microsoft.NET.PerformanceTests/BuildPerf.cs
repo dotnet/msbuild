@@ -65,6 +65,9 @@ namespace Microsoft.NET.Perf.Tests
         public void BuildMVCApp(ProjectPerfOperation operation)
         {
             var testDir = _testAssetsManager.CreateTestDirectory(identifier: operation.ToString());
+
+            NuGetConfigWriter.Write(testDir.Path, NuGetConfigWriter.AspNetCoreDevFeed, NuGetConfigWriter.DotnetCoreMyGetFeed);
+
             var newCommand = new DotnetCommand(Log);
             newCommand.WorkingDirectory = testDir.Path;
 
@@ -73,7 +76,7 @@ namespace Microsoft.NET.Perf.Tests
             TestProject(testDir.Path, "ASP.NET Core MVC app", operation);
         }
 
-        [CoreMSBuildOnlyTheory(Skip ="The code for these scenarios needs to be acquired during the test run (instead of relying on hard-coded local path)")]
+        [CoreMSBuildOnlyTheory(Skip = "The code for these scenarios needs to be acquired during the test run (instead of relying on hard-coded local path)")]
         [InlineData("SmallP2POldCsproj", ProjectPerfOperation.CleanBuild)]
         [InlineData("SmallP2POldCsproj", ProjectPerfOperation.BuildWithNoChanges)]
         [InlineData("SmallP2PNewCsproj", ProjectPerfOperation.CleanBuild)]
@@ -107,18 +110,18 @@ namespace Microsoft.NET.Perf.Tests
             TestProject(testDir.Path, name, operation);
         }
 
-        [CoreMSBuildOnlyTheory(Skip ="This test needs to clone the Roslyn repo and checkout a given commit instead of relying on a local copy of the repo")]
+        [CoreMSBuildOnlyTheory(Skip = "This test needs to clone the Roslyn repo and checkout a given commit instead of relying on a local copy of the repo")]
         [InlineData(ProjectPerfOperation.CleanBuild)]
         [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
         public void BuildRoslynCompilers(ProjectPerfOperation operation)
         {
-            
+
             string sourceProject = @"C:\git\roslyn";
             var testDir = _testAssetsManager.CreateTestDirectory("Perf_Roslyn", identifier: operation.ToString());
             Console.WriteLine($"Mirroring {sourceProject} to {testDir.Path}...");
             FolderSnapshot.MirrorFiles(sourceProject, testDir.Path);
             Console.WriteLine("Done");
-            
+
             //  Override global.json from repo
             File.Delete(Path.Combine(testDir.Path, "global.json"));
 
@@ -141,7 +144,7 @@ namespace Microsoft.NET.Perf.Tests
             NoOpRestore
         }
 
-        private void TestProject(string projectFolderOrFile, string testName, ProjectPerfOperation perfOperation)
+        private void TestProject(string projectFolderOrFile, string testName, ProjectPerfOperation perfOperation, string restoreSources = null)
         {
             string testProjectPath;
             string testProjectDirectory;
@@ -189,6 +192,10 @@ namespace Microsoft.NET.Perf.Tests
                         restoreCommand.Arguments.Add(testProjectPath);
                     }
                 }
+                if (!string.IsNullOrEmpty(restoreSources))
+                {
+                    restoreCommand.Arguments.Add($"/p:RestoreSources={restoreSources}");
+                }
                 restoreCommand.WorkingDirectory = testProjectDirectory;
 
                 restoreCommand.Execute().Should().Pass();
@@ -210,6 +217,10 @@ namespace Microsoft.NET.Perf.Tests
                     {
                         commandToTest.Arguments.Add(testProjectPath);
                     }
+                }
+                if (!string.IsNullOrEmpty(restoreSources))
+                {
+                    commandToTest.Arguments.Add($"/p:RestoreSources={restoreSources}");
                 }
                 commandToTest.WorkingDirectory = testProjectDirectory;
 

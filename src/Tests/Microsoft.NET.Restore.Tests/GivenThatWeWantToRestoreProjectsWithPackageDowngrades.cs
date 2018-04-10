@@ -22,8 +22,7 @@ namespace Microsoft.NET.Restore.Tests
         {
         }
 
-        // https://github.com/dotnet/sdk/issues/1327
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void DowngradeWarningsAreErrorsByDefault()
         {
             const string testProjectName = "ProjectWithDowngradeWarning";
@@ -44,6 +43,12 @@ namespace Microsoft.NET.Restore.Tests
             var restoreCommand = testAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand
                 .Execute($"/p:RestorePackagesPath={packagesFolder}")
+                .Should().Fail()
+                .And.HaveStdOutContaining("NU1605");
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProjectName));
+            buildCommand
+                .Execute()
                 .Should().Fail()
                 .And.HaveStdOutContaining("NU1605");
         }

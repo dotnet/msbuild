@@ -20,15 +20,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
   </PropertyGroup>
   
-  <Import Project="$(MSBuildThisFileDirectory)..\build\Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets"
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets"
           Condition="'$(IsCrossTargetingBuild)' == 'true'"/>
-  <Import Project="$(MSBuildThisFileDirectory)..\build\Microsoft.NET.Sdk.BeforeCommon.targets"
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BeforeCommon.targets"
           Condition="'$(IsCrossTargetingBuild)' != 'true'"/>
 
   <PropertyGroup Condition="'$(LanguageTargets)' == ''">
     <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.csproj'">$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
     <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.vbproj'">$(MSBuildToolsPath)\Microsoft.VisualBasic.targets</LanguageTargets>
-    <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.fsproj'">$(MSBuildThisFileDirectory)..\build\Microsoft.NET.Sdk.FSharpTargetsShim.targets</LanguageTargets>
+    <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.fsproj'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.FSharpTargetsShim.targets</LanguageTargets>
 
     <!-- If LanguageTargets isn't otherwise set, then just import the common targets.  This should allow the restore target to run,
          which could bring in NuGet packages that set the LanguageTargets to something else.  This means support for different
@@ -40,13 +40,16 @@ Copyright (c) .NET Foundation. All rights reserved.
                using Sdk attribute (from .NET Core Sdk 1.0.0-preview4) -->
   <Import Project="$(LanguageTargets)"/>
   
-  <Import Project="$(MSBuildThisFileDirectory)..\buildCrossTargeting\Microsoft.NET.Sdk.targets"
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.CrossTargeting.targets"
           Condition="'$(IsCrossTargetingBuild)' == 'true'"/>
-  <Import Project="$(MSBuildThisFileDirectory)..\build\Microsoft.NET.Sdk.targets"
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.targets"
           Condition="'$(IsCrossTargetingBuild)' != 'true'"/>
   
   <!-- Import targets from NuGet.Build.Tasks.Pack package/Sdk -->
-  <PropertyGroup Condition="'$(NuGetBuildTasksPackTargets)' == '' AND '$(ImportNuGetBuildTasksPackTargetsFromSdk' != 'false'">
+  <PropertyGroup Condition="'$(NuGetBuildTasksPackTargets)' == '' AND '$(ImportNuGetBuildTasksPackTargetsFromSdk)' != 'false'">
+    <IncludeBuildOutput Condition=" '$(PackAsTool)' == 'true' ">false</IncludeBuildOutput>
+    <PackageType Condition=" '$(PackAsTool)' == 'true' ">DotnetTool</PackageType>
+
     <NuGetBuildTasksPackTargets Condition="'$(IsCrossTargetingBuild)' == 'true'">$(MSBuildThisFileDirectory)..\..\NuGet.Build.Tasks.Pack\buildCrossTargeting\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
     <NuGetBuildTasksPackTargets Condition="'$(IsCrossTargetingBuild)' != 'true'">$(MSBuildThisFileDirectory)..\..\NuGet.Build.Tasks.Pack\build\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
     <ImportNuGetBuildTasksPackTargetsFromSdk>true</ImportNuGetBuildTasksPackTargetsFromSdk>

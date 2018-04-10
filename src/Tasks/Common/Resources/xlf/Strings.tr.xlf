@@ -318,8 +318,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
-        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="translated">Çözümlenen dosyada hatalı görüntü var, meta veri yok veya dosya erişilemez durumda. {0}</target>
+        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
+        <target state="translated">Çözümlenen dosyada hatalı görüntü var, meta veri yok veya dosya erişilemez durumda. {0} {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
@@ -328,8 +328,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
-        <target state="translated">RuntimeIdentifier platformu ile PlatformTarget eşleşmelidir.</target>
+        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="translated">RuntimeIdentifier platformu '{0}' ile PlatformTarget '{1}' uyumlu olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -341,6 +341,38 @@
         <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
         <target state="translated">'{0}' çerçeve listesi dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportSelfContained">
+        <source>Pack as tool does not support self contained.</source>
+        <target state="translated">Araç olarak paketleme kendi kendini kapsamayı desteklemiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedRuntimeIdentifier">
+        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="translated">Proje '{0}' çalışma zamanını hedefliyor ancak çalışma zamanına özgü herhangi bir paketi çözümlemedi. Bu çalışma zamanı hedef çerçeve tarafından desteklenmiyor olabilir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingPreviewSdkWarning">
+        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="translated">.NET Core SDK’nın önizleme sürümüyle çalışıyorsunuz. SDK sürümünü geçerli projedeki bir global.json dosyası aracılığıyla tanımlayabilirsiniz. Daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
+        <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
+        <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingAssetsFile">
+        <source>Error reading assets file: {0}</source>
+        <target state="new">Error reading assets file: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MismatchedPlatformPackageVersion">
+        <source>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
+        <target state="new">The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</target>
+        <note>{0} - Package Identifier for platform package
+{1} - Restored version of platform package
+{2} - Current version of platform package</note>
       </trans-unit>
     </body>
   </file>

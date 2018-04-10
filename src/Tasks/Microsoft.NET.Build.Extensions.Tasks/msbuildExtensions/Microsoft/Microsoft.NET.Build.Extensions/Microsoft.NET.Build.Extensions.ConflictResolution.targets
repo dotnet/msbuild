@@ -23,6 +23,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_HandlePackageFileConflictsBefore>ResolveAssemblyReferences</_HandlePackageFileConflictsBefore>
   </PropertyGroup>
 
+  <Import Project="Microsoft.NET.DefaultPackageConflictOverrides.targets" />
+  
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <Target Name="_HandlePackageFileConflicts" 
           BeforeTargets="$(_HandlePackageFileConflictsBefore)"
@@ -32,6 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
                                  TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
+                                 PackageOverrides="@(PackageConflictOverrides)"
                                  PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />

@@ -176,7 +176,7 @@ function InstallDotNetCli {
 
   if [ ! -d "$NetCoreApp10Dir" ]
   then
-    bash "$DotNetInstallScript" --channel "Preview" --version $NetCoreApp10Version --shared-runtime $DotNetInstallVerbosity
+    bash "$DotNetInstallScript" --version $NetCoreApp10Version --shared-runtime $DotNetInstallVerbosity
     LASTEXITCODE=$?
 
     if [ $LASTEXITCODE != 0 ]
@@ -192,12 +192,28 @@ function InstallDotNetCli {
 
   if [ ! -d "$NetCoreApp11Dir" ]
   then
-    bash "$DotNetInstallScript" --channel "Release/1.1.0" --version $NetCoreApp11Version --shared-runtime $DotNetInstallVerbosity
+    bash "$DotNetInstallScript" --version $NetCoreApp11Version --shared-runtime $DotNetInstallVerbosity
     LASTEXITCODE=$?
 
     if [ $LASTEXITCODE != 0 ]
     then
       echo "Failed to install 1.1 shared framework"
+      return $LASTEXITCODE
+    fi
+  fi
+
+  # Install 2.0 shared framework
+  NetCoreApp20Version="2.0.0"
+  NetCoreApp20Dir="$DotNetRoot/shared/Microsoft.NETCore.App/$NetCoreApp20Version"
+
+  if [ ! -d "$NetCoreApp20Dir" ]
+  then
+    bash "$DotNetInstallScript" --version $NetCoreApp20Version --shared-runtime $DotNetInstallVerbosity
+    LASTEXITCODE=$?
+
+    if [ $LASTEXITCODE != 0 ]
+    then
+      echo "Failed to install 2.0 shared framework"
       return $LASTEXITCODE
     fi
   fi

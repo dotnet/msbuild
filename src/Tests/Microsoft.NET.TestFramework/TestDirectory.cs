@@ -29,7 +29,14 @@ namespace Microsoft.NET.TestFramework
         {
             if (Directory.Exists(path))
             {
-                Directory.Delete(path, true);
+                try
+                {
+                    Directory.Delete(path, true);
+                }
+                catch (IOException ex)
+                {
+                    throw new IOException("Unable to delete directory " + path, ex);
+                }
             }
 
             Directory.CreateDirectory(path);

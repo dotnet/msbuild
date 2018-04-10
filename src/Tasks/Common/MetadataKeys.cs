@@ -50,5 +50,31 @@ namespace Microsoft.NET.Build.Tasks
 
         // Publish Target Manifest
         public const string RuntimeStoreManifestNames = "RuntimeStoreManifestNames";
+
+        // Conflict Resolution
+        public const string OverriddenPackages = "OverriddenPackages";
+
+        // Package assets
+        public const string NuGetIsFrameworkReference = "NuGetIsFrameworkReference";
+        public const string NuGetPackageId = "NuGetPackageId";
+        public const string NuGetPackageVersion = "NuGetPackageVersion";
+        public const string NuGetSourceType = "NuGetSourceType";
+
+        // References
+        public const string ExternallyResolved = "ExternallyResolved";
+        public const string HintPath = "HintPath";
+        public const string Private = "Private";
+        public const string Pack = "Pack";
+
+        // Content files
+        public const string PPOutputPath = "PPOutputPath";
+        public const string CodeLanguage = "CodeLanguage";
+        public const string CopyToOutput = "CopyToOutput";
+        public const string BuildAction = "BuildAction";
+        public const string OutputPath = "OutputPath";
+
+        // Resource assemblies
+        public const string Culture = "Culture";
+        public const string DestinationSubDirectory = "DestinationSubDirectory";
     }
 }

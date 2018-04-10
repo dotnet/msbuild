@@ -6,8 +6,8 @@
     <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Sdk</PackageId>
-    <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -37,43 +37,35 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="$(NETStandardLibraryNETFrameworkVersion)" ExcludeAssets="All" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackVersion)" ExcludeAssets="All" />
-    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="$(SystemDiagnosticsFileVersionInfoVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
+  </ItemGroup>
+
+  <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <PackageReference Update="Microsoft.Extensions.DependencyModel" ExcludeAssets="Runtime" />
+    <PackageReference Update="NuGet.ProjectModel" ExcludeAssets="Runtime" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <Compile Include="..\Common\**\*.cs" Link="Common\%(RecursiveDir)\%(FileName)%(Extension)" />
+    <Compile Include="..\Common\**\*.cs" LinkBase="Common" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="..\Common\Resources\Strings.Designer.cs" Link="Resources\%(FileName)%(Extension)">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="..\Common\Resources\Strings.resx" Link="Resources\%(FileName)%(Extension)">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
-    </EmbeddedResource>
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="Microsoft.NET.Build.Tasks.UnitTests" />
+    <InternalsVisibleTo Include="Microsoft.NET.Build.Tests" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build\**\*" PackagePath="build\" />
-    <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
+    <None Include="targets\**\*" PackagePath="targets\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
-    <None Include="..\Common\Resources\xlf\**\*" Link="Resources\xlf\%(FileName)%(Extension)" />
+    <None Include="..\Common\targets\**\*" PackagePath="targets\" LinkBase="targets" />
+    <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
@@ -94,7 +86,8 @@
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\FSharp.NET.Sdk\**" SdkName="FSharp.NET.Sdk" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Publish\**" SdkName="Microsoft.NET.Sdk.Publish" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web\**" SdkName="Microsoft.NET.Sdk.Web" />
-      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web.ProjectSystem\**" SdkName="Microsoft.NET.Sdk.Web.ProjectSystem"/>
+      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web.ProjectSystem\**" SdkName="Microsoft.NET.Sdk.Web.ProjectSystem" />
+      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Razor\**" SdkName="Microsoft.NET.Sdk.Razor" />
       <LayoutFile Include="@(Stage0SdkFile)">
         <TargetPath>..\%(Stage0SdkFile.SdkName)\%(Stage0SdkFile.RecursiveDir)%(Stage0SdkFile.Filename)%(Stage0SdkFile.Extension)</TargetPath>
       </LayoutFile>

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Version>1.2.3-beta</Version>
+    <Authors>Test Authors</Authors>
+    <Product>Test Product</Product>
+    <AssemblyTitle>Test AssemblyTitle</AssemblyTitle>
+    <Copyright>Copyright (c) Test Authors</Copyright>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../TestLibrary/TestLibrary.vbproj" />
+  </ItemGroup>
+</Project>

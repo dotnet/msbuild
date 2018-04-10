@@ -51,11 +51,11 @@ namespace Microsoft.NET.TestFramework.Commands
                 }
             }
 
-            var buildProjectFiles = Directory.GetFiles(projectRootPath, "*.csproj");
+            var buildProjectFiles = Directory.GetFiles(projectRootPath, "*.*proj");
 
             if (buildProjectFiles.Length != 1)
             {
-                var errorMsg = $"Found {buildProjectFiles.Length} .csproj files under {projectRootPath} instead of just 1.";
+                var errorMsg = $"Found {buildProjectFiles.Length} project files under {projectRootPath} instead of just 1.";
                 throw new ArgumentException(errorMsg);
             }
 
@@ -69,6 +69,16 @@ namespace Microsoft.NET.TestFramework.Commands
             runtimeIdentifier = runtimeIdentifier ?? string.Empty;
 
             string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework, runtimeIdentifier);
+            return new DirectoryInfo(output);
+        }
+
+        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
+        {
+            targetFramework = targetFramework ?? string.Empty;
+            configuration = configuration ?? string.Empty;
+            runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+
+            string output = Path.Combine(ProjectRootPath, "obj", configuration, targetFramework, runtimeIdentifier);
             return new DirectoryInfo(output);
         }
 

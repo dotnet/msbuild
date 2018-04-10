@@ -16,17 +16,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void ItReportsDiagnosticsWithMinimumData()
         {
-            var log = new MockLog();
             string lockFileContent = CreateDefaultLockFileSnippet(
                 logs: new string[] {
                     CreateLog(NuGetLogCode.NU1000, LogLevel.Warning, "Sample warning")
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, log);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             task.DiagnosticMessages.Should().HaveCount(1);
-            log.Messages.Should().HaveCount(1);
         }
 
         [Theory]
@@ -34,19 +32,16 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [InlineData(new object[] { new string[0] })]
         public void ItReportsZeroDiagnosticsWithNoLogs(string [] logsJson)
         {
-            var log = new MockLog();
             string lockFileContent = CreateDefaultLockFileSnippet(logsJson);
 
-            var task = GetExecutedTaskFromContents(lockFileContent, log);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             task.DiagnosticMessages.Should().BeEmpty();
-            log.Messages.Should().BeEmpty();
         }
 
         [Fact]
         public void ItReportsDiagnosticsMetadataWithLogs()
         {
-            var log = new MockLog();
             string lockFileContent = CreateDefaultLockFileSnippet(
                 logs: new string[] {
                     CreateLog(NuGetLogCode.NU1000, LogLevel.Error, "Sample error",
@@ -59,9 +54,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, log);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
-            log.Messages.Should().HaveCount(2);
             task.DiagnosticMessages.Should().HaveCount(2);
 
             Action<string,string,string> checkMetadata = (key, val1, val2) => {
@@ -85,7 +79,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [InlineData(new string[] { ".NETCoreApp,Version=v1.0" }, "LibA", ".NETCoreApp,Version=v1.0", "LibA/1.2.3")]
         public void ItReportsDiagnosticsWithAllTargetLibraryCases(string[] targetGraphs, string libraryId, string expectedTarget, string expectedPackage)
         {
-            var log = new MockLog();
             string lockFileContent = CreateDefaultLockFileSnippet(
                 logs: new string[] {
                     CreateLog(NuGetLogCode.NU1000, LogLevel.Warning, "Sample warning",
@@ -95,9 +88,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, log);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
-            log.Messages.Should().HaveCount(1);
             task.DiagnosticMessages.Should().HaveCount(1);
             var item = task.DiagnosticMessages.First();
 
@@ -108,7 +100,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void ItHandlesInfoLogLevels()
         {
-            var log = new MockLog();
             string lockFileContent = CreateDefaultLockFileSnippet(
                 logs: new string[] {
                     CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "Sample message"),
@@ -118,9 +109,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, log);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
-            log.Messages.Should().HaveCount(4);
             task.DiagnosticMessages.Should().HaveCount(4);
 
             task.DiagnosticMessages
@@ -133,7 +123,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [InlineData(new string[] { ".NETCoreApp,Version=v1.0" }, "LibA")]
         public void ItHandlesMultiTFMScenarios(string[] targetGraphs, string libraryId)
         {
-            var log = new MockLog();
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
                     CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
@@ -151,13 +140,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, log);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
             // a diagnostic for each target graph...
             task.DiagnosticMessages.Should().HaveCount(targetGraphs.Length);
-
-            // ...but only one is logged
-            log.Messages.Should().HaveCount(1);
 
             task.DiagnosticMessages
                     .Select(item => item.GetMetadata(MetadataKeys.ParentTarget))
@@ -171,7 +157,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void ItSkipsInvalidEntries()
         {
-            var log = new MockLog();
             string lockFileContent = CreateDefaultLockFileSnippet(
                 logs: new string[] {
                     CreateLog(NuGetLogCode.NU1000, LogLevel.Error, "Sample error that will be invalid"),
@@ -180,9 +165,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             );
             lockFileContent = lockFileContent.Replace("NU1000", "CA1000");
 
-            var task = GetExecutedTaskFromContents(lockFileContent, log);
+            var task = GetExecutedTaskFromContents(lockFileContent);
 
-            log.Messages.Should().HaveCount(1);
             task.DiagnosticMessages.Should().HaveCount(1);
 
             task.DiagnosticMessages
@@ -202,15 +186,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 logs: logs
             );
 
-        private ReportAssetsLogMessages GetExecutedTaskFromContents(string lockFileContents, MockLog logger)
+        private ReportAssetsLogMessages GetExecutedTaskFromContents(string lockFileContents)
         {
             var lockFile = TestLockFiles.CreateLockFile(lockFileContents);
-            return GetExecutedTask(lockFile, logger);
+            return GetExecutedTask(lockFile);
         }
 
-        private ReportAssetsLogMessages GetExecutedTask(LockFile lockFile, MockLog logger)
+        private ReportAssetsLogMessages GetExecutedTask(LockFile lockFile)
         {
-            var task = new ReportAssetsLogMessages(lockFile, logger)
+            var task = new ReportAssetsLogMessages(lockFile)
             {
                 ProjectAssetsFile = lockFile.Path,
             };

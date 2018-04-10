@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
+using System.Text;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -41,14 +42,39 @@ namespace Microsoft.NET.TestFramework
                     const ushort prolog = 1; // two-byte "prolog" defined by ECMA-335 (II.23.3) to be at the beginning of attribute value blobs
                     if (value.ReadUInt16() != prolog || header.Kind != SignatureKind.Method || header.IsGeneric)
                     {
-                        throw new BadImageFormatException(); 
+                        throw new BadImageFormatException();
                     }
 
-                    if (signature.ReadCompressedInteger() == 1 && // must have 1 parameter
-                        signature.ReadSignatureTypeCode() == SignatureTypeCode.Void && // return type must be void
-                        signature.ReadSignatureTypeCode() == SignatureTypeCode.String) // first parameter must be string
+                    var paramCount = signature.ReadCompressedInteger();
+                    if (paramCount <= 0 || // must have at least 1 parameter
+                        signature.ReadSignatureTypeCode() != SignatureTypeCode.Void) // return type must be void
                     {
-                        dictionary.Add(name, value.ReadSerializedString());
+                        continue;
+                    }
+
+                    var sb = new StringBuilder();
+                    while (paramCount > 0 && sb != null)
+                    {
+                        switch (signature.ReadSignatureTypeCode())
+                        {
+                            case SignatureTypeCode.String:
+                                sb.Append(value.ReadSerializedString());
+                                break;
+                            default:
+                                sb = null;
+                                break;
+                        }
+
+                        paramCount--;
+                        if (paramCount != 0)
+                        {
+                            sb?.Append(':');
+                        }
+                    }
+
+                    if (sb != null)
+                    {
+                        dictionary.Add(name, sb.ToString());
                     }
                 }
             }

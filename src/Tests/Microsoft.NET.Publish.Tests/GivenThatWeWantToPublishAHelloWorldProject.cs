@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", "SelfContained")
                 .WithSource()
-                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifiers={rid}");
+                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifier={rid}");
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}");
@@ -92,7 +92,6 @@ namespace Microsoft.NET.Publish.Tests
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
@@ -443,6 +442,34 @@ public static class Program
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [Fact]
+        public void It_fails_for_unsupported_rid()
+        {
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .Restore(Log, "", "/p:RuntimeIdentifier=notvalid");
+
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid");
+
+            publishResult.Should().Fail();
+        }
+
+        [Fact]
+        public void It_allows_unsupported_rid_with_override()
+        {
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .Restore(Log, "", "/p:RuntimeIdentifier=notvalid");
+
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid", "/p:EnsureNETCoreAppRuntime=false");
+
+            publishResult.Should().Pass();
         }
     }
 }

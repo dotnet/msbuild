@@ -1,0 +1,6 @@
+<!-- 
+Sometimes it is useful to play around with the test assets 
+directly where you're authoring them, and they should never
+get the build customization from the rest of the repo. 
+-->
+<Project />
