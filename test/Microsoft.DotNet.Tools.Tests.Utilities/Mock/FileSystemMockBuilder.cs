@@ -132,6 +132,20 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                 _files.Remove(path);
             }
+
+            public void Copy(string source, string destination)
+            {
+                if (!Exists(source))
+                {
+                    throw new FileNotFoundException("source does not exist.");
+                }
+                if (Exists(destination))
+                {
+                    throw new IOException("destination exists.");
+                }
+
+                _files[destination] = _files[source];
+            }
         }
 
         private class DirectoryMock : IDirectory

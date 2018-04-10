@@ -22,6 +22,7 @@ using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
 using InstallLocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
+using Microsoft.DotNet.ShellShim;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
@@ -203,7 +204,10 @@ namespace Microsoft.DotNet.Tests.Commands
                 result["dotnet"]["tool"]["install"],
                 result,
                 (_) => (store, packageInstallerMock),
-                (_) => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
+                (_) => new ShellShimRepository(
+                    new DirectoryPath(ShimsDirectory),
+                    fileSystem: _fileSystem,
+                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _environmentPathInstructionMock,
                 _reporter);
         }
@@ -219,7 +223,10 @@ namespace Microsoft.DotNet.Tests.Commands
                     new DirectoryPath(ToolsDirectory),
                     _fileSystem,
                     uninstallCallback),
-                (_) => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
+                (_) => new ShellShimRepository(
+                    new DirectoryPath(ShimsDirectory),
+                    fileSystem: _fileSystem,
+                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _reporter);
         }
     }
