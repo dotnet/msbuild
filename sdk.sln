@@ -52,9 +52,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{09AD2F
 		src\Tasks\Common\FileUtilities.netstandard.cs = src\Tasks\Common\FileUtilities.netstandard.cs
 		src\Tasks\Common\ILog.cs = src\Tasks\Common\ILog.cs
 		src\Tasks\Common\ItemUtilities.cs = src\Tasks\Common\ItemUtilities.cs
+		src\Tasks\Common\MessageBase.cs = src\Tasks\Common\MessageBase.cs
 		src\Tasks\Common\MetadataKeys.cs = src\Tasks\Common\MetadataKeys.cs
 		src\Tasks\Common\MSBuildLog.cs = src\Tasks\Common\MSBuildLog.cs
-		src\Tasks\Common\MessageBase.cs = src\Tasks\Common\MessageBase.cs
 		src\Tasks\Common\NETSdkError.cs = src\Tasks\Common\NETSdkError.cs
 		src\Tasks\Common\NuGetUtils.cs = src\Tasks\Common\NuGetUtils.cs
 		src\Tasks\Common\TaskBase.cs = src\Tasks\Common\TaskBase.cs
@@ -185,10 +185,6 @@ Global
 		{CAF71BDC-7B7D-4A43-AB8C-E440A1E4F108}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAF71BDC-7B7D-4A43-AB8C-E440A1E4F108}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAF71BDC-7B7D-4A43-AB8C-E440A1E4F108}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AFB72217-54A0-4E76-870A-42718B8E0AE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -218,7 +214,6 @@ Global
 		{112668D7-322D-4F83-A6CE-B814C25AD3BF} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{CAF71BDC-7B7D-4A43-AB8C-E440A1E4F108} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{7C6A88D0-DBCC-4933-A92D-A0AC133DD5FC} = {5293658E-96D2-421F-A789-D0B6BA129570}
-		{AFB72217-54A0-4E76-870A-42718B8E0AE5} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
