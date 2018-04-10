@@ -367,7 +367,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_does_not_include_source_files_in_None_when_default_compile_items_are_disabled()
+        public void It_does_not_include_source_or_resx_files_in_None()
         {
             var testProject = new TestProject()
             {
@@ -377,6 +377,7 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true
             };
             testProject.AdditionalProperties["EnableDefaultCompileItems"] = "false";
+            testProject.AdditionalProperties["EnableDefaultResourceItems"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project =>
@@ -391,6 +392,7 @@ namespace Microsoft.NET.Build.Tests
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
             File.WriteAllText(Path.Combine(projectFolder, "ShouldBeIgnored.cs"), "!InvalidCSharp!");
+            File.WriteAllText(Path.Combine(projectFolder, "Resources.resx"), "<Resource/>");
 
             var getCompileItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Compile", GetValuesCommand.ValueType.Item);
             getCompileItemsCommand.Execute()
@@ -407,6 +409,14 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             getNoneItemsCommand.GetValues()
+                .Should().BeEmpty();
+
+            var getResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Resource", GetValuesCommand.ValueType.Item);
+            getResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getResourceItemsCommand.GetValues()
                 .Should().BeEmpty();
 
         }
