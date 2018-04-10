@@ -251,6 +251,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var item in CompileTimeAssemblies)
             {
+                item.SetMetadata(MetadataKeys.NuGetSourceType, "Package");
                 item.SetMetadata(MetadataKeys.Private, "false");
                 item.SetMetadata(MetadataKeys.HintPath, item.ItemSpec);
                 item.SetMetadata(MetadataKeys.ExternallyResolved, externallyResolved);
@@ -262,6 +263,7 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var item in FrameworkAssemblies)
             {
                 item.SetMetadata(MetadataKeys.NuGetIsFrameworkReference, "true");
+                item.SetMetadata(MetadataKeys.NuGetSourceType, "Package");
                 item.SetMetadata(MetadataKeys.Pack, "false");
                 item.SetMetadata(MetadataKeys.Private, "false");
             }
