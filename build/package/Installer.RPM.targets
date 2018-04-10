@@ -112,8 +112,8 @@
         Glob="$(AfterInstallHostScriptDestinationFile)"
         Mode="ugo+x" />
 
-    <ReplaceFileContents InputFile="$(ConfigJsonFile)"
-                         DestinationFile="$(RpmLayoutDirectory)$(RpmConfigJsonName)"
+    <ReplaceFileContents InputFiles="$(ConfigJsonFile)"
+                         DestinationFiles="$(RpmLayoutDirectory)$(RpmConfigJsonName)"
                          ReplacementItems="@(SDKTokenValue)"/>
 
     <!-- Call the task to build the pre-reqs (parameters, copyright, changelog) for calling the FPM tool -->
