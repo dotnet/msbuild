@@ -5,7 +5,8 @@
           DependsOnTargets="CheckIfAllBuildsHavePublished;
                             FinalizeBuild" />
 
-  <Target Name="CheckIfAllBuildsHavePublished">
+  <Target Name="CheckIfAllBuildsHavePublished"
+          DependsOnTargets="SetBadgeProps">
     <CheckIfAllBuildsHavePublished AccountKey="$(ArtifactCloudDropAccessToken)"
                                    AccountName="$(ArtifactCloudDropAccountName)"
                                    ContainerName="$(ArtifactContainerName)"
