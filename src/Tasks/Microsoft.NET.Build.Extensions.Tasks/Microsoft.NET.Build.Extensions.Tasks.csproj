@@ -27,6 +27,7 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
+    <IncludeSymbols>true</IncludeSymbols>
     <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
@@ -87,7 +88,7 @@
 
   <Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
     <ItemGroup>
-      <Content Include="$(PackageLayoutOutputPath)**\*" Exclude="$(PackageLayoutOutputPath)**\*.pdb" PackagePath="\" />
+      <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
     </ItemGroup>
   </Target>
 
