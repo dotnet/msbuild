@@ -20,6 +20,7 @@
         <![CDATA[
     <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
     <add key="aspnetcore-release" value="https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json" />
+    <add key="roslyn" value="https://dotnet.myget.org/f/roslyn/api/v3/index.json" />
     <add key="container-tools" value="https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json" />
     <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
         ]]>
