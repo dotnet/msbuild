@@ -29,7 +29,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         Unknown,
         /// <summary>
-        /// C#, VB, and VJ# projects
+        /// C#, VB, F#, and VJ# projects
         /// </summary>
         KnownToBeMSBuildFormat,
         /// <summary>
@@ -47,7 +47,11 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Project inside an Enterprise Template project
         /// </summary>
-        EtpSubProject
+        EtpSubProject,
+        /// <summary>
+        /// A shared project represents a collection of shared files that is not buildable on its own.
+        /// </summary>
+        SharedProject
     }
 
     internal struct AspNetCompilerParameters
