@@ -43,6 +43,7 @@
 
   <!-- Production Dependencies -->
   <PropertyGroup>
+    <MicrosoftNETCoreAppVersion>2.1.0-preview2-26406-04</MicrosoftNETCoreAppVersion>
   </PropertyGroup>
 
   <!-- Test Dependencies -->
