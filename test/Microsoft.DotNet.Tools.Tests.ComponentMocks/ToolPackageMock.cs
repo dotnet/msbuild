@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         private Lazy<IReadOnlyList<CommandSettings>> _commands;
         private Action _uninstallCallback;
         private IEnumerable<string> _warnings;
+        private readonly IReadOnlyList<FilePath> _packagedShims;
 
         public ToolPackageMock(
             IFileSystem fileSystem,
@@ -25,7 +26,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             NuGetVersion version,
             DirectoryPath packageDirectory,
             Action uninstallCallback = null,
-            IEnumerable<string> warnings = null)
+            IEnumerable<string> warnings = null,
+            IReadOnlyList<FilePath> packagedShims = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             Id = id;
@@ -34,6 +36,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
             _uninstallCallback = uninstallCallback;
             _warnings = warnings ?? new List<string>();
+            _packagedShims = packagedShims ?? new List<FilePath>();
         }
 
         public PackageId Id { get; private set; }
@@ -51,6 +54,14 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         }
 
         public IEnumerable<string> Warnings => _warnings;
+
+        public IReadOnlyList<FilePath> PackagedShims
+        {
+            get
+            {
+                return _packagedShims;
+            }
+        }
 
         public void Uninstall()
         {

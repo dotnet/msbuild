@@ -107,7 +107,7 @@ while [[ $# > 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-            echo "  --architecture <ARCHITECTURE>       Build the specified architecture (x64 or arm , default: x64)"
+            echo "  --architecture <ARCHITECTURE>       Build the specified architecture (x64, arm or arm64 , default: x64)"
             echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --nopackage                         Skip packaging targets"
             echo "  --nobuild                           Skip building, showing the command that would be used to build"
@@ -150,6 +150,9 @@ export VSTEST_TRACE_BUILD=1
 
 # Don't resolve shared frameworks from user or global locations
 export DOTNET_MULTILEVEL_LOOKUP=0
+
+# Turn off MSBuild Node re-use
+export MSBUILDDISABLENODEREUSE=1
 
 # Install a stage 0
 INSTALL_ARCHITECTURE=$ARCHITECTURE

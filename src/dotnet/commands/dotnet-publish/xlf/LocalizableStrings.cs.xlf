@@ -42,6 +42,11 @@
         <target state="translated">Publikuje spolu s aplikací modul runtime .NET Core, aby se tento modul nemusel instalovat na cílový počítač. Standardně se nastaví na True, pokud je zadaný identifikátor modulu runtime.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="new">Do not build the project before publishing. Implies --no-restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

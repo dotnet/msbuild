@@ -62,6 +62,11 @@
         <target state="needs-review-translation">No puede tener una ruta global y de herramienta como opinión al mismo tiempo."</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

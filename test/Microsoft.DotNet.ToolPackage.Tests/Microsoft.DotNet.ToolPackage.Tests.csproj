@@ -45,6 +45,11 @@
     <Content Remove="SampleGlobalTool/**" />
     <EmbeddedResource Remove="SampleGlobalTool/**" />
     <None Remove="SampleGlobalTool/**" />
+
+    <Compile Remove="SampleGlobalToolWithShim/**" />
+    <Content Remove="SampleGlobalToolWithShim/**" />
+    <EmbeddedResource Remove="SampleGlobalToolWithShim/**" />
+    <None Remove="SampleGlobalToolWithShim/**" />
   </ItemGroup>
 
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
@@ -57,6 +62,19 @@
     <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="Restore;Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/">
     </MSBuild>
     <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)/TestAssetLocalNugetFeed">
+    </MSBuild>
+  </Target>
+
+  <Target Name="CreateNupkgWithShimFromSource" BeforeTargets="Build">
+    <PropertyGroup>
+      <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalToolWithShim</testAssetSourceRoot>
+    </PropertyGroup>
+    <Copy SourceFiles="SampleGlobalToolWithShim/DotnetToolSettings.xml" DestinationFolder="$(testAssetSourceRoot)" />
+    <Copy SourceFiles="SampleGlobalToolWithShim/dummyshim" DestinationFolder="$(testAssetSourceRoot)" />
+    <Copy SourceFiles="SampleGlobalToolWithShim/dummyshim.exe" DestinationFolder="$(testAssetSourceRoot)" />
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithShim/consoledemo.csproj" Targets="Restore;Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithShim/consoledemo.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)/TestAssetLocalNugetFeed">
     </MSBuild>
   </Target>
 </Project>

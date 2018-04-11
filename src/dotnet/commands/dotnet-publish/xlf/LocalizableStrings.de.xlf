@@ -42,6 +42,11 @@
         <target state="translated">Veröffentlichen Sie die .NET Core-Runtime mit Ihrer Anwendung, damit die Runtime auf dem Zielcomputer nicht installiert werden muss. Der Standardwert ist "true", wenn ein Runtimebezeichner angegeben ist.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="new">Do not build the project before publishing. Implies --no-restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

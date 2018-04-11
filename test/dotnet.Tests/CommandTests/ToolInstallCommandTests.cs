@@ -46,7 +46,11 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem = new FileSystemMockBuilder().Build();
             _toolPackageStore = new ToolPackageStoreMock(new DirectoryPath(PathToPlacePackages), _fileSystem);
             _createShellShimRepository =
-                (nonGlobalLocation) => new ShellShimRepositoryMock(new DirectoryPath(PathToPlaceShim), _fileSystem);
+                (nonGlobalLocation) => new ShellShimRepository(
+                    new DirectoryPath(PathToPlaceShim),
+                    fileSystem: _fileSystem,
+                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem),
+                    filePermissionSetter: new NoOpFilePermissionSetter());
             _environmentPathInstructionMock =
                 new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim);
             _createToolPackageStoreAndInstaller = (_) => (_toolPackageStore, CreateToolPackageInstaller());
@@ -71,7 +75,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             // It is hard to simulate shell behavior. Only Assert shim can point to executable dll
             _fileSystem.File.Exists(ExpectedCommandPath()).Should().BeTrue();
-            var deserializedFakeShim = JsonConvert.DeserializeObject<ShellShimRepositoryMock.FakeShim>(
+            var deserializedFakeShim = JsonConvert.DeserializeObject<AppHostShellShimMakerMock.FakeShim>(
                 _fileSystem.File.ReadAllText(ExpectedCommandPath()));
 
             _fileSystem.File.Exists(deserializedFakeShim.ExecutablePath).Should().BeTrue();
@@ -117,7 +121,7 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem.File.Exists(ExpectedCommandPath())
             .Should().BeTrue();
             var deserializedFakeShim =
-                JsonConvert.DeserializeObject<ShellShimRepositoryMock.FakeShim>(
+                JsonConvert.DeserializeObject<AppHostShellShimMakerMock.FakeShim>(
                     _fileSystem.File.ReadAllText(ExpectedCommandPath()));
             _fileSystem.File.Exists(deserializedFakeShim.ExecutablePath).Should().BeTrue();
         }
@@ -455,6 +459,42 @@ namespace Microsoft.DotNet.Tests.Commands
             _reporter.Lines.Should().NotContain(l => l.Contains(EnvironmentPathInstructionMock.MockInstructionText));
         }
 
+        [Fact]
+        public void AndPackagedShimIsProvidedWhenRunWithPackageIdItCreateShimUsingPackagedShim()
+        {
+            var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+            var prepackagedShimPath = "packagedShimDirectory/" + ProjectRestorerMock.FakeCommandName + extension;
+            var tokenToIdentifyPackagedShim = "packagedShim";
+            _fileSystem.File.WriteAllText(prepackagedShimPath, tokenToIdentifyPackagedShim);
+
+            var result = Parser.Instance.Parse($"dotnet tool install --tool-path /tmp/folder {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["install"];
+            var parser = Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet tool", new[] {"install", "-g", PackageId});
+
+            var packagedShimsMap = new Dictionary<PackageId, IReadOnlyList<FilePath>>
+            {
+                [new PackageId(PackageId)] = new[] {new FilePath(prepackagedShimPath)}
+            };
+
+            var installCommand = new ToolInstallCommand(appliedCommand,
+                parseResult,
+                (_) => (_toolPackageStore, new ToolPackageInstallerMock(
+                    fileSystem: _fileSystem,
+                    store: _toolPackageStore,
+                    packagedShimsMap: packagedShimsMap,
+                    projectRestorer: new ProjectRestorerMock(
+                        fileSystem: _fileSystem,
+                        reporter: _reporter))),
+                _createShellShimRepository,
+                new EnvironmentPathInstructionMock(_reporter, PathToPlaceShim),
+                _reporter);
+
+            installCommand.Execute().Should().Be(0);
+
+            _fileSystem.File.ReadAllText(ExpectedCommandPath()).Should().Be(tokenToIdentifyPackagedShim);
+        }
+
         private IToolPackageInstaller CreateToolPackageInstaller(
             IEnumerable<MockFeed> feeds = null,
             Action installCallback = null)
@@ -475,6 +515,13 @@ namespace Microsoft.DotNet.Tests.Commands
             return Path.Combine(
                 "pathToPlace",
                 ProjectRestorerMock.FakeCommandName + extension);
+        }
+
+        private class NoOpFilePermissionSetter : IFilePermissionSetter
+        {
+            public void SetUserExecutionPermission(string path)
+            {
+            }
         }
     }
 }

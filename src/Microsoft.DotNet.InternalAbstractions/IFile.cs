@@ -27,6 +27,8 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         void Move(string source, string destination);
 
+        void Copy(string source, string destination);
+
         void Delete(string path);
     }
 }

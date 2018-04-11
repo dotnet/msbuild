@@ -14,7 +14,9 @@ param(
     [Parameter(Mandatory=$true)][string]$DotnetCLIDisplayVersion,
     [Parameter(Mandatory=$true)][string]$DotnetCLINugetVersion,
     [Parameter(Mandatory=$true)][string]$UpgradeCode,
-    [Parameter(Mandatory=$true)][string]$Architecture
+    [Parameter(Mandatory=$true)][string]$Architecture,
+    [Parameter(Mandatory=$true)][string]$DotNetRuntimeVersion,
+    [Parameter(Mandatory=$true)][string]$AspNetCoreVersion
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -43,6 +45,8 @@ function RunCandleForBundle
         -dAdditionalSharedFXMsiSourcePath="$AdditionalSharedFxMSIFile" `
         -dAdditionalHostFXRMsiSourcePath="$AdditionalHostFxrMSIFile" `
         -dAdditionalSharedHostMsiSourcePath="$AdditionalSharedHostMSIFile" `
+        -dDotNetRuntimeVersion="$DotNetRuntimeVersion" `
+        -dAspNetCoreVersion="$AspNetCoreVersion" `
         -arch "$Architecture" `
         -ext WixBalExtension.dll `
         -ext WixUtilExtension.dll `

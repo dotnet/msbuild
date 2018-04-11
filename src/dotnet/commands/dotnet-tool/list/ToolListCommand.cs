@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -44,6 +45,14 @@ namespace Microsoft.DotNet.Tools.Tool.List
             DirectoryPath? toolPath = null;
             if (!string.IsNullOrWhiteSpace(toolPathOption))
             {
+                if (!Directory.Exists(toolPathOption))
+                {
+                    throw new GracefulException(
+                        string.Format(
+                            LocalizableStrings.InvalidToolPathOption,
+                            toolPathOption));
+                }
+
                 toolPath = new DirectoryPath(toolPathOption);
             }
 

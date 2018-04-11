@@ -62,6 +62,11 @@
         <target state="needs-review-translation">Non è possibile specificare contemporaneamente global e tool-path come opzione."</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

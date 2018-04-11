@@ -23,19 +23,22 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         private readonly IFileSystem _fileSystem;
         private readonly Action _installCallback;
         private readonly Dictionary<PackageId, IEnumerable<string>> _warningsMap;
+        private readonly Dictionary<PackageId, IReadOnlyList<FilePath>> _packagedShimsMap;
 
         public ToolPackageInstallerMock(
             IFileSystem fileSystem,
             IToolPackageStore store,
             IProjectRestorer projectRestorer,
             Action installCallback = null,
-            Dictionary<PackageId, IEnumerable<string>> warningsMap = null)
+            Dictionary<PackageId, IEnumerable<string>> warningsMap = null,
+            Dictionary<PackageId, IReadOnlyList<FilePath>> packagedShimsMap = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _projectRestorer = projectRestorer ?? throw new ArgumentNullException(nameof(projectRestorer));
             _installCallback = installCallback;
             _warningsMap = warningsMap ?? new Dictionary<PackageId, IEnumerable<string>>();
+            _packagedShimsMap = packagedShimsMap ?? new Dictionary<PackageId, IReadOnlyList<FilePath>>();
         }
 
         public IToolPackage InstallPackage(PackageId packageId,
@@ -92,7 +95,10 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     IEnumerable<string> warnings = null;
                     _warningsMap.TryGetValue(packageId, out warnings);
 
-                    return new ToolPackageMock(_fileSystem, packageId, version, packageDirectory, warnings: warnings);
+                    IReadOnlyList<FilePath> packedShims = null;
+                    _packagedShimsMap.TryGetValue(packageId, out packedShims);
+
+                    return new ToolPackageMock(_fileSystem, packageId, version, packageDirectory, warnings: warnings, packagedShims: packedShims);
                 },
                 rollback: () => {
                     if (rollbackDirectory != null && _fileSystem.Directory.Exists(rollbackDirectory))
