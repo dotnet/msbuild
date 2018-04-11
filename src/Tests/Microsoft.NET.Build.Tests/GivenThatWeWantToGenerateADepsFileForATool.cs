@@ -141,7 +141,8 @@ class Program
 
             var args = new List<string>();
 
-            string generateDepsProjectPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
+            string generateDepsProjectDirectoryPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "targets", "GenerateDeps");
+            string generateDepsProjectFileName = "GenerateDeps.proj";
 
             args.Add($"/p:ProjectAssetsFile=\"{toolAssetsFilePath}\"");
 
@@ -183,11 +184,15 @@ class Program
 
             args.Add("/v:n");
 
-            var generateDepsCommand = new MSBuildCommand(Log, "BuildDepsJson", generateDepsProjectPath);
+            var generateDepsCommand = new MSBuildCommand(Log, "BuildDepsJson", generateDepsProjectDirectoryPath, generateDepsProjectFileName);
 
             generateDepsCommand.Execute(args.ToArray())
                 .Should()
                 .Pass();
+
+            new DirectoryInfo(generateDepsProjectDirectoryPath)
+                 .Should()
+                 .OnlyHaveFiles(new[] { generateDepsProjectFileName });
 
             var toolLibrary = toolAssetsFile.Targets
                 .Single()
