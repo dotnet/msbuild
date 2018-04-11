@@ -121,9 +121,8 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void GetItemSpecModifierOnBadPath()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -136,9 +135,8 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void GetItemSpecModifierOnBadPath2()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -147,6 +145,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+
         private static void TestGetItemSpecModifierOnBadPath(string currentDirectory)
         {
             try
@@ -453,6 +452,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void NormalizePathBadUNC1()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -464,6 +464,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void NormalizePathBadUNC2()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -475,6 +476,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void NormalizePathBadUNC3()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -522,14 +524,15 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void NormalizePathInvalid()
         {
+            string filePath = @"c:\aardvark\|||";
+
             Assert.Throws<ArgumentException>(() =>
             {
-                string filePath = @"c:\aardvark\|||";
-                Assert.Equal(null, FileUtilities.NormalizePath(filePath));
-            }
-           );
+                FileUtilities.NormalizePath(filePath);
+            });
         }
 
         [Fact]
