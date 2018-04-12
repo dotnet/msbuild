@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -237,6 +239,16 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
+        }
+
+        /// <summary>
+        /// Logs a telemetry event.
+        /// </summary>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        internal void LogTelemetry(string eventName, IDictionary<string, string> properties)
+        {
+            LoggingService.LogTelemetry(BuildEventContext, eventName, properties);
         }
     }
 }
