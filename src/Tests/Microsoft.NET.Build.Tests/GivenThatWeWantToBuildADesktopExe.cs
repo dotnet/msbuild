@@ -545,5 +545,27 @@ namespace DefaultReferences
             outputDirectory.Should().NotHaveFile("FluentValidation.resources.dll");
             outputDirectory.Should().HaveFile(@"fr\FluentValidation.resources.dll");
         }
+
+        [WindowsOnlyFact(Skip = "https://github.com/NuGet/Home/issues/6823")]
+        public void It_allows_TargetFrameworkVersion_to_be_capitalized()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "UppercaseTargetFrameworkVersion",
+                IsSdkProject = false,
+                IsExe = true,
+                TargetFrameworkVersion = "V4.6.1"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
