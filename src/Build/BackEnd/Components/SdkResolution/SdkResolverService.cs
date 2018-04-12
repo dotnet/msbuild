@@ -146,6 +146,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, result.Version);
                     }
 
+                    loggingContext.LogTelemetry("SdkResolved", new Dictionary<string, string>
+                    {
+                        {"SdkName", sdk.Name},
+                        {"SdkVersion", sdk.Version},
+                        {"SdkMinimumVersion", sdk.MinimumVersion},
+                        {"ResolvedVersion", result.Version}
+                    });
+
                     // Associate the element location of the resolved SDK reference
                     result.ElementLocation = sdkReferenceLocation;
 
