@@ -131,6 +131,13 @@
         "System.Xml.XmlDocument.dll",
         "System.Xml.XmlSerializer.dll",
         "System.Xml.XPath.dll",
-        "System.Xml.XPath.XDocument.dll"
+        "System.Xml.XPath.XDocument.dll",
+        "System.Diagnostics.DiagnosticSource.dll",
+        "System.Reflection.Emit.dll",
+        "System.Reflection.Emit.ILGeneration.dll",
+        "System.Reflection.Emit.Lightweight.dll",
+        "System.Reflection.TypeExtensions.dll",
+        "System.Security.Cryptography.OpenSsl.dll",
+        "System.Threading.Tasks.Extensions.dll"
     ]
 }
