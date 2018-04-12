@@ -137,7 +137,7 @@ function ExitIfError {
   then
     echo "$2"
 
-    if ! $ci # kill command not permitted on CI machines
+    if [[ "$ci" != "true" && "$dotnetBuildFromSource" != "true" ]]; # kill command not permitted on CI machines or in source-build
     then
       StopProcesses
     fi
@@ -269,7 +269,7 @@ function InstallRepoToolset {
   if [ ! -d "$RepoToolsetBuildProj" ]
   then
     ToolsetProj="$ScriptRoot/Toolset.proj"
-    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd
+    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /nologo /clp:Summary /warnaserror /v:$verbosity $logCmd $properties
   fi
 }
 

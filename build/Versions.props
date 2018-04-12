@@ -2,11 +2,18 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(DotNetRestoreSourcePropsPath)"
+          Condition="'$(DotNetRestoreSourcePropsPath)' != ''"/>
+
   <PropertyGroup>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn/api/v3/index.json</RestoreSources>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/nuget-build/api/v3/index.json</RestoreSources>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json</RestoreSources>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json</RestoreSources>
+    <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
+    <RestoreSources  Condition="'$(DotNetBuildOffline)' != 'true'">
+        $(RestoreSources);
+        https://dotnet.myget.org/F/roslyn/api/v3/index.json;
+        https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
+        https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
+        https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
+    </RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
@@ -36,7 +43,7 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>2.1.1-preview-007216</DotNetCliVersion>
-    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62512-02</RoslynToolsRepoToolsetVersion>
+    <RoslynToolsRepoToolsetVersion>1.0.0-msbuild-62811-02</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
     <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
