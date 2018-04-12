@@ -59,6 +59,9 @@ namespace Microsoft.NET.TestFramework
             command.Environment["GenerateResourceMSBuildArchitecture"] = "CurrentArchitecture";
             command.Environment["GenerateResourceMSBuildRuntime"] = "CurrentRuntime";
 
+            //  Prevent test MSBuild nodes from persisting
+            command.Environment["MSBUILDDISABLENODEREUSE"] = "1";
+
             ToolsetUnderTest.AddTestEnvironmentVariables(command);
         }
 
