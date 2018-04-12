@@ -368,6 +368,24 @@ namespace Microsoft.Build.Internal
         {
             byte[] bytes = new byte[8];
 
+#if NETCOREAPP2_1
+            // A legacy MSBuild.exe won't try to connect to MSBuild running
+            // in a dotnet host process, so we can read the bytes simply.
+            var readTask = stream.ReadAsync(bytes, 0, bytes.Length);
+            const int HandshakeReadTimeout = 30;
+
+            // Manual timeout here because the timeout passed to Connect() just before
+            // calling this method does not apply on UNIX domain socket-based
+            // implementations of PipeStream.
+            // https://github.com/dotnet/corefx/issues/28791
+            if (!readTask.Wait(HandshakeReadTimeout))
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", HandshakeReadTimeout));
+            }
+
+            readTask.GetAwaiter().GetResult();
+#else
+            // Legacy approach with an early-abort for connection attempts from ancient MSBuild.exes
             for (int i = 0; i < bytes.Length; i++)
             {
                 int read = stream.ReadByte();
@@ -394,6 +412,7 @@ namespace Microsoft.Build.Internal
 
                 bytes[i] = Convert.ToByte(read);
             }
+#endif
 
             long result;
 
