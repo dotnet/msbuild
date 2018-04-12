@@ -129,7 +129,8 @@
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="translated">Führt Microsoft-Buildmodul (MSBuild) aus.</target>
+        <target state="translated">Führt die Microsoft-Build-Engine (MSBuild) aus.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
@@ -189,7 +190,7 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET Core SDK version in use.</source>
-        <target state="needs-review-translation">.NET Core SDK-Version anzeigen.</target>
+        <target state="translated">Die verwendete .NET Core SDK-Version anzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
@@ -254,7 +255,7 @@
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Modify tools.</source>
-        <target state="new">Modify tools.</target>
+        <target state="translated">Hiermit werden Tools geändert.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">

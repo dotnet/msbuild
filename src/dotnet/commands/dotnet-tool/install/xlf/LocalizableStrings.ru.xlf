@@ -5,8 +5,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="translated">Если не было других указаний, вы можете ввести для вызова инструмента следующую команду: {0}
-Инструмент "{1}" (версия "{2}") установлен.</target>
+        <target state="translated">Вы можете вызвать это средство с помощью следующей команды: {0}
+Средство "{1}" (версии "{2}") успешно установлено.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -91,27 +91,27 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Требуется указать глобальный параметр или параметр tool-path.</target>
+        <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Невозможно указать глобальный параметр и параметр tool-path в качестве оценки одновременно.</target>
+        <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="needs-review-translation">Расположение оболочки совместимости для доступа к инструменту</target>
+        <target state="translated">Расположение для установки средства.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <target state="translated">Добавляет дополнительный источник пакета NuGet, используемый во время установки.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

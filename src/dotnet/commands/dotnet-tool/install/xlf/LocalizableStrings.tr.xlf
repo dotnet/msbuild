@@ -5,7 +5,7 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="translated">Başka bir yönerge sağlanmadıysa şu komutu yazarak aracı çağırabilirsiniz: {0}
+        <target state="translated">Şu komutu kullanarak aracı çağırabilirsiniz: {0}
 '{1}' aracı (sürüm '{2}') başarıyla yüklendi.</target>
         <note />
       </trans-unit>
@@ -91,27 +91,27 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Genel yolun veya araç yolunun sağlanması gerekir.</target>
+        <target state="translated">Lütfen genel seçeneğini (--global) veya araç yolu seçeneğini (--tool-path) belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Fikir olarak aynı anda hem genel yol hem de araç yolu kullanılamaz.</target>
+        <target state="translated">(--global), araç yolu seçeneği (--tool-path) ile çakışıyor. Lütfen seçeneklerden yalnızca birini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="needs-review-translation">Araca erişmek için dolgu konumu</target>
+        <target state="translated">Aracın yükleneceği konum.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <target state="translated">Yükleme sırasında kullanılacak ek bir NuGet paket kaynağı ekler.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

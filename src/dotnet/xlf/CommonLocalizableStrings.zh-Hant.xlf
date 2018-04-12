@@ -601,7 +601,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="needs-review-translation">不支援的專案類型。請與 SDK 提供者連絡。</target>
+        <target state="translated">專案 '{0}' 的專案類型不明，且無法新增至解決方案檔。如需支援，請連絡 SDK 提供者。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -860,7 +860,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
         <source>The command name '{0}' cannot begin with a leading dot (.).</source>
-        <target state="needs-review-translation">命令 '{0}' 的開頭有一個點 (.)。</target>
+        <target state="translated">命令名稱 '{0}' 的開頭不能為點 (.)。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
