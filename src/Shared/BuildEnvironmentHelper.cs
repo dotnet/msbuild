@@ -29,7 +29,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Name of the MSBuild process(es)
         /// </summary>
-        private static readonly string[] s_msBuildProcess = {"MSBUILD"};
+        private static readonly string[] s_msBuildProcess = {"MSBUILD", "MSBUILDTASKHOST"};
 
         /// <summary>
         /// Name of MSBuild executable files.
@@ -152,7 +152,7 @@ namespace Microsoft.Build.Shared
 
             // First check if we're in a VS installation
             if (NativeMethodsShared.IsWindows &&
-                Regex.IsMatch(msBuildExe, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild\.exe", RegexOptions.IgnoreCase))
+                Regex.IsMatch(msBuildExe, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
             {
                 return new BuildEnvironment(
                     BuildEnvironmentMode.VisualStudio,
