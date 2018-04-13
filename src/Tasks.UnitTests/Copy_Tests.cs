@@ -540,6 +540,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void DoNotRetryCopyNotSupportedException()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -905,6 +906,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void OutputsOnlyIncludeSuccessfulCopies()
         {
             string temp = Path.GetTempPath();

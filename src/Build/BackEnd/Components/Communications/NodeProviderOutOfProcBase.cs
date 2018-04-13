@@ -475,6 +475,9 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
                 {
+                    // Redirect the streams of worker nodes so that this MSBuild.exe's
+                    // parent doesn't wait on idle worker nodes to close streams
+                    // after the build is complete.
                     startInfo.hStdError = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
@@ -510,6 +513,12 @@ namespace Microsoft.Build.BackEnd
                 processStartInfo.Arguments = commandLineArgs;
                 if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
                 {
+                    // Redirect the streams of worker nodes so that this MSBuild.exe's
+                    // parent doesn't wait on idle worker nodes to close streams
+                    // after the build is complete.
+                    processStartInfo.RedirectStandardInput = true;
+                    processStartInfo.RedirectStandardOutput = true;
+                    processStartInfo.RedirectStandardError = true;
                     processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
                 }
                 processStartInfo.UseShellExecute = false;
