@@ -71,6 +71,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.GC.RetainVM"": false,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,
+            ""System.Globalization.Invariant"": true,
             ""extraProperty"": true
         },
         ""framework"": {
