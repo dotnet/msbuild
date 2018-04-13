@@ -16,8 +16,10 @@
   </Target>
 
 
-  <Target Name="Sign" DependsOnTargets="_GetSignFiles;SignFiles" />
-  <Target Name="_GetSignFiles">
+  <Target Name="SignBinaries" DependsOnTargets="_GetSignBinaries;SignFiles" />
+  <Target Name="SignPackages" DependsOnTargets="_GetSignPackages;SignFiles" />
+
+  <Target Name="_GetSignBinaries">
     
     <PropertyGroup>
       <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
@@ -31,6 +33,22 @@
       <FilesToSign Include="$(OutDir)bin\**\Microsoft.NET.Sdk.Publish.Tasks.dll">
         <Authenticode>Microsoft400</Authenticode>
         <StrongName>StrongName</StrongName>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GetSignPackages">
+    <PropertyGroup>
+      <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
+           signs files that are under these paths. -->
+      <OutDir>$(WebSdkRoot)\</OutDir>
+      <IntermediateOutputPath>$(WebSdkRoot)\artifacts\scratch</IntermediateOutputPath>
+    </PropertyGroup>
+  
+    <ItemGroup>
+      <!-- Adding the assemblies to sign -->
+      <FilesToSign Include="$(OutDir)bin\**\*.nupkg" Exclude="$(OutDir)bin\**\*.symbols.nupkg">
+        <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
   </Target>
