@@ -3133,6 +3133,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void ResolveFromDirectoryInvalidChar()
         {
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform =

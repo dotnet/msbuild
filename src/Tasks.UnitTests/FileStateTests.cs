@@ -43,6 +43,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void BadChars()
         {
             var state = new FileState("|");

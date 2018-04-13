@@ -34,13 +34,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidFile()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Cannot have invalid characters in file name on Unix"
-            }
-
             FindUnderPath t = new FindUnderPath();
             t.BuildEngine = new MockEngine();
 
@@ -55,13 +52,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPath()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Cannot have invalid characters in file name on Unix"
-            }
-
             FindUnderPath t = new FindUnderPath();
             t.BuildEngine = new MockEngine();
 
