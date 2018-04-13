@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tools are installed.</source>
-        <target state="new">Location where the tools are installed.</target>
+        <target state="translated">Speicherort, an dem die Tools installiert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="translated">Geben Sie entweder die globale Option (--global) oder die Toolpfadoption (--tool-path) an.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalAndToolPathConflict">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="translated">(--global) verursacht einen Konflikt mit der Toolpfadoption (--tool-path). Geben Sie nur eine der beiden Optionen an.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

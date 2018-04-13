@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Należy podać ścieżkę globalną lub ścieżkę narzędzia.</target>
+        <target state="translated">Określ opcję globalną (--global) lub opcję ścieżki narzędzia (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool was previously installed.</source>
-        <target state="needs-review-translation">Lokalizacja podkładki na potrzeby dostępu do narzędzia</target>
+        <target state="translated">Lokalizacja, w której narzędzie było wcześniej zainstalowane.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Nie można jednocześnie używać ścieżki globalnej i ścieżki narzędzia jako opinii.</target>
+        <target state="translated">Opcja (--global) powoduje konflikt z opcją ścieżki narzędzia (--tool-path). Określ tylko jedną z opcji.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

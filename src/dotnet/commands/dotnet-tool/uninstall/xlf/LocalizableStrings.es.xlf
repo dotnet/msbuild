@@ -49,17 +49,17 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Se necesita una ruta global o de herramienta.</target>
+        <target state="translated">Especifique la opción global (--global) o la opción de la ruta de acceso de herramientas (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool was previously installed.</source>
-        <target state="needs-review-translation">Ubicación de las correcciones de compatibilidad (shim) para acceder a la herramienta</target>
+        <target state="translated">La ubicación en la que se instaló anteriormente la herramienta.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">No puede tener una ruta global y de herramienta como opinión al mismo tiempo."</target>
+        <target state="translated">(--global) entra en conflicto con la opción de la ruta de acceso de herramientas (--tool-path). Especifique solo una de las opciones.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

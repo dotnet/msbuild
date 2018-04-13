@@ -64,10 +64,10 @@ Tuto chybu můžete opravit pomocí některé z těchto možností:
 Successfully installed the ASP.NET Core HTTPS Development Certificate.
 To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms please refer to the platform specific documentation.
 For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="needs-review-translation">ASP.NET Core
+        <target state="translated">ASP.NET Core
 ------------
 Úspěšně se podařilo nainstalovat certifikát pro vývoj ASP.NET Core HTTPS Development Certificate.
-Pokud chcete certifikátu důvěřovat (platí jenom pro Windows a macOS), nainstalujte nejprve nástroj dev-certs. To uděláte tak, že spustíte dotnet install tool dotnet-dev-certs -g --version 2.1.0-preview1-final a potom dotnet-dev-certs https --trust.
+Pokud chcete certifikátu důvěřovat (platí jenom pro Windows a macOS), nainstalujte nejprve nástroj dev-certs. To uděláte tak, že spustíte dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final a potom dotnet-dev-certs https --trust.
 Další informace o konfiguraci protokolu HTTPS najdete na webu https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
