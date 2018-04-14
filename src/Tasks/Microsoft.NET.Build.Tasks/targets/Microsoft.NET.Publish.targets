@@ -37,36 +37,43 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
 
-  <PropertyGroup Condition="'$(NoBuild)' != 'true'">
-    <_BeforePublishTargets>Build</_BeforePublishTargets>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(NoBuild)' == 'true'">
+  <PropertyGroup>
     <!-- We still need to resolve references even if we are not building during publish. -->
     <!-- BuildOnlySettings are required for RAR to find satellites and dependencies -->
-    <_BeforePublishTargets>
+    <_BeforePublishNoBuildTargets>
       BuildOnlySettings;
       _PreventProjectReferencesFromBuilding;
       ResolveReferences;
       PrepareResourceNames;
       ComputeIntermediateSatelliteAssemblies;
-    </_BeforePublishTargets>
+    </_BeforePublishNoBuildTargets>
+
+    <_CorePublishTargets>
+      PrepareForPublish;
+      ComputeAndCopyFilesToPublishDirectory;
+      GeneratePublishDependencyFile;
+      GeneratePublishRuntimeConfigurationFile;
+    </_CorePublishTargets>
   </PropertyGroup>
+
+  <Target Name="_PublishBuildAlternative"
+          Condition="'$(NoBuild)' != 'true'"
+          DependsOnTargets="Build;$(_CorePublishTargets)" />
+
+  <Target Name="_PublishNoBuildAlternative"
+          Condition="'$(NoBuild)' == 'true'"
+          DependsOnTargets="$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)" />
 
   <Target Name="Publish"
           Condition="$(IsPublishable) == 'true'"
-          DependsOnTargets="$(_BeforePublishTargets);
-                            PrepareForPublish;
-                            ComputeAndCopyFilesToPublishDirectory;
-                            GeneratePublishDependencyFile;
-                            GeneratePublishRuntimeConfigurationFile">
+          DependsOnTargets="_PublishBuildAlternative;_PublishNoBuildAlternative" >
 
     <!-- Ensure there is minimal verbosity output pointing to the publish directory and not just the
          build step's minimal output. Otherwise there is no indication at minimal verbosity of where
          the published assets were copied. -->
     <Message Importance="High" Text="$(MSBuildProjectName) -&gt; $([System.IO.Path]::GetFullPath('$(PublishDir)'))" />
   </Target>
-  
+
   <!-- Don't let project reference resolution build project references in NoBuild case. -->
   <Target Name="_PreventProjectReferencesFromBuilding">
     <PropertyGroup>
