@@ -321,7 +321,7 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(MarkPackageReferencesAsExternallyResolved);
                     writer.Write(ImplicitPlatformPackageIdentifier ?? "");
                     writer.Write(ProjectAssetsCacheFile);
-                    writer.Write(ProjectAssetsFile);
+                    writer.Write(ProjectAssetsFile ?? "");
                     writer.Write(ProjectLanguage ?? "");
                     writer.Write(ProjectPath);
                     writer.Write(RuntimeIdentifier ?? "");
