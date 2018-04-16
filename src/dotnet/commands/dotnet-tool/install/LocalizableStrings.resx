@@ -163,10 +163,13 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   <data name="ToolInstallationFailed" xml:space="preserve">
     <value>Tool '{0}' failed to install.</value>
   </data>
-  <data name="ToolInstallationFailedWithExplicitVersionGuide" xml:space="preserve">
-    <value>Tool '{0}' failed to install. You may need to specify the version using
+  <data name="ToolInstallationFailedWithRestoreGuidance" xml:space="preserve">
+    <value>Tool '{0}' failed to install. This failure may have been caused by:
 
-   dotnet tool install -g {0} --version &lt;version&gt;</value>
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.</value>
   </data>
   <data name="ToolInstallationFailedContactAuthor" xml:space="preserve">
     <value>Tool '{0}' failed to install. Please contact the tool author for assistance.</value>
