@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
-        <target state="new">.NET Install Command</target>
+        <target state="translated">.NET インストール コマンド</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Modify tools.</source>
-        <target state="new">Modify tools.</target>
+        <target state="translated">ツールを変更します。</target>
         <note />
       </trans-unit>
     </body>

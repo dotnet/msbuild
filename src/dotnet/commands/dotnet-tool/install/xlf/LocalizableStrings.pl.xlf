@@ -5,7 +5,7 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="translated">Jeśli nie było dodatkowych instrukcji, możesz wpisać następujące polecenie, aby wywołać narzędzie: {0}
+        <target state="translated">Możesz wywołać narzędzie za pomocą następującego polecenia: {0}
 Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
         <note />
       </trans-unit>
@@ -91,27 +91,27 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Należy podać ścieżkę globalną lub ścieżkę narzędzia.</target>
+        <target state="translated">Określ opcję globalną (--global) lub opcję ścieżki narzędzia (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Nie można jednocześnie używać ścieżki globalnej i ścieżki narzędzia jako opinii.</target>
+        <target state="translated">Opcja (--global) powoduje konflikt z opcją ścieżki narzędzia (--tool-path). Określ tylko jedną z opcji.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="needs-review-translation">Lokalizacja podkładki na potrzeby dostępu do narzędzia</target>
+        <target state="translated">Lokalizacja, w której narzędzie zostanie zainstalowane.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <target state="translated">Dodaje dodatkowe źródło pakietu NuGet do użycia podczas instalacji.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
@@ -22,7 +21,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"/p:PublishDir={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"-property:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),
@@ -32,7 +31,11 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.ManifestOptionDescription,
                     Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.ManifestOption)
-                        .ForwardAsSingle(o => $"/p:TargetManifestFiles={string.Join("%3B", o.Arguments)}")),
+                        .ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Arguments)}")),
+                Create.Option(
+                    "--no-build",
+                    LocalizableStrings.NoBuildOptionDescription,
+                    Accept.NoArguments().ForwardAs("-property:NoBuild=true")),
                 Create.Option(
                     "--self-contained",
                     LocalizableStrings.SelfContainedOptionDescription,
@@ -41,7 +44,7 @@ namespace Microsoft.DotNet.Cli
                         .ForwardAsSingle(o =>
                         {
                             string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
-                            return $"/p:SelfContained={value}";
+                            return $"-property:SelfContained={value}";
                         })),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());

@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Newtonsoft.Json;
 
@@ -20,16 +21,24 @@ namespace Microsoft.DotNet.ShellShim
         private const string ApphostNameWithoutExtension = "apphost";
 
         private readonly DirectoryPath _shimsDirectory;
-        private readonly string _appHostSourceDirectory;
+        private readonly IFileSystem _fileSystem;
+        private readonly IAppHostShellShimMaker _appHostShellShimMaker;
+        private readonly IFilePermissionSetter _filePermissionSetter;
 
-        public ShellShimRepository(DirectoryPath shimsDirectory, string appHostSourcePath = null)
+        public ShellShimRepository(
+            DirectoryPath shimsDirectory,
+            string appHostSourceDirectory = null,
+            IFileSystem fileSystem = null,
+            IAppHostShellShimMaker appHostShellShimMaker = null,
+            IFilePermissionSetter filePermissionSetter = null)
         {
             _shimsDirectory = shimsDirectory;
-            _appHostSourceDirectory = appHostSourcePath ?? Path.Combine(ApplicationEnvironment.ApplicationBasePath,
-                    "AppHostTemplate");
+            _fileSystem = fileSystem ?? new FileSystemWrapper();
+            _appHostShellShimMaker = appHostShellShimMaker ?? new AppHostShellShimMaker(appHostSourceDirectory: appHostSourceDirectory);
+            _filePermissionSetter = filePermissionSetter ?? new FilePermissionSetter();
         }
 
-        public void CreateShim(FilePath targetExecutablePath, string commandName)
+        public void CreateShim(FilePath targetExecutablePath, string commandName, IReadOnlyList<FilePath> packagedShims = null)
         {
             if (string.IsNullOrEmpty(targetExecutablePath.Value))
             {
@@ -53,19 +62,27 @@ namespace Microsoft.DotNet.ShellShim
                 {
                     try
                     {
-                        if (!Directory.Exists(_shimsDirectory.Value))
+                        if (!_fileSystem.Directory.Exists(_shimsDirectory.Value))
                         {
-                            Directory.CreateDirectory(_shimsDirectory.Value);
+                            _fileSystem.Directory.CreateDirectory(_shimsDirectory.Value);
                         }
 
-                        CreateApphostShimAndConfigFile(
-                                   commandName,
-                                   entryPoint: targetExecutablePath);
-
-                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        if (TryGetPackagedShim(packagedShims, commandName, out FilePath? packagedShim))
                         {
-                            SetUserExecutionPermission(GetShimPath(commandName));
+                            _fileSystem.File.Copy(packagedShim.Value.Value, GetShimPath(commandName).Value);
+                            _filePermissionSetter.SetUserExecutionPermission(GetShimPath(commandName).Value);
                         }
+                        else
+                        {
+                            _appHostShellShimMaker.CreateApphostShellShim(
+                                targetExecutablePath,
+                                GetShimPath(commandName));
+                        }
+                    }
+                    catch (FilePermissionSettingException ex)
+                    {
+                        throw new ShellShimException(
+                                string.Format(CommonLocalizableStrings.FailedSettingShimPermissions, ex.Message));
                     }
                     catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
                     {
@@ -79,7 +96,7 @@ namespace Microsoft.DotNet.ShellShim
                     }
                 },
                 rollback: () => {
-                    foreach (var file in GetShimFiles(commandName).Where(f => File.Exists(f.Value)))
+                    foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                     {
                         File.Delete(file.Value);
                     }
@@ -93,10 +110,10 @@ namespace Microsoft.DotNet.ShellShim
                 action: () => {
                     try
                     {
-                        foreach (var file in GetShimFiles(commandName).Where(f => File.Exists(f.Value)))
+                        foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
                             var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                            File.Move(file.Value, tempPath);
+                            _fileSystem.File.Move(file.Value, tempPath);
                             files[file.Value] = tempPath;
                         }
                     }
@@ -114,44 +131,15 @@ namespace Microsoft.DotNet.ShellShim
                 commit: () => {
                     foreach (var value in files.Values)
                     {
-                        File.Delete(value);
+                        _fileSystem.File.Delete(value);
                     }
                 },
                 rollback: () => {
                     foreach (var kvp in files)
                     {
-                        File.Move(kvp.Value, kvp.Key);
+                        _fileSystem.File.Move(kvp.Value, kvp.Key);
                     }
                 });
-        }
-
-        private void CreateApphostShimAndConfigFile(string commandName, FilePath entryPoint)
-        {
-            string appHostSourcePath;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                appHostSourcePath = Path.Combine(_appHostSourceDirectory, ApphostNameWithoutExtension + ".exe");
-            }
-            else
-            {
-                appHostSourcePath = Path.Combine(_appHostSourceDirectory, ApphostNameWithoutExtension);
-            }
-
-            EmbedAppNameInHost.EmbedAndReturnModifiedAppHostPath(
-                appHostSourceFilePath: appHostSourcePath,
-                appHostDestinationFilePath: GetShimPath(commandName).Value,
-                appBinaryName: Path.GetFileName(entryPoint.Value));
-
-            var config = JsonConvert.SerializeObject(
-                new RootObject
-                {
-                    startupOptions = new StartupOptions
-                    {
-                        appRoot = entryPoint.GetDirectoryPath().Value
-                    }
-                });
-
-            File.WriteAllText(GetConfigPath(commandName).Value, config);
         }
 
         private class StartupOptions
@@ -166,7 +154,7 @@ namespace Microsoft.DotNet.ShellShim
 
         private bool ShimExists(string commandName)
         {
-            return GetShimFiles(commandName).Any(p => File.Exists(p.Value));
+            return GetShimFiles(commandName).Any(p => _fileSystem.File.Exists(p.Value));
         }
 
         private IEnumerable<FilePath> GetShimFiles(string commandName)
@@ -177,7 +165,6 @@ namespace Microsoft.DotNet.ShellShim
             }
 
             yield return GetShimPath(commandName);
-            yield return GetConfigPath(commandName);
         }
 
         private FilePath GetShimPath(string commandName)
@@ -192,29 +179,37 @@ namespace Microsoft.DotNet.ShellShim
             }
         }
 
-        private FilePath GetConfigPath(string commandName)
+        private bool TryGetPackagedShim(
+            IReadOnlyList<FilePath> packagedShims,
+            string commandName,
+            out FilePath? packagedShim)
         {
-            return _shimsDirectory.WithFile(commandName + ".startupconfig.json");
-        }
+            packagedShim = null;
 
-        private static void SetUserExecutionPermission(FilePath path)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (packagedShims != null && packagedShims.Count > 0)
             {
-                return;
+                FilePath[] candidatepackagedShim =
+                    packagedShims
+                        .Where(s => string.Equals(
+                            Path.GetFileName(s.Value),
+                            Path.GetFileName(GetShimPath(commandName).Value))).ToArray();
+
+                if (candidatepackagedShim.Length > 1)
+                {
+                    throw new ShellShimException(
+                        string.Format(
+                            CommonLocalizableStrings.MoreThanOnePackagedShimAvailable,
+                            string.Join(';', candidatepackagedShim)));
+                }
+
+                if (candidatepackagedShim.Length == 1)
+                {
+                    packagedShim = candidatepackagedShim.Single();
+                    return true;
+                }
             }
 
-            CommandResult result = new CommandFactory()
-                .Create("chmod", new[] { "u+x", path.Value })
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute();
-
-            if (result.ExitCode != 0)
-            {
-                throw new ShellShimException(
-                    string.Format(CommonLocalizableStrings.FailedSettingShimPermissions, result.StdErr));
-            }
+            return false;
         }
     }
 }

@@ -134,6 +134,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             {
                 throw new UnauthorizedAccessException();
             }
+
+            public void Copy(string source, string destination)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
 
         private class NoPermissionDirectoryFake : IDirectory

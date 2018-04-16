@@ -20,7 +20,7 @@ if($Help)
     Write-Output ""
     Write-Output "Options:"
     Write-Output "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-    Write-Output "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64, x86, or arm , default: x64)"
+    Write-Output "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64, x86, arm, or arm64 , default: x64)"
     Write-Output "  -NoPackage                         Skip packaging targets"
     Write-Output "  -NoBuild                           Skip building the product"
     Write-Output "  -Help                              Display this help message"
@@ -74,6 +74,9 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Don't resolve shared frameworks from user or global locations
 $env:DOTNET_MULTILEVEL_LOOKUP=0
+
+# Turn off MSBuild Node re-use
+$env:MSBUILDDISABLENODEREUSE=1
 
 # Enable vs test console logging
 $env:VSTEST_BUILD_TRACE=1

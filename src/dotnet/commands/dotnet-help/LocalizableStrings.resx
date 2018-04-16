@@ -232,7 +232,7 @@
     <value>The path to an application .dll file to execute.</value>
   </data>
   <data name="SDKVersionCommandDefinition" xml:space="preserve">
-    <value>Display .NET Core SDK version.</value>
+    <value>Display .NET Core SDK version in use.</value>
   </data>
   <data name="SDKInfoCommandDefinition" xml:space="preserve">
     <value>Display .NET Core information.</value>

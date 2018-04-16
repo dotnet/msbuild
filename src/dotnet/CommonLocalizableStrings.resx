@@ -640,4 +640,10 @@ setx PATH "%PATH%;{0}"
   <data name="FormatVersionIsMissing" xml:space="preserve">
     <value>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</value>
   </data>
+  <data name="MoreThanOnePackagedShimAvailable" xml:space="preserve">
+    <value>More than one packaged shim is available: {0}.</value>
+  </data>
+  <data name="FailedToReadNuGetLockFile" xml:space="preserve">
+    <value>Failed to read NuGet LockFile for tool package '{0}': {1}</value>
+  </data>
 </root>

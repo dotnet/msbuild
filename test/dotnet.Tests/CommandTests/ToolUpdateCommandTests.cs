@@ -17,6 +17,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
+using Microsoft.DotNet.ShellShim;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
@@ -139,7 +140,7 @@ namespace Microsoft.DotNet.Tests.Commands
                             _mockFeeds
                         ),
                         installCallback: () => throw new ToolConfigurationException("Simulated error"))),
-                _ => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
+                _ => GetMockedShellShimRepository(),
                 _reporter);
 
             Action a = () => command.Execute();
@@ -168,7 +169,7 @@ namespace Microsoft.DotNet.Tests.Commands
                             _mockFeeds
                         ),
                         installCallback: () => throw new ToolConfigurationException("Simulated error"))),
-                _ => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
+                _ => GetMockedShellShimRepository(),
                 _reporter);
 
             Action a = () => command.Execute();
@@ -216,7 +217,7 @@ namespace Microsoft.DotNet.Tests.Commands
                         _reporter,
                         _mockFeeds
                     ))),
-                (_) => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
+                (_) => GetMockedShellShimRepository(),
                 _environmentPathInstructionMock,
                 _reporter);
         }
@@ -236,8 +237,16 @@ namespace Microsoft.DotNet.Tests.Commands
                         _reporter,
                         _mockFeeds
                     ))),
-                (_) => new ShellShimRepositoryMock(new DirectoryPath(ShimsDirectory), _fileSystem),
+                (_) => GetMockedShellShimRepository(),
                 _reporter);
+        }
+
+        private ShellShimRepository GetMockedShellShimRepository()
+        {
+            return new ShellShimRepository(
+                    new DirectoryPath(ShimsDirectory),
+                    fileSystem: _fileSystem,
+                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem));
         }
     }
 }

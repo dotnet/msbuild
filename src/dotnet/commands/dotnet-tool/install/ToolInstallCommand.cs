@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
                     foreach (var command in package.Commands)
                     {
-                        shellShimRepository.CreateShim(command.Executable, command.Name);
+                        shellShimRepository.CreateShim(command.Executable, command.Name, package.PackagedShims);
                     }
 
                     scope.Complete();
