@@ -36,9 +36,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
     <DefineConstants>$(DefineConstants);$(ImplicitConfigurationDefine)</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup  Condition=" '$(UseBundledFSharpTargets)' == 'true' ">
-    <DefineConstants>$(DefineConstants);$(ImplicitFrameworkDefine)</DefineConstants>
-  </PropertyGroup>
 
   <!-- ***************************************************************************************************************
        Loads the cross-targeting targets if we are doing a cross-targeting build

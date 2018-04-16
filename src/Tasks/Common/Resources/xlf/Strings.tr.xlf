@@ -357,14 +357,19 @@
         <target state="translated">.NET Core SDK’nın önizleme sürümüyle çalışıyorsunuz. SDK sürümünü geçerli projedeki bir global.json dosyası aracılığıyla tanımlayabilirsiniz. Daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidItemSpecToUse">
+        <source>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
+        <target state="translated">ItemSpecToUse parametresi için geçersiz değer: '{0}'. Bu özellik boş olmalı veya 'Left' veya 'Right' olarak ayarlanmalıdır</target>
+        <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
+      </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
-        <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
+        <target state="translated">'{0}' başvurusuna yönelik DotNetCliToolReference kullanımı kalktı ve bu projeden kaldırılabilir. Bu araç varsayılan olarak .NET Core SDK’sında paketlenmiştir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
         <source>Error reading assets file: {0}</source>
-        <target state="new">Error reading assets file: {0}</target>
+        <target state="translated">Varlıklar dosyası okunurken hata: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">

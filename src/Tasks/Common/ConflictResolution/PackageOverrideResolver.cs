@@ -78,20 +78,18 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
         public TConflictItem Resolve(TConflictItem item1, TConflictItem item2)
         {
-            if (PackageOverrides != null)
+            if (PackageOverrides != null && item1.PackageId != null && item2.PackageId != null)
             {
                 PackageOverride packageOverride;
                 Version version;
-                if (item1.PackageId != null
-                    && PackageOverrides.TryGetValue(item1.PackageId, out packageOverride)
+                if (PackageOverrides.TryGetValue(item1.PackageId, out packageOverride)
                     && packageOverride.OverriddenPackages.TryGetValue(item2.PackageId, out version)
                     && item2.PackageVersion != null
                     && item2.PackageVersion <= version)
                 {
                     return item1;
                 }
-                else if (item2.PackageId != null
-                    && PackageOverrides.TryGetValue(item2.PackageId, out packageOverride)
+                else if (PackageOverrides.TryGetValue(item2.PackageId, out packageOverride)
                     && packageOverride.OverriddenPackages.TryGetValue(item1.PackageId, out version)
                     && item1.PackageVersion != null
                     && item1.PackageVersion <= version)

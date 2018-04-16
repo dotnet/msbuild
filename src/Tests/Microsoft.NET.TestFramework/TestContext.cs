@@ -59,12 +59,17 @@ namespace Microsoft.NET.TestFramework
             command.Environment["GenerateResourceMSBuildArchitecture"] = "CurrentArchitecture";
             command.Environment["GenerateResourceMSBuildRuntime"] = "CurrentRuntime";
 
+            //  Prevent test MSBuild nodes from persisting
+            command.Environment["MSBUILDDISABLENODEREUSE"] = "1";
+
             ToolsetUnderTest.AddTestEnvironmentVariables(command);
         }
 
 
         public static void Initialize(TestCommandLine commandLine)
         {
+            Environment.SetEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
+
             TestContext testContext = new TestContext();
 
             // This is dependent on the current artifacts layout:

@@ -36,18 +36,49 @@ Copyright (c) .NET Foundation. All rights reserved.
     The main publish entry point.
     ============================================================
     -->
+
+  <PropertyGroup>
+    <!-- We still need to resolve references even if we are not building during publish. -->
+    <!-- BuildOnlySettings are required for RAR to find satellites and dependencies -->
+    <_BeforePublishNoBuildTargets>
+      BuildOnlySettings;
+      _PreventProjectReferencesFromBuilding;
+      ResolveReferences;
+      PrepareResourceNames;
+      ComputeIntermediateSatelliteAssemblies;
+    </_BeforePublishNoBuildTargets>
+
+    <_CorePublishTargets>
+      PrepareForPublish;
+      ComputeAndCopyFilesToPublishDirectory;
+      GeneratePublishDependencyFile;
+      GeneratePublishRuntimeConfigurationFile;
+    </_CorePublishTargets>
+  </PropertyGroup>
+
+  <Target Name="_PublishBuildAlternative"
+          Condition="'$(NoBuild)' != 'true'"
+          DependsOnTargets="Build;$(_CorePublishTargets)" />
+
+  <Target Name="_PublishNoBuildAlternative"
+          Condition="'$(NoBuild)' == 'true'"
+          DependsOnTargets="$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)" />
+
   <Target Name="Publish"
           Condition="$(IsPublishable) == 'true'"
-          DependsOnTargets="Build;
-                            PrepareForPublish;
-                            ComputeAndCopyFilesToPublishDirectory;
-                            GeneratePublishDependencyFile;
-                            GeneratePublishRuntimeConfigurationFile">
+          DependsOnTargets="_PublishBuildAlternative;_PublishNoBuildAlternative" >
 
     <!-- Ensure there is minimal verbosity output pointing to the publish directory and not just the
          build step's minimal output. Otherwise there is no indication at minimal verbosity of where
          the published assets were copied. -->
     <Message Importance="High" Text="$(MSBuildProjectName) -&gt; $([System.IO.Path]::GetFullPath('$(PublishDir)'))" />
+  </Target>
+
+  <!-- Don't let project reference resolution build project references in NoBuild case. -->
+  <Target Name="_PreventProjectReferencesFromBuilding">
+    <PropertyGroup>
+      <BuildProjectReferences>false</BuildProjectReferences>
+    </PropertyGroup>
   </Target>
 
   <!--
@@ -258,6 +289,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
     </ResolvePublishAssemblies>
+  </Target>
+
+  <Target Name="FilterPublishSatelliteResources" AfterTargets="RunResolvePublishAssemblies"
+          Condition="'$(SatelliteResourceLanguages)' != ''">
+
+    <ItemGroup>
+      <PublishSatelliteResources Include="@(ResolvedAssembliesToPublish)"
+                                 Condition="'%(ResolvedAssembliesToPublish.AssetType)' == 'resources'" />
+    </ItemGroup>
+    
+    <JoinItems Left="@(PublishSatelliteResources)" LeftKey="Culture" LeftMetadata="*"
+               Right="$(SatelliteResourceLanguages)" RightKey="" RightMetadata=""
+               ItemSpecToUse="Left">
+      <Output TaskParameter="JoinResult" ItemName="FilteredPublishSatelliteResources" />
+    </JoinItems>
+
+    <ItemGroup Condition="'@(PublishSatelliteResources)' != ''">
+      <ResolvedAssembliesToPublish Remove="@(PublishSatelliteResources)" />
+      <ResolvedAssembliesToPublish Include="@(FilteredPublishSatelliteResources)" />
+    </ItemGroup>
   </Target>
   
   <!--
@@ -471,6 +522,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       ReferencePaths="@(ReferencePath)"
+                      ReferenceDependencyPaths="@(ReferenceDependencyPaths)"
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       ReferenceAssemblies="@(_ReferenceAssemblies)"
                       IncludeMainProject="$(IncludeMainProjectInDepsFile)"

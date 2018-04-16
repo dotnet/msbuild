@@ -13,6 +13,7 @@
     <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
     <ThreadPoolMinThreads>2</ThreadPoolMinThreads>
     <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>

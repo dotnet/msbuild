@@ -357,14 +357,19 @@
         <target state="translated">.NET Core SDK のプレビュー バージョンで作業をしています。現在のプロジェクトの global.json ファイルによって SDK バージョンを定義できます。詳細については、https://go.microsoft.com/fwlink/?linkid=869452 をご覧ください</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidItemSpecToUse">
+        <source>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
+        <target state="translated">ItemSpecToUse パラメーターの値が無効です: '{0}'。このプロパティは空白にするか、'Left' または 'Right' に設定する必要があります</target>
+        <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
+      </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
-        <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
+        <target state="translated">DotNetCliToolReference を使用して '{0}' を参照するのは古い方法であるため、このプロジェクトから削除できます。既定で、このツールは .NET Core SDK にバンドルされています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
         <source>Error reading assets file: {0}</source>
-        <target state="new">Error reading assets file: {0}</target>
+        <target state="translated">アセット ファイルの読み取りでエラーが発生しました: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">

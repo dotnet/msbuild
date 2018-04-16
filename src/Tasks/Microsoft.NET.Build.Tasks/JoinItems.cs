@@ -21,6 +21,9 @@ namespace Microsoft.NET.Build.Tasks
 
         public string RightKey { get; set; }
 
+        //  Set to "Left" or "Right" to use that itemspec in results.  Leave blank to set itemspec based on the joined key value
+        public string ItemSpecToUse { get; set; }
+
 
         //  LeftMetadata and RightMetadata: The metadata names to include in the result.  Specify "*" to include all metadata
         public string[] LeftMetadata { get; set; }
@@ -36,6 +39,21 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
+            bool useLeftItemSpec = false;
+            bool useRightItemSpec = false;
+            if (string.Equals(ItemSpecToUse, "Left", StringComparison.OrdinalIgnoreCase))
+            {
+                useLeftItemSpec = true;
+            }
+            else if (string.Equals(ItemSpecToUse, "Right", StringComparison.OrdinalIgnoreCase))
+            {
+                useRightItemSpec = true;
+            }
+            else if (!string.IsNullOrEmpty(ItemSpecToUse))
+            {
+                throw new BuildErrorException(Strings.InvalidItemSpecToUse, ItemSpecToUse);
+            }
+
             bool useAllLeftMetadata = LeftMetadata != null && LeftMetadata.Length == 1 && LeftMetadata[0] == "*";
             bool useAllRightMetadata = RightMetadata != null && RightMetadata.Length == 1 && RightMetadata[0] == "*";
 
@@ -46,7 +64,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     //  If including all metadata from left items and none from right items, just return left items directly
                     if (useAllLeftMetadata &&
-                        string.IsNullOrEmpty(LeftKey) &&
+                        (string.IsNullOrEmpty(LeftKey) || useLeftItemSpec) &&
                         (RightMetadata == null || RightMetadata.Length == 0))
                     {
                         return left;
@@ -54,13 +72,27 @@ namespace Microsoft.NET.Build.Tasks
 
                     //  If including all metadata from right items and none from left items, just return the right items directly
                     if (useAllRightMetadata &&
-                        string.IsNullOrEmpty(RightKey) &&
+                        (string.IsNullOrEmpty(RightKey) || useRightItemSpec) &&
                         (LeftMetadata == null || LeftMetadata.Length == 0))
                     {
                         return right;
                     }
 
-                    var ret = new TaskItem(GetKeyValue(LeftKey, left));
+                    string resultItemSpec;
+                    if (useLeftItemSpec)
+                    {
+                        resultItemSpec = left.ItemSpec;
+                    }
+                    else if (useRightItemSpec)
+                    {
+                        resultItemSpec = right.ItemSpec;
+                    }
+                    else
+                    {
+                        resultItemSpec = GetKeyValue(LeftKey, left);
+                    }
+
+                    var ret = new TaskItem(resultItemSpec);
 
                     //  Weird ordering here is to prefer left metadata in all cases, as CopyToMetadata doesn't overwrite any existing metadata
                     if (useAllLeftMetadata)
