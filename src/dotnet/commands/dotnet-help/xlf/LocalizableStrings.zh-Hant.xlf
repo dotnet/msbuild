@@ -253,8 +253,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
-        <source>Modify tools.</source>
-        <target state="translated">修改工具。</target>
+        <source>Install or work with tools that extend the .NET experience.</source>
+        <target state="needs-review-translation">修改工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
