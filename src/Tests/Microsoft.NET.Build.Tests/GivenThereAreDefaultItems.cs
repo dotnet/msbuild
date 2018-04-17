@@ -367,6 +367,61 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
+        public void It_does_not_include_source_or_resx_files_in_None()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DontIncludeSourceFilesInNone",
+                TargetFrameworks = "netcoreapp2.0",
+                IsExe = true,
+                IsSdkProject = true
+            };
+            testProject.AdditionalProperties["EnableDefaultCompileItems"] = "false";
+            testProject.AdditionalProperties["EnableDefaultResourceItems"] = "false";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    XElement itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + ".cs")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            File.WriteAllText(Path.Combine(projectFolder, "ShouldBeIgnored.cs"), "!InvalidCSharp!");
+            File.WriteAllText(Path.Combine(projectFolder, "Resources.resx"), "<Resource/>");
+
+            var getCompileItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Compile", GetValuesCommand.ValueType.Item);
+            getCompileItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            var compileItems = getCompileItemsCommand.GetValues();
+            RemoveGeneratedCompileItems(compileItems);
+            compileItems.ShouldBeEquivalentTo(new[] { testProject.Name + ".cs" });
+
+            var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
+            getNoneItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getNoneItemsCommand.GetValues()
+                .Should().BeEmpty();
+
+            var getResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Resource", GetValuesCommand.ValueType.Item);
+            getResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getResourceItemsCommand.GetValues()
+                .Should().BeEmpty();
+
+        }
+
+        [Fact]
         public void Default_items_have_the_correct_relative_paths()
         {
             Action<XDocument> projectChanges = project =>

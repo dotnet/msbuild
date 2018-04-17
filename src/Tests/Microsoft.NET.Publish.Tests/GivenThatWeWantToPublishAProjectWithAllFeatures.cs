@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using FluentAssertions;
 using FluentAssertions.Json;
 using Microsoft.Extensions.DependencyModel;
@@ -13,7 +15,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Newtonsoft.Json.Linq;
 using Xunit;
-using System.Xml.Linq;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
@@ -28,26 +29,7 @@ namespace Microsoft.NET.Publish.Tests
         [MemberData(nameof(PublishData))]
         public void It_publishes_the_project_correctly(string targetFramework, string [] expectedPublishFiles)
         {
-            TestAsset testAsset = _testAssetsManager
-                .CopyTestAsset("KitchenSink", "KitchenSinkPublish_", targetFramework)
-                .WithSource()
-                .WithProjectChanges((path, project) =>
-                {
-                    if (Path.GetFileName(path).Equals("TestApp.csproj", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var ns = project.Root.Name.Namespace;
-
-                        var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
-                        targetFrameworkElement.SetValue(targetFramework);
-                    }
-                });
-
-            testAsset.Restore(Log, "TestApp");
-            testAsset.Restore(Log, "TestLibrary");
-
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            PublishCommand publishCommand = new PublishCommand(Log, appProjectDirectory);
+            PublishCommand publishCommand = GetPublishCommand(targetFramework);
             publishCommand
                 .Execute()
                 .Should()
@@ -89,6 +71,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.GC.RetainVM"": false,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,
+            ""System.Globalization.Invariant"": true,
             ""extraProperty"": true
         },
         ""framework"": {
@@ -105,6 +88,87 @@ namespace Microsoft.NET.Publish.Tests
             runtimeConfigJsonObject
                 .Should()
                 .BeEquivalentTo(baselineConfigJsonObject);
+        }
+
+        [Fact]
+        public void It_fails_when_nobuild_is_set_and_build_was_not_performed_previously()
+        {
+            var publishCommand = GetPublishCommand("netcoreapp1.0").Execute("/p:NoBuild=true");
+            publishCommand.Should().Fail().And.HaveStdOutContaining("MSB3030"); // "Could not copy ___ because it was not found."
+        }
+
+        [Theory]
+        [MemberData(nameof(PublishData))]
+        public void It_does_not_build_when_nobuild_is_set(string targetFramework, string[] expectedPublishFiles)
+        {
+            var publishCommand = GetPublishCommand(targetFramework);
+
+            // do a separate build invocation before publish
+            var buildCommand = new BuildCommand(Log, publishCommand.ProjectRootPath);
+            buildCommand.Execute().Should().Pass();
+
+            // modify all project files, which would force recompilation if we were to build during publish
+            WaitForUtcNowToAdvance();
+            foreach (string projectFile in EnumerateFiles(buildCommand, "*.csproj"))
+            {
+                File.AppendAllText(projectFile, " ");
+            }
+
+            // capture modification time of all binaries before publish
+            var modificationTimes = GetLastWriteTimesUtc(buildCommand, "*.exe", "*.dll", "*.resources", "*.pdb");
+
+            // publish (with NoBuild set)
+            WaitForUtcNowToAdvance();
+            publishCommand.Execute("/p:NoBuild=true").Should().Pass();
+            publishCommand.GetOutputDirectory(targetFramework).Should().OnlyHaveFiles(expectedPublishFiles);
+
+            // check that publish did not modify any of the build output
+            foreach (var (file, modificationTime) in modificationTimes)
+            {
+                File.GetLastWriteTimeUtc(file)
+                    .Should().Be(
+                        modificationTime, 
+                        because: $"Publish with NoBuild=true should not overwrite {file}");
+            }
+        }
+
+        private static List<(string, DateTime)> GetLastWriteTimesUtc(MSBuildCommand command, params string[] searchPatterns)
+        {
+            return EnumerateFiles(command, searchPatterns)
+                .Select(file => (file, File.GetLastWriteTimeUtc(file)))
+                .ToList();
+        }
+
+        private static IEnumerable<string> EnumerateFiles(MSBuildCommand command, params string[] searchPatterns)
+        {
+            return searchPatterns.SelectMany(
+                pattern => Directory.EnumerateFiles(
+                    Path.Combine(command.ProjectRootPath, ".."), // up one level from TestApp to also get TestLibrary P2P files
+                    pattern,
+                    SearchOption.AllDirectories));
+        }
+
+        private PublishCommand GetPublishCommand(string targetFramework, [CallerMemberName] string callingMethod = null)
+        {
+            TestAsset testAsset = _testAssetsManager
+                .CopyTestAsset("KitchenSink", callingMethod, identifier: targetFramework)
+                .WithSource()
+                .WithProjectChanges((path, project) =>
+                {
+                    if (Path.GetFileName(path).Equals("TestApp.csproj", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
+                        targetFrameworkElement.SetValue(targetFramework);
+                    }
+                });
+
+            testAsset.Restore(Log, "TestApp");
+
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+
+            return new PublishCommand(Log, appProjectDirectory);
         }
 
         private static void VerifyDependency(

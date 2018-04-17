@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework
@@ -19,6 +20,16 @@ namespace Microsoft.NET.TestFramework
         protected SdkTest(ITestOutputHelper log)
         {
             Log = log;
+        }
+
+        protected static void WaitForUtcNowToAdvance()
+        {
+            var start = DateTime.UtcNow;
+
+            while (DateTime.UtcNow <= start)
+            {
+                Thread.Sleep(millisecondsTimeout: 1);
+            }
         }
     }
 }

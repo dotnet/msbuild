@@ -23,9 +23,13 @@ Copyright (c) .NET Foundation. All rights reserved.
        if running core msbuild select Microsoft.FSharp.targets from dotnet cli deployment
        *************************************************************************************************************** -->
   <PropertyGroup Condition=" '$(IsCrossTargetingBuild)' != 'true' " >
-     <FSharpTargetsShim Condition = " '$(FSharpOverridesTargetsShim)' == '' and Exists('$(MSBuildToolsPath)\FSharp\Microsoft.FSharp.Overrides.NetSdk.targets') ">$(MSBuildToolsPath)\FSharp\Microsoft.FSharp.Overrides.NetSdk.targets</FSharpTargetsShim>
-     <FSharpTargetsShim Condition = " '$(FSharpOverridesTargetsShim)' == '' and Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Overrides.NetSdk.targets') ">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.NetSdk.targets</FSharpTargetsShim>
+     <FSharpOverridesTargetsShim Condition = " '$(FSharpOverridesTargetsShim)' == '' and Exists('$(MSBuildToolsPath)\FSharp\Microsoft.FSharp.Overrides.NetSdk.targets') ">$(MSBuildToolsPath)\FSharp\Microsoft.FSharp.Overrides.NetSdk.targets</FSharpOverridesTargetsShim>
+     <FSharpOverridesTargetsShim Condition = " '$(FSharpOverridesTargetsShim)' == '' and Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Overrides.NetSdk.targets') ">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.NetSdk.targets</FSharpOverridesTargetsShim>
   </PropertyGroup>
   <Import Condition=" '$(UseBundledFSharpTargets)' == 'true' and  '$(IsCrossTargetingBuild)' != 'true' and Exists('$(FSharpOverridesTargetsShim)') " Project="$(FSharpOverridesTargetsShim)" />
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine)</DefineConstants>
+  </PropertyGroup>
 
 </Project>

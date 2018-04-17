@@ -48,5 +48,50 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Assert.Null(resolver.PackageOverrides);
             Assert.Null(resolver.Resolve(new MockConflictItem(), new MockConflictItem()));
         }
+
+        [Fact]
+        public void ItHandlesNullPackageIds()
+        {
+            ITaskItem[] packageOverrides = new[]
+            {
+                new MockTaskItem("FakePlatform", new Dictionary<string, string>
+                {
+                    { MetadataKeys.OverriddenPackages, "System.Ben|4.2.0;System.Jobst-Immo|4.2.0;System.Livar|4.3.0;System.Dave|4.2.0" }
+                })
+            };
+
+            var resolver = new PackageOverrideResolver<MockConflictItem>(packageOverrides);
+
+            Assert.NotNull(resolver.PackageOverrides);
+
+            var packageItem = new MockConflictItem("System.Eric")
+            {
+                PackageId = "System.Eric",
+                PackageVersion = new Version(4, 0, 0),
+                AssemblyVersion = new Version(4, 0, 0, 0),
+                ItemType = ConflictItemType.Reference
+            };
+
+            var platformItem = new MockConflictItem("System.Eric")
+            {
+                PackageId = null,
+                AssemblyVersion = new Version(4, 1, 0, 0),
+                ItemType = ConflictItemType.Platform
+            };
+            
+            Assert.Null(resolver.Resolve(packageItem, platformItem));
+            Assert.Null(resolver.Resolve(platformItem, packageItem));
+
+            var packageItem2 = new MockConflictItem("System.Eric")
+            {
+                PackageId = "FakePlatform",
+                PackageVersion = new Version(4, 0, 0),
+                AssemblyVersion = new Version(4, 0, 0, 0),
+                ItemType = ConflictItemType.Reference
+            };
+
+            Assert.Null(resolver.Resolve(packageItem2, platformItem));
+            Assert.Null(resolver.Resolve(platformItem, packageItem2));
+        }
     }
 }
