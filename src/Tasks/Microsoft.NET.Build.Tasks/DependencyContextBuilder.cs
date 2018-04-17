@@ -22,6 +22,7 @@ namespace Microsoft.NET.Build.Tasks
         private readonly ProjectContext _projectContext;
         private IEnumerable<ReferenceInfo> _referenceAssemblies;
         private IEnumerable<ReferenceInfo> _directReferences;
+        private IEnumerable<ReferenceInfo> _dependencyReferences;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _excludeFromPublishPackageIds;
         private CompilationOptions _compilationOptions;
@@ -97,6 +98,12 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
+        public DependencyContextBuilder WithDependencyReferences(IEnumerable<ReferenceInfo> dependencyReferences)
+        {
+            _dependencyReferences = dependencyReferences;
+            return this;
+        }
+
         public DependencyContextBuilder WithReferenceProjectInfos(Dictionary<string, SingleProjectInfo> referenceProjectInfos)
         {
             _referenceProjectInfos = referenceProjectInfos;
@@ -161,7 +168,8 @@ namespace Microsoft.NET.Build.Tasks
             }
             runtimeLibraries = runtimeLibraries
                 .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>())
-                .Concat(GetDirectReferenceRuntimeLibraries());
+                .Concat(GetDirectReferenceRuntimeLibraries())
+                .Concat(GetDependencyReferenceRuntimeLibraries());
 
             IEnumerable<CompilationLibrary> compilationLibraries = Enumerable.Empty<CompilationLibrary>();
             if (includeCompilationLibraries)
@@ -379,6 +387,20 @@ namespace Microsoft.NET.Build.Tasks
                 else if (export.IsProject())
                 {
                     referenceProjectInfo = GetProjectInfo(library);
+
+                    if (runtime)
+                    {
+                        // DependencyReferences do not get passed to the compilation, so we should only
+                        // process them when getting the runtime libraries.
+
+                        foreach (var dependencyReference in referenceProjectInfo.DependencyReferences)
+                        {
+                            libraryDependencies.Add(
+                                new Dependency(
+                                    GetReferenceLibraryName(dependencyReference),
+                                    dependencyReference.Version));
+                        }
+                    }
                 }
             }
 
@@ -530,9 +552,9 @@ namespace Microsoft.NET.Build.Tasks
             return Path.GetFileName(fullPath);
         }
 
-        private IEnumerable<RuntimeLibrary> GetDirectReferenceRuntimeLibraries()
+        private IEnumerable<RuntimeLibrary> GetReferenceRuntimeLibraries(IEnumerable<ReferenceInfo> references)
         {
-            return _directReferences
+            return references
                 ?.Select(r => CreateRuntimeLibrary(
                     type: "reference",
                     name: GetReferenceLibraryName(r),
@@ -547,9 +569,9 @@ namespace Microsoft.NET.Build.Tasks
                 Enumerable.Empty<RuntimeLibrary>();
         }
 
-        private IEnumerable<CompilationLibrary> GetDirectReferenceCompilationLibraries()
+        private IEnumerable<CompilationLibrary> GetReferenceCompilationLibraries(IEnumerable<ReferenceInfo> references)
         {
-            return _directReferences
+            return references
                 ?.Select(r => new CompilationLibrary(
                     type: "reference",
                     name: GetReferenceLibraryName(r),
@@ -560,6 +582,21 @@ namespace Microsoft.NET.Build.Tasks
                     serviceable: false))
                 ??
                 Enumerable.Empty<CompilationLibrary>();
+        }
+
+        private IEnumerable<RuntimeLibrary> GetDirectReferenceRuntimeLibraries()
+        {
+            return GetReferenceRuntimeLibraries(_directReferences);
+        }
+
+        private IEnumerable<CompilationLibrary> GetDirectReferenceCompilationLibraries()
+        {
+            return GetReferenceCompilationLibraries(_directReferences);
+        }
+
+        private IEnumerable<RuntimeLibrary> GetDependencyReferenceRuntimeLibraries()
+        {
+            return GetReferenceRuntimeLibraries(_dependencyReferences);
         }
 
         private string GetReferenceLibraryName(ReferenceInfo reference)

@@ -73,6 +73,39 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
+        [Fact]
+        public void It_does_not_treat_nuget_refs_as_copylocal_false()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NuGetCopyLocalFalse",
+                TargetFrameworks = "netcoreapp2.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+            testProject.AdditionalProperties.Add("PreserveCompilationContext", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            // Although nuget references are not copied locally in build, we do not need to put them in refs folder.
+            // So there should be no refs/*.dll causing OnlyHaveFiles below to fail.
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().OnlyHaveFiles(new string[] {
+                "NuGetCopyLocalFalse.deps.json",
+                "NuGetCopyLocalFalse.dll",
+                "NuGetCopyLocalFalse.pdb",
+                "NuGetCopyLocalFalse.runtimeconfig.dev.json",
+                "NuGetCopyLocalFalse.runtimeconfig.json",
+            });
+        }
+
         private static readonly string[] Net461ReferenceOnlyAssemblies = new []
         {
             "Microsoft.Win32.Primitives.dll",

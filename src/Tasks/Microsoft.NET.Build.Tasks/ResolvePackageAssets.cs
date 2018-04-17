@@ -55,6 +55,11 @@ namespace Microsoft.NET.Build.Tasks
         public string RuntimeIdentifier { get; set; }
 
         /// <summary>
+        /// Do not write package assets cache to disk nor attempt to read previous cache from disk.
+        /// </summary>
+        public bool DisablePackageAssetsCache { get; set; }
+
+        /// <summary>
         /// Do not generate transitive project references.
         /// </summary>
         public bool DisableTransitiveProjectReferences { get; set; }
@@ -251,6 +256,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var item in CompileTimeAssemblies)
             {
+                item.SetMetadata(MetadataKeys.NuGetSourceType, "Package");
                 item.SetMetadata(MetadataKeys.Private, "false");
                 item.SetMetadata(MetadataKeys.HintPath, item.ItemSpec);
                 item.SetMetadata(MetadataKeys.ExternallyResolved, externallyResolved);
@@ -262,6 +268,7 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var item in FrameworkAssemblies)
             {
                 item.SetMetadata(MetadataKeys.NuGetIsFrameworkReference, "true");
+                item.SetMetadata(MetadataKeys.NuGetSourceType, "Package");
                 item.SetMetadata(MetadataKeys.Pack, "false");
                 item.SetMetadata(MetadataKeys.Private, "false");
             }
@@ -301,6 +308,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 using (var writer = new BinaryWriter(stream, TextEncoding, leaveOpen: true))
                 {
+                    writer.Write(DisablePackageAssetsCache);
                     writer.Write(DisableFrameworkAssemblies);
                     writer.Write(DisableTransitiveProjectReferences);
                     writer.Write(EmitAssetsLogMessages);
@@ -334,8 +342,38 @@ namespace Microsoft.NET.Build.Tasks
             public CacheReader(ResolvePackageAssets task)
             {
                 byte[] settingsHash = task.HashSettings();
-                BinaryReader reader = null;
 
+                if (task.DisablePackageAssetsCache)
+                {
+                    _reader = CreateReaderFromMemory(task, settingsHash);
+                }
+                else
+                {
+                    _reader = CreateReaderFromDisk(task, settingsHash);
+                }
+
+                ReadMetadataStringTable();
+            }
+
+            private static BinaryReader CreateReaderFromMemory(ResolvePackageAssets task, byte[] settingsHash)
+            {
+                Debug.Assert(task.DisablePackageAssetsCache);
+
+                var stream = new MemoryStream();
+                using (var writer = new CacheWriter(task, stream))
+                {
+                    writer.Write();
+                }
+
+                stream.Position = 0;
+                return OpenCacheStream(stream, settingsHash);
+            }
+
+            private static BinaryReader CreateReaderFromDisk(ResolvePackageAssets task, byte[] settingsHash)
+            {
+                Debug.Assert(!task.DisablePackageAssetsCache);
+
+                BinaryReader reader = null;
                 try
                 {
                     if (File.GetLastWriteTimeUtc(task.ProjectAssetsCacheFile) > File.GetLastWriteTimeUtc(task.ProjectAssetsFile))
@@ -357,13 +395,11 @@ namespace Microsoft.NET.Build.Tasks
                     reader = OpenCacheFile(task.ProjectAssetsCacheFile, settingsHash);
                 }
 
-                _reader = reader;
-                ReadMetadataStringTable();
+                return reader;
             }
 
-            private static BinaryReader OpenCacheFile(string path, byte[] settingsHash)
+            private static BinaryReader OpenCacheStream(Stream stream, byte[] settingsHash)
             {
-                var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var reader = new BinaryReader(stream, TextEncoding, leaveOpen: false);
 
                 try
@@ -377,6 +413,12 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 return reader;
+            }
+
+            private static BinaryReader OpenCacheFile(string path, byte[] settingsHash)
+            {
+                var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return OpenCacheStream(stream, settingsHash);
             }
 
             private static void ValidateHeader(BinaryReader reader, byte[] settingsHash)
@@ -459,7 +501,7 @@ namespace Microsoft.NET.Build.Tasks
             private Placeholder _metadataStringTablePosition;
             private int _itemCount;
 
-            public CacheWriter(ResolvePackageAssets task)
+            public CacheWriter(ResolvePackageAssets task, Stream stream = null)
             {
                 var targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
 
@@ -472,8 +514,16 @@ namespace Microsoft.NET.Build.Tasks
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
                 _bufferedMetadata = new List<int>();
 
-                var stream = File.Open(task.ProjectAssetsCacheFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: false);
+                if (stream == null)
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(task.ProjectAssetsCacheFile));
+                    stream = File.Open(task.ProjectAssetsCacheFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                    _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: false);
+                }
+                else
+                {
+                    _writer = new BinaryWriter(stream, TextEncoding, leaveOpen: true);
+                }
             }
 
             public void Dispose()

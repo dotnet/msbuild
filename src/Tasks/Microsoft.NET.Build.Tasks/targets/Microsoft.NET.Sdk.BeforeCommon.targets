@@ -87,8 +87,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- For .NET Framework, reference core assemblies -->
 
   <PropertyGroup>
-    <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion)</_TargetFrameworkVersionWithoutV>
-    <_TargetFrameworkVersionWithoutV Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_TargetFrameworkVersionWithoutV>
+    <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion.TrimStart('vV'))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
 
   <!--
@@ -149,8 +148,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <VersionlessImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)</VersionlessImplicitFrameworkDefine>
     <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">NET</_FrameworkIdentifierForImplicitDefine>
 
-    <_FrameworkVersionForImplicitDefine Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_FrameworkVersionForImplicitDefine>
-    <_FrameworkVersionForImplicitDefine Condition="!$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion)</_FrameworkVersionForImplicitDefine>
+    <_FrameworkVersionForImplicitDefine>$(TargetFrameworkVersion.TrimStart('vV'))</_FrameworkVersionForImplicitDefine>
 
     <_FrameworkVersionForImplicitDefine>$(_FrameworkVersionForImplicitDefine.Replace('.', '_'))</_FrameworkVersionForImplicitDefine>
     

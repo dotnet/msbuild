@@ -330,6 +330,10 @@
   <data name="UsingPreviewSdkWarning" xml:space="preserve">
     <value>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</value>
   </data>
+  <data name="InvalidItemSpecToUse" xml:space="preserve">
+    <value>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</value>
+    <comment>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</comment>
+  </data>
   <data name="ProjectContainsObsoleteDotNetCliTool" xml:space="preserve">
     <value>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</value>
   </data>

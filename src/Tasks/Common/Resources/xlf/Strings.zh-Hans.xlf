@@ -357,14 +357,19 @@
         <target state="translated">你正在使用 .NET Core SDK 的预览版。可通过当前项目中的 global.json 文件来定义 SDK 版本。详细信息请访问 https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidItemSpecToUse">
+        <source>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
+        <target state="translated">无效的 ItemSpecToUse 参数值:“{0}”。此属性必须为空或设为“左”或“右”</target>
+        <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
+      </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
-        <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
+        <target state="translated">使用 DotNetCliToolReference 引用“{0}”已过时，且可从此项目中删除。此工具默认捆绑于 .NET Core SDK。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
         <source>Error reading assets file: {0}</source>
-        <target state="new">Error reading assets file: {0}</target>
+        <target state="translated">读取资产文件时出错: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">

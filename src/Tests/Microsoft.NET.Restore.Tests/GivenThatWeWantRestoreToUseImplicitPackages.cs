@@ -51,7 +51,7 @@ namespace Microsoft.NET.Restore.Tests
                 lockFile.GetTarget(NuGetFramework.Parse(".NETStandard,Version=v2.0"), null);
             var netStandardLibrary =
                 target.Libraries.Single(l => l.Name == "NETStandard.Library");
-            netStandardLibrary.Version.ToString().Should().Be("2.0.1");
+            netStandardLibrary.Version.ToString().Should().Be("2.0.2");
         }
 
         [Fact]

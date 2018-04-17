@@ -85,6 +85,15 @@ namespace Microsoft.NET.Build.Tasks
                 item.SetMetadata("AssetType", resolvedAssembly.Asset.ToString().ToLower());
                 item.SetMetadata(MetadataKeys.PackageName, resolvedAssembly.Package.Id.ToString());
                 item.SetMetadata(MetadataKeys.PackageVersion, resolvedAssembly.Package.Version.ToString().ToLower());
+
+                if (resolvedAssembly.Asset == AssetType.Resources)
+                {
+                    //  For resources, the DestinationSubDirectory is set to the locale.  Set the Culture
+                    //  metadata on the generated item to this value so that the satellite assemblies can
+                    //  be filtered by culture.
+                    item.SetMetadata(MetadataKeys.Culture, resolvedAssembly.DestinationSubDirectory);
+                }
+
                 _assembliesToPublish.Add(item);
             }
 

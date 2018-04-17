@@ -26,15 +26,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Project Assets File -->
   <PropertyGroup>
     <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == ''">$(BaseIntermediateOutputPath)/project.assets.json</ProjectAssetsFile>
+    <ProjectAssetsFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsFile)))</ProjectAssetsFile>
 
     <!-- Note that the assets.cache file has contents that are unique to the current TFM and configuration and therefore cannot
          be stored in a shared directory next to the assets.json file -->
     <ProjectAssetsCacheFile Condition="'$(ProjectAssetsCacheFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).assets.cache</ProjectAssetsCacheFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- Ensure $(ProjectAssetsFile) is a full path -->
-    <ProjectAssetsFile Condition="'$([System.IO.Path]::IsPathRooted($(ProjectAssetsFile)))' != 'true'">$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(ProjectAssetsFile)'))))</ProjectAssetsFile>
+    <ProjectAssetsCacheFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(ProjectAssetsCacheFile)))</ProjectAssetsCacheFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -193,8 +190,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ResolvePackageAssets" 
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
-          DependsOnTargets="PrepareForBuild">
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
 
     <PropertyGroup Condition="'$(EnsureRuntimePackageDependencies)' == ''
                           and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
@@ -211,6 +207,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
+      DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
@@ -232,6 +229,22 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
     </ResolvePackageAssets>
 
+
+  </Target>
+
+  <Target Name="FilterSatelliteResources" AfterTargets="ResolvePackageAssets"
+          Condition="'$(SatelliteResourceLanguages)' != ''">
+
+    <JoinItems Left="@(ResourceCopyLocalItems)" LeftKey="Culture" LeftMetadata="*"
+               Right="$(SatelliteResourceLanguages)" RightKey="" RightMetadata=""
+               ItemSpecToUse="Left">
+      <Output TaskParameter="JoinResult" ItemName="FilteredResourceCopyLocalItems" />
+    </JoinItems>
+
+    <ItemGroup>
+      <ResourceCopyLocalItems Remove="@(ResourceCopyLocalItems)" />
+      <ResourceCopyLocalItems Include="@(FilteredResourceCopyLocalItems)" />
+    </ItemGroup>
   </Target>
 
   <!--

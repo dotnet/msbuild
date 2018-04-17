@@ -357,14 +357,19 @@
         <target state="translated">Si sta usando una versione in anteprima di .NET Core SDK. È possibile definire la versione dell'SDK tramite un file global.json nel progetto corrente. Per altre informazioni, vedere https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidItemSpecToUse">
+        <source>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
+        <target state="translated">Valore non valido per il parametro ItemSpecToUse: '{0}'. Questa proprietà deve essere vuota o impostata su 'Left' o 'Right'</target>
+        <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
+      </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
-        <target state="new">Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</target>
+        <target state="translated">L'uso di DotNetCliToolReference per fare riferimento a '{0}' è obsoleto e può essere da questo progetto. Questo strumento è incluso in .NET Core SDK per impostazione predefinita.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
         <source>Error reading assets file: {0}</source>
-        <target state="new">Error reading assets file: {0}</target>
+        <target state="translated">Si è verificato un errore durante la lettura del file di risorse: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
