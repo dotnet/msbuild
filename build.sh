@@ -13,8 +13,8 @@ REPOROOT="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 export DOTNET_VERSION=2.1.300-preview2-008248
 export WebSdkRoot=$REPOROOT
-export WebSdkReferences=$WebSdkRoot/references/ 
-export WebSdkSource=$WebSdkRoot/src/ 
+export WebSdkReferences=$WebSdkRoot/references/
+export WebSdkSource=$WebSdkRoot/src/
 export WebSdkBuild=$WebSdkRoot/build/
 
 [ -z "$BuildConfiguration" ] && export BuildConfiguration=Release

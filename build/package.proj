@@ -9,8 +9,8 @@
     <BuildBranchName Condition="'$(BuildBranchName)' == ''">dev</BuildBranchName>
     <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(BuildBranchName)$(CurrentDate)-$(BUILD_BUILDNUMBER)</WebSdkVersion>
   </PropertyGroup>
-  
-  <Target Name="Package" 
+
+  <Target Name="Package"
           Condition="'$(SkipPackages)' != 'true'"
           DependsOnTargets="_Package"/>
 
@@ -44,6 +44,7 @@
 
     <MSBuild Projects="@(WebSdkPackageProject)"
          Targets ="Restore;Build;Pack"/>
-    
+
   </Target>
+
 </Project>

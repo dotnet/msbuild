@@ -6,7 +6,7 @@
     <DotNetSdksFolder>$(DOTNET_INSTALL_DIR)/Sdk/$(DOTNET_VERSION)/Sdks</DotNetSdksFolder>
   </PropertyGroup>
 
-  <Target Name="Test" 
+  <Target Name="Test"
           Condition="'$(SkipTests)' != 'true'"
           DependsOnTargets="_Test"/>
 
@@ -39,13 +39,13 @@
         DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web.ProjectSystem/Sdk/Sdk.targets"
         OverwriteReadOnlyFiles="true" />
 
-    <!--Copy web sdks-->
-    <Copy SourceFiles="$(WebSdkSource)/Web/Microsoft.NET.Sdk.Web.Targets/Sdk.props"
-        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web/Sdk/Sdk.props"
-        OverwriteReadOnlyFiles="true" />
+    <ItemGroup>
+      <SDKFiles Include="$(WebSdkSource)/Web/Microsoft.NET.Sdk.Web.Targets/*.props;$(WebSdkSource)/Web/Microsoft.NET.Sdk.Web.Targets/*.targets" />
+    </ItemGroup>
 
-    <Copy SourceFiles="$(WebSdkSource)/Web/Microsoft.NET.Sdk.Web.Targets/Sdk.targets"
-        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web/Sdk/Sdk.targets"
+    <!--Copy web sdks-->
+    <Copy SourceFiles="@(SDKFiles)"
+        DestinationFolder="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Web/Sdk/"
         OverwriteReadOnlyFiles="true" />
 
     <!-- Copy Publish targets and projectsystem targets-->
