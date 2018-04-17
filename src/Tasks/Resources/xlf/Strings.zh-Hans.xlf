@@ -1936,7 +1936,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotFindWrapperForTypeLib">
         <source>MSB3283: Cannot find wrapper assembly for type library "{0}". Verify that (1) the COM component is registered correctly and (2) your target platform is the same as the bitness of the COM component. For example, if the COM component is 32-bit, your target platform must not be 64-bit.</source>
-        <target state="translated">MSB3283: 找不到类型库“{0}”的包装器程序集。请验证 (1) 是否已正确注册 COM 组件，以及 (2) 目标平台与 COM 组件的位元是否相同。例如，如果 COM 组件为 32 位，目标平台就不能为 64 位。</target>
+        <target state="translated">MSB3283: 找不到类型库“{0}”的包装器程序集。请验证 (1) 是否已正确注册 COM 组件，以及 (2) 目标平台与 COM 组件的位数是否相同。例如，如果 COM 组件为 32 位，目标平台就不能为 64 位。</target>
         <note>{StrBegin="MSB3283: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotGetPathForTypeLib">
