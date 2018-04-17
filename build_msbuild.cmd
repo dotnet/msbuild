@@ -5,3 +5,4 @@ xcopy \\aspnetci\share\tools\websdk\WebDeploy\* "%WebSdkBuild%\WebDeploy\*" /y /
 
 msbuild "%WebSdkBuild%\BuildPackages.csproj" /t:Restore
 msbuild "%WebSdkBuild%\build.proj" /p:Configuration=%BuildConfiguration% /t:Build %*
+msbuild "%WebSdkBuild%\build.proj" /p:Configuration=%BuildConfiguration% /t:SignPackages %*
