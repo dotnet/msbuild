@@ -5,8 +5,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="translated">追加の指示がない場合、次のコマンドを入力してツールを呼び出すことができます: {0}
-ツール '{1}' (バージョン '{2}') は正常にインストールされました。</target>
+        <target state="translated">次のコマンドを使用してツールを呼び出せます。{0}
+ツール '{1}' (バージョン '{2}') が正常にインストールされました。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -91,27 +91,27 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">global か tool-path を指定する必要があります。</target>
+        <target state="translated">グローバル オプション (--global) またはツール パス オプション (--tool-path) のいずれかを指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">global と tool-path を意見として同時に指定することはできません。</target>
+        <target state="translated">(--global) とツール パス オプション (--tool-path) は競合します。どちらか片方のオプションのみを指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="needs-review-translation">ツールにアクセスする shim の場所</target>
+        <target state="translated">ツールがインストールされる場所。</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <target state="translated">インストール中に使用する他の NuGet パッケージ ソースを追加します。</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

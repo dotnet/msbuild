@@ -167,12 +167,12 @@ namespace Microsoft.DotNet.Tools.Run
         {
             List<string> args = new List<string>()
             {
-                "/nologo"
+                "-nologo"
             };
 
-            if (!RestoreArgs.Any(a => a.StartsWith("/verbosity:")))
+            if (!RestoreArgs.Any(a => a.StartsWith("-verbosity:")))
             {
-                args.Add("/verbosity:quiet");
+                args.Add("-verbosity:quiet");
             }
 
             args.AddRange(RestoreArgs);

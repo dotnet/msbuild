@@ -34,17 +34,22 @@
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tools are installed.</source>
-        <target state="new">Location where the tools are installed.</target>
+        <target state="translated">도구가 설치되는 위치입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="new">Please specify either the global option (--global) or the tool path option (--tool-path).</target>
+        <target state="translated">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalAndToolPathConflict">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="new">(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</target>
+        <target state="translated">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
         <note />
       </trans-unit>
     </body>

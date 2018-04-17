@@ -5,7 +5,7 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="translated">Pokud nebyly dostupné žádné další pokyny, můžete zadáním následujícího příkazu nástroj vyvolat: {0}
+        <target state="translated">Tento nástroj lze vyvolat pomocí následujícího příkazu: {0}
 Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
@@ -91,27 +91,27 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Je potřeba zadat buď globální cestu, nebo cestu k nástroji.</target>
+        <target state="translated">Zadejte prosím globální parametr (--global) nebo parametr cesty nástroje (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Globální cesta a cesta k nástroji nemůžou být zadané současně.</target>
+        <target state="translated">(--global) je v konfliktu s parametrem cesty nástroje (--tool-path). Zadejte prosím pouze jeden z parametrů.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="needs-review-translation">Umístění překrytí pro přístup k nástroji</target>
+        <target state="translated">Umístění, do kterého se nástroj nainstaluje</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <target state="translated">Přidá další zdroj balíčku NuGet, který se použije při instalaci.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

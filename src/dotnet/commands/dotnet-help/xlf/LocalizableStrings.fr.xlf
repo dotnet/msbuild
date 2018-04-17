@@ -188,8 +188,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
-        <source>Display .NET Core SDK version.</source>
-        <target state="translated">Affichez la version du SDK .NET Core.</target>
+        <source>Display .NET Core SDK version in use.</source>
+        <target state="translated">Affichez la version utilisée du kit SDK .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Modify tools.</source>
-        <target state="new">Modify tools.</target>
+        <target state="translated">Modifier les outils.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">

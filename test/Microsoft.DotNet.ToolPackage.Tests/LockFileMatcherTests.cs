@@ -10,7 +10,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 {
     public class LockFileMatcherTests : TestBase
     {
-
         [Theory]
         [InlineData("tools/netcoreapp1.1/any/tool.dll", "tool.dll", true)]
         [InlineData(@"tools\netcoreapp1.1\any\subDirectory\tool.dll", "subDirectory/tool.dll", true)]
@@ -22,6 +21,21 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         public void MatchesEntryPointTests(string pathInLockFileItem, string targetRelativeFilePath, bool shouldMatch)
         {
             LockFileMatcher.MatchesFile(new LockFileItem(pathInLockFileItem), targetRelativeFilePath)
+                .Should().Be(shouldMatch);
+        }
+
+
+        [Theory]
+        [InlineData("tools/netcoreapp1.1/any/tool.dll", "", true)]
+        [InlineData(@"tools\netcoreapp1.1\any\subDirectory\tool.dll", "subDirectory", true)]
+        [InlineData(@"tools\netcoreapp1.1\any\subDirectory\tool.dll", "sub", false)]
+        [InlineData("tools/netcoreapp1.1/any/subDirectory/tool.dll", "any/subDirectory", false)]
+        public void MatchesDirectoryPathTests(
+            string pathInLockFileItem,
+            string targetRelativeFilePath,
+            bool shouldMatch)
+        {
+            LockFileMatcher.MatchesDirectoryPath(new LockFileItem(pathInLockFileItem), targetRelativeFilePath)
                 .Should().Be(shouldMatch);
         }
     }

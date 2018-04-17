@@ -601,7 +601,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="needs-review-translation">Tipo di progetto non supportato. Verificare con il provider SDK.</target>
+        <target state="translated">Il progetto '{0}' ha un tipo progetto sconosciuto e non può essere aggiunto al file di soluzione. Per assistenza, contattare il fornitore dell'SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -860,7 +860,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
         <source>The command name '{0}' cannot begin with a leading dot (.).</source>
-        <target state="needs-review-translation">Il comando '{0}' presenta un punto iniziale.</target>
+        <target state="translated">Il nome del comando '{0}' non può iniziare con un punto (.).</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
@@ -881,6 +881,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
         <target state="new">Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="new">More than one packaged shim is available: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="new">Failed to read NuGet LockFile for tool package '{0}': {1}</target>
         <note />
       </trans-unit>
     </body>

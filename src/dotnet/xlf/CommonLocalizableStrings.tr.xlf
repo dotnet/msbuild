@@ -601,7 +601,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="needs-review-translation">Proje türü desteklenmiyor. Lütfen SDK sağlayıcınıza başvurun.</target>
+        <target state="translated">'{0}' projesi bilinmeyen bir proje türüne sahip ve çözüm dosyasına eklenemiyor. Lütfen destek için SDK sağlayıcınıza başvurun.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -860,7 +860,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
         <source>The command name '{0}' cannot begin with a leading dot (.).</source>
-        <target state="needs-review-translation">'{0}' komutunun başında nokta var.</target>
+        <target state="translated">'{0}' komut adının başında bir nokta (.) olamaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
@@ -881,6 +881,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
         <target state="new">Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="new">More than one packaged shim is available: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="new">Failed to read NuGet LockFile for tool package '{0}': {1}</target>
         <note />
       </trans-unit>
     </body>

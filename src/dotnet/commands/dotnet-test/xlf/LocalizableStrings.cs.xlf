@@ -127,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
-        <source>Do not build project before testing.  Implies --no-restore.</source>
-        <target state="translated">Nesestavujte projekt, dokud ho neotestujete. Implikuje možnost --no-restore.</target>
+        <source>Do not build the project before testing. Implies --no-restore.</source>
+        <target state="needs-review-translation">Nesestavujte projekt, dokud ho neotestujete. Implikuje možnost --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">

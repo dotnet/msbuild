@@ -49,20 +49,28 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             var global = _options.ValueOrDefault<bool>("global");
             var toolPath = _options.SingleArgumentOrDefault("tool-path");
 
-            if (string.IsNullOrWhiteSpace(toolPath) && !global)
+            DirectoryPath? toolDirectoryPath = null;
+            if (!string.IsNullOrWhiteSpace(toolPath))
+            {
+                if (!Directory.Exists(toolPath))
+                {
+                    throw new GracefulException(
+                        string.Format(
+                            LocalizableStrings.InvalidToolPathOption,
+                            toolPath));
+                }
+
+                toolDirectoryPath = new DirectoryPath(toolPath);
+            }
+
+            if (toolDirectoryPath == null && !global)
             {
                 throw new GracefulException(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
             }
 
-            if (!string.IsNullOrWhiteSpace(toolPath) && global)
+            if (toolDirectoryPath != null && global)
             {
                 throw new GracefulException(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
-            }
-
-            DirectoryPath? toolDirectoryPath = null;
-            if (!string.IsNullOrWhiteSpace(toolPath))
-            {
-                toolDirectoryPath = new DirectoryPath(toolPath);
             }
 
             IToolPackageStore toolPackageStore = _createToolPackageStore(toolDirectoryPath);

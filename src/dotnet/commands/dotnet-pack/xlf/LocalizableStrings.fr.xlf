@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Do not build project before packing.  Implies --no-restore.</source>
-        <target state="translated">Ne pas générer le projet avant la compression. Implique --no-restore.</target>
+        <source>Do not build the project before packing. Implies --no-restore.</source>
+        <target state="needs-review-translation">Ne pas générer le projet avant la compression. Implique --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">

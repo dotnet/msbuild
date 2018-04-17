@@ -44,10 +44,10 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             {
                 "--runtime",
                 AnyRid,
-                $"/p:BaseIntermediateOutputPath={assetJsonOutput.ToXmlEncodeString()}"
+                $"-property:BaseIntermediateOutputPath={assetJsonOutput.ToXmlEncodeString()}"
             });
 
-            argsToPassToRestore.Add($"/verbosity:{verbosity ?? "quiet"}");
+            argsToPassToRestore.Add($"-verbosity:{verbosity ?? "quiet"}");
 
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
                 .Create("restore", argsToPassToRestore);

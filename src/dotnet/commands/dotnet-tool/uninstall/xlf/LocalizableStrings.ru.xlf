@@ -49,17 +49,22 @@
       </trans-unit>
       <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Требуется указать глобальный параметр или параметр tool-path.</target>
+        <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool was previously installed.</source>
-        <target state="needs-review-translation">Расположение оболочки совместимости для доступа к инструменту</target>
+        <target state="translated">Расположение предыдущей установки средства.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Невозможно указать глобальный параметр и параметр tool-path в качестве оценки одновременно.</target>
+        <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="new">Tool path '{0}' does not exist.</target>
         <note />
       </trans-unit>
     </body>

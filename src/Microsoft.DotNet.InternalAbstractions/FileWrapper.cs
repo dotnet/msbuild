@@ -51,6 +51,11 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             File.Move(source, destination);
         }
 
+        public void Copy(string sourceFileName, string destFileName)
+        {
+            File.Copy(sourceFileName, destFileName);
+        }
+
         public void Delete(string path)
         {
             File.Delete(path);

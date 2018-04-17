@@ -286,6 +286,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             {
                 throw new NotImplementedException();
             }
+
+            public void Copy(string source, string destination)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class MockStream : MemoryStream

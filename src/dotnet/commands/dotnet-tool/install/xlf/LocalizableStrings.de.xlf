@@ -5,8 +5,8 @@
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
-        <target state="translated">Wenn keine zusätzlichen Anweisungen vorliegen, können Sie den folgenden Befehl zum Aufruf des Tools eingeben: {0}
-Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert.</target>
+        <target state="translated">Sie können das Tool über den folgenden Befehl aufrufen: {0}
+Das Tool "{1}" (Version {2}) wurde erfolgreich installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -91,27 +91,27 @@ Das Tool "{1}" (Version "{2}") wurde erfolgreich installiert.</target>
       </trans-unit>
       <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="needs-review-translation">Es muss entweder "global" oder "tool-path" angegeben werden.</target>
+        <target state="translated">Geben Sie entweder die globale Option (--global) oder die Toolpfadoption (--tool-path) an.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="needs-review-translation">Die gleichzeitige Angabe von "global" und "tool-path" ist nicht möglich.</target>
+        <target state="translated">(--global) verursacht einen Konflikt mit der Toolpfadoption (--tool-path). Geben Sie nur eine der beiden Optionen an.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathDescription">
         <source>Location where the tool will be installed.</source>
-        <target state="needs-review-translation">Shim-Speicherort für Toolzugriff</target>
+        <target state="translated">Speicherort für die Installation des Tools.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionDescription">
         <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <target state="translated">Fügt eine weitere NuGet-Paketquelle zur Verwendung während der Installation hinzu.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceFeedOptionName">
         <source>SOURCE_FEED</source>
-        <target state="new">SOURCE_FEED</target>
+        <target state="translated">SOURCE_FEED</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

@@ -42,6 +42,11 @@
         <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 응용 프로그램과 함께 .NET Core 런타임을 게시합니다. 런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="new">Do not build the project before publishing. Implies --no-restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
