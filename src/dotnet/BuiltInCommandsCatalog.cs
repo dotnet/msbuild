@@ -148,11 +148,13 @@ namespace Microsoft.DotNet.Cli
             },
             ["tool"] = new BuiltInCommandMetadata
             {
-                Command = ToolCommand.Run
+                Command = ToolCommand.Run,
+                DocLink = "https://aka.ms/dotnet-tool"
             },
             ["buildserver"] = new BuiltInCommandMetadata
             {
-                Command = BuildServerCommand.Run
+                Command = BuildServerCommand.Run,
+                DocLink = "https://aka.ms/dotnet-build-server"
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {

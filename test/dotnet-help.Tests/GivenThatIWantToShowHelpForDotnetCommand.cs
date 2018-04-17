@@ -39,7 +39,7 @@ SDK commands:
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.
   store            Stores the specified assemblies in the runtime store.
-  tool             Modify tools.
+  tool             Install or work with tools that extend the .NET experience.
   buildserver      Interact with servers started by a build.
   help             Show help.
 

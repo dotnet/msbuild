@@ -268,7 +268,7 @@
     <value>Path to additional deps.json file.</value>
   </data>
   <data name="ToolDefinition" xml:space="preserve">
-    <value>Modify tools.</value>
+    <value>Install or work with tools that extend the .NET experience.</value>
   </data>
   <data name="BuildServerDefinition" xml:space="preserve">
     <value>Interact with servers started by a build.</value>
