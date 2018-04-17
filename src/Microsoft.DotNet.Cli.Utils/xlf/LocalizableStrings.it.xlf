@@ -259,6 +259,15 @@
         <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="new">Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
