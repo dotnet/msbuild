@@ -301,6 +301,13 @@ For example if the directory already contains a project, it doesn't list all pro
 The language of the template to create.
 The language accepted varies by the template (see defaults in the arguments section).
 Not valid for some templates.
+.IP
+.nf
+\f[C]
+>\ [!NOTE]
+>\ Some\ shells\ interpret\ `#`\ as\ a\ special\ character.\ In\ those\ cases,\ you\ need\ to\ enclose\ the\ language\ parameter\ value,\ such\ as\ `dotnet\ new\ console\ \-lang\ "F#"`.
+\f[]
+.fi
 .PP
 \f[C]\-n|\-\-name\ <OUTPUT_NAME>\f[]
 .PP
@@ -350,6 +357,13 @@ For example if the directory already contains a project, it doesn't list all pro
 The language of the template to create.
 The language accepted varies by the template (see defaults in the arguments section).
 Not valid for some templates.
+.IP
+.nf
+\f[C]
+>\ [!NOTE]
+>\ Some\ shells\ interpret\ `#`\ as\ a\ special\ character.\ In\ those\ cases,\ you\ need\ to\ enclose\ the\ language\ parameter\ value,\ such\ as\ `dotnet\ new\ console\ \-lang\ "F#"`.
+\f[]
+.fi
 .PP
 \f[C]\-n|\-\-name\ <OUTPUT_NAME>\f[]
 .PP
@@ -548,7 +562,7 @@ The default value is \f[C]false\f[].
 .PP
 Create an F# console application project in the current directory:
 .PP
-\f[C]dotnet\ new\ console\ \-lang\ f#\f[]
+\f[C]dotnet\ new\ console\ \-lang\ F#\f[]
 .PP
 Create a .NET Standard class library project in the specified directory (available only with .NET Core 2.0 SDK or later versions):
 .PP
