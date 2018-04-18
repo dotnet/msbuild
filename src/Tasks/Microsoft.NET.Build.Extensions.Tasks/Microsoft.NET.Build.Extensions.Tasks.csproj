@@ -5,7 +5,6 @@
   <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside of SDK projects -->
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
     <Description>The MSBuild targets and tasks which extend MSBuild's common targets.</Description>
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Build.Extensions</PackageId>
@@ -26,6 +25,7 @@
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
+    <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
     <IsPackable>true</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>
     <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
