@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Cli
                 Command = ToolCommand.Run,
                 DocLink = "https://aka.ms/dotnet-tool"
             },
-            ["buildserver"] = new BuiltInCommandMetadata
+            ["build-server"] = new BuiltInCommandMetadata
             {
                 Command = BuildServerCommand.Run,
                 DocLink = "https://aka.ms/dotnet-build-server"
