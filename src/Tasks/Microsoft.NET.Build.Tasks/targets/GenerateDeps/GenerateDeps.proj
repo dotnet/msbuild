@@ -28,9 +28,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <ToolFolder>$([System.IO.Path]::GetDirectoryName($(ProjectAssetsFile)))</ToolFolder>
     <ProjectDepsFilePath Condition="'$(ProjectDepsFilePath)' == ''">$(ToolFolder)\$(ToolName).deps.json</ProjectDepsFilePath>
-    
     <OutputType>Exe</OutputType>
     <IncludeMainProjectInDepsFile>false</IncludeMainProjectInDepsFile>
+
+    <!-- This project must not write to intermediate directory as it is inside the SDK directory and not in a user path. -->
+    <DisablePackageAssetsCache>true</DisablePackageAssetsCache>
+    <DisableRarCache>true</DisableRarCache>
 
     <!-- The tool asets file is restored as a separate graph and doesn't get an implicit reference to Microsoft.NETCore.App.  So
          the version of that package will be determined by the version the tool package references.  However, when building
