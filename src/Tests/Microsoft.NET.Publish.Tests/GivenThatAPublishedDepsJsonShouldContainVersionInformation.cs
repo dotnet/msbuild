@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -83,13 +86,13 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Versions_are_not_included_for_self_contained_apps()
         {
-            Versions_are_not_included(false);
+            Versions_are_not_included(build: false);
         }
 
         [Fact]
         public void Versions_are_not_included_for_build()
         {
-            Versions_are_not_included(true);
+            Versions_are_not_included(build: true);
         }
 
         private void Versions_are_not_included(bool build, [CallerMemberName] string callingMethod = "")
