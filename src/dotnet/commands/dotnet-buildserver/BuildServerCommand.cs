@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.BuildServer
 {
     public class BuildServerCommand : DotNetTopLevelCommandBase
     {
-        protected override string CommandName => "buildserver";
+        protected override string CommandName => "build-server";
         protected override string FullCommandNameLocalized => LocalizableStrings.BuildServerCommandName;
         protected override string ArgumentName => "";
         protected override string ArgumentDescriptionLocalized => "";

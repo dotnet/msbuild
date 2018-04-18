@@ -23,9 +23,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void GivenNoOptionsAllFlagsAreFalse()
         {
-            var result = Parser.Instance.Parse("dotnet buildserver shutdown");
+            var result = Parser.Instance.Parse("dotnet build-server shutdown");
 
-            var options = result["dotnet"]["buildserver"]["shutdown"];
+            var options = result["dotnet"]["build-server"]["shutdown"];
             options.ValueOrDefault<bool>("msbuild").Should().Be(false);
             options.ValueOrDefault<bool>("vbcscompiler").Should().Be(false);
             options.ValueOrDefault<bool>("razor").Should().Be(false);
@@ -34,9 +34,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void GivenMSBuildOptionIsItTrue()
         {
-            var result = Parser.Instance.Parse("dotnet buildserver shutdown --msbuild");
+            var result = Parser.Instance.Parse("dotnet build-server shutdown --msbuild");
 
-            var options = result["dotnet"]["buildserver"]["shutdown"];
+            var options = result["dotnet"]["build-server"]["shutdown"];
             options.ValueOrDefault<bool>("msbuild").Should().Be(true);
             options.ValueOrDefault<bool>("vbcscompiler").Should().Be(false);
             options.ValueOrDefault<bool>("razor").Should().Be(false);
@@ -45,9 +45,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void GivenVBCSCompilerOptionIsItTrue()
         {
-            var result = Parser.Instance.Parse("dotnet buildserver shutdown --vbcscompiler");
+            var result = Parser.Instance.Parse("dotnet build-server shutdown --vbcscompiler");
 
-            var options = result["dotnet"]["buildserver"]["shutdown"];
+            var options = result["dotnet"]["build-server"]["shutdown"];
             options.ValueOrDefault<bool>("msbuild").Should().Be(false);
             options.ValueOrDefault<bool>("vbcscompiler").Should().Be(true);
             options.ValueOrDefault<bool>("razor").Should().Be(false);
@@ -56,9 +56,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void GivenRazorOptionIsItTrue()
         {
-            var result = Parser.Instance.Parse("dotnet buildserver shutdown --razor");
+            var result = Parser.Instance.Parse("dotnet build-server shutdown --razor");
 
-            var options = result["dotnet"]["buildserver"]["shutdown"];
+            var options = result["dotnet"]["build-server"]["shutdown"];
             options.ValueOrDefault<bool>("msbuild").Should().Be(false);
             options.ValueOrDefault<bool>("vbcscompiler").Should().Be(false);
             options.ValueOrDefault<bool>("razor").Should().Be(true);
@@ -67,9 +67,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void GivenMultipleOptionsThoseAreTrue()
         {
-            var result = Parser.Instance.Parse("dotnet buildserver shutdown --razor --msbuild");
+            var result = Parser.Instance.Parse("dotnet build-server shutdown --razor --msbuild");
 
-            var options = result["dotnet"]["buildserver"]["shutdown"];
+            var options = result["dotnet"]["build-server"]["shutdown"];
             options.ValueOrDefault<bool>("msbuild").Should().Be(true);
             options.ValueOrDefault<bool>("vbcscompiler").Should().Be(false);
             options.ValueOrDefault<bool>("razor").Should().Be(true);

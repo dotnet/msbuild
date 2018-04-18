@@ -40,7 +40,7 @@ SDK commands:
   vstest           Runs Microsoft Test Execution Command Line Tool.
   store            Stores the specified assemblies in the runtime store.
   tool             Install or work with tools that extend the .NET experience.
-  buildserver      Interact with servers started by a build.
+  build-server     Interact with servers started by a build.
   help             Show help.
 
 Common options:

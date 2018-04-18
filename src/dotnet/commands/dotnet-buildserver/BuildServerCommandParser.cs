@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
         public static Command CreateCommand()
         {
             return Create.Command(
-                "buildserver",
+                "build-server",
                 LocalizableStrings.CommandDescription,
                 Accept.NoArguments(),
                 CommonOptions.HelpOption(),
