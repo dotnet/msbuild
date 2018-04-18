@@ -31,21 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)..\Common\Empty.props" />
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)..\Common\Empty.targets" />
+    <None Include="SetupTestRoot.targets" />
   </ItemGroup>
 
-  <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.props" />
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
-  </ItemGroup>
-
-  <Target Name="_CopyDirectoryBuildTestDependencies" AfterTargets="Build" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
-    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
-  </Target>
-  <Target Name="_CopyTestNuGetConfig" AfterTargets="Build">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\..\Assets\NuGet.Config" DestinationFolder="$(ArtifactsTmpDir)" SkipUnchangedFiles="true" />
-  </Target>
+  <Import Project="SetupTestRoot.targets" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

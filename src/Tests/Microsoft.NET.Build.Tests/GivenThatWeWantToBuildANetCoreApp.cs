@@ -248,10 +248,12 @@ namespace Microsoft.NET.Build.Tests
             targetDefs.Should().Contain(".NETCoreApp,Version=v1.1");
         }
 
-        [Fact]
-        public void It_runs_the_app_from_the_output_folder()
+        [Theory]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp2.1")]
+        public void It_runs_the_app_from_the_output_folder(string targetFramework)
         {
-            RunAppFromOutputFolder("RunFromOutputFolder", false, false);
+            RunAppFromOutputFolder("RunFromOutputFolder_" + targetFramework, false, false, targetFramework);
         }
 
         [Fact]
@@ -272,9 +274,9 @@ namespace Microsoft.NET.Build.Tests
             RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts", true, true);
         }
 
-        private void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
+        private void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts,
+            string targetFramework = "netcoreapp2.0")
         {
-            var targetFramework = "netcoreapp2.0";
             var runtimeIdentifier = useRid ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
             TestProject project = new TestProject()
