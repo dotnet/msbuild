@@ -394,6 +394,11 @@
         <target state="new">DotnetTool does not support target framework lower than netcoreapp2.1.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnableToUsePackageAssetsCache">
+        <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
+        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

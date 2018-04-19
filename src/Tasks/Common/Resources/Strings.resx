@@ -352,6 +352,9 @@
 {1} - Restored version of platform package
 {2} - Current version of platform package</comment>
   </data>
+  <data name="UnableToUsePackageAssetsCache" xml:space="preserve">
+    <value>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</value>
+  </data>
   <data name="AssetsFileNotSet" xml:space="preserve">
     <value>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
   </data>
