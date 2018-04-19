@@ -73,7 +73,6 @@
     <CurrentAspNetCoreRuntimeVersion Condition="'$(AspNetCoreRuntimePackageFlavor)'!='notimestamp'">$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</CurrentAspNetCoreRuntimeVersion>
 
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
-    <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
     <AspNetCoreRuntimeAzureblobStoresSubfolderName>$(AspNetCoreBranchName)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeAzureblobStoresSubfolderName>
   </PropertyGroup>
 

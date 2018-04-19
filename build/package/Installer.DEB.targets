@@ -35,6 +35,7 @@
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
+      <AspNetCoreRuntimeDebPackageName>$(AspNetCoreRuntimePackageBrandName)-$(CurrentAspNetCoreRuntimeVersion)</AspNetCoreRuntimeDebPackageName>
     </PropertyGroup>
 
     <!-- Inputs -->
@@ -84,7 +85,7 @@
         <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%ASPNETCOREPACKAGESTORE_DEBIAN_PACKAGE_NAME%">
-        <ReplacementString>$(AspNetCoreRuntimePackageName)</ReplacementString>
+        <ReplacementString>$(AspNetCoreRuntimeDebPackageName)</ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_ADDITIONAL_DEPENDENCY%"
                                Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'">

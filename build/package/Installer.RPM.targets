@@ -50,10 +50,8 @@
       <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
       <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
       <HostRpmPackageName>dotnet-host</HostRpmPackageName>
-      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageName Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageName200>$(AspNetCoreRuntimePackageBrandName)-2.0.0</AspNetCoreRuntimePackageName200>
-      <AspNetCoreRuntimePackageName203>$(AspNetCoreRuntimePackageBrandName)-2.0.3</AspNetCoreRuntimePackageName203>
+      <AspNetCoreRuntimeRpmPackageName>$(AspNetCoreRuntimePackageBrandName)-$(CurrentAspNetCoreRuntimeVersion)</AspNetCoreRuntimeRpmPackageName>
+      <AspNetCoreRuntimeRpmPackageVersion>$(CurrentAspNetCoreRuntimeVersion)</AspNetCoreRuntimeRpmPackageVersion>
       <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
       <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
     </PropertyGroup>
@@ -112,10 +110,10 @@
         <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_NAME%">
-        <ReplacementString>$(AspNetCoreRuntimePackageName)</ReplacementString>
+        <ReplacementString>$(AspNetCoreRuntimeRpmPackageName)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_VERSION%">
-        <ReplacementString>$(AspNetCoreRuntimePackageVersion)</ReplacementString>
+        <ReplacementString>$(AspNetCoreRuntimeRpmPackageVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%SHARED_HOST_RPM_NAME%">
         <ReplacementString>$(SharedFxRpmPackageName)</ReplacementString>
