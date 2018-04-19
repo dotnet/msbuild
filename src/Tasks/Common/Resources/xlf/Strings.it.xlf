@@ -384,6 +384,16 @@
         <target state="new">The path to the project assets file was not set. Run a NuGet package restore to generate this file.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetToolOnlySupportNetcoreapp">
+        <source>only supports .NET Core.</source>
+        <target state="new">only supports .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
+        <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
+        <target state="new">DotnetTool does not support target framework lower than netcoreapp2.1.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

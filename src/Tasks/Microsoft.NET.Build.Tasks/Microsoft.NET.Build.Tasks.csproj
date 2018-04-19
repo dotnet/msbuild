@@ -60,6 +60,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Microsoft.NET.Build.Tasks.UnitTests" />
     <InternalsVisibleTo Include="Microsoft.NET.Build.Tests" />
+    <InternalsVisibleTo Include="Microsoft.NET.ToolPack.Tests" />
   </ItemGroup>
 
   <ItemGroup>
