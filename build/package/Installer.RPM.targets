@@ -137,6 +137,7 @@
 
     <ItemGroup>
       <TestSdkRpmTaskEnvironmentVariables Include="PATH=$(RpmInstalledDirectory)$(PathListSeparator)$(PATH)" />
+      <TestSdkRpmTaskEnvironmentVariables Include="SDK_INSTALLER_FILE=$(SdkInstallerFile)" />
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
 
@@ -238,7 +239,7 @@
                    ToolPath="$(RpmInstalledDirectory)" />
 
     <DotNetTest ProjectPath="$(EndToEndTestProject)"
-                EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
+                EnvironmentVariables="@(TestSdkRpmTaskEnvironmentVariables)"
                 ToolPath="$(RpmInstalledDirectory)" />
 
     <!-- Clean up Packages -->
