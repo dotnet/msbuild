@@ -51,7 +51,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         public int Length
         {
-            get { return ((_borrowedBuilder == null) ? 0 : _borrowedBuilder.Length); }
+            get => _borrowedBuilder?.Length ?? 0;
             set
             {
                 LazyPrepare();
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Shared
         /// That should be a good compromise to not allocate to much but still make use of the intern cache. The actual cutoff where it is cheaper
         /// to allocate a temp string might be well below that limit but that depends on many other factors such as GC Heap size and other allocating threads. 
         /// </summary>
-        const int MaxByCharCompareLength = 40 * 1000;
+        const int MaxByCharCompareLength = 40_000;
 
         /// <summary>
         /// Compare target to string. 
@@ -128,15 +128,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Convert to a string.
         /// </summary>
-        public override string ToString()
-        {
-            if (_borrowedBuilder == null)
-            {
-                return String.Empty;
-            }
-
-            return _borrowedBuilder.ToString();
-        }
+        public override string ToString() => _borrowedBuilder?.ToString() ?? String.Empty;
 
         /// <summary>
         /// Dispose, indicating you are done with this builder.
