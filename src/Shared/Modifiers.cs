@@ -440,7 +440,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            modifiedItemSpec = Path.GetFileNameWithoutExtension(itemSpec);
+                            modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
                         }
                     }
                     else if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase) == 0)
