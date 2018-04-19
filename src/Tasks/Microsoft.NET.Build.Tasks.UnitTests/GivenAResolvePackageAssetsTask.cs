@@ -62,8 +62,12 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         property.SetValue(task, property.Name);
                         break;
 
+                    case var t when t == typeof(ITaskItem[]):
+                        property.SetValue(task, new[] { new MockTaskItem() { ItemSpec = property.Name } });
+                        break;
+
                     default:
-                        Assert.True(false, $"{property.Name} is not a bool or string. Update the test code to handle that.");
+                        Assert.True(false, $"{property.Name} is not a bool or string or ITaskItem[]. Update the test code to handle that.");
                         throw null; // unreachable
                 }
 

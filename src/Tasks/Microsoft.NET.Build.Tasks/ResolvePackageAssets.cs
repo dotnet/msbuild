@@ -93,21 +93,16 @@ namespace Microsoft.NET.Build.Tasks
         public bool EnsureRuntimePackageDependencies { get; set; }
 
         /// <summary>
-        /// Specifies whether to validate that the version of the implicit platform package in the assets
-        /// file matches the version specified by <see cref="ExpectedPlatformPackageVersion"/>
+        /// Specifies whether to validate that the version of the implicit platform packages in the assets
+        /// file matches the version specified by <see cref="ExpectedPlatformPackages"/>
         /// </summary>
         public bool VerifyMatchingImplicitPackageVersion { get; set; }
 
         /// <summary>
-        /// Identifier for implicitly referenced platform package.  If set, then an error will be generated if the
-        /// version of that package from the assets file does not match the <see cref="ExpectedPlatformPackageVersion"/>
+        /// Implicitly referenced platform packages.  If set, then an error will be generated if the
+        /// version of the specified packages from the assets file does not match the expected versions.
         /// </summary>
-        public string ImplicitPlatformPackageIdentifier { get; set; }
-
-        /// <summary>
-        /// Expected version of the <see cref="ImplicitPlatformPackageIdentifier"/>
-        /// </summary>
-        public string ExpectedPlatformPackageVersion { get; set; }
+        public ITaskItem[] ExpectedPlatformPackages { get; set; }
 
         /// <summary>
         /// Full paths to assemblies from packages to pass to compiler as analyzers.
@@ -317,9 +312,15 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(DisableTransitiveProjectReferences);
                     writer.Write(EmitAssetsLogMessages);
                     writer.Write(EnsureRuntimePackageDependencies);
-                    writer.Write(ExpectedPlatformPackageVersion ?? "");
                     writer.Write(MarkPackageReferencesAsExternallyResolved);
-                    writer.Write(ImplicitPlatformPackageIdentifier ?? "");
+                    if (ExpectedPlatformPackages != null)
+                    {
+                        foreach (var implicitPackage in ExpectedPlatformPackages)
+                        {
+                            writer.Write(implicitPackage.ItemSpec ?? "");
+                            writer.Write(implicitPackage.GetMetadata(MetadataKeys.ExpectedVersion) ?? "");
+                        }
+                    }
                     writer.Write(ProjectAssetsCacheFile);
                     writer.Write(ProjectAssetsFile ?? "");
                     writer.Write(ProjectLanguage ?? "");
@@ -780,31 +781,41 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 if (_task.VerifyMatchingImplicitPackageVersion &&
-                    !string.IsNullOrEmpty(_task.ImplicitPlatformPackageIdentifier) &&
-                    !string.IsNullOrEmpty(_task.ExpectedPlatformPackageVersion) &&
-                    //  If RuntimeFrameworkVersion was specified as a version range or a floating version,
-                    //  then we can't compare the versions directly, so just skip the check
-                    _task.ExpectedPlatformPackageVersion.IndexOfAny(_specialNuGetVersionChars) < 0)
+                    _task.ExpectedPlatformPackages != null)
                 {
-                    var platformLibrary = _runtimeTarget.GetLibrary(_task.ImplicitPlatformPackageIdentifier);
-                    if (platformLibrary != null)
+                    foreach (var implicitPackge in _task.ExpectedPlatformPackages)
                     {
-                        string restoredPlatformLibraryVersion = platformLibrary.Version.ToNormalizedString();
+                        var packageName = implicitPackge.ItemSpec;
+                        var expectedVersion = implicitPackge.GetMetadata(MetadataKeys.ExpectedVersion);
 
-                        //  Normalize expected version.  For example, converts "2.0" to "2.0.0"
-                        string expectedPlatformPackageVersion = _task.ExpectedPlatformPackageVersion;
-                        if (!hasTwoPeriods(expectedPlatformPackageVersion))
+                        if (string.IsNullOrEmpty(packageName) ||
+                            string.IsNullOrEmpty(expectedVersion) ||
+                            //  If RuntimeFrameworkVersion was specified as a version range or a floating version,
+                            //  then we can't compare the versions directly, so just skip the check
+                            expectedVersion.IndexOfAny(_specialNuGetVersionChars) >= 0)
                         {
-                            expectedPlatformPackageVersion += ".0";
-                        }                        
+                            continue;
+                        }
 
-                        if (restoredPlatformLibraryVersion != expectedPlatformPackageVersion)
+                        var restoredPackage = _runtimeTarget.GetLibrary(packageName);
+                        if (restoredPackage != null)
                         {
-                            WriteItem(string.Format(Strings.MismatchedPlatformPackageVersion,
-                                                    _task.ImplicitPlatformPackageIdentifier,
-                                                    restoredPlatformLibraryVersion,
-                                                    expectedPlatformPackageVersion));
-                            WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
+                            var restoredVersion = restoredPackage.Version.ToNormalizedString();
+
+                            //  Normalize expected version.  For example, converts "2.0" to "2.0.0"
+                            if (!hasTwoPeriods(expectedVersion))
+                            {
+                                expectedVersion += ".0";
+                            }                        
+
+                            if (restoredVersion != expectedVersion)
+                            {
+                                WriteItem(string.Format(Strings.MismatchedPlatformPackageVersion,
+                                                        packageName,
+                                                        restoredVersion,
+                                                        expectedVersion));
+                                WriteMetadata(MetadataKeys.Severity, nameof(LogLevel.Error));
+                            }
                         }
                     }
                 }

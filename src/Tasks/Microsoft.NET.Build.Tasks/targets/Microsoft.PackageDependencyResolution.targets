@@ -205,8 +205,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       DisableTransitiveProjectReferences="$(DisableTransitiveProjectReferences)"
       EnsureRuntimePackageDependencies="$(EnsureRuntimePackageDependencies)"
       VerifyMatchingImplicitPackageVersion="$(VerifyMatchingImplicitPackageVersion)"
-      ImplicitPlatformPackageIdentifier="$(ImplicitPlatformPackageIdentifier)"
-      ExpectedPlatformPackageVersion="$(RuntimeFrameworkVersion)"      
+      ExpectedPlatformPackages="@(ExpectedPlatformPackages)"      
       >
 
       <!-- NOTE: items names here are inconsistent because they match prior implementation
