@@ -11,7 +11,6 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class CheckForTargetInAssetsFile : TaskBase
     {
-        [Required]
         public string AssetsFilePath { get; set; }
 
         [Required]

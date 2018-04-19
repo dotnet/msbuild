@@ -346,4 +346,7 @@
 {1} - Restored version of platform package
 {2} - Current version of platform package</comment>
   </data>
+  <data name="AssetsFileNotSet" xml:space="preserve">
+    <value>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
+  </data>
 </root>
