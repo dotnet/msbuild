@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -28,7 +27,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Profiling showed that the hot code path for large string builder calls first IsOrdinalEqualToStringOfSameLength followed by ExpensiveConvertToString
-        /// when IsOrdinalEqualToStringOfSameLength did return true. We can therefore reduce the costs for large strings by over a factor two. 
+        /// when IsOrdinalEqualToStringOfSameLength did return true. We can therefore reduce the costs for large strings by over a factor two.
         /// </summary>
         private string _cachedString;
 
@@ -292,10 +291,6 @@ namespace Microsoft.Build.Shared
             /// </summary>
             private static int s_saved = 0;
 
-            /// <summary>
-            /// Callstacks of those handed out and not returned yet
-            /// </summary>
-            private static ConcurrentDictionary<StringBuilder, string> s_handouts = new ConcurrentDictionary<StringBuilder, string>();
 #endif
             /// <summary>
             /// Obtains a string builder which may or may not already
@@ -335,8 +330,6 @@ namespace Microsoft.Build.Shared
                 {
                     Interlocked.Add(ref s_saved, (capacity + returned.Capacity) / 2);
                 }
-
-                // handouts.TryAdd(returned, Environment.StackTrace);
 #endif
                 return returned;
             }
@@ -358,7 +351,6 @@ namespace Microsoft.Build.Shared
                 // So the shared builder will be "replaced".
                 if (returningBuilder.Capacity < MaxBuilderSize)
                 {
-                    // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
                     returningBuilder.Clear(); // Clear before pooling
 
                     Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
@@ -371,24 +363,6 @@ namespace Microsoft.Build.Shared
 #endif
                 }
             }
-
-#if DEBUG
-            /// <summary>
-            /// Debugging dumping
-            /// </summary>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Handy helper method that can be used to annotate ReuseableStringBuilder when debugging it, but is not hooked up usually for the sake of perf.")]
-            [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.String.Format(System.IFormatProvider,System.String,System.Object[])", Justification = "Handy string that can be used to annotate ReuseableStringBuilder when debugging it, but is not hooked up usually.")]
-            internal static void DumpUnreturned()
-            {
-                String.Format(CultureInfo.CurrentUICulture, "{0} Hits of which\n    {1} Misses (was on loan)\n    {2} Upsizes (needed bigger) \n\n{3} Returns=\n{4}    Discards (returned too large)+\n    {5} Accepts\n\n{6} estimated bytes saved", s_hits, s_misses, s_upsizes, s_discards + s_accepts, s_discards, s_accepts, s_saved);
-
-                Console.WriteLine("Unreturned string builders were allocated here:");
-                foreach (var entry in s_handouts.Values)
-                {
-                    Console.WriteLine(entry + "\n");
-                }
-            }
-#endif
         }
     }
 }
