@@ -22,6 +22,11 @@
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AssemblyVersion>$(FileVersion)</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
