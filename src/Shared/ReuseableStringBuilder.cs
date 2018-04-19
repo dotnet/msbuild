@@ -156,6 +156,29 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Append an array of characters.
+        /// </summary>
+        internal ReuseableStringBuilder Append(char[] value)
+        {
+            LazyPrepare();
+            _cachedString = null;
+            _borrowedBuilder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Append part of an array of characters.
+        /// </summary>
+        internal ReuseableStringBuilder Append(char[] value, int startIndex, int charCount)
+        {
+            LazyPrepare();
+            _cachedString = null;
+            _borrowedBuilder.Append(value, startIndex, charCount);
+            return this;
+        }
+
+
+        /// <summary>
         /// Append a string.
         /// </summary>
         internal ReuseableStringBuilder Append(string value)
@@ -361,7 +384,7 @@ namespace Microsoft.Build.Shared
                 // So the shared builder will be "replaced".
                 if (returningBuilder.Capacity < MaxBuilderSize)
                 {
-                    returningBuilder.Clear(); // Clear before pooling
+                    returningBuilder.Length = 0; // Clear before pooling
 
                     Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
 #if DEBUG
