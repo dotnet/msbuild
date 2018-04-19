@@ -9,7 +9,7 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionBase>2.1.300</VersionBase>
-    <PreReleaseVersionLabel>preview3</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>rc1</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <!-- Repo Toolset Features -->
