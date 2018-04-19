@@ -17,8 +17,8 @@ then
     export DOTNET_VERSION=$( ${DotNetCoreSdkDir}/dotnet --version )
 fi
 export WebSdkRoot=$REPOROOT
-export WebSdkReferences=$WebSdkRoot/references/ 
-export WebSdkSource=$WebSdkRoot/src/ 
+export WebSdkReferences=$WebSdkRoot/references/
+export WebSdkSource=$WebSdkRoot/src/
 export WebSdkBuild=$WebSdkRoot/build/
 
 [ -z "$BuildConfiguration" ] && export BuildConfiguration=Release
