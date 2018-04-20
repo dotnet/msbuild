@@ -14,7 +14,6 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// This class will create a text file which will contain the build log for that node
     /// </summary>
-    [Obsolete]
     public class DistributedFileLogger : IForwardingLogger
     {
         #region Constructors

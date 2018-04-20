@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// The cache of responses which is cleared between builds.
         /// </summary>
-        private readonly ConcurrentDictionary<string, SdkResolverResponse> _responseCache = new ConcurrentDictionary<string, SdkResolverResponse>(MSBuildNameIgnoreCaseComparer.Default);
+        private readonly ConcurrentDictionary<string, SdkResult> _responseCache = new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
         /// An event to signal when a response has been received.
@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// An object used to store the last response from a remote node.  Since evaluation is single threaded, this object is only set one at a time.
         /// </summary>
-        private volatile SdkResolverResponse _lastResponse;
+        private volatile SdkResult _lastResponse;
 
         /// <summary>
         /// Initializes a new instance of the OutOfProcNodeSdkResolverService class.
@@ -55,26 +55,30 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             switch (packet.Type)
             {
                 case NodePacketType.ResolveSdkResponse:
-                    HandleResponse(packet as SdkResolverResponse);
+                    HandleResponse(packet as SdkResult);
                     break;
             }
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public override string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             // Get a cached response if possible, otherwise send the request
-            SdkResolverResponse response = _responseCache.GetOrAdd(
+            var sdkResult = _responseCache.GetOrAdd(
                 sdk.Name,
-                key => RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
+                key =>
+                {
+                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+                    return new SdkResult(null, result.Path, result.Version, null);
+                });
 
-            if (!SdkResolverService.IsReferenceSameVersion(sdk, response.Version))
+            if (sdkResult.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
             {
-                // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version already specified at "{1}" will be used and the version will be "{2}" ignored.
-                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, response.ElementLocation, sdk.Version);
+                // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.
+                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, sdkResult.Version, sdkResult.ElementLocation, sdk.Version);
             }
 
-            return response.FullPath;
+            return sdkResult;
         }
 
         /// <inheritdoc cref="IBuildComponent.ShutdownComponent"/>
@@ -90,7 +94,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Handles a response from the main node.
         /// </summary>
         /// <param name="response"></param>
-        private void HandleResponse(SdkResolverResponse response)
+        private void HandleResponse(SdkResult response)
         {
             // Store the last response so the awaiting thread can use it
             _lastResponse = response;
@@ -99,7 +103,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _responseReceivedEvent.Set();
         }
 
-        private SdkResolverResponse RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             // Clear out the last response for good measure
             _lastResponse = null;

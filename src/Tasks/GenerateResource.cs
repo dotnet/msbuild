@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 #endif
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
 
         #region Fields
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
         // This cache helps us track the linked resource files listed inside of a resx resource file
         private ResGenDependencies _cache;
 #endif
@@ -809,7 +809,7 @@ namespace Microsoft.Build.Tasks
                                     OutputResources = outputResources;
                                 }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                                 // Get portable library cache info (and if needed, marshal it to this AD).
                                 List<ResGenDependencies.PortableLibraryFile> portableLibraryCacheInfo = process.PortableLibraryCacheInfo;
                                 for (int i = 0; i < portableLibraryCacheInfo.Count; i++)
@@ -853,7 +853,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
                 WriteStateFile();
 #endif
@@ -1219,7 +1219,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private void GetResourcesToProcess(out List<ITaskItem> inputsToProcess, out List<ITaskItem> outputsToProcess, out List<ITaskItem> cachedOutputFiles)
         {
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
             // First we look to see if we have a resgen linked files cache.  If so, then we can use that
             // cache to speed up processing.
             ReadStateFile();
@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (ExtractResWFiles)
                 {
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                     // We can't cheaply predict the output files, since that would require
                     // loading each assembly.  So don't even try guessing what they will be.
                     // However, our cache will sometimes record all the info we need (for incremental builds).
@@ -1249,7 +1249,7 @@ namespace Microsoft.Build.Tasks
                     {
 #endif
                         inputsToProcess.Add(Sources[i]);
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                     }
 #endif
 
@@ -1292,7 +1292,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
         /// <summary>
         /// Given a cached portable library that is up to date, create ITaskItems to represent the output of the task, as if we did real work.
         /// </summary>
@@ -1383,7 +1383,7 @@ namespace Microsoft.Build.Tasks
                 return NeedToRebuildSourceFile(sourceTime, outputTime);
             }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
             // OK, we have a .resx file
 
             // PERF: Regardless of whether the outputFile exists, if the source file is a .resx 
@@ -1790,7 +1790,7 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                     catch (SerializationException e)
                     {
                         Log.LogMessageFromResources
@@ -1856,7 +1856,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool NeedSeparateAppDomainBasedOnSerializedType(XmlReader reader)
         {
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element)
@@ -1885,7 +1885,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
         /// <summary>
         /// Deserializes a base64 block from a resx in order to figure out if its type is in the GAC.
         /// Because we're not providing any assembly resolution callback, deserialization
@@ -2085,7 +2085,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
         /// <summary>
         /// Read the state file if able.
         /// </summary>
@@ -2245,7 +2245,7 @@ namespace Microsoft.Build.Tasks
         }
         private List<ITaskItem> _extractedResWFiles;
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
         /// <summary>
         /// Record all the information about outputs here to avoid future incremental builds.
         /// </summary>
@@ -2315,7 +2315,7 @@ namespace Microsoft.Build.Tasks
             _readers = new List<ReaderInfo>();
             _extractResWFiles = extractingResWFiles;
             _resWOutputDirectory = resWOutputDirectory;
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
 #endif
 
@@ -2514,7 +2514,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
 #endif
                                       e is TargetInvocationException)
@@ -2547,7 +2547,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (GetFormat(inFile) == Format.Assembly)
                 {
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                     // Prepare cache data
                     ResGenDependencies.PortableLibraryFile library = new ResGenDependencies.PortableLibraryFile(inFile);
 #endif
@@ -2591,20 +2591,20 @@ namespace Microsoft.Build.Tasks
                         ITaskItem newOutputFile = new TaskItem(escapedOutputFile);
                         resWFilesForThisAssembly.Add(escapedOutputFile);
                         newOutputFile.SetMetadata("ResourceIndexName", reader.assemblySimpleName);
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                         library.AssemblySimpleName = reader.assemblySimpleName;
 #endif
                         if (reader.fromNeutralResources)
                         {
                             newOutputFile.SetMetadata("NeutralResourceLanguage", reader.cultureName);
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                             library.NeutralResourceLanguage = reader.cultureName;
 #endif
                         }
                         ExtractedResWFiles.Add(newOutputFile);
                     }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                     library.OutputFiles = resWFilesForThisAssembly.ToArray();
                     _portableLibraryCacheInfo.Add(library);
 #endif
@@ -2685,7 +2685,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             catch (Exception e) when (
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
                                       e is SerializationException ||
 #endif
                                       e is TargetInvocationException)
@@ -2905,12 +2905,17 @@ namespace Microsoft.Build.Tasks
                         ReadResources(reader, resXReader, filename);
                         break;
 #else
-                        XDocument doc = XDocument.Load(filename, LoadOptions.PreserveWhitespace);
-                        foreach (XElement dataElem in doc.Element("root").Elements("data"))
+
+                        using (var xmlReader = new XmlTextReader(filename))
                         {
-                            string name = dataElem.Attribute("name").Value;
-                            string value = dataElem.Element("value").Value;
-                            AddResource(reader, name, value, filename);
+                            xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                            XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
+                            foreach (XElement dataElem in doc.Element("root").Elements("data"))
+                            {
+                                string name = dataElem.Attribute("name").Value;
+                                string value = dataElem.Element("value").Value;
+                                AddResource(reader, name, value, filename);
+                            }
                         }
                         break;
 #endif
@@ -3738,7 +3743,7 @@ namespace Microsoft.Build.Tasks
             private int lineNumber;
             private int column;
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESGENCACHE
             /// <summary>
             /// Fxcop want to have the correct basic exception constructors implemented
             /// </summary>

@@ -19,7 +19,6 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a single target in its parent project.
     /// </summary>
     [DebuggerDisplay("Target (Name = { Name }, Condition = { Condition })")]
-    [Obsolete]
     public class Target : IEnumerable
     {
         #region Enums

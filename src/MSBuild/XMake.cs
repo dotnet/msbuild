@@ -550,7 +550,6 @@ namespace Microsoft.Build.CommandLine
                 bool enableNodeReuse = false;
 #endif
                 TextWriter preprocessWriter = null;
-                bool debugger = false;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsAsMessages = null;
@@ -579,7 +578,6 @@ namespace Microsoft.Build.CommandLine
                         ref cpuCount,
                         ref enableNodeReuse,
                         ref preprocessWriter,
-                        ref debugger,
                         ref detailedSummary,
                         ref warningsAsErrors,
                         ref warningsAsMessages,
@@ -598,7 +596,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
-                    if (preprocessWriter != null || debugger)
+                    if (preprocessWriter != null)
                     {
                         // Indicate to the engine that it can NOT toss extraneous file content: we want to 
                         // see that in preprocessing/debugging
@@ -624,7 +622,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler))
+                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -918,7 +916,6 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
-            bool debugger,
             bool detailedSummary,
             ISet<string> warningsAsErrors,
             ISet<string> warningsAsMessages,
@@ -1020,14 +1017,6 @@ namespace Microsoft.Build.CommandLine
                     cpuCount,
                     onlyLogCriticalEvents
                 );
-
-                if (debugger)
-                {
-                    // Debugging is not currently fully supported so we don't want to open
-                    // public API for it. Also, we want to have a way to make it work when running inside VS.
-                    // So use an environment variable. The undocumented /debug switch is just an easy way to set it.
-                    Environment.SetEnvironmentVariable("MSBUILDDEBUGGING", "1");
-                }
 
 #if MONO
                 // FIXME: Remove toolsVersion added from xbuild and then remove this too
@@ -1911,7 +1900,6 @@ namespace Microsoft.Build.CommandLine
             ref int cpuCount,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
-            ref bool debugger,
             ref bool detailedSummary,
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
@@ -2022,7 +2010,6 @@ namespace Microsoft.Build.CommandLine
                                                                ref cpuCount,
                                                                ref enableNodeReuse,
                                                                ref preprocessWriter,
-                                                               ref debugger,
                                                                ref detailedSummary,
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
@@ -2061,9 +2048,6 @@ namespace Microsoft.Build.CommandLine
                         preprocessWriter = ProcessPreprocessSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Preprocess]);
                     }
 
-#if FEATURE_MSBUILD_DEBUGGER
-                    debugger = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Debugger);
-#endif
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
 
                     warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
@@ -3548,12 +3532,6 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
-#if FEATURE_MSBUILD_DEBUGGER
-            if (CommandLineSwitches.IsParameterlessSwitch("debug"))
-            {
-                Console.WriteLine(AssemblyResources.GetString("HelpMessage_27_DebuggerSwitch"));
-            }
-#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_33_RestorePropertySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));

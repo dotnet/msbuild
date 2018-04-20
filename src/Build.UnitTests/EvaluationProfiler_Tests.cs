@@ -11,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
+using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
@@ -251,6 +252,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 ShutdownInProcNodeOnBuildFinish = true,
                 Loggers = new ILogger[] { profilerLogger },
                 DisableInProcNode = true, // This is actually important since we also want to test the serialization of the events
+                EnableNodeReuse = false,
                 ProjectLoadSettings = ProjectLoadSettings.ProfileEvaluation
             };
 

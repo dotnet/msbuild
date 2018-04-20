@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests
             // Unmatched curly would crash if they did
             t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                             ? "/C echo hello world {"
-                                            : @"-c """"""echo hello world {""""""";
+                                            : @"-c ""echo hello world {""";
             t.Execute();
             engine.AssertLogContains("echo hello world {");
             engine.Errors.ShouldBe(0);
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : @"-c """"""echo Who made you king anyways 1>&2""""""";
+                                                : @"-c ""echo Who made you king anyways 1>&2""";
 
                 t.Execute().ShouldBeTrue();
 
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways'"
-                                                : @"-c """"""echo Who made you king anyways""""""";
+                                                : @"-c ""echo Who made you king anyways""";
 
                 t.Execute().ShouldBeTrue();
 
@@ -347,7 +347,7 @@ namespace Microsoft.Build.UnitTests
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : @"-c """"""echo 'Who made you king anyways' 1>&2""""""";
+                                                : @"-c ""echo 'Who made you king anyways' 1>&2""";
 
                 t.Execute().ShouldBeFalse();
 

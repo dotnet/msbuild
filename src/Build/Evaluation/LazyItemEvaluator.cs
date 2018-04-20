@@ -4,9 +4,6 @@
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-#if FEATURE_MSBUILD_DEBUGGER
-using Microsoft.Build.Debugging;
-#endif 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;

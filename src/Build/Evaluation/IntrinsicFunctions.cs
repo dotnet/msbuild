@@ -440,6 +440,15 @@ namespace Microsoft.Build.Evaluation
             return NativeMethodsShared.IsUnixLike;
         }
 
+        /// <summary>
+        /// True if current OS is a BSD system.
+        /// </summary>
+        /// <returns></returns>
+        internal static bool IsOsBsdLike()
+        {
+            return NativeMethodsShared.IsBSD;
+        }
+
         public static string GetCurrentToolsDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;

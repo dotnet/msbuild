@@ -163,13 +163,6 @@ namespace Microsoft.Build.Evaluation
 
                             foreach (var metadataElement in metadata)
                             {
-#if FEATURE_MSBUILD_DEBUGGER
-                                //if (DebuggerManager.DebuggingEnabled)
-                                //{
-                                //    DebuggerManager.PulseState(metadataElementElement.Location, _itemPassLocals);
-                                //}
-#endif
-
                                 if (!EvaluateCondition(metadataElement.Condition, metadataElement, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
                                 {
                                     continue;
@@ -206,13 +199,6 @@ namespace Microsoft.Build.Evaluation
                             {
                                 continue;
                             }
-
-#if FEATURE_MSBUILD_DEBUGGER
-                            //if (DebuggerManager.DebuggingEnabled)
-                            //{
-                            //    DebuggerManager.PulseState(metadataElementElement.Location, _itemPassLocals);
-                            //}
-#endif
 
                             string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);

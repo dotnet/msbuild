@@ -21,7 +21,6 @@ namespace Microsoft.Build.BuildEngine
     /// or it may just be a virtual BuildItemGroup (e.g., the evaluated items).
     /// </summary>
     [DebuggerDisplay("BuildItemGroup (Count = { Count }, Condition = { Condition })")]
-    [Obsolete]
     public class BuildItemGroup : IItemPropertyGrouping, IEnumerable
     {
         #region Member Data

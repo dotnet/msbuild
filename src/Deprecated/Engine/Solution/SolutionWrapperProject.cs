@@ -20,7 +20,6 @@ namespace Microsoft.Build.BuildEngine
     /// This class is used to generate an MSBuild wrapper project for a solution file or standalone VC project.
     /// </summary>
     /// <owner>LukaszG, RGoel</owner>
-    [Obsolete]
     static public class SolutionWrapperProject
     {
         private const string webProjectOverrideFolder = "_PublishedWebsites";

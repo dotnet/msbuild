@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -19,14 +16,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneItemNop()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt") };
+            t.Inputs = new[] { new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(1, t.Filtered.Length);
             Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.False(t.HadAnyDuplicates);
         }
 
         /// <summary>
@@ -35,14 +34,68 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TwoItemsTheSame()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt"), new TaskItem("MyFile.txt") };
+            t.Inputs = new[] { new TaskItem("MyFile.txt"), new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(1, t.Filtered.Length);
             Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.True(t.HadAnyDuplicates);
+        }
+
+        /// <summary>
+        /// Item order preserved
+        /// </summary>
+        [Fact]
+        public void OrderPreservedNoDups()
+        {
+            var t = new RemoveDuplicates();
+            t.BuildEngine = new MockEngine();
+
+            // intentionally not sorted to catch an invalid implementation that sorts before
+            // de-duping.
+            t.Inputs = new[]
+            {
+                new TaskItem("MyFile2.txt"),
+                new TaskItem("MyFile1.txt"),
+                new TaskItem("MyFile3.txt")
+            };
+
+            bool success = t.Execute();
+            Assert.True(success);
+            Assert.Equal(3, t.Filtered.Length);
+            Assert.Equal("MyFile2.txt", t.Filtered[0].ItemSpec);
+            Assert.Equal("MyFile1.txt", t.Filtered[1].ItemSpec);
+            Assert.Equal("MyFile3.txt", t.Filtered[2].ItemSpec);
+        }
+
+        /// <summary>
+        /// Item order preserved, keeping the first items seen when there are duplicates.
+        /// </summary>
+        [Fact]
+        public void OrderPreservedDups()
+        {
+            var t = new RemoveDuplicates();
+            t.BuildEngine = new MockEngine();
+
+            t.Inputs = new[]
+            {
+                new TaskItem("MyFile2.txt"),
+                new TaskItem("MyFile1.txt"),
+                new TaskItem("MyFile2.txt"),
+                new TaskItem("MyFile3.txt"),
+                new TaskItem("MyFile1.txt")
+            };
+
+            bool success = t.Execute();
+            Assert.True(success);
+            Assert.Equal(3, t.Filtered.Length);
+            Assert.Equal("MyFile2.txt", t.Filtered[0].ItemSpec);
+            Assert.Equal("MyFile1.txt", t.Filtered[1].ItemSpec);
+            Assert.Equal("MyFile3.txt", t.Filtered[2].ItemSpec);
         }
 
         /// <summary>
@@ -51,15 +104,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TwoItemsDifferent()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile1.txt"), new TaskItem("MyFile2.txt") };
+            t.Inputs = new[] { new TaskItem("MyFile1.txt"), new TaskItem("MyFile2.txt") };
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(2, t.Filtered.Length);
             Assert.Equal("MyFile1.txt", t.Filtered[0].ItemSpec);
             Assert.Equal("MyFile2.txt", t.Filtered[1].ItemSpec);
+            Assert.False(t.HadAnyDuplicates);
         }
 
         /// <summary>
@@ -68,14 +123,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CaseInsensitive()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
 
-            t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt"), new TaskItem("MyFIle.tXt") };
+            t.Inputs = new[] { new TaskItem("MyFile.txt"), new TaskItem("MyFIle.tXt") };
 
             bool success = t.Execute();
             Assert.True(success);
+            Assert.Equal(1, t.Filtered.Length);
             Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.True(t.HadAnyDuplicates);
         }
 
         /// <summary>
@@ -84,15 +141,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MissingInputs()
         {
-            RemoveDuplicates t = new RemoveDuplicates();
+            var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
             bool success = t.Execute();
 
             Assert.True(success);
             Assert.Equal(0, t.Filtered.Length);
+            Assert.False(t.HadAnyDuplicates);
         }
     }
 }
-
-
-

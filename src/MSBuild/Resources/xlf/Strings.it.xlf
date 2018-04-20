@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
     <body>
-      <group id="MSBUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousProjectError">
         <source>MSBUILD : error MSB1011: Specify which project or solution file to use because this folder contains more than one project or solution file.</source>
         <target state="translated">MSBUILD : error MSB1011: la cartella contiene più file di soluzione o di progetto. Specificare il file da usare.</target>
@@ -768,20 +767,6 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </target>
         <note />
       </trans-unit>
-      <trans-unit id="HelpMessage_27_DebuggerSwitch">
-        <source>  /debug
-                     Causes a debugger prompt to appear immediately so that
-                     Visual Studio can be attached for you to debug the
-                     MSBuild XML and any tasks and loggers it uses.
-   </source>
-        <target state="translated">  /debug
-                     Causa la visualizzazione immediata di un prompt del
-                     debugger in modo che sia possibile collegare Visual Studio
-                     per il debug dell'XML di MSBuild e di eventuali attività e
-                     logger usati.
-   </target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
         <target state="translated">MSBUILD : Configuration error MSB1043: non è stato possibile avviare l'applicazione. {0}</target>
@@ -1070,7 +1055,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <source>MSBUILD : error MSB1026: Schema file '{0}' does not exist.</source>
         <target state="translated">MSBUILD : error MSB1026: il file di schema '{0}' non esiste.</target>
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
-    that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.  
+    that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
@@ -1100,7 +1085,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <source>MSBUILD : error MSB1035: Specify the project extensions to ignore.</source>
         <target state="translated">MSBUILD : error MSB1035: specificare le estensioni di progetto da ignorare.</target>
         <note>{StrBegin="MSBUILD : error MSB1035: "}
-      UE: This happens if the user does something like "msbuild.exe /IgnoreProjectextensions". The user must pass in one or more 
+      UE: This happens if the user does something like "msbuild.exe /IgnoreProjectextensions". The user must pass in one or more
       project extensions to ignore e.g. "msbuild.exe /IgnoreProjectExtensions:.sln".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1422,6 +1407,61 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_32_ProfilerSwitch">
+        <source>  /profileevaluation:&lt;file&gt;    
+                     Profiles MSBuild evaluation and writes the result 
+                     to the specified file. If the extension of the specified
+                     file is '.md', the result is generated in markdown
+                     format. Otherwise, a tab separated file is produced.
+    </source>
+        <target state="translated">  /profileevaluation:&lt;file&gt;    
+                     Esegue la profilatura della valutazione di MSBuild e scrive 
+                     il risultato nel file specificato. Se l'estensione del file
+                     specificato è '.md', il risultato viene generato in formato
+                     markdown. In caso contrario, viene prodotto un file 
+                     delimitato da tabulazioni.
+    </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_33_RestorePropertySwitch">
+        <source>  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     Set or override these project-level properties only
+                     during restore and do not use properties specified
+                     with the /property argument. &lt;n&gt; is the property
+                     name, and &lt;v&gt; is the property value. Use a
+                     semicolon or a comma to separate multiple properties,
+                     or specify each property separately.
+                     (Short form: /rp)
+                     Example:
+                       /restoreProperty:IsRestore=true;MyProperty=value
+    </source>
+        <target state="translated">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
+                     Imposta le proprietà specificate a livello di progetto o ne
+                     esegue l'override solo durante il ripristino e non usa le 
+                     proprietà specificate con l'argomento /property. &lt;n&gt; è 
+                     il nome della proprietà, mentre &lt;v&gt; è il valore della
+                     proprietà. Usare un punto e virgola o una virgola per
+                     separare più proprietà oppure specificare ogni proprietà
+                     separatamente.
+                     Forma breve: /rp
+                     Esempio:
+                       /restoreProperty:IsRestore=true;MyProperty=value
+    </target>
+        <note>
+      LOCALIZATION: "/restoreProperty" and "/rp" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidProfilerValue">
+        <source>MSBUILD : error MSB1053: Provided filename is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1053: il nome file specificato non è valido. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingProfileParameterError">
+        <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
+        <target state="translated">MSBUILD :error MSB1054: per generare il risultato del profiler, è necessario specificare un nome file.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

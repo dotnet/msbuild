@@ -14,7 +14,6 @@ namespace Microsoft.Build.BuildEngine
     /// Exception subclass that ToolsetReaders should throw.
     /// </summary>
     [Serializable]
-    [Obsolete]
     public class InvalidToolsetDefinitionException : Exception
     {
         /// <summary>

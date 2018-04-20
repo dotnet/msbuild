@@ -88,6 +88,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void OverrideTaskPathHasInvalidChars()
         {
             ProjectCollection e = new ProjectCollection();

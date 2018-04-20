@@ -1,24 +1,27 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D21C4BF9-E131-4ACB-8960-794797F19A39}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Microsoft.Build.Engine</AssemblyName>
-    <RootNamespace>Microsoft.Build.Engine</RootNamespace>
-    <NoWarn>$(NoWarn);618;612</NoWarn>
+    <TargetFramework>net46</TargetFramework>
+    <NoWarn>$(NoWarn);618</NoWarn>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <CreateTlb>true</CreateTlb>
+    <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
+    <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
+    <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
+    <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
+    <CopyToSuiteBin>true</CopyToSuiteBin>
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <DebugType>full</DebugType>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
+  
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\..\Shared\Constants.cs" />
     <Compile Include="AssemblyInfo.cs" />
@@ -199,38 +202,20 @@
     <Compile Include="Shared\XMakeAttributes.cs" />
     <Compile Include="Shared\XMakeElements.cs" />
     <Compile Include="Shared\XmlUtilities.cs" />
+
     <!-- Resource Files -->
+
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+
     <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <!-- Assemblies Files we depend on -->
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
   </ItemGroup>
-  <PropertyGroup>
-    <CreateTlb>true</CreateTlb>
-    <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
-    <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
-  </PropertyGroup>
-  <PropertyGroup>
-    <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
-    <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
-    <CopyToSuiteBin>true</CopyToSuiteBin>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Include="project.json" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
 </Project>

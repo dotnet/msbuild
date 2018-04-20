@@ -2681,7 +2681,7 @@
             MSB3501 - MSB3510   Task: ReadLinesFromFile
             MSB3511 - MSB3520   Task: Message
             MSB3521 - MSB3530   Task: Warning
-            MSB3531 - MSB3540   Task: Error
+            MSB3531 - MSB3540   Task: Error    // MSB3539, MSB3540 is used in Microsoft.Common.CurrentVersion.targets, do not reuse
             MSB3541 - MSB3550   Task: FindUnderPath
             MSB3551 - MSB3580   Task: GenerateResource     // MSB3561, MSB3571 not used but already shipped, do not reuse
             MSB3581 - MSB3600   Task: ResolveNonMSBuildProjectOutput

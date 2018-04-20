@@ -10,47 +10,51 @@ The current development branch is `master`. It builds for .NET Core and the full
 | Runtime\OS | Windows | Ubuntu 14.04 | Ubuntu 16.04 |Mac OS X|
 |:------|:------:|:------:|:------:|:------:|
 | **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
-|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_OSX_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_OSX_CoreCLR)|
+|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_OSX10.13_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_OSX10.13_CoreCLR)|
 |**Mono**|returning soon|
 
-We have entered stabilization for the 15.6 release (corresponding to Visual Studio 15.6) in the [`vs15.6`](https://github.com/Microsoft/msbuild/tree/vs15.6) branch.
+We have entered stabilization for the 15.7 release (corresponding to Visual Studio 15.7) in the [`vs15.7`](https://github.com/Microsoft/msbuild/tree/vs15.7) branch.
 
 | Runtime\OS | Windows | Ubuntu 14.04 | Ubuntu 16.04 |Mac OS X|
 |:------|:------:|:------:|:------:|:------:|
-| **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
-|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.6/innerloop_OSX_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.6/job/innerloop_OSX_CoreCLR)|
+| **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.7/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.7/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
+|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.7/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.7/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.7/innerloop_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.7/job/innerloop_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.7/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.7/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.7/innerloop_OSX10.13_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.7/job/innerloop_OSX10.13_CoreCLR)|
 
 ### Source code
 
 * Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
 
 ## Building
+
 ### Building MSBuild with Visual Studio 2017
+
 For the full supported experience, you will need to have Visual Studio 2017.
 
 To get started on **Visual Studio 2017**:
 
 1. [Install Visual Studio 2017](https://www.visualstudio.com/vs/).  Select the following Workloads:
   - _.NET desktop development_
-  - _Desktop development with C++_
-    - Optional, build warnings may occur without it.
   - _.NET Core cross-platform development_
     - Optional, not strictly required (yet) but used to develop .NET Core applications.
 2. Clone the source code (see above).
 2. Open a `Developer Command Prompt for VS 2017` prompt.
-3. Build the code using the `cibuild.cmd` script. This also restores packages needed to open the projects in Visual Studio.
+3. Build the code using the `build.cmd` script. This also restores packages needed to open the projects in Visual Studio.
 5. Open `src/MSBuild.sln` in Visual Studio 2017.
 
 ### Building MSBuild in Unix (Mac & Linux)
+
 MSBuild can be run on Unix systems that support .NET Core. Set-up instructions can be viewed on the wiki:   [Building Testing and Debugging on .Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
 
 ## Localization
+
 You can turn on localized builds via the `/p:LocalizedBuild=true` command line argument. For more information on localized builds and how to make contributions to MSBuild's translations, see our [localization wiki](https://github.com/Microsoft/msbuild/wiki/Localization)
 
-### How to Engage, Contribute and Provide Feedback
+## How to Engage, Contribute and Provide Feedback
+
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 #### Getting Started
+
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.
 
 * [Contributing Guide](https://github.com/Microsoft/msbuild/wiki/Contributing-Code)

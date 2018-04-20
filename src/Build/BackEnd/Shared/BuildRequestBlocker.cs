@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -66,6 +67,8 @@ namespace Microsoft.Build.BackEnd
         /// The name of the blocking target, if any.
         /// </summary>
         private string _blockingTarget;
+
+        private BuildResult _partialBuildResult;
 
         /// <summary>
         /// The requests which need to be built to unblock the request, if any.
@@ -130,6 +133,12 @@ namespace Microsoft.Build.BackEnd
             _blockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
             _targetsInProgress = targetsInProgress;
             _yieldAction = YieldAction.None;
+        }
+
+        public BuildRequestBlocker(int requestGlobalRequestId, string[] targetsInProgress, int unsubmittedRequestBlockingGlobalRequestId, string unsubmittedRequestBlockingTarget, BuildResult partialBuildResult)
+        : this(requestGlobalRequestId, targetsInProgress, unsubmittedRequestBlockingGlobalRequestId, unsubmittedRequestBlockingTarget)
+        {
+            _partialBuildResult = partialBuildResult;
         }
 
         /// <summary>
@@ -214,6 +223,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        public BuildResult PartialBuildResult => _partialBuildResult;
+
         #region INodePacketTranslatable Members
 
         /// <summary>
@@ -227,6 +238,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _blockingTarget);
             translator.TranslateEnum(ref _yieldAction, (int)_yieldAction);
             translator.TranslateArray(ref _buildRequests);
+            translator.Translate(ref _partialBuildResult, packetTranslator => BuildResult.FactoryForDeserialization(packetTranslator));
         }
 
         #endregion

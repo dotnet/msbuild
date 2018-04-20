@@ -11,16 +11,14 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
-
-using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
 // Microsoft.Build.Tasks has MSBuildConstants compiled into it under a different namespace otherwise
 // there are collisions with the one compiled into Microsoft.Build.Framework
@@ -134,7 +132,7 @@ namespace Microsoft.Build.UnitTests
             normalizeSlashes);
         }
 
-        internal static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<TestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, TempPaths[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        internal static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<TestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
             using (var env = TestEnvironment.Create())
             using (var collection = new ProjectCollection())
@@ -777,7 +775,7 @@ namespace Microsoft.Build.UnitTests
         private static string s_tempProjectDir = null;
 
         /// <summary>
-        /// Returns the path %TEMP%\TempDirForMSBuildUnitTests
+        /// Creates and returns a unique path under temp
         /// </summary>
         internal static string TempProjectDir
         {
@@ -785,7 +783,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (s_tempProjectDir == null)
                 {
-                    s_tempProjectDir = Path.Combine(Path.GetTempPath(), "TempDirForMSBuildUnitTests");
+                    s_tempProjectDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
                     Directory.CreateDirectory(s_tempProjectDir);
                 }
@@ -1633,113 +1631,6 @@ namespace Microsoft.Build.UnitTests
             Path.IsPathRooted(path)
                 ? path
                 : path.ToSlash();
-
-        /// <summary>
-        /// Creates a new temp path
-        /// Sets all OS temp environment variables to the new path
-        ///
-        /// Cleanup:
-        /// - restores OS temp environment variables
-        /// - deletes all files written to the new temp path
-        /// </summary>
-        internal class AlternativeTempPath : IDisposable
-        {
-            private const string TMP = "TMP";
-            private const string TMPDIR = "TMPDIR";
-            private const string TEMP = "TEMP";
-
-            private TempPaths _oldtempPaths;
-            private bool _disposed;
-
-            private string _path;
-            public string Path
-            {
-                get
-                {
-                    if (_disposed)
-                    {
-                        throw new ObjectDisposedException($"{nameof(AlternativeTempPath)}(\"{_path})\"");
-                    }
-
-                    return _path;
-                }
-
-                private set { _path = value; }
-            }
-
-            public AlternativeTempPath()
-            {
-                Path = System.IO.Path.GetFullPath($"TMP_{Guid.NewGuid()}");
-                Directory.CreateDirectory(_path);
-
-                // TODO: this could use TemporaryEnvironment
-                _oldtempPaths = SetTempPath(_path);
-            }
-
-            public void Dispose()
-            {
-                Cleanup();
-                GC.SuppressFinalize(this);
-            }
-
-            private void Cleanup()
-            {
-                if (_disposed)
-                {
-                    return;
-                }
-
-                SetTempPaths(_oldtempPaths);
-                FileUtilities.DeleteDirectoryNoThrow(Path, true);
-
-                _disposed = true;
-            }
-
-            ~AlternativeTempPath()
-            {
-                Cleanup();
-            }
-
-            private static TempPaths SetTempPaths(TempPaths tempPaths)
-            {
-                var oldTempPaths = GetTempPaths();
-
-                foreach (var key in oldTempPaths.Keys)
-                {
-                    Environment.SetEnvironmentVariable(key, tempPaths[key]);
-                }
-
-                return oldTempPaths;
-            }
-
-            private static TempPaths SetTempPath(string tempPath)
-            {
-                var oldTempPaths = GetTempPaths();
-
-                foreach (var key in oldTempPaths.Keys)
-                {
-                    Environment.SetEnvironmentVariable(key, tempPath);
-                }
-
-                return oldTempPaths;
-            }
-
-            private static TempPaths GetTempPaths()
-            {
-                var tempPaths = new TempPaths
-                {
-                    [TMP] = Environment.GetEnvironmentVariable(TMP),
-                    [TEMP] = Environment.GetEnvironmentVariable(TEMP)
-                };
-
-                if (NativeMethodsShared.IsUnixLike)
-                {
-                    tempPaths[TMPDIR] = Environment.GetEnvironmentVariable(TMPDIR);
-                }
-
-                return tempPaths;
-            }
-        }
 
         internal class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
         {

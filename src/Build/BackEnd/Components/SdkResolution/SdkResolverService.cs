@@ -17,10 +17,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// <summary>
     /// The main implementation of <see cref="ISdkResolverService"/> which resolves SDKs.  This class is the central location for all SDK resolution and is used
     /// directly by the main node and non-build evaluations and is used indirectly by the out-of-proc node when it sends requests to the main node.
-    ///
-    /// All access to this class must go through the singleton <see cref="SdkResolverService.Instance"/>.
     /// </summary>
-    internal sealed class SdkResolverService : ISdkResolverService
+    internal class SdkResolverService : ISdkResolverService
     {
         /// <summary>
         /// Stores the singleton instance for a particular process.
@@ -47,7 +45,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         private SdkResolverLoader _sdkResolverLoader = new SdkResolverLoader();
 
-        private SdkResolverService()
+        public SdkResolverService()
         {
         }
 
@@ -78,24 +76,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
-        public void ClearCache(int submissionId)
+        public virtual void ClearCache(int submissionId)
         {
-            ConcurrentDictionary<SdkResolver, object> notused;
-
-            _resolverStateBySubmission.TryRemove(submissionId, out notused);
+            _resolverStateBySubmission.TryRemove(submissionId, out _);
         }
 
-        /// <summary>
-        /// Resolves and SDK and gets a result.
-        /// </summary>
-        /// <param name="submissionId">The build submission ID that the resolution request is for.</param>
-        /// <param name="sdk">The <see cref="SdkReference"/> containing information about the referenced SDK.</param>
-        /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
-        /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element which referenced the SDK.</param>
-        /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
-        /// <param name="projectPath">The full path to that referenced the SDK.</param>
-        /// <returns>An <see cref="SdkResult"/> containing information of the SDK if it could be resolved, otherwise <code>null</code>.</returns>
-        public SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
+        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             // Lazy initialize the SDK resolvers
             if (_resolvers == null)
@@ -123,7 +110,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 try
                 {
-                    result = (SdkResult) sdkResolver.Resolve(sdk, context, resultFactory);
+                    result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
                 }
                 catch (Exception e) when (e is FileNotFoundException || e is FileLoadException && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
@@ -152,6 +139,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 if (result.Success)
                 {
                     LogWarnings(loggingContext, sdkReferenceLocation, result);
+
+                    if (!IsReferenceSameVersion(sdk, result.Version))
+                    {
+                        // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
+                        loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, result.Version);
+                    }
+
+                    // Associate the element location of the resolved SDK reference
+                    result.ElementLocation = sdkReferenceLocation;
+
                     return result;
                 }
 
@@ -172,14 +169,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
 
             return null;
-        }
-
-        /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
-        {
-            SdkResult result = GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-
-            return result?.Path;
         }
 
         /// <summary>

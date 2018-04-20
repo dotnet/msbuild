@@ -29,11 +29,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     internal sealed class MainNodeSdkResolverService : HostedSdkResolverServiceBase
     {
         /// <summary>
-        /// Stores the cache in a set of concurrent dictionaries.  The main dictionary is by build submission ID and the inner dictionary contains a case-insensitive SDK name and the cached <see cref="SdkResult"/>.
-        /// </summary>
-        private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, SdkResult>> _cache = new ConcurrentDictionary<int, ConcurrentDictionary<string, SdkResult>>();
-
-        /// <summary>
         /// An object used for locking in this class instance.
         /// </summary>
         private readonly object _lockObject = new object();
@@ -53,6 +48,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         private ConcurrentQueue<SdkResolverRequest> _requests;
 
+        private readonly ISdkResolverService _cachedSdkResolver = new CachingSdkResolverService();
+
         /// <summary>
         /// A factory which is registered to create an instance of this class.
         /// </summary>
@@ -64,13 +61,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
         public override void ClearCache(int submissionId)
         {
-            ConcurrentDictionary<string, SdkResult> entry;
-
-            // Clear our cache of resolved SDKs
-            _cache.TryRemove(submissionId, out entry);
-
-            // Also clear any cache for the SdkResolverService singleton which is the central place where resolution happens
-            SdkResolverService.Instance.ClearCache(submissionId);
+            _cachedSdkResolver.ClearCache(submissionId);
         }
 
         /// <inheritdoc cref="INodePacketHandler.PacketReceived"/>
@@ -85,87 +76,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public override string ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
-        {
-            SdkResult result = GetSdkResultAndCache(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-
-            return result?.Path;
-        }
-
-        /// <summary>
-        /// Resolves the specified SDK.  This method uses concurrent dictionaries for locking per build submission and SDK name.  This allows a build to be resolving multiple
-        /// SDKs at once where the first request does the heavy lifting and blocked requests use the cached result.
-        /// </summary>
-        /// <param name="submissionId">The current build submission ID that is resolving an SDK.</param>
-        /// <param name="sdk">The <see cref="SdkReference"/> containing information about the SDK to resolve.</param>
-        /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
-        /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element that referenced the SDK.</param>
-        /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
-        /// <param name="projectPath">The full path to the project that referenced the SDK.</param>
-        /// <returns>An <see cref="SdkResult"/> containing information about the SDK if one was resolved, otherwise <code>null</code>.</returns>
-        private SdkResult GetSdkResultAndCache(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             ErrorUtilities.VerifyThrowInternalNull(sdk, nameof(sdk));
             ErrorUtilities.VerifyThrowInternalNull(loggingContext, nameof(loggingContext));
             ErrorUtilities.VerifyThrowInternalNull(sdkReferenceLocation, nameof(sdkReferenceLocation));
+            ErrorUtilities.VerifyThrowInternalLength(projectPath, nameof(projectPath));
 
-            SdkResult result;
-
-            if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
-            {
-                result = GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-            }
-            else
-            {
-                // Get the dictionary for the specified submission if one is already added otherwise create a new dictionary for the submission.
-                ConcurrentDictionary<string, SdkResult> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default));
-
-                /*
-                 * Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
-                 * the same SDK, they will all block while the first one resolves.  Blocked requests will then get the cached result.  This ensures that a single
-                 * build submission resolves each unique SDK only one time.
-                 */
-                result = cached.GetOrAdd(
-                    sdk.Name,
-                    key => GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath));
-            }
-
-            if (result != null && !SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
-            {
-                // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.
-                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Resolves the specified SDK without caching the result.
-        /// </summary>
-        /// <param name="submissionId">The current build submission ID that is resolving an SDK.</param>
-        /// <param name="sdk">The <see cref="SdkReference"/> containing information about the SDK to resolve.</param>
-        /// <param name="loggingContext">The <see cref="LoggingContext"/> to use when logging messages during resolution.</param>
-        /// <param name="sdkReferenceLocation">The <see cref="ElementLocation"/> of the element that referenced the SDK.</param>
-        /// <param name="solutionPath">The full path to the solution, if any, that is being built.</param>
-        /// <param name="projectPath">The full path to the project that referenced the SDK.</param>
-        /// <returns>An <see cref="SdkResult"/> containing information about the SDK if one was resolved, otherwise <code>null</code>.</returns>
-        private SdkResult GetSdkResult(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
-        {
-            SdkResult sdkResult = SdkResolverService.Instance.GetSdkResult(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
-
-            if (sdkResult != null)
-            {
-                if (!SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
-                {
-                    // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, sdkResult.Version);
-                }
-
-                // Associate the element location of the resolved SDK reference
-                sdkResult.ElementLocation = sdkReferenceLocation;
-            }
-
-            return sdkResult;
+            return _cachedSdkResolver.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
         }
 
         /// <summary>
@@ -222,21 +140,32 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // Start a thread to resolve an SDK and add it to the list of threads
                 tasks.Add(Task.Run(() =>
                 {
-                    // Create an SdkReference from the request
-                    SdkReference sdkReference = new SdkReference(request.Name, request.Version, request.MinimumVersion);
+                    SdkResult response = null;
+                    try
+                    {
+                        // Create an SdkReference from the request
+                        SdkReference sdkReference = new SdkReference(request.Name, request.Version, request.MinimumVersion);
 
-                    ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
+                        ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
 
-                    // This call is usually cached so is very fast but can take longer for a new SDK that is downloaded.  Other queued threads for different SDKs will complete sooner and continue on which unblocks evaluations
-                    SdkResult result = GetSdkResultAndCache(request.SubmissionId, sdkReference, new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath), request.ElementLocation, request.SolutionPath, request.ProjectPath);
+                        // This call is usually cached so is very fast but can take longer for a new SDK that is downloaded.  Other queued threads for different SDKs will complete sooner and continue on which unblocks evaluations
+                        response = ResolveSdk(request.SubmissionId, sdkReference, new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath), request.ElementLocation, request.SolutionPath, request.ProjectPath);
+                    }
+                    catch (Exception e)
+                    {
+                        ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
 
-                    // Create a response
-                    SdkResolverResponse response = new SdkResolverResponse(result.Path, result.Version);
+                        EvaluationLoggingContext loggingContext = new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath);
 
-                    // Get the node manager and send the response back to the node that requested the SDK
-                    INodeManager nodeManager = Host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
+                        loggingService.LogFatalBuildError(loggingContext.BuildEventContext, e, new BuildEventFileInfo(request.ElementLocation));
+                    }
+                    finally
+                    {
+                        // Get the node manager and send the response back to the node that requested the SDK
+                        INodeManager nodeManager = Host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                    nodeManager.SendData(request.NodeId, response);
+                        nodeManager.SendData(request.NodeId, response ?? new SdkResult());
+                    }
                 }));
             }
 

@@ -154,12 +154,18 @@ namespace Microsoft.Build.Tasks
             {
                 ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
-                lastModified = info.GetDateTime("lastModified");
-                assemblyName = (AssemblyNameExtension)info.GetValue("assemblyName", typeof(AssemblyNameExtension));
-                dependencies = (AssemblyNameExtension[])info.GetValue("dependencies", typeof(AssemblyNameExtension[]));
-                scatterFiles = (string[])info.GetValue("scatterFiles", typeof(string[]));
-                runtimeVersion = (string)info.GetValue("runtimeVersion", typeof(string));
-                frameworkName = (FrameworkName)info.GetValue("frameworkName", typeof(FrameworkName));
+                lastModified = new DateTime(info.GetInt64("mod"), (DateTimeKind)info.GetInt32("modk"));
+                assemblyName = (AssemblyNameExtension)info.GetValue("an", typeof(AssemblyNameExtension));
+                dependencies = (AssemblyNameExtension[])info.GetValue("deps", typeof(AssemblyNameExtension[]));
+                scatterFiles = (string[])info.GetValue("sfiles", typeof(string[]));
+                runtimeVersion = (string)info.GetValue("rtver", typeof(string));
+                if (info.GetBoolean("fn"))
+                {
+                    var frameworkNameVersion = (Version) info.GetValue("fnVer", typeof(Version));
+                    var frameworkIdentifier = info.GetString("fnId");
+                    var frameworkProfile = info.GetString("fmProf");
+                    frameworkName = new FrameworkName(frameworkIdentifier, frameworkNameVersion, frameworkProfile);
+                }
             }
 
             /// <summary>
@@ -170,12 +176,19 @@ namespace Microsoft.Build.Tasks
             {
                 ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
-                info.AddValue("lastModified", lastModified);
-                info.AddValue("assemblyName", assemblyName);
-                info.AddValue("dependencies", dependencies);
-                info.AddValue("scatterFiles", scatterFiles);
-                info.AddValue("runtimeVersion", runtimeVersion);
-                info.AddValue("frameworkName", frameworkName);
+                info.AddValue("mod", lastModified.Ticks);
+                info.AddValue("modk", (int)lastModified.Kind);
+                info.AddValue("an", assemblyName);
+                info.AddValue("deps", dependencies);
+                info.AddValue("sfiles", scatterFiles);
+                info.AddValue("rtver", runtimeVersion);
+                info.AddValue("fn", frameworkName != null);
+                if (frameworkName != null)
+                {
+                    info.AddValue("fnVer", frameworkName.Version);
+                    info.AddValue("fnId", frameworkName.Identifier);
+                    info.AddValue("fmProf", frameworkName.Profile);
+                }
             }
 
             /// <summary>

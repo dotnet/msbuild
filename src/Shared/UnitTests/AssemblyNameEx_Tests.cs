@@ -5,8 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -220,11 +223,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General equals comparison validator.
         /// </summary>
-#if FEATURE_ASSEMBLYNAME_CULTUREINFO
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/252")]
-#endif
         public void Equals()
         {
             // For each pair of assembly strings...
@@ -265,11 +264,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General equals comparison validator when we are ignoring the version numbers in the name.
         /// </summary>
-#if FEATURE_ASSEMBLYNAME_CULTUREINFO
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/252")]
-#endif
         public void EqualsIgnoreVersion()
         {
             // For each pair of assembly strings...
@@ -683,6 +678,69 @@ namespace Microsoft.Build.UnitTests
             Assert.True(assemblies[0].Equals(x));
             Assert.True(assemblies[1].Equals(z));
             Assert.True(assemblies[2].Equals(y));
+        }
+
+        [Theory]
+        [InlineData("System.Xml")]
+        [InlineData("System.XML, Version=2.0.0.0")]
+        [InlineData("System.Xml, Culture=de-DE")]
+        [InlineData("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes")]
+        [InlineData("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+        public void VerifyAssemblyNameExSerialization(string assemblyName)
+        {
+            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension(assemblyName);
+            AssemblyNameExtension assemblyNameDeserialized;
+
+            byte[] bytes;
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(ms, assemblyNameOriginal);
+
+                bytes = ms.ToArray();
+            }
+
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                assemblyNameDeserialized = (AssemblyNameExtension) formatter.Deserialize(ms);
+            }
+
+            assemblyNameDeserialized.ShouldBe(assemblyNameOriginal);
+        }
+
+        [Fact]
+        public void VerifyAssemblyNameExSerializationWithRemappedFrom()
+        {
+            
+            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+            AssemblyNameExtension assemblyRemappedFrom = new AssemblyNameExtension("System.Xml, Version=9.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+            assemblyRemappedFrom.MarkImmutable();
+            assemblyNameOriginal.AddRemappedAssemblyName(assemblyRemappedFrom);
+            assemblyNameOriginal.RemappedFromEnumerator.Count().ShouldBe(1);
+
+            AssemblyNameExtension assemblyNameDeserialized;
+
+            byte[] bytes;
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(ms, assemblyNameOriginal);
+
+                bytes = ms.ToArray();
+            }
+
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                assemblyNameDeserialized = (AssemblyNameExtension)formatter.Deserialize(ms);
+            }
+
+            assemblyNameDeserialized.Equals(assemblyNameOriginal).ShouldBeTrue();
+            assemblyNameDeserialized.RemappedFromEnumerator.Count().ShouldBe(1);
+            assemblyNameDeserialized.RemappedFromEnumerator.First().ShouldBe(assemblyRemappedFrom);
         }
     }
 }

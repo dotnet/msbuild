@@ -361,13 +361,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -376,11 +371,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"c:\my project\myproj.proj",
                 _continueOnErrorDefault,
                 "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\MyTasks\MyTask.dll",
-#else
-                new AssemblyName("MyTask"),
-#endif
                 parameters);
 
             ((INodePacketTranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());

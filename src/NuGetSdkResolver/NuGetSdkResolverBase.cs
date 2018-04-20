@@ -2,16 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Microsoft.Build.Utilities;
 #if !FEATURE_APPDOMAIN
 using System.Runtime.Loader;
 #endif
 
+using SdkReference = Microsoft.Build.Framework.SdkReference;
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
+using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
+using SdkResultBase = Microsoft.Build.Framework.SdkResult;
+using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 
 namespace NuGet.MSBuildSdkResolver
 {
@@ -52,7 +56,7 @@ namespace NuGet.MSBuildSdkResolver
         /// A list of NuGet assemblies that we have a dependency on but should load at runtime.  This list is from dependencies of the
         /// NuGet.Commands and NuGet.Protocol packages in project.json.  This list should be updated if those dependencies change.
         /// </summary>
-        private static readonly HashSet<string> NuGetAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        internal static readonly HashSet<string> NuGetAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "Newtonsoft.Json",
             "NuGet.Commands",
@@ -66,18 +70,6 @@ namespace NuGet.MSBuildSdkResolver
             "NuGet.Protocol",
             "NuGet.Versioning",
         };
-
-        static NuGetSdkResolverBase()
-        {
-            if (!Traits.Instance.EscapeHatches.DisableNuGetSdkResolver)
-            {
-#if FEATURE_APPDOMAIN
-                AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
-#else
-                AssemblyLoadContext.Default.Resolving += AssemblyResolve;
-#endif
-            }
-        }
 
         /// <summary>
         /// A custom assembly resolver used to locate NuGet dependencies.  It is very important that we do not ship with
@@ -113,5 +105,35 @@ namespace NuGet.MSBuildSdkResolver
 
             return null;
         }
+
+        public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
+        {
+            // Escape hatch to disable this resolver
+            if (Traits.Instance.EscapeHatches.DisableNuGetSdkResolver)
+            {
+                return null;
+            }
+
+#if FEATURE_APPDOMAIN
+            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
+#else
+            AssemblyLoadContext.Default.Resolving += AssemblyResolve;
+#endif
+
+            try
+            {
+                return ResolveSdk(sdk, context, factory);
+            }
+            finally
+            {
+#if FEATURE_APPDOMAIN
+                AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolve;
+#else
+                AssemblyLoadContext.Default.Resolving -= AssemblyResolve;
+#endif
+            }
+        }
+
+        protected abstract SdkResultBase ResolveSdk(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory);
     }
 }

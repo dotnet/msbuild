@@ -1,21 +1,19 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.Build.Engine.UnitTests
+using TempPaths = System.Collections.Generic.Dictionary<string, string>;
+
+namespace Microsoft.Build.UnitTests
 {
-    public class TestEnvironment : IDisposable
+    public partial class TestEnvironment : IDisposable
     {
         /// <summary>
         ///     List of test invariants to assert value does not change.
@@ -29,13 +27,21 @@ namespace Microsoft.Build.Engine.UnitTests
 
         private readonly ITestOutputHelper _output;
 
+        private readonly Lazy<TransientTestFolder> _defaultTestDirectory;
+
+        private bool _disposed;
+
+        public TransientTestFolder DefaultTestDirectory => _defaultTestDirectory.Value;
+
         public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
         {
             var env = new TestEnvironment(output ?? new DefaultOutput());
 
             // In most cases, if MSBuild wrote an MSBuild_*.txt to the temp path something went wrong.
             if (!ignoreBuildErrorFiles)
+            {
                 env.WithInvariant(new BuildFailureLogInvariant());
+            }
 
             env.SetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS", "1");
 
@@ -45,21 +51,38 @@ namespace Microsoft.Build.Engine.UnitTests
         private TestEnvironment(ITestOutputHelper output)
         {
             _output = output;
+            _defaultTestDirectory = new Lazy<TransientTestFolder>(() => CreateFolder());
             SetDefaultInvariant();
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+            GC.SuppressFinalize(this);
+        }
+
+        ~TestEnvironment()
+        {
+            Cleanup();
         }
 
         /// <summary>
         ///     Revert / cleanup variants and then assert invariants.
         /// </summary>
-        public void Dispose()
+        private void Cleanup()
         {
-            // Reset test variants
-            foreach (var variant in _variants)
-                variant.Revert();
+            if (!_disposed)
+            {
+                _disposed = true;
 
-            // Assert invariants
-            foreach (var item in _invariants)
-                item.AssertInvariant(_output);
+                // Reset test variants
+                foreach (var variant in _variants)
+                    variant.Revert();
+
+                // Assert invariants
+                foreach (var item in _invariants)
+                    item.AssertInvariant(_output);
+            }
         }
 
         /// <summary>
@@ -101,14 +124,7 @@ namespace Microsoft.Build.Engine.UnitTests
             // Temp folder should not change before and after a test
             WithInvariant(new StringInvariant("Directory.GetCurrentDirectory", Directory.GetCurrentDirectory));
 
-            // Common set of MSBuild environment variables that should remain the same before and after a test
-            // runs. If these differ it likely indicates an issue with the test.
-            WithEnvironmentVariableInvariant("MSBUILDNOINPROCNODE");
-            WithEnvironmentVariableInvariant("MSBUILDENABLEALLPROPERTYFUNCTIONS");
-            WithEnvironmentVariableInvariant("MSBuildForwardPropertiesFromChild");
-            WithEnvironmentVariableInvariant("MsBuildForwardAllPropertiesFromChild");
-            WithEnvironmentVariableInvariant("MSBUILDDEBUGFORCECACHING");
-            WithEnvironmentVariableInvariant("MSBUILDRELOADTRAITSONEACHACCESS");
+            WithEnvironmentInvariant();
         }
 
         /// <summary>
@@ -119,6 +135,13 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             return WithInvariant(new StringInvariant(environmentVariableName,
                 () => Environment.GetEnvironmentVariable(environmentVariableName)));
+        }
+        /// <summary>
+        /// Creates a test invariant which asserts that the environment variables do not change
+        /// </summary>
+        public TestInvariant WithEnvironmentInvariant()
+        {
+            return WithInvariant(new EnvironmentInvariant());
         }
 
         /// <summary>
@@ -132,12 +155,49 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
+        /// Creates a new temp path
+        /// </summary>
+        public TransientTempPath CreateNewTempPath()
+        {
+            var folder = CreateFolder();
+            return SetTempPath(folder.FolderPath, true);
+        }
+
+        /// <summary>
+        /// Creates a new temp path
+        /// Sets all OS temp environment variables to the new path
+        ///
+        /// Cleanup:
+        /// - restores OS temp environment variables
+        /// </summary>
+        public TransientTempPath SetTempPath(string tempPath, bool deleteTempDirectory = false)
+        {
+            var transientTempPath = new TransientTempPath(tempPath, deleteTempDirectory);
+            _variants.Add(transientTempPath);
+
+            return transientTempPath;
+        }
+
+        /// <summary>
         ///     Creates a test variant that corresponds to a temporary file which will be deleted when the test completes.
         /// </summary>
         /// <param name="extension">Extensions of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(extension));
+            return WithTransientTestState(new TransientTestFile(extension, createFile:true, expectedAsOutput:false));
+        }
+
+        public TransientTestFile CreateFile(string fileName, string contents = "")
+        {
+            return CreateFile(DefaultTestDirectory, fileName, contents);
+        }
+
+        public TransientTestFile CreateFile(TransientTestFolder transientTestFolder, string fileName, string contents = "")
+        {
+            var file = WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, Path.GetFileNameWithoutExtension(fileName), Path.GetExtension(fileName)));
+            File.WriteAllText(file.Path, contents);
+
+            return file;
         }
 
         /// <summary>
@@ -148,26 +208,74 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension));
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension,
+                createFile: true, expectedAsOutput: false));
+        }
+
+
+        /// <summary>
+        ///     Gets a transient test file associated with a unique file name but does not create the file.
+        /// </summary>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile GetTempFile(string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: false));
+        }
+
+        /// <summary>
+        ///     Gets a transient test file under a specified folder associated with a unique file name but does not create the file.
+        /// </summary>
+        /// <param name="transientTestFolder">Temp folder</param>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile GetTempFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension,
+                createFile: false, expectedAsOutput: false));
+        }
+
+        /// <summary>
+        ///     Create a temp file name that is expected to exist when the test completes.
+        /// </summary>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile ExpectFile(string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: true));
+        }
+
+        /// <summary>
+        /// Create a temp file name under a specific temporary folder. The file is expected to exist when the test completes.
+        /// </summary>
+        /// <param name="transientTestFolder">Temp folder</param>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension, createFile: false, expectedAsOutput: true));
         }
 
         /// <summary>
         ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
         ///     completes.
         /// </summary>
-        public TransientTestFolder CreateFolder()
+        public TransientTestFolder CreateFolder(string folderPath = null, bool createFolder = true)
         {
-            return WithTransientTestState(new TransientTestFolder());
+            var folder = WithTransientTestState(new TransientTestFolder(folderPath, createFolder));
+
+            Assert.True(!(createFolder ^ Directory.Exists(folder.FolderPath)));
+
+            return folder;
         }
 
         /// <summary>
-        ///     Creates a test variant that corresponds to a project collection which will have its projects unloaded,
-        ///     loggers unregistered, toolsets removed and disposed when the test completes
+        ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
+        ///     completes.
         /// </summary>
-        /// <returns></returns>
-        public TransientProjectCollection CreateProjectCollection()
+        public TransientTestFolder CreateFolder(bool createFolder)
         {
-            return WithTransientTestState(new TransientProjectCollection());
+            return CreateFolder(null, createFolder);
         }
 
         /// <summary>
@@ -182,26 +290,6 @@ namespace Microsoft.Build.Engine.UnitTests
         public TransientTestState SetCurrentDirectory(string newWorkingDirectory)
         {
             return WithTransientTestState(new TransientWorkingDirectory(newWorkingDirectory));
-        }
-
-        /// <summary>
-        ///     Creates a test variant representing a test project with files relative to the project root. All files
-        ///     and the root will be cleaned up when the test completes.
-        /// </summary>
-        /// <param name="projectContents">Contents of the project file to be created.</param>
-        /// <param name="files">Files to be created.</param>
-        /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to 
-        /// the root of the project directory.</param>
-        public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectContents, string[] files = null,
-            string relativePathFromRootToProject = ".")
-        {
-            return WithTransientTestState(
-                new TransientTestProjectWithFiles(projectContents, files, relativePathFromRootToProject));
-        }
-
-        public TransientSdkResolution CustomSdkResolution(Dictionary<string, string> sdkToFolderMapping)
-        {
-            return WithTransientTestState(new TransientSdkResolution(sdkToFolderMapping));
         }
 
         #endregion
@@ -251,7 +339,41 @@ namespace Microsoft.Build.Engine.UnitTests
 
         public override void AssertInvariant(ITestOutputHelper output)
         {
-            Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
+            var currentValue = _accessorFunc();
+
+            //  Something like the following might be preferrable, but the assertion method truncates the values leaving us without
+            //  useful information.  So use Assert.True instead
+            //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
+
+            Assert.True(currentValue == _originalValue, $"Expected {_name} to be '{_originalValue}', but it was '{currentValue}'");
+        }
+    }
+
+    public class EnvironmentInvariant : TestInvariant
+    {
+        private IDictionary _initialEnvironment;
+
+        public EnvironmentInvariant()
+        {
+            _initialEnvironment = Environment.GetEnvironmentVariables();
+        }
+
+        public override void AssertInvariant(ITestOutputHelper output)
+        {
+            var environment = Environment.GetEnvironmentVariables();
+
+            AssertDictionaryInclusion(_initialEnvironment, environment, "added");
+            AssertDictionaryInclusion(environment, _initialEnvironment, "removed");
+
+            // a includes b
+            void AssertDictionaryInclusion(IDictionary a, IDictionary b, string operation)
+            {
+                foreach (var key in b.Keys)
+                {
+                    a.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
+                    a[key].ShouldBe(b[key]);
+                }
+            }
         }
     }
 
@@ -304,31 +426,132 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
-    public class TransientTestFile : TransientTestState
+    public class TransientTempPath : TransientTestState
     {
-        public TransientTestFile(string extension)
+        private const string TMP = "TMP";
+        private const string TMPDIR = "TMPDIR";
+        private const string TEMP = "TEMP";
+
+        private readonly bool _deleteTempDirectory;
+
+        private readonly TempPaths _oldtempPaths;
+
+        public string TempPath { get; }
+
+        public TransientTempPath(string tempPath, bool deleteTempDirectory)
         {
-            Path = FileUtilities.GetTemporaryFile(extension);
+            TempPath = tempPath;
+            _deleteTempDirectory = deleteTempDirectory;
+
+            _oldtempPaths = SetTempPath(tempPath);
         }
 
-        public TransientTestFile(string rootPath, string extension)
+        private static TempPaths SetTempPath(string tempPath)
         {
-            Path = FileUtilities.GetTemporaryFile(rootPath, extension);
+            var oldTempPaths = GetTempPaths();
+
+            foreach (var key in oldTempPaths.Keys)
+            {
+                Environment.SetEnvironmentVariable(key, tempPath);
+            }
+
+            return oldTempPaths;
+        }
+
+        private static TempPaths SetTempPaths(TempPaths tempPaths)
+        {
+            var oldTempPaths = GetTempPaths();
+
+            foreach (var key in oldTempPaths.Keys)
+            {
+                Environment.SetEnvironmentVariable(key, tempPaths[key]);
+            }
+
+            return oldTempPaths;
+        }
+
+        private static TempPaths GetTempPaths()
+        {
+            var tempPaths = new TempPaths
+            {
+                [TMP] = Environment.GetEnvironmentVariable(TMP),
+                [TEMP] = Environment.GetEnvironmentVariable(TEMP)
+            };
+
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                tempPaths[TMPDIR] = Environment.GetEnvironmentVariable(TMPDIR);
+            }
+
+            return tempPaths;
+        }
+
+        public override void Revert()
+        {
+            SetTempPaths(_oldtempPaths);
+
+            if (_deleteTempDirectory)
+            {
+                FileUtilities.DeleteDirectoryNoThrow(TempPath, recursive: true);
+            }
+        }
+    }
+
+
+    public class TransientTestFile : TransientTestState
+    {
+        private readonly bool _createFile;
+        private readonly bool _expectedAsOutput;
+
+        public TransientTestFile(string extension, bool createFile, bool expectedAsOutput)
+        {
+            _createFile = createFile;
+            _expectedAsOutput = expectedAsOutput;
+            Path = FileUtilities.GetTemporaryFile(null, extension, createFile);
+        }
+
+        public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
+        {
+            _createFile = createFile;
+            _expectedAsOutput = expectedAsOutput;
+            Path = FileUtilities.GetTemporaryFile(rootPath, extension, createFile);
+        }
+
+        public TransientTestFile(string rootPath, string fileNameWithoutExtension, string extension)
+        {
+            Path = System.IO.Path.Combine(rootPath, fileNameWithoutExtension + extension);
+
+            File.WriteAllText(Path, string.Empty);
         }
 
         public string Path { get; }
 
         public override void Revert()
         {
-            FileUtilities.DeleteNoThrow(Path);
+            try
+            {
+                if (_expectedAsOutput)
+                {
+                    Assert.True(File.Exists(Path), $"A file expected as an output does not exist: {Path}");
+                }
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(Path);
+            }
         }
     }
 
     public class TransientTestFolder : TransientTestState
     {
-        public TransientTestFolder()
+        public TransientTestFolder(string folderPath = null, bool createFolder = true)
         {
-            FolderPath = FileUtilities.GetTemporaryDirectory();
+            FolderPath = folderPath ?? FileUtilities.GetTemporaryDirectory(createFolder);
+
+            if (createFolder)
+            {
+                Directory.CreateDirectory(FolderPath);
+            }
         }
 
         public string FolderPath { get; }
@@ -380,145 +603,6 @@ namespace Microsoft.Build.Engine.UnitTests
         public override void Revert()
         {
             Directory.SetCurrentDirectory(_originalValue);
-        }
-    }
-
-    public class TransientTestProjectWithFiles : TransientTestState
-    {
-        private readonly TransientTestFolder _folder;
-
-        public string TestRoot => _folder.FolderPath;
-
-        public string[] CreatedFiles { get; }
-
-        public string ProjectFile { get; }
-
-        public TransientTestProjectWithFiles(string projectContents, string[] files,
-            string relativePathFromRootToProject = ".")
-        {
-            _folder = new TransientTestFolder();
-
-            var projectDir = Path.Combine(TestRoot, relativePathFromRootToProject);
-            Directory.CreateDirectory(projectDir);
-
-            ProjectFile = Path.Combine(projectDir, "build.proj");
-            File.WriteAllText(ProjectFile, ObjectModelHelpers.CleanupFileContents(projectContents));
-
-            CreatedFiles = Helpers.CreateFilesInDirectory(TestRoot, files);
-        }
-
-        internal MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
-        {
-            MockLogger logger;
-
-            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeFalse();
-
-            return logger;
-        }
-
-        internal MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
-        {
-            MockLogger logger;
-
-            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeTrue();
-
-            return logger;
-        }
-
-        public override void Revert()
-        {
-            _folder.Revert();
-        }
-
-        private bool BuildProject(IDictionary<string, string> globalProperties, string toolsVersion, out MockLogger logger)
-        {
-            logger = new MockLogger();
-
-            using (ProjectCollection projectCollection = new ProjectCollection())
-            {
-                Project project = new Project(ProjectFile, globalProperties, toolsVersion, projectCollection);
-
-                return project.Build(logger);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Represents custom SDK resolution in the context of this test.
-    /// </summary>
-    public class TransientSdkResolution : TransientTestState
-    {
-        private readonly Dictionary<string, string> _mapping;
-
-        public TransientSdkResolution(Dictionary<string, string> mapping)
-        {
-            _mapping = mapping;
-            
-            CallResetForTests(new List<SdkResolver> { new TestSdkResolver(_mapping) });
-        }
-
-        public override void Revert()
-        {
-            CallResetForTests(null);
-        }
-
-        /// <summary>
-        /// SdkResolution is internal (by design) and not all UnitTest projects are allowed to have
-        /// InternalsVisibleTo.
-        /// </summary>
-        /// <param name="resolvers"></param>
-        private static void CallResetForTests(IList<SdkResolver> resolvers)
-        {
-            Type sdkResolverServiceType = typeof(ProjectCollection).GetTypeInfo().Assembly.GetType("Microsoft.Build.BackEnd.SdkResolution.SdkResolverService");
-
-            PropertyInfo instancePropertyInfo = sdkResolverServiceType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-
-            object sdkResolverService = instancePropertyInfo.GetValue(null);
-
-            MethodInfo initializeForTestsMethodInfo = sdkResolverServiceType.GetMethod("InitializeForTests", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            initializeForTestsMethodInfo.Invoke(sdkResolverService, new object[] { null, resolvers });
-        }
-
-        private class TestSdkResolver : SdkResolver
-        {
-            private readonly Dictionary<string, string> _mapping;
-
-            public TestSdkResolver(Dictionary<string, string> mapping)
-            {
-                _mapping = mapping;
-            }
-            public override string Name => "TestSdkResolver";
-            public override int Priority => int.MinValue;
-
-            public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
-            {
-                resolverContext.Logger.LogMessage($"{nameof(resolverContext.ProjectFilePath)} = {resolverContext.ProjectFilePath}", MessageImportance.High);
-                resolverContext.Logger.LogMessage($"{nameof(resolverContext.SolutionFilePath)} = {resolverContext.SolutionFilePath}", MessageImportance.High);
-                resolverContext.Logger.LogMessage($"{nameof(resolverContext.MSBuildVersion)} = {resolverContext.MSBuildVersion}", MessageImportance.High);
-
-                return _mapping.ContainsKey(sdkReference.Name)
-                    ? factory.IndicateSuccess(_mapping[sdkReference.Name], null)
-                    : factory.IndicateFailure(new[] {$"Not in {nameof(_mapping)}"});
-            }
-        }
-    }
-
-    public class TransientProjectCollection : TransientTestState
-    {
-        public ProjectCollection Collection { get; }
-
-        public TransientProjectCollection()
-        {
-            Collection = new ProjectCollection();
-        }
-
-        public override void Revert()
-        {
-            Collection.UnloadAllProjects();
-            Collection.UnregisterAllLoggers();
-            Collection.RemoveAllToolsets();
-            Collection.Dispose();
         }
     }
 }

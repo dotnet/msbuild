@@ -2582,7 +2582,20 @@ namespace Microsoft.Build.Execution
 
             ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
-            _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(this, xml, buildParameters.ProjectLoadSettings, buildParameters.MaxNodeCount, buildParameters.EnvironmentPropertiesInternal, loggingService, new ProjectItemInstanceFactory(this), buildParameters.ToolsetProvider, ProjectRootElementCache, buildEventContext, this /* for debugging only */, sdkResolverService ?? SdkResolverService.Instance, submissionId);
+            _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
+                this,
+                xml,
+                buildParameters.ProjectLoadSettings,
+                buildParameters.MaxNodeCount,
+                buildParameters.EnvironmentPropertiesInternal,
+                loggingService,
+                new ProjectItemInstanceFactory(this),
+                buildParameters.ToolsetProvider,
+                ProjectRootElementCache,
+                buildEventContext,
+                this /* for debugging only */,
+                sdkResolverService ?? SdkResolverService.Instance,
+                submissionId);
 
             ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }
