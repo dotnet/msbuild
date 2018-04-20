@@ -3081,7 +3081,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void RebuildsInPresenceOfFileRefWithWindowsPath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

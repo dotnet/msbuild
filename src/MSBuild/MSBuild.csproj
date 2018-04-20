@@ -248,6 +248,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="NuGetSdkResolverResolvedProjectReferencePath">
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=net46</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=net461</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>
   </ItemGroup>
@@ -329,7 +330,7 @@
 
   </Target>
 
-  <!-- Import targets to create bootstrap version of MSBuild if building for full Framework.
+  <!-- Import targets to create bootstrap version of MSBuild if building for full Framework and Mono.
        For .NET Core, a separate MSBuild.Bootstrap project is used. -->
-  <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" Condition="$(TargetFramework.StartsWith('net4'))" />
+  <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" Condition="$(TargetFramework.StartsWith('net4')) and '$(MonoBuild)' != 'true'" />
 </Project>
