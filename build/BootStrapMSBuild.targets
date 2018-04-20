@@ -34,7 +34,10 @@
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
       <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\**\*.*" />
-      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
+
+      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)sdk\$(DotNetCliVersion)\Sdks\**\*.*" Condition="'$(MonoBuild)' != 'true'" />
+      <InstalledSdks Include="$(MSBuildBinPath)\Sdks\**\*" Condition="'$(MonoBuild)' == 'true'" />
+
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
       <ShimTargets Include="Microsoft.Data.Entity.targets" />
@@ -49,12 +52,16 @@
 
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 
-      <NuGetCommonExtensions Include="$(VSInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*" />
+      <NuGetRestoreSupport Include="$(MSBuildBinPath)\NuGet*" Condition="'$(MonoBuild)' == 'true'" />
+      <NuGetRestoreSupport Include="$(MSBuildBinPath)\Newton*" Condition="'$(MonoBuild)' == 'true'" />
+
+      <NuGetCommonExtensions Include="$(VSInstallRoot)\Common7\IDE\CommonExtensions\Microsoft\NuGet\**\*" Condition="'$(MonoBuild)' != 'true'" />
 
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.pdb" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe.config" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll.config" />
 
       <FreshlyBuiltProjects Include="$(OutputPath)**\*props" />
       <FreshlyBuiltProjects Include="$(OutputPath)**\*targets" />
@@ -68,8 +75,14 @@
           DestinationFiles="@(SdkResolverFiles->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
           DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
+
     <Copy SourceFiles="@(InstalledSdks)"
-          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')"
+          Condition="'$(MonoBuild)' != 'true'" />
+    <Copy SourceFiles="@(InstalledSdks)"
+          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\Sdks\%(RecursiveDir)%(Filename)%(Extension)')"
+          Condition="'$(MonoBuild)' == 'true'" />
+
     <Copy SourceFiles="@(InstalledStaticAnalysisTools)"
           DestinationFiles="@(InstalledStaticAnalysisTools -> '$(BootstrapDestination)..\Team Tools\Static Analysis Tools\%(RecursiveDir)%(Filename)%(Extension)')" />
 
@@ -77,6 +90,8 @@
           DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(NuGetCommonExtensions)"
           DestinationFiles="@(NuGetCommonExtensions -> '$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\%(RecursiveDir)%(FileName)%(Extension)')" />
+    <Copy SourceFiles="@(NuGetRestoreSupport)"
+          DestinationFiles="@(NuGetRestoreSupport->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!-- Delete shim projects, because they point where we can't follow. -->
     <!-- It would be better to just not copy these. -->

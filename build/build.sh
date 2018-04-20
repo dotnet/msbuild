@@ -27,6 +27,7 @@ dotnetCoreSdkDir=""
 function Help() {
   echo "Common settings:"
   echo "  -configuration <value>  Build configuration Debug, Release"
+  echo "  -hostType <value>       core (default), mono"
   echo "  -verbosity <value>      Msbuild verbosity (q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic])"
   echo "  -help                   Print help and exit"
   echo ""
@@ -69,6 +70,10 @@ while [[ $# -gt 0 ]]; do
     -h | -help)
       Help
       exit 0
+      ;;
+    -hosttype)
+      hostType=$2
+      shift 2
       ;;
     -nolog)
       nolog=true
@@ -120,6 +125,10 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [ "$hostType" = "mono" ]; then
+  configuration="$configuration-MONO"
+fi
 
 function KillProcessWithName {
   echo "Killing processes containing \"$1\""
@@ -293,6 +302,9 @@ function Build {
   if [ "$hostType" = "core" ]
   then
     msbuildHost=$(QQ $DOTNET_HOST_PATH)
+  elif [ "$hostType" = "mono" ]
+  then
+   msbuildHost=""
   else
     ErrorHostType
   fi
@@ -325,11 +337,18 @@ function Build {
     if [ $hostType = "core" ]
     then
       msbuildToUse=$(QQ "$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll")
+    elif [ "$hostType" = "mono" ]
+    then
+      msbuildToUse="$bootstrapRoot/net461/MSBuild/15.0/Bin/MSBuild.dll"
+      msbuildHost="mono"
+
+      properties="$properties /p:MSBuildExtensionsPath=$bootstrapRoot/net461/MSBuild/"
     else
       ErrorHostType
     fi
 
-    export ArtifactsDir="$ArtifactsDir/2"
+    # forcing the slashes here or they get normalized and lost later
+    export ArtifactsDir="$ArtifactsDir\\2\\"
 
     local logCmd=$(GetLogCmd BuildWithBootstrap)
 
@@ -400,7 +419,7 @@ then
   test=true
 fi
 
-if [ "$hostType" != "core" ]; then
+if [ "$hostType" != "core" -a "$hostType" != "mono" ]; then
   ErrorHostType
 fi
 
