@@ -369,50 +369,55 @@ namespace Microsoft.Build.Internal
             byte[] bytes = new byte[8];
 
 #if NETCOREAPP2_1
-            // A legacy MSBuild.exe won't try to connect to MSBuild running
-            // in a dotnet host process, so we can read the bytes simply.
-            var readTask = stream.ReadAsync(bytes, 0, bytes.Length);
-            const int HandshakeReadTimeout = 30;
-
-            // Manual timeout here because the timeout passed to Connect() just before
-            // calling this method does not apply on UNIX domain socket-based
-            // implementations of PipeStream.
-            // https://github.com/dotnet/corefx/issues/28791
-            if (!readTask.Wait(HandshakeReadTimeout))
+            if (!NativeMethodsShared.IsWindows)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", HandshakeReadTimeout));
-            }
+                // A legacy MSBuild.exe won't try to connect to MSBuild running
+                // in a dotnet host process, so we can read the bytes simply.
+                var readTask = stream.ReadAsync(bytes, 0, bytes.Length);
+                const int HandshakeReadTimeout = 30;
 
-            readTask.GetAwaiter().GetResult();
-#else
-            // Legacy approach with an early-abort for connection attempts from ancient MSBuild.exes
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                int read = stream.ReadByte();
-
-                if (read == -1)
+                // Manual timeout here because the timeout passed to Connect() just before
+                // calling this method does not apply on UNIX domain socket-based
+                // implementations of PipeStream.
+                // https://github.com/dotnet/corefx/issues/28791
+                if (!readTask.Wait(HandshakeReadTimeout))
                 {
-                    // We've unexpectly reached end of stream.
-                    // We are now in a bad state, disconnect on our end
-                    throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
+                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", HandshakeReadTimeout));
                 }
 
-                if (i == 0 && leadingBytesToReject != null)
+                readTask.GetAwaiter().GetResult();
+            }
+            else
+#endif
+            {
+                // Legacy approach with an early-abort for connection attempts from ancient MSBuild.exes
+                for (int i = 0; i < bytes.Length; i++)
                 {
-                    foreach (byte reject in leadingBytesToReject)
-                    {
-                        if (read == reject)
-                        {
-                            stream.WriteByte(rejectionByteToReturn); // disconnect the host
+                    int read = stream.ReadByte();
 
-                            throw new IOException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} but this matched a byte to reject.", bytes[i]));  // disconnect and quit
+                    if (read == -1)
+                    {
+                        // We've unexpectly reached end of stream.
+                        // We are now in a bad state, disconnect on our end
+                        throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
+                    }
+
+                    if (i == 0 && leadingBytesToReject != null)
+                    {
+                        foreach (byte reject in leadingBytesToReject)
+                        {
+                            if (read == reject)
+                            {
+                                stream.WriteByte(rejectionByteToReturn); // disconnect the host
+
+                                throw new IOException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} but this matched a byte to reject.", bytes[i]));  // disconnect and quit
+                            }
                         }
                     }
-                }
 
-                bytes[i] = Convert.ToByte(read);
+                    bytes[i] = Convert.ToByte(read);
+                }
             }
-#endif
 
             long result;
 
