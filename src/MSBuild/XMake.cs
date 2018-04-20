@@ -596,7 +596,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
-                    if (preprocessWriter != null)
+                    if (preprocessWriter != null && !BuildEnvironmentHelper.Instance.RunningTests)
                     {
                         // Indicate to the engine that it can NOT toss extraneous file content: we want to 
                         // see that in preprocessing/debugging
