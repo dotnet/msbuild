@@ -1,0 +1,11 @@
+<Project>
+	<!-- Building it like this till these projects get merged upstream and we can
+	     have the facades+mono-tasks projects in the sln. -->
+
+	<!-- FIXME: Support Configurations in task build -->
+	<Target Name="BuildMonoTasks" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+		<MSBuild
+			Projects="$(RepoRoot)\mono\tasks\build.csproj"
+			Properties="OutputPath=$(OutputPath);OutDir=$(OutDir);TargetFramework=$(TargetFramework);MonoBuild=true" />
+	</Target>
+</Project>
