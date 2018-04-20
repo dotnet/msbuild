@@ -58,8 +58,14 @@ namespace Microsoft.NET.Publish.Tests
             var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks, runtimeIdentifier: testProject.RuntimeIdentifier);
             publishDirectory.Should().HaveFile(testProject.Name + ".deps.json");
 
+            var depsFilePath = Path.Combine(publishDirectory.FullName, $"{testProject.Name}.deps.json");
+            CheckVersionsInDepsFile(depsFilePath);
+        }
+
+        void CheckVersionsInDepsFile(string depsFilePath)
+        {
             DependencyContext dependencyContext;
-            using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, $"{testProject.Name}.deps.json")))
+            using (var depsJsonFileStream = File.OpenRead(depsFilePath))
             {
                 dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
             }
@@ -84,18 +90,18 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void Versions_are_not_included_for_self_contained_apps()
+        public void Versions_are_included_for_self_contained_apps()
         {
-            Versions_are_not_included(build: false);
+            Versions_are_included(build: false);
         }
 
         [Fact]
-        public void Versions_are_not_included_for_build()
+        public void Versions_are_included_for_build()
         {
-            Versions_are_not_included(build: true);
+            Versions_are_included(build: true);
         }
 
-        private void Versions_are_not_included(bool build, [CallerMemberName] string callingMethod = "")
+        private void Versions_are_included(bool build, [CallerMemberName] string callingMethod = "")
         {
             var testProject = GetTestProject();
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
@@ -120,22 +126,8 @@ namespace Microsoft.NET.Publish.Tests
             var outputDirectory = command.GetOutputDirectory(testProject.TargetFrameworks, runtimeIdentifier: testProject.RuntimeIdentifier);
             outputDirectory.Should().HaveFile(testProject.Name + ".deps.json");
 
-            DependencyContext dependencyContext;
-            using (var depsJsonFileStream = File.OpenRead(Path.Combine(outputDirectory.FullName, $"{testProject.Name}.deps.json")))
-            {
-                dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
-            }
-
-            var allRuntimeFiles = dependencyContext.RuntimeLibraries.SelectMany(rl => rl.NativeLibraryGroups.Concat(rl.RuntimeAssemblyGroups))
-                .SelectMany(rag => rag.RuntimeFiles);
-
-            allRuntimeFiles.Should().NotBeEmpty();
-
-            foreach (var runtimeFile in allRuntimeFiles)
-            {
-                runtimeFile.AssemblyVersion.Should().BeNull();
-                runtimeFile.FileVersion.Should().BeNull();
-            }
+            var depsFilePath = Path.Combine(outputDirectory.FullName, $"{testProject.Name}.deps.json");
+            CheckVersionsInDepsFile(depsFilePath);
         }
 
         [Fact(Skip = "Host deps.json doesn't have runtime file version info yet: https://github.com/dotnet/sdk/issues/2124")]
