@@ -511,13 +511,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
-      <!--
-      If publishing a framework-dependent app, then include the assembly and file versions of files in the
-      deps.json to support rolling forward to a newer shared framework.  See https://github.com/dotnet/core-setup/pull/3704
-      Reading these versions could impact build perf, so we avoid doing it by default if we aren't publishing or if we are
-      publishing a self-contained app.
-      -->
-      <IncludeRuntimeFileVersions Condition =" '$(IncludeRuntimeFileVersions)' == '' And '$(SelfContained)' != 'true' ">true</IncludeRuntimeFileVersions>
     </PropertyGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
@@ -540,7 +533,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
                       RuntimeStorePackages="@(RuntimeStorePackages)"
                       IsSelfContained="$(SelfContained)"
-                      IncludeRuntimeFileVersions="$(IncludeRuntimeFileVersions)" />
+                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)" />
 
   </Target>
 
