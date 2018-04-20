@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <NuspecFile>Microsoft.Build.Localization.nuspec</NuspecFile>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\NuspecProject.targets" />
+  
+</Project>

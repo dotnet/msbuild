@@ -6,8 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -15,7 +13,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -31,6 +28,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using System.Globalization;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
@@ -123,9 +122,40 @@ namespace Microsoft.Build.Evaluation
         private RenameHandlerDelegate _renameHandler;
 
         /// <summary>
+        /// Needed because the Project may trigger reevalutions under the covers on some of its operations, which, ideally,
+        /// should use the same context as the initial evaluation.
+        /// 
+        /// Examples of operations which may trigger reevaluations:
+        /// - <see cref="CreateProjectInstance()"/>
+        /// - <see cref="GetAllGlobs()"/>
+        /// - <see cref="GetItemProvenance(string)"/>
+        /// </summary>
+        private EvaluationContext _lastEvaluationContext;
+
+        /// <summary>
         /// Default project template options (include all features).
         /// </summary>
         internal const NewProjectFileOptions DefaultNewProjectTemplateOptions = NewProjectFileOptions.IncludeAllOptions;
+
+        /// <summary>
+        /// Certain item operations split the item element in multiple elements if the include
+        /// contains globs, references to items or properties, or multiple item values.
+        ///
+        /// The items operations that may expand item elements are:
+        /// - <see cref="RemoveItem"/>
+        /// - <see cref="RemoveItems"/>
+        /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
+        /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
+        /// - <see cref="ProjectItem.ChangeItemType"/>
+        /// - <see cref="ProjectItem.Rename"/>
+        /// - <see cref="ProjectItem.RemoveMetadata"/>
+        /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
+        /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
+        /// 
+        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
+        /// instead of expanding the item element. 
+        /// </summary>
+        public bool ThrowInsteadOfSplittingItemElement { get; set; }
 
         /// <summary>
         /// Construct an empty project, evaluating with the global project collection's
@@ -156,26 +186,6 @@ namespace Microsoft.Build.Evaluation
             : this(ProjectRootElement.Create(projectCollection), null, null, projectCollection)
         {
         }
-
-        /// <summary>
-        /// Certain item operations split the item element in multiple elements if the include
-        /// contains globs, references to items or properties, or multiple item values.
-        ///
-        /// The items operations that may expand item elements are:
-        /// - <see cref="RemoveItem"/>
-        /// - <see cref="RemoveItems"/>
-        /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
-        /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
-        /// - <see cref="ProjectItem.ChangeItemType"/>
-        /// - <see cref="ProjectItem.Rename"/>
-        /// - <see cref="ProjectItem.RemoveMetadata"/>
-        /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
-        /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
-        /// 
-        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
-        /// instead of expanding the item element. 
-        /// </summary>
-        public bool ThrowInsteadOfSplittingItemElement { get; set; }
 
         /// <summary>
         /// Construct an empty project, evaluating with the specified project collection's
@@ -289,6 +299,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
+            : this(xml, globalProperties,toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+        {
+        }
+
+        private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
@@ -297,7 +312,7 @@ namespace Microsoft.Build.Evaluation
             _xml = xml;
             _projectCollection = projectCollection;
 
-            Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings);
+            Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
         /// <summary>
@@ -375,6 +390,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
+            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+        {
+        }
+
+        private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, "xmlReader");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
@@ -393,7 +413,7 @@ namespace Microsoft.Build.Evaluation
                 throw;
             }
 
-            Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings);
+            Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
         /// <summary>
@@ -473,6 +493,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+        {
+        }
+
+        private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
@@ -486,7 +511,12 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                _xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, projectCollection.ProjectRootElementCache, true /*Explicitly loaded*/);
+                _xml = ProjectRootElement.OpenProjectOrSolution(
+                    projectFile,
+                    globalProperties,
+                    toolsVersion,
+                    projectCollection.ProjectRootElementCache,
+                    true /*Explicitly loaded*/);
             }
             catch (InvalidProjectFileException ex)
             {
@@ -496,7 +526,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings);
+                Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
             }
             catch (Exception ex)
             {
@@ -512,6 +542,60 @@ namespace Microsoft.Build.Evaluation
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Create a file based project.
+        /// </summary>
+        /// <param name="file">The file to evaluate the project from.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
+        /// <returns></returns>
+        public static Project FromFile(string file, ProjectOptions options)
+        {
+            return new Project(
+                file,
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
+        }
+
+        /// <summary>
+        /// Create a <see cref="ProjectRootElement"/> based project.
+        /// </summary>
+        /// <param name="rootElement">The <see cref="ProjectRootElement"/> to evaluate the project from.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
+        /// <returns></returns>
+        public static Project FromProjectRootElement(ProjectRootElement rootElement, ProjectOptions options)
+        {
+            return new Project(
+                rootElement,
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
+        }
+
+        /// <summary>
+        /// Create a <see cref="XmlReader"/> based project.
+        /// </summary>
+        /// <param name="rootElement">The <see cref="XmlReader"/> to evaluate the project from.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
+        /// <returns></returns>
+        public static Project FromXmlReader(XmlReader reader, ProjectOptions options)
+        {
+            return new Project(
+                reader,
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
         }
 
         /// <summary>
@@ -2089,6 +2173,16 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// See <see cref="ReevaluateIfNecessary()"/>
+        /// </summary>
+        /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
+        public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
+        {
+            _lastEvaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated); ;
+            ReevaluateIfNecessary(LoggingService);
+        }
+
+        /// <summary>
         /// Save the project to the file system, if dirty.
         /// Uses the default encoding.
         /// </summary>
@@ -2599,16 +2693,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Creates a project instance based on this project using the specified logging service.
-        /// </summary>  
-        private ProjectInstance CreateProjectInstance(ILoggingService loggingServiceForEvaluation, ProjectInstanceSettings settings)
-        {
-            ReevaluateIfNecessary(loggingServiceForEvaluation);
-
-            return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, _projectCollection.EnvironmentProperties, settings);
-        }
-
-        /// <summary>
         /// Re-evaluates the project using the specified logging service.
         /// </summary>
         private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation)
@@ -2637,9 +2721,33 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        /// <summary>
+        /// Creates a project instance based on this project using the specified logging service.
+        /// </summary>  
+        private ProjectInstance CreateProjectInstance(ILoggingService loggingServiceForEvaluation, ProjectInstanceSettings settings)
+        {
+            ReevaluateIfNecessary(loggingServiceForEvaluation);
+
+            return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, _projectCollection.EnvironmentProperties, settings);
+        }
+
         private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
         {
-            Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */, SdkResolverService.Instance, BuildEventContext.InvalidSubmissionId);
+            Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
+                _data,
+                _xml,
+                loadSettings,
+                ProjectCollection.MaxNodeCount,
+                ProjectCollection.EnvironmentProperties,
+                loggingServiceForEvaluation,
+                new ProjectItemFactory(this),
+                _projectCollection,
+                _projectCollection.ProjectRootElementCache,
+                s_buildEventContext,
+                null /* no project instance for debugging */,
+                _lastEvaluationContext.SdkResolverService,
+                BuildEventContext.InvalidSubmissionId,
+                _lastEvaluationContext);
 
             ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
@@ -2670,7 +2778,7 @@ namespace Microsoft.Build.Evaluation
         /// Global properties may be null.
         /// Tools version may be null.
         /// </summary>
-        private void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings)
+        private void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
         {
             _xml.MarkAsExplicitlyLoaded();
 
@@ -2709,7 +2817,7 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 
-            ReevaluateIfNecessary();
+            ReevaluateIfNecessary(evaluationContext);
 
             ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");
 

@@ -126,6 +126,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/Microsoft/msbuild/issues/282")]
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = PacketProcessor;

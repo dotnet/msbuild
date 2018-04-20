@@ -122,12 +122,7 @@ namespace Microsoft.Build.Internal
                     // them, so just check COMPLUS_InstallRoot.
                     string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
 
-                    // We should also check the file version when COMPLUS_INSTALLROOT is null, because the protocol can change between releases.
-                    // If we don't check, we'll run into issues
-                    string taskhostexe = FileUtilities.ExecutingAssemblyPath;
-                    string majorVersion = FileVersionInfo.GetVersionInfo(taskhostexe).FileMajorPart.ToString();
-
-                    s_fileVersionHash = GetHandshakeHashCode(complusInstallRoot ?? majorVersion);
+                    s_fileVersionHash = GetHandshakeHashCode(complusInstallRoot ?? ThisAssembly.AssemblyInformationalVersion);
                     s_fileVersionChecked = true;
                 }
 

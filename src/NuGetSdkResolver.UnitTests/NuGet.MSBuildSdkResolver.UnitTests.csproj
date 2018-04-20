@@ -1,59 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
-    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v1.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <Import Project="..\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7FD51C62-1D6A-4DF5-9E70-E4D23CA3048C}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <RootNamespace>NuGet.MSBuildSdkResolver.UnitTests</RootNamespace>
     <AssemblyName>NuGet.MSBuildSdkResolver.UnitTests</AssemblyName>
-    <IsTestProject>true</IsTestProject>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <Reference Include="$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll">
-      <Name>Microsoft.Build.Tasks.CodeAnalysis</Name>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
-      <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
-      <Name>Microsoft.Build.Utilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Build\Microsoft.Build.csproj">
-      <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
-      <Name>Microsoft.Build</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj">
-      <Project>{C7988833-3EF2-43F4-A170-34E8CCCB1320}</Project>
-      <Name>NuGet.MSBuildSdkResolver</Name>
-    </ProjectReference>
+    <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
+
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="GlobalJsonReader_Tests.cs" />
-    <Compile Include="MockSdkLogger.cs" />
-    <Compile Include="MockSdkResolverContext.cs" />
-    <Compile Include="NuGetSdkLogger_Tests.cs" />
-    <Compile Include="NuGetSdkResolver_Tests.cs" />
-  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <Link>Shared\Microsoft.Build.Shared.Suppressions.cs</Link>
@@ -64,24 +29,11 @@
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs">
       <Link>Shared\ObjectModelHelpers.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
+      <Link>EngineTestEnvironment.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>Shared\TestEnvironment.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <AppDesigner Include="Properties\" />
-    <EmbeddedResource Include="*.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <None Include="..\Shared\UnitTests\App.config">
-      <Link>App.config</Link>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="project.json" />
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <Import Project="..\dir.targets" />
 </Project>

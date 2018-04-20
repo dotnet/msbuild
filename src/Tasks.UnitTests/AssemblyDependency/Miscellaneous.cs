@@ -1289,7 +1289,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Do the most basic AssemblyFoldersEx resolve.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExBasic()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1310,7 +1310,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify that higher alphabetical values for a component are chosen over lower alphabetic values of a component.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExVerifyComponentFolderSorting()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1332,7 +1332,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// with the letter "v", we should tolerate it and treat it as if it does.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExTargetFrameworkVersionDoesNotBeginWithV()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchDoesNotMatch()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1383,7 +1383,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchMSILX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1406,7 +1406,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a warning.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Trait("Category", "mono-windows-failing")]
         public void VerifyProcessArchitectureMismatchWarning()
         {
@@ -1432,7 +1432,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a warning.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Trait("Category", "mono-windows-failing")]
         public void VerifyProcessArchitectureMismatchWarningDefault()
         {
@@ -1457,7 +1457,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a error.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Trait("Category", "mono-windows-failing")]
         public void VerifyProcessArchitectureMismatchError()
         {
@@ -1486,7 +1486,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchNoneX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1507,7 +1507,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// has a MSIL architecture or a NONE architecture. NONE means you do not care what architecture is picked.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchNoneMix()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1536,7 +1536,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchMSILLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1562,7 +1562,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchNoneLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1587,7 +1587,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchX86FirstFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1611,7 +1611,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchX86MSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1634,7 +1634,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchX86None()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1657,7 +1657,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchNoneNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1679,7 +1679,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArcMSILNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1701,7 +1701,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchNoneMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1724,7 +1724,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchMSILMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1747,7 +1747,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExProcessorArchMatches()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1772,7 +1772,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// carry on and inspect those.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExTargetFrameworkVersionBogusValue()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1794,7 +1794,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Tolerate keys like v2.0.x86chk.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Regress357227_AssemblyFoldersExAgainstRawDrop()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1815,7 +1815,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Matches that exist only in the HKLM hive.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExHKLM()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1835,7 +1835,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Matches that exist in both HKLM and HKCU should favor HKCU
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExHKCUTrumpsHKLM()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1860,7 +1860,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When matches that have v3.0 (future) and v2.0 (current) versions, the 2.0 version wins.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExFutureTargetNDPVersionsDontMatch()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1880,7 +1880,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If there is no v2.0 (current target NDP) match, then v1.0 should match.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExMatchBackVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1900,7 +1900,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If there is a 2.0 and a 1.0 then match 2.0.
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExCurrentTargetVersionTrumpsPastTargetVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1920,7 +1920,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If a control has a service pack then that wins over the control itself
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExServicePackTrumpsBaseVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1941,7 +1941,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Test MaxOSVersion condition
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExConditionFilterMaxOS()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1985,7 +1985,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Test MinOSVersion condition
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExConditionFilterMinOS()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -2300,7 +2300,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Test Platform condition
         /// </summary>
         [Fact]
-        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void AssemblyFoldersExConditionFilterPlatform()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();

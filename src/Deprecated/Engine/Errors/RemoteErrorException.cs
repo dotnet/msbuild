@@ -14,7 +14,6 @@ namespace Microsoft.Build.BuildEngine
     /// This class is used to wrap exceptions that occur on a different node
     /// </summary>
     [Serializable]
-    [Obsolete]
     public sealed class RemoteErrorException : Exception
     {
         internal RemoteErrorException(string message, Exception innerException, BuildEventContext buildEventContext)

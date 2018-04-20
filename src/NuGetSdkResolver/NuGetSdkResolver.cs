@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Utilities;
+
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
@@ -31,14 +31,8 @@ namespace NuGet.MSBuildSdkResolver
 
         public override int Priority => 2500;
 
-        public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
+        protected override SdkResultBase ResolveSdk(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
         {
-            // Escape hatch to disable this resolver
-            if (Traits.Instance.EscapeHatches.DisableNuGetSdkResolver)
-            {
-                return null;
-            }
-
             object parsedSdkVersion;
 
             // This resolver only works if the user specifies a version in a project or a global.json.
@@ -203,8 +197,15 @@ namespace NuGet.MSBuildSdkResolver
                     return false;
                 }
 
-                // Get the installed path and add the expected "Sdk" folder
+                // Get the installed path and add the expected "Sdk" folder.  Windows file systems are not case sensitive
                 installedPath = Path.Combine(packageInfo.PathResolver.GetInstallPath(packageInfo.Id, packageInfo.Version), "Sdk");
+
+                if (!NativeMethodsShared.IsWindows && !Directory.Exists(installedPath))
+                {
+                    // Fall back to lower case "sdk" folder in case the file system is case sensitive
+                    installedPath = Path.Combine(packageInfo.PathResolver.GetInstallPath(packageInfo.Id, packageInfo.Version), "sdk");
+                }
+
                 installedVersion = packageInfo.Version.ToString();
 
                 return true;

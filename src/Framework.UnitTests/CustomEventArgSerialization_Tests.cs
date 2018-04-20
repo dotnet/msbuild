@@ -35,18 +35,8 @@ namespace Microsoft.Build.UnitTests
         private BinaryWriter _writer;
         private BinaryReader _reader;
 
-#if FEATURE_DOTNETVERSION
         private int _eventArgVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
-#else
-        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
 
-        private static int GetDefaultPacketVersion()
-        {
-            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
-            Version coreAssemblyVersion = coreAssembly.GetName().Version;
-            return 1000 + coreAssemblyVersion.Major * 10 + coreAssemblyVersion.Minor;
-        }
-#endif
 
         public CustomEventArgSerialization_Tests()
         {

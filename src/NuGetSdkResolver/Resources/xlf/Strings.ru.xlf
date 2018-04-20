@@ -2,21 +2,20 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
     <body>
-      <group id="NUGET.MSBUILDSDKRESOLVER/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="FailedToParseGlobalJson">
         <source>Failed to parse "{0}". {1}</source>
-        <target state="new">Failed to parse "{0}". {1}</target>
-        <note/>
+        <target state="translated">Не удалось проанализировать "{0}". {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotFindInstalledPackage">
         <source>Failed to resolve SDK '{0}'. A package was successfully restored but the package could not be located.</source>
-        <target state="new">Failed to resolve SDK '{0}'. A package was successfully restored but the package could not be located.</target>
-        <note/>
+        <target state="translated">Не удалось сопоставить SDK "{0}". Пакет восстановлен, но найти пакет не удалось.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageWasNotInstalled">
         <source>Failed to resolve SDK '{0}'. Package restore was successful but a package with the ID of "{1}" was not installed.</source>
-        <target state="new">Failed to resolve SDK '{0}'. Package restore was successful but a package with the ID of "{1}" was not installed.</target>
-        <note/>
+        <target state="translated">Не удалось сопоставить SDK "{0}". Пакет восстановлен, но пакет с идентификатором "{1}" установлен не был.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

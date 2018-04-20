@@ -1,48 +1,54 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
-    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v1.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <Import Project="..\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
+
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
-    <EnableDocumentationFile>true</EnableDocumentationFile>
+
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+
+    <!-- Generate API only for the more limited .NET Core flavor. -->
+    <GenerateReferenceAssemblySources Condition="'$(TargetFramework)' != 'netcoreapp2.0'">true</GenerateReferenceAssemblySources>
+    <CreateTlb>true</CreateTlb>
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'">
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
-  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+
+    <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.5.24.0" />
+    
+    <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
+    <PackageReference Include="System.IO.Pipes.AccessControl" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.0.0" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.0.1" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.6.0" />
+  </ItemGroup>
+
   <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
        The code here was generally copied from the .NET Framework reference source and
-       modified to compile for .NET Core -->
+       modified to compile for .NET Core.
+       
+       After retargeting to .NET Standard 2.0, many of these can probably be removed -->
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
     <Compile Include="..\Shared\Compat\Base64Encoder.cs">
       <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
@@ -68,30 +74,19 @@
     <Compile Include="..\Shared\Compat\XmlTextEncoder.cs">
       <Link>SharedUtilities\Compat\XmlTextEncoder.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\XmlTextWriter.cs">
-      <Link>SharedUtilities\Compat\XmlTextWriter.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
-      <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Compat\defaultbinder.cs">
       <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\PipeSecurity.cs">
-      <Link>SharedUtilities\Compat\PipeSecurity.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs" Link="BinaryWriterExtensions.cs" />
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>SharedUtilities\EncodingUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureSpecialFolders)' != 'true'">
+    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
       <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
@@ -234,10 +229,10 @@
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverServiceFactory.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkLogger.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverContext.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverLoader.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverRequest.cs" />
-    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverResponse.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\MainNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\HostedSdkResolverServiceBase.cs" />
@@ -261,11 +256,13 @@
     </Compile>
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
+    <Compile Include="Definition\ProjectOptions.cs" />
     <Compile Include="Definition\NewProjectFileOptions.cs" />
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Definition\ProjectLoadSettings.cs" />
     <Compile Include="Definition\ToolsetLocalReader.cs" />
+    <Compile Include="Evaluation\Context\EvaluationContext.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationMarkdownPrettyPrinter.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationPrettyPrinterBase.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationTabSeparatedPrettyPrinter.cs" />
@@ -420,8 +417,6 @@
     <Compile Include="Construction\Solution\SolutionFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Debugger\DebuggerLocalType.cs" />
-    <Compile Include="Debugger\DebuggerManager.cs" />
     <!-- #### DEFINITION MODEL ### -->
     <Compile Include="Definition\BuiltInMetadata.cs" />
     <Compile Include="Definition\ProjectCollection.cs" />
@@ -433,8 +428,8 @@
     <Compile Include="Definition\ResolvedImport.cs" />
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="$(FeatureSystemConfiguration) == 'true'" />
-    <Compile Include="..\Shared\ToolsetElement.cs" Condition="$(FeatureSystemConfiguration) == 'true'">
+    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Compile Include="..\Shared\ToolsetElement.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />
@@ -754,7 +749,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(NetCoreBuild)'=='true'" />
+    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
     </Compile>
@@ -776,6 +771,8 @@
     <Compile Include="FxCopExclusions\Microsoft.Build.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
+
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
     <!-- Resource Files -->
@@ -789,29 +786,9 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <!-- Assemblies Files we depend on -->
-    <!-- Be conservative when adding references... adding System.Xml.Linq can add .47 sec cold start time to our launch time, or 80 ms to warm start time -->
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Threading.Tasks">
-      <HintPath>$(FrameworkPathOverride)\System.Threading.Tasks.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
+    <Compile Remove="Collections\RetrievableEntryHashSet\Originals\*" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
-    <None Include="project.json" />
-  </ItemGroup>
-  <!--
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
-  -->
-  <Import Project="..\dir.targets" />
+
 </Project>

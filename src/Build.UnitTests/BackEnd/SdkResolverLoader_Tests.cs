@@ -43,8 +43,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
 
-            resolvers.Select(i => i.GetType()).ShouldBe(new [] { typeof(DefaultSdkResolver) });
-
+            resolvers.Select(i => i.GetType().FullName).ShouldBe(new [] { "NuGet.MSBuildSdkResolver.NuGetSdkResolver", typeof(DefaultSdkResolver).FullName });
+            
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
         }
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
             });
 
-            Assert.True(exception.Message.StartsWith($"The SDK resolver type \"{nameof(MockSdkResolverNoPublicConstructor)}\" failed to load."));
+            exception.Message.ShouldStartWith($"The SDK resolver type \"{nameof(MockSdkResolverNoPublicConstructor)}\" failed to load.");
 
             exception.InnerException.ShouldBeOfType<MissingMethodException>();
 

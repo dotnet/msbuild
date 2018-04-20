@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <UseProductOutputPath>true</UseProductOutputPath>
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
+  </PropertyGroup>
+</Project>

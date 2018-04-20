@@ -158,7 +158,7 @@
     </comment>
   </data>
   <data name="Shared.KillingProcess">
-    <value>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</value>
+    <value>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</value>
     <comment>{StrBegin="MSB5002: "}</comment>
   </data>
   <data name="Shared.ParameterCannotBeNull" UESanitized="false" Visibility="Public">
@@ -251,7 +251,7 @@
     <comment>{StrBegin="MSB5020: "}</comment>
   </data>
   <data name="Shared.KillingProcessByCancellation">
-    <value>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</value>
+    <value>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</value>
     <comment>{StrBegin="MSB5021: "}</comment>
   </data>
   <data name="Shared.CanNotFindValidMSBuildLocation">

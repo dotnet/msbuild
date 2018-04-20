@@ -737,6 +737,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemDefinitionGroup>
 
   <!--
+    Target that allows targets consuming source control confirmation to establish a dependency on targets producing this information.
+
+    Any target that reads SourceRevisionId, PrivateRepositoryUrl, SourceRoot, and other source control properties and items 
+    should depend on this target and be conditioned on '$(SourceControlInformationFeatureSupported)' == 'true'.
+
+    SourceRevisionId property uniquely identifies the source control revision of the repository the project belongs to.
+    For Git repositories this id is a commit hash, for TFVC repositories it's the changeset number, etc.
+
+    PrivateRepositoryUrl property stores the URL of the repository supplied by the CI server or retrieved from source control manager.
+    Targets consuming this property shall not publish its value implicitly as it might inadvertently reveal an internal URL.
+    Instead, they shall only do so if the project sets PublishRepositoryUrl property to true. For example, the NuGet Pack target
+    may include the repository URL in the nuspec file generated for NuGet package produced by the project if PublishRepositoryUrl is true.
+
+    SourceRoot item group lists all source roots that the project source files reside under and their mapping to source control server URLs,
+    if available. This includes both source files under source control as well as source files in source packages. SourceRoot items are 
+    used by compilers to determine path map in deterministic build and by SourceLink provider, which maps local paths to URLs of source files
+    stored on the source control server.
+
+    Source control information provider that sets these properties and items shall execute before this target (by including 
+    InitializeSourceControlInformation in its BeforeTargets) and set source control properties and items that haven't been initialized yet.
+  -->
+  <Target Name="InitializeSourceControlInformation" />
+
+  <PropertyGroup>
+    <SourceControlInformationFeatureSupported>true</SourceControlInformationFeatureSupported>
+  </PropertyGroup>
+
+  <!--
     ***********************************************************************************************
     ***********************************************************************************************
                                                                 Build Section
@@ -782,6 +810,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup Condition="'$(Prefer32Bit)' == 'true' and ('$(PlatformTarget)' == 'AnyCPU' or '$(PlatformTarget)' == '') and '$(PlatformTargetAsMSBuildArchitectureExplicitlySet)' != 'true'">
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
+
+    <!--
+      Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
+      if you set a value in the body, the value is not used by the top implicit import but is used by the bottom.
+      This can lead to confusing behavior and builds can fail for obscure reasons.
+    -->
+    <Error Condition=" '$(_InitialMSBuildProjectExtensionsPath)' != '' And '$(MSBuildProjectExtensionsPath)' != '$(_InitialMSBuildProjectExtensionsPath)' "
+           Code="MSB3540"
+           Text="The value of the property &quot;MSBuildProjectExtensionsPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"
+            />
+
+    <!--
+      Log a warning if:
+        1. $(EnableBaseIntermediateOutputPathMismatchWarning) is 'true'
+        2. $(BaseIntermediateOutputPath) was set in the body of a project after its default value was set in Microsoft.Common.props
+        3. $(BaseIntermediateOutputPath) is not the same as $(MSBuildProjectExtensionsPath)
+
+      Similar to the error above, there are cases when users set $(BaseIntermediateOutputPath) in the body of their project and things build but only by coincidence.
+      MSBuild does not know if $(BaseIntermediateOutputPath) changing would cause problems so tools like NuGet must set $(EnableBaseIntermediateOutputPathMismatchWarning)
+      to 'true'.
+    -->
+    <Warning Condition=" '$(EnableBaseIntermediateOutputPathMismatchWarning)' == 'true' And '$(_InitialBaseIntermediateOutputPath)' != '$(BaseIntermediateOutputPath)' And '$(BaseIntermediateOutputPath)' != '$(MSBuildProjectExtensionsPath)' "
+             Code="MSB3539"
+             Text="The value of the property &quot;BaseIntermediateOutputPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the &quot;MSBuildProjectExtensionsPath&quot; instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"
+             />
   </Target>
 
   <!--
@@ -1567,9 +1620,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       the output would need to be compatible with.
    -->
    <ItemGroup>
-      <_MSBuildProjectReferenceExistent
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and
-                   ('%(Extension)' == '.vcxproj' or '%(ReferenceOutputAssembly)' == 'false')">
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and ('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj')">
         <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
       </_MSBuildProjectReferenceExistent>
    </ItemGroup>
@@ -1824,6 +1875,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingProject)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
+        SkipNonexistentTargets="true"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
 
       <Output TaskParameter="TargetOutputs" ItemName="NativeReference" Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)' == 'true'"/>
@@ -2035,7 +2087,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         expensive to write the newly created cache file.
         -->
     <PropertyGroup>
-      <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true'">$(IntermediateOutputPath)$(MSBuildProjectFile)ResolveAssemblyReference.cache</ResolveAssemblyReferencesStateFile>
+      <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesStateFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectFile)AssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
@@ -4395,6 +4447,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToOutputDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false' and '$(UseCommonOutputDirectory)' != 'true'"
         ContinueOnError="$(ContinueOnError)"
+        SkipNonexistentTargets="true"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectItemsWithTargetPath"/>

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -13,9 +13,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Build.Construction;
-#if FEATURE_MSBUILD_DEBUGGER
-using Microsoft.Build.Debugging;
-#endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using ObjectModel = System.Collections.ObjectModel;
@@ -26,6 +23,7 @@ using System.Threading;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Evaluation.Context;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
@@ -39,6 +37,8 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
@@ -178,6 +178,8 @@ namespace Microsoft.Build.Evaluation
         /// The current build submission ID.
         /// </summary>
         private readonly int _submissionId;
+        
+        private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
         /// The environment properties with which evaluation should take place.
@@ -196,58 +198,6 @@ namespace Microsoft.Build.Evaluation
 
         private bool _logProjectImportedEvents = true;
 
-#if FEATURE_MSBUILD_DEBUGGER
-        /// <summary>
-        /// Types of locals pulled in at the start - environment, global, toolset, and built-in properties
-        /// </summary>
-        private static IList<DebuggerLocalType> s_initialLocalsTypes;
-
-        /// <summary>
-        /// Types of locals relevant to the property pass
-        /// </summary>
-        private static IList<DebuggerLocalType> s_propertyPassLocalsTypes;
-
-        /// <summary>
-        /// Types of locals relevant to the item definition pass
-        /// </summary>
-        private static IList<DebuggerLocalType> s_itemDefinitionPassLocalsTypes;
-
-        /// <summary>
-        /// Types of locals relevant to the item pass
-        /// </summary>
-        private static IList<DebuggerLocalType> s_itemPassLocalsTypes;
-
-        /// <summary>
-        /// List of values and names available initially
-        /// </summary>
-        private IDictionary<string, object> _initialLocals;
-
-        /// <summary>
-        /// List of values and names available in the property pass of evaluation
-        /// </summary>
-        private IDictionary<string, object> _propertyPassLocals;
-
-        /// <summary>
-        /// List of values and names available in the item definition pass of evaluation
-        /// </summary>
-        private IDictionary<string, object> _itemDefinitionPassLocals;
-
-        /// <summary>
-        /// List of values and names available in the item pass of evaluation
-        /// </summary>
-        private IDictionary<string, object> _itemPassLocals;
-
-        /// <summary>
-        /// Dictionary of {child, parent} import relationships.
-        /// </summary>
-        private IDictionary<ProjectRootElement, ProjectRootElement> _importRelationships;
-
-        /// <summary>
-        /// This is passed back so it can go to the build for debugger display while executing targets
-        /// </summary>
-        private IDictionary<string, object> _projectLevelLocalsForBuild;
-#endif
-
         /// <summary>
         /// The search paths are machine specific and should not change during builds
         /// </summary>
@@ -258,7 +208,19 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
-        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
+        private Evaluator(
+            IEvaluatorData<P, I, M, D> data,
+            ProjectRootElement projectRootElement,
+            ProjectLoadSettings loadSettings,
+            int maxNodeCount,
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            IItemFactory<I, I> itemFactory,
+            IToolsetProvider toolsetProvider,
+            ProjectRootElementCache projectRootElementCache,
+            ProjectInstance projectInstanceIfAnyForDebuggerOnly,
+            ISdkResolverService sdkResolverService,
+            int submissionId,
+            EvaluationContext evaluationContext)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -287,6 +249,7 @@ namespace Microsoft.Build.Evaluation
             _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
+            _evaluationContext = evaluationContext;
             _evaluationProfiler = new EvaluationProfiler((loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0);
         }
 
@@ -379,12 +342,21 @@ namespace Microsoft.Build.Evaluation
         /// newing one up, yet the whole class need not be static.
         /// The optional ProjectInstance is only exposed when doing debugging. It is not used by the evaluator.
         /// </remarks>
-        internal static IDictionary<string, object> Evaluate(IEvaluatorData<P, I, M, D> data, ProjectRootElement root,
-            ProjectLoadSettings loadSettings, int maxNodeCount,
-            PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService,
-            IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider,
-            ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext,
-            ProjectInstance projectInstanceIfAnyForDebuggerOnly, ISdkResolverService sdkResolverService, int submissionId)
+        internal static IDictionary<string, object> Evaluate(
+            IEvaluatorData<P, I, M, D> data,
+            ProjectRootElement root,
+            ProjectLoadSettings loadSettings,
+            int maxNodeCount,
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            ILoggingService loggingService,
+            IItemFactory<I, I> itemFactory,
+            IToolsetProvider toolsetProvider,
+            ProjectRootElementCache projectRootElementCache,
+            BuildEventContext buildEventContext,
+            ProjectInstance projectInstanceIfAnyForDebuggerOnly,
+            ISdkResolverService sdkResolverService,
+            int submissionId,
+            EvaluationContext evaluationContext = null)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
@@ -397,7 +369,20 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
-                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, itemFactory, toolsetProvider, projectRootElementCache, projectInstanceIfAnyForDebuggerOnly, sdkResolverService, submissionId);
+                var evaluator = new Evaluator<P, I, M, D>(
+                    data,
+                    root,
+                    loadSettings,
+                    maxNodeCount,
+                    environmentProperties,
+                    itemFactory,
+                    toolsetProvider,
+                    projectRootElementCache,
+                    projectInstanceIfAnyForDebuggerOnly,
+                    sdkResolverService,
+                    submissionId,
+                    evaluationContext);
+
                 return evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
             }
@@ -462,44 +447,6 @@ namespace Microsoft.Build.Evaluation
 
             return items;
         }
-
-#if FEATURE_MSBUILD_DEBUGGER
-        /// <summary>
-        /// Initializes DebuggerManager.
-        /// Initialize definitions of locals types.
-        /// This must not be called by a static constructor, as the 
-        /// time at which it is called will then be undefined, and
-        /// the debugging environment variable might not have had a 
-        /// chance to be set.
-        /// </summary>
-        private static void InitializeForDebugging()
-        {
-            DebuggerManager.Initialize();
-
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                s_initialLocalsTypes = new List<DebuggerLocalType>(6);
-                s_initialLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.Project], typeof(ProjectInstance)));
-                s_initialLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.BuiltIn], typeof(ICollection<P>)));
-                s_initialLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.Environment], typeof(ICollection<P>)));
-                s_initialLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.Toolset], typeof(ICollection<P>)));
-                s_initialLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.SubToolset], typeof(ICollection<P>)));
-                s_initialLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.Global], typeof(ICollection<P>)));
-
-                s_propertyPassLocalsTypes = new List<DebuggerLocalType>(s_initialLocalsTypes);
-                s_propertyPassLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.EvaluateExpression], typeof(ExpandExpression)));
-                s_propertyPassLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.EvaluateCondition], typeof(EvaluateConditionalExpression)));
-                s_propertyPassLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.ToolsVersion], typeof(string)));
-                s_propertyPassLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.Properties], typeof(PropertyDictionary<P>)));
-
-                s_itemDefinitionPassLocalsTypes = new List<DebuggerLocalType>(s_propertyPassLocalsTypes);
-                s_itemDefinitionPassLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.ItemDefinitions], typeof(IEnumerable<D>)));
-
-                s_itemPassLocalsTypes = new List<DebuggerLocalType>(s_itemDefinitionPassLocalsTypes);
-                s_itemPassLocalsTypes.Add(new DebuggerLocalType(Evaluator<P, I, M, D>.s_localsTypesNames[(int)LocalsTypes.Items], typeof(ItemDictionary<I>)));
-            }
-        }
-#endif
 
         /// <summary>
         /// Read the task into an instance.
@@ -741,10 +688,6 @@ namespace Microsoft.Build.Evaluation
 
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
-#if FEATURE_MSBUILD_DEBUGGER
-                InitializeForDebugging();
-#endif
-
                 ICollection<P> builtInProperties;
                 ICollection<P> environmentProperties;
                 ICollection<P> toolsetProperties;
@@ -760,42 +703,6 @@ namespace Microsoft.Build.Evaluation
                     globalProperties = AddGlobalProperties();
                 }
 
-#if FEATURE_MSBUILD_DEBUGGER
-                // Create a state for the root project node to show initial properties
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    _initialLocals = new Dictionary<string, object>();
-                    _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.Project].Name, _projectInstanceIfAnyForDebuggerOnly));
-                    _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.BuiltIn].Name, builtInProperties));
-                    _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.Environment].Name, environmentProperties));
-                    _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.Toolset].Name, toolsetProperties));
-                    _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.Global].Name, globalProperties));
-
-                    DebuggerManager.DefineState(_projectRootElement.Location, _projectRootElement.ElementName, s_initialLocalsTypes);
-
-                    DebuggerManager.BakeStates(Path.GetFileNameWithoutExtension(_projectRootElement.FullPath));
-
-                    DebuggerManager.PulseState(_projectRootElement.Location, _initialLocals);
-
-                    _propertyPassLocals = new Dictionary<string, object>(_initialLocals);
-                    _propertyPassLocals.Add(new KeyValuePair<string, object>(s_propertyPassLocalsTypes[(int)LocalsTypes.EvaluateExpression].Name, (ExpandExpression)_data.ExpandString));
-                    _propertyPassLocals.Add(new KeyValuePair<string, object>(s_propertyPassLocalsTypes[(int)LocalsTypes.EvaluateCondition].Name, (EvaluateConditionalExpression)_data.EvaluateCondition));
-                    _propertyPassLocals.Add(new KeyValuePair<string, object>(s_propertyPassLocalsTypes[(int)LocalsTypes.ToolsVersion].Name, _data.Toolset.ToolsVersion));
-                    _propertyPassLocals.Add(new KeyValuePair<string, object>(s_propertyPassLocalsTypes[(int)LocalsTypes.Properties].Name, _data.Properties));
-
-                    _itemDefinitionPassLocals = new Dictionary<string, object>(_propertyPassLocals);
-                    _itemDefinitionPassLocals.Add(new KeyValuePair<string, object>(s_itemDefinitionPassLocalsTypes[(int)LocalsTypes.ItemDefinitions].Name, _data.ItemDefinitionsEnumerable));
-
-                    _itemPassLocals = new Dictionary<string, object>(_itemDefinitionPassLocals);
-                    _itemPassLocals.Add(new KeyValuePair<string, object>(s_itemPassLocalsTypes[(int)LocalsTypes.Items].Name, _data.Items));
-
-                    // This is currently only needed when debugging
-                    _importRelationships = new Dictionary<ProjectRootElement, ProjectRootElement>();
-
-                    // This is passed back to the build, so locals are visible during the build
-                    _projectLevelLocalsForBuild = _itemPassLocals;
-                }
-#endif
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass0End);
 #endif
@@ -998,11 +905,8 @@ namespace Microsoft.Build.Evaluation
                 ProjectFile = projectFile,
                 ProfilerResult = (_loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 ? (ProfilerResult?)_evaluationProfiler.ProfiledResult : null
             });
-#if FEATURE_MSBUILD_DEBUGGER
-            return _projectLevelLocalsForBuild;
-#else
+
             return null;
-#endif
         }
 
         /// <summary>
@@ -1029,47 +933,17 @@ namespace Microsoft.Build.Evaluation
 
                 UpdateDefaultTargets(currentProjectOrImport);
 
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
+                // Get all the implicit imports (e.g. <Project Sdk="" />, but not <Import Sdk="" />)
+                List<ProjectImportElement> implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
+
+                // Evaluate the "top" implicit imports as if they were the first entry in the file.
+                foreach (var import in implicitImports)
                 {
-                    // Create a state for every element processed during the properties pass
-                    foreach (ProjectElement element in currentProjectOrImport.AllChildren)
+                    if (import.ImplicitImportLocation == ImplicitImportLocation.Top)
                     {
-                        if (
-                            element is ProjectPropertyGroupElement ||
-                            element is ProjectPropertyElement ||
-                            element is ProjectImportGroupElement ||
-                            element is ProjectImportElement ||
-                            element is ProjectChooseElement ||
-                            element is ProjectWhenElement || // although Whens are encountered again during the item pass, the condition is only evaluated on the first pass, hence, property locals only
-                            element is ProjectOtherwiseElement
-                            )
-                        {
-                            // Skip any that are somewhere below targets; those will be defined later
-                            if (!(element is ProjectTargetElement) &&
-                                element.AllParents.FirstOrDefault(delegate (ProjectElementContainer current) { return (current != null && current is ProjectTargetElement); }) == null)
-                            {
-                                DebuggerManager.DefineState(element.Location, element.Location.LocationString, s_propertyPassLocalsTypes);
-                            }
-                        }
+                        EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
                     }
-
-                    // Bake the property pass states so we can enter them
-                    DebuggerManager.BakeStates(Path.GetFileNameWithoutExtension(currentProjectOrImport.FullPath));
                 }
-#endif
-
-            // Get all the implicit imports (e.g. <Project Sdk="" />, but not <Import Sdk="" />)
-            List<ProjectImportElement> implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
-
-            // Evaluate the "top" implicit imports as if they were the first entry in the file.
-            foreach (var import in implicitImports)
-            {
-                if (import.ImplicitImportLocation == ImplicitImportLocation.Top)
-                {
-                    EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
-                }
-            }
 
                 foreach (ProjectElement element in currentProjectOrImport.Children)
                 {
@@ -1087,23 +961,6 @@ namespace Microsoft.Build.Evaluation
                     {
                         _itemGroupElements.Add(itemGroup);
 
-#if FEATURE_MSBUILD_DEBUGGER
-                        if (DebuggerManager.DebuggingEnabled)
-                        {
-                            DebuggerManager.DefineState(element.Location, element.Location.LocationString, s_itemPassLocalsTypes);
-
-                            foreach (ProjectItemElement item in itemGroup.Items)
-                            {
-                                DebuggerManager.DefineState(item.Location, item.Location.LocationString, s_itemPassLocalsTypes);
-
-                                foreach (ProjectMetadataElement metadatum in item.Metadata)
-                                {
-                                    DebuggerManager.DefineState(metadatum.Location, metadatum.Location.LocationString, s_itemPassLocalsTypes);
-                                }
-                            }
-                        }
-#endif
-
                         continue;
                     }
 
@@ -1113,23 +970,6 @@ namespace Microsoft.Build.Evaluation
                     {
                         _itemDefinitionGroupElements.Add(itemDefinitionGroup);
 
-#if FEATURE_MSBUILD_DEBUGGER
-                        if (DebuggerManager.DebuggingEnabled)
-                        {
-                            DebuggerManager.DefineState(element.Location, element.Location.LocationString, s_itemDefinitionPassLocalsTypes);
-
-                            foreach (ProjectItemDefinitionElement itemDefinition in itemDefinitionGroup.ItemDefinitions)
-                            {
-                                DebuggerManager.DefineState(itemDefinition.Location, itemDefinition.Location.LocationString, s_itemDefinitionPassLocalsTypes);
-
-                                foreach (ProjectMetadataElement metadatum in itemDefinition.Metadata)
-                                {
-                                    DebuggerManager.DefineState(metadatum.Location, metadatum.Location.LocationString, s_itemDefinitionPassLocalsTypes);
-                                }
-                            }
-                        }
-#endif
-
                         continue;
                     }
 
@@ -1137,18 +977,6 @@ namespace Microsoft.Build.Evaluation
 
                     if (target != null)
                     {
-#if FEATURE_MSBUILD_DEBUGGER
-                        if (DebuggerManager.DebuggingEnabled)
-                        {
-                            DebuggerManager.DefineState(element.Location, element.Location.LocationString, s_itemPassLocalsTypes);
-
-                            foreach (ProjectElement child in (target.AllChildren))
-                            {
-                                DebuggerManager.DefineState(child.Location, child.Location.LocationString, s_itemPassLocalsTypes);
-                            }
-                        }
-#endif
-
                         if (_projectSupportsReturnsAttribute.ContainsKey(currentProjectOrImport))
                         {
                             _projectSupportsReturnsAttribute[currentProjectOrImport] |= (target.Returns != null);
@@ -1182,13 +1010,6 @@ namespace Microsoft.Build.Evaluation
 
                     if (usingTask != null)
                     {
-#if FEATURE_MSBUILD_DEBUGGER
-                        if (DebuggerManager.DebuggingEnabled)
-                        {
-                            DebuggerManager.DefineState(element.Location, element.Location.LocationString, s_itemPassLocalsTypes);
-                        }
-#endif
-
                         _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
                         continue;
                     }
@@ -1197,23 +1018,6 @@ namespace Microsoft.Build.Evaluation
 
                     if (choose != null)
                     {
-#if FEATURE_MSBUILD_DEBUGGER
-                        if (DebuggerManager.DebuggingEnabled)
-                        {
-                            // Already defined states for all choose children that were relevant to the
-                            // property pass; now the ones relevant to the item pass, which get the item pass locals
-                            foreach (ProjectElement child in choose.AllChildren)
-                            {
-                                if (child is ProjectItemGroupElement ||
-                                    child is ProjectItemElement ||
-                                    child is ProjectMetadataElement)
-                                {
-                                    DebuggerManager.DefineState(child.Location, child.Location.LocationString, s_itemPassLocalsTypes);
-                                }
-                            }
-                        }
-#endif
-
                         EvaluateChooseElement(choose);
                         continue;
                     }
@@ -1231,21 +1035,14 @@ namespace Microsoft.Build.Evaluation
                     ErrorUtilities.ThrowInternalError("Unexpected child type");
                 }
 
-            // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
-            foreach (var import in implicitImports)
-            {
-                if (import.ImplicitImportLocation == ImplicitImportLocation.Bottom)
+                // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
+                foreach (var import in implicitImports)
                 {
-                    EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                    if (import.ImplicitImportLocation == ImplicitImportLocation.Bottom)
+                    {
+                        EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                    }
                 }
-            }
-
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.BakeStates(Path.GetFileNameWithoutExtension(currentProjectOrImport.FullPath));
-                }
-#endif
             }
         }
 
@@ -1285,13 +1082,6 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(propertyGroupElement))
             { 
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.PulseState(propertyGroupElement.Location, _propertyPassLocals);
-                }
-#endif
-
                 if (EvaluateConditionCollectingConditionedProperties(propertyGroupElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
                     foreach (ProjectPropertyElement propertyElement in propertyGroupElement.Properties)
@@ -1307,13 +1097,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateItemDefinitionGroupElement(ProjectItemDefinitionGroupElement itemDefinitionGroupElement)
         {
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.PulseState(itemDefinitionGroupElement.Location, _itemDefinitionPassLocals);
-            }
-#endif
-
             if (EvaluateCondition(itemDefinitionGroupElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
             {
                 foreach (ProjectItemDefinitionElement itemDefinitionElement in itemDefinitionGroupElement.ItemDefinitions)
@@ -1331,13 +1114,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateItemGroupElement(ProjectItemGroupElement itemGroupElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.PulseState(itemGroupElement.Location, _itemPassLocals);
-            }
-#endif
-
             bool itemGroupConditionResult;
             if (lazyEvaluator != null)
             {
@@ -1365,13 +1141,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateUsingTaskElement(string directoryOfImportingFile, ProjectUsingTaskElement projectUsingTaskElement)
         {
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.PulseState(projectUsingTaskElement.Location, _itemPassLocals);
-            }
-#endif
-
             TaskRegistry.RegisterTasksFromUsingTaskElement<P, I>
                 (
                 _evaluationLoggingContext.LoggingService,
@@ -1654,14 +1423,6 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(propertyElement))
             {
-
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.EnterState(propertyElement.Location, _propertyPassLocals);
-                }
-#endif
-
                 // Global properties cannot be overridden.  We silently ignore them if we try.  Legacy behavior.
                 // That is, unless this global property has been explicitly labeled as one that we want to treat as overridable for the duration 
                 // of this project (or import). 
@@ -1670,25 +1431,11 @@ namespace Microsoft.Build.Evaluation
                         !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name)
                     )
                 {
-#if FEATURE_MSBUILD_DEBUGGER
-                    if (DebuggerManager.DebuggingEnabled)
-                    {
-                        DebuggerManager.LeaveState(propertyElement.Location);
-                    }
-#endif
-
                     return;
                 }
 
                 if (!EvaluateConditionCollectingConditionedProperties(propertyElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
-#if FEATURE_MSBUILD_DEBUGGER
-                    if (DebuggerManager.DebuggingEnabled)
-                    {
-                        DebuggerManager.LeaveState(propertyElement.Location);
-                    }
-#endif
-
                     return;
                 }
 
@@ -1724,13 +1471,6 @@ namespace Microsoft.Build.Evaluation
                 {
                     LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
                 }
-
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.LeaveState(propertyElement.Location);
-                }
-#endif
             }
         }
 
@@ -1753,13 +1493,6 @@ namespace Microsoft.Build.Evaluation
 
         private void EvaluateItemElement(bool itemGroupConditionResult, ProjectItemElement itemElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.EnterState(itemElement.Location, _itemPassLocals);
-            }
-#endif
-
             bool itemConditionResult;
             if (lazyEvaluator != null)
             {
@@ -1772,13 +1505,6 @@ namespace Microsoft.Build.Evaluation
 
             if (!itemConditionResult && !(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.LeaveState(itemElement.Location);
-                }
-#endif
-
                 return;
             }
 
@@ -1836,13 +1562,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateItemElementInclude(bool itemGroupConditionResult, bool itemConditionResult, ProjectItemElement itemElement)
         {
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.EnterState(itemElement.Location, _itemPassLocals);
-            }
-#endif
-
             // Paths in items are evaluated relative to the outer project file, rather than relative to any targets file they may be contained in
             IList<I> items = CreateItemsFromInclude(_projectRootElement.DirectoryPath, itemElement, _itemFactory, itemElement.Include, _expander);
 
@@ -1907,13 +1626,6 @@ namespace Microsoft.Build.Evaluation
                     _data.AddItemIgnoringCondition(item);
                 }
             }
-
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.LeaveState(itemElement.Location);
-            }
-#endif
         }
 
         private void DecorateItemsWithMetadataFromProjectItemElement(ProjectItemElement itemElement, IList<I> items)
@@ -1990,13 +1702,6 @@ namespace Microsoft.Build.Evaluation
 
                         foreach (ProjectMetadataElement metadatumElement in itemElement.Metadata)
                         {
-#if FEATURE_MSBUILD_DEBUGGER
-                            if (DebuggerManager.DebuggingEnabled)
-                            {
-                                DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
-                            }
-#endif
-
                             if (!EvaluateCondition(metadatumElement, ExpanderOptions.ExpandAll, ParserOptions.AllowAll))
                             {
                                 continue;
@@ -2034,13 +1739,6 @@ namespace Microsoft.Build.Evaluation
                             continue;
                         }
 
-#if FEATURE_MSBUILD_DEBUGGER
-                        if (DebuggerManager.DebuggingEnabled)
-                        {
-                            DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
-                        }
-#endif
-
                         string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
 
                         metadataTable.SetValue(metadatumElement, evaluatedValue);
@@ -2067,13 +1765,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateItemDefinitionElement(ProjectItemDefinitionElement itemDefinitionElement)
         {
-#if FEATURE_MSBUILD_DEBUGGER
-            if (DebuggerManager.DebuggingEnabled)
-            {
-                DebuggerManager.PulseState(itemDefinitionElement.Location, _itemDefinitionPassLocals);
-            }
-#endif
-
             // Get matching existing item definition, if any.
             IItemDefinition<M> itemDefinition = _data.GetItemDefinition(itemDefinitionElement.ItemType);
 
@@ -2098,13 +1789,6 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (ProjectMetadataElement metadataElement in itemDefinitionElement.Metadata)
                 {
-#if FEATURE_MSBUILD_DEBUGGER
-                    if (DebuggerManager.DebuggingEnabled)
-                    {
-                        DebuggerManager.PulseState(metadataElement.Location, _itemDefinitionPassLocals);
-                    }
-#endif
-
                     if (EvaluateCondition(metadataElement, ExpanderOptions.ExpandPropertiesAndMetadata, ParserOptions.AllowPropertiesAndCustomMetadata))
                     {
                         string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, ExpanderOptions.ExpandPropertiesAndCustomMetadata, itemDefinitionElement.Location);
@@ -2136,36 +1820,14 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(importElement))
             {
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.EnterState(importElement.Location, _propertyPassLocals);
-                }
-#endif
-
                 List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement);
 
                 foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                 {
                     _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version);
 
-                    // This key should be unique, as duplicate imports were already discarded
-#if FEATURE_MSBUILD_DEBUGGER
-                    if (DebuggerManager.DebuggingEnabled)
-                    {
-                        _importRelationships.Add(importedProjectRootElement, importElement.ContainingProject);
-                    }
-#endif
-
                     PerformDepthFirstPass(importedProjectRootElement);
                 }
-
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.LeaveState(importElement.Location);
-                }
-#endif
             }
         }
 
@@ -2180,13 +1842,6 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(importGroupElement))
             {
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.PulseState(importGroupElement.Location, _propertyPassLocals);
-                }
-#endif
-
                 if (EvaluateConditionCollectingConditionedProperties(importGroupElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties, _projectRootElementCache))
                 {
                     foreach (ProjectImportElement importElement in importGroupElement.Imports)
@@ -2211,13 +1866,6 @@ namespace Microsoft.Build.Evaluation
             {
                 foreach (ProjectWhenElement whenElement in chooseElement.WhenElements)
                 {
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.PulseState(whenElement.Location, _propertyPassLocals);
-                }
-#endif
-
                     if (EvaluateConditionCollectingConditionedProperties(whenElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                     {
                         EvaluateWhenOrOtherwiseChildren(whenElement.Children);
@@ -2228,13 +1876,6 @@ namespace Microsoft.Build.Evaluation
                 // "Otherwise" elements never have a condition
                 if (chooseElement.OtherwiseElement != null)
                 {
-#if FEATURE_MSBUILD_DEBUGGER
-                if (DebuggerManager.DebuggingEnabled)
-                {
-                    DebuggerManager.PulseState(chooseElement.OtherwiseElement.Location, _propertyPassLocals);
-                }
-#endif
-
                     EvaluateWhenOrOtherwiseChildren(chooseElement.OtherwiseElement.Children);
                 }
             }
@@ -2495,10 +2136,32 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
+                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath)?.Path;
 
                 if (string.IsNullOrEmpty(sdkRootPath))
                 {
+                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports))
+                    {
+                        ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                            importElement.Location.Line,
+                            importElement.Location.Column,
+                            ResourceUtilities.GetResourceString("CouldNotResolveSdk"),
+                            importElement.ParsedSdkReference.ToString())
+                        {
+                            BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                            UnexpandedProject = importElement.Project,
+                            ProjectFile = importElement.ContainingProject.FullPath,
+                            ImportedProjectFile = null,
+                            ImportIgnored = true,
+                        };
+
+                        _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                        projects = new List<ProjectRootElement>();
+
+                        return;
+                    }
+
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.ParsedSdkReference.ToString());
                 }
 

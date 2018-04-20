@@ -34,6 +34,8 @@ namespace Microsoft.Build.Logging
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
         private ProjectImportsCollector projectImportsCollector;
+        private string _initialTargetOutputLogging;
+        private string _initialLogImports;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -80,6 +82,9 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
+            _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
+            _initialLogImports = Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS");
+
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
 
@@ -132,6 +137,9 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Shutdown()
         {
+            Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
+            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports);
+
             if (projectImportsCollector != null)
             {
                 projectImportsCollector.Close();
@@ -236,7 +244,7 @@ namespace Microsoft.Build.Logging
                         FilePath = FilePath.Substring("LogFile=".Length);
                     }
 
-                    FilePath = parameter.TrimStart('"').TrimEnd('"');
+                    FilePath = FilePath.Trim('"');
                 }
                 else
                 {

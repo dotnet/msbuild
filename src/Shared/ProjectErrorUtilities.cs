@@ -14,9 +14,6 @@ using System.Diagnostics;
  * 
  * 
  ******************************************************************************/
-#if FEATURE_MSBUILD_DEBUGGER
-using Microsoft.Build.Debugging;
-#endif
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.Shared
@@ -412,33 +409,7 @@ namespace Microsoft.Build.Shared
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, resourceName, args);
 
-            Exception exceptionToThrow = new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
-
-#if FEATURE_MSBUILD_DEBUGGER
-            if (!DebuggerManager.DebuggingEnabled)
-            {
-                throw exceptionToThrow;
-            }
-
-            try
-            {
-                throw exceptionToThrow;
-            }
-            catch (InvalidProjectFileException ex)
-            {
-                // To help out the user debugging their project, break into the debugger here.
-                // That's because otherwise, since they're debugging our optimized code with JMC on,
-                // they may not be able to break on this exception at all themselves.
-                // Also, dump the exception information, as it's hard to see in optimized code.
-                // Note that we use Trace as Debug.WriteLine is not compiled in release builds, which is 
-                // what we are in here.
-                Trace.WriteLine(ex.ToString());
-                Debugger.Break();
-                throw;
-            }
-#else
-            throw exceptionToThrow;
-#endif
+            throw new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
         }
     }
 }

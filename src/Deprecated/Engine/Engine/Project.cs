@@ -34,7 +34,6 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// The position of a property to be set inside a project file.
     /// </summary>
-    [Obsolete]
     public enum PropertyPosition
     {
         /// <summary>

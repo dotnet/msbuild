@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
     <body>
-      <group id="MICROSOFT.BUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: "{0}" タスクには "{1}" という名前のパラメーターが 2 つ以上あります。</target>
@@ -174,8 +173,8 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in the temporary files directory named MSBuild_*.failure.txt.</source>
-        <target state="translated">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャットダウンしています。診断情報は、MSBuild_*.failure.txt という名前の一時ファイル ディレクトリのファイル内で見つかる可能性があります。</target>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
+        <target state="needs-review-translation">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャットダウンしています。診断情報は、MSBuild_*.failure.txt という名前の一時ファイル ディレクトリのファイル内で見つかる可能性があります。</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -242,10 +241,10 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="translated">ファイル "{0}" をファイル "{1}" にインポートすると、循環する依存関係が生じます。</target>
+        <target state="needs-review-translation">ファイル "{0}" をファイル "{1}" にインポートすると、循環する依存関係が生じます。</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
-       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency. 
+       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
     </note>
       </trans-unit>
       <trans-unit id="SearchPathsForMSBuildExtensionsPath">
@@ -2003,8 +2002,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
-        <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="translated">MSB4237: SDK リゾルバーが見つかりましたが、読み込めませんでした。エラー: {0}.</target>
+        <source>MSB4237: The SDK resolver type "{0}" failed to load. {1}</source>
+        <target state="translated">MSB4237: SDK 競合回避モジュールの型 "{0}" を読み込めませんでした。{1}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2056,6 +2055,67 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
         <target state="translated">このプロジェクトを読み込んだときに ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition が設定されていたため、指定された API "{0}" を使用できません。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CouldNotLoadSdkResolverAssembly">
+        <source>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</source>
+        <target state="translated">MSB4244: SDK 競合回避モジュールのアセンブリ "{0}" を読み込めませんでした。{1}</target>
+        <note>{StrBegin="MSB4244: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotRunSdkResolver">
+        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
+        <target state="translated">MSB4242: SDK 競合回避モジュール "{0}" を実行できませんでした。{1}</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotRunNuGetSdkResolver">
+        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">MSB4243: NuGet アセンブリを見つけることができなかったため、NuGet ベースの SDK 競合回避モジュールを実行できませんでした。MSBuild のインストールを確認するか、環境変数 "{0}" を、必要な NuGet アセンブリが含まれているフォルダーに設定してください。{1}</target>
+        <note>{StrBegin="MSB4243: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedInvalidFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
+        <target state="translated">ファイルが無効であるため、プロジェクト "{0}" は "{1}" によって ({2},{3}) でインポートされませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedMissingFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
+        <target state="translated">ファイルが存在しないため、プロジェクト "{0}" は "{1}" によって ({2},{3}) でインポートされませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingProfilerReport">
+        <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
+        <target state="translated">MSBUILD : エラー MSB4239: プロファイル レポートの書き込みでエラーが発生しました。{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReport">
+        <source>Writing profiler report to '{0}'...</source>
+        <target state="translated">プロファイル レポートを '{0}' に書き込んでいます...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReportDone">
+        <source>Done writing report.</source>
+        <target state="translated">レポートの書き込みが完了しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="needs-review-translation">MSB4240: 同じ SDK "{0}" の複数のバージョンを指定することはできません。既に "{2}" によって指定されている SDK バージョン "{1}" が使用され、バージョン "{3}" は無視されます。</target>
+        <note>{StrBegin="MSB4240: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResultVersionDifferentThanReference">
+        <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
+        <target state="translated">MSB4241: SDK 参照 "{0}" のバージョン "{1}" は、代わりにバージョン "{2}" に解決されました。  参照されたバージョンを一致するように更新しない場合、必要なバージョンとは別のバージョンを使用する可能性があります。</target>
+        <note>{StrBegin="MSB4241: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResolving">
+        <source>Resolving SDK '{0}'...</source>
+        <target state="translated">SDK '{0}' を解決しています...</target>
+        <note>
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
       </trans-unit>
     </body>
   </file>

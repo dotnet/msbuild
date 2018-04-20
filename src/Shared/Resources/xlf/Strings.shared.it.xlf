@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../Strings.shared.resx">
     <body>
-      <group id="SHARED/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="BuildAborted">
         <source>MSB4188: Build was canceled.</source>
         <target state="translated">MSB4188: compilazione annullata.</target>
@@ -142,8 +141,8 @@
     </note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcess">
-        <source>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</source>
-        <target state="translated">MSB5002: l'esecuzione del file eseguibile dell'attività non è stata completata entro il limite specificato di {0} millisecondi e verrà terminata.</target>
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: l'eseguibile "{0}" dell'attività verrà terminato perché non è finito entro il limite specificato di {1} millisecondi.</target>
         <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotBeNull">
@@ -260,8 +259,8 @@
         <note>{StrBegin="MSB5020: "}</note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcessByCancellation">
-        <source>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</source>
-        <target state="translated">MSB5021: "{0}" e i processi figlio verranno terminati per annullare la compilazione.</target>
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: l'eseguibile "{0}" dell'attività e i relativi processi figlio verranno terminati perché la compilazione è stata annullata.</target>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
       <trans-unit id="OM_NotSupportedReadOnlyCollection">

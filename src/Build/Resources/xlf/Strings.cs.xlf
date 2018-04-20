@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
-      <group id="MICROSOFT.BUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: Úloha {0} má více než jeden parametr s názvem {1}.</target>
@@ -174,8 +173,8 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in the temporary files directory named MSBuild_*.failure.txt.</source>
-        <target state="translated">MSB4166: Podřízený uzel {0} skončil předčasně. Probíhá ukončení práce. Diagnostické informace naleznete v souborech s názvy MSBuild_*.failure.txt v adresáři s dočasnými soubory.</target>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
+        <target state="needs-review-translation">MSB4166: Podřízený uzel {0} skončil předčasně. Probíhá ukončení práce. Diagnostické informace naleznete v souborech s názvy MSBuild_*.failure.txt v adresáři s dočasnými soubory.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -242,10 +241,10 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="translated">Import souboru {0} do souboru {1} má za následek cyklickou závislost.</target>
+        <target state="needs-review-translation">Import souboru {0} do souboru {1} má za následek cyklickou závislost.</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
-       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency. 
+       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
     </note>
       </trans-unit>
       <trans-unit id="SearchPathsForMSBuildExtensionsPath">
@@ -2003,8 +2002,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
-        <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="translated">MSB4237: Překladač SDK byl nalezen, ale nejde zavést. Chyba: {0}</target>
+        <source>MSB4237: The SDK resolver type "{0}" failed to load. {1}</source>
+        <target state="translated">MSB4237: Typ překladače sady SDK {0} se nepodařilo načíst. {1}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2056,6 +2055,67 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
         <target state="translated">Zadané rozhraní API {0} není k dispozici, protože při načítání tohoto projektu bylo nastaveno ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CouldNotLoadSdkResolverAssembly">
+        <source>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</source>
+        <target state="translated">MSB4244: Sestavení překladače sady SDK {0} nebylo možné načíst. {1}</target>
+        <note>{StrBegin="MSB4244: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotRunSdkResolver">
+        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
+        <target state="translated">MSB4242: Překladač sady SDK {0} se nepodařilo spustit. {1}</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotRunNuGetSdkResolver">
+        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">MSB4243: Překladač sady SDK založený na NuGet se nepodařilo spustit, protože sestavení NuGet se nenašla. Zkontrolujte instalaci nástroje MSBuild nebo nastavte proměnnou prostředí {0} na složku, která obsahuje požadovaná sestavení NuGet. {1}</target>
+        <note>{StrBegin="MSB4243: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedInvalidFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
+        <target state="translated">{1} neimportoval projekt {0} v ({2},{3}), protože soubor je neplatný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedMissingFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
+        <target state="translated">{1} neimportoval projekt {0} v ({2},{3}), protože soubor neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingProfilerReport">
+        <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
+        <target state="translated">MSBUILD: chyba MSB4239: Při zápisu sestavy profilace došlo k chybě. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReport">
+        <source>Writing profiler report to '{0}'...</source>
+        <target state="translated">Sestava profileru se zapisuje do {0}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReportDone">
+        <source>Done writing report.</source>
+        <target state="translated">Zápis sestavy je hotový.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="needs-review-translation">MSB4240: Několik verzí stejné sady SDK {0} nelze zadat. Bude použita verze {1} sady SDK, kterou už určuje {2}, verze {3} bude ignorována.</target>
+        <note>{StrBegin="MSB4240: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResultVersionDifferentThanReference">
+        <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
+        <target state="translated">MSB4241: Odkaz na sadu SDK {0} verze {1} byl místo toho přeložen na verzi {2}. Pokud neaktualizujete odkazovanou verzi tak, aby se shodovala, může se používat jiná verze, než kterou očekáváte.</target>
+        <note>{StrBegin="MSB4241: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResolving">
+        <source>Resolving SDK '{0}'...</source>
+        <target state="translated">Překládá se sada SDK {0}...</target>
+        <note>
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
       </trans-unit>
     </body>
   </file>

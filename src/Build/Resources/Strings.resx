@@ -187,7 +187,7 @@
     <comment>{StrBegin="MSB4162: "}</comment>
   </data>
   <data name="ChildExitedPrematurely" UESanitized="false" Visibility="Public">
-    <value>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in the temporary files directory named MSBuild_*.failure.txt.</value>
+    <value>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</value>
     <comment>{StrBegin="MSB4166: "}</comment>
   </data>
   <data name="ChooseMustContainWhen" UESanitized="false" Visibility="Public">
@@ -245,7 +245,7 @@
     <value>Importing the file "{0}" into the file "{1}" results in a circular dependency.</value>
     <comment>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
-       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency. 
+       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
     </comment>
   </data>
   <data name="SearchPathsForMSBuildExtensionsPath">
@@ -299,11 +299,11 @@
   <data name="UsedUninitializedProperty" Visibility="Public">
     <value>MSB4211: The property "{0}" is being set to a value for the first time, but it was already consumed at "{1}".</value>
     <comment>{StrBegin="MSB4211: "}</comment>
-  </data>  
+  </data>
   <data name="SelfImport" Visibility="Public">
     <value>MSB4210: "{0}" is attempting to import itself, directly or indirectly. This is most likely a build authoring error. The import will be ignored.</value>
     <comment>{StrBegin="MSB4210: "}</comment>
-  </data>  
+  </data>
   <data name="DuplicateProjectExtensions" UESanitized="false" Visibility="Public">
     <value>MSB4079: The &lt;ProjectExtensions&gt; element occurs more than once.</value>
     <comment>{StrBegin="MSB4079: "}</comment>
@@ -927,16 +927,16 @@
     <value>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</value>
     <comment>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</comment>
   </data>
-  
+
   <!-- ====================================================================== -->
-  
+
   <!-- TargetStartedEventArgs: Project and File paths are different -->
   <data name="TargetStartedFileProject" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in file "{1}" from project "{2}":</value>
-  </data>  
+  </data>
   <data name="TargetStartedFileProjectEntry" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in file "{1}" from project "{2}" (entry point):</value>
-  </data>    
+  </data>
   <data name="TargetStartedFileProjectDepends" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in file "{1}" from project "{2}" (target "{3}" depends on it):</value>
   </data>
@@ -945,15 +945,15 @@
   </data>
   <data name="TargetStartedFileProjectAfter" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in file "{1}" from project "{2}" (designated to run after target "{3}"):</value>
-  </data> 
-  
+  </data>
+
   <!-- TargetStartedEventArgs: Project and File paths are the same -->
   <data name="TargetStarted" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in project "{1}":</value>
-  </data>  
+  </data>
   <data name="TargetStartedProjectEntry" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in project "{1}" (entry point):</value>
-  </data>    
+  </data>
   <data name="TargetStartedProjectDepends" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in project "{1}" (target "{2}" depends on it):</value>
   </data>
@@ -962,28 +962,28 @@
   </data>
   <data name="TargetStartedProjectAfter" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in project "{1}" (designated to run after target "{2}"):</value>
-  </data>   
-  
+  </data>
+
   <!-- Serial logger low verbosity -->
   <data name="TargetStartedPrefix" UESanitized="false" Visibility="Public">
     <value>Target {0}:</value>
   </data>
-  
+
   <!-- Serial logger high verbosity -->
   <data name="TargetStartedFromFile" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in file "{1}":</value>
   </data>
-  
+
   <!-- Parallel logger low verbosity -->
   <data name="TargetStartedPrefixInProject" UESanitized="false" Visibility="Public">
     <value>Target {0} from project "{1}":</value>
   </data>
-  
+
   <!-- Parallel logger high verbosity -->
   <data name="TargetStartedFromFileInProject" UESanitized="false" Visibility="Public">
     <value>Target "{0}" in file "{1}" from project "{2}":</value>
   </data>
-  
+
   <!-- Log messages for item/property group -->
   <data name="ItemGroupIncludeLogMessagePrefix" UESanitized="false" Visibility="Public">
     <value>Added Item(s): </value>
@@ -994,7 +994,7 @@
   <data name="PropertyGroupLogMessage" UESanitized="false" Visibility="Public">
     <value>Set Property: {0}={1}</value>
   </data>
-  
+
   <!-- Log messages for target outputs -->
   <data name="OutputItemParameterMessagePrefix" UESanitized="false" Visibility="Public">
     <value>Output Item(s): </value>
@@ -1002,9 +1002,9 @@
   <data name="OutputPropertyLogMessage" UESanitized="false" Visibility="Public">
     <value>Output Property: {0}={1}</value>
   </data>
-  
+
   <!-- ====================================================================== -->
-  
+
   <data name="TaskContinuedDueToContinueOnError" UESanitized="false" Visibility="Public">
       <value>Build continuing because "{0}" on the task "{1}" is set to "{2}".</value>
   </data>
@@ -1122,7 +1122,7 @@
   </data>
   <data name="TaskParameterPrefix" UESanitized="false" Visibility="Public">
     <value>Task Parameter:</value>
-  </data>  
+  </data>
   <data name="TaskPerformanceSummary" UESanitized="false" Visibility="Public">
     <value>Task Performance Summary:</value>
   </data>
@@ -1461,7 +1461,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="OM_CannotSaveFileLoadedAsReadOnly">
     <value>Project or targets file "{0}" was loaded in read-only mode, and cannot be saved.</value>
-  </data>  
+  </data>
   <!-- #################################################################################################-->
   <!-- ############################## Evaluation-model-related strings #################################-->
   <!-- #################################################################################################-->
@@ -1501,10 +1501,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>The project XML file "{0}" cannot be unloaded because at least one project "{1}" is still loaded which references that project XML.</value>
   </data>
   <data name="OM_ProjectInstanceImmutable">
-    <value>Instance object was created as immutable.</value>    
+    <value>Instance object was created as immutable.</value>
   </data>
   <data name="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
-    <value>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</value>    
+    <value>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</value>
   </data>
   <!-- #################################################################################################-->
   <!-- ############################## Execution-model-related strings #################################-->
@@ -1572,7 +1572,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</comment>
   </data>
 
-  <!-- 
+  <!--
   Some General properties replicated from tasks for MSBuild task
   TODO: Are these ever used anywhere else?
   -->
@@ -1598,13 +1598,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="General.ProjectUndefineProperties">
     <value>Removing Properties for project "{0}":</value>
   </data>
-  
+
   <!-- Engine errors for features not supported on .NET Core have the arbitrarily-chosen 48 prefix -->
   <data name="TaskInstantiationFailureNotSupported" xml:space="preserve">
     <value>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</value>
     <comment>{StrBegin="MSB4802: "}</comment>
   </data>
-  
+
   <data name="InvalidGetPathOfFileAboveParameter">
     <value>The parameter '{0}' can only be a file name and cannot include a directory.</value>
   </data>
@@ -1627,7 +1627,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProjectImportSkippedFalseCondition">
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</value>
   </data>
-  
+
   <data name="ProjectImportSkippedNoMatches">
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to no matching files.</value>
   </data>
@@ -1657,7 +1657,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Done writing report.</value>
   </data>
   <data name="ReferencingMultipleVersionsOfTheSameSdk" UESanitized="false" Visibility="Public">
-    <value>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.</value>
+    <value>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</value>
     <comment>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
@@ -1676,12 +1676,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
-        
+
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
         Next message code should be MSB4245.
-              
+
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
 

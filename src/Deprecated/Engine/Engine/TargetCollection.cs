@@ -23,7 +23,6 @@ namespace Microsoft.Build.BuildEngine
     /// all the imported Targets as well as the ones in the main project file.
     /// </summary>
     /// <owner>rgoel</owner>
-    [Obsolete]
     public class TargetCollection : IEnumerable, ICollection
     {
         #region Member Data

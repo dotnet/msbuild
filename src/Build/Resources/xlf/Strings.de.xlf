@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
-      <group id="MICROSOFT.BUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: Die {0}-Aufgabe enthält mehrere Parameter mit dem Namen "{1}".</target>
@@ -174,8 +173,8 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in the temporary files directory named MSBuild_*.failure.txt.</source>
-        <target state="translated">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Herunterfahren. Diagnoseinformationen finden Sie in den Dateien des Verzeichnisses für temporäre Dateien mit dem Namen MSBuild_*.failure.txt.</target>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
+        <target state="needs-review-translation">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Herunterfahren. Diagnoseinformationen finden Sie in den Dateien des Verzeichnisses für temporäre Dateien mit dem Namen MSBuild_*.failure.txt.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -242,10 +241,10 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="translated">Der Import der Datei "{0}" in die Datei "{1}" führt zu einer Ringabhängigkeit.</target>
+        <target state="needs-review-translation">Der Import der Datei "{0}" in die Datei "{1}" führt zu einer Ringabhängigkeit.</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
-       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency. 
+       t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
     </note>
       </trans-unit>
       <trans-unit id="SearchPathsForMSBuildExtensionsPath">
@@ -2003,8 +2002,8 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
-        <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="translated">MSB4237: Ein SDK-Resolver wurde gefunden, konnte aber nicht geladen werden. Fehler: {0}.</target>
+        <source>MSB4237: The SDK resolver type "{0}" failed to load. {1}</source>
+        <target state="translated">MSB4237: Der SDK-Resolvertyp "{0}" konnte nicht geladen werden. {1}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
@@ -2024,17 +2023,17 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedFalseCondition">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" bei ({2},{3}) aufgrund einer falschen Bedingung nicht importiert; ({4}) wurde als ({5}) ausgewertet.</target>
+        <target state="translated">Das Projekt "{0}" wurde aufgrund einer falschen Bedingung nicht von "{1}" in ({2},{3}) importiert; ({4}) wurde als ({5}) ausgewertet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedNoMatches">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" bei ({2},{3}) aufgrund nicht übereinstimmender Dateien nicht importiert.</target>
+        <target state="translated">Das Projekt "{0}" wurde aufgrund nicht übereinstimmender Dateien nicht von "{1}" in ({2},{3}) importiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedEmptyFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</source>
-        <target state="translated">Das Projekt "{0}" wurde von "{1}" bei ({2},{3}) nicht importiert, da die Datei leer war.</target>
+        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht in ({2},{3}) importiert, da die Datei leer war.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectImported">
@@ -2056,6 +2055,67 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <source>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</source>
         <target state="translated">Die angegebene API "{0}" ist nicht verfügbar, weil beim Laden dieses Projekts "ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition" festgelegt wurde.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CouldNotLoadSdkResolverAssembly">
+        <source>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</source>
+        <target state="translated">MSB4244: Die SDK-Resolverassembly "{0}" konnte nicht geladen werden. {1}</target>
+        <note>{StrBegin="MSB4244: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotRunSdkResolver">
+        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
+        <target state="translated">MSB4242: Der SDK-Resolver "{0}" konnte nicht ausgeführt werden. {1}</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotRunNuGetSdkResolver">
+        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">MSB4243: Fehler beim NuGet-basierten SDK-Resolver, weil die NuGet-Assemblys nicht gefunden wurden. Überprüfen Sie Ihre Installation von MSBuild, oder legen Sie die Umgebungsvariable "{0}" auf den Ordner fest, der die erforderlichen NuGet-Assemblys enthält. {1}</target>
+        <note>{StrBegin="MSB4243: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedInvalidFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>
+        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht in ({2},{3}) importiert, weil die Datei ungültig ist.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedMissingFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</source>
+        <target state="translated">Das Projekt "{0}" wurde von "{1}" nicht in ({2},{3}) importiert, weil die Datei nicht vorhanden ist.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorWritingProfilerReport">
+        <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
+        <target state="translated">MSBUILD: Fehler MSB4239: Fehler beim Schreiben des Profilerstellungsberichts. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReport">
+        <source>Writing profiler report to '{0}'...</source>
+        <target state="translated">Profilerbericht wird in "{0}" geschrieben...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingProfilerReportDone">
+        <source>Done writing report.</source>
+        <target state="translated">Bericht wurde geschrieben.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
+        <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
+        <target state="needs-review-translation">MSB4240: Es können nicht mehrere Versionen für dasselbe SDK "{0}" angegeben werden. Die bereits von "{2}" angegebene SDK-Version "{1}" wird verwendet, die Version "{3}" wird ignoriert.</target>
+        <note>{StrBegin="MSB4240: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResultVersionDifferentThanReference">
+        <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
+        <target state="translated">MSB4241: Der SDK-Verweis "{0}" auf Version "{1}" wurde stattdessen in Version "{2}" aufgelöst. Sie könnten eine andere Version als die erwartete verwenden, wenn Sie die referenzierte Version nicht entsprechend aktualisieren.</target>
+        <note>{StrBegin="MSB4241: "}
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
+      </trans-unit>
+      <trans-unit id="SdkResolving">
+        <source>Resolving SDK '{0}'...</source>
+        <target state="translated">SDK "{0}" wird aufgelöst...</target>
+        <note>
+      LOCALIZATION:  Do not localize the word SDK.
+    </note>
       </trans-unit>
     </body>
   </file>

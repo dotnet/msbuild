@@ -45,7 +45,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.XML" />
-    <ProjectReference Include="..\..\XMakeBuildEngine\XMakeBuildEngine.csproj">
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj">
       <Project>{3F1F7307-EE89-4110-B636-BDE1E45358C4}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Name>XMakeBuildEngine</Name>
@@ -59,13 +59,13 @@
       <Comment>Needs 'microsoft.build.engine.dll'</Comment>
       <SpecificVersion>true</SpecificVersion>
     </ProjectReference>
-    <ProjectReference Include="..\..\Utilities\Utilities.csproj">
+    <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{653E79B4-118B-4E0A-9E34-8EB30E5E0881}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Name>Utilities %28components\xmake\Framework\Utilities%29</Name>
       <Comment>Needs 'microsoft.build.utilities.v12.0.dll'</Comment>
     </ProjectReference>
-    <ProjectReference Include="..\..\Framework\Framework.csproj">
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{784BF121-CE8F-4314-AA55-E86AB61670FE}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Name>Framework %28components\xmake\Framework\Framework%29</Name>
@@ -95,4 +95,6 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
 </Project>

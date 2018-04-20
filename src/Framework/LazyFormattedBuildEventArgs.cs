@@ -28,7 +28,13 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Stores the original culture for String.Format.
         /// </summary>
-        private CultureInfo originalCulture;
+        private string originalCultureName;
+
+        /// <summary>
+        /// Non-serializable CultureInfo object
+        /// </summary>
+        [NonSerialized]
+        private CultureInfo originalCultureInfo;
 
         /// <summary>
         /// Lock object.
@@ -73,7 +79,8 @@ namespace Microsoft.Build.Framework
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
             arguments = messageArgs;
-            originalCulture = CultureInfo.CurrentCulture;
+            originalCultureName = CultureInfo.CurrentCulture.Name;
+            originalCultureInfo = CultureInfo.CurrentCulture;
             locker = new Object();
         }
 
@@ -97,7 +104,12 @@ namespace Microsoft.Build.Framework
                 {
                     if (arguments != null && arguments.Length > 0)
                     {
-                        base.Message = FormatString(originalCulture, base.Message, arguments);
+                        if (originalCultureInfo == null)
+                        {
+                            originalCultureInfo = new CultureInfo(originalCultureName);
+                        }
+
+                        base.Message = FormatString(originalCultureInfo, base.Message, arguments);
                         arguments = null;
                     }
                 }
@@ -139,10 +151,10 @@ namespace Microsoft.Build.Framework
                 }
                 else
                 {
-                    writer.Write((Int32)(-1));
+                    writer.Write(-1);
                 }
 
-                writer.Write(originalCulture != null ? originalCulture.LCID : 0);
+                writer.Write(originalCultureName);
             }
         }
 
@@ -172,18 +184,7 @@ namespace Microsoft.Build.Framework
 
                 arguments = messageArgs;
 
-                int originalCultureId = reader.ReadInt32();
-                if (originalCultureId != 0)
-                {
-                    if (originalCultureId == CultureInfo.CurrentCulture.LCID)
-                    {
-                        originalCulture = CultureInfo.CurrentCulture;
-                    }
-                    else
-                    {
-                        originalCulture = new CultureInfo(originalCultureId);
-                    }
-                }
+                originalCultureName = reader.ReadString();
             }
         }
 #endif

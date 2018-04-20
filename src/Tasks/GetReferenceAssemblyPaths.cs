@@ -21,7 +21,6 @@ namespace Microsoft.Build.Tasks
     public class GetReferenceAssemblyPaths : TaskExtension
     {
         #region Data
-        /// <summary>
 #if FEATURE_GAC
         /// <summary>
         /// This is the sentinel assembly for .NET FX 3.5 SP1
@@ -163,6 +162,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// If set to true, the task will not generate an error (or a warning) if the reference assemblies cannot be found.
+        /// This allows the task to be used to check whether reference assemblies for a framework are available.
+        /// </summary>
+        public bool SuppressNotFoundError { get; set; }
+
+        /// <summary>
         /// Gets the display name for the targetframeworkmoniker
         /// </summary>
         [Output]
@@ -286,11 +291,14 @@ namespace Microsoft.Build.Tasks
                 pathsToReturn = ToolLocationHelper.GetPathToReferenceAssemblies(rootPath, frameworkmoniker);
             }
 
-            // No reference assembly paths could be found, log an error so an invalid build will not be produced.
-            // 1/26/16: Note this was changed from a warning to an error (see GitHub #173).
-            if (pathsToReturn.Count == 0)
+            if (!SuppressNotFoundError)
             {
-                Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
+                // No reference assembly paths could be found, log an error so an invalid build will not be produced.
+                // 1/26/16: Note this was changed from a warning to an error (see GitHub #173).
+                if (pathsToReturn.Count == 0)
+                {
+                    Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
+                }
             }
 
             return pathsToReturn;
