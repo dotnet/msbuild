@@ -207,6 +207,12 @@ namespace Microsoft.Build.Evaluation
                                 {
                                     continue;
                                 }
+
+                                if (NativeMethodsShared.IsMono && float.TryParse(version, out float floatVersion) && floatVersion > 14.0)
+                                {
+                                        continue;
+                                }
+
                                 // Create standard properties. On Mono they are well known
                                 var buildProperties =
                                     CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
