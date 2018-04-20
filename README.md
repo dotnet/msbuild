@@ -51,8 +51,8 @@ Build Status
 [rhel6-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7392/badge
 [rhel6-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7392
 
-[linux-musl-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/8168/badge
-[linux-musl-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=8168
+[linux-musl-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9036/badge
+[linux-musl-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9036
 
 Installers and Binaries
 -----------------------
