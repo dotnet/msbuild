@@ -13,7 +13,7 @@
     <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0-dev-62817-01</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
-    <MicrosoftNETSdkPackageVersion>2.1.200-preview-62816-05</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>2.1.200-preview-62820-08</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>2.0.0-rel-20180221-676</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
