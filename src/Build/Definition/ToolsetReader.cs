@@ -131,21 +131,15 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_SYSTEM_CONFIGURATION
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
-                if (configurationReader == null && ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
+                if (configurationReader == null)
                 {
-                    // We haven't been passed in a fake configuration reader by a unit test,
-                    // and it looks like we have a .config file to read, so create a real
-                    // configuration reader
                     configurationReader = new ToolsetConfigurationReader(environmentProperties, globalProperties);
                 }
 
-                if (configurationReader != null)
-                {
-                    // Accumulation of properties is okay in the config file because it's deterministically ordered
-                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
-                        initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
-                        out defaultOverrideToolsVersionFromConfiguration);
-                }
+                // Accumulation of properties is okay in the config file because it's deterministically ordered
+                defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
+                    initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
+                    out defaultOverrideToolsVersionFromConfiguration);
             }
 #endif
 
