@@ -126,7 +126,7 @@
   <data name="RazorServer" xml:space="preserve">
     <value>Razor build server</value>
   </data>
-  <data name="NoRazorProjectFound" xml:space="preserve">
-    <value>a Razor project was not found in the current directory.</value>
+  <data name="ShutdownCommandFailed" xml:space="preserve">
+    <value>The shutdown command failed: {0}</value>
   </data>
 </root>

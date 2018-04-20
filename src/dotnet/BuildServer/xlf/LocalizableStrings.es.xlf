@@ -17,9 +17,9 @@
         <target state="new">Razor build server</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoRazorProjectFound">
-        <source>a Razor project was not found in the current directory.</source>
-        <target state="new">a Razor project was not found in the current directory.</target>
+      <trans-unit id="ShutdownCommandFailed">
+        <source>The shutdown command failed: {0}</source>
+        <target state="new">The shutdown command failed: {0}</target>
         <note />
       </trans-unit>
     </body>
