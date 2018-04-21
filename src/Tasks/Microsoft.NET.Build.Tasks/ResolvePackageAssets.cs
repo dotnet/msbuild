@@ -671,7 +671,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (targetLibraries.TryGetValue(library.Name, out var targetLibrary))
                         {
-                            WriteItem(ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
+                            WriteItem(_packageResolver.ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
                         }
                     }
                 }
@@ -925,7 +925,7 @@ namespace Microsoft.NET.Build.Tasks
                             continue;
                         }
 
-                        string itemSpec = ResolvePackageAssetPath(library, asset.Path);
+                        string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
                         WriteItem(itemSpec, library);
                         writeMetadata?.Invoke(asset);
                     }
@@ -968,12 +968,6 @@ namespace Microsoft.NET.Build.Tasks
                 return index;
             }
 
-            private string ResolvePackageAssetPath(LockFileTargetLibrary package, string relativePath)
-            {
-                string packagePath = _packageResolver.GetPackageDirectory(package.Name, package.Version);
-                return Path.Combine(packagePath, NormalizeRelativePath(relativePath));
-            }
-
             private static Dictionary<string, string> GetProjectReferencePaths(LockFile lockFile)
             {
                 Dictionary<string, string> paths = new Dictionary<string, string>();
@@ -982,15 +976,12 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     if (library.IsProject())
                     {
-                        paths[library.Name] = NormalizeRelativePath(library.MSBuildProject);
+                        paths[library.Name] = NuGetPackageResolver.NormalizeRelativePath(library.MSBuildProject);
                     }
                 }
 
                 return paths;
             }
-
-            private static string NormalizeRelativePath(string relativePath)
-                => relativePath.Replace('/', Path.DirectorySeparatorChar);
         }
     }
 }

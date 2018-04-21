@@ -532,7 +532,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
                       RuntimeStorePackages="@(RuntimeStorePackages)"
-                      IsSelfContained="$(SelfContained)" />
+                      IsSelfContained="$(SelfContained)"
+                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)" />
 
   </Target>
 

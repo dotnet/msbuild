@@ -73,6 +73,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsSelfContained { get; set; }
 
+        public bool IncludeRuntimeFileVersions { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -138,7 +140,7 @@ namespace Microsoft.NET.Build.Tasks
                 PlatformLibraryName,
                 IsSelfContained);
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions)
                 .WithMainProjectInDepsFile(IncludeMainProject)
                 .WithReferenceAssemblies(referenceAssemblyInfos)
                 .WithDirectReferences(directReferences)
@@ -229,7 +231,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var assetGroup in assetGroups)
             {
-                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimAssemblies(assetGroup.AssetPaths, filesToTrim));
+                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimRuntimeFiles(assetGroup.RuntimeFiles, filesToTrim));
             }
         }
 
@@ -273,6 +275,18 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var assembly in assemblies)
             {
                 if (!filesToTrim.Contains(assembly))
+                {
+                    yield return assembly;
+                }
+            }
+        }
+
+
+        private IEnumerable<RuntimeFile> TrimRuntimeFiles(IEnumerable<RuntimeFile> assemblies, ISet<string> filesToTrim)
+        {
+            foreach (var assembly in assemblies)
+            {
+                if (!filesToTrim.Contains(assembly.Path))
                 {
                     yield return assembly;
                 }
