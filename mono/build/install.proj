@@ -71,7 +71,8 @@
 
             <OldToolsVersionFiles Include="$(XBuildDir)\14.0\Imports\**\*" />
 
-            <RemainingMSBuildBinFiles Include="$(MSBuildBinSrcDir)\**\*" />
+            <_AllFiles Include="$(MSBuildBinSrcDir)\**\*" />
+            <RemainingMSBuildBinFiles Include="@(_AllFiles -> Distinct())" />
 
             <RemainingMSBuildBinFiles Remove="@(MSBuildFiles)" />
             <RemainingMSBuildBinFiles Remove="@(SdksFiles)" />
@@ -83,8 +84,6 @@
         </ItemGroup>
 
         <ItemGroup>
-            <RemainingMSBuildBinFiles Remove="@(MSBuildBinDirFiles)" />
-
             <RemainingMSBuildBinFiles_Relative Include="@(RemainingMSBuildBinFiles -> '$([MSBuild]::MakeRelative('$(MSBuildBinSrcDir)', %(RemainingMSBuildBinFiles.Identity)))' )" />
         </ItemGroup>
 
@@ -123,7 +122,7 @@
         </Copy>
 
         <Copy SourceFiles="@(OldToolsVersionFiles)"
-            DestinationFiles="@(OldToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\Imports\%(RecursiveDir)\%(Filename)%(Extension)')">
+            DestinationFiles="@(OldToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\Imports\%(RecursiveDir)%(Filename)%(Extension)')">
             <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
         </Copy>
 
@@ -143,7 +142,8 @@
         </Copy>
 
         <ItemGroup>
-            <CopiedFiles_Relative Include="@(CopiedFiles -> '$([MSBuild]::MakeRelative('$(MonoInstallPrefix)', %(CopiedFiles.Identity)))' )" />
+            <_CopiedFiles_Relative_Tmp Include="@(CopiedFiles -> '$([MSBuild]::MakeRelative('$(MonoInstallPrefix)', %(CopiedFiles.Identity)))' )" />
+            <CopiedFiles_Relative Include="@(_CopiedFiles_Relative_Tmp -> Distinct())" />
         </ItemGroup>
 
         <WriteLinesToFile Lines="@(CopiedFiles_Relative)" File="$(AllInstalledFiles_File)" Overwrite="true" />
