@@ -1,19 +1,17 @@
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Import Project="..\..\dir.props" />
-
+<Project>
 	<ItemGroup>
 		<Facades Include="Microsoft.Build.Tasks">
 			<Version>v4.0</Version>
 			<Sources>AssemblyInfo.Tasks.%(Version).cs;TypeForwarders.Tasks.cs;Tasks.Hack.cs</Sources>
 			<OutputAssembly>%(Identity).%(Version).dll</OutputAssembly>
-			<References>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll;$(OutputPath)\Microsoft.Build.Utilities.Core.dll</References>
+			<References>$(OutDir)\Roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll;$(OutDir)\Microsoft.Build.Utilities.Core.dll</References>
 		</Facades>
 
 		<Facades Include="Microsoft.Build.Tasks">
 			<Version>v12.0</Version>
 			<Sources>AssemblyInfo.Tasks.%(Version).cs;TypeForwarders.Tasks.cs;Tasks.Hack.cs</Sources>
 			<OutputAssembly>%(Identity).%(Version).dll</OutputAssembly>
-			<References>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll;$(OutputPath)\Microsoft.Build.Utilities.Core.dll</References>
+			<References>$(OutDir)\Roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll;$(OutDir)\Microsoft.Build.Utilities.Core.dll</References>
 		</Facades>
 
 		<Facades Include="Microsoft.Build.Utilities">
@@ -33,8 +31,9 @@
 
 	<Target Name="Build"
 		Inputs="%(Facades.Sources)"
-		Outputs="$(OutputPath)\%(Facades.OutputAssembly)"
-		Condition="'$(MonoBuild)' == 'true'">
+		Outputs="$(OutDir)\%(Facades.OutputAssembly)">
+
+		<Error Condition="'$(OutDir)' == ''" Text="OutDir property must be set to directory with msbuild output assemblies." />
 
 		<!-- Disabled CS1701, as Microsoft.Build.Tasks.CodeAnalysis.dll from roslyn
 			 is built against Microsoft.Build.* 14.0 assemblies, are we are referencing
@@ -43,19 +42,14 @@
 			DelaySign="true"
 			KeyFile="msfinal.pub"
 			DisabledWarnings="1701"
-			OutputAssembly="$(OutputPath)\%(Facades.OutputAssembly)"
-			References="$(OutputPath)\%(Facades.Identity).Core.dll;%(References)"
+			OutputAssembly="$(OutDir)\%(Facades.OutputAssembly)"
+			References="$(OutDir)\%(Facades.Identity).Core.dll;%(References)"
 			Sources="%(Facades.Sources)"
 			TargetType="Library"
 			ToolExe="$(CscToolExe)"
 			ToolPath="$(CscToolPath)"
 			/>
 
-		<Exec Command="sn -R $(OutputPath)\%(Facades.OutputAssembly) mono.snk" />
-	</Target>
-
-	<Target Name="Test" DependsOnTargets="Build">
-		<MSBuild Projects="tests/build.csproj" Targets="Test" Properties="AsmVersion=v4.0" />
-        <MSBuild Projects="tests/build.csproj" Targets="Test" Properties="AsmVersion=v12.0" />
+		<Exec Command="sn -R $(OutDir)\%(Facades.OutputAssembly) mono.snk" />
 	</Target>
 </Project>
