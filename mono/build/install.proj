@@ -12,6 +12,12 @@
             <XBuildDir>$(MonoInstallPrefix)\lib\mono\xbuild</XBuildDir>
 
             <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\$(Configuration)\bin\MSBuild.Bootstrap\net461\</MSBuildBinSrcDir>
+
+            <AllInstalledFiles_FileCanonical>$(MSBuildThisFileDirectory)\all_files.canon.txt</AllInstalledFiles_FileCanonical>
+            <AllInstalledFiles_File>$(MSBuildThisFileDirectory)\all_files.new.txt</AllInstalledFiles_File>
+
+            <RemainingFiles_FileCanonical>$(MSBuildThisFileDirectory)\remaining_files.canon.txt</RemainingFiles_FileCanonical>
+            <RemainingFiles_File>$(MSBuildThisFileDirectory)\remaining_files.new.txt</RemainingFiles_File>
         </PropertyGroup>
 
         <Error Text="Can't find built output in $(MSBuildBinSrcDir)." Condition="!Exists('$(MSBuildBinSrcDir)')" />
@@ -45,6 +51,7 @@
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\Microsoft.Common.props;$(MSBuildBinSrcDir)\Microsoft.VisualStudioVersion.v*props" />
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\MSBuild.Bootstrap.*" />
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\System.Runtime.InteropServices.RuntimeInformation.dll" />
+            <MSBuildFiles Remove="$(MSBuildBinSrcDir)\System.Reflection.Metadata.dll" />
 
             <ResourceAssemblies Include="$(MSBuildBinSrcDir)\*\*.resources.dll" />
 
@@ -63,29 +70,62 @@
             <ExtensionsPathToolsVersionFiles Include="$(MSBuildBinSrcDir)\Microsoft.VisualStudioVersion.v*props" />
 
             <OldToolsVersionFiles Include="$(XBuildDir)\14.0\Imports\**\*" />
+
+            <RemainingMSBuildBinFiles Include="$(MSBuildBinSrcDir)\**\*" />
+
+            <RemainingMSBuildBinFiles Remove="@(MSBuildFiles)" />
+            <RemainingMSBuildBinFiles Remove="@(SdksFiles)" />
+            <RemainingMSBuildBinFiles Remove="@(SdkResolverFiles)" />
+            <RemainingMSBuildBinFiles Remove="@(ResourceAssemblies)" />
+            <RemainingMSBuildBinFiles Remove="@(ExtensionsPathFiles)" />
+            <RemainingMSBuildBinFiles Remove="@(ExtensionsPathToolsVersionFiles)" />
+            <RemainingMSBuildBinFiles Remove="$(MSBuildBinSrcDir)\Roslyn\*" />
         </ItemGroup>
 
-        <Copy SourceFiles="@(MSBuildFiles)" DestinationFolder="$(MSBuildInstallBinDir)" />
+        <ItemGroup>
+            <RemainingMSBuildBinFiles Remove="@(MSBuildBinDirFiles)" />
+
+            <RemainingMSBuildBinFiles_Relative Include="@(RemainingMSBuildBinFiles -> '$([MSBuild]::MakeRelative('$(MSBuildBinSrcDir)', %(RemainingMSBuildBinFiles.Identity)))' )" />
+        </ItemGroup>
+
+        <Copy SourceFiles="@(MSBuildFiles)" DestinationFolder="$(MSBuildInstallBinDir)">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
 
         <Copy SourceFiles="@(ResourceAssemblies)"
-            DestinationFiles="@(ResourceAssemblies -> '$(MSBuildInstallBinDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(ResourceAssemblies -> '$(MSBuildInstallBinDir)\%(RecursiveDir)%(Filename)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
 
         <Copy SourceFiles="@(ExtensionsPathFiles)"
-            DestinationFiles="@(ExtensionsPathFiles -> '$(XBuildDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(ExtensionsPathFiles -> '$(XBuildDir)\%(RecursiveDir)%(Filename)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
 
         <Copy SourceFiles="@(ExtensionsPathToolsVersionFiles)"
-            DestinationFiles="@(ExtensionsPathToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(ExtensionsPathToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
+
         <Copy SourceFiles="@(NuGetToolsVersionFiles)"
-            DestinationFiles="@(NuGetToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(NuGetToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
 
         <Copy SourceFiles="@(SdksFiles)"
-            DestinationFiles="@(SdksFiles -> '$(MSBuildInstallBinDir)\Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(SdksFiles -> '$(MSBuildInstallBinDir)\Sdks\%(RecursiveDir)%(Filename)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
 
         <Copy SourceFiles="@(SdkResolverFiles)"
-            DestinationFiles="@(SdkResolverFiles -> '$(MSBuildInstallBinDir)\SdkResolvers\%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(SdkResolverFiles -> '$(MSBuildInstallBinDir)\SdkResolvers\%(RecursiveDir)%(Filename)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
 
         <Copy SourceFiles="@(OldToolsVersionFiles)"
-            DestinationFiles="@(OldToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\Imports\%(RecursiveDir)\%(Filename)%(Extension)')" />
+            DestinationFiles="@(OldToolsVersionFiles -> '$(XBuildDir)\$(TargetMSBuildToolsVersion)\Imports\%(RecursiveDir)\%(Filename)%(Extension)')">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
 
         <!-- we want to use the same version of System.Reflection.Metadata.dll in msbuild and roslyn -->
         <Delete Files="$(MSBuildInstallBinDir)\System.Reflection.Metadata.dll" />
@@ -94,7 +134,27 @@
             Command="ln -s Roslyn/System.Reflection.Metadata.dll System.Reflection.Metadata.dll" />
 
         <Exec Command="$(RepoRoot)\mono\build\gen_msbuild_wrapper.sh $(MonoInstallPrefix) $(MonoInstallPrefix)\bin" />
+        <ItemGroup>
+            <CopiedFiles Include="$(MonoInstallPrefix)\bin\msbuild" />
+        </ItemGroup>
 
-        <Copy SourceFiles="$(RepoRoot)\mono\msbuild.1" DestinationFolder="$(MonoInstallPrefix)\share\man\man1" />
+        <Copy SourceFiles="$(RepoRoot)\mono\msbuild.1" DestinationFolder="$(MonoInstallPrefix)\share\man\man1">
+            <Output TaskParameter="CopiedFiles" ItemName="CopiedFiles" />
+        </Copy>
+
+        <ItemGroup>
+            <CopiedFiles_Relative Include="@(CopiedFiles -> '$([MSBuild]::MakeRelative('$(MonoInstallPrefix)', %(CopiedFiles.Identity)))' )" />
+        </ItemGroup>
+
+        <WriteLinesToFile Lines="@(CopiedFiles_Relative)" File="$(AllInstalledFiles_File)" Overwrite="true" />
+        <WriteLinesToFile Lines="@(RemainingMSBuildBinFiles_Relative)" File="$(RemainingFiles_File)" Overwrite="true" />
+
+        <Exec
+            Condition="Exists('$(AllInstalledFiles_FileCanonical)')"
+            Command="diff -u $(AllInstalledFiles_FileCanonical) $(AllInstalledFiles_File)"/>
+
+        <Exec
+            Condition="Exists('$(RemainingFiles_FileCanonical)')"
+            Command="diff -u $(RemainingFiles_FileCanonical) $(RemainingFiles_File)" />
     </Target>
 </Project>
