@@ -12,3 +12,13 @@ mono/build/install.proj:
                 - files that were *not* copied from the bin dir in artifacts
 
     If files get added/removed, then handle them and update these lists.
+
+mono/create_bootstrap.sh:
+
+    Create a bootstrap msbuild zip, for use with the initial build.
+
+    This uses the msbuild in $PATH to build this bootstrap. This is mainly
+    to ensure that we get the corresponding Roslyn binaries too.
+
+    To create a bootstrap from the current build, install that, add to $PATH
+    and run the script.
