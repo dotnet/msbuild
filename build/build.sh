@@ -42,6 +42,7 @@ function Help() {
   echo "  -ci                     Set when running on CI server"
   echo "  -nolog                  Disable logging"
   echo "  -prepareMachine         Prepare machine for CI run"
+  echo "  -useSystemMSBuild       [mono] Use system msbuild instead of downloading a copy for use with mono"
   echo ""
   echo "Command line arguments not listed above are passed through to MSBuild."
 }
@@ -101,6 +102,10 @@ while [[ $# > 0 ]]; do
       bootstrapOnly=true
       shift 1
       ;;
+    -usesystemmsbuild)
+      useSystemMSBuild=true
+      shift 1
+      ;;
     -verbosity)
       verbosity=$2
       shift 2
@@ -144,6 +149,20 @@ function GetLogCmd {
   fi
 
   echo $logCmd
+}
+
+function downloadMSBuildForMono {
+  if [[ -z $useSystemMSBuild && ! -e "$MONO_MSBUILD_DIR/MSBuild.dll" ]]
+  then
+    echo "** Downloading MSBUILD from $MSBUILD_DOWNLOAD_URL"
+    curl -sL -o "$MSBUILD_ZIP" "$MSBUILD_DOWNLOAD_URL"
+
+    unzip -q "$MSBUILD_ZIP" -d "$ArtifactsDir"
+    # rename just to make it obvious when reading logs!
+    mv $ArtifactsDir/msbuild $ArtifactsDir/mono-msbuild
+    chmod +x $ArtifactsDir/mono-msbuild/MSBuild.dll
+    rm "$MSBUILD_ZIP"
+  fi
 }
 
 function CallMSBuild {
@@ -266,7 +285,14 @@ function Build {
     msbuildHost=$(QQ $DOTNET_HOST_PATH)
   elif [ "$hostType" = "mono" ]
   then
-   msbuildHost=""
+    if [ -z $useSystemMSBuild ]; then
+      downloadMSBuildForMono
+      msbuildHost=""
+      msbuildToUse="$MONO_MSBUILD_DIR/msbuild"
+    else
+      msbuildHost=""
+      msbuildToUse="msbuild"
+    fi
   else
     ErrorHostType
   fi
@@ -351,7 +377,9 @@ ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
 LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
 
-msbuildToUse="msbuild"
+MONO_MSBUILD_DIR="$ArtifactsDir/mono-msbuild"
+MSBUILD_DOWNLOAD_URL="https://github.com/mono/msbuild/releases/download/v0.05/mono_msbuild_port2-394a6b5e.zip"
+MSBUILD_ZIP="$ArtifactsDir/msbuild.zip"
 
 log=false
 if ! $nolog
