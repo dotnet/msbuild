@@ -18,6 +18,8 @@
 
             <RemainingFiles_FileCanonical>$(MSBuildThisFileDirectory)\remaining_files.canon.txt</RemainingFiles_FileCanonical>
             <RemainingFiles_File>$(MSBuildThisFileDirectory)\remaining_files.new.txt</RemainingFiles_File>
+
+            <IgnoreDiffFailure Condition="'$(IgnoreDiffFailure)' == ''">true</IgnoreDiffFailure>
         </PropertyGroup>
 
         <Error Text="Can't find built output in $(MSBuildBinSrcDir)." Condition="!Exists('$(MSBuildBinSrcDir)')" />
@@ -151,10 +153,12 @@
 
         <Exec
             Condition="Exists('$(AllInstalledFiles_FileCanonical)')"
+            IgnoreExitCode="$(IgnoreDiffFailure)"
             Command="diff -u $(AllInstalledFiles_FileCanonical) $(AllInstalledFiles_File)"/>
 
         <Exec
             Condition="Exists('$(RemainingFiles_FileCanonical)')"
+            IgnoreExitCode="$(IgnoreDiffFailure)"
             Command="diff -u $(RemainingFiles_FileCanonical) $(RemainingFiles_File)" />
     </Target>
 </Project>
