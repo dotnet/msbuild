@@ -5,7 +5,6 @@ lib/mono/msbuild/15.0/bin/Microsoft.Build.Framework.dll
 lib/mono/msbuild/15.0/bin/Microsoft.Build.Framework.pdb
 lib/mono/msbuild/15.0/bin/Microsoft.Build.Framework.xml
 lib/mono/msbuild/15.0/bin/Microsoft.Build.pdb
-lib/mono/msbuild/15.0/bin/Microsoft.Build.Tasks.CodeAnalysis.dll
 lib/mono/msbuild/15.0/bin/Microsoft.Build.Tasks.Core.dll
 lib/mono/msbuild/15.0/bin/Microsoft.Build.Tasks.Core.pdb
 lib/mono/msbuild/15.0/bin/Microsoft.Build.Tasks.Core.xml
@@ -242,7 +241,6 @@ lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net462/lib/System.Runti
 lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net47/lib/System.Runtime.InteropServices.RuntimeInformation.dll
 lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net47/lib/System.Security.Cryptography.Algorithms.dll
 lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net47/lib/System.ValueTuple.dll
-lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net471/lib/netfx.force.conflicts.dll
 lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net471/lib/System.Data.Common.dll
 lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net471/lib/System.Diagnostics.StackTrace.dll
 lib/mono/xbuild/Microsoft/Microsoft.NET.Build.Extensions/net471/lib/System.Diagnostics.Tracing.dll
@@ -292,9 +290,6 @@ lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/Co
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/DotNetCLIToolTargets/Microsoft.NET.Sdk.DotNetCLITool.targets
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/Microsoft.NET.Sdk.Publish.props
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/Microsoft.NET.Sdk.Publish.targets
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/PublishProfiles/FileSystem.pubxml
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/PublishProfiles/MSDeploy.pubxml
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/PublishProfiles/MSDeployPackage.pubxml
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/PublishTargets/Microsoft.NET.Sdk.Publish.Docker.targets
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/PublishTargets/Microsoft.NET.Sdk.Publish.FileSystem.targets
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/PublishTargets/Microsoft.NET.Sdk.Publish.Kudu.targets
@@ -303,11 +298,7 @@ lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/Pu
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/build/netstandard1.0/TransformTargets/Microsoft.NET.Sdk.Publish.TransformFiles.targets
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/Sdk.props
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/Sdk.targets
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/tools/net46/en-US/Microsoft.Web.Delegation.resources.dll
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/tools/net46/en-US/Microsoft.Web.Deployment.resources.dll
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.NET.Sdk.Publish.Tasks.dll
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.Web.Delegation.dll
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.Web.Deployment.dll
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Publish/tools/net46/Newtonsoft.Json.dll
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Web.ProjectSystem/build/netstandard1.0/Microsoft.NET.Sdk.Web.ProjectSystem.props
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Web.ProjectSystem/build/netstandard1.0/Microsoft.NET.Sdk.Web.ProjectSystem.targets
@@ -315,7 +306,6 @@ lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Web.ProjectSystem/Sdk/Sdk.props
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Web.ProjectSystem/Sdk/Sdk.targets
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Web/Sdk/Sdk.props
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk.Web/Sdk/Sdk.targets
-lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/build/GenerateDeps/GenerateDeps.proj
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/build/Microsoft.NET.ComposeStore.targets
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/build/Microsoft.NET.ConflictResolution.targets
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/build/Microsoft.NET.CrossGen.targets
@@ -374,7 +364,6 @@ lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/tools/net46/ru/Microsoft.NET.Bu
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/tools/net46/tr/Microsoft.NET.Build.Tasks.resources.dll
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/tools/net46/zh-Hans/Microsoft.NET.Build.Tasks.resources.dll
 lib/mono/msbuild/15.0/bin/Sdks/Microsoft.NET.Sdk/tools/net46/zh-Hant/Microsoft.NET.Build.Tasks.resources.dll
-lib/mono/msbuild/15.0/bin/Sdks/NuGet.Build.Tasks.Pack/.signature.p7s
 lib/mono/msbuild/15.0/bin/Sdks/NuGet.Build.Tasks.Pack/build/NuGet.Build.Tasks.Pack.targets
 lib/mono/msbuild/15.0/bin/Sdks/NuGet.Build.Tasks.Pack/buildCrossTargeting/NuGet.Build.Tasks.Pack.targets
 lib/mono/msbuild/15.0/bin/Sdks/NuGet.Build.Tasks.Pack/Desktop/cs/NuGet.Build.Tasks.Pack.resources.dll
