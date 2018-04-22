@@ -22,3 +22,11 @@ mono/create_bootstrap.sh:
 
     To create a bootstrap from the current build, install that, add to $PATH
     and run the script.
+
+Build notes:
+
+- We download a bootstrap msbuild and use that for the initial build. `csc` used here is from the bootstrap msbuild.
+- The subsequent build uses the freshly built msbuild. And `csc` used is whatever was referenced, so same as upstream.
+
+- The installation process does not install any roslyn, instead depending on the mono prefix to have that available. And just
+  sets up symlinks for them.
