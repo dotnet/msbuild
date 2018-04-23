@@ -1,9 +1,0 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Target Name="GenerateGitBuildInfo" BeforeTargets="BuildAllProjects">
-		<PropertyGroup>
-            <BuildInfoFileName>$(MSBuildThisFileDirectory)\src\MSBuild\GitBuildInfo.cs</BuildInfoFileName>
-            <!-- BuildInfoFileName>$(DeploymentDir)\version.txt</BuildInfoFileName -->
-		</PropertyGroup>
-		<Exec Command="$(RepoRoot)\gen_build_info.sh $(BuildInfoFileName)"/>
-	</Target>
-</Project>

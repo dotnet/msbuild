@@ -1,22 +1,22 @@
-<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="..\..\dir.props" />
+<Project>
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <AssemblyName>Mono.Build.Tasks</AssemblyName>
         <DebugType>full</DebugType>
+        <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     </PropertyGroup>
 
    <ItemGroup>
         <Compile Include="FilterDeniedAssemblies.cs" />
 
-        <Reference Include="Microsoft.Build.Framework" />
-        <Reference Include="Microsoft.Build.Utilities.v4.0" />
+        <Reference Include="Microsoft.Build.Framework" HintPath="$(OutDir)\Microsoft.Build.Framework.dll" />
+        <Reference Include="Microsoft.Build.Utilities.Core" HintPath="$(OutDir)\Microsoft.Build.Utilities.Core.dll" />
 
         <Reference Include="System.Reflection.Metadata">
-            <HintPath>$(CompilerToolsDir)\System.Reflection.Metadata.dll</HintPath>
+            <HintPath>$(OutDir)\Roslyn\System.Reflection.Metadata.dll</HintPath>
         </Reference>
         <Reference Include="System.Collections.Immutable">
-            <HintPath>$(CompilerToolsDir)\System.Collections.Immutable.dll</HintPath>
+            <HintPath>$(OutDir)\Roslyn\System.Collections.Immutable.dll</HintPath>
         </Reference>
    </ItemGroup>
 

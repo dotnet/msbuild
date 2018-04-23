@@ -1,0 +1,7 @@
+Directory.Build.props
+Directory.Build.rsp
+Directory.Build.targets
+MSBuild.Bootstrap.dll
+MSBuild.Bootstrap.pdb
+System.Reflection.Metadata.dll
+System.Runtime.InteropServices.RuntimeInformation.dll

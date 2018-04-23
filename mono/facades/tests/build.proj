@@ -1,0 +1,35 @@
+<Project>
+	<PropertyGroup>
+		<AssemblyName>TestTask.$(AsmVersion)</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="TestTask.cs" />
+
+		<Reference Include="$(OutDir)\Microsoft.Build.Tasks.$(AsmVersion).dll" />
+		<Reference Include="$(OutDir)\Microsoft.Build.Tasks.Core.dll" />
+		<Reference Include="$(OutDir)\Roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll" />
+
+		<Reference Include="$(OutDir)\Microsoft.Build.Utilities.$(AsmVersion).dll" />
+		<Reference Include="$(OutDir)\Microsoft.Build.Utilities.Core.dll" />
+	</ItemGroup>
+
+	<Target Name="Build" Inputs="@(Compile)" Outputs="$(OutDir)\$(AssemblyName).dll">
+		<Error Condition="'$(AsmVersion)' == ''" Text="AsmVersion property must be set to 'v4.0' or 'v12.0'" />
+		<Error Condition="'$(OutDir)' == ''" Text="OutDir property must be set to directory with msbuild output assemblies." />
+
+		<!-- Disabled CS1701, as Microsoft.Build.Tasks.CodeAnalysis.dll from roslyn
+			 is built against Microsoft.Build.* 14.0 assemblies, are we are referencing
+			 15.1.x -->
+		<Csc
+			DisabledWarnings="1701"
+			OutputAssembly="$(OutDir)\$(AssemblyName).dll"
+			References="@(Reference)"
+			Sources="@(Compile)"
+			TargetType="Library"
+			ToolExe="$(CscToolExe)"
+			ToolPath="$(CscToolPath)"
+			/>
+	</Target>
+
+</Project>

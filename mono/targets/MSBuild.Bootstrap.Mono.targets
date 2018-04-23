@@ -1,0 +1,47 @@
+<Project>
+	<!-- Building it like this till these projects get merged upstream and we can
+	     have the facades+mono-tasks projects in the sln. -->
+
+	<Target Name="BuildFacades" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+		<MSBuild
+			Projects="$(RepoRoot)\mono\facades\build.proj"
+			Properties="OutDir=$(OutDir);CscToolExe=$(CscToolExe);CscToolPath=$(CscToolPath)" />
+	</Target>
+
+	<Target Name="TestFacades" AfterTargets="Test" Condition="'$(TargetFramework)' != ''">
+		<ItemGroup>
+			<AsmVersions Include="v4.0" />
+			<AsmVersions Include="v12.0" />
+		</ItemGroup>
+
+		<MSBuild
+			Projects="$(RepoRoot)\mono\facades\tests\build.proj"
+			Targets="Build"
+			Properties="AsmVersion=%(AsmVersions.Identity);OutDir=$(OutDir);CscToolExe=$(CscToolExe);CscToolPath=$(CscToolPath)" />
+
+		<Copy SourceFiles="$(OutDir)\Roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll" DestinationFolder="$(OutDir)" />
+
+		<!--
+			We build the facade assemblies (Microsoft.Build.{Tasks,Utilities}.v{4,12}) which type-forward to the ones from msbuild.
+			We want to use the `TestTask*` assembly (with the test.proj), which references the v4/v12 assemblies but we need to run
+			these against the *facade* assemblies and NOT the xbuild ones from the GAC or elsewhere.
+
+			If we try to use the TestTask* assembly (in the $(OutDir)), then the runtime will try to resolve the referenced
+			Microsoft.Build.{Tasks,Utilities}.v{4,12} assemblies and it will try to find it next to the msbuild.dll being used[1] and
+			it won't find it there. So, it will fall back to the GAC and load the xbuild assemblies, which are NOT the ones we want!
+
+			Instead, we ensure that the TestTask*.dll is in the same directory as msbuild.dll that we just produced and has the facade assemblies too.
+			And then just invoke that msbuild.dll, thus ensuring that the test always runs with the correct assemblies.
+
+			1. this will be the system msbuild for `-bootstrapOnly` . And the `bootstrap` folder for the second build.
+		-->
+		<Exec Command="mono $(OutDir)\MSBuild.dll $(RepoRoot)\mono\facades\tests\test.proj /v:minimal /t:Test /p:AsmVersion=%(AsmVersions.Identity) /p:OutDir=$(OutDir) /p:CscToolExe=$(CscToolExe) /p:CscToolPath=$(CscToolPath)" />
+	</Target>
+
+	<!-- FIXME: Support Configurations in task build -->
+	<Target Name="BuildMonoTasks" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+		<MSBuild
+			Projects="$(RepoRoot)\mono\tasks\build.csproj"
+			Properties="OutputPath=$(OutputPath);OutDir=$(OutDir);TargetFramework=$(TargetFramework);MonoBuild=true" />
+	</Target>
+</Project>

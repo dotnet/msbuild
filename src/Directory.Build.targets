@@ -148,4 +148,6 @@
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 
+  <Import Project="$(RepoRoot)\mono\targets\$(MSBuildProjectName).Mono.targets" Condition="Exists('$(RepoRoot)\mono\targets\$(MSBuildProjectName).Mono.targets') and '$(MonoBuild)' == 'true'" />
+
 </Project>

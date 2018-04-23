@@ -2,11 +2,9 @@
 	<!-- Test for redirecting Assembly references to Microsoft.Build.{Tasks,Utilities}.v{12.0,4.0}.dll
 		 to the corresponding msbuild assemblies -->
 
-	<Import Project="..\..\..\dir.props" />
-
-	<UsingTask AssemblyFile="$(OutputPath)\TestTask.$(AsmVersion).dll" TaskName="TestExec" />
-	<UsingTask AssemblyFile="$(OutputPath)\TestTask.$(AsmVersion).dll" TaskName="TestCsc" />
-	<UsingTask AssemblyFile="$(OutputPath)\TestTask.$(AsmVersion).dll" TaskName="TestTask" />
+	<UsingTask AssemblyFile="$(OutDir)\TestTask.$(AsmVersion).dll" TaskName="TestExec" />
+	<UsingTask AssemblyFile="$(OutDir)\TestTask.$(AsmVersion).dll" TaskName="TestCsc" />
+	<UsingTask AssemblyFile="$(OutDir)\TestTask.$(AsmVersion).dll" TaskName="TestTask" />
 
 	<Target Name="Test" DependsOnTargets="TestTasks;TestUtilities" />
 
@@ -33,6 +31,8 @@
 		<TestCsc
 			AdditionalFiles="foo.cs"
 			YieldDuringToolExecution="false"
+			AsmVersion="$(AsmVersion)"
+			MSBuildBinPath="$(MSBuildBinPath)"
 			/>
 	</Target>
 

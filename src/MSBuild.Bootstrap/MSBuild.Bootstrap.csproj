@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+
+    <!-- For mono builds we only use TF=net461, so using this project with TF=netcoreapp2.1
+         will cause build failures because the projects are compatible. So, instead we use
+         TF=net461 here and let this set up the `bootstrap/` folder. And to avoid the
+         `MSBuild` project doing the same, we will disable the `bootstrap` bits from there,
+         for mono. -->
+    <TargetFramework Condition="'$(MonoBuild)' == 'true'">net461</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +19,7 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(MonoBuild)' != 'true'">
     <!-- Include SDKs from the Stage 0 .NET Core SDK -->
     <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
 
@@ -21,7 +28,21 @@
     <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
+    <!-- Include the bundled SDKs -->
+    <Content Include="$(RepoRoot)sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- Use the NuGet.targets that we bundle, since that is what we will install so we should be testing against that -->
+    <Content Include="$(RepoRoot)nuget-support\tasks-targets\*" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- Include DependencyModel libraries. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(MonoBuild)' != 'true'">
+    <!-- Include SDKs from the Stage 0 .NET Core SDK -->
+    <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
+
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
     <!-- Include NuGet.targets from NuGet.Build.Tasks package.  Ideally, this should probably be in contentFiles in the package so we don't have to do this. -->
@@ -32,13 +53,12 @@
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
-  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build">
+  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true'">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" />
   </Target>
-  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish">
+  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(MonoBuild)' != 'true'">
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
   </Target>
 
   <Import Project="$(RepoRoot)build\BootStrapMSBuild.targets" />
-
 </Project>
