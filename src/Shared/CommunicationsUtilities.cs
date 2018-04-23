@@ -355,34 +355,51 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Extension method to read a series of bytes from a stream
         /// </summary>
-        internal static long ReadLongForHandshake(this PipeStream stream)
+        internal static long ReadLongForHandshake(this PipeStream stream
+#if NETCOREAPP2_1
+            , int handshakeReadTimeout
+#endif
+            )
         {
-            return stream.ReadLongForHandshake((byte[])null, 0);
+            return stream.ReadLongForHandshake((byte[])null, 0
+#if NETCOREAPP2_1
+                , handshakeReadTimeout
+#endif
+                );
         }
 
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static long ReadLongForHandshake(this PipeStream stream, byte[] leadingBytesToReject, byte rejectionByteToReturn)
+        internal static long ReadLongForHandshake(this PipeStream stream, byte[] leadingBytesToReject,
+            byte rejectionByteToReturn
+#if NETCOREAPP2_1
+            , int timeout
+#endif
+            )
         {
             byte[] bytes = new byte[8];
 
 #if NETCOREAPP2_1
             if (!NativeMethodsShared.IsWindows)
             {
+                // Enforce a minimum timeout because the Windows code can pass
+                // a timeout of 0 for the connection, but that doesn't work for
+                // the actual timeout here.
+                timeout = Math.Max(timeout, 50);
+
                 // A legacy MSBuild.exe won't try to connect to MSBuild running
                 // in a dotnet host process, so we can read the bytes simply.
                 var readTask = stream.ReadAsync(bytes, 0, bytes.Length);
-                const int HandshakeReadTimeout = 30;
 
                 // Manual timeout here because the timeout passed to Connect() just before
                 // calling this method does not apply on UNIX domain socket-based
                 // implementations of PipeStream.
                 // https://github.com/dotnet/corefx/issues/28791
-                if (!readTask.Wait(HandshakeReadTimeout))
+                if (!readTask.Wait(timeout))
                 {
-                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", HandshakeReadTimeout));
+                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", timeout));
                 }
 
                 readTask.GetAwaiter().GetResult();
