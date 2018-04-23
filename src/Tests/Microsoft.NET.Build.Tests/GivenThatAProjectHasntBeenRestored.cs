@@ -36,14 +36,14 @@ namespace Microsoft.NET.Build.Tests
         {
             var buildCommand = new BuildCommand(Log, projectDirectory);
 
-            var expectedError = Strings.AssetsFileNotSet;
+            var assetsFile = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
             buildCommand
                 //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
                 .Execute("/clp:summary")
                 .Should()
                 .Fail()
-                .And.HaveStdOutContaining(expectedError)
+                .And.HaveStdOutContaining(assetsFile)
                 //  We should only get one error
                 .And.HaveStdOutContaining("1 Error(s)");
         }
