@@ -73,6 +73,22 @@ namespace Microsoft.NET.Perf.Tests
 
             newCommand.Execute("new", "mvc", "--no-restore").Should().Pass();
 
+            var nugetConfig = Path.Combine(testDir.Path, "NuGet.Config");
+            // We need these feeds because we are using a CLI that has by default versions of ASP.NET not available in
+            // Nuget.
+            File.WriteAllText(
+                nugetConfig,
+                $@"<?xml version=""1.0"" encoding=""utf-8""?>
+                <configuration>
+                  <packageSources>
+                    <add key=""BlobFeed"" value=""https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;"" />
+                    <add key=""aspnet"" value=""https://dotnetcli.azureedge.net/dotnet/aspnetcore/store/2.0.7-231/packages/index.json"" />
+                    <add key=""aspnet-master"" value=""https://dotnet.myget.org/F/aspnetcore-master/api/v3/index.json;"" />
+                    <add key=""aspnet-dev"" value=""https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json"" />
+                  </packageSources>
+                </configuration>
+                ");
+
             TestProject(testDir.Path, "ASP.NET Core MVC app", operation);
         }
 
