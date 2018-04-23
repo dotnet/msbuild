@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                     Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.SourceFeedOptionName)),
                 Create.Option(
-                    "-f|--framework",
+                    "--framework",
                     LocalizableStrings.FrameworkOptionDescription,
                     Accept.ExactlyOneArgument()),
                 CommonOptions.HelpOption(),
