@@ -113,10 +113,14 @@
       <_NETCoreAppPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</_NETCoreAppPackageVersion>
       <_NETStandardLibraryPackageVersion>@(_NETStandardLibraryPackageVersions->Distinct())</_NETStandardLibraryPackageVersion>
       <_NETCorePlatformsPackageVersion>@(_NETCorePlatformsPackageVersions->Distinct())</_NETCorePlatformsPackageVersion>
+      <_AspNetCoreAllPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</_AspNetCoreAllPackageVersion>
+      <_AspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</_AspNetCoreAppPackageVersion>
 
       <!-- Use only major and minor in target framework version -->
       <_NETCoreAppTargetFrameworkVersion>$(_NETCoreAppPackageVersion.Split('.')[0]).$(_NETCoreAppPackageVersion.Split('.')[1])</_NETCoreAppTargetFrameworkVersion>
       <_NETStandardTargetFrameworkVersion>$(_NETStandardLibraryPackageVersion.Split('.')[0]).$(_NETStandardLibraryPackageVersion.Split('.')[1])</_NETStandardTargetFrameworkVersion>
+      <_AspNetCoreAllTargetFrameworkVersion>$(_NETCoreAppTargetFrameworkVersion)</_AspNetCoreAllTargetFrameworkVersion>
+      <_AspNetCoreAppTargetFrameworkVersion>$(_AspNetCoreAllTargetFrameworkVersion)</_AspNetCoreAppTargetFrameworkVersion>
 
       <_NETCoreSdkIsPreview Condition=" '$(DropSuffix)' == '' ">true</_NETCoreSdkIsPreview>
 
@@ -140,9 +144,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <BundledNETStandardTargetFrameworkVersion>$(_NETStandardTargetFrameworkVersion)</BundledNETStandardTargetFrameworkVersion>
     <BundledNETStandardPackageVersion>$(_NETStandardLibraryPackageVersion)</BundledNETStandardPackageVersion>
     <BundledNETCorePlatformsPackageVersion>$(_NETCorePlatformsPackageVersion)</BundledNETCorePlatformsPackageVersion>
+    <BundledAspNetCoreAllTargetFrameworkVersion>$(_AspNetCoreAllTargetFrameworkVersion)</BundledAspNetCoreAllTargetFrameworkVersion>
+    <BundledAspNetCoreAllPackageVersion>$(_AspNetCoreAllPackageVersion)</BundledAspNetCoreAllPackageVersion>
+    <BundledAspNetCoreAppTargetFrameworkVersion>$(_AspNetCoreAppTargetFrameworkVersion)</BundledAspNetCoreAppTargetFrameworkVersion>
+    <BundledAspNetCoreAppPackageVersion>$(_AspNetCoreAppPackageVersion)</BundledAspNetCoreAppPackageVersion>
     <NETCoreSdkVersion>$(SdkVersion)</NETCoreSdkVersion>
     <_NETCoreSdkIsPreview>$(_NETCoreSdkIsPreview)</_NETCoreSdkIsPreview>
-    
+
     <!-- Latest patch versions for each minor version of .NET Core -->
     <LatestPatchVersionForNetCore1_0 Condition="'$(LatestPatchVersionForNetCore1_0)' == ''">1.0.11</LatestPatchVersionForNetCore1_0>
     <LatestPatchVersionForNetCore1_1 Condition="'$(LatestPatchVersionForNetCore1_1)' == ''">1.1.8</LatestPatchVersionForNetCore1_1>
