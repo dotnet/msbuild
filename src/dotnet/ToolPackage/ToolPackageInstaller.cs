@@ -54,6 +54,7 @@ namespace Microsoft.DotNet.ToolPackage
                             versionRange: versionRange,
                             targetFramework: targetFramework ?? BundledTargetFramework.GetTargetFrameworkMoniker(),
                             restoreDirectory: stageDirectory,
+                            assetJsonOutputDirectory: stageDirectory,
                             rootConfigDirectory: rootConfigDirectory,
                             additionalFeeds: additionalFeeds);
 
@@ -61,7 +62,6 @@ namespace Microsoft.DotNet.ToolPackage
                         {
                             _projectRestorer.Restore(
                                 tempProject,
-                                stageDirectory,
                                 nugetConfig,
                                 verbosity: verbosity);
                         }
@@ -116,6 +116,7 @@ namespace Microsoft.DotNet.ToolPackage
             VersionRange versionRange,
             string targetFramework,
             DirectoryPath restoreDirectory,
+            DirectoryPath assetJsonOutputDirectory,
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
@@ -132,7 +133,11 @@ namespace Microsoft.DotNet.ToolPackage
 
             var tempProjectContent = new XDocument(
                 new XElement("Project",
-                    new XAttribute("Sdk", "Microsoft.NET.Sdk"),
+                    new XElement("PropertyGroup",
+                        new XElement("MsBuildProjectExtensionsPath", assetJsonOutputDirectory.Value)), // change the output directory of asset.json
+                    new XElement(("Import"),
+                        new XAttribute("Project", "Sdk.props"),
+                        new XAttribute("Sdk", "Microsoft.NET.Sdk")),
                     new XElement("PropertyGroup",
                         new XElement("TargetFramework", targetFramework),
                         new XElement("RestorePackagesPath", restoreDirectory.Value),
@@ -148,9 +153,10 @@ namespace Microsoft.DotNet.ToolPackage
                         new XElement("PackageReference",
                             new XAttribute("Include", packageId.ToString()),
                             new XAttribute("Version",
-                                versionRange?.ToString("S", new VersionRangeFormatter()) ?? "*") // nuget will restore latest stable for *
-                            ))
-                        ));
+                                versionRange?.ToString("S", new VersionRangeFormatter()) ?? "*"))), // nuget will restore latest stable for *
+                    new XElement(("Import"),
+                        new XAttribute("Project", "Sdk.targets"),
+                        new XAttribute("Sdk", "Microsoft.NET.Sdk"))));
 
             File.WriteAllText(tempProject.Value, tempProjectContent.ToString());
             return tempProject;

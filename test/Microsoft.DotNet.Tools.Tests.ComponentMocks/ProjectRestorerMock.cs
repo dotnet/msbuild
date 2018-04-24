@@ -57,19 +57,19 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         }
 
         public void Restore(FilePath project,
-            DirectoryPath assetJsonOutput,
             FilePath? nugetConfig = null,
             string verbosity = null)
         {
             string packageId;
             VersionRange versionRange;
             string targetFramework;
+            DirectoryPath assetJsonOutput;
             try
             {
-                // The mock installer wrote a mock project file containing id:version:framework
+                // The mock installer wrote a mock project file containing id;version;framework;stageDirectory
                 var contents = _fileSystem.File.ReadAllText(project.Value);
-                var tokens = contents.Split(':');
-                if (tokens.Length != 3)
+                var tokens = contents.Split(';');
+                if (tokens.Length != 4)
                 {
                     throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
                 }
@@ -77,6 +77,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 packageId = tokens[0];
                 versionRange = VersionRange.Parse(tokens[1]);
                 targetFramework = tokens[2];
+                assetJsonOutput = new DirectoryPath(tokens[3]);
             }
             catch (IOException)
             {
