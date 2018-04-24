@@ -658,19 +658,7 @@ namespace Microsoft.Build.BackEnd
                                 packetStream.Position = 1;
                                 packetStream.Write(BitConverter.GetBytes((int)packetStream.Length - 5), 0, 4);
 
-#if FEATURE_MEMORYSTREAM_GETBUFFER
                                 localWritePipe.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
-#else
-                                ArraySegment<byte> packetStreamBuffer;
-                                if (packetStream.TryGetBuffer(out packetStreamBuffer))
-                                {
-                                    localWritePipe.Write(packetStreamBuffer.Array, packetStreamBuffer.Offset, packetStreamBuffer.Count);
-                                }
-                                else
-                                {
-                                    localWritePipe.Write(packetStream.ToArray(), 0, (int)packetStream.Length);
-                                }
-#endif
                             }
                         }
                         catch (Exception e)

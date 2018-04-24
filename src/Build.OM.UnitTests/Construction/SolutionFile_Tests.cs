@@ -425,6 +425,81 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
+        /// Exercises shared projects.
+        /// </summary>
+        [Fact]
+        public void SharedProjects()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27610.1
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{D954291E-2A0B-460D-934E-DC6B0785DB48}') = 'SharedProject1', 'SharedProject1\SharedProject1.shproj', '{14686F51-D0C2-4832-BBAA-6FBAEC676995}'
+                EndProject
+                Project('{D954291E-2A0B-460D-934E-DC6B0785DB48}') = 'SharedProject2', 'SharedProject2\SharedProject2.shproj', '{BAE750E8-4656-4947-B06B-3961E1051DF7}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{3A0EC360-A42A-417F-BDEF-619682CF6119}'
+                EndProject
+                Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ClassLibrary2', 'ClassLibrary2\ClassLibrary2.vbproj', '{6DEF6DE8-FBF0-4240-B469-282DEE87899C}'
+                EndProject
+                Global
+                    GlobalSection(SharedMSBuildProjectFiles) = preSolution
+                        SharedProject1\SharedProject1.projitems*{14686f51-d0c2-4832-bbaa-6fbaec676995}*SharedItemsImports = 13
+                        SharedProject1\SharedProject1.projitems*{3a0ec360-a42a-417f-bdef-619682cf6119}*SharedItemsImports = 4
+                        SharedProject2\SharedProject2.projitems*{6def6de8-fbf0-4240-b469-282dee87899c}*SharedItemsImports = 4
+                        SharedProject2\SharedProject2.projitems*{bae750e8-4656-4947-b06b-3961e1051df7}*SharedItemsImports = 13
+                    EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {3A0EC360-A42A-417F-BDEF-619682CF6119}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {3A0EC360-A42A-417F-BDEF-619682CF6119}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {3A0EC360-A42A-417F-BDEF-619682CF6119}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {3A0EC360-A42A-417F-BDEF-619682CF6119}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {6DEF6DE8-FBF0-4240-B469-282DEE87899C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {6DEF6DE8-FBF0-4240-B469-282DEE87899C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {6DEF6DE8-FBF0-4240-B469-282DEE87899C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6DEF6DE8-FBF0-4240-B469-282DEE87899C}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(ExtensibilityGlobals) = postSolution
+                        SolutionGuid = {1B671EF6-A62A-4497-8351-3EE8679CA86F}
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            Assert.Equal(4, solution.ProjectsInOrder.Count);
+
+            Assert.Equal(@"SharedProject1\SharedProject1.shproj", solution.ProjectsInOrder[0].RelativePath);
+            Assert.Equal("{14686F51-D0C2-4832-BBAA-6FBAEC676995}", solution.ProjectsInOrder[0].ProjectGuid);
+            Assert.Equal(0, solution.ProjectsInOrder[0].Dependencies.Count);
+            Assert.Equal(null, solution.ProjectsInOrder[0].ParentProjectGuid);
+
+            Assert.Equal(@"SharedProject2\SharedProject2.shproj", solution.ProjectsInOrder[1].RelativePath);
+            Assert.Equal("{BAE750E8-4656-4947-B06B-3961E1051DF7}", solution.ProjectsInOrder[1].ProjectGuid);
+            Assert.Equal(0, solution.ProjectsInOrder[1].Dependencies.Count);
+            Assert.Equal(null, solution.ProjectsInOrder[1].ParentProjectGuid);
+
+            Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
+            Assert.Equal("{3A0EC360-A42A-417F-BDEF-619682CF6119}", solution.ProjectsInOrder[2].ProjectGuid);
+            Assert.Equal(0, solution.ProjectsInOrder[2].Dependencies.Count);
+            Assert.Equal(null, solution.ProjectsInOrder[2].ParentProjectGuid);
+
+            Assert.Equal(@"ClassLibrary2\ClassLibrary2.vbproj", solution.ProjectsInOrder[3].RelativePath);
+            Assert.Equal("{6DEF6DE8-FBF0-4240-B469-282DEE87899C}", solution.ProjectsInOrder[3].ProjectGuid);
+            Assert.Equal(0, solution.ProjectsInOrder[3].Dependencies.Count);
+            Assert.Equal(null, solution.ProjectsInOrder[3].ParentProjectGuid);
+        }
+
+        /// <summary>
         /// Tests situation where there's a nonexistent project listed in the solution folders.  We should 
         /// error with a useful message. 
         /// </summary>

@@ -15,9 +15,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// This structure is used to return the result of the build and the target outputs.
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "Would require a public API change -- currently we're trying to keep our surface area static.")]
     public struct BuildEngineResult
     {

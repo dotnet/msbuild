@@ -52,13 +52,18 @@ namespace Microsoft.Build.UnitTests
                 foreach (var file in new DirectoryInfo(ProjectFilePath).GetFiles())
                 {
                     File.Copy(file.FullName, Path.Combine(folder, file.Name));
+                    _outputHelper.WriteLine($"Copied {file.FullName} to {Path.Combine(folder, file.Name)}");
                 }
 
                 File.Exists(projFile).ShouldBeTrue($"Project file {projFile} does not exist");
 
+                _outputHelper.WriteLine(File.ReadAllText(projFile));
+
+                _outputHelper.WriteLine($"Building project {projFile}");
+
                 var executionOutput = useDesktopMSBuild
                     ? RunnerUtilities.RunProcessAndGetOutput("msbuild", projFile, out successfulExit,
-                        shellExecute: true)
+                        shellExecute: true, outputHelper: _outputHelper)
                     : RunnerUtilities.ExecMSBuild(projFile, out successfulExit);
 
                 _outputHelper.WriteLine(executionOutput);

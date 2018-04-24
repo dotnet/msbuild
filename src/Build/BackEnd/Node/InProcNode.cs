@@ -479,13 +479,8 @@ namespace Microsoft.Build.BackEnd
         private void HandleNodeConfiguration(NodeConfiguration configuration)
         {
             // Set the culture.
-#if FEATURE_CULTUREINFO_SETTERS
             CultureInfo.CurrentCulture = configuration.BuildParameters.Culture;
             CultureInfo.CurrentUICulture = configuration.BuildParameters.UICulture;
-#else
-            Thread.CurrentThread.CurrentCulture = configuration.BuildParameters.Culture;
-            Thread.CurrentThread.CurrentUICulture = configuration.BuildParameters.UICulture;
-#endif
 
             // Snapshot the initial environment.
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();

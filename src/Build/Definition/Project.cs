@@ -1398,11 +1398,11 @@ namespace Microsoft.Build.Evaluation
         /// <example>
         /// The following snippet shows what <c>GetItemProvenance("a.cs")</c> returns for various item elements
         /// <code>
-        /// <A Include="a.cs;*.cs"/> // Occurences:2; Operation: Include; Provenance: StringLiteral | Glob
-        /// <B Include="*.cs" Exclude="a.cs"/> // Occurences: 1; Operation: Exclude; Provenance: StringLiteral
+        /// <A Include="a.cs;*.cs"/> // Occurrences:2; Operation: Include; Provenance: StringLiteral | Glob
+        /// <B Include="*.cs" Exclude="a.cs"/> // Occurrences: 1; Operation: Exclude; Provenance: StringLiteral
         /// <C Include="b.cs"/> // NA
-        /// <D Include="@(A)"/> // Occurences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurence from a referenced item)
-        /// <E Include="$(P)"/> // Occurences: 4; Operation: Include; Provenance: FromLiteral (direct reference in $P) | Glob (direct reference in $P) | Inconclusive (it is an indirect occurence from referenced properties and items)
+        /// <D Include="@(A)"/> // Occurrences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurence from a referenced item)
+        /// <E Include="$(P)"/> // Occurrences: 4; Operation: Include; Provenance: FromLiteral (direct reference in $P) | Glob (direct reference in $P) | Inconclusive (it is an indirect occurrence from referenced properties and items)
         /// <PropertyGroup>
         ///     <P>a.cs;*.cs;@(A)</P>
         /// </PropertyGroup>
@@ -1420,7 +1420,7 @@ namespace Microsoft.Build.Evaluation
         /// Literal string matching tries to first match the strings. If the check fails, it then tries to match
         /// the strings as if they represented files: it normalizes both strings as files relative to the current project directory
         ///
-        /// GetItemProvenance suffers from some sources of innacuracy:
+        /// GetItemProvenance suffers from some sources of inaccuracy:
         /// - it is performed after evaluation, thus is insensitive to item data flow when item references are present
         /// (it sees items as they are at the end of evaluation)
         /// 

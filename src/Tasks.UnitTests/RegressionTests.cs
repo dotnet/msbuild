@@ -4,11 +4,19 @@
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public sealed class RegressionTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public RegressionTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         /// Verifies that when a user overrides the BaseIntermediateOutputPath that the build still works.
         /// </summary>
@@ -30,7 +38,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 </Project>
                 ");
 
-            bool result = project.Build();
+            bool result = project.Build(new MockLogger(_output));
 
             Assert.True(result);
         }

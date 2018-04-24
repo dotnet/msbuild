@@ -38,14 +38,12 @@ namespace Microsoft.Build.Tasks
             this.sourceItemSpec = sourceItemSpec;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Construct
         /// </summary>
         private InvalidReferenceAssemblyNameException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
-#endif
 
         /// <summary>
         /// The item spec of the item that is the source fo the problem.

@@ -97,7 +97,6 @@ namespace Microsoft.Build
                     {
                         // Optimization: we can avoid reading into a byte buffer
                         // and instead read directly from the memorystream's backing buffer
-#if FEATURE_MEMORYSTREAM_GETBUFFER
                         rawBuffer = memoryStream.GetBuffer();
                         rawPosition = (int)memoryStream.Position;
                         int length = (int)memoryStream.Length;
@@ -111,17 +110,6 @@ namespace Microsoft.Build
                         {
                             ErrorUtilities.ThrowInternalError("From calculating based on the memorystream, about to read n = {0}. length = {1}, rawPosition = {2}, readLength = {3}, stringLength = {4}, currPos = {5}.", n, length, rawPosition, readLength, stringLength, currPos);
                         }
-#else
-                        ArraySegment<byte> rawBufferSegment;
-                        if (memoryStream.TryGetBuffer(out rawBufferSegment))
-                        {
-                            rawBuffer = rawBufferSegment.Array;
-                            rawPosition = rawBufferSegment.Offset + (int) memoryStream.Position;
-
-                            long maxReadLength = memoryStream.Length - memoryStream.Position;
-                            n = readLength > maxReadLength ? (int) maxReadLength : readLength;
-                        }
-#endif
                     }
 
                     if (rawBuffer == null)

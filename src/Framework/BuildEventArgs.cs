@@ -59,9 +59,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Build event context
         /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
-#endif
         private BuildEventContext buildEventContext;
 
         /// <summary>
@@ -153,7 +151,6 @@ namespace Microsoft.Build.Framework
             set => buildEventContext = value;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
 #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
@@ -235,9 +232,7 @@ namespace Microsoft.Build.Framework
             }
         }
 #endregion
-#endif
 
-#if FEATURE_BINARY_SERIALIZATION
 #region SetSerializationDefaults
         /// <summary>
         /// Run before the object has been deserialized
@@ -271,8 +266,5 @@ namespace Microsoft.Build.Framework
         }
 #endregion
 
-        //private BuildErrorEventArgs()
-
-#endif
     }
 }
