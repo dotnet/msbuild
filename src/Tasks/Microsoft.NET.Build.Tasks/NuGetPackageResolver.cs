@@ -25,6 +25,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             _packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackPackageFolders);
         }
+
         public string GetPackageDirectory(string packageId, NuGetVersion version)
         {
             string  packageRoot = null;
@@ -44,6 +45,13 @@ namespace Microsoft.NET.Build.Tasks
         public string ResolvePackageAssetPath(LockFileTargetLibrary package, string relativePath)
         {
             string packagePath = GetPackageDirectory(package.Name, package.Version);
+
+            if (packagePath == null)
+            {
+                throw new BuildErrorException(
+                    string.Format(Strings.PackageNotFound, package.Name, package.Version));
+            }
+
             return Path.Combine(packagePath, NormalizeRelativePath(relativePath));
         }
 

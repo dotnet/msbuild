@@ -575,11 +575,18 @@ namespace Microsoft.NET.Build.Tasks
                 WriteHeader();
                 WriteItemGroups();
                 WriteMetadataStringTable();
+
+                // Write signature last so that we will not attempt to use an incomplete cache file and instead
+                // regenerate it.
+                WriteToPlaceholder(new Placeholder(0), CacheFormatSignature);
             }
 
             private void WriteHeader()
             {
-                _writer.Write(CacheFormatSignature);
+                // Leave room for signature, which we only write at the very end so that we will
+                // not attempt to use a cache file corrupted by a prior crash.
+                WritePlaceholder();
+
                 _writer.Write(CacheFormatVersion);
 
                 byte[] hash = _task.HashSettings();
