@@ -19,7 +19,6 @@ namespace Microsoft.NET.Build.Tasks
         private readonly List<ITaskItem> _assembliesToPublish = new List<ITaskItem>();
         private readonly List<ITaskItem> _packagesResolved = new List<ITaskItem>();
 
-        [Required]
         public string AssetsFilePath { get; set; }
 
         [Required]

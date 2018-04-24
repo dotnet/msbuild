@@ -56,6 +56,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default settings for .NET Core and .NET Standard build logic -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == 'true'">
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
+    
+    <!-- Assembly and file versions of runtime assets should be written to the deps.json by default, to support
+         runtime minor version roll-forward: https://github.com/dotnet/core-setup/issues/3546 -->
+    <IncludeFileVersionsInDependencyFile Condition="'$(IncludeFileVersionsInDependencyFile)' == ''">true</IncludeFileVersionsInDependencyFile>
 
     <!-- Force .dll extension for .NETCoreApp and .NETStandard projects even if output type is exe. -->
     <TargetExt Condition="'$(TargetExt)' == ''">.dll</TargetExt>

@@ -24,8 +24,9 @@ namespace Microsoft.NET.ToolPack.Tests
         {
             TestAsset testAsset = _testAssetsManager
                 .CopyTestAsset("PortableToolWithP2P", callingMethod)
-                .WithSource()
-                .Restore(Log, "App");
+                .WithSource();
+
+            testAsset.Restore(Log, "App");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
             var packCommand = new PackCommand(Log, appProjectDirectory);

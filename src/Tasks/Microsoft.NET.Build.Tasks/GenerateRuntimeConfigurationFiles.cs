@@ -21,7 +21,6 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public class GenerateRuntimeConfigurationFiles : TaskBase
     {
-        [Required]
         public string AssetsFilePath { get; set; }
 
         [Required]

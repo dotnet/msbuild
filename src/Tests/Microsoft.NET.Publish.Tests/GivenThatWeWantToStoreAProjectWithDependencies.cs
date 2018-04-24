@@ -160,7 +160,7 @@ namespace Microsoft.NET.Publish.Tests
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
-        [CoreMSBuildOnlyFact(Skip="https://github.com/dotnet/sdk/issues/2089")]
+        [CoreMSBuildOnlyFact]
         public void compose_multifile()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
