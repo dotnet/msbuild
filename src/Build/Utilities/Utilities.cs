@@ -328,8 +328,9 @@ namespace Microsoft.Build.Internal
         /// <param name="getToolset">Delegate used to test whether a toolset exists for a given ToolsVersion.  May be null, in which
         /// case we act as though that toolset existed.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion</param>
+        /// <param name="usingDifferentToolsVersionFromProjectFile">true if the project file specifies an explicit toolsversion but a different one is chosen</param>
         /// <returns>The ToolsVersion we should use to build this project.  Should never be null.</returns>
-        internal static string GenerateToolsVersionToUse(string explicitToolsVersion, string toolsVersionFromProject, GetToolset getToolset, string defaultToolsVersion)
+        internal static string GenerateToolsVersionToUse(string explicitToolsVersion, string toolsVersionFromProject, GetToolset getToolset, string defaultToolsVersion, out bool usingDifferentToolsVersionFromProjectFile)
         {
             string toolsVersionToUse = explicitToolsVersion;
 
@@ -441,7 +442,18 @@ namespace Microsoft.Build.Internal
             }
 
             ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(toolsVersionToUse), "Should always return a ToolsVersion");
+
+            var explicitToolsVersionSpecified = explicitToolsVersion != null;
+            usingDifferentToolsVersionFromProjectFile = UsingDifferentToolsVersionFromProjectFile(toolsVersionFromProject, toolsVersionToUse, explicitToolsVersionSpecified);
+
             return toolsVersionToUse;
+        }
+
+        private static bool UsingDifferentToolsVersionFromProjectFile(string toolsVersionFromProject, string toolsVersionToUse, bool explicitToolsVersionSpecified)
+        {
+            return (!explicitToolsVersionSpecified &&
+                    !string.IsNullOrEmpty(toolsVersionFromProject) &&
+                    !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

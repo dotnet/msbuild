@@ -2082,7 +2082,12 @@ namespace Microsoft.Build.Execution
                         toolsVersion = visualStudioVersion.ToString(CultureInfo.InvariantCulture) + ".0";
                     }
 
-                    string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(explicitToolsVersion: null, toolsVersionFromProject: toolsVersion, getToolset: buildParameters.GetToolset, defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion);
+                    string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
+                        explicitToolsVersion: null,
+                        toolsVersionFromProject: toolsVersion,
+                        getToolset: buildParameters.GetToolset,
+                        defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion,
+                        usingDifferentToolsVersionFromProjectFile: out _);
                     projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersionToUse, loggingService, projectBuildEventContext, targetNames, sdkResolverService, submissionId);
                 }
             }
@@ -2525,16 +2530,11 @@ namespace Microsoft.Build.Execution
                 explicitToolsVersion,
                 xml.ToolsVersion,
                 buildParameters.GetToolset,
-                buildParameters.DefaultToolsVersion
+                buildParameters.DefaultToolsVersion,
+                out var usingDifferentToolsVersionFromProjectFile
             );
 
-            // Don't log the message if the toolsversion is different because an explicit toolsversion was specified -- 
-            // in that case the user already knows what they're doing; the point of this warning is to give them a heads
-            // up if we're doing this ourselves for our own reasons. 
-            if (!_explicitToolsVersionSpecified && !String.Equals(_originalProjectToolsVersion, toolsVersionToUse, StringComparison.OrdinalIgnoreCase))
-            {
-                _usingDifferentToolsVersionFromProjectFile = true;
-            }
+            _usingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 
             this.Toolset = buildParameters.GetToolset(toolsVersionToUse);
 
