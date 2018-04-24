@@ -37,8 +37,9 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager.CopyTestAsset("HelloWorld").WithSource();
             var build = new BuildCommand(Log, testAsset.TestRoot);
+            var assetsFile = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
-            build.Execute().Should().Fail().And.HaveStdOutContaining(Strings.AssetsFileNotSet);
+            build.Execute().Should().Fail().And.HaveStdOutContaining(assetsFile);
         }
 
         [Fact]
