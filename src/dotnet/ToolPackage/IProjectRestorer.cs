@@ -9,7 +9,6 @@ namespace Microsoft.DotNet.ToolPackage
     internal interface IProjectRestorer
     {
         void Restore(FilePath project,
-            DirectoryPath assetJsonOutput,
             FilePath? nugetConfig = null,
             string verbosity = null);
     }

@@ -27,7 +27,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         }
 
         public void Restore(FilePath project,
-            DirectoryPath assetJsonOutput,
             FilePath? nugetConfig = null,
             string verbosity = null)
         {
@@ -43,8 +42,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
-                AnyRid,
-                $"-property:BaseIntermediateOutputPath={assetJsonOutput.ToXmlEncodeString()}"
+                AnyRid
             });
 
             argsToPassToRestore.Add($"-verbosity:{verbosity ?? "quiet"}");
