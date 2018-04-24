@@ -4,6 +4,7 @@
          in .NETStandard. -->
     <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netstandard2.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
 
