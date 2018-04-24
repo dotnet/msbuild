@@ -25,6 +25,11 @@
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AssemblyVersion>$(FileVersion)</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
     <IsPackable>true</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>
