@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="needs-review-translation">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャットダウンしています。診断情報は、MSBuild_*.failure.txt という名前の一時ファイル ディレクトリのファイル内で見つかる可能性があります。</target>
+        <target state="translated">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャットダウンしています。診断情報は "{1}" のファイル内で見つかる可能性があり、MSBuild_*.failure.txt という名前になります。この場所は変更できます。変更するには、MSBUILDDEBUGPATH 環境変数を別のディレクトリに設定します。</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -241,7 +241,7 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="needs-review-translation">ファイル "{0}" をファイル "{1}" にインポートすると、循環する依存関係が生じます。</target>
+        <target state="translated">ファイル "{0}" をファイル "{1}" にインポートすると、循環する依存関係が生じます。</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
@@ -806,7 +806,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: プロジェクトの既定の XML 名前空間は MSBuild の XML 名前空間であるか、名前空間なしである必要があります。プロジェクトが MSBuild 2003 形式で作成されている場合、xmlns="{0}" を &lt;Project&gt; 要素に追加してください。プロジェクトが古い 1.0 または 1.2 形式で作成されている場合、MSBuild 2003 形式に変換してください。</target>
+        <target state="translated">MSB4041: プロジェクトの既定の XML 名前空間は MSBuild の XML 名前空間か、名前空間なしでなければなりません。プロジェクトが MSBuild 2003 形式で作成されている場合、xmlns="{0}" を &lt;Project&gt; 要素に追加してください。プロジェクトが古い 1.0 または 1.2 形式で作成されている場合、MSBuild 2003 形式に変換してください。</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1983,7 +1983,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: バイナリー ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
+        <target state="translated">MSB4234: バイナリ ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2043,7 +2043,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="translated">ターゲット "{0}" はスキップされました。ターゲットがプロジェクトに存在しないので、SkipNonexistentTargets が true に設定されます。</target>
+        <target state="translated">ターゲット "{0}" を省略しました。ターゲットがプロジェクトに存在しないので、SkipNonexistentTargets が true に設定されます。</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
@@ -2098,14 +2098,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="needs-review-translation">MSB4240: 同じ SDK "{0}" の複数のバージョンを指定することはできません。既に "{2}" によって指定されている SDK バージョン "{1}" が使用され、バージョン "{3}" は無視されます。</target>
+        <target state="translated">MSB4240: 同じ SDK "{0}" の複数のバージョンを指定することはできません。場所 "{2}" にある以前に解決された SDK バージョン "{1}" が使用され、バージョン "{3}" は無視されます。</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: SDK 参照 "{0}" のバージョン "{1}" は、代わりにバージョン "{2}" に解決されました。  参照されたバージョンを一致するように更新しない場合、必要なバージョンとは別のバージョンを使用する可能性があります。</target>
+        <target state="translated">MSB4241: SDK 参照 "{0}" のバージョン "{1}" は、代わりにバージョン "{2}" に解決されました。参照されたバージョンを一致するように更新しない場合、必要なバージョンとは別のバージョンを使用する可能性があります。</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
