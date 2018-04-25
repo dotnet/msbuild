@@ -102,30 +102,30 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
                 case 'OSX10.13':
                     script = "./build/cibuild.sh"
 
-                    if (runtime == "Mono") {
-                        // tests are failing on mono right now
-                        script += " --scope Compile"
+                    if (runtime == "MonoTest") {
+                        // default is to run tests!
+                        script += " -host mono"
                     }
 
-                    if (runtime.startsWith("Mono")) {
-                        // Redundantly specify target to override
-                        // "MonoTest" which cibuild.sh doesn't know
-                        script += " --host Mono --target Mono"
+                    if (runtime == "Mono") {
+                        // tests are failing on mono right now, so default to
+                        // skipping tests
+                        script += " -skipTests"
                     }
 
                     break;
                 case { it.startsWith('Ubuntu') }:
                     script = "./build/cibuild.sh"
 
-                    if (runtime == "Mono") {
-                        // tests are failing on mono right now
-                        script += " --scope Compile"
+                    if (runtime == "MonoTest") {
+                        // default is to run tests!
+                        script += " -host mono"
                     }
 
-                    if (runtime.startsWith("Mono")) {
-                        // Redundantly specify target to override
-                        // "MonoTest" which cibuild.sh doesn't know
-                        script += " --host Mono --target Mono"
+                    if (runtime == "Mono") {
+                        // tests are failing on mono right now, so default to
+                        // skipping tests
+                        script += " -skipTests"
                     }
 
                     break;
