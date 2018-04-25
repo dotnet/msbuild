@@ -76,8 +76,8 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
             runtimes.add('Full')
         }
 
-        // TODO: make this !windows once Mono 5.0+ is available in an OSX image
-        if (osName.startsWith('Ubuntu')) {
+        // TODO: make this !windows once RHEL builds are working
+        if (osName.startsWith('Ubuntu') || osName.startsWith('OSX')) {
             runtimes.add('Mono')
             runtimes.add('MonoTest')
         }
