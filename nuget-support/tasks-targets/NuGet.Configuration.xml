@@ -111,6 +111,11 @@
             Gets the <see cref="T:NuGet.Configuration.ISettings"/> that this source originated from. May be null.
             </summary>
         </member>
+        <member name="P:NuGet.Configuration.PackageSource.TrustedSource">
+            <summary>
+            Corresponding trusted source details. Null if the package source does not have trusted sources information.
+            </summary>
+        </member>
         <member name="T:NuGet.Configuration.PackageSourceCredential">
             <summary>
             Represents credentials required to authenticate user within package source web requests.
@@ -370,6 +375,13 @@
             Otherwise, path relative to ISettings.Root is returned
             </summary>
         </member>
+        <member name="M:NuGet.Configuration.ISettings.GetAllSubsections(System.String)">
+            <summary>
+            Gets all subsection element names under section as a List of string.
+            </summary>
+            <param name="section">Name of the section.</param>
+            <returns>List of string containing subsection element names.</returns>
+        </member>
         <member name="M:NuGet.Configuration.ISettings.GetSettingValues(System.String,System.Boolean)">
             <summary>
             Gets all the values under section
@@ -377,8 +389,21 @@
         </member>
         <member name="M:NuGet.Configuration.ISettings.GetNestedValues(System.String,System.String)">
             <summary>
-            Gets all the values under section
+            Gets all the values under section as List of KeyValuePair
             </summary>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.GetNestedSettingValues(System.String,System.String)">
+            <summary>
+            Gets all the values under section as List of SettingValue
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.SetValue(System.String,System.String,System.String)">
+            <summary>
+            Sets the value under the specified <paramref name="section" />.
+            </summary>
+            <param name="section">The name of the section.</param>
+            <param name="key">The key to set set.</param>
+            <param name="value">The value to set.</param>
         </member>
         <member name="M:NuGet.Configuration.ISettings.SetValues(System.String,System.Collections.Generic.IReadOnlyList{NuGet.Configuration.SettingValue})">
             <summary>
@@ -394,6 +419,46 @@
             </summary>
             <param name="section">The name of the section.</param>
             <param name="values">The values to set.</param>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.UpdateSubsections(System.String,System.String,System.Collections.Generic.IReadOnlyList{NuGet.Configuration.SettingValue})">
+            <summary>
+            Updates nested <paramref name="values" /> across multiple <see cref="T:NuGet.Configuration.ISettings" /> instances in the hierarchy.
+            Values are updated in the <see cref="T:NuGet.Configuration.ISettings" /> with the nearest priority.
+            </summary>
+            <param name="section">The name of the section.</param>
+            <param name="subsection">The name of the subsection.</param>
+            <param name="values">The values to set.</param>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.SetNestedValues(System.String,System.String,System.Collections.Generic.IList{System.Collections.Generic.KeyValuePair{System.String,System.String}})">
+            <summary>
+            Sets the values under the specified <paramref name="section" /> and <paramref name="subsection" />.
+            </summary>
+            <param name="section">The name of the section.</param>
+            <param name="subsection">The name of the subsection.</param>
+            <param name="values">The values to set.</param>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.SetNestedSettingValues(System.String,System.String,System.Collections.Generic.IList{NuGet.Configuration.SettingValue})">
+            <summary>
+            Sets the setting values under the specified <paramref name="section" /> and <paramref name="subsection" />.
+            </summary>
+            <param name="section">The name of the section.</param>
+            <param name="subsection">The name of the subsection.</param>
+            <param name="values">The setting values to set.</param>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.DeleteValue(System.String,System.String)">
+            <summary>
+            Deletes a key from the specified <paramref name="section" />.
+            </summary>
+            <param name="section">The name of the section.</param>
+            <param name="key">The key to be delted.</param>
+            <returns>bool indicating success.</returns>
+        </member>
+        <member name="M:NuGet.Configuration.ISettings.DeleteSection(System.String)">
+            <summary>
+            Deletes the specified <paramref name="section" />.
+            </summary>
+            <param name="section">The name of the section.</param>
+            <returns>bool indicating success.</returns>
         </member>
         <member name="E:NuGet.Configuration.ISettings.SettingsChanged">
             <summary>
@@ -519,6 +584,41 @@
             <param name="paths">The additional paths under which to look for settings files.</param>
             <returns>The list of settings read.</returns>
         </member>
+        <member name="M:NuGet.Configuration.Settings.UpdateSection(System.Xml.Linq.XElement,System.String,System.Collections.Generic.IEnumerable{NuGet.Configuration.SettingValue})">
+            <summary>
+            Adds or Updates a section in the root element with the values.
+            </summary>
+            <param name="root">Root element.</param>
+            <param name="section">Name of the section.</param>
+            <param name="valuesToWrite">Values to be added or updated in the section.</param>
+        </member>
+        <member name="M:NuGet.Configuration.Settings.RemoveElementBeforeClearTag(System.Xml.Linq.XElement)">
+            <summary>
+            Removes all element nodes in the sectionElement which appear before a clear element.
+            </summary>
+            <param name="sectionElement">XElement section.</param>
+        </member>
+        <member name="M:NuGet.Configuration.Settings.ContainsClearTag(System.Xml.Linq.XElement)">
+            <summary>
+            Checks if a section contains clear tag.
+            </summary>
+            <param name="section">XElement section.</param>
+        </member>
+        <member name="M:NuGet.Configuration.Settings.IsElement(System.Xml.Linq.XNode)">
+            <summary>
+            Checks if an XNode is an XElement.
+            </summary>
+            <param name="node">XNode</param>
+            <returns>Bool indicating if the node is an element.</returns>
+        </member>
+        <member name="M:NuGet.Configuration.Settings.HasName(System.Xml.Linq.XElement,System.String)">
+            <summary>
+            Checks if an XElement has a specific local name. Performs an OrdinalIgnoreCase comparison.
+            </summary>
+            <param name="element">XElement to be matched</param>
+            <param name="name">name to be matched</param>
+            <returns>Bool indicating if the element and has the same local name as the name parameter.</returns>
+        </member>
         <member name="M:NuGet.Configuration.Settings.GetSettingsFileNames(System.String)">
             <remarks>
             Order is most significant (e.g. applied last) to least significant (applied first)
@@ -552,22 +652,26 @@
         </member>
         <member name="P:NuGet.Configuration.SettingValue.OriginalValue">
             <summary>
-            original value of the source as in NuGet.Config
+            Original value of the source as in NuGet.Config.
+            Should be used only if the SettingValue is read from a config file.
             </summary>
         </member>
         <member name="P:NuGet.Configuration.SettingValue.IsMachineWide">
             <summary>
-            IsMachineWide tells if the setting is machine-wide or not
+            IsMachineWide tells if the setting is machine-wide or not.
+            Should be used only if the SettingValue is read from a config file.
             </summary>
         </member>
         <member name="P:NuGet.Configuration.SettingValue.Priority">
             <summary>
-            The priority of this setting in the nuget.config hierarchy. Bigger number means higher priority
+            The priority of this setting in the nuget.config hierarchy. Bigger number means higher priority.
+            Should be used only if the SettingValue is read from a config file.
             </summary>
         </member>
         <member name="P:NuGet.Configuration.SettingValue.Origin">
             <summary>
             Gets the <see cref="T:NuGet.Configuration.ISettings"/> that provided this value.
+            Should be used only if the SettingValue is read from a config file.
             </summary>
         </member>
         <member name="P:NuGet.Configuration.SettingValue.AdditionalData">
@@ -582,6 +686,90 @@
         <member name="T:NuGet.Configuration.XPlatMachineWideSetting">
             <summary>
             Machine wide settings based on the default machine wide config directory.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.CertificateTrustEntry.Fingerprint">
+            <summary>
+            Certificate fingerprint.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.CertificateTrustEntry.SubjectName">
+            <summary>
+            Certificate subject name.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.CertificateTrustEntry.FingerprintAlgorithm">
+            <summary>
+            Hash algorithm used to generate the certificate fingerprint.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.CertificateTrustEntry.Priority">
+            <summary>
+            The priority of this certificate entry in the nuget.config hierarchy. Same as SettingValue.Priority.
+            Null if this entry is not read from a config file.
+            </summary>
+        </member>
+        <member name="M:NuGet.Configuration.ITrustedSourceProvider.LoadTrustedSources">
+            <summary>
+            Loads all trusted sources.
+            </summary>
+            <returns>IEnumerable of TrustedSource.</returns>
+        </member>
+        <member name="M:NuGet.Configuration.ITrustedSourceProvider.LoadTrustedSource(System.String)">
+            <summary>
+            Loads a trusted source corresponding to a package source.
+            </summary>
+            <param name="packageSourceName">Name of the PackageSource used for lookup.</param>
+            <returns>TrustedSource corresponding to the PackageSource. Null if none found.</returns>
+        </member>
+        <member name="M:NuGet.Configuration.ITrustedSourceProvider.SaveTrustedSources(System.Collections.Generic.IEnumerable{NuGet.Configuration.TrustedSource})">
+            <summary>
+            Saves all trusted sources. Creates new entries or updates existing trusted source entries.
+            </summary>
+            <param name="sources">IEnumerable of TrustedSource to be saved.</param>
+        </member>
+        <member name="M:NuGet.Configuration.ITrustedSourceProvider.SaveTrustedSource(NuGet.Configuration.TrustedSource)">
+            <summary>
+            Saves a trusted sources. Creates new entry or updates existing trusted source entry.
+            </summary>
+            <param name="source">TrustedSource to be saved.</param>
+        </member>
+        <member name="M:NuGet.Configuration.ITrustedSourceProvider.DeleteTrustedSource(System.String)">
+            <summary>
+            Deletes a trusted source.
+            </summary>
+            <param name="sourceName">Name of the TrustedSource to be deleted.</param>
+        </member>
+        <member name="P:NuGet.Configuration.ITrustEntry.Priority">
+            <summary>
+            The priority of this entry in the nuget.config hierarchy. Same as SettingValue.Priority.
+            Null if this entry is not read from a config file.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.ServiceIndexTrustEntry.Value">
+            <summary>
+            Service index uri.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.ServiceIndexTrustEntry.Priority">
+            <summary>
+            The priority of this entry in the nuget.config hierarchy. Same as SettingValue.Priority.
+            Null if this entry is not read from a config file.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.TrustedSource.SourceName">
+            <summary>
+            Name of the associated package source.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.TrustedSource.ServiceIndex">
+            <summary>
+            Service index of the source.
+            </summary>
+        </member>
+        <member name="P:NuGet.Configuration.TrustedSource.Certificates">
+            <summary>
+            List of trusted certificates.
             </summary>
         </member>
         <member name="T:NuGet.Configuration.IExtensionLocator">

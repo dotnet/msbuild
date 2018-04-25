@@ -14,7 +14,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <WarningLevel Condition=" '$(WarningLevel)' == '' ">4</WarningLevel>
-    <NoWarn Condition=" '$(NoWarn)' == '' ">1701;1702;1705</NoWarn>
+    <NoWarn Condition=" '$(NoWarn)' == '' ">1701;1702</NoWarn>
 
     <!-- Remove the line below once https://github.com/Microsoft/visualfsharp/issues/3207 gets fixed -->
     <WarningsAsErrors Condition=" '$(WarningsAsErrors)' == '' ">NU1605</WarningsAsErrors>

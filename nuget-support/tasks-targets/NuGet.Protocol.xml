@@ -157,13 +157,6 @@
             <param name="source">A package source.</param>
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="stream" /> is <c>null</c>.</exception>
         </member>
-        <member name="M:NuGet.Protocol.Core.Types.DownloadResourceResult.#ctor(System.IO.Stream)">
-            <summary>
-            Initializes a new <see cref="T:NuGet.Protocol.Core.Types.DownloadResourceResult" /> class.
-            </summary>
-            <param name="stream">A package stream.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="stream" /> is <c>null</c>.</exception>
-        </member>
         <member name="M:NuGet.Protocol.Core.Types.DownloadResourceResult.#ctor(System.IO.Stream,NuGet.Packaging.PackageReaderBase,System.String)">
             <summary>
             Initializes a new <see cref="T:NuGet.Protocol.Core.Types.DownloadResourceResult" /> class.
@@ -171,14 +164,6 @@
             <param name="stream">A package stream.</param>
             <param name="packageReader">A package reader.</param>
             <param name="source">A package source.</param>
-            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="stream" /> is <c>null</c>.</exception>
-        </member>
-        <member name="M:NuGet.Protocol.Core.Types.DownloadResourceResult.#ctor(System.IO.Stream,NuGet.Packaging.PackageReaderBase)">
-            <summary>
-            Initializes a new <see cref="T:NuGet.Protocol.Core.Types.DownloadResourceResult" /> class.
-            </summary>
-            <param name="stream">A package stream.</param>
-            <param name="packageReader">A package reader.</param>
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="stream" /> is <c>null</c>.</exception>
         </member>
         <member name="M:NuGet.Protocol.Core.Types.DownloadResourceResult.#ctor(NuGet.Packaging.PackageReaderBase,System.String)">
@@ -244,7 +229,12 @@
         <member name="P:NuGet.Protocol.Core.Types.HttpSourceCacheContext.RootTempFolder">
             <summary>
             A suggested root folder to drop temporary files under, it will get cleared by the
-            disposal of the <see cref="T:NuGet.Protocol.Core.Types.SourceCacheContext"/> that was used to create this instance.
+            disposal of the <see cref="P:NuGet.Protocol.Core.Types.HttpSourceCacheContext.SourceCacheContext"/> that was used to create this instance.
+            </summary>
+        </member>
+        <member name="P:NuGet.Protocol.Core.Types.HttpSourceCacheContext.SourceCacheContext">
+            <summary>
+            Inner cache context.
             </summary>
         </member>
         <member name="T:NuGet.Protocol.Core.Types.INuGetResource">
@@ -981,6 +971,12 @@
             This should only be used for retries.
             </summary>
         </member>
+        <member name="P:NuGet.Protocol.Core.Types.SourceCacheContext.SessionId">
+            <summary>
+            X-NUGET-SESSION
+            This should be unique for each package operation.
+            </summary>
+        </member>
         <member name="P:NuGet.Protocol.Core.Types.SourceCacheContext.MaxAgeTimeSpan">
             <summary>
             Package version lists from the server older than this time span
@@ -1352,6 +1348,11 @@
         <member name="P:NuGet.Protocol.HttpRetryHandlerRequest.DownloadTimeout">
             <summary>The timeout to apply to <see cref="T:NuGet.Protocol.DownloadTimeoutStream"/> instances.</summary>
         </member>
+        <member name="P:NuGet.Protocol.HttpRetryHandlerRequest.AddHeaders">
+            <summary>
+            Additional headers to add to the request.
+            </summary>
+        </member>
         <member name="P:NuGet.Protocol.HttpSource.RetryHandler">
             <summary>The retry handler to use for all HTTP requests.</summary>
             <summary>This API is intended only for testing purposes and should not be used in product code.</summary>
@@ -1526,6 +1527,11 @@
             <summary>
             A message handler responsible for retrying request for authenticated proxies
             with missing credentials.
+            </summary>
+        </member>
+        <member name="P:NuGet.Protocol.SemaphoreSlimThrottle.CurrentCount">
+            <summary>
+            The number of remaining threads that can enter the semaphore.
             </summary>
         </member>
         <member name="F:NuGet.Protocol.StsAuthenticationHandler.STSEndPointHeader">
@@ -5799,10 +5805,11 @@
             </summary>
             <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
         </member>
-        <member name="M:NuGet.Protocol.RemotePackageArchiveDownloader.#ctor(NuGet.Protocol.Core.Types.FindPackageByIdResource,NuGet.Packaging.Core.PackageIdentity,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger)">
+        <member name="M:NuGet.Protocol.RemotePackageArchiveDownloader.#ctor(System.String,NuGet.Protocol.Core.Types.FindPackageByIdResource,NuGet.Packaging.Core.PackageIdentity,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger)">
             <summary>
             Initializes a new <see cref="T:NuGet.Protocol.RemotePackageArchiveDownloader" /> class.
             </summary>
+            <param name="source">A package source.</param>
             <param name="resource">A <see cref="T:NuGet.Protocol.Core.Types.FindPackageByIdResource" /> resource.</param>
             <param name="packageIdentity">A package identity.</param>
             <param name="cacheContext">A source cache context.</param>
@@ -6585,6 +6592,16 @@
               Looks up a localized string similar to Unable to load nuspec from package &apos;{0}&apos;..
             </summary>
         </member>
+        <member name="P:NuGet.Protocol.Strings.Log_FailedToParseRepoSignInfor">
+            <summary>
+              Looks up a localized string similar to Unable to parse {0} information from {1}. .
+            </summary>
+        </member>
+        <member name="P:NuGet.Protocol.Strings.Log_FailedToReadRepositorySignature">
+            <summary>
+              Looks up a localized string similar to Unable to get repository signature information for source {0}..
+            </summary>
+        </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToReadServiceIndex">
             <summary>
               Looks up a localized string similar to Unable to load the service index for source {0}..
@@ -6633,6 +6650,11 @@
         <member name="P:NuGet.Protocol.Strings.Log_RetryingHttp">
             <summary>
               Looks up a localized string similar to An error was encountered when fetching &apos;{0} {1}&apos;. The request will now be retried..
+            </summary>
+        </member>
+        <member name="P:NuGet.Protocol.Strings.Log_RetryingRepositorySignature">
+            <summary>
+              Looks up a localized string similar to Retrying repository signature request for source &apos;{0}&apos;..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_RetryingServiceIndex">

@@ -61,6 +61,11 @@
             Pattern used to identify content files
             </summary>
         </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.ToolsAssemblies">
+            <summary>
+            Pattern used to identify Tools assets for global tools
+            </summary>
+        </member>
         <member name="P:NuGet.ContentModel.ContentItemCollection.HasContract">
             <summary>
             True if lib/contract exists
@@ -475,10 +480,11 @@
             </summary>
             <exception cref="T:System.ObjectDisposedException">Thrown if this object is disposed.</exception>
         </member>
-        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.#ctor(System.String,NuGet.Packaging.Core.PackageIdentity,NuGet.Common.ILogger)">
+        <member name="M:NuGet.Packaging.LocalPackageArchiveDownloader.#ctor(System.String,System.String,NuGet.Packaging.Core.PackageIdentity,NuGet.Common.ILogger)">
             <summary>
             Initializes a new <see cref="T:NuGet.Packaging.LocalPackageArchiveDownloader" /> class.
             </summary>
+            <param name="source">A package source.</param>
             <param name="packageFilePath">A source package archive file path.</param>
             <param name="packageIdentity">A package identity.</param>
             <param name="logger">A logger.</param>
@@ -691,6 +697,11 @@
         <member name="M:NuGet.Packaging.NuspecReader.GetCopyright">
             <summary>
             Copyright information.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.NuspecReader.GetRepositoryMetadata">
+            <summary>
+            Source control repository information.
             </summary>
         </member>
         <member name="M:NuGet.Packaging.NuspecReader.GetRequireLicenseAcceptance">
@@ -1087,7 +1098,7 @@
             Nupkg reading helper methods
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.PackageExtractor.InstallFromSourceAsync(NuGet.Packaging.Core.PackageIdentity,System.Func{System.IO.Stream,System.Threading.Tasks.Task},NuGet.Packaging.VersionFolderPathResolver,NuGet.Packaging.PackageExtractionContext,System.Threading.CancellationToken)">
+        <member name="M:NuGet.Packaging.PackageExtractor.InstallFromSourceAsync(System.String,NuGet.Packaging.Core.PackageIdentity,System.Func{System.IO.Stream,System.Threading.Tasks.Task},NuGet.Packaging.VersionFolderPathResolver,NuGet.Packaging.PackageExtractionContext,System.Threading.CancellationToken,System.Guid)">
             <summary>
             Uses a copy function to install a package to a global packages directory.
             </summary>
@@ -1452,6 +1463,123 @@
             Represents the ".nuspec" extension.
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.Rules.AnalysisResources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.AssemblyDirectlyUnderLibWarning">
+            <summary>
+              Looks up a localized string similar to The assembly &apos;{0}&apos; is placed directly under &apos;lib&apos; folder. It is recommended that assemblies be placed inside a framework-specific folder. Move it into a framework-specific folder..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.AssemblyOutsideLibWarning">
+            <summary>
+              Looks up a localized string similar to The assembly &apos;{0}&apos; is not inside the &apos;lib&apos; folder and hence it won&apos;t be added as a reference when the package is installed into a project. Move it into the &apos;lib&apos; folder if it needs to be referenced..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.DefaultSpecValueWarning">
+            <summary>
+              Looks up a localized string similar to The value &quot;{0}&quot; for {1} is a sample value and should be removed. Replace it with an appropriate value or remove it and rebuild your package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidFrameworkWarning">
+            <summary>
+              Looks up a localized string similar to The folder &apos;{0}&apos; under &apos;lib&apos; is not recognized as a valid framework name or a supported culture identifier. Rename it to a valid framework name or culture identifier..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidPrereleaseDependencyWarning">
+            <summary>
+              Looks up a localized string similar to A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency &quot;{0}&quot; or update the version field in the nuspec..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.LegacyVersionWarning">
+            <summary>
+              Looks up a localized string similar to The package version &apos;{0}&apos; uses SemVer 2.0.0 or components of SemVer 1.0.0 that are not supported on legacy clients. Change the package version to a SemVer 1.0.0 string. If the version contains a release label it must start with a letter. This message can be ignored if the package is not intended for older clients..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_AssemblyDirectlyUnderLibWarning">
+            <summary>
+              Looks up a localized string similar to The assembly &apos;lib\{0}&apos; will be ignored when the package is installed after the migration..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_PackageHasContentFolder">
+            <summary>
+              Looks up a localized string similar to &apos;content&apos; assets will not be available when the package is installed after the migration..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_PackageHasInstallScript">
+            <summary>
+              Looks up a localized string similar to install.ps1 script will be ignored when the package is installed after the migration..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_XdtTransformInPackage">
+            <summary>
+              Looks up a localized string similar to XDT transform file &apos;{0}&apos; will not be applied when the package is installed after the migration..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.MisplacedInitScriptWarning">
+            <summary>
+              Looks up a localized string similar to The file &apos;{0}&apos; will be ignored by NuGet because it is not directly under &apos;tools&apos; folder. Place the file directly under &apos;tools&apos; folder..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.MisplacedTransformFileWarning">
+            <summary>
+              Looks up a localized string similar to The transform file &apos;{0}&apos; is outside the &apos;content&apos; folder and hence will not be transformed during installation of this package. Move it into the &apos;content&apos; folder..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.PlaceholderFileInPackageWarning">
+            <summary>
+              Looks up a localized string similar to An empty folder placeholder file &apos;{0}&apos; is in a non-empty folder and should be removed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.ScriptOutsideToolsWarning">
+            <summary>
+              Looks up a localized string similar to The script file &apos;{0}&apos; is outside the &apos;tools&apos; folder and hence will not be executed during installation of this package. Move it into the &apos;tools&apos; folder..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.UnrecognizedScriptWarning">
+            <summary>
+              Looks up a localized string similar to The script file &apos;{0}&apos; is not recognized by NuGet and hence will not be executed during installation of this package. Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under &apos;tools&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.UnspecifiedDependencyVersionWarning">
+            <summary>
+              Looks up a localized string similar to The version of dependency &apos;{0}&apos; is not specified. Specify the version of dependency and rebuild your package..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.AnalysisResources.WinRTObsoleteWarning">
+            <summary>
+              Looks up a localized string similar to The file at &apos;{0}&apos; uses the obsolete &apos;WinRT&apos; as the framework folder. Replace &apos;WinRT&apos; or &apos;WinRT45&apos; with &apos;NetCore45&apos;..
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Rules.LegacyVersionRule">
+            <summary>
+            Warn if the version is not parsable by older nuget clients.
+            </summary>
+            <remarks>This rule should be removed once more users move to SemVer 2.0.0 capable clients.</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.MisplacedAssemblyOutsideLibRule.ValidFolders">
+            <summary>
+            Folders that are expected to have .dll and .winmd files
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Rules.MisplacedAssemblyUnderLibRule.ValidFolders">
+            <summary>
+            Folders that are expected to have .dll and .winmd files
+            </summary>
+        </member>
         <member name="T:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata">
             <summary>
             This class is used to hold metadata about the central directory archive structure
@@ -1462,7 +1590,7 @@
             Position in bytes of the corresponding central directory header relative to the start of the archive
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.OffsetToFileHeader">
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.OffsetToLocalFileHeader">
             <summary>
             Offset in bytes to the corresponding file header relative to the start of the archive
             </summary>
@@ -1473,9 +1601,9 @@
             This should include size of local file header + encryption header + file data + data descriptor
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.Filename">
+        <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.IsPackageSignatureFile">
             <summary>
-            Filename for the central directory header
+            Flag indicating if the entry is the package signature file
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata.HeaderSize">
@@ -1509,20 +1637,6 @@
             <param name="data">Byte[] of the data.</param>
             <returns>32 bit cyclic redundancy code for the input data in uint.</returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.SeekReaderForwardToMatchByteSignature(System.IO.BinaryReader,System.Byte[])">
-            <summary>
-            Takes a binary reader and moves forwards the current position of its base stream until it finds the specified signature.
-            </summary>
-            <param name="reader">Binary reader to update current position</param>
-            <param name="byteSignature">byte signature to be matched</param>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.SeekReaderBackwardToMatchByteSignature(System.IO.BinaryReader,System.Byte[])">
-            <summary>
-            Takes a binary reader and moves backwards the current position of it's base stream until it finds the specified signature.
-            </summary>
-            <param name="reader">Binary reader to update current position</param>
-            <param name="byteSignature">byte signature to be matched</param>
-        </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndWriteUntilPosition(System.IO.BinaryReader,System.IO.BinaryWriter,System.Int64)">
             <summary>
             Read bytes from a BinaryReader and write them to the BinaryWriter and stop when the provided position
@@ -1555,29 +1669,13 @@
             <param name="reader">binary reader to zip archive</param>
             <returns>metadata with offsets and positions for entries</returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.UpdateSignedPackageArchiveMetadata(System.IO.BinaryReader,NuGet.Packaging.Signing.SignedPackageArchiveMetadata)">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.AssertSignatureEntryMetadata(System.IO.BinaryReader,NuGet.Packaging.Signing.SignedPackageArchiveMetadata)">
             <summary>
-            Updates the SignedPackageArchiveMetadata.CentralDirectoryHeaders by updating IndexInHeaders and FileEntryTotalSize.
-            Updates the SignedPackageArchiveMetadata.EndOfFileHeaders.
-            </summary>
-            <param name="reader">Binary reader to zip archive.</param>
-            <param name="metadata">SignedPackageArchiveMetadata to be updated.</param>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.AssertExactlyOnePrimarySignatureAndUpdateMetadata(NuGet.Packaging.Signing.SignedPackageArchiveMetadata)">
-            <summary>
-            Asserts that the SignedPackageArchiveMetadata contains only one Signature file entry.
-            Updates SignedPackageArchiveMetadata.SignatureCentralDirectoryHeaderIndex with the index of the signature central directory header.
-            Throws SignatureException if less or more entries are found.
-            </summary>
-            <param name="metadata">SignedPackageArchiveMetadata to be checked for signature entry.</param>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.AssertSignatureEntryMetadata(System.IO.BinaryReader,NuGet.Packaging.Signing.CentralDirectoryHeaderMetadata)">
-            <summary>
-            Asserts the validity of local file header and central directory file header for the signature file in the package.
-            Throws Signature Exception if the headers are invalid.
+            Asserts the validity of central directory header and local file header for the package signature file entry.
             </summary>
             <param name="reader">BinaryReader on the package.</param>
-            <param name="signatureCentralDirectoryHeader">Metadata of the the package.</param>
+            <param name="metadata">Metadata for the package signature file's central directory header.</param>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">Thrown if either header is invalid.</exception>
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.WriteSignatureIntoZip(System.IO.MemoryStream,System.IO.BinaryReader,System.IO.BinaryWriter)">
             <summary>
@@ -1617,13 +1715,14 @@
             <param name="fileOffset">Offset, in bytes, for the local file header of the corresponding file from the start of the archive.</param>
             <returns>Number of total bytes written into the zip.</returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndWriteUpdatedEndOfCentralDirectoryRecordIntoZip(System.IO.BinaryReader,System.IO.BinaryWriter,System.Int64,System.Int64)">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveIOUtility.ReadAndWriteUpdatedEndOfCentralDirectoryRecordIntoZip(System.IO.BinaryReader,System.IO.BinaryWriter,System.SByte,System.Int64,System.Int64)">
             <summary>
             Writes the end of central directory header into a zip using the writer starting at the writer.BaseStream.Position.
             The new end of central directory record will be based on the one at reader.BaseStream.Position.
             </summary>
-            <param name="reader">BinaryWriter to be used to read exisitng end of central directory record.</param>
-            <param name="writer">BinaryWriter to be used to write file.</param>
+            <param name="reader">BinaryReader to be used to read the existing end of central directory record.</param>
+            <param name="writer">BinaryWriter to be used to write the updated end of central directory record.</param>
+            <param name="entryCountChange">The change to central directory header counts.</param>
             <param name="sizeOfSignatureCentralDirectoryRecord">Size of the central directory header for the signature file.</param>
             <param name="sizeOfSignatureFileHeaderAndData">Size of the signature file and the corresponding local file header.</param>
         </member>
@@ -1646,14 +1745,9 @@
             List of central directory metadata ordered by the same order the central directory headers are in the archive
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.StartOfFileHeaders">
+        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.StartOfLocalFileHeaders">
             <summary>
             Offset, in bytes, to the first file header relative to the start of the archive. Should typically be 0.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.EndOfFileHeaders">
-            <summary>
-            Offset, in bytes, to the end of last file header relative to the start of the archive.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.EndOfCentralDirectory">
@@ -1667,20 +1761,31 @@
             If the CentralDirectoryHeaders list is ordered by IndexInHeaders this index indicates the position on the list for the signature.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageArchiveMetadata.EndOfCentralDirectoryRecordPosition">
-            <summary>
-            Offset, in bytes, to the start of "End of Central Directory Record" relative to the start of the archive.
-            </summary>
-        </member>
-        <member name="T:NuGet.Packaging.Signing.SignedPackageArchiveUtility">
-            <remarks>This is public only to facilitate testing.</remarks>
-        </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.IsSigned(System.IO.BinaryReader)">
             <summary>
             Utility method to know if a zip archive is signed.
             </summary>
             <param name="reader">Binary reader pointing to a zip archive.</param>
             <returns>true if the given archive is signed</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.OpenPackageSignatureFileStream(System.IO.BinaryReader)">
+            <summary>
+            Opens a read-only stream for the package signature file.
+            </summary>
+            <remarks>Callers should first verify that a package is signed before calling this method.</remarks>
+            <param name="reader">A binary reader for a signed package.</param>
+            <returns>A readable stream.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="reader" /> is <c>null</c>.</exception>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">Thrown if a package signature file is invalid or missing.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.RemoveRepositorySignaturesAsync(System.IO.Stream,System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Removes repository primary signature (if it exists) or any repository countersignature (if it exists).
+            </summary>
+            <param name="input">A readable stream for a signed package.</param>
+            <param name="output">A read/write stream for receiving an updated package.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A flag indicating whether or not a signature was removed.</returns>
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageArchiveUtility.SignZip(System.IO.MemoryStream,System.IO.BinaryReader,System.IO.BinaryWriter)">
             <summary>
@@ -1700,127 +1805,158 @@
             <param name="expectedHash">Hash value of the original data.</param>
             <returns>True if package archive's hash matches the expected hash</returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndication(NuGet.Packaging.Signing.SignatureType)">
+        <member name="P:NuGet.Packaging.Signing.AuthorSignPackageRequest.SignatureType">
             <summary>
-            Create a CommitmentTypeIndication attribute.
-            https://tools.ietf.org/html/rfc5126.html#section-5.11.1
+            Gets the signature type.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndication(System.Security.Cryptography.CryptographicAttributeObject)">
+        <member name="M:NuGet.Packaging.Signing.AuthorSignPackageRequest.#ctor(System.Security.Cryptography.X509Certificates.X509Certificate2,NuGet.Common.HashAlgorithmName)">
             <summary>
-            Oid -> SignatureType
+            Instantiates a new instance of the <see cref="T:NuGet.Packaging.Signing.AuthorSignPackageRequest" /> class.
             </summary>
-            <remarks>Unknown Oids are ignored. Throws for empty values and invalid combinations.</remarks>
+            <param name="certificate">The signing certificate.</param>
+            <param name="hashAlgorithm">The signature and timestamp hash algorithm.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="certificate" />
+            is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="hashAlgorithm" />
+            is invalid.</exception>
         </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidCommitmentTypeIndication(System.Security.Cryptography.CryptographicAttributeObject)">
+        <member name="M:NuGet.Packaging.Signing.AuthorSignPackageRequest.#ctor(System.Security.Cryptography.X509Certificates.X509Certificate2,NuGet.Common.HashAlgorithmName,NuGet.Common.HashAlgorithmName)">
             <summary>
-            True if the commitment-type-indication value does not
-            contain an invalid combination of values. Unknown
-            values are ignored.
+            Instantiates a new instance of the <see cref="T:NuGet.Packaging.Signing.AuthorSignPackageRequest" /> class.
             </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureType(System.String)">
-            <summary>
-            Oid -> SignatureType
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureTypeOid(NuGet.Packaging.Signing.SignatureType)">
-            <summary>
-            SignatureType -> Oid
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSigningCertificateV2(System.Collections.Generic.IEnumerable{System.Security.Cryptography.X509Certificates.X509Certificate2},NuGet.Common.HashAlgorithmName)">
-            <summary>
-            Create a signing-certificate-v2 from a certificate.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidSigningCertificateV2(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Security.Cryptography.X509Certificates.X509Chain,System.Security.Cryptography.CryptographicAttributeObject,NuGet.Packaging.Signing.SigningSpecifications)">
-            <summary>
-            Verify a signing-certificate-v2 attribute.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidSigningCertificateV2(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Collections.Generic.IReadOnlyList{System.Security.Cryptography.X509Certificates.X509Certificate2},System.Security.Cryptography.CryptographicAttributeObject,NuGet.Packaging.Signing.SigningSpecifications)">
-            <summary>
-            Verify a signing-certificate-v2 attribute.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.IsValidSigningCertificateV2(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Collections.Generic.IReadOnlyList{System.Security.Cryptography.X509Certificates.X509Certificate2},System.Collections.Generic.IReadOnlyList{System.Collections.Generic.KeyValuePair{NuGet.Common.HashAlgorithmName,System.Byte[]}},NuGet.Packaging.Signing.SigningSpecifications)">
-            <summary>
-            Verify components of a signing-certificate-v2 attribute.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetAttributeOrDefault(System.Security.Cryptography.CryptographicAttributeObjectCollection,System.String)">
-            <summary>
-            Returns the first attribute if the Oid is found.
-            Returns null if the attribute is not found.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.VerifyHash(System.Collections.Generic.KeyValuePair{NuGet.Common.HashAlgorithmName,System.Byte[]},System.Collections.Generic.KeyValuePair{NuGet.Common.HashAlgorithmName,System.Byte[]})">
-            <summary>
-            Compare hash values.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.VerifyHash(System.Byte[],System.Byte[])">
-            <summary>
-            Compare hash values.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ToDerSequenceReader(System.Security.Cryptography.CryptographicAttributeObject)">
-            <summary>
-            CryptographicAttributeObject -> DerSequenceReader
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ThrowInvalidAttributeException(System.Security.Cryptography.CryptographicAttributeObject)">
-            <summary>
-            Throw a signature exception due to an invalid attribute. This is used for unusual situations
-            where the format is corrupt.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ToList(System.Security.Cryptography.AsnEncodedDataCollection)">
-            <summary>
-            Enumerate AsnEncodedDataCollection
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndicationRawValues(System.Security.Cryptography.CryptographicAttributeObject)">
-            <summary>
-            Attribute -> SignatureType values with no validation.
-            </summary>
+            <param name="certificate">The signing certificate.</param>
+            <param name="signatureHashAlgorithm">The signature hash algorithm.</param>
+            <param name="timestampHashAlgorithm">The timestamp hash algorithm.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="certificate" />
+            is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="signatureHashAlgorithm" />
+            is invalid.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="timestampHashAlgorithm" />
+            is invalid.</exception>
         </member>
         <member name="T:NuGet.Packaging.Signing.ISignatureProvider">
             <summary>
             Creates Signatures that can be added to packages.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.ISignatureProvider.CreateSignatureAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Packaging.Signing.SignatureContent,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+        <member name="M:NuGet.Packaging.Signing.ISignatureProvider.CreatePrimarySignatureAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Packaging.Signing.SignatureContent,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
             Create a signature.
             </summary>
-            <param name="certificate">Certificate to be used while signing the package.</param>
+            <param name="request">Signing request with all the information needed to create signature.</param>
             <param name="signatureContent">SignatureContent containing the Hash of the package and the signature version.</param>
             <param name="logger">Logger</param>
             <param name="token">Cancellation token.</param>
             <returns>A signature for the package.</returns>
         </member>
-        <member name="T:NuGet.Packaging.Signing.Signer">
+        <member name="M:NuGet.Packaging.Signing.ISignatureProvider.CreateRepositoryCountersignatureAsync(NuGet.Packaging.Signing.RepositorySignPackageRequest,NuGet.Packaging.Signing.PrimarySignature,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            Remove or add signature package metadata.
+            Create a repository countersignature.
+            </summary>
+            <param name="request">Signing request with all the information needed to create signature.</param>
+            <param name="primarySignature">Primary signature to be countersigned.</param>
+            <param name="logger">Logger</param>
+            <param name="token">Cancellation token.</param>
+            <returns>A signature for the package.</returns>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.RepositorySignPackageRequest.V3ServiceIndexUrl">
+            <summary>
+            Gets the repository V3 service index URL.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signer.#ctor(NuGet.Packaging.Signing.ISignedPackage,NuGet.Packaging.Signing.ISignatureProvider)">
+        <member name="P:NuGet.Packaging.Signing.RepositorySignPackageRequest.PackageOwners">
             <summary>
-            Creates a signer for a specific package.
-            </summary>
-            <param name="package">Package to sign or modify.</param>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.Signer.SignAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
-            <summary>
-            Add a signature to a package.
+            Gets a read-only list of package owners.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signer.RemoveSignaturesAsync(NuGet.Common.ILogger,System.Threading.CancellationToken)">
+        <member name="P:NuGet.Packaging.Signing.RepositorySignPackageRequest.SignatureType">
             <summary>
-            Remove all signatures from a package.
+            Gets the signature type.
             </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.RepositorySignPackageRequest.#ctor(System.Security.Cryptography.X509Certificates.X509Certificate2,NuGet.Common.HashAlgorithmName,NuGet.Common.HashAlgorithmName,System.Uri,System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Instantiates a new instance of the <see cref="T:NuGet.Packaging.Signing.RepositorySignPackageRequest" /> class.
+            </summary>
+            <param name="certificate">The signing certificate.</param>
+            <param name="signatureHashAlgorithm">The signature hash algorithm.</param>
+            <param name="timestampHashAlgorithm">The timestamp hash algorithm.</param>
+            <param name="v3ServiceIndexUrl">The V3 service index URL.</param>
+            <param name="packageOwners">A read-only list of package owners.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="certificate" />
+            is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="signatureHashAlgorithm" />
+            is invalid.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="timestampHashAlgorithm" />
+            is invalid.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="v3ServiceIndexUrl" />
+            is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="v3ServiceIndexUrl" />
+            is neither absolute nor HTTPS.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="packageOwners" />
+            is either empty or contains an invalid value.</exception>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningOptions.InputPackageStream">
+            <summary>
+            Readable stream for the package that will be used as an input for any signing operation.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningOptions.OutputPackageStream">
+            <summary>
+            Readable and writeable stream for the output package for any signing operation.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningOptions.Overwrite">
+            <summary>
+            Switch used to indicate if an existing signature should be overwritten.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningOptions.SignatureProvider">
+            <summary>
+            Provider to create a Signature that can be added to the package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningOptions.Logger">
+            <summary>
+            Logger to be used to display the logs during the execution of signing actions.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningOptions.#ctor(System.Lazy{System.IO.Stream},System.Lazy{System.IO.Stream},System.Boolean,NuGet.Packaging.Signing.ISignatureProvider,NuGet.Common.ILogger)">
+            <summary>Instantiates a new <see cref="T:NuGet.Packaging.Signing.SigningOptions" /> object.</summary>
+            <param name="inputPackageStream">A readable stream for the package that will be used as input for any
+            signing operation.</param>
+            <param name="outputPackageStream">A readable and writeable stream for the output package for any signing
+            operation.</param>
+            <param name="overwrite">A flag indicating if an existing signature should be overwritten.</param>
+            <param name="signatureProvider">A provider to create a Signature that can be added to the package.</param>
+            <param name="logger">A logger.</param>
+            <remarks>Signing operations cannot be done in place; therefore, <paramref name="inputPackageStream"/>
+            and <paramref name="outputPackageStream" /> should be different streams.</remarks>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="inputPackageStream" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="outputPackageStream" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="signatureProvider" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="inputPackageStream" /> and
+            <paramref name="outputPackageStream"/> are the same object.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningOptions.CreateFromFilePaths(System.String,System.String,System.Boolean,NuGet.Packaging.Signing.ISignatureProvider,NuGet.Common.ILogger)">
+            <summary>Creates a new <see cref="T:NuGet.Packaging.Signing.SigningOptions" /> object from file paths.</summary>
+            <param name="inputPackageFilePath">The file path of the package that will be used as input for any
+            signing operation.</param>
+            <param name="outputPackageFilePath">The file path of the package that will be the output for any signing
+            operation.</param>
+            <param name="overwrite">A flag indicating if an existing signature should be overwritten.</param>
+            <param name="signatureProvider">A provider to create a Signature that can be added to the package.</param>
+            <param name="logger">A logger.</param>
+            <remarks>Signing operations cannot be done in place; therefore, <paramref name="inputPackageFilePath"/>
+            and <paramref name="outputPackageFilePath" /> should be different file paths.</remarks>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="inputPackageFilePath" /> is <c>null</c>,
+            an empty string, or equivalent to <paramref name="outputPackageFilePath" />.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="inputPackageFilePath" /> is <c>null</c>,
+            an empty string, or equivalent to <paramref name="outputPackageFilePath" />.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="signatureProvider" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
         </member>
         <member name="T:NuGet.Packaging.Signing.SignPackageRequest">
             <summary>
@@ -1834,12 +1970,22 @@
         </member>
         <member name="P:NuGet.Packaging.Signing.SignPackageRequest.TimestampHashAlgorithm">
             <summary>
-            Hash algorithm used to timestamping the signed package.
+            Hash algorithm used to timestamp the signed package.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignPackageRequest.Certificate">
             <summary>
-            X509Certificate2 to be used while signing the package.
+            Certificate used to sign the package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.AdditionalCertificates">
+            <summary>
+            Gets a collection of additional certificates for building a chain for the signing certificate.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.SignatureType">
+            <summary>
+            Gets the signature type.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignPackageRequest.PrivateKey">
@@ -1847,9 +1993,9 @@
             PrivateKey is only used in mssign command.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignPackageRequest.SignatureType">
+        <member name="M:NuGet.Packaging.Signing.SignPackageRequest.Dispose">
             <summary>
-            Author or Repository signature type.
+            Disposes of this instance.
             </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.X509SignatureProvider">
@@ -1857,39 +2003,15 @@
             Sign a manifest hash with an X509Certificate2.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.X509SignatureProvider.CreateSignatureAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Packaging.Signing.SignatureContent,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+        <member name="M:NuGet.Packaging.Signing.X509SignatureProvider.CreatePrimarySignatureAsync(NuGet.Packaging.Signing.SignPackageRequest,NuGet.Packaging.Signing.SignatureContent,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
             Sign the package stream hash with an X509Certificate2.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.CertificateUtility.X509Certificate2ToString(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+        <member name="M:NuGet.Packaging.Signing.X509SignatureProvider.CreateRepositoryCountersignatureAsync(NuGet.Packaging.Signing.RepositorySignPackageRequest,NuGet.Packaging.Signing.PrimarySignature,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            Converts a X509Certificate2 to a human friendly string of the following format -
-            Subject Name: CN=name
-            SHA1 hash: hash
-            Issued by: CN=issuer
-            Valid from: issue date time to expiry date time in local time
+            Countersign the primary signature with a X509Certificate2.
             </summary>
-            <param name="cert">X509Certificate2 to be converted to string.</param>
-            <returns>string representation of the X509Certificate2.</returns>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.CertificateUtility.X509Certificate2CollectionToString(System.Security.Cryptography.X509Certificates.X509Certificate2Collection)">
-             <summary>
-             Converts a X509Certificate2Collection to a human friendly string of the following format -
-             Subject Name: CN=name
-             SHA1 hash: hash
-             Issued by: CN=issuer
-             Valid from: issue date time to expiry date time in local time
-            
-             Subject Name: CN=name
-             SHA1 hash: hash
-             Issued by: CN=issuer
-             Valid from: issue date time to expiry date time in local time
-            
-             ... N more.
-             </summary>
-             <param name="certCollection">X509Certificate2Collection to be converted to string.</param>
-             <returns>string representation of the X509Certificate2Collection.</returns>
         </member>
         <member name="M:NuGet.Packaging.Signing.KeyPairFileReader.ReadSection">
             <summary>
@@ -1897,11 +2019,6 @@
             Throw for invalid formats.
             </summary>
             <remarks>Returns an empty set if the file has reached the end.</remarks>
-        </member>
-        <member name="F:NuGet.Packaging.Signing.KeyPairFileUtility.Encoding">
-            <summary>
-            File encoding.
-            </summary>
         </member>
         <member name="M:NuGet.Packaging.Signing.KeyPairFileUtility.GetValueOrThrow(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
             <summary>
@@ -2190,6 +2307,9 @@
             Each byte[][] should be a byte[][3] of {tag (1 byte), length (1-5 bytes), payload (variable)}.
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.Signing.DerEncoding.DerGeneralizedTime">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
         <member name="T:NuGet.Packaging.Signing.DerEncoding.DerSequenceReader">
             <summary>
             Reads data encoded via the Distinguished Encoding Rules for Abstract
@@ -2242,11 +2362,11 @@
             A readonly package that can provide signatures and a sign manifest from a package.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.GetSignaturesAsync(System.Threading.CancellationToken)">
+        <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.GetPrimarySignatureAsync(System.Threading.CancellationToken)">
             <summary>
-            Get all signatures used to sign a package.
+            Get package signature.
             </summary>
-            <remarks>Returns an empty list if the package is unsigned.</remarks>
+            <remarks>Returns a null if the package is unsigned.</remarks>
         </member>
         <member name="M:NuGet.Packaging.Signing.ISignedPackageReader.IsSignedAsync(System.Threading.CancellationToken)">
             <summary>
@@ -2326,24 +2446,86 @@
             Individual trust results.
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.Signing.AlgorithmIdentifier">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.CommitmentTypeIndication">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.CommitmentTypeQualifier">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.EssCertId">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.EssCertIdV2">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.GeneralName">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.IssuerSerial">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.NuGetPackageOwners">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.NuGetV3ServiceIndexUrl">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.PolicyInformation">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.PolicyQualifierInfo">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.PrimarySignature.SignedCms">
+            <summary>
+            A SignedCms object holding the signature and SignerInfo.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.PrimarySignature.SignatureContent">
+            <summary>
+            Signature content.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.PrimarySignature.Save(System.IO.Stream)">
+            <summary>
+            Save the signed cms signature to a stream.
+            </summary>
+            <param name="stream"></param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.PrimarySignature.GetBytes">
+            <summary>
+            Retrieve the bytes of the signed cms signature.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.PrimarySignature.Load(System.Security.Cryptography.Pkcs.SignedCms)">
+            <summary>
+            Create a signature based on a valid signed cms
+            </summary>
+            <param name="cms">signature data</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.PrimarySignature.Load(System.Byte[])">
+            <summary>
+            Create a signature based on a valid byte array to be decoded as a signed cms
+            </summary>
+            <param name="data">signature data</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.PrimarySignature.Load(System.IO.Stream)">
+            <summary>
+            Create a signature based on a valid byte stream to be decoded as a signed cms
+            </summary>
+            <param name="stream">signature data</param>
+        </member>
         <member name="T:NuGet.Packaging.Signing.Signature">
             <summary>
             Package signature information.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.Signature.SignedCms">
-            <summary>
-            A SignedCms object holding the signature and SignerInfo.
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Signing.Signature.Type">
             <summary>
             Indicates if this is an author or repository signature.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Signing.Signature.SignatureContent">
-            <summary>
-            Signature content.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.Signature.Timestamps">
@@ -2356,40 +2538,29 @@
             SignerInfo for this signature.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.Save(System.IO.Stream)">
+        <member name="M:NuGet.Packaging.Signing.Signature.GetValidTimestamp(NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
             <summary>
-            Save the signed cms signature to a stream.
+            
             </summary>
-            <param name="stream"></param>
+            <param name="allowMultipleTimestamps"></param>
+            <param name="allowIgnoreTimestamp"></param>
+            <param name="allowNoTimestamp"></param>
+            <param name="allowUnknownRevocation"></param>
+            <param name="issues"></param>
+            <returns></returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.GetBytes">
+        <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
             <summary>
-            Retrieve the bytes of the signed cms signature.
+            Verify if the signature object meets the specification trust and validity requirements.
             </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.Load(System.Security.Cryptography.Pkcs.SignedCms)">
-            <summary>
-            Create a signature based on a valid signed cms
-            </summary>
-            <param name="cms">signature data</param>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.Load(System.Byte[])">
-            <summary>
-            Create a signature based on a valid byte array to be decoded as a signed cms
-            </summary>
-            <param name="data">signature data</param>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.Load(System.IO.Stream)">
-            <summary>
-            Create a signature based on a valid byte stream to be decoded as a signed cms
-            </summary>
-            <param name="stream">signature data</param>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.GetSignatureType(System.Security.Cryptography.Pkcs.SignerInfo)">
-            <summary>
-            Get Signature type depending on signature metadata
-            </summary>
-            <param name="signer">SignerInfo containing signature metadata</param>
+            <param name="timestamp">Timestamp for this signature, if signature is not timestamped it can be null.</param>
+            <param name="allowUntrusted">Setting that tells if a signature that does not meet any soft failure requirements can still be allowed. Used to know if warnings or errors should be logged for an issue.</param>
+            <param name="allowUnknownRevocation">Setting that tells if unkown revocation is valid when building the chain.</param>
+            <param name="allowUntrustedSelfSignedCertificate">Setting that tells if an untrusted self-signed certificate should be allowed as the signing certificate.</param>
+            <param name="fingerprintAlgorithm">Algorithm used to calculate and display the certificate's fingerprint.</param>
+            <param name="certificateExtraStore">Collection of certificates to help the chain building engine as an extra store.</param>
+            <param name="issues">List of log messages.</param>
+            <returns>Status of trust for signature.</returns>
         </member>
         <member name="M:NuGet.Packaging.Signing.Signature.GetTimestamps(System.Security.Cryptography.Pkcs.SignerInfo)">
             <summary>
@@ -2397,6 +2568,21 @@
             </summary>
             <param name="signer"></param>
             <returns></returns>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SignaturePlacement">
+            <summary>
+            Indicates signature placement.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignaturePlacement.PrimarySignature">
+            <summary>
+            The primary signature.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignaturePlacement.Countersignature">
+            <summary>
+            A countersignature on the primary signature.
+            </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.SignatureType">
             <summary>
@@ -2418,62 +2604,11 @@
             Signed by the repository.
             </summary>
         </member>
-        <member name="T:NuGet.Packaging.Signing.SigningUtility">
-            <summary>
-            Utility methods for signing.
-            </summary>
+        <member name="T:NuGet.Packaging.Signing.SigningCertificate">
+            <remarks>This is public only to facilitate testing.</remarks>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SigningUtility.IsSignatureAlgorithmSupported(System.Security.Cryptography.X509Certificates.X509Certificate2)">
-            <summary>
-            Determines if a certificate's signature algorithm is supported.
-            </summary>
-            <param name="certificate">Certificate to validate</param>
-            <returns>True if the certificate's signature algorithm is supported.</returns>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SigningUtility.IsCertificatePublicKeyValid(System.Security.Cryptography.X509Certificates.X509Certificate2)">
-            <summary> 
-            Validates the public key requirements for a certificate 
-            </summary> 
-            <param name="certificate">Certificate to validate</param> 
-            <returns>True if the certificate's public key is valid within NuGet signature requirements</returns> 
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SigningUtility.HasLifetimeSigningEku(System.Security.Cryptography.X509Certificates.X509Certificate2)">
-            <summary>
-            Validates if the certificate contains the lifetime signing EKU
-            </summary>
-            <param name="certificate">Certificate to validate</param>
-            <returns>True if the certificate has the lifetime signing EKU</returns>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SigningUtility.GetCertificateChain(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Security.Cryptography.X509Certificates.X509Certificate2Collection)">
-            <summary>
-            Create a list of certificates in chain order with the leaf first and root last.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SigningUtility.GetCertificateChain(System.Security.Cryptography.X509Certificates.X509Chain)">
-            <summary>
-            Create an ordered list of certificates. The leaf node is returned first.
-            </summary>
-            <remarks>This does not check validity or trust. It returns the chain as-is.</remarks>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SigningUtility.HasExtendedKeyUsage(System.Security.Cryptography.X509Certificates.X509Certificate2,System.String)">
-            <summary>
-            Checks if an X509Certificate2 contains a particular Extended Key Usage (EKU).
-            </summary>
-            <param name="certificate">X509Certificate2 to be checked.</param>
-            <param name="ekuOid">String OID of the Extended Key Usage</param>
-            <returns>A bool indicating if the X509Certificate2 contains specified OID in its Extended Key Usage.</returns>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SigningUtility.IsValidForPurposeFast(System.Security.Cryptography.X509Certificates.X509Certificate2,System.String)">
-            <summary>
-            Checks if an X509Certificate2 is valid for a particular purpose.
-            </summary>
-            <remarks>
-            This must not be used in evaluation of a signed package.
-            A more accurate test is building a chain with the specified EKU asserted in the application policy.
-            </remarks>
-            <param name="certificate">X509Certificate2 to be checked.</param>
-            <param name="ekuOid">String OID of the Extended Key Usage</param>
-            <returns>A bool indicating if the X509Certificate2 contains specified OID string in its Extended Key Usage.</returns>
+        <member name="T:NuGet.Packaging.Signing.SigningCertificateV2">
+            <remarks>This is public only to facilitate testing.</remarks>
         </member>
         <member name="T:NuGet.Packaging.Signing.SigningSpecifications">
             <summary>
@@ -2535,18 +2670,30 @@
             Gets the signature format version.
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.Signing.Accuracy">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Extension">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.Extensions">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.MessageImprint">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
         <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampProvider">
             <summary>
             A provider for RFC 3161 timestamps
             https://tools.ietf.org/html/rfc3161
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.TimestampSignatureAsync(NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.TimestampSignatureAsync(NuGet.Packaging.Signing.PrimarySignature,NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
             Timestamps data present in the TimestampRequest.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.TimestampData(NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.GetTimestamp(NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
             Timestamps data present in the TimestampRequest.
             </summary>
@@ -2632,6 +2779,16 @@
             </summary>
             <param name="timestampCms">SignedCms from Time Stamp Authority</param>
         </member>
+        <member name="M:NuGet.Packaging.Signing.Timestamp.Verify(NuGet.Packaging.Signing.Signature,NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+            <summary>
+            Verify if the timestamp object meets the specification requirements.
+            </summary>
+            <param name="signature">Signature which this timestamp is for.</param>
+            <param name="allowIgnoreTimestamp">Setting that tells if a timestamp can be ignored if it doesn't meet the requirements. Used to know if warnings or errors should be logged for an issue.</param>
+            <param name="allowUnknownRevocation">Setting that tells if unkown revocation is valid when building the chain.</param>
+            <param name="issues">List of log messages.</param>
+            <returns>true if the timestamp meets the requierements, false otherwise.</returns>
+        </member>
         <member name="T:NuGet.Packaging.Signing.TimestampException">
             <summary>
             Exceptions that are generated while creating a package timestamp.
@@ -2642,42 +2799,371 @@
             Request for timestamping a signature
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.TimestampRequest.SignatureValue">
-            <summary>
-            Signature that needs to be timestamped.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Signing.TimestampRequest.Certificate">
-            <summary>
-            X509Certificate2 used to generate the Signature.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Signing.TimestampRequest.TimestampHashAlgorithm">
-            <summary>
-            Hash algorithm to be used for timestamping.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Signing.TimestampRequest.SigningSpec">
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.SigningSpecifications">
             <summary>
             Signing Specification for this timestamp request.
             </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.HashedMessage">
+            <summary>
+            Gets the hashed message to be timestamped.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.HashAlgorithm">
+            <summary>
+            Gets the hash algorithm used to generate <see cref="P:NuGet.Packaging.Signing.TimestampRequest.HashedMessage" />.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.TimestampRequest.Target">
+            <summary>
+            Gets the target signature for the timestamp
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.TstInfo">
+            <remarks>This is public only to facilitate testing.</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.CreateCommitmentTypeIndication(NuGet.Packaging.Signing.SignatureType)">
+            <summary>
+            Create a CommitmentTypeIndication attribute.
+            https://tools.ietf.org/html/rfc5126.html#section-5.11.1
+            </summary>
+            <param name="type">The signature type.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureType(System.Security.Cryptography.CryptographicAttributeObjectCollection)">
+            <summary>
+            Gets the signature type from one or more commitment-type-indication attributes.
+            </summary>
+            <param name="signedAttributes">A <see cref="T:System.Security.Cryptography.Pkcs.SignerInfo" /> signed attributes collection.</param>
+            <remarks>Unknown OIDs are ignored.</remarks>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="signedAttributes" /> is <c>null</c>.</exception>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">Thrown if one or more attributes are invalid.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.CreateNuGetV3ServiceIndexUrl(System.Uri)">
+            <summary>
+            Creates a nuget-v3-service-index-url attribute.
+            </summary>
+            <param name="v3ServiceIndexUrl">The V3 service index HTTPS URL.</param>
+            <returns>An attribute object.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="v3ServiceIndexUrl" /> is null.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="v3ServiceIndexUrl" /> is neither absolute
+            nor HTTPS.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetNuGetV3ServiceIndexUrl(System.Security.Cryptography.CryptographicAttributeObjectCollection)">
+            <summary>
+            Gets the V3 service index HTTPS URL from the nuget-v3-service-index-url attribute.
+            </summary>
+            <param name="signedAttributes">A <see cref="T:System.Security.Cryptography.Pkcs.SignerInfo" /> signed attributes collection.</param>
+            <returns>The V3 service index HTTPS URL.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="signedAttributes" />
+            is <c>null</c>.</exception>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">Thrown if either exactly one attribute is not present or if
+            the attribute does not contain exactly one attribute value.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.CreateNuGetPackageOwners(System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Creates a nuget-package-owners attribute.
+            </summary>
+            <param name="packageOwners">A read-only list of package owners.</param>
+            <returns>An attribute object.</returns>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="packageOwners" /> is either <c>null</c>
+            or empty or if any package owner name is invalid.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetNuGetPackageOwners(System.Security.Cryptography.CryptographicAttributeObjectCollection)">
+            <summary>
+            Gets a read-only list of package owners from an optional nuget-package-owners attribute.
+            </summary>
+            <param name="signedAttributes">A <see cref="T:System.Security.Cryptography.Pkcs.SignerInfo" /> signed attributes collection.</param>
+            <returns>A read-only list of package owners or <c>null</c>.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="signedAttributes" /> is <c>null</c>.</exception>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">Thrown if the attribute does not contain exactly one
+            attribute value.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureType(System.String)">
+            <summary>
+            Oid -> SignatureType
+            </summary>
+            <param name="oid">The commitment-type-indication value.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureTypeOid(NuGet.Packaging.Signing.SignatureType)">
+            <summary>
+            SignatureType -> Oid
+            </summary>
+            <param name="signatureType">The signature type.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.CreateSigningCertificateV2(System.Security.Cryptography.X509Certificates.X509Certificate2,NuGet.Common.HashAlgorithmName)">
+            <summary>
+            Create a signing-certificate-v2 from a certificate.
+            </summary>
+            <param name="certificate">The signing certificate.</param>
+            <param name="hashAlgorithm">The hash algorithm for the signing-certificate-v2 attribute.</param>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetAttributeOrDefault(System.Security.Cryptography.CryptographicAttributeObjectCollection,System.String)">
+            <summary>
+            Returns the first attribute if the Oid is found.
+            Returns null if the attribute is not found.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ThrowInvalidAttributeException(System.Security.Cryptography.CryptographicAttributeObject)">
+            <summary>
+            Throw a signature exception due to an invalid attribute. This is used for unusual situations
+            where the format is corrupt.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.ToList(System.Security.Cryptography.AsnEncodedDataCollection)">
+            <summary>
+            Enumerate AsnEncodedDataCollection
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndicationRawValues(System.Security.Cryptography.CryptographicAttributeObject)">
+            <summary>
+            Attribute -> SignatureType values with no validation.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetAttribute(System.Security.Cryptography.CryptographicAttributeObjectCollection,System.String)">
+            <summary>
+            Gets 0 or 1 attribute with the specified OID.  If more than one attribute is found, an exception is thrown.
+            </summary>
+            <param name="attributes">A collection of attributes.</param>
+            <param name="oid">The attribute OID to search for.</param>
+            <returns>Either a <see cref="T:System.Security.Cryptography.CryptographicAttributeObject" /> or <c>null</c>, if no attribute was found.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="attributes" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="oid" /> is either <c>null</c> or an empty string.</exception>
+            <exception cref="T:System.Security.Cryptography.CryptographicException">Thrown if multiple attribute instances with the specified OID were found.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetAttributes(System.Security.Cryptography.CryptographicAttributeObjectCollection,System.String)">
+            <summary>
+            Gets 0 or 1 or many attributes with the specified OID.
+            </summary>
+            <param name="attributes">A collection of attributes.</param>
+            <param name="oid">The attribute OID to search for.</param>
+            <returns>Either a <see cref="T:System.Security.Cryptography.CryptographicAttributeObject" /> or <c>null</c>, if no attribute was found.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="attributes" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="oid" /> is either <c>null</c> or an empty string.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateChainUtility.GetCertificateChain(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,NuGet.Common.ILogger,NuGet.Packaging.Signing.CertificateType)">
+            <summary>
+            Create a list of certificates in chain order with the leaf first and root last.
+            </summary>
+            <param name="certificate">The certificate for which a chain should be built.</param>
+            <param name="extraStore">A certificate store containing additional certificates necessary
+            for chain building.</param>
+            <param name="logger">A logger.</param>
+            <param name="certificateType">The certificate type.</param>
+            <returns>A certificate chain.</returns>
+            <remarks>This is intended to be used only during signing and timestamping operations,
+            not verification.</remarks>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="certificate" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="extraStore" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="certificateType" /> is undefined.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateChainUtility.GetCertificateChain(System.Security.Cryptography.X509Certificates.X509Chain)">
+            <summary>
+            Create an ordered list of certificates. The leaf node is returned first.
+            </summary>
+            <param name="x509Chain">Certificate chain to be converted to list.</param>
+            <remarks>This does not check validity or trust. It returns the chain as-is.</remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.X509Certificate2ToString(System.Security.Cryptography.X509Certificates.X509Certificate2,NuGet.Common.HashAlgorithmName)">
+            <summary>
+            Converts a X509Certificate2 to a human friendly string of the following format -
+            Subject Name: CN=name
+            SHA1 hash: hash
+            Issued by: CN=issuer
+            Valid from: issue date time to expiry date time in local time
+            </summary>
+            <param name="cert">X509Certificate2 to be converted to string.</param>
+            <param name="fingerprintAlgorithm">Algorithm used to calculate certificate fingerprint</param>
+            <returns>string representation of the X509Certificate2.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.X509Certificate2CollectionToString(System.Security.Cryptography.X509Certificates.X509Certificate2Collection,NuGet.Common.HashAlgorithmName)">
+             <summary>
+             Converts a X509Certificate2Collection to a human friendly string of the following format -
+             Subject Name: CN=name
+             SHA1 hash: hash
+             Issued by: CN=issuer
+             Valid from: issue date time to expiry date time in local time
+            
+             Subject Name: CN=name
+             SHA1 hash: hash
+             Issued by: CN=issuer
+             Valid from: issue date time to expiry date time in local time
+            
+             ... N more.
+             </summary>
+             <param name="certCollection">X509Certificate2Collection to be converted to string.</param>
+             <param name="fingerprintAlgorithm">Algorithm used to calculate certificate fingerprint</param>
+             <returns>string representation of the X509Certificate2Collection.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.IsSignatureAlgorithmSupported(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Determines if a certificate's signature algorithm is supported.
+            </summary>
+            <param name="certificate">Certificate to validate</param>
+            <returns>True if the certificate's signature algorithm is supported.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.IsCertificatePublicKeyValid(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary> 
+            Validates the public key requirements for a certificate 
+            </summary> 
+            <param name="certificate">Certificate to validate</param> 
+            <returns>True if the certificate's public key is valid within NuGet signature requirements</returns> 
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.HasLifetimeSigningEku(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Validates if the certificate contains the lifetime signing EKU
+            </summary>
+            <param name="certificate">Certificate to validate</param>
+            <returns>True if the certificate has the lifetime signing EKU</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.HasExtendedKeyUsage(System.Security.Cryptography.X509Certificates.X509Certificate2,System.String)">
+            <summary>
+            Checks if an X509Certificate2 contains a particular Extended Key Usage (EKU).
+            </summary>
+            <param name="certificate">X509Certificate2 to be checked.</param>
+            <param name="ekuOid">String OID of the Extended Key Usage</param>
+            <returns>A bool indicating if the X509Certificate2 contains specified OID in its Extended Key Usage.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.IsValidForPurposeFast(System.Security.Cryptography.X509Certificates.X509Certificate2,System.String)">
+            <summary>
+            Checks if an X509Certificate2 is valid for a particular purpose.
+            </summary>
+            <remarks>
+            This must not be used in evaluation of a signed package.
+            A more accurate test is building a chain with the specified EKU asserted in the application policy.
+            </remarks>
+            <param name="certificate">X509Certificate2 to be checked.</param>
+            <param name="ekuOid">String OID of the Extended Key Usage</param>
+            <returns>A bool indicating if the X509Certificate2 contains specified OID string in its Extended Key Usage.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.GetHash(System.Security.Cryptography.X509Certificates.X509Certificate2,NuGet.Common.HashAlgorithmName)">
+            <summary>
+            Gets the certificate fingerprint with the given hashing algorithm
+            </summary>
+            <param name="certificate">X509Certificate2 to be compute fingerprint</param>
+            <param name="hashAlgorithm">Hash algorithm for fingerprint</param>
+            <returns>A byte array representing the certificate hash.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.CertificateUtility.IsSelfIssued(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Determines if a certificate is self-issued.
+            </summary>
+            <remarks>Warning:  this method does not evaluate certificate trust, revocation status, or validity!
+            This method attempts to build a chain for the provided certificate, and although revocation status
+            checking is explicitly skipped, the underlying chain building engine may go online to fetch
+            additional information (e.g.:  the issuer's certificate).  This method is not a guaranteed offline
+            check.</remarks>
+            <param name="certificate">The certificate to check.</param>
+            <returns><c>true</c> if the certificate is self-issued; otherwise, <c>false</c>.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="certificate" /> is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.RepositorySignatureInfoUtility.GetSignedPackageVerifierSettings(NuGet.Packaging.RepositorySignatureInfo,NuGet.Packaging.Signing.SignedPackageVerifierSettings)">
+            <summary>
+            Gets SignedPackageVerifierSettings from a given RepositorySignatureInfo. 
+            </summary>
+            <param name="repoSignatureInfo">RepositorySignatureInfo to be used.</param>
+            <param name="fallbackSettings">SignedPackageVerifierSettings to be used if RepositorySignatureInfo is unavailable.</param>
+            <returns>SignedPackageVerifierSettings based on the RepositorySignatureInfo and SignedPackageVerifierSettings.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureUtility.GetCertificateChain(NuGet.Packaging.Signing.PrimarySignature)">
+            <summary>
+            Gets certificates in the certificate chain for the primary signature.
+            </summary>
+            <param name="primarySignature">The primary signature.</param>
+            <returns>A non-empty, read-only list of X.509 certificates ordered from signing certificate to root.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="primarySignature" /> is <c>null</c>.</exception>
+            <remarks>
+            WARNING:  This method does not perform revocation, trust, or certificate validity checking.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureUtility.GetCertificateChain(NuGet.Packaging.Signing.PrimarySignature,NuGet.Packaging.Signing.RepositoryCountersignature)">
+            <summary>
+            Gets certificates in the certificate chain for the repository countersignature.
+            </summary>
+            <param name="primarySignature">The primary signature.</param>
+            <param name="repositoryCountersignature">The repository countersignature.</param>
+            <returns>A non-empty, read-only list of X.509 certificates ordered from signing certificate to root.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="primarySignature" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="repositoryCountersignature" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="repositoryCountersignature" /> is
+            unrelated to <paramref name="primarySignature" />.</exception>
+            <remarks>
+            WARNING:  This method does not perform revocation, trust, or certificate validity checking.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureUtility.GetTimestampCertificateChain(NuGet.Packaging.Signing.PrimarySignature)">
+            <summary>
+            Gets certificates in the certificate chain for a timestamp on the primary signature.
+            </summary>
+            <param name="primarySignature">The primary signature.</param>
+            <returns>A non-empty, read-only list of X.509 certificates ordered from signing certificate to root.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="primarySignature" /> is <c>null</c>.</exception>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">Thrown if <paramref name="primarySignature" /> does not have a valid
+            timestamp.</exception>
+            <remarks>
+            WARNING:  This method does not perform revocation, trust, or certificate validity checking.
+            </remarks>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignatureUtility.GetTimestampCertificateChain(NuGet.Packaging.Signing.PrimarySignature,NuGet.Packaging.Signing.RepositoryCountersignature)">
+            <summary>
+            Gets certificates in the certificate chain for a timestamp on the repository countersignature.
+            </summary>
+            <param name="primarySignature">The primary signature.</param>
+            <param name="repositoryCountersignature">The repository countersignature.</param>
+            <returns>A non-empty, read-only list of X.509 certificates ordered from signing certificate to root.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="primarySignature" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="repositoryCountersignature" /> is <c>null</c>.</exception>
+            <exception cref="T:NuGet.Packaging.Signing.SignatureException">Thrown if <paramref name="repositoryCountersignature" /> does not have a valid
+            timestamp.</exception>
+            <remarks>
+            WARNING:  This method does not perform revocation, trust, or certificate validity checking.
+            </remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.SigningUtility">
+            <summary>
+            Utility methods for signing.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SigningUtility.SignAsync(NuGet.Packaging.Signing.SigningOptions,NuGet.Packaging.Signing.SignPackageRequest,System.Threading.CancellationToken)">
+            <summary>
+            Add a signature to a package.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.X509ChainHolder">
+            <summary>
+            Creates and performs cleanup on an <see cref="T:System.Security.Cryptography.X509Certificates.X509Chain" /> instance.
+            </summary>
+            <remarks>
+            Certificates held by individual X509ChainElement objects should be disposed immediately after use to minimize
+            finalizer impact.
+            </remarks>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.IPackageSignatureVerifier">
+            <summary>
+            Loads trust providers and verifies package signatures.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.IPackageSignatureVerifier.VerifySignaturesAsync(NuGet.Packaging.Signing.ISignedPackageReader,NuGet.Packaging.Signing.SignedPackageVerifierSettings,System.Threading.CancellationToken,System.Guid)">
+            <summary>
+            Verifies package signature.
+            </summary>
+            <param name="package">Package to be verified.</param>
+            <param name="settings">SignedPackageVerifierSettings to be used when verifying the package.</param>
+            <param name="token">Cancellation Token.</param>
+            <param name="telemetryOperationId">Guid of the parent event.</param>
+            <returns>VerifySignaturesResult containing the result of the verify operation.</returns>
         </member>
         <member name="T:NuGet.Packaging.Signing.ISignatureVerificationProvider">
             <summary>
             Providers signature trust information.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.ISignatureVerificationProvider.GetTrustResultAsync(NuGet.Packaging.Signing.ISignedPackageReader,NuGet.Packaging.Signing.Signature,NuGet.Packaging.Signing.SignedPackageVerifierSettings,System.Threading.CancellationToken)">
+        <member name="M:NuGet.Packaging.Signing.ISignatureVerificationProvider.GetTrustResultAsync(NuGet.Packaging.Signing.ISignedPackageReader,NuGet.Packaging.Signing.PrimarySignature,NuGet.Packaging.Signing.SignedPackageVerifierSettings,System.Threading.CancellationToken)">
             <summary>
             Check if <paramref name="signature" /> is trusted by the provider.
             </summary>
         </member>
-        <member name="T:NuGet.Packaging.Signing.PackageSignatureVerifier">
-            <summary>
-            Loads trust providers and verifies package signatures.
-            </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.PackageSignatureVerifier.IsValid(System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.PackageVerificationResult},System.Boolean)">
+        <member name="M:NuGet.Packaging.Signing.PackageSignatureVerifier.IsValid(System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.PackageVerificationResult},NuGet.Packaging.Signing.SignedPackageVerifierSettings)">
             <summary>
             True if a provider trusts the package signature.
             </summary>
@@ -2700,15 +3186,8 @@
         </member>
         <member name="M:NuGet.Packaging.Signing.PackageVerificationResult.#ctor(NuGet.Packaging.Signing.SignatureVerificationStatus,System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.SignatureLog})">
             <summary>
-            SignatureVerificationResult
+            PackageVerificationResult
             </summary>
-        </member>
-        <member name="M:NuGet.Packaging.Signing.SignatureTrustAndValidityVerificationProvider.IsTimestampValid(NuGet.Packaging.Signing.Timestamp,System.Byte[],System.Boolean,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
-            <summary>
-            Validates a SignedCms object containing a timestamp response.
-            </summary>
-            <param name="timestampCms">SignedCms response from the timestamp authority.</param>
-            <param name="data">byte[] data that was signed and timestamped.</param>
         </member>
         <member name="T:NuGet.Packaging.Signing.SignatureVerificationStatus">
             <summary>
@@ -2720,20 +3199,25 @@
             Default unknown value.
             </summary>
         </member>
-        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Invalid">
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Suspect">
             <summary>
-            Invalid signature.
+            Invalid package signature.
             </summary>
-            <remarks>This could happen for many reasons such as a tampered with package, invalid hash algorithm, or invalid signing data.</remarks>
+            <remarks>This could happen because the package integrity check fails or the certificate is revoked.</remarks>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Illegal">
+            <summary>
+            Signature does not conform with NuGet signing specification.
+            </summary>
         </member>
         <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Untrusted">
             <summary>
-            Signature is NOT trusted.
+            Signature certificate does not match known allowlists.
             </summary>
         </member>
-        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Trusted">
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Valid">
             <summary>
-            Signature is trusted.
+            Signature is valid for the verification step.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerificationResult.Signature">
@@ -2751,19 +3235,74 @@
             Allow packages that do not contain signatures.
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowIllegal">
+            <summary>
+            Allow packages with signatures that do not conform to the specification.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUntrusted">
             <summary>
-            Allow packages that are not trusted.
+            Allow packages that have not been explicitly trusted by the consumer.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowAll">
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUntrustedSelfIssuedCertificate">
             <summary>
-            Allow unsigned.
+            Allow packages that do not chain to a trusted root certificate.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.Default">
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowIgnoreTimestamp">
+            <summary>
+            Allow ignoring timestamp.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowMultipleTimestamps">
+            <summary>
+            Allow more than one timestamp.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoTimestamp">
+            <summary>
+            Allow no timestamp.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUnknownRevocation">
+            <summary>
+            Treat unknown revocation status as a warning instead of an error during verification.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoRepositoryCertificateList">
+            <summary>
+            Allow an empty or null RepositoryCertificateList.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoClientCertificateList">
+            <summary>
+            Allow an empty or null ClientCertificateList.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.RepositoryCertificateList">
+            <summary>
+            Allowlist of repository certificates hashes.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.ClientCertificateList">
+            <summary>
+            Allowlist of client side certificate hashes.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetDefault(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
             <summary>
             Default settings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVSClientDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+            <summary>
+            Default policy for scenarios in VS.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVerifyCommandDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+            <summary>
+            Default policy for nuget.exe verify --signatures command.
             </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.VerifySignaturesResult">
@@ -2780,6 +3319,26 @@
             <summary>
             Individual trust results.
             </summary>
+        </member>
+        <member name="T:NuGet.Packaging.RepositorySignatureInfoProvider">
+            <summary>
+            RepositorySignatureInfoProvdier is a static cache for repository signature information for package source.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.RepositorySignatureInfoProvider.TryGetRepositorySignatureInfo(System.String,NuGet.Packaging.RepositorySignatureInfo@)">
+            <summary>
+            Try to get repository signature information for the source.
+            </summary>
+            <param name="source">Package source URL.</param>
+            <param name="repositorySignatureInfo">Contains the RepositorySignatureInfo when the method returns. It is null if repository signature information is unavailable.</param>
+            <returns>True if the repository signature information was found. Otherwise, False.</returns>
+        </member>
+        <member name="M:NuGet.Packaging.RepositorySignatureInfoProvider.AddOrUpdateRepositorySignatureInfo(System.String,NuGet.Packaging.RepositorySignatureInfo)">
+            <summary>
+            Add or update the repository signature information for the source.
+            </summary>
+            <param name="source">Package source URL.</param>
+            <param name="repositorySignatureInfo">RepositorySignatureInfo for the source url.</param>
         </member>
         <member name="T:NuGet.Packaging.Strings">
             <summary>
@@ -2802,7 +3361,22 @@
               Looks up a localized string similar to The argument cannot be null or empty..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.CertificateChainBuildFailed">
+            <summary>
+              Looks up a localized string similar to A complete certificate chain could not be built for the signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertificateChainValidationFailed">
+            <summary>
+              Looks up a localized string similar to Certificate chain validation failed..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.CertUtilityCertificateHash">
+            <summary>
+              Looks up a localized string similar to {0} hash: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.CertUtilityCertificateHashSha1">
             <summary>
               Looks up a localized string similar to SHA1 hash: {0}.
             </summary>
@@ -2834,17 +3408,12 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.CommitmentTypeIndicationAttributeInvalid">
             <summary>
-              Looks up a localized string similar to commitment-type-indication attribute contains an invalid value..
+              Looks up a localized string similar to The commitment-type-indication attribute is invalid..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.CommitmentTypeIndicationInvalid">
+        <member name="P:NuGet.Packaging.Strings.CommitmentTypeIndicationAttributeInvalidCombination">
             <summary>
-              Looks up a localized string similar to commitment-type-indication attribute is invalid..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.DebugNoCertificate">
-            <summary>
-              Looks up a localized string similar to Certificate inside main SignerInfo is null..
+              Looks up a localized string similar to The commitment-type-indication attribute contains an invalid combination of values..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_InvalidTargetFramework">
@@ -2852,9 +3421,39 @@
               Looks up a localized string similar to Unsupported targetFramework value &apos;{0}&apos;..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.Error_NoClientAllowList">
+            <summary>
+              Looks up a localized string similar to The package signature certificate cannot be trusted as no client allow list found..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_NoMatchingClientCertificate">
+            <summary>
+              Looks up a localized string similar to The package signature certificate fingerprint does not match any certificate fingerprint in client allow list..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_NoMatchingRepositoryCertificate">
+            <summary>
+              Looks up a localized string similar to The package signature certificate fingerprint does not match any certificate fingerprint in repository allow list..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_NoRepoAllowList">
+            <summary>
+              Looks up a localized string similar to The package signature certificate cannot be trusted as no repository allow list found..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.Error_NotOnePrimarySignature">
             <summary>
-              Looks up a localized string similar to The package signature contains multiple primary signatures..
+              Looks up a localized string similar to The package signature file does not contain exactly one primary signature..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_NotOneRepositoryCounterSignature">
+            <summary>
+              Looks up a localized string similar to The package signature contains multiple repository countersignatures..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Error_RepositorySignatureMustNotHaveARepositoryCountersignature">
+            <summary>
+              Looks up a localized string similar to A repository primary signature must not have a repository countersignature..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorByteSignatureNotFound">
@@ -2867,9 +3466,9 @@
               Looks up a localized string similar to Byte signature too big to seek in current stream position..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorCertificateHasLifetimeSignerEKU">
+        <member name="P:NuGet.Packaging.Strings.ErrorCertificateHasLifetimeSigningEKU">
             <summary>
-              Looks up a localized string similar to Certificates with lifetime signer EKU are not supported..
+              Looks up a localized string similar to The lifetime signing EKU is not supported..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorDuplicatePackages">
@@ -2884,7 +3483,7 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChain">
             <summary>
-              Looks up a localized string similar to Certificate chain validation failed with error: {0}.
+              Looks up a localized string similar to Certificate chain validation failed with error(s): {0}.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChainUnspecifiedReason">
@@ -2912,11 +3511,6 @@
               Looks up a localized string similar to Invalid package version for a dependency with id &apos;{0}&apos; in package &apos;{1}&apos;: &apos;{2}&apos;.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorInvalidPublicKey">
-            <summary>
-              Looks up a localized string similar to Could not validate signature. Certificate does not meet the public key requirements..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.ErrorManifestFileNotFound">
             <summary>
               Looks up a localized string similar to Manifest file not found at &apos;{0}&apos;.
@@ -2929,7 +3523,7 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorNoCertificate">
             <summary>
-              Looks up a localized string similar to The primary signature did not have a signing certificate..
+              Looks up a localized string similar to The primary signature does not have a signing certificate..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorNoTimestamp">
@@ -2944,32 +3538,17 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorPackageNotSigned">
             <summary>
-              Looks up a localized string similar to Package is not signed..
+              Looks up a localized string similar to The package is not signed..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorPackageSignatureInvalid">
             <summary>
-              Looks up a localized string similar to Package signature is invalid..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorPackageTampered">
-            <summary>
-              Looks up a localized string similar to Package contents might have been tampered..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorSignatureFileTooBig">
-            <summary>
-              Looks up a localized string similar to Signature file is not of a reasonable size. Package contents might have been tampered..
+              Looks up a localized string similar to The package signature is invalid or cannot be verified on this platform..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorSignatureVerificationFailed">
             <summary>
               Looks up a localized string similar to Primary signature validation failed..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorSigningCertUntrustedRoot">
-            <summary>
-              Looks up a localized string similar to Signing certificate chains to an untrusted root..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
@@ -2979,7 +3558,17 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorZip64NotSupported">
             <summary>
-              Looks up a localized string similar to ZIP64 signed packages are not supported..
+              Looks up a localized string similar to Signed Zip64 packages are not supported..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ExactlyOneAttributeRequired">
+            <summary>
+              Looks up a localized string similar to Exactly one {0} attribute is required..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.ExactlyOneAttributeValueRequired">
+            <summary>
+              Looks up a localized string similar to The {0} attribute must have exactly one attribute value..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.FailedFileTime">
@@ -3002,6 +3591,16 @@
               Looks up a localized string similar to Unable to find fallback package folder &apos;{0}&apos;..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidArgument">
+            <summary>
+              Looks up a localized string similar to The argument is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidAsn1">
+            <summary>
+              Looks up a localized string similar to The ASN.1 data is invalid..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.InvalidNuspecElement">
             <summary>
               Looks up a localized string similar to {0} This validation error occurred in a &apos;{1}&apos; element..
@@ -3022,9 +3621,49 @@
               Looks up a localized string similar to Package {0} signature is invalid..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageSignatureFile">
+            <summary>
+              Looks up a localized string similar to The package contains an invalid package signature file..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageSignatureFileEntry">
+            <summary>
+              Looks up a localized string similar to The package signature file entry is invalid. {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageSignatureFileEntryCentralDirectoryHeader">
+            <summary>
+              Looks up a localized string similar to The central directory header field &apos;{0}&apos; has an invalid value ({1})..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageSignatureFileEntryLocalFileHeader">
+            <summary>
+              Looks up a localized string similar to The local file header field &apos;{0}&apos; has an invalid value ({1})..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPrimarySignature">
+            <summary>
+              Looks up a localized string similar to The primary signature is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidRepositoryCountersignature">
+            <summary>
+              Looks up a localized string similar to The repository countersignature is invalid..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.InvalidSignatureContent">
             <summary>
               Looks up a localized string similar to The package signature content is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidTimestampSignature">
+            <summary>
+              Looks up a localized string similar to The timestamp signature is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidUrl">
+            <summary>
+              Looks up a localized string similar to The URL value is invalid..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Log_InstallingPackage">
@@ -3042,14 +3681,59 @@
               Looks up a localized string similar to Nuspec file does not exist in package..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.MultipleAttributesDisallowed">
+            <summary>
+              Looks up a localized string similar to Multiple {0} attributes are not allowed..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.MultipleNuspecFiles">
             <summary>
               Looks up a localized string similar to Package contains multiple nuspec files..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.MultiplePackageSignatureFiles">
+            <summary>
+              Looks up a localized string similar to The package contains multiple package signature files..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.MustContainAbsolutePath">
             <summary>
               Looks up a localized string similar to &apos;{0}&apos; must contain an absolute path &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NoPackageSignatureFile">
+            <summary>
+              Looks up a localized string similar to The package does not contain a valid package signature file..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetPackageOwners">
+            <summary>
+              Looks up a localized string similar to nuget-package-owners: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetPackageOwnersInvalid">
+            <summary>
+              Looks up a localized string similar to The nuget-package-owners attribute is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetPackageOwnersInvalidValue">
+            <summary>
+              Looks up a localized string similar to One or more package owner values are invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetV3ServiceIndexUrl">
+            <summary>
+              Looks up a localized string similar to nuget-v3-service-index-url: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetV3ServiceIndexUrlInvalid">
+            <summary>
+              Looks up a localized string similar to The nuget-v3-service-index-url attribute is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NuGetV3ServiceIndexUrlInvalidValue">
+            <summary>
+              Looks up a localized string similar to The nuget-v3-service-index-url attribute value is invalid..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.PackageEntryAlreadyExist">
@@ -3077,9 +3761,24 @@
               Looks up a localized string similar to Package stream should be seekable.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.SignatureCentralDirectoryHeaderInvalid">
+        <member name="P:NuGet.Packaging.Strings.PrimarySignatureHasNoTimestamp">
             <summary>
-              Looks up a localized string similar to Invalid central directory header for signature entry: {0}.
+              Looks up a localized string similar to The primary signature does not have a timestamp..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.RangeOutOfBoundsForArray">
+            <summary>
+              Looks up a localized string similar to Arguments {0} and {1} were out of bounds for the array..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureHasNoCertificate">
+            <summary>
+              Looks up a localized string similar to The repository countersignature does not have a signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureHasNoTimestamp">
+            <summary>
+              Looks up a localized string similar to The repository countersignature does not have a timestamp..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureContainsInvalidAttribute">
@@ -3089,17 +3788,12 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureDebug_HashOidFound">
             <summary>
-              Looks up a localized string similar to Signature hash oid found: {0}.
+              Looks up a localized string similar to Signature hash OID found: {0}.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureFailureInvalidHashAlgorithmOid">
             <summary>
-              Looks up a localized string similar to The primary signature uses an unsupported hash algorithm..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.SignatureFileCompressed">
-            <summary>
-              Looks up a localized string similar to File was found to be compressed..
+              Looks up a localized string similar to The package hash uses an unsupported hash algorithm..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureHashAlgorithm">
@@ -3107,24 +3801,14 @@
               Looks up a localized string similar to Signature Hash Algorithm: {0}.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.SignatureInvalidCompressionMethod">
-            <summary>
-              Looks up a localized string similar to Invalid compression method. Expected &apos;{0}&apos;, actual &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.SignatureInvalidExternalFileAttributes">
-            <summary>
-              Looks up a localized string similar to The package signature file entry is invalid..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.SignatureInvalidGeneralPurposeBits">
             <summary>
               Looks up a localized string similar to Invalid general purpose bit flags. Expected &apos;{0}&apos;, actual &apos;{1}&apos;..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.SignatureLocalFileHeaderInvalid">
+        <member name="P:NuGet.Packaging.Strings.SignatureNotTimeValid">
             <summary>
-              Looks up a localized string similar to Invalid local file header for signature entry: {0}.
+              Looks up a localized string similar to The primary signature validity period has expired..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureNotYetValid">
@@ -3134,12 +3818,17 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.SignaturePackageIntegrityFailure">
             <summary>
-              Looks up a localized string similar to Package integrity check failed..
+              Looks up a localized string similar to The package integrity check failed..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureType">
             <summary>
               Looks up a localized string similar to Signature type: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignedPackageAlreadySigned">
+            <summary>
+              Looks up a localized string similar to The package already contains a signature. Please remove the existing signature before adding a new signature..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignedPackageArchiveIOExtraRead">
@@ -3162,19 +3851,34 @@
               Looks up a localized string similar to The package is not signed. Unable to verify signature from an unsigned package..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.SignedPackagePackageAlreadySigned">
+        <member name="P:NuGet.Packaging.Strings.SignedPackagePackageAlreadyCountersigned">
             <summary>
-              Looks up a localized string similar to The package already contains a signature. Please remove the existing signature before adding a new signature..
+              Looks up a localized string similar to The package already contains a repository countersignature. Please remove the existing signature before adding a new repository countersignature..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignedPackageUnableToAccessSignature">
             <summary>
-              Looks up a localized string similar to The package was not opened correctly to perform Signature operations. Please use a Stream based constructor to have access to Signature attributes of the package..
+              Looks up a localized string similar to The package was not opened correctly to perform signature operations. Please use a Stream-based constructor to have access to signature attributes of the package..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignFailureCertificateInvalidProviderType">
             <summary>
               Looks up a localized string similar to The following certificate cannot be used for package signing as the private key provider is unsupported:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCannotBeDoneInPlace">
+            <summary>
+              Looks up a localized string similar to {0} and {1} should be different. Package signing cannot be done in place..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateAttributeMustNotBePresent">
+            <summary>
+              Looks up a localized string similar to The signing-certificate attribute is not allowed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateCertificateNotFound">
+            <summary>
+              Looks up a localized string similar to A certificate referenced by the signing-certificate attribute could not be found..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SigningCertificateFailsPublicKeyLengthRequirement">
@@ -3187,9 +3891,44 @@
               Looks up a localized string similar to The signing certificate has an unsupported signature algorithm..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateInvalid">
+            <summary>
+              Looks up a localized string similar to The signing-certificate attribute is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateV1OrV2AttributeMustBePresent">
+            <summary>
+              Looks up a localized string similar to Either the signing-certificate or signing-certificate-v2 attribute must be present..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateV2CertificateNotFound">
+            <summary>
+              Looks up a localized string similar to A certificate referenced by the signing-certificate-v2 attribute could not be found..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.SigningCertificateV2Invalid">
             <summary>
-              Looks up a localized string similar to signing-certificate-v2 attribute value does not match the current certificate chain..
+              Looks up a localized string similar to The signing-certificate-v2 attribute is invalid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateV2NotExactlyOneAttributeValue">
+            <summary>
+              Looks up a localized string similar to The signing-certificate-v2 attribute does not have exactly one attribute value..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningCertificateV2UnsupportedHashAlgorithm">
+            <summary>
+              Looks up a localized string similar to The signing-certificate-v2 attribute uses an unsupported hash algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.StreamMustBeReadable">
+            <summary>
+              Looks up a localized string similar to The stream must be readable..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.StreamMustBeSeekable">
+            <summary>
+              Looks up a localized string similar to The stream must be seekable..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.StringCannotBeNullOrEmpty">
@@ -3197,9 +3936,9 @@
               Looks up a localized string similar to String argument &apos;{0}&apos; cannot be null or empty.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampCertificateChainBuildFailure">
+        <member name="P:NuGet.Packaging.Strings.TimestampCertificateFailsPublicKeyLengthRequirement">
             <summary>
-              Looks up a localized string similar to The timestamp service&apos;s certificate chain could not be built for the following certificate: {0}.
+              Looks up a localized string similar to The timestamp certificate does not meet a minimum public key length requirement..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampCertificateInvalid">
@@ -3207,34 +3946,19 @@
               Looks up a localized string similar to The timestamp service&apos;s certificate has a valid time in the future: {0}.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampFailureAuthorCertNotValid">
-            <summary>
-              Looks up a localized string similar to Author certificate was not valid when it was timestamped..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidContentType">
-            <summary>
-              Looks up a localized string similar to Timestamp signature validation failed..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHash">
-            <summary>
-              Looks up a localized string similar to Timestamp integrity check failed..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHashAlgorithmOid">
-            <summary>
-              Looks up a localized string similar to The timestamp uses as unsupported hash algorithm..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHttpScheme">
             <summary>
-              Looks up a localized string similar to The timestamper url &apos;{0}&apos; has an invalid uri scheme. The supported schemes are &apos;{1}&apos; and &apos;{2}&apos;..
+              Looks up a localized string similar to The timestamper URL &apos;{0}&apos; has an invalid URI scheme. The supported schemes are &apos;{1}&apos; and &apos;{2}&apos;..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampFailureNonceMismatch">
             <summary>
-              Looks up a localized string similar to Timestamp response does not contain a matching response..
+              Looks up a localized string similar to The timestamp response is invalid.  Nonces did not match..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampIntegrityCheckFailed">
+            <summary>
+              Looks up a localized string similar to The timestamp integrity check failed..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampInvalid">
@@ -3242,9 +3966,14 @@
               Looks up a localized string similar to The signature contains an invalid timestamp..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampMessageImprintUnsupportedHashAlgorithm">
+            <summary>
+              Looks up a localized string similar to The timestamp&apos;s message imprint uses an unsupported hash algorithm..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.TimestampNoCertificate">
             <summary>
-              Looks up a localized string similar to The timestamp signature did not have a signing certificate..
+              Looks up a localized string similar to The timestamp signature does not have a signing certificate..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampNotYetValid">
@@ -3255,6 +3984,16 @@
         <member name="P:NuGet.Packaging.Strings.TimestampResponseExceptionGeneral">
             <summary>
               Looks up a localized string similar to Timestamp service&apos;s response does not meet the NuGet package signature specification: &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampSignatureValidationFailed">
+            <summary>
+              Looks up a localized string similar to Timestamp signature validation failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampUnsupportedSignatureAlgorithm">
+            <summary>
+              Looks up a localized string similar to The timestamp certificate has an unsupported signature algorithm..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampValue">
@@ -3277,6 +4016,21 @@
               Looks up a localized string similar to Package hash information could not be read from the package signature..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.UnexpectedPackageSignatureVerificationError">
+            <summary>
+              Looks up a localized string similar to An unexpected error occurred while verifying a package signature..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnrelatedSignatures">
+            <summary>
+              Looks up a localized string similar to The primary signature and repository countersignature are unrelated..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.UnsupportedAsn1">
+            <summary>
+              Looks up a localized string similar to The ASN.1 data is unsupported..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.UnsupportedSignatureFormatVersion">
             <summary>
               Looks up a localized string similar to The package signature format version is not supported. Updating your client may solve this problem..
@@ -3287,29 +4041,9 @@
               Looks up a localized string similar to Verifying signature with author certificate: {0}.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.VerificationDefaultCertDisplay">
-            <summary>
-              Looks up a localized string similar to Verifying signature with certificate: {0}.
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.VerificationTimestamperCertDisplay">
             <summary>
               Looks up a localized string similar to Verifying timestamp with timestamping service certificate: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.WarningOfflineRevocationCheck">
-            <summary>
-              Looks up a localized string similar to Could not check revocation status of signing certificate online..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.WarningUnknownSignatureType">
-            <summary>
-              Looks up a localized string similar to Could not validate signature. Unknown signature type..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.WarningUntrustedRoot">
-            <summary>
-              Looks up a localized string similar to Signing certificate does not chain to a trusted root..
             </summary>
         </member>
         <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder``1(System.Collections.Generic.IEnumerable{``0},System.StringComparer,System.Func{``0,System.String},System.Func{``0,System.String[]})">

@@ -16,51 +16,35 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
+  <Import Project="Microsoft.NET.DefaultPackageConflictOverrides.targets" />
+
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  
-  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="_ComputeLockFileCopyLocal;GetReferenceAssemblyPaths">
-    
-    <ItemGroup>
+  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="GetReferenceAssemblyPaths">
+
+    <ItemGroup Condition="'$(CopyLocalLockFileAssemblies)' != 'true'">
       <!-- We need to find all the files that will be loaded from deps for conflict resolution.
           To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true.
           However, if CopyLocalLockFileAssemblies is true, then we don't add these items, as they
           will always be included in ReferenceCopyLocalPaths.
           -->
-      <_LockFileAssemblies Include="@(AllCopyLocalItems->WithMetadataValue('Type', 'assembly'))"
-                           Condition="'$(CopyLocalLockFileAssemblies)' != 'true'"
-                           />
-
-      
-      <!-- Also include RuntimeTarget items, which aren't included in AllCopyLocalItems, but need to be considered
-           for conflict resolution.  Set DestinationSubPath for these items so that conflict resolution will consider
-           that path (for example "runtimes/win/lib/netstandard1.3/System.Diagnostics.TraceSource.dll" when looking
-           for conflicts). -->
-      <_RuntimeTargetItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeTarget'))" />
+      <_LockFileAssemblies Include="@(RuntimeCopyLocalItems)" />
+      <_LockFileAssemblies Include="@(NativeCopyLocalItems)" />
+      <_LockFileAssemblies Include="@(ResourceCopyLocalItems)" />
     </ItemGroup>
-    
-    <JoinItems Left="@(_RuntimeTargetItems)" Right="@(FileDefinitions)" RightMetadata="*">
-      <Output TaskParameter="JoinResult" ItemName="_RuntimeTargetPublishItems" />
-    </JoinItems>
-    
-    <ItemGroup>
-      <_RuntimeTargetPublishItems Update="@(_RuntimeTargetPublishItems)"
-                                  DestinationSubPath="%(Path)" />
 
-      <_LockFileAssemblies Include="@(_RuntimeTargetPublishItems->WithMetadataValue('Type', 'assembly')->'%(ResolvedPath)')">
-        <Private>false</Private>
-        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
-        <NuGetSourceType>Package</NuGetSourceType>
-        <NuGetPackageId>%(PackageName)</NuGetPackageId>
-        <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
-      </_LockFileAssemblies>
-    </ItemGroup>    
-    
+    <!-- Also include RuntimeTarget items, which aren't ever included in ReferenceCopyLocalPaths, but need to be considered
+         for conflict resolution. -->
+    <ItemGroup>
+      <_LockFileAssemblies Include="@(ResolvedRuntimeTargets)" />
+    </ItemGroup>
+
     <ResolvePackageFileConflicts References="@(Reference)"
-                                ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
-                                OtherRuntimeItems="@(_LockFileAssemblies)"
-                                PlatformManifests="@(PackageConflictPlatformManifests)"
-                                TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
-                                PreferredPackages="$(PackageConflictPreferredPackages)">
+                                 ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+                                 OtherRuntimeItems="@(_LockFileAssemblies)"
+                                 PlatformManifests="@(PackageConflictPlatformManifests)"
+                                 TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
+                                 PackageOverrides="@(PackageConflictOverrides)"
+                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />

@@ -296,9 +296,9 @@
         </member>
         <member name="T:NuGet.Common.NuGetLogCode">
              <summary>
-             This enum is used to quantify NuGet error and wanring codes. 
+             This enum is used to quantify NuGet error and warning codes. 
              Format - NUxyzw where NU is the profix indicating NuGet and xyzw is a 4 digit code
-             
+            
              Numbers - xyzw
                  x - 'x' is the largest digit and should be used to quantify a set of errors.
                      For example 1yzw are set of restore related errors and no other code path should use the range 1000 to 1999 for errors or warnings.
@@ -310,11 +310,12 @@
                      
                  zw - 'zw' are the least two digit.
                      These could be used for different errors or warnings within the broad categories set by digits 'xy'.
-                     
+            
              Groups:
-             1000      - Restore
-             3000/3500 - Signing
-             
+             1000-1999 - Restore
+             3000-3999 - Signing
+             5000-5999 - Packaging
+            
              Sub groups for Restore:
              error/warning - Reason
              1000/1500     - Input
@@ -322,15 +323,6 @@
              1200/1700     - Compat
              1300/1800     - Feed
              1400/1900     - Package
-            
-             Sub groups for Signing:
-             error/warning - Reason
-             3000/3500     - Input
-             3010/3510     - Package and package signature file
-             3020/3520     - Primary certificate
-             3030/3530     - Primary signature
-             3040/3540     - Timestamp certificate
-             3050/3550     - Timestamp signature
              </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.Undefined">
@@ -419,6 +411,21 @@
             un-matched reference assemblies
             </summary>
         </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU1204">
+            <summary>
+            Invalid package types
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU1211">
+            <summary>
+            project has an invalid dependency count
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU1212">
+            <summary>
+            Incompatible tools package/project combination
+            </summary>
+        </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU1401">
             <summary>
             Package MinClientVersion did not match.
@@ -496,167 +503,183 @@
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3001">
             <summary>
-            Invalid Input error
+            Invalid input error
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3002">
             <summary>
-            Invalid package error
+            The '-Timestamper' option was not provided. The signed package will not be timestamped.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3003">
             <summary>
-            Invalid number of certificates were found while signing package
+            The package signature is invalid.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3004">
+            <summary>
+            The package is not signed.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3005">
             <summary>
-            Package signature is invalid
+            The package signature file entry is invalid.
             </summary>
+            <remarks>
+            Examples which would trigger this include:
+                * the entry has incorrect external file attributes
+                * the entry is compressed not stored
+                * the entry's compressed and uncompressed sizes differ
+            </remarks>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3006">
             <summary>
-            Package is not signed
+            Signed Zip64 packages are not supported.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3007">
+            <summary>
+            The package signature format version is not supported.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3008">
+            <summary>
+            The package integrity check failed.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3009">
+            <summary>
+            The package signature file does not contain exactly one primary signature.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3010">
+            <summary>
+            The primary signature does not have a signing certificate.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3011">
             <summary>
-            ZIP entry is either not a regular file or is not stored (no compression)
+            The primary signature is invalid.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3012">
             <summary>
-            Unsupported signature format version
+            Primary signature validation failed.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3013">
             <summary>
-            Primary signature has an unsuported hash algorithm
+            The signing certificate has an unsupported signature algorithm.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3014">
             <summary>
-            Primary signature count not 1
+            The signing certificate does not meet a minimum public key length requirement.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3015">
             <summary>
-            Package integrity check failed
+            Certificates with lifetime signer EKU are not supported.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3020">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3016">
             <summary>
-            Primary signature does not have certificate
+            The package hash uses an unsupported hash algorithm.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3021">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3017">
+            <summary>
+            The signing certificate is not yet valid.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3018">
             <summary>
             Chain building failed for primary signature
             </summary>
         </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3019">
+            <summary>
+            The timestamp integrity check failed.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3020">
+            <summary>
+            The timestamp signature does not have a signing certificate.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3021">
+            <summary>
+            Timestamp signature validation failed.
+            </summary>
+        </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3022">
             <summary>
-            Unsupported signature algorithm
+            The timestamp certificate has an unsupported signature algorithm.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3023">
             <summary>
-            Unsupported public key length
+            The timestamp's certificate does not meet a minimum public key length requirement.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU3024">
             <summary>
-            Certificate not yet valid
+            The timestamp signing certificate has an unsupported signature algorithm.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3030">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3025">
             <summary>
-            Primary signature verification failed
+            The timestamp signing certificate is not yet valid.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3040">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3026">
             <summary>
-            Timestamp with no certificate
+            The timestamp response is invalid.  Nonces did not match.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3041">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3027">
+            <summary>
+            The primary signature should be timestamped to enable long-term signature validity after the certificate has expired.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3028">
             <summary>
             Chain building failed for timestamp
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3044">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3029">
             <summary>
-            Timestamp certificate not yet effective
+            The timestamp signature is invalid.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3050">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3030">
             <summary>
-            Invalid timestamp in signature
+            The timestamp's message imprint uses an unsupported hash algorithm.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3051">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3031">
             <summary>
-            Timestamp nonce mismatch
+            The repository countersignature is invalid.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3052">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3032">
             <summary>
-            Timestamp unsupported algorithm
+            The package signature contains multiple repository countersignatures.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3053">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3033">
             <summary>
-            Timestamp integrity check
+            A repository primary signature must not have a repository countersignature.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3500">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3034">
             <summary>
-            Undefined signature warning
+            The package signature certificate does not match the trusted certificate list.
             </summary>
         </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3501">
+        <member name="F:NuGet.Common.NuGetLogCode.NU3035">
             <summary>
-            Untrusted root warning
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3502">
-            <summary>
-            Signature information unavailable warning
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3513">
-            <summary>
-            Primary signature has an unsuported hash algorithm
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3521">
-            <summary>
-            Timestamp url not passed to sign command
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3524">
-            <summary>
-            Certificate not yet valid
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3530">
-            <summary>
-            Primary signature verification failed
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3544">
-            <summary>
-            Timestamp not yet valid
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3550">
-            <summary>
-            Invalid timestamp in signature
-            </summary>
-        </member>
-        <member name="F:NuGet.Common.NuGetLogCode.NU3552">
-            <summary>
-            Timestamp unsupported algorithm
+            Chain building failed for the repository countersignature.
             </summary>
         </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU5000">
@@ -704,12 +727,232 @@
             ErrorManifestFileNotFound
             </summary>
         </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5009">
+            <summary>
+            Error_CannotFindMsbuild
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5010">
+            <summary>
+            Error_InvalidVersionInPackage
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5011">
+            <summary>
+            Error_UnableToExtractAssemblyMetadata
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5012">
+            <summary>
+            Error_UnableToFindBuildOutput
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5013">
+            <summary>
+            Error_FailedToBuildProject
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5014">
+            <summary>
+            Error_ProcessingNuspecFile
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5015">
+            <summary>
+            Error_MultipleTargetFrameworks
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5016">
+            <summary>
+            Error_InvalidDependencyVersionConstraints
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5017">
+            <summary>
+            Error_CannotCreateEmptyPackage
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5018">
+            <summary>
+            Error_Manifest_InvalidReference
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5019">
+            <summary>
+            Error_PackageAuthoring_FileNotFound
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5020">
+            <summary>
+            Error_EmptySourceFilePath
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5021">
+            <summary>
+            Error_EmptySourceFileProjectDirectory
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5022">
+            <summary>
+            Error_InvalidMinClientVersion
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5023">
+            <summary>
+            Error_AssetsFileNotFound
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5024">
+            <summary>
+            Error_InvalidPackageVersion
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5025">
+            <summary>
+            Error_AssetsFileDoesNotHaveValidPackageSpec
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5026">
+            <summary>
+            Error_FileNotFound
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5027">
+            <summary>
+            Error_InvalidTargetFramework
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5028">
+            <summary>
+            Error_NoPackItemProvided
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5029">
+            <summary>
+            Error_InvalidNuspecProperties
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5100">
+            <summary>
+            AssemblyOutsideLibWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5101">
+            <summary>
+            AssemblyDirectlyUnderLibWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5102">
+            <summary>
+            DefaultSpecValueWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5103">
+            <summary>
+            InvalidFrameworkWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5104">
+            <summary>
+            InvalidPrereleaseDependencyWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5105">
+            <summary>
+            LegacyVersionWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5106">
+            <summary>
+            WinRTObsoleteWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5107">
+            <summary>
+            MisplacedInitScriptWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5108">
+            <summary>
+            MisplacedTransformFileWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5109">
+            <summary>
+            PlaceholderFileInPackageWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5110">
+            <summary>
+            ScriptOutsideToolsWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5111">
+            <summary>
+            UnrecognizedScriptWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5112">
+            <summary>
+            UnspecifiedDependencyVersionWarning
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5113">
+            <summary>
+            Warning_SemanticVersion
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5114">
+            <summary>
+            Warning_DuplicatePropertyKey
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5115">
+            <summary>
+            Warning_UnspecifiedField
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5116">
+            <summary>
+            Warning_FileDoesNotExist
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5117">
+            <summary>
+            Warning_UnresolvedFilePath
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5118">
+            <summary>
+            Warning_FileNotAddedToPackage
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5119">
+            <summary>
+            Warning_FileExcludedByDefault
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5120">
+            <summary>
+            Migrator_PackageHasInstallScript
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5121">
+            <summary>
+            Migrator_PackageHasContentFolder
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU5122">
+            <summary>
+            Migrator_XdtTransformInPackage
+            </summary>
+        </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU5500">
             <summary>
             Undefined package warning
             </summary>
         </member>
-        <member name="M:NuGet.Common.PackLogMessage.#ctor(NuGet.Common.LogLevel,NuGet.Common.NuGetLogCode,System.String)">
+        <member name="M:NuGet.Common.PackagingLogMessage.#ctor(NuGet.Common.LogLevel,NuGet.Common.NuGetLogCode,System.String)">
             <summary>
             Initializes a new instance of the PackLogMessage class
             </summary>
@@ -717,14 +960,14 @@
             <param name="logCode">The NuGet log code</param>
             <param name="message">The log message</param>
         </member>
-        <member name="M:NuGet.Common.PackLogMessage.CreateError(NuGet.Common.NuGetLogCode,System.String)">
+        <member name="M:NuGet.Common.PackagingLogMessage.CreateError(System.String,NuGet.Common.NuGetLogCode)">
             <summary>
             Create an error log message.
             </summary>
             <param name="code">The logging code</param>
             <param name="message">The log message</param>
         </member>
-        <member name="M:NuGet.Common.PackLogMessage.GetDefaultLogCode(NuGet.Common.LogLevel)">
+        <member name="M:NuGet.Common.PackagingLogMessage.GetDefaultLogCode(NuGet.Common.LogLevel)">
             <summary>
             Get default LogCode based on the log level
             </summary>
@@ -850,6 +1093,44 @@
             <param name="code">NuGetLogCode to be formatted into string.</param>
             <param name="codeString">strings representation of the NuGetLogCode if the result is true else null.</param>
             <returns>bool indcating if the GetName operation was successfull or not.</returns>
+        </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.Split(System.String)">
+            <summary>
+            Split on ; and trim. Null or empty inputs will return an
+            empty array.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.Split(System.String,System.Char[])">
+            <summary>
+            Split on ; and trim. Null or empty inputs will return an
+            empty array.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.TrimAndGetNullForEmpty(System.String)">
+            <summary>
+            Trims the provided string and converts empty strings to null.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.TrimAndExcludeNullOrEmpty(System.String[])">
+            <summary>
+            Trims the provided strings and excludes empty or null strings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.IsTrue(System.String)">
+            <summary>
+            True if the property is set to true
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.IsTrueOrEmpty(System.String)">
+            <summary>
+            True if the property is set to true or empty.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.GetNuGetLogCodes(System.String)">
+            <summary>
+            Splits and parses a ; or , delimited list of log codes.
+            Ignores codes that are unknown.
+            </summary>
         </member>
         <member name="M:NuGet.Common.NetworkProtocolUtility.ConfigureSupportedSslProtocols">
             <summary>
@@ -1184,6 +1465,51 @@
         <member name="P:NuGet.Common.Strings.UnsupportedHashAlgorithm">
             <summary>
               Looks up a localized string similar to Hash algorithm &apos;{0}&apos; is unsupported. Supported algorithms include: SHA512 and SHA256..
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.UnsupportedHashAlgorithmName">
+            <summary>
+              Looks up a localized string similar to The hash algorithm &apos;{0}&apos; is unsupported..
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.ITelemetrySession">
+            <summary>
+            Interface to post telemetry events.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.NuGetOperationStatus">
+            <summary>
+            Define different states for nuget operation status.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetOperationStatus.NoOp">
+            <summary>
+            no operation performed.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetOperationStatus.Succeeded">
+            <summary>
+            operation was successful.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetOperationStatus.Failed">
+            <summary>
+            operation failed.
+            </summary>
+        </member>
+        <member name="F:NuGet.Common.NuGetOperationStatus.Cancelled">
+            <summary>
+            operation was cancelled
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.TelemetryEvent">
+            <summary>
+            This will be used to pass different nuget telemetry events data to vs telemetry service.
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.TelemetryEvent.Count">
+            <summary>
+            Property count in TelemetryEvent
             </summary>
         </member>
         <member name="T:NuGet.Common.Tokenizer">
