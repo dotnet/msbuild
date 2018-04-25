@@ -8,8 +8,8 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionBase>2.1.400</VersionBase>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <VersionBase>2.2.100</VersionBase>
+    <PreReleaseVersionLabel>preview1</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <!-- Repo Toolset Features -->
