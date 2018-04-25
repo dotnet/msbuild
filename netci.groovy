@@ -77,10 +77,10 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
         }
 
         // TODO: make this !windows once Mono 5.0+ is available in an OSX image
-        // if (osName.startsWith('Ubuntu')) {
-        //     runtimes.add('Mono')
-        //     runtimes.add('MonoTest')
-        // }
+        if (osName.startsWith('Ubuntu')) {
+            runtimes.add('Mono')
+            runtimes.add('MonoTest')
+        }
 
         def script = "NA"
 
