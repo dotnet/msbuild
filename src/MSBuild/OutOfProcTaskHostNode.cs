@@ -821,14 +821,8 @@ namespace Microsoft.Build.CommandLine
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
 
                 // Set culture
-#if FEATURE_CULTUREINFO_SETTERS
-                CultureInfo.CurrentCulture = taskConfiguration.Culture;
-                CultureInfo.CurrentUICulture = taskConfiguration.UICulture;
-
-#else
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
                 Thread.CurrentThread.CurrentUICulture = taskConfiguration.UICulture;
-#endif
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
@@ -1102,11 +1096,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint != null && _nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-#if FEATURE_BINARY_SERIALIZATION
                 if (!e.GetType().GetTypeInfo().IsSerializable)
-#else
-                if (!NodePacketTranslator.IsSerializable(e))
-#endif
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
                     // that the warning that we constructed is serializable, so everything should be good.  

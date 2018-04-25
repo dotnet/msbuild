@@ -480,6 +480,7 @@ namespace Microsoft.Build.Construction
     {
         EtpSubProject = 5,
         KnownToBeMSBuildFormat = 1,
+        SharedProject = 6,
         SolutionFolder = 2,
         Unknown = 0,
         WebDeploymentProject = 4,
@@ -1093,7 +1094,7 @@ namespace Microsoft.Build.Execution
     }
     public partial class OutOfProcNode
     {
-        public OutOfProcNode() { }
+        public OutOfProcNode(string clientToServerPipeHandle, string serverToClientPipeHandle) { }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
     }

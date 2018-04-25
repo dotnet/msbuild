@@ -422,7 +422,11 @@ namespace Microsoft.Build.BackEnd
                     // it will cause the host to reject us; new hosts expect 00 and old hosts expect F5 or 06).
                     try
                     {
-                        long handshake = localReadPipe.ReadLongForHandshake(/* reject these leads */ new byte[] { 0x5F, 0x60 }, 0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */);
+                        long handshake = localReadPipe.ReadLongForHandshake(/* reject these leads */ new byte[] { 0x5F, 0x60 }, 0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */
+#if NETCOREAPP2_1
+                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
+#endif
+                            );
 
 #if FEATURE_SECURITY_PERMISSIONS
                         WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
@@ -654,19 +658,7 @@ namespace Microsoft.Build.BackEnd
                                 packetStream.Position = 1;
                                 packetStream.Write(BitConverter.GetBytes((int)packetStream.Length - 5), 0, 4);
 
-#if FEATURE_MEMORYSTREAM_GETBUFFER
                                 localWritePipe.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
-#else
-                                ArraySegment<byte> packetStreamBuffer;
-                                if (packetStream.TryGetBuffer(out packetStreamBuffer))
-                                {
-                                    localWritePipe.Write(packetStreamBuffer.Array, packetStreamBuffer.Offset, packetStreamBuffer.Count);
-                                }
-                                else
-                                {
-                                    localWritePipe.Write(packetStream.ToArray(), 0, (int)packetStream.Length);
-                                }
-#endif
                             }
                         }
                         catch (Exception e)

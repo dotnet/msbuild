@@ -6,18 +6,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-#if !SILVERLIGHT
 using System.Runtime.Serialization;
-#endif
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
-#if SILVERLIGHT
-using System.Core; // for System.Core.SR
-#endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
@@ -86,20 +81,14 @@ namespace Microsoft.Build.Collections
     [DebuggerTypeProxy(typeof(Microsoft.Build.Collections.HashSetDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "By design")]
-#if SILVERLIGHT
-    public class HashSet<T> : ICollection<T>, ISet<T>
-#else
     [Serializable()]
 #if FEATURE_SECURITY_PERMISSIONS
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
     internal class RetrievableEntryHashSet<T> : ICollection<T>,
-#if FEATURE_BINARY_SERIALIZATION
         ISerializable, IDeserializationCallback,
-#endif
         IDictionary<string, T>
         where T : class, IKeyed
-#endif
     {
         // store lower 31 bits of hash code
         private const int Lower31BitMask = 0x7FFFFFFF;
@@ -112,13 +101,11 @@ namespace Microsoft.Build.Collections
         // This is set to 3 because capacity is acceptable as 2x rounded up to nearest prime.
         private const int ShrinkThreshold = 3;
 
-#if !SILVERLIGHT
         // constants for serialization
         private const String CapacityName = "Capacity";
         private const String ElementsName = "Elements";
         private const String ComparerName = "Comparer";
         private const String VersionName = "Version";
-#endif
 
         private int[] _buckets;
         private Slot[] _slots;
@@ -130,12 +117,8 @@ namespace Microsoft.Build.Collections
         private int _version;
         private bool _readOnly;
 
-#if !SILVERLIGHT
-#if FEATURE_BINARY_SERIALIZATION
         // temporary variable needed during deserialization
         private SerializationInfo _siInfo;
-#endif
-#endif
 
         #region Constructors
 
@@ -211,8 +194,6 @@ namespace Microsoft.Build.Collections
             }
         }
 
-#if !SILVERLIGHT
-#if FEATURE_BINARY_SERIALIZATION
         protected RetrievableEntryHashSet(SerializationInfo info, StreamingContext context)
         {
             // We can't do anything with the keys and values until the entire graph has been 
@@ -221,8 +202,6 @@ namespace Microsoft.Build.Collections
             // OnDeserialization has been called.
             _siInfo = info;
         }
-#endif
-#endif
 
         #endregion
 
@@ -532,8 +511,6 @@ namespace Microsoft.Build.Collections
 
         #region ISerializable methods
 
-#if !SILVERLIGHT
-#if FEATURE_BINARY_SERIALIZATION
         // [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         [SecurityCritical]
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -554,14 +531,11 @@ namespace Microsoft.Build.Collections
                 info.AddValue(ElementsName, array, typeof(T[]));
             }
         }
-#endif
-#endif
+
         #endregion
 
         #region IDeserializationCallback methods
 
-#if !SILVERLIGHT
-#if FEATURE_BINARY_SERIALIZATION
         public virtual void OnDeserialization(Object sender)
         {
             if (_siInfo == null)
@@ -604,8 +578,6 @@ namespace Microsoft.Build.Collections
             _version = _siInfo.GetInt32(VersionName);
             _siInfo = null;
         }
-#endif
-#endif
 
         #endregion
 

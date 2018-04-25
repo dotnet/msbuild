@@ -42,12 +42,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Project
         {
-            get
-            {
-                return
-                    FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
-            }
-
+            get => FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
@@ -67,12 +62,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Sdk
         {
-            get
-            {
-                return
-                    FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk));
-            }
-
+            get => FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
@@ -87,7 +77,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Version
         {
-            get { return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion); }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion);
             set
             {
                 if (!CheckUpdatedSdk()) return;
@@ -101,7 +91,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string MinimumVersion
         {
-            get { return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion); }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion);
             set
             {
                 if (!CheckUpdatedSdk()) return;

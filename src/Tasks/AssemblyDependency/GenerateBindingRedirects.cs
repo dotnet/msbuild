@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------------------------------------------- 
+//-------------------------------------------------------------------------------------------------
 // Copyright (c) Microsoft Corp. All rights reserved.
 // </copyright>
 //-------------------------------------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -120,6 +121,26 @@ namespace Microsoft.Build.Tasks
 
             runtimeNode.Add(redirectNodes);
 
+            var writeOutput = true;
+
+            if(File.Exists(OutputAppConfigFile.ItemSpec))
+            {
+                try
+                {
+                    var outputDoc = LoadAppConfig(OutputAppConfigFile);
+                    if(outputDoc.ToString() == doc.ToString())
+                    {
+                        writeOutput = false;
+                    }
+
+                }
+                catch(System.Xml.XmlException)
+                {
+                    writeOutput = true;
+                }
+            }
+
+
             if (AppConfigFile != null)
             {
                 AppConfigFile.CopyMetadataTo(OutputAppConfigFile);
@@ -129,9 +150,12 @@ namespace Microsoft.Build.Tasks
                 OutputAppConfigFile.SetMetadata(ItemMetadataNames.targetPath, TargetName);
             }
 
-            using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
+            if(writeOutput)
             {
-                doc.Save(stream);
+                using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
+                {
+                    doc.Save(stream);
+                }
             }
 
             return !Log.HasLoggedErrors;

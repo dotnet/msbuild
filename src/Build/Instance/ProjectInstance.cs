@@ -2511,7 +2511,6 @@ namespace Microsoft.Build.Execution
 
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
-            string toolsVersionToUse = explicitToolsVersion;
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
             ElementLocation toolsVersionLocation = xml.Location;
 
@@ -2521,13 +2520,13 @@ namespace Microsoft.Build.Execution
                 toolsVersionLocation = xml.ToolsVersionLocation;
             }
 
-            toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                (
-                    explicitToolsVersion,
-                    xml.ToolsVersion,
-                    buildParameters.GetToolset,
-                    buildParameters.DefaultToolsVersion
-                );
+            var toolsVersionToUse = Utilities.GenerateToolsVersionToUse
+            (
+                explicitToolsVersion,
+                xml.ToolsVersion,
+                buildParameters.GetToolset,
+                buildParameters.DefaultToolsVersion
+            );
 
             // Don't log the message if the toolsversion is different because an explicit toolsversion was specified -- 
             // in that case the user already knows what they're doing; the point of this warning is to give them a heads

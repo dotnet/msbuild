@@ -440,6 +440,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
+                            // Fix path to avoid problem with Path.GetFileNameWithoutExtension when backslashes in itemSpec on Unix
                             modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
                         }
                     }

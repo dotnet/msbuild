@@ -80,6 +80,7 @@ namespace Microsoft.Build.Construction
         private const string wdProjectGuid = "{2CFEAB61-6A3B-4EB8-B523-560B4BEEF521}";
         private const string webProjectGuid = "{E24C65DC-7377-472B-9ABA-BC803B73C61A}";
         private const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
+        private const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
         #endregion
 
@@ -1272,6 +1273,10 @@ namespace Microsoft.Build.Construction
                 (String.Compare(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase) == 0))
             {
                 proj.ProjectType = SolutionProjectType.KnownToBeMSBuildFormat;
+            }
+            else if (String.Compare(projectTypeGuid, sharedProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                proj.ProjectType = SolutionProjectType.SharedProject;
             }
             else if (String.Compare(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase) == 0)
             {

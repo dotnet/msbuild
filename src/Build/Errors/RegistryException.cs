@@ -54,7 +54,6 @@ namespace Microsoft.Build.Exceptions
             base.Source = source;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Since this class implements Iserializable this constructor is required to be implemented.
         /// </summary>
@@ -63,7 +62,6 @@ namespace Microsoft.Build.Exceptions
             // We don't have any reason at the moment to do any custom serizlization or deserialization, this methods was added
             // to conform to the implementation of the standard constructors for ISerializable classes
         }
-#endif
 
         /// <summary>
         /// Constructor that takes a string description of the registry
