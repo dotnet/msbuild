@@ -12,7 +12,6 @@
   "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
   "shortName": "nugetconfig",
-  "sourceName": "Nuget",
   "primaryOutputs": [ { "path": "nuget.config" } ],
   "defaultName": "nuget.config",
   "symbols": {
