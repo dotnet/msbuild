@@ -49,13 +49,46 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <returns></returns>
         internal virtual IList<string> FindPotentialSdkResolvers(string rootFolder)
         {
-            if (string.IsNullOrEmpty(rootFolder) || !FileUtilities.DirectoryExistsNoThrow(rootFolder))
-                return new List<string>();
+            var assembliesList = new List<string>();
 
-            return new DirectoryInfo(rootFolder).GetDirectories()
-                .Select(subfolder => Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll"))
-                .Where(FileUtilities.FileExistsNoThrow)
-                .ToList();
+            if (string.IsNullOrEmpty(rootFolder) || !FileUtilities.DirectoryExistsNoThrow(rootFolder))
+            {
+                return assembliesList;
+            }
+
+            foreach (var subfolder in new DirectoryInfo(rootFolder).GetDirectories())
+            {
+                var assembly = Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll");
+                var manifest = Path.Combine(subfolder.FullName, $"{subfolder.Name}.xml");
+
+                var assemblyAdded = TryAddAssembly(assembly, assembliesList);
+                if (!assemblyAdded)
+                {
+                    AddAssemblyFromManifest(manifest, assembliesList);
+                }
+            }
+
+            return assembliesList;
+        }
+
+        private void AddAssemblyFromManifest(string pathToManifest, List<string> assembliesList)
+        {
+            if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest)) return;
+
+            // <SdkResolver>
+            //   <Path>...</Path>
+            // </SdkResolver>
+
+            var manifest = SdkResolverManifest.Load(pathToManifest);
+            TryAddAssembly(manifest?.Path, assembliesList);
+        }
+
+        private bool TryAddAssembly(string assemblyPath, List<string> assembliesList)
+        {
+            if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
+
+            assembliesList.Add(assemblyPath);
+            return true;
         }
 
         protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)

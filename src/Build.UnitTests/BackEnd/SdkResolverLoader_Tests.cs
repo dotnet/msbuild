@@ -4,6 +4,8 @@ using Shouldly;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
@@ -12,6 +14,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit;
+using Xunit.Abstractions;
 using Exception = System.Exception;
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
@@ -22,12 +25,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolverLoader_Tests
     {
+        private readonly ITestOutputHelper _output;
         private readonly MockLogger _logger;
         private readonly LoggingContext _loggingContext;
 
-        public SdkResolverLoader_Tests()
+        public SdkResolverLoader_Tests(ITestOutputHelper output)
         {
-            _logger = new MockLogger();
+            _output = output;
+            _logger = new MockLogger(output);
             ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             loggingService.RegisterLogger(_logger);
 
@@ -156,10 +161,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
-                LoadResolverAssemblyFunc = (resolverPath, loggingContext, location) =>
-                {
-                    throw new Exception(expectedMessage);
-                },
+                LoadResolverAssemblyFunc = (resolverPath, loggingContext, location) => throw new Exception(expectedMessage),
                 FindPotentialSdkResolversFunc = rootFolder => new List<string>
                 {
                     assemblyPath,
@@ -179,6 +181,54 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             _logger.WarningCount.ShouldBe(0);
             _logger.ErrorCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void SdkResolverLoaderReadsManifestFile()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var root = env.CreateFolder().FolderPath;
+                var resolverPath = Path.Combine(root, "MyTestResolver");
+                var resolverManifest = Path.Combine(resolverPath, "MyTestResolver.xml");
+
+                var assemblyToLoad = env.CreateFile(".dll").Path;
+
+                Directory.CreateDirectory(resolverPath);
+                File.WriteAllText(resolverManifest, $@"
+                    <SdkResolver>
+                      <Path>{assemblyToLoad}</Path>
+                    </SdkResolver>");
+
+                SdkResolverLoader loader = new SdkResolverLoader();
+                var resolversFound = loader.FindPotentialSdkResolvers(root);
+
+                resolversFound.Count.ShouldBe(1);
+                resolversFound.First().ShouldBe(assemblyToLoad);
+            }
+        }
+
+        [Fact]
+        public void SdkResolverLoaderErrorsWithInvalidManifestFile()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var root = env.CreateFolder().FolderPath;
+                var resolverPath = Path.Combine(root, "MyTestResolver");
+                var resolverManifest = Path.Combine(resolverPath, "MyTestResolver.xml");
+
+                var assemblyToLoad = env.CreateFile(".dll").Path;
+
+                Directory.CreateDirectory(resolverPath);
+                File.WriteAllText(resolverManifest, $@"
+                    <SdkResolver2>
+                      <Path>{assemblyToLoad}</Path>
+                    </SdkResolver2>");
+
+                SdkResolverLoader loader = new SdkResolverLoader();
+
+                Should.Throw<SerializationException>(() => loader.FindPotentialSdkResolvers(root));
+            }
         }
 
         private class MockSdkResolverThatDoesNotLoad : SdkResolverBase
