@@ -50,10 +50,11 @@
 
   <!-- Production Dependencies -->
   <PropertyGroup>
+    <VisualStudioSetupInteropVersion>1.16.30</VisualStudioSetupInteropVersion>
     <MicrosoftNETCoreAppVersion>2.1.0-preview2-26406-04</MicrosoftNETCoreAppVersion>
 
     <!-- MSBuild custom overall switch -->
-    <NuGetPackageVersion>4.7.0-rtm.5081</NuGetPackageVersion>
+    <NuGetPackageVersion>4.7.0-rtm.5148</NuGetPackageVersion>
 
     <!-- Prodcon-overrideable, using repo-toolset naming convention -->
     <NuGetBuildTasksVersion>$(NuGetPackageVersion)</NuGetBuildTasksVersion>
