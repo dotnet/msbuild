@@ -64,14 +64,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 var assemblyAdded = TryAddAssembly(assembly, assembliesList);
                 if (!assemblyAdded)
                 {
-                    AddAssemblyFromManifest(manifest, assembliesList);
+                    AddAssemblyFromManifest(manifest, subfolder.FullName, assembliesList);
                 }
             }
 
             return assembliesList;
         }
 
-        private void AddAssemblyFromManifest(string pathToManifest, List<string> assembliesList)
+        private void AddAssemblyFromManifest(string pathToManifest, string manifestFolder, List<string> assembliesList)
         {
             if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest)) return;
 
@@ -80,7 +80,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // </SdkResolver>
 
             var manifest = SdkResolverManifest.Load(pathToManifest);
-            TryAddAssembly(manifest?.Path, assembliesList);
+            if (!string.IsNullOrEmpty(manifest?.Path))
+            {
+                var path = manifest.Path;
+                if (!Path.IsPathRooted(path))
+                {
+                    path = Path.Combine(manifestFolder, manifest.Path);
+                    path = Path.GetFullPath(path);
+                }
+
+                TryAddAssembly(path, assembliesList);
+            }
         }
 
         private bool TryAddAssembly(string assemblyPath, List<string> assembliesList)
