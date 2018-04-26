@@ -23,7 +23,7 @@ namespace Microsoft.NET.TestFramework
 
         public bool ShouldShowHelp { get; private set; }
 
-        public string BuildVersion { get; private set; }
+        public string SdkVersion { get; private set; }
 
         public static TestCommandLine Parse(string[] args)
         {
@@ -58,9 +58,9 @@ namespace Microsoft.NET.TestFramework
                 {
                     ret.NoRepoInference = true;
                 }
-                else if (arg.Equals("-buildVersion", StringComparison.CurrentCultureIgnoreCase))
+                else if (arg.Equals("-sdkVersion", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    ret.BuildVersion = argStack.Pop();
+                    ret.SdkVersion = argStack.Pop();
                 }
                 else if (arg.Equals("-help", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("/?"))
                 {

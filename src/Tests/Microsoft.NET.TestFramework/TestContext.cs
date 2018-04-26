@@ -21,7 +21,7 @@ namespace Microsoft.NET.TestFramework
 
         public string NuGetExePath { get; set; }
 
-        public string BuildVersion { get; set; }
+        public string SdkVersion { get; set; }
 
         public ToolsetInfo ToolsetUnderTest { get; set; }
 
@@ -118,14 +118,14 @@ namespace Microsoft.NET.TestFramework
                 testContext.NuGetCachePath = Path.Combine(nugetFolder, "packages");
             }
 
-            if (commandLine.BuildVersion != null)
+            if (commandLine.SdkVersion != null)
             {
-                testContext.BuildVersion = commandLine.BuildVersion;
+                testContext.SdkVersion = commandLine.SdkVersion;
             }
             else
             {
                 var assemblyInformationalVersion = (AssemblyInformationalVersionAttribute)(Attribute.GetCustomAttribute(typeof(TestContext).Assembly, typeof(AssemblyInformationalVersionAttribute)));
-                testContext.BuildVersion = assemblyInformationalVersion.InformationalVersion;
+                testContext.SdkVersion = assemblyInformationalVersion.InformationalVersion;
             }
 
             testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, artifactsDir, repoConfiguration, commandLine);
