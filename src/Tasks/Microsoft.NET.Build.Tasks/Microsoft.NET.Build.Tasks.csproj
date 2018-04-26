@@ -47,6 +47,11 @@
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackVersion)" ExcludeAssets="All" />
   </ItemGroup>
 
+  <!-- System.Reflection.Metadata is in-box for .NET Core 2.0, so we only need to reference it for .NET Framework -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+  </ItemGroup>
+
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Update="Microsoft.Extensions.DependencyModel" ExcludeAssets="Runtime" />
