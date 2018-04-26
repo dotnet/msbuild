@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The ToolsVersion we should use to build this project.  Should never be null.</returns>
         public string GetEffectiveToolsVersion(string explicitToolsVersion, string toolsVersionFromProject)
         {
-            return Utilities.GenerateToolsVersionToUse(explicitToolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion);
+            return Utilities.GenerateToolsVersionToUse(explicitToolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
         }
 
         /// <summary>
@@ -1107,7 +1107,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion);
+                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
                 Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
 
                 if (project == null)
