@@ -172,9 +172,9 @@ namespace Microsoft.DotNet.Tests.Commands
 
         private BuildServerShutdownCommand CreateCommand(string options = "", IEnumerable<IBuildServerManager> managers = null)
         {
-            ParseResult result = Parser.Instance.Parse("dotnet buildserver shutdown " + options);
+            ParseResult result = Parser.Instance.Parse("dotnet build-server shutdown " + options);
             return new BuildServerShutdownCommand(
-                options: result["dotnet"]["buildserver"]["shutdown"],
+                options: result["dotnet"]["build-server"]["shutdown"],
                 result: result,
                 managers: managers,
                 useOrderedWait: true,

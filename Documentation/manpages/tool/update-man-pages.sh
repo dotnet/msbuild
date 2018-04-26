@@ -19,7 +19,10 @@ else
   exit 1
 fi
 
+echo "Extracting master.zip"
 unzip -o master.zip > /dev/null
+
+echo "Removing master.zip"
 rm master.zip*
 
 ls docs-master/docs/core/tools/dotnet*.md | while read -r line;
