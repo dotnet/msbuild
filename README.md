@@ -123,8 +123,8 @@ Reference notes:
 [rhel-6-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-rhel.6-x64.tar.gz
 [rhel-6-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-rhel.6-x64.tar.gz.sha
 
-[alpine-3.6-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-alpine.3.6-x64.tar.gz
-[alpine-3.6-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-alpine.3.6-x64.tar.gz.sha
+[linux-musl-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-linux-musl-x64.tar.gz
+[linux-musl-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-linux-musl-x64.tar.gz.sha
 
 # Debian daily feed
 
