@@ -146,6 +146,24 @@ function ExitIfError {
   fi
 }
 
+# copied from https://github.com/dotnet/metadata-tools/blob/0c2c58c79edc2085f97b208afb8980cfed33b857/eng/common/build.sh#L122-L138
+# ReadJson [filename] [json key]
+# Result: Sets 'readjsonvalue' to the value of the provided json key
+# Note: this method may return unexpected results if there are duplicate
+# keys in the json
+function ReadJson {
+  local unamestr="$(uname)"
+  local sedextended='-r'
+  if [[ "$unamestr" == 'Darwin' ]]; then
+    sedextended='-E'
+  fi;
+
+  readjsonvalue="$(grep -m 1 "\"${2}\"" ${1} | sed ${sedextended} 's/^ *//;s/.*: *"//;s/",?//')"
+  if [[ ! "$readjsonvalue" ]]; then
+    ExitIfError 1 "Error: Cannot find \"${2}\" in ${1}"
+  fi;
+}
+
 function CreateDirectory {
   if [ ! -d "$1" ]
   then
@@ -260,15 +278,18 @@ function InstallDotNetCli {
 }
 
 function InstallRepoToolset {
-  RepoToolsetVersion="$( GetVersionsPropsVersion RoslynToolsRepoToolsetVersion )"
+  ReadJson "$RepoRoot/global.json" "RoslynTools.RepoToolset"
+  RepoToolsetVersion=$readjsonvalue
   RepoToolsetDir="$NuGetPackageRoot/roslyntools.repotoolset/$RepoToolsetVersion/tools"
   RepoToolsetBuildProj="$RepoToolsetDir/Build.proj"
+
+  echo "Using repo tools version: $readjsonvalue"
 
   local logCmd=$(GetLogCmd Toolset)
 
   if [ ! -d "$RepoToolsetBuildProj" ]
   then
-    ToolsetProj="$ScriptRoot/Toolset.proj"
+    local ToolsetProj="$ScriptRoot/Toolset.csproj"
     CallMSBuild $(QQ $ToolsetProj) /t:restore /m /clp:Summary /warnaserror /v:$verbosity $logCmd $properties
   fi
 }
@@ -301,7 +322,7 @@ function Build {
 
   local logCmd=$(GetLogCmd Build)
 
-  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $MSBuildSolution) /p:CIBuild=$ci /p:DisableNerdbankVersioning=$dotnetBuildFromSource"
+  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:RepoRoot=$(QQ $RepoRoot) /p:Projects=$(QQ $MSBuildSolution) /p:CIBuild=$ci /p:DisableNerdbankVersioning=$dotnetBuildFromSource"
 
   # Only enable warnaserror on CI runs.
   if $ci
