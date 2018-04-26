@@ -3,11 +3,11 @@
 <Project>
 
   <PropertyGroup>
+    <!-- Add the imported props file -->
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.props</MSBuildAllProjects>
   </PropertyGroup>
 
   <Import Project="..\Directory.Build.props" />
-  <Import Project="$(RepoToolsetDir)Settings.props" />
 
   <PropertyGroup>
     <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>

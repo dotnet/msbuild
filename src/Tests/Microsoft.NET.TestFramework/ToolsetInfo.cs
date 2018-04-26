@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
 using System.Xml.Linq;
+using System.Reflection;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -123,9 +124,7 @@ namespace Microsoft.NET.TestFramework
             }
             else if (repoRoot != null)
             {
-                var dotnetCliVersion = GetDotNetCliVersion(repoRoot);
-
-                ret.DotNetHostPath = Path.Combine(repoArtifactsDir, ".dotnet", dotnetCliVersion, $"dotnet{Constants.ExeSuffix}");
+                ret.DotNetHostPath = Path.Combine(repoRoot, ".dotnet", $"dotnet{Constants.ExeSuffix}");
             }
             else
             {
@@ -134,7 +133,7 @@ namespace Microsoft.NET.TestFramework
 
             if (repoRoot != null)
             {
-                ret.CliVersionForBundledVersions = GetDotNetCliVersion(repoRoot);
+                ret.CliVersionForBundledVersions = GetDotNetCliVersion();
                 ret.SdksPath = Path.Combine(repoArtifactsDir, configuration, "bin", "Sdks");
             }
 
@@ -150,22 +149,8 @@ namespace Microsoft.NET.TestFramework
             return ret;
         }
 
-        private static string GetDotNetCliVersion(string repoRoot)
-        {
-            var xml = XDocument.Load(Path.Combine(repoRoot, "build", "Versions.props"));
-
-            foreach (var propertyGroup in xml.Descendants(XName.Get("PropertyGroup", "http://schemas.microsoft.com/developer/msbuild/2003")))
-            {
-                var dotnetCliVersion = propertyGroup.Descendants(XName.Get("DotNetCliVersion", "http://schemas.microsoft.com/developer/msbuild/2003"));
-
-                if (dotnetCliVersion.Any())
-                {
-                    return dotnetCliVersion.Single().Value;
-                }
-            }
-
-            throw new Exception("Failed to locate the .NET CLI Version");
-        }
+        private static string GetDotNetCliVersion()
+            => typeof(ToolsetInfo).Assembly.GetCustomAttribute<DotNetSdkVersionAttribute>().Version;
 
         private static string ResolveCommand(string command)
         {
