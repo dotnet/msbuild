@@ -18,10 +18,16 @@
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
     <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetPackagingVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetPackagingVersion)" />
+
+    <!-- Referenced explicitly here because Microsoft.DotNet.Cli.Utils references a lower version at the moment, which causes
+         RAR conflicts (though ideally I would think NuGet would resolve this) -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
   </ItemGroup>
 
   <ItemGroup>

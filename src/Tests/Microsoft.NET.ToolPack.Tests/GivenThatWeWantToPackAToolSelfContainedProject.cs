@@ -10,6 +10,8 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.Build.Tasks;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -32,13 +34,15 @@ namespace Microsoft.NET.ToolPack.Tests
                                             XNamespace ns = project.Root.Name.Namespace;
                                             XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                                             propertyGroup.Add(new XElement("RuntimeIdentifier", "win-x64"));
-                                        })
-                                        .Restore(Log);
+                                        });
+
+            helloWorldAsset.Restore(Log);
+
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
             CommandResult result = packCommand.Execute();
             result.ExitCode.Should().NotBe(0);
-            result.StdOut.Should().Contain("Pack as tool does not support self contained.");
+            result.StdOut.Should().Contain(Strings.PackAsToolCannotSupportSelfContained);
         }
     }
 }

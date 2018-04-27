@@ -36,8 +36,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish" Condition=" '$(PackAsTool)' == 'true' ">
 
-    <NETSdkError Condition="'$(SelfContained)' == 'true'"
+    <NETSdkError Condition=" '$(SelfContained)' == 'true' "
                  ResourceName="PackAsToolCannotSupportSelfContained" />
+    
+    <NETSdkError Condition=" '$(TargetFrameworkIdentifier)' != '.NETCoreApp' "
+                 ResourceName="DotnetToolOnlySupportNetcoreapp" />
+    
+    <NETSdkError Condition=" '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1' "
+                 ResourceName="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21" />
 
     <ItemGroup>
         <_GeneratedFiles Include="$(PublishDepsFilePath)"/>

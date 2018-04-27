@@ -31,6 +31,10 @@
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetProjectModelVersion)" />
+
+    <!-- Referenced explicitly here because Microsoft.DotNet.Cli.Utils references a lower version at the moment, which causes
+         RAR conflicts (though ideally I would think NuGet would resolve this) -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
   </ItemGroup>
 
   <ItemGroup>

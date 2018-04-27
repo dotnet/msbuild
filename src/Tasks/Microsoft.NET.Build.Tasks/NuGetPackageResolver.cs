@@ -41,6 +41,15 @@ namespace Microsoft.NET.Build.Tasks
             return _packagePathResolver.GetPackageDirectory(packageId, version);
         }
 
+        public string ResolvePackageAssetPath(LockFileTargetLibrary package, string relativePath)
+        {
+            string packagePath = GetPackageDirectory(package.Name, package.Version);
+            return Path.Combine(packagePath, NormalizeRelativePath(relativePath));
+        }
+
+        public static string NormalizeRelativePath(string relativePath)
+                => relativePath.Replace('/', Path.DirectorySeparatorChar);
+
         public static NuGetPackageResolver CreateResolver(LockFile lockFile, string projectPath)
         {
             NuGetPackageResolver packageResolver;

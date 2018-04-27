@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 Constants.DefaultPlatformLibrary,
                 isSelfContained: !string.IsNullOrEmpty(runtime));
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions: false)
                 .WithDirectReferences(directReferences)
                 .WithCompilationOptions(compilationOptions)
                 .Build();
@@ -260,7 +260,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 useCompilationOptions ? CreateCompilationOptions() :
                 null;
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions: false)
                 .WithReferenceAssemblies(ReferenceInfo.CreateReferenceInfos(referencePaths))
                 .WithCompilationOptions(compilationOptions)
                 .Build();

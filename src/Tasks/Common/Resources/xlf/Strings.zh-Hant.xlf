@@ -379,6 +379,26 @@
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
       </trans-unit>
+      <trans-unit id="AssetsFileNotSet">
+        <source>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
+        <target state="new">The path to the project assets file was not set. Run a NuGet package restore to generate this file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotnetToolOnlySupportNetcoreapp">
+        <source>only supports .NET Core.</source>
+        <target state="new">only supports .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
+        <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
+        <target state="new">DotnetTool does not support target framework lower than netcoreapp2.1.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToUsePackageAssetsCache">
+        <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
+        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
