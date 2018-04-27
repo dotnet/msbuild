@@ -374,29 +374,29 @@
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
-        <target state="new">The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</target>
+        <target state="translated">Das Projekt wurde mit der {0}-Version {1} wiederhergestellt, aber mit den aktuellen Einstellungen würde stattdessen Version {2} verwendet. Um dieses Problem zu beheben, müssen Sie sicherstellen, dass für die Wiederherstellung und nachfolgende Vorgänge – wie z. B. das Erstellen oder Veröffentlichen – dieselben Einstellungen verwendet werden. Dieses Problem tritt typischerweise auf, wenn die RuntimeIdentifier-Eigenschaft während der Erstellung oder Veröffentlichung, aber nicht während der Wiederherstellung festgelegt wird.</target>
         <note>{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotSet">
         <source>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
-        <target state="new">The path to the project assets file was not set. Run a NuGet package restore to generate this file.</target>
+        <target state="translated">Der Pfad zur Datei mit den Projektassets wurde nicht festgelegt. Führen Sie eine NuGet-Paketwiederherstellung durch, um diese Datei zu generieren.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
         <source>only supports .NET Core.</source>
-        <target state="new">only supports .NET Core.</target>
+        <target state="translated">Unterstützt nur .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
-        <target state="new">DotnetTool does not support target framework lower than netcoreapp2.1.</target>
+        <target state="translated">DotnetTool unterstützt kein Zielframework vor netcoreapp2.1.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache">
         <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <target state="translated">Der Cache für Paketassets kann aufgrund eines E/A-Fehlers nicht verwendet werden. Dieses Problem kann auftreten, wenn dasselbe Projekt parallel mehrfach erstellt wird. Die Leistung ist möglicherweise herabgesetzt, aber das Buildergebnis wird nicht beeinträchtigt.</target>
         <note />
       </trans-unit>
     </body>
