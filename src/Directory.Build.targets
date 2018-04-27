@@ -103,8 +103,8 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="GetBuildVersion" BeforeTargets="GenerateNuspec" Condition="'$(DisableNerdbankVersioning)' == 'true'"/>
-  
+  <Import Project="$([System.IO.Path]::Combine('$(RepoRoot)', 'build', 'GetBuildVersionStub.proj'))" Condition="'$(DisableNerdbankVersioning)' == 'true'" />
+
   <Target Name="GetNuGetPackageVersionEx"
     BeforeTargets="GenerateNuspec"
     DependsOnTargets="GetBuildVersion"
