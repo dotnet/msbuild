@@ -116,7 +116,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">ツール '{0}' をインストールできませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
@@ -126,12 +126,12 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.</source>
-        <target state="new">Tool '{0}' failed to install. This failure may have been caused by:
+        <target state="translated">ツール '{0}' のインストールに失敗しました。この失敗は次の原因で生じた可能性があります。
 
-* You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
-* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</target>
+* プレビュー リリースをインストールしようとしており、--version オプションを使用してバージョンを指定しなかった。
+* この名前のパッケージが見つかったが、.NET Core ツールではなかった。
+* 恐らくインターネットの接続の問題で、必須の NuGet フィードにアクセスできない。
+* ツールの名前のタイプミス。</target>
         <note />
       </trans-unit>
     </body>

@@ -116,7 +116,7 @@ A ferramenta '{1}' (versão '{2}') foi instalada com êxito.</target>
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">Não foi possível instalar a ferramenta '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
@@ -126,12 +126,12 @@ A ferramenta '{1}' (versão '{2}') foi instalada com êxito.</target>
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.</source>
-        <target state="new">Tool '{0}' failed to install. This failure may have been caused by:
+        <target state="translated">A ferramenta '{0}' falhou ao ser instalada. Essa falha pode ter sido causada pelos seguintes motivos:
 
-* You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
-* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</target>
+* Você está tentando instalar uma versão prévia e não usou a opção --version para especificar a versão.
+* Um pacote com esse nome foi encontrado, mas ele não era uma ferramenta do .NET Core.
+* O feed do NuGet necessário não pode ser acessado, talvez devido a um problema de conexão com a Internet.
+* Você digitou errado o nome da ferramenta.</target>
         <note />
       </trans-unit>
     </body>

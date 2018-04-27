@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">修改工具。</target>
+        <target state="translated">安裝或使用可擴充 .NET 體驗的工具。</target>
         <note />
       </trans-unit>
     </body>

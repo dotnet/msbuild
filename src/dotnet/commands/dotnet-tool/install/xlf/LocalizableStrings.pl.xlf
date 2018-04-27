@@ -116,7 +116,7 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">Zainstalowanie narzędzia „{0}” nie powiodło się.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
@@ -126,12 +126,12 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.</source>
-        <target state="new">Tool '{0}' failed to install. This failure may have been caused by:
+        <target state="translated">Zainstalowanie narzędzia „{0}” nie powiodło się. To niepowodzenie może wynikać z następujących powodów:
 
-* You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
-* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</target>
+* Próbujesz zainstalować wersję zapoznawczą bez użycia opcji --version do określenia wersji.
+* Znaleziono pakiet o tej nazwie, ale nie było to narzędzie .NET Core.
+* Nie można uzyskać dostępu do wymaganego kanału informacyjnego NuGet, być może ze względu na problemy z połączeniem z Internetem.
+* Błędnie wpisano nazwę narzędzia.</target>
         <note />
       </trans-unit>
     </body>

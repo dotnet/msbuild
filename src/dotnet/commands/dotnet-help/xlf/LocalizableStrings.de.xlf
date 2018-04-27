@@ -255,12 +255,12 @@
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">Hiermit werden Tools geändert.</target>
+        <target state="translated">Installation oder Arbeit mit Tools zum Erweitern der .NET-Benutzeroberfläche.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
         <source>Interact with servers started by a build.</source>
-        <target state="new">Interact with servers started by a build.</target>
+        <target state="translated">Interaktion mit Servern, die durch einen Build gestartet werden.</target>
         <note />
       </trans-unit>
     </body>

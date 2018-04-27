@@ -254,12 +254,12 @@
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">ツールを変更します。</target>
+        <target state="translated">.NET のエクスペリエンスを向上するツールをインストールするか、使用します。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
         <source>Interact with servers started by a build.</source>
-        <target state="new">Interact with servers started by a build.</target>
+        <target state="translated">ビルドによって開始されたサーバーとやり取りします。</target>
         <note />
       </trans-unit>
     </body>

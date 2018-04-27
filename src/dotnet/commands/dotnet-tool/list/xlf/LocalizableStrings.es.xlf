@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">
         <source>Tool path '{0}' does not exist.</source>
-        <target state="new">Tool path '{0}' does not exist.</target>
+        <target state="translated">La ruta de acceso de la herramienta "{0}" no existe.</target>
         <note />
       </trans-unit>
     </body>

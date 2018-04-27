@@ -116,7 +116,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">Не удалось установить инструмент "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
@@ -126,12 +126,12 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.</source>
-        <target state="new">Tool '{0}' failed to install. This failure may have been caused by:
+        <target state="translated">Не удалось установить средство "{0}". Возможные причины сбоя:
 
-* You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
-* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</target>
+* Вы пытаетесь установить предварительный выпуск и не указали версию с помощью параметра --version.
+* Пакет с таким именем найден, но он не является средством .NET Core.
+* Недоступен требуемый веб-канал NuGet, возможно, из-за проблемы с подключением к Интернету.
+* Неправильно введено имя средства.</target>
         <note />
       </trans-unit>
     </body>

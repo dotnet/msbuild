@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
-        <target state="new">Do not build the project before publishing. Implies --no-restore.</target>
+        <target state="translated">Nesestavujte projekt, dokud ho nepublikujete. Implikuje možnost --no-restore.</target>
         <note />
       </trans-unit>
     </body>

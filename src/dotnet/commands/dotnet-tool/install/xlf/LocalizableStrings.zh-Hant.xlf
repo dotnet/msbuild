@@ -116,7 +116,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">工具 '{0}' 無法安裝。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
@@ -126,12 +126,12 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.</source>
-        <target state="new">Tool '{0}' failed to install. This failure may have been caused by:
+        <target state="translated">工具 '{0}' 無法安裝。此失敗原因可能是因為:
 
-* You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
-* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</target>
+* 您嘗試要安裝預覽版，但並未使用 --version 選項來指定版本。
+* 找到此名稱的套件，但其並非為 .NET Core 工具。
+* 無法存取必要的 NuGet 摘要，可能是因為網際網路連線發生問題。
+* 您打錯了工具的名稱。</target>
         <note />
       </trans-unit>
     </body>
