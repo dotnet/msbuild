@@ -66,6 +66,11 @@
             The current project's target framework.
             </summary>
         </member>
+        <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.FallbackTargetFrameworks">
+            <summary>
+            Optional list of target frameworks to be used as Fallback target frameworks.
+            </summary>
+        </member>
         <member name="P:NuGet.Build.Tasks.GetReferenceNearestTargetFrameworkTask.AnnotatedProjectReferences">
             <summary>
             The project references for property lookup.
@@ -159,6 +164,11 @@
         <member name="T:NuGet.Build.Tasks.GetRestoreSettingsTask">
             <summary>
             Get all the settings to be used for project restore.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.RestoreRootConfigDirectory">
+            <summary>
+            The root directory from which to talk to find the config files. Used by the CLI in Dotnet Tool install
             </summary>
         </member>
         <member name="P:NuGet.Build.Tasks.GetRestoreSettingsTask.RestoreSettingsPerFramework">
@@ -310,9 +320,14 @@
               Looks up a localized string similar to Restore canceled!.
             </summary>
         </member>
+        <member name="P:NuGet.Build.Tasks.Strings.UnsupportedFallbackFramework">
+            <summary>
+              Looks up a localized string similar to The project fallback framework &apos;{0}&apos; is not a supported target framework..
+            </summary>
+        </member>
         <member name="P:NuGet.Build.Tasks.Strings.UnsupportedTargetFramework">
             <summary>
-              Looks up a localized string similar to The framework &apos;{0}&apos; is not a supported target framework..
+              Looks up a localized string similar to The project target framework &apos;{0}&apos; is not a supported target framework..
             </summary>
         </member>
         <member name="P:NuGet.Build.Tasks.WarnForInvalidProjectsTask.AllProjects">
@@ -350,7 +365,7 @@
             TaskLoggingHelper -> ILogger
             </summary>
         </member>
-        <member name="M:NuGet.Build.MSBuildLogger.LogForNonMono(NuGet.Common.IRestoreLogMessage)">
+        <member name="M:NuGet.Build.MSBuildLogger.LogForNonMono(NuGet.Common.INuGetLogMessage)">
             <summary>
             Log using with metadata for non mono platforms.
             </summary>

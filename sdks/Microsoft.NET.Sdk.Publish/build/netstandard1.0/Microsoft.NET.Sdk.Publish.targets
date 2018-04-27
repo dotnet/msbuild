@@ -42,8 +42,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
 
   <PropertyGroup>
-    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</_PublishProfileRootFolder>
-    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</_PublishProfileRootFolder>
+    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == ''">$(MSBuildProjectDirectory)\$(AppDesignerFolder)\PublishProfiles\</_PublishProfileRootFolder>
     <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystem</PublishProfile>
     <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
     <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>

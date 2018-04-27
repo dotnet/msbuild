@@ -34,6 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyTitleAttribute Condition="'$(GenerateAssemblyTitleAttribute)' == ''">true</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute Condition="'$(GenerateAssemblyVersionAttribute)' == ''">true</GenerateAssemblyVersionAttribute>
     <GenerateNeutralResourcesLanguageAttribute Condition="'$(GenerateNeutralResourcesLanguageAttribute)' == ''">true</GenerateNeutralResourcesLanguageAttribute>
+    <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <!-- 
@@ -48,8 +49,21 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="PrepareForBuild;CoreGenerateAssemblyInfo"
           Condition="'$(GenerateAssemblyInfo)' == 'true'" />
 
+  <Target Name="AddSourceRevisionToInformationalVersion"
+          DependsOnTargets="GetAssemblyVersion;InitializeSourceControlInformation"
+          Condition="'$(SourceControlInformationFeatureSupported)' == 'true' and '$(IncludeSourceRevisionInInformationalVersion)' == 'true'">
+    <PropertyGroup Condition="'$(SourceRevisionId)' != ''">
+      <!-- Follow SemVer 2.0 rules -->
+      <_InformationalVersionContainsPlus>false</_InformationalVersionContainsPlus>
+      <_InformationalVersionContainsPlus Condition="$(InformationalVersion.Contains('+'))">true</_InformationalVersionContainsPlus>
+
+      <InformationalVersion Condition="!$(_InformationalVersionContainsPlus)">$(InformationalVersion)+$(SourceRevisionId)</InformationalVersion>
+      <InformationalVersion Condition="$(_InformationalVersionContainsPlus)">$(InformationalVersion).$(SourceRevisionId)</InformationalVersion>
+    </PropertyGroup>
+  </Target>
+
   <Target Name="GetAssemblyAttributes"
-          DependsOnTargets="GetAssemblyVersion">
+          DependsOnTargets="GetAssemblyVersion;AddSourceRevisionToInformationalVersion">
     <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Company)' != '' and '$(GenerateAssemblyCompanyAttribute)' == 'true'">
         <_Parameter1>$(Company)</_Parameter1>
@@ -95,7 +109,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <GeneratedAssemblyInfoInputsCacheFile>$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfoInputs.cache</GeneratedAssemblyInfoInputsCacheFile>
     </PropertyGroup>
 
-    <Hash ItemsToHash="@(AssemblyAttribute->'%(Identity)%(_Parameter1)')">
+    <!-- We only use up to _Parameter1 for most attributes, but other targets may add additional assembly attributes with multiple parameters. -->
+    <Hash ItemsToHash="@(AssemblyAttribute->'%(Identity)%(_Parameter1)%(_Parameter2)%(_Parameter3)%(_Parameter4)%(_Parameter5)%(_Parameter6)%(_Parameter7)%(_Parameter8)')">
       <Output TaskParameter="HashResult" PropertyName="_AssemblyAttributesHash" />
     </Hash>
 

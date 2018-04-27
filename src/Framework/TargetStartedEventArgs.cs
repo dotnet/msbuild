@@ -19,9 +19,7 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>    
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public class TargetStartedEventArgs : BuildStatusEventArgs
     {
         /// <summary>
@@ -119,7 +117,6 @@ namespace Microsoft.Build.Framework
         private string parentTarget;
         private TargetBuiltReason buildReason;
 
-#if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
@@ -156,7 +153,6 @@ namespace Microsoft.Build.Framework
             }
         }
         #endregion
-#endif
 
         /// <summary>
         /// target name

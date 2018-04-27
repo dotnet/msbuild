@@ -15,7 +15,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AppDesignerFolder Condition="'$(AppDesignerFolder)' == ''">My Project</AppDesignerFolder>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants),$(ImplicitFrameworkDefine)</DefineConstants>
+    <DefineConstants>$(DefineConstants),$(VersionlessImplicitFrameworkDefine),$(ImplicitFrameworkDefine)</DefineConstants>
     <DisableImplicitNamespaceImports Condition="'$(DisableImplicitNamespaceImports)'==''">$(DisableImplicitFrameworkReferences)</DisableImplicitNamespaceImports>
   </PropertyGroup>
   <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">

@@ -314,7 +314,9 @@
         <member name="P:NuGet.ProjectModel.PackageSpec.RestoreSettings">
             <summary>
             Project Settings is used to pass settings like HideWarningsAndErrors down to lower levels.
+            Currently they do not include any settings that affect the final result of restore.
             This should not be part of the Equals and GetHashCode.
+            Don't write this to the package spec
             </summary>
         </member>
         <member name="P:NuGet.ProjectModel.PackageSpec.RestoreMetadata">
@@ -575,7 +577,7 @@
         </member>
         <member name="F:NuGet.ProjectModel.ProjectStyle.DotnetCliTool">
             <summary>
-            Tool
+            DotnetCliToolReference "project"
             </summary>
         </member>
         <member name="F:NuGet.ProjectModel.ProjectStyle.Standalone">
@@ -586,6 +588,11 @@
         <member name="F:NuGet.ProjectModel.ProjectStyle.PackagesConfig">
             <summary>
             Packages.config project
+            </summary>
+        </member>
+        <member name="F:NuGet.ProjectModel.ProjectStyle.DotnetToolReference">
+            <summary>
+            DotnetToolReference project
             </summary>
         </member>
         <member name="T:NuGet.ProjectModel.Sha512HashFunction">
@@ -731,6 +738,11 @@
         <member name="P:NuGet.ProjectModel.WarningProperties.AllWarningsAsErrors">
             <summary>
             Indicates if all warnings should be ignored.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.WarningProperties.GetWarningProperties(System.String,System.String,System.String)">
+            <summary>
+            Create warning properties from the msbuild property strings.
             </summary>
         </member>
         <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">

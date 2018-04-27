@@ -480,6 +480,7 @@ namespace Microsoft.Build.Construction
     {
         EtpSubProject = 5,
         KnownToBeMSBuildFormat = 1,
+        SharedProject = 6,
         SolutionFolder = 2,
         Unknown = 0,
         WebDeploymentProject = 4,
@@ -968,7 +969,7 @@ namespace Microsoft.Build.Execution
         public BuildParameters() { }
         public BuildParameters(Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IDictionary<string, string> BuildProcessEnvironment { get { throw null; } }
-        public System.Threading.ThreadPriority BuildThreadPriority { get { throw null; } set { } }
+        public System.Threading.ThreadPriority BuildThreadPriority { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Globalization.CultureInfo Culture { get { throw null; } set { } }
         public string DefaultToolsVersion { get { throw null; } set { } }
         public bool DetailedSummary { get { throw null; } set { } }

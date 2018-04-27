@@ -10,12 +10,12 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" Private="false"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.Commands" Version="4.6.0-rtm-4822" />
-    <PackageReference Include="NuGet.Protocol" Version="4.6.0-rtm-4822" />
+    <PackageReference Include="NuGet.Commands" Version="$(NuGetCommandsVersion)" />
+    <PackageReference Include="NuGet.Protocol" Version="$(NuGetProtocolVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.14.114" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
 

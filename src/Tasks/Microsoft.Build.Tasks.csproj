@@ -949,7 +949,7 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
 
     <!-- Reference compilers package without using assets, so we can copy them to the output directory under the Roslyn folder -->

@@ -7,10 +7,7 @@
 
 using System;
 using System.IO;
-#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
-
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
@@ -58,7 +55,6 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Verify a whidbey project started event can be deserialized, the whidbey event is stored in a serialized base64 string.
         /// </summary>
@@ -79,7 +75,6 @@ namespace Microsoft.Build.UnitTests
             pse.BuildEventContext.ShouldBe(BuildEventContext.Invalid);
             pse.ParentProjectBuildEventContext.ShouldBe(BuildEventContext.Invalid);
         }
-#endif
 
         /// <summary>
         /// Verify the BuildEventContext is exercised

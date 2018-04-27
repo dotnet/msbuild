@@ -141,15 +141,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <CrossgenProfilingSymbolsOutputDirectory>$([System.IO.Path]::GetDirectoryName($(_RuntimeSymbolsDir)\$(CrossgenSubOutputPath)))</CrossgenProfilingSymbolsOutputDirectory>
       <CrossgenSymbolsStagingDirectory>$([System.IO.Path]::GetDirectoryName($(StoreSymbolsStagingDir)\$(CrossgenSubOutputPath)))</CrossgenSymbolsStagingDirectory>
-      <CrossgenCommandline>$(CrossgenExe) -readytorun -in $(CrossgenInputAssembly) -out $(CrossgenOutputAssembly) -jitpath $(CrossgenJit) -platform_assemblies_paths $(CrossgenPlatformAssembliesPath)</CrossgenCommandline>
+      <CrossgenCommandline>$(CrossgenExe) -readytorun -in "$(CrossgenInputAssembly)" -out "$(CrossgenOutputAssembly)" -jitpath "$(CrossgenJit)" -platform_assemblies_paths "$(CrossgenPlatformAssembliesPath)"</CrossgenCommandline>
       <CreateProfilingSymbolsOptionName Condition="'$(OS)' == 'Windows_NT'">CreatePDB</CreateProfilingSymbolsOptionName>
       <CreateProfilingSymbolsOptionName Condition="'$(CreateProfilingSymbolsOptionName)' == ''">CreatePerfMap</CreateProfilingSymbolsOptionName>
     </PropertyGroup>
 
     <Message Text="CrossgenCommandline: $(CrossgenCommandline)"/>
-
-    <!-- Workaround for https://github.com/NuGet/Home/issues/4424 -->
-    <Exec Command="chmod 755 $(CrossgenExe)" Condition="'$(OS)' != 'Windows_NT'"/>
 
     <!--Optimization skip if the assembly is already present in the final output directory-->
     <Exec

@@ -3,9 +3,7 @@
 
 using System;
 using System.IO;
-#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
 using Microsoft.Build.Exceptions;
 
 using Xunit;
@@ -14,7 +12,6 @@ namespace Microsoft.Build.UnitTests
 {
     public class InvalidProjectFileExceptionTests
     {
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>
@@ -50,7 +47,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(e.ProjectFile, e2.ProjectFile);
             }
         }
-#endif
 
         /// <summary>
         /// Verify that nesting an IPFE copies the error code

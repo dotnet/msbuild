@@ -21,6 +21,8 @@ bootstrapOnly=false
 verbosity="minimal"
 hostType="core"
 properties=""
+dotnetBuildFromSource=false
+dotnetCoreSdkDir=""
 
 function Help() {
   echo "Common settings:"
@@ -47,9 +49,13 @@ function Help() {
   echo "Command line arguments not listed above are passed through to MSBuild."
 }
 
-while [[ $# > 0 ]]; do
+while [[ $# -gt 0 ]]; do
   lowerI="$(echo $1 | awk '{print tolower($0)}')"
   case $lowerI in
+    build)
+      build=true
+      shift 1
+      ;;
     -build)
       build=true
       shift 1
@@ -110,6 +116,14 @@ while [[ $# > 0 ]]; do
       verbosity=$2
       shift 2
       ;;
+    -dotnetbuildfromsource)
+      dotnetBuildFromSource=true
+      shift 1
+      ;;
+    -dotnetcoresdkdir)
+      dotnetCoreSdkDir=$2
+      shift 2
+      ;;
     *)
       properties="$properties $1"
       shift 1
@@ -120,6 +134,31 @@ done
 if [ "$hostType" = "mono" ]; then
   configuration="$configuration-MONO"
 fi
+
+function KillProcessWithName {
+  echo "Killing processes containing \"$1\""
+  kill $(ps ax | grep -i "$1" | awk '{ print $1 }')
+}
+
+function StopProcesses {
+  echo "Killing running build processes..."
+  KillProcessWithName "dotnet"
+  KillProcessWithName "vbcscompiler"
+}
+
+function ExitIfError {
+  if [ $1 != 0 ]
+  then
+    echo "$2"
+
+    if [[ "$ci" != "true" && "$dotnetBuildFromSource" != "true" ]]; # kill command not permitted on CI machines or in source-build
+    then
+      StopProcesses
+    fi
+
+    exit $1
+  fi
+}
 
 function CreateDirectory {
   if [ ! -d "$1" ]
@@ -181,20 +220,14 @@ function CallMSBuild {
 
   eval $commandLine
 
-  LASTEXITCODE=$?
-
-  if [ $LASTEXITCODE != 0 ]
-  then
-    echo "Failed to run MSBuild"
-    exit $LASTEXITCODE
-  fi
+  ExitIfError $? "Failed to run MSBuild: $commandLine"
 }
 
 function GetVersionsPropsVersion {
   echo "$( awk -F'[<>]' "/<$1>/{print \$3}" "$VersionsProps" )"
 }
 
-function InstallDotNetCli {
+function DownloadDotnetCli {
   DotNetCliVersion="$( GetVersionsPropsVersion DotNetCliVersion )"
   DotNetInstallVerbosity=""
 
@@ -231,9 +264,21 @@ function InstallDotNetCli {
       return $LASTEXITCODE
     fi
   fi
+}
+
+function InstallDotNetCli {
+  if [ "$dotnetCoreSdkDir" = "" ]
+  then
+    DownloadDotnetCli
+  else
+    export DOTNET_INSTALL_DIR=$dotnetCoreSdkDir
+  fi
+
+  # don't double quote this otherwise the csc tooltask will fail with double double-quotting
+  export DOTNET_HOST_PATH="$DOTNET_INSTALL_DIR/dotnet"
 
   # Put the stage 0 on the path
-  export PATH="$DotNetRoot:$PATH"
+  export PATH="$DOTNET_INSTALL_DIR:$PATH"
 
   # Disable first run since we want to control all package sources
   export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
@@ -252,7 +297,7 @@ function InstallRepoToolset {
   if [ ! -d "$RepoToolsetBuildProj" ]
   then
     ToolsetProj="$ScriptRoot/Toolset.proj"
-    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /clp:Summary /warnaserror /v:$verbosity $logCmd
+    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /clp:Summary /warnaserror /v:$verbosity $logCmd $properties
   fi
 }
 
@@ -262,22 +307,19 @@ function ErrorHostType {
 }
 
 function Build {
-  InstallDotNetCli
-
-  # don't double quote this otherwise the csc tooltask will fail with double double-quotting
-  export DOTNET_HOST_PATH="$DOTNET_INSTALL_DIR/dotnet"
+  if [ "$host" = "core" ]; then
+    InstallDotNetCli
+    echo "Using dotnet from: $DOTNET_INSTALL_DIR"
+  else
+    CreateDirectory $ArtifactsDir
+  fi
 
   if $prepareMachine
   then
     CreateDirectory "$NuGetPackageRoot"
     eval "$(QQ $DOTNET_HOST_PATH) nuget locals all --clear"
-    LASTEXITCODE=$?
 
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to clear NuGet cache"
-      exit $LASTEXITCODE
-    fi
+    ExitIfError $? "Failed to clear NuGet cache"
   fi
 
   if [ "$hostType" = "core" ]
@@ -301,9 +343,7 @@ function Build {
 
   local logCmd=$(GetLogCmd Build)
 
-  solution="$RepoRoot/MSBuild.sln"
-
-  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $solution) /p:CIBuild=$ci"
+  commonMSBuildArgs="/m /clp:Summary /v:$verbosity /p:Configuration=$configuration /p:SolutionPath=$(QQ $MSBuildSolution) /p:CIBuild=$ci /p:DisableNerdbankVersioning=$dotnetBuildFromSource"
 
   # Only enable warnaserror on CI runs.
   if $ci
@@ -352,15 +392,18 @@ function Build {
   fi
 }
 
-function KillProcessWithName {
-  echo "Killing processes containing \"$1\""
-  kill $(ps ax | grep -i "$1" | awk '{ print $1 }')
-}
+function AssertNugetPackages {
+  packageCount=$(find $PackagesDir -type f | wc -l)
+  if $pack || $dotnetBuildFromSource
+  then
 
-function StopProcesses {
-  echo "Killing running build processes..."
-  KillProcessWithName "dotnet"
-  KillProcessWithName "vbcscompiler"
+    if [ $packageCount -ne 5 ]
+    then
+      ExitIfError 1 "Did not find 5 packages in $PackagesDir"
+    fi
+
+    echo "Ensured that 5 nuget packages were created"
+  fi
 }
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -374,12 +417,23 @@ ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 RepoRoot="$ScriptRoot/.."
 ArtifactsDir="$RepoRoot/artifacts"
 ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
+PackagesDir="$ArtifactsConfigurationDir/packages"
 LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
 
 MONO_MSBUILD_DIR="$ArtifactsDir/mono-msbuild"
 MSBUILD_DOWNLOAD_URL="https://github.com/mono/msbuild/releases/download/v0.05/mono_msbuild_port2-394a6b5e.zip"
 MSBUILD_ZIP="$ArtifactsDir/msbuild.zip"
+
+#https://github.com/dotnet/source-build
+if $dotnetBuildFromSource
+then
+  MSBuildSolution="$RepoRoot/MSBuild.SourceBuild.sln"
+else
+  MSBuildSolution="$RepoRoot/MSBuild.sln"
+fi
+
+msbuildToUse="msbuild"
 
 log=false
 if ! $nolog
@@ -428,11 +482,9 @@ fi
 NuGetPackageRoot=$NUGET_PACKAGES
 
 Build
-LASTEXITCODE=$?
 
-if ! $ci # kill command not permitted on CI machines
-then
-  StopProcesses
-fi
+ExitIfError $? "Build failed"
 
-exit $LASTEXITCODE
+AssertNugetPackages
+
+ExitIfError $? "AssertNugetPackages failed"

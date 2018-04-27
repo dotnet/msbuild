@@ -611,6 +611,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void ExpandItemVectorFunctionsBuiltIn_InvalidCharsError()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -875,6 +876,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -896,6 +898,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -936,6 +939,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -957,6 +961,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1018,6 +1023,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void InvalidPathAndMetadataItemInvalidWindowsPathChars3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"

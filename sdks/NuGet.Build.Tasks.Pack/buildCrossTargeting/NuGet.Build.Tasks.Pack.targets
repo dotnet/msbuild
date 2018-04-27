@@ -1,3 +1,4 @@
+
 <!--
 ***********************************************************************************************
 NuGet.targets
@@ -19,6 +20,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="NuGet.Build.Tasks.Pack.PackTask" AssemblyFile="$(NuGetPackTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.Pack.GetPackOutputItemsTask" AssemblyFile="$(NuGetPackTaskAssemblyFile)" />
   <UsingTask TaskName="NuGet.Build.Tasks.GetProjectTargetFrameworksTask" AssemblyFile="$(NuGetPackTaskAssemblyFile)" />
+  <UsingTask TaskName="NuGet.Build.Tasks.Pack.GetProjectReferencesFromAssetsFileTask" AssemblyFile="$(NuGetPackTaskAssemblyFile)" />
+  <UsingTask TaskName="NuGet.Build.Tasks.Pack.IsPackableFalseWarningTask" AssemblyFile="$(NuGetPackTaskAssemblyFile)" />
 
   <PropertyGroup>
     <PackageId Condition=" '$(PackageId)' == '' ">$(AssemblyName)</PackageId>
@@ -38,6 +41,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NoBuild Condition="'$(GeneratePackageOnBuild)' == 'true'">true</NoBuild>
     <AddPriFileDependsOn Condition="'$(MicrosoftPortableCurrentVersionPropsHasBeenImported)' == 'true'">DeterminePortableBuildCapabilities</AddPriFileDependsOn>
     <NuspecOutputPath Condition="'$(NuspecOutputPath)' == ''">$(BaseIntermediateOutputPath)$(Configuration)\</NuspecOutputPath>
+    <WarnOnPackingNonPackableProject Condition="'$(WarnOnPackingNonPackableProject)' == ''">false</WarnOnPackingNonPackableProject>
     <ImportNuGetBuildTasksPackTargetsFromSdk Condition="'$(ImportNuGetBuildTasksPackTargetsFromSdk)' == ''">false</ImportNuGetBuildTasksPackTargetsFromSdk>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>.dll; .exe; .winmd; .json; .pri; .xml; $(AllowedOutputExtensionsInPackageBuildOutputFolder)</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder>.pdb; .mdb; $(AllowedOutputExtensionsInPackageBuildOutputFolder); $(AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder)</AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder>
@@ -138,13 +142,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Delete Files="@(_PackageFilesToDelete)"/>
   </Target>
 
-  <Target Name="_CalculateInputsOutputsForPack">
+  <Target Name="_CalculateInputsOutputsForPack" DependsOnTargets="_GetOutputItemsFromPack">
     <PropertyGroup Condition="$(ContinuePackingAfterGeneratingNuspec) == '' ">
       <ContinuePackingAfterGeneratingNuspec>false</ContinuePackingAfterGeneratingNuspec>
     </PropertyGroup>
     <PropertyGroup>
       <PackageOutputPath Condition=" '$(PackageOutputPath)' == '' ">$(OutputPath)</PackageOutputPath>
-      <RestoreOutputPath Condition=" '$(RestoreOutputPath)' == '' " >$(BaseIntermediateOutputPath)</RestoreOutputPath>
+      <RestoreOutputPath Condition=" '$(RestoreOutputPath)' == '' " >$(MSBuildProjectExtensionsPath)</RestoreOutputPath>
     </PropertyGroup>
 
     <ConvertToAbsolutePath Paths="$(NuspecOutputPath)">
@@ -169,18 +173,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <NuGetPackInput Include="@(_TargetPathsToSymbols->'%(FinalOutputPath)')"/>
       <NuGetPackInput Include="@(_SourceFiles)"/>
       <NuGetPackInput Include="@(_References)"/>
-      <NuGetPackOutput Include="$(RestoreOutputAbsolutePath)$(PackageId).$(PackageVersion).nuspec"/>
-
-      <NuGetPackOutput Include="$(PackageOutputAbsolutePath)$(PackageId).$(PackageVersion).nupkg"
-                       Condition="'$(ContinuePackingAfterGeneratingNuspec)' == 'true'"/>
-
-      <NuGetPackOutput Include="$(PackageOutputAbsolutePath)$(PackageId).$(PackageVersion).symbols.nupkg"
-                       Condition="'$(IncludeSource)' == 'true'
-                               OR '$(IncludeSymbols)' == 'true'"/>
-
-      <NuGetPackOutput Include="$(RestoreOutputAbsolutePath)$(PackageId).$(PackageVersion).symbols.nuspec"
-                       Condition="'$(IncludeSource)' == 'true'
-                             OR '$(IncludeSymbols)' == 'true'"/>
+      <NuGetPackOutput Include="@(_OutputPackItems)" />
     </ItemGroup>
   </Target>
 
@@ -191,6 +184,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="Pack" DependsOnTargets="$(PackDependsOn)">
+     <IsPackableFalseWarningTask Condition="'$(IsPackable)' == 'false' AND '$(WarnOnPackingNonPackableProject)' == 'true'"/>
   </Target>
   <Target Name="_IntermediatePack">
     <PropertyGroup>
@@ -198,7 +192,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
   </Target>
 
-  <Target Name="GenerateNuspec" DependsOnTargets="$(GenerateNuspecDependsOn);_CalculateInputsOutputsForPack" Condition="$(IsPackable) == 'true'"
+  <Target Name="GenerateNuspec" DependsOnTargets="$(GenerateNuspecDependsOn);_CalculateInputsOutputsForPack;_GetProjectReferenceVersions;_InitializeNuspecRepositoryInformationProperties" Condition="$(IsPackable) == 'true'"
           Inputs="@(NuGetPackInput)" Outputs="@(NuGetPackOutput)">
     <!-- Call Pack -->
     <PackTask PackItem="$(PackProjectInputFile)"
@@ -218,6 +212,7 @@ Copyright (c) .NET Foundation. All rights reserved.
               Tags="$(PackageTags)"
               DevelopmentDependency="$(DevelopmentDependency)"
               BuildOutputInPackage="@(_BuildOutputInPackage)"
+              ProjectReferencesWithVersions="@(_ProjectReferencesWithVersions)"
               TargetPathsToSymbols="@(_TargetPathsToSymbols)"
               TargetFrameworks="@(_TargetFrameworks)"
               AssemblyName="$(AssemblyName)"
@@ -228,6 +223,8 @@ Copyright (c) .NET Foundation. All rights reserved.
               IsTool="$(IsTool)"
               RepositoryUrl="$(RepositoryUrl)"
               RepositoryType="$(RepositoryType)"
+              RepositoryBranch="$(RepositoryBranch)"
+              RepositoryCommit="$(RepositoryCommit)"
               SourceFiles="@(_SourceFiles->Distinct())"
               NoPackageAnalysis="$(NoPackageAnalysis)"
               MinClientVersion="$(MinClientVersion)"
@@ -243,7 +240,23 @@ Copyright (c) .NET Foundation. All rights reserved.
               NuspecBasePath="$(NuspecBasePath)"
               NuspecProperties="$(NuspecProperties)"
               AllowedOutputExtensionsInPackageBuildOutputFolder="$(AllowedOutputExtensionsInPackageBuildOutputFolder)"
-              AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder="$(AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder)"/>
+              AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder="$(AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder)"
+              NoWarn="$(NoWarn)"
+              WarningsAsErrors="$(WarningsAsErrors)"
+              TreatWarningsAsErrors="$(TreatWarningsAsErrors)"/>
+  </Target>
+
+  <!--
+    Initialize Repository* properties from properties set by a source control package, if available in the project.
+  -->
+  <Target Name="_InitializeNuspecRepositoryInformationProperties"
+          DependsOnTargets="InitializeSourceControlInformation"
+          Condition="'$(SourceControlInformationFeatureSupported)' == 'true'">
+    <PropertyGroup>
+      <!-- The project must specify PublishRepositoryUrl=true in order to publish the URL, in order to prevent inadvertent leak of internal URL. -->
+      <RepositoryUrl Condition="'$(RepositoryUrl)' == '' and '$(PublishRepositoryUrl)' == 'true'">$(PrivateRepositoryUrl)</RepositoryUrl>
+      <RepositoryCommit Condition="'$(RepositoryCommit)' == ''">$(SourceRevisionId)</RepositoryCommit>
+    </PropertyGroup>
   </Target>
 
   <!--
@@ -257,6 +270,45 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup Condition="'$(PackProjectInputFile)' == ''">
       <PackProjectInputFile>$(MSBuildProjectFullPath)</PackProjectInputFile>
     </PropertyGroup>
+  </Target>
+  
+  <Target Name="_GetProjectReferenceVersions" DependsOnTargets="_CalculateInputsOutputsForPack;$(GetPackageVersionDependsOn)">
+    <ConvertToAbsolutePath Paths="$(RestoreOutputPath)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="RestoreOutputAbsolutePath" />
+    </ConvertToAbsolutePath>
+
+    <ConvertToAbsolutePath Condition="'$(ProjectAssetsFile)' != ''" Paths="$(ProjectAssetsFile)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="ProjectAssetsFileAbsolutePath" />
+    </ConvertToAbsolutePath>
+
+    <GetProjectReferencesFromAssetsFileTask
+        RestoreOutputAbsolutePath="$(RestoreOutputAbsolutePath)"
+        ProjectAssetsFileAbsolutePath="$(ProjectAssetsFileAbsolutePath)">
+      <Output
+        TaskParameter="ProjectReferences"
+        ItemName="_ProjectReferencesFromAssetsFile" />
+    </GetProjectReferencesFromAssetsFileTask>
+
+    <Msbuild
+      Projects="@(_ProjectReferencesFromAssetsFile)"
+      Targets="_GetProjectVersion"
+      SkipNonexistentTargets="true"
+      SkipNonexistentProjects="true"
+      Properties="BuildProjectReferences=false;">
+      <Output
+        TaskParameter="TargetOutputs"
+        ItemName="_ProjectReferencesWithVersions"/>
+    </Msbuild>
+  </Target>
+
+  <Target Name="_GetProjectVersion" DependsOnTargets="$(GetPackageVersionDependsOn)"
+          Returns="@(_ProjectPathWithVersion)">
+    <ItemGroup>
+      <_ProjectPathWithVersion Include="$(MSBuildProjectFullPath)">
+        <ProjectVersion Condition="'$(PackageVersion)' != ''">$(PackageVersion)</ProjectVersion>
+        <ProjectVersion Condition="'$(PackageVersion)' == ''">1.0.0</ProjectVersion>
+      </_ProjectPathWithVersion>
+    </ItemGroup>
   </Target>
 
   <Target Name="_WalkEachTargetPerFramework">
@@ -339,7 +391,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_GetTfmSpecificContentForPackage"
           DependsOnTargets="$(TargetsForTfmSpecificContentInPackage)"
-          Returns="@(TfmSpecificPackageFile)">
+          Returns="@(TfmSpecificPackageFileWithRecursiveDir)">
+    <!-- The below workaround needs to be done due to msbuild bug https://github.com/Microsoft/msbuild/issues/3121 -->
+    <ItemGroup>
+      <TfmSpecificPackageFileWithRecursiveDir Include="@(TfmSpecificPackageFile)">
+        <NuGetRecursiveDir>%(TfmSpecificPackageFile.RecursiveDir)</NuGetRecursiveDir>
+      </TfmSpecificPackageFileWithRecursiveDir>
+    </ItemGroup>
   </Target>
 
   <Target Name="_GetDebugSymbolsWithTfm"

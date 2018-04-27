@@ -44,9 +44,9 @@
     <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
 
     <!-- Include NuGet build tasks -->
-    <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
+    <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
     <!-- Include NuGet.targets from NuGet.Build.Tasks package.  Ideally, this should probably be in contentFiles in the package so we don't have to do this. -->
-    <Content Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetBuildTasksPackageVersion)\runtimes\any\native\NuGet.targets" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetBuildTasksVersion)\runtimes\any\native\NuGet.targets" CopyToOutputDirectory="PreserveNewest" />
     
     <!-- Include DependencyModel libraries. -->
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />

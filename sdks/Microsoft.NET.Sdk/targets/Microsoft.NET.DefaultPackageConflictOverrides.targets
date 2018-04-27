@@ -17,7 +17,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup Condition="'$(DisableDefaultPackageConflictOverrides)' != 'true'">
     <PackageConflictOverrides Include="Microsoft.NETCore.App">
-      <OverridenPackages>
+      <OverriddenPackages>
         Microsoft.CSharp|4.4.0;
         Microsoft.Win32.Primitives|4.3.0;
         Microsoft.Win32.Registry|4.4.0;
@@ -132,10 +132,10 @@ Copyright (c) .NET Foundation. All rights reserved.
         System.Xml.XmlSerializer|4.3.0;
         System.Xml.XPath|4.3.0;
         System.Xml.XPath.XDocument|4.3.0;
-      </OverridenPackages>
+      </OverriddenPackages>
     </PackageConflictOverrides>
     <PackageConflictOverrides Include="NETStandard.Library">
-      <OverridenPackages>
+      <OverriddenPackages>
         Microsoft.Win32.Primitives|4.3.0;
         System.AppContext|4.3.0;
         System.Collections|4.3.0;
@@ -231,7 +231,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         System.Xml.XmlSerializer|4.3.0;
         System.Xml.XPath|4.3.0;
         System.Xml.XPath.XDocument|4.3.0;
-      </OverridenPackages>
+      </OverriddenPackages>
     </PackageConflictOverrides>
   </ItemGroup>
 </Project>

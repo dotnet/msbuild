@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
 
     <Reference Include="System.Configuration" />
   </ItemGroup>

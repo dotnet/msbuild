@@ -9,9 +9,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the project evaluation finished event.
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public sealed class ProjectEvaluationFinishedEventArgs : BuildStatusEventArgs
     {
         /// <summary>

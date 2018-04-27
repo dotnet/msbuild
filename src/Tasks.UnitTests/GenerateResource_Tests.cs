@@ -2499,6 +2499,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;

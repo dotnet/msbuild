@@ -10,14 +10,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!--
+      Indicate to other targets that Microsoft.NET.Sdk.Web is being used.
+    -->
+  <PropertyGroup>
+    <UsingMicrosoftNETSdkWeb>true</UsingMicrosoftNETSdkWeb>
+  </PropertyGroup>
 
   <!-- Default properties that shouldn't be replaced by the microsoft.net.sdk.props -->
   <PropertyGroup>
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
-    <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">true</PreserveCompilationContext>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
+  <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />
   
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.props" />
   
