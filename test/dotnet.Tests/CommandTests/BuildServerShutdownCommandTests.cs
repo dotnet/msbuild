@@ -10,17 +10,21 @@ using Microsoft.DotNet.BuildServer;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.BuildServer;
 using Microsoft.DotNet.Tools.BuildServer.Shutdown;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using CommandLocalizableStrings = Microsoft.DotNet.BuildServer.LocalizableStrings;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.Shutdown.LocalizableStrings;
+using TestBuildServerCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildServerCommand;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
-    public class BuildServerShutdownCommandTests
+    public class BuildServerShutdownCommandTests : TestBase
     {
         private readonly BufferedReporter _reporter = new BufferedReporter();
 
@@ -155,6 +159,43 @@ namespace Microsoft.DotNet.Tests.Commands
                 FormatFailureMessage(mocks[2].Object, ThirdFailureMessage));
 
             VerifyShutdownCalls(mocks);
+        }
+
+        [Fact]
+        public void GivenARunningRazorServerItShutsDownSuccessfully()
+        {
+            var pipeName = Path.GetRandomFileName();
+            var pidDirectory = Path.GetFullPath(Path.Combine(TempRoot.Root, Path.GetRandomFileName()));
+
+            var testInstance = TestAssets.Get("TestRazorApp")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName, pidDirectory)
+                .Execute($"/p:_RazorBuildServerPipeName={pipeName}")
+                .Should()
+                .Pass();
+
+            var files = Directory.GetFiles(pidDirectory, RazorPidFile.FilePrefix + "*");
+            files.Length.Should().Be(1);
+
+            var pidFile = RazorPidFile.Read(new FilePath(files.First()));
+            pidFile.PipeName.Should().Be(pipeName);
+
+            new TestBuildServerCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName, pidDirectory)
+                .ExecuteWithCapturedOutput("shutdown --razor")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(
+                    string.Format(
+                        LocalizableStrings.ShutDownSucceededWithPid,
+                        CommandLocalizableStrings.RazorServer,
+                        pidFile.ProcessId));
         }
 
         private BuildServerShutdownCommand CreateCommand(

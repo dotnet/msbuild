@@ -9,7 +9,9 @@ using FluentAssertions;
 using Microsoft.DotNet.BuildServer;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using Xunit;
 using LocalizableStrings = Microsoft.DotNet.BuildServer.LocalizableStrings;
@@ -129,12 +131,59 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
             razorServer.PidFile.PipeName.Should().Be(PipeName);
         }
 
+        [Theory]
+        [InlineData(typeof(UnauthorizedAccessException))]
+        [InlineData(typeof(IOException))]
+        public void GivenAnExceptionAccessingTheRazorPidFileItPrintsAWarning(Type exceptionType)
+        {
+            const int ProcessId = 1234;
+            const string ErrorMessage = "failed!";
+
+            string pidDirectory = Path.GetFullPath("var/pids/build");
+            string pidFilePath = Path.Combine(pidDirectory, $"{RazorPidFile.FilePrefix}{ProcessId}");
+
+            var directoryMock = new Mock<IDirectory>();
+            directoryMock.Setup(d => d.Exists(pidDirectory)).Returns(true);
+            directoryMock.Setup(d => d.EnumerateFiles(pidDirectory, "*")).Returns(new [] { pidFilePath });
+
+            var fileMock = new Mock<IFile>();
+            fileMock
+                .Setup(f => f.OpenFile(
+                    pidFilePath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Write | FileShare.Delete,
+                    4096,
+                    FileOptions.None))
+                .Throws((Exception)Activator.CreateInstance(exceptionType, new object[] { ErrorMessage } ));
+
+            var fileSystemMock = new Mock<IFileSystem>();
+            fileSystemMock.SetupGet(fs => fs.Directory).Returns(directoryMock.Object);
+            fileSystemMock.SetupGet(fs => fs.File).Returns(fileMock.Object);
+
+            var reporter = new BufferedReporter();
+
+            var provider = new BuildServerProvider(
+                fileSystemMock.Object,
+                CreateEnvironmentProviderMock(pidDirectory).Object,
+                reporter);
+
+            var servers = provider.EnumerateBuildServers(ServerEnumerationFlags.Razor).ToArray();
+            servers.Should().BeEmpty();
+
+            reporter.Lines.Should().Equal(
+                string.Format(
+                    LocalizableStrings.FailedToReadPidFile,
+                    pidFilePath,
+                    ErrorMessage).Yellow());
+        }
+
         private Mock<IEnvironmentProvider> CreateEnvironmentProviderMock(string value = null)
         {
             var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
 
             provider
-                .Setup(p => p.GetEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY"))
+                .Setup(p => p.GetEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName))
                 .Returns(value);
 
             return provider;
