@@ -146,6 +146,14 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
+        [Fact]
+        public void UsingExplicitToolsVersionShouldBeFalseWhenNoToolsetIsReferencedInProject()
+        {
+            var project = ObjectModelHelpers.CreateInMemoryProject("<Project></Project>");
+
+            project.TestOnlyGetPrivateData.UsingDifferentToolsVersionFromProjectFile.ShouldBeFalse();
+        }
+
         /// <summary>
         /// $(MSBuildToolsVersion) should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)

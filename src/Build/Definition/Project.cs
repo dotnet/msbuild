@@ -3448,16 +3448,11 @@ namespace Microsoft.Build.Evaluation
                         ExplicitToolsVersion,
                         _project._xml.ToolsVersion,
                         Project.ProjectCollection.GetToolset,
-                        Project.ProjectCollection.DefaultToolsVersion
+                        Project.ProjectCollection.DefaultToolsVersion,
+                        out var usingDifferentToolsVersionFromProjectFile
                     );
 
-                // Don't log the message if the toolsversion is different because an explicit toolsversion was specified -- 
-                // in that case the user already knows what they're doing; the point of this warning is to give them a heads
-                // up if we're doing this ourselves for our own reasons. 
-                if (!explicitToolsVersionSpecified && !String.Equals(_originalProjectToolsVersion, toolsVersionToUse, StringComparison.OrdinalIgnoreCase))
-                {
-                    _usingDifferentToolsVersionFromProjectFile = true;
-                }
+                _usingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 
                 Toolset = toolsetProvider.GetToolset(toolsVersionToUse);
 

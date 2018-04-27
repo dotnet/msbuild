@@ -1080,9 +1080,7 @@ namespace Microsoft.Build.BackEnd
             //
             ConfigureWarningsAsErrorsAndMessages();
 
-            // See comment on ProjectItemInstance.Initialize for full details
-            // We have been asked to build with a tools verison that we don't know about
-            // so we'll report that we're building as if the project had been marked with a known toolsversion instead
+            // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
             _requestEntry.RequestConfiguration.RetrieveFromCache();
             if (_requestEntry.RequestConfiguration.Project.UsingDifferentToolsVersionFromProjectFile)
             {
