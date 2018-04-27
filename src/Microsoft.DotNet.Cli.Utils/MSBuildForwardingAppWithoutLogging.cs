@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             _forwardingApp = new ForwardingAppImplementation(
                 msbuildPath ?? GetMSBuildExePath(),
-                _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
+                _msbuildRequiredParameters.Concat(argsToForward.Select(QuotePropertyValue)),
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
@@ -48,13 +48,6 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return GetProcessStartInfo().Execute();
         }
-
-        private static string Escape(string arg) =>
-             // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
-             IsRestoreSources(arg) ?
-                arg.Replace(";", "%3B")
-                   .Replace("://", ":%2F%2F") :
-                arg;
 
         private static string GetMSBuildExePath()
         {
@@ -82,12 +75,37 @@ namespace Microsoft.DotNet.Cli.Utils
             return new Muxer().MuxerPath;
         }
 
-        private static bool IsRestoreSources(string arg)
+        private static bool IsPropertyArgument(string arg)
         {
-            return arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase) ||
-                arg.StartsWith("/property:RestoreSources=", StringComparison.OrdinalIgnoreCase) ||
-                arg.StartsWith("-p:RestoreSources=", StringComparison.OrdinalIgnoreCase) ||
-                arg.StartsWith("-property:RestoreSources=", StringComparison.OrdinalIgnoreCase);
+            return
+                arg.StartsWith("/p:", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("/property:", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("-p:", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("-property:", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string QuotePropertyValue(string arg)
+        {
+            if (!IsPropertyArgument(arg))
+            {
+                return arg;
+            }
+
+            var parts = arg.Split(new[] { '=' }, 2);
+            if (parts.Length != 2)
+            {
+                return arg;
+            }
+
+            // Escaping `://` is a workaround for https://github.com/Microsoft/msbuild/issues/1622
+            // The issue is that MSBuild is collapsing multiple slashes to a single slash due to a bad regex.
+            var value = parts[1].Replace("://", ":%2f%2f");
+            if (ArgumentEscaper.IsSurroundedWithQuotes(value))
+            {
+                return $"{parts[0]}={value}";
+            }
+
+            return $"{parts[0]}={ArgumentEscaper.EscapeSingleArg(value, forceQuotes: true)}";
         }
     }
 }

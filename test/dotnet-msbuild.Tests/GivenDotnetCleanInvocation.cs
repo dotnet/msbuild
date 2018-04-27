@@ -22,12 +22,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-o", "<output>" }, "-property:OutputPath=<output>")]
-        [InlineData(new string[] { "--output", "<output>" }, "-property:OutputPath=<output>")]
-        [InlineData(new string[] { "-f", "<framework>" }, "-property:TargetFramework=<framework>")]
-        [InlineData(new string[] { "--framework", "<framework>" }, "-property:TargetFramework=<framework>")]
-        [InlineData(new string[] { "-c", "<configuration>" }, "-property:Configuration=<configuration>")]
-        [InlineData(new string[] { "--configuration", "<configuration>" }, "-property:Configuration=<configuration>")]
+        [InlineData(new string[] { "-o", "<output>" }, @"-property:OutputPath=\""<output>\""")]
+        [InlineData(new string[] { "--output", "<output>" }, @"-property:OutputPath=\""<output>\""")]
+        [InlineData(new string[] { "-f", "<framework>" }, @"-property:TargetFramework=\""<framework>\""")]
+        [InlineData(new string[] { "--framework", "<framework>" }, @"-property:TargetFramework=\""<framework>\""")]
+        [InlineData(new string[] { "-c", "<configuration>" }, @"-property:Configuration=\""<configuration>\""")]
+        [InlineData(new string[] { "--configuration", "<configuration>" }, @"-property:Configuration=\""<configuration>\""")]
         [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
