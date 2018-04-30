@@ -47,6 +47,8 @@ namespace Microsoft.Build.Tasks
 
         public bool? NoLogo { get; set; }
 
+        public bool? NoStandardLib { get; set; }
+
         public bool? Optimize { get; set; }
 
         public ITaskItem OutputAssembly { get; set; }
@@ -59,7 +61,7 @@ namespace Microsoft.Build.Tasks
 
         public bool? UseSharedCompilation { get; set; }
 
-        protected abstract string ReferenceSwitch { get; }
+        protected virtual string ReferenceSwitch => "/reference:";
 
         protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
@@ -68,7 +70,6 @@ namespace Microsoft.Build.Tasks
             commandLine.AppendTextUnquoted(" ");
 #endif
             commandLine.AppendSwitchIfTrue("/noconfig", NoConfig);
-
         }
 
         protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
@@ -106,15 +107,29 @@ namespace Microsoft.Build.Tasks
 
     internal sealed class RoslynCodeTaskFactoryCSharpCompiler : RoslynCodeTaskFactoryCompilerBase
     {
-        public bool? NoStandardLib { get; set; }
-
-        protected override string ReferenceSwitch => "/reference:";
-
         protected override string ToolName => "csc.exe";
 
         protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
             commandLine.AppendPlusOrMinusSwitch("/nostdlib", NoStandardLib);
+
+            base.AddResponseFileCommands(commandLine);
+        }
+    }
+
+    internal sealed class RoslynCodeTaskFactoryVisualBasicCompiler : RoslynCodeTaskFactoryCompilerBase
+    {
+        public bool? OptionExplicit { get; set; }
+
+        public string RootNamespace { get; set; }
+
+        protected override string ToolName => "vbc.exe";
+
+        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+        {
+            commandLine.AppendSwitchIfTrue("/nostdlib", NoStandardLib);
+            commandLine.AppendPlusOrMinusSwitch("/optionexplicit", OptionExplicit);
+            commandLine.AppendSwitchIfNotNull("/rootnamespace:", RootNamespace);
 
             base.AddResponseFileCommands(commandLine);
         }

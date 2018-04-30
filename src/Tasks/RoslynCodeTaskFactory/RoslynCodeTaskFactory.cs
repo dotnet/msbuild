@@ -45,16 +45,14 @@ namespace Microsoft.Build.Tasks
                 {
                     "Microsoft.Build.Framework",
                     "Microsoft.Build.Utilities.Core",
+                    "mscorlib",
                     "netstandard"
                 }
             },
             // CSharp specific assembly references
             {
                 "CS",
-                new List<string>
-                {
-                    "mscorlib"
-                }
+                new List<string>()
             },
             // Visual Basic specific assembly references
             {
@@ -573,7 +571,7 @@ namespace Microsoft.Build.Tasks
             // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
             // the temp folder as well as the assembly.  After compilation, the source code and assembly are deleted.
             string sourceCodePath = Path.GetTempFileName();
-            string assemblyPath = Path.GetTempFileName();
+            string assemblyPath = Path.Combine(Path.GetTempPath(), $"{Path.GetRandomFileName()}.dll");
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
@@ -605,23 +603,19 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (taskInfo.CodeLanguage.Equals("VB"))
                 {
-                    // TODO: managedCompiler = new Vbc
-                    //{
-                    //NoStandardLib = true,
-                    //RootNamespace = "InlineCode",
-                    //OptionCompare = "Binary",
-                    //OptionExplicit = true,
-                    //OptionInfer = true,
-                    //OptionStrict = false,
-                    //Verbosity = "Verbose",
-                    //};
+                    managedCompiler = new RoslynCodeTaskFactoryVisualBasicCompiler
+                    {
+                        NoStandardLib = true,
+                        OptionExplicit = true,
+                        RootNamespace = "InlineCode",
+                    };
 
-                    //string toolExe = Environment.GetEnvironmentVariable("VbcToolExe");
+                    string toolExe = Environment.GetEnvironmentVariable("VbcToolExe");
 
-                    //if (!String.IsNullOrEmpty(toolExe))
-                    //{
-                    //    managedCompiler.ToolExe = toolExe;
-                    //}
+                    if (!String.IsNullOrEmpty(toolExe))
+                    {
+                        managedCompiler.ToolExe = toolExe;
+                    }
                 }
 
                 if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
