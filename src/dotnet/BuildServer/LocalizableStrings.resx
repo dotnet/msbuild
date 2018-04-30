@@ -129,4 +129,7 @@
   <data name="ShutdownCommandFailed" xml:space="preserve">
     <value>The shutdown command failed: {0}</value>
   </data>
+  <data name="FailedToReadPidFile" xml:space="preserve">
+    <value>Failed to read pid file '{0}': {1}</value>
+  </data>
 </root>

@@ -33,7 +33,13 @@ namespace Microsoft.DotNet.BuildServer
         {
             fileSystem = fileSystem ?? FileSystemWrapper.Default;
 
-            using (var stream = fileSystem.File.OpenRead(path.Value))
+            using (var stream = fileSystem.File.OpenFile(
+                path.Value,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Write | FileShare.Delete,
+                4096,
+                FileOptions.None))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
                 if (!int.TryParse(reader.ReadLine(), out var processId))

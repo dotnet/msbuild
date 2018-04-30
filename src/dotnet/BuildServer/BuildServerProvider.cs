@@ -12,15 +12,19 @@ namespace Microsoft.DotNet.BuildServer
 {
     internal class BuildServerProvider : IBuildServerProvider
     {
+        public const string PidFileDirectoryVariableName = "DOTNET_BUILD_PIDFILE_DIRECTORY";
         private readonly IFileSystem _fileSystem;
         private readonly IEnvironmentProvider _environmentProvider;
+        private readonly IReporter _reporter;
 
         public BuildServerProvider(
             IFileSystem fileSystem = null,
-            IEnvironmentProvider environmentProvider = null)
+            IEnvironmentProvider environmentProvider = null,
+            IReporter reporter = null)
         {
             _fileSystem = fileSystem ?? FileSystemWrapper.Default;
             _environmentProvider = environmentProvider ?? new EnvironmentProvider();
+            _reporter = reporter ?? Reporter.Error;
         }
 
         public IEnumerable<IBuildServer> EnumerateBuildServers(ServerEnumerationFlags flags = ServerEnumerationFlags.All)
@@ -59,7 +63,7 @@ namespace Microsoft.DotNet.BuildServer
                 if ((flags & ServerEnumerationFlags.Razor) == ServerEnumerationFlags.Razor &&
                     Path.GetFileName(path).StartsWith(RazorPidFile.FilePrefix))
                 {
-                    var file = RazorPidFile.Read(new FilePath(path), _fileSystem);
+                    var file = ReadRazorPidFile(new FilePath(path));
                     if (file != null)
                     {
                         yield return new RazorServer(file);
@@ -70,7 +74,7 @@ namespace Microsoft.DotNet.BuildServer
 
         public DirectoryPath GetPidFileDirectory()
         {
-            var directory = _environmentProvider.GetEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY");
+            var directory = _environmentProvider.GetEnvironmentVariable(PidFileDirectoryVariableName);
             if (!string.IsNullOrEmpty(directory))
             {
                 return new DirectoryPath(directory);
@@ -81,6 +85,23 @@ namespace Microsoft.DotNet.BuildServer
                     CliFolderPathCalculator.DotnetUserProfileFolderPath,
                     "pids",
                     "build"));
+        }
+
+        private RazorPidFile ReadRazorPidFile(FilePath path)
+        {
+            try
+            {
+                return RazorPidFile.Read(path, _fileSystem);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        LocalizableStrings.FailedToReadPidFile,
+                        path.Value,
+                        ex.Message).Yellow());
+                return null;
+            }
         }
     }
 }
