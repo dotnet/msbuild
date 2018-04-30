@@ -247,6 +247,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(RetainVMGarbageCollection)' != ''"
                                     Value="$(RetainVMGarbageCollection)" />
 
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation"
+                                    Condition="'$(TieredCompilation)' != ''"
+                                    Value="$(TieredCompilation)" />
+
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
                                     Condition="'$(ThreadPoolMinThreads)' != ''"
                                     Value="$(ThreadPoolMinThreads)" />
