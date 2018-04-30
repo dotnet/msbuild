@@ -14,7 +14,7 @@ imageVersionMap = ['Windows_NT':'latest-dev15-5',
                     'Ubuntu16.04':'20170731',
                     'RHEL7.2' : 'latest']
 
-def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=false, isSourceBuild = false) {
+def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, shouldSkipTestsWhenResultsNotFound = false, isSourceBuild = false) {
     def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}${isSourceBuild ? '_SourceBuild' : ''}", isPR)
 
     // Create a new job with the specified name.  The brace opens a new closure
@@ -37,8 +37,15 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
 
     // Add xunit result archiving. Skip if no results found.
     Utilities.addXUnitDotNETResults(newJob, 'artifacts/**/TestResults/*.xml', skipTestsWhenResultsNotFound)
-    def imageVersion = imageVersionMap[osName];
-    Utilities.setMachineAffinity(newJob, osName, imageVersion)
+
+    if (machineAffinityOverride == null) {
+        def imageVersion = imageVersionMap[osName];
+        Utilities.setMachineAffinity(newJob, osName, imageVersion)
+    }
+    else {
+        Utilities.setMachineAffinity(machineAffinityOverride)
+    }
+
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     // Add archiving of logs (even if the build failed)
     Utilities.addArchival(newJob,
@@ -83,6 +90,7 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
         // }
 
         def script = "NA"
+        def machineAffinityOverride = null
 
         runtimes.each { runtime ->
             switch(osName) {
@@ -97,6 +105,9 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
                     else if (runtime == "CoreCLR") {
                         script += " && build\\cibuild.cmd -hostType Core"
                     }
+
+                    // this agent has VS 15.7 on it, which is a min requirement for our repo now.
+                    machineAffinityOverride = 'Windows.10.Amd64.ClientRS3.DevEx.Open'
 
                     break;
                 case 'OSX10.13':
@@ -142,6 +153,7 @@ CreateJob(
     "CoreCLR",
     "RHEL7.2",
     true,
+    null,
     true,
     true)
 
