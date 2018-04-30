@@ -54,7 +54,7 @@
     <MicrosoftNETCoreAppVersion>2.1.0-preview2-26406-04</MicrosoftNETCoreAppVersion>
 
     <!-- MSBuild custom overall switch -->
-    <NuGetPackageVersion>4.7.0-rtm.5148</NuGetPackageVersion>
+    <NuGetPackageVersion>4.8.0-preview1.5158</NuGetPackageVersion>
 
     <!-- Prodcon-overrideable, using repo-toolset naming convention -->
     <NuGetBuildTasksVersion>$(NuGetPackageVersion)</NuGetBuildTasksVersion>
