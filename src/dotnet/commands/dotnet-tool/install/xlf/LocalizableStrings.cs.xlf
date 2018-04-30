@@ -10,13 +10,13 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to install.</source>
-        <target state="translated">ID balíčku NuGet nástroje, který se má nainstalovat</target>
+        <source>The NuGet Package Id of the tool to install.</source>
+        <target state="needs-review-translation">ID balíčku NuGet nástroje, který se má nainstalovat</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Installs a tool for use on the command line.</source>
-        <target state="translated">Nainstaluje nástroj, který se bude používat na příkazovém řádku.</target>
+        <source>Install a tool for use on the command line.</source>
+        <target state="needs-review-translation">Nainstaluje nástroj, který se bude používat na příkazovém řádku.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -30,8 +30,8 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
-        <source>Version of the tool package in NuGet.</source>
-        <target state="translated">Verze balíčku nástroje v NuGetu</target>
+        <source>The version of the tool package to install.</source>
+        <target state="needs-review-translation">Verze balíčku nástroje v NuGetu</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -45,8 +45,8 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Install user wide.</source>
-        <target state="translated">Instalovat pro všechny uživatele</target>
+        <source>Install the tool to the current user's tools directory.</source>
+        <target state="needs-review-translation">Instalovat pro všechny uživatele</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -99,11 +99,6 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <target state="translated">(--global) je v konfliktu s parametrem cesty nástroje (--tool-path). Zadejte prosím pouze jeden z parametrů.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="translated">Umístění, do kterého se nástroj nainstaluje</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
         <target state="translated">Nástroj {0} se nepodařilo nainstalovat.</target>
@@ -125,13 +120,38 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
-        <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <source>Add an additional NuGet package source to use during installation.</source>
+        <target state="new">Add an additional NuGet package source to use during installation.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
         <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="new">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="new">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
+        <target state="new">The directory where the tool will be installed. The directory will be created if it does not exist.</target>
         <note />
       </trans-unit>
     </body>

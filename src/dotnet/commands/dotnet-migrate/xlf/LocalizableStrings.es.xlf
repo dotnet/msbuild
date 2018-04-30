@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <source>PATH</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -33,13 +33,15 @@ Si no se especifica ninguno, usa el directorio actual de forma predeterminada.</
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
-        <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="translated">Plantilla base de MSBuild para la aplicación migrada. El valor predeterminado es el proyecto incluido en dotnet new.</target>
+        <source>The base MSBuild template to use for the migrated project.
+The default is the project included in dotnet new.</source>
+        <target state="needs-review-translation">Plantilla base de MSBuild para la aplicación migrada. El valor predeterminado es el proyecto incluido en dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="translated">Versión del paquete de SDK al que se hará referencia en la aplicación migrada. El valor predeterminado es la versión del SDK en dotnet new.</target>
+        <source>The version of the SDK package that will be referenced in the migrated project.
+The default is the version of the SDK in dotnet new.</source>
+        <target state="needs-review-translation">Versión del paquete de SDK al que se hará referencia en la aplicación migrada. El valor predeterminado es la versión del SDK en dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

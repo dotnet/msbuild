@@ -124,15 +124,24 @@
     <value>.NET Builder</value>
   </data>
   <data name="NoDependenciesOptionDescription" xml:space="preserve">
-    <value>Set this flag to ignore project-to-project references and only build the root project</value>
+    <value>Do not build project-to-project references and only build the specified project.</value>
   </data>
   <data name="NoIncrementialOptionDescription" xml:space="preserve">
-    <value>Disables incremental build.</value>
+    <value>Do not use incremental building.</value>
   </data>
   <data name="OutputOptionDescription" xml:space="preserve">
-    <value>Output directory in which to place built artifacts.</value>
+    <value>The output directory to place built artifacts in.</value>
   </data>
   <data name="OutputOptionName" xml:space="preserve">
     <value>OUTPUT_DIR</value>
+  </data>
+  <data name="FrameworkOptionDescription" xml:space="preserve">
+    <value>The target framework to build for. The target framework must also be specified in the project file.</value>
+  </data>
+  <data name="RuntimeOptionDescription" xml:space="preserve">
+    <value>The target runtime to build for.</value>
+  </data>
+  <data name="ConfigurationOptionDescription" xml:space="preserve">
+    <value>The configuration to use for building the project. The default for most projects is 'Debug'.</value>
   </data>
 </root>

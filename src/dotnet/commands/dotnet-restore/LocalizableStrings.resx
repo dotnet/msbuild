@@ -133,22 +133,22 @@
     <value>SOURCE</value>
   </data>
   <data name="CmdSourceOptionDescription" xml:space="preserve">
-    <value>Specifies a NuGet package source to use during the restore.</value>
+    <value>The NuGet package source to use for the restore.</value>
   </data>
   <data name="CmdRuntimeOption" xml:space="preserve">
     <value>RUNTIME_IDENTIFIER</value>
   </data>
   <data name="CmdRuntimeOptionDescription" xml:space="preserve">
-    <value>Target runtime to restore packages for.</value>
+    <value>The target runtime to restore packages for.</value>
   </data>
   <data name="CmdPackagesOption" xml:space="preserve">
-    <value>PACKAGES_DIRECTORY</value>
+    <value>PACKAGES_DIR</value>
   </data>
   <data name="CmdPackagesOptionDescription" xml:space="preserve">
-    <value>Directory to install packages in.</value>
+    <value>The directory to restore packages to.</value>
   </data>
   <data name="CmdDisableParallelOptionDescription" xml:space="preserve">
-    <value>Disables restoring multiple projects in parallel.</value>
+    <value>Prevent restoring multiple projects in parallel.</value>
   </data>
   <data name="CmdConfigFileOption" xml:space="preserve">
     <value>FILE</value>
@@ -163,9 +163,10 @@
     <value>Treat package source failures as warnings.</value>
   </data>
   <data name="CmdNoDependenciesOptionDescription" xml:space="preserve">
-    <value>Set this flag to ignore project to project references and only restore the root project.</value>
+    <value>Do not restore project-to-project references and only restore the specified project.</value>
   </data>
   <data name="CmdForceRestoreOptionDescription" xml:space="preserve">
-    <value>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</value>
+    <value>Force all dependencies to be resolved even if the last restore was successful.
+This is equivalent to deleting project.assets.json.</value>
   </data>
 </root>

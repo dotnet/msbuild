@@ -13,13 +13,13 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to store the given assemblies.</source>
-        <target state="translated">指定されたアセンブリを格納する出力ディレクトリ。</target>
+        <source>The output directory to store the given assemblies in.</source>
+        <target state="needs-review-translation">指定されたアセンブリを格納する出力ディレクトリ。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
-        <source>FrameworkVersion</source>
-        <target state="translated">FrameworkVersion</target>
+        <source>FRAMEWORK_VERSION</source>
+        <target state="needs-review-translation">FrameworkVersion</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
@@ -28,13 +28,13 @@
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
-        <source>IntermediateWorkingDir</source>
-        <target state="translated">IntermediateWorkingDir</target>
+        <source>WORKING_DIR</source>
+        <target state="needs-review-translation">IntermediateWorkingDir</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
-        <source>The directory used by the command to execute.</source>
-        <target state="translated">実行のためにコマンドで使用されるディレクトリ。</target>
+        <source>The working directory used by the command to execute.</source>
+        <target state="needs-review-translation">実行のためにコマンドで使用されるディレクトリ。</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateDirExists">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
-        <source>Skips the optimization phase.</source>
-        <target state="translated">最適化フェーズをスキップします。</target>
+        <source>Skip the optimization phase.</source>
+        <target state="needs-review-translation">最適化フェーズをスキップします。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectManifest">
@@ -58,13 +58,23 @@
         <note />
       </trans-unit>
       <trans-unit id="SkipSymbolsOptionDescription">
-        <source>Skips creating symbol files which can be used for profiling the optimized assemblies.</source>
-        <target state="translated">最適化されたアセンブリのプロファイルに使用できるシンボル ファイルの作成をスキップします。</target>
+        <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
+        <target state="needs-review-translation">最適化されたアセンブリのプロファイルに使用できるシンボル ファイルの作成をスキップします。</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyManifests">
         <source>Specify at least one manifest with --manifest.</source>
         <target state="translated">--manifest を使用して、少なくとも 1 つのマニフェストを指定します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
+        <target state="new">The target framework to store packages for. The target framework has to be specified in the project file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to store packages for.</source>
+        <target state="new">The target runtime to store packages for.</target>
         <note />
       </trans-unit>
     </body>

@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place built packages.</source>
-        <target state="translated">Verzeichnis, in dem erstellte Pakete abgelegt werden.</target>
+        <source>The output directory to place built packages in.</source>
+        <target state="needs-review-translation">Verzeichnis, in dem erstellte Pakete abgelegt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -33,13 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
-        <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
-        <target state="translated">PDBs und Quelldateien einschließen. Quelldateien werden im Ordner "src" im resultierenden NuGet-Paket abgelegt.</target>
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="needs-review-translation">PDBs und Quelldateien einschließen. Quelldateien werden im Ordner "src" im resultierenden NuGet-Paket abgelegt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">Legt das Verarbeitungsflag im Paket fest. Weitere Informationen finden Sie unter https://aka.ms/nupkgservicing.</target>
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="needs-review-translation">Legt das Verarbeitungsflag im Paket fest. Weitere Informationen finden Sie unter https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -50,6 +50,11 @@
       <trans-unit id="CmdArgumentDescription">
         <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
         <target state="translated">Das zu packende Projekt (standardmäßig die Projektdatei im aktuellen Verzeichnis). Kann ein Pfad zu einer beliebigen Projektdatei sein.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

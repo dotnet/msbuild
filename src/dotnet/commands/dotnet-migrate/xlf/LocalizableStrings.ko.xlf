@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <source>PATH</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -33,13 +33,15 @@ Defaults to current directory if nothing is specified.</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
-        <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="translated">마이그레이션된 앱에 사용할 기본 MSBuild 템플릿입니다. 기본값은 새 dotnet에 포함된 프로젝트입니다.</target>
+        <source>The base MSBuild template to use for the migrated project.
+The default is the project included in dotnet new.</source>
+        <target state="needs-review-translation">마이그레이션된 앱에 사용할 기본 MSBuild 템플릿입니다. 기본값은 새 dotnet에 포함된 프로젝트입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="translated">마이그레이션된 앱에서 참조되는 SDK 패키지의 버전입니다. 기본값은 새 dotnet의 SDK 버전입니다.</target>
+        <source>The version of the SDK package that will be referenced in the migrated project.
+The default is the version of the SDK in dotnet new.</source>
+        <target state="needs-review-translation">마이그레이션된 앱에서 참조되는 SDK 패키지의 버전입니다. 기본값은 새 dotnet의 SDK 버전입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

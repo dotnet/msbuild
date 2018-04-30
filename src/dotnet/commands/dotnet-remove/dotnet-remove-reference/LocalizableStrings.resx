@@ -123,10 +123,13 @@
   <data name="AppDescription" xml:space="preserve">
     <value>Command to remove project to project reference</value>
   </data>
-  <data name="AppHelpText" xml:space="preserve">
-    <value>Project to project references to remove</value>
+  <data name="ProjectPathArgumentName" xml:space="preserve">
+    <value>PROJECT_PATH</value>
+  </data>
+  <data name="ProjectPathArgumentDescription" xml:space="preserve">
+    <value>The paths to the referenced projects to remove.</value>
   </data>
   <data name="CmdFrameworkDescription" xml:space="preserve">
-    <value>Remove reference only when targeting a specific framework</value>
+    <value>Remove the reference only when targeting a specific framework.</value>
   </data>
 </root>

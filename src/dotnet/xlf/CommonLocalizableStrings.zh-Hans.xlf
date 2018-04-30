@@ -609,64 +609,29 @@
         <target state="translated">解决方案“{0}”无效。{1}。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ArgumentsProjectDescription">
-        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="translated">要操作的项目文件。如果未指定文件，则命令会在当前目录下搜索一个文件。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsSolutionDescription">
-        <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="translated">要操作的解决方案文件。如未指定，则命令会在当前目录下搜索一个文件。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdSlnFile">
-        <source>SLN_FILE</source>
-        <target state="translated">SLN_FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdProjectFile">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
         <source>Invalid project `{0}`. {1}.</source>
         <target state="translated">项目“{0}”无效。{1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
-        <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="translated">设置命令的详细级别。允许值为 q[uiet]、m[inimal]、n[ormal]、d[etailed] 和 diag[nostic]。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">要发布的目标框架。目标框架必须在项目文件中指定。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="translated">针对给定运行时发布项目。创建自包含部署时使用此项。默认操作为发布依赖框架的应用。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">用于生成项目的配置。对大多数项目的默认值是 "Debug"。</target>
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="needs-review-translation">设置命令的详细级别。允许值为 q[uiet]、m[inimal]、n[ormal]、d[etailed] 和 diag[nostic]。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">定义项目中 $(VersionSuffix) 属性的值。</target>
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="needs-review-translation">定义项目中 $(VersionSuffix) 属性的值。</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
-        <source>Show help information.</source>
-        <target state="translated">显示帮助信息。</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">显示帮助信息。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
-        <source>Does not do an implicit restore when executing the command.</source>
-        <target state="translated">请勿在执行命令时进行隐式还原。</target>
+        <source>Do not restore the project before building.</source>
+        <target state="needs-review-translation">请勿在执行命令时进行隐式还原。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -891,6 +856,41 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToReadNuGetLockFile">
         <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
         <target state="translated">未能读取工具包“{0}”的 NuGet LockFile: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="new">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="new">CONFIGURATION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="new">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

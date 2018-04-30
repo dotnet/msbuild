@@ -17,29 +17,27 @@ namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 {
     public class GivenDotnetSlnAdd : TestBase
     {
-        private string HelpText = @"Usage: dotnet sln <SLN_FILE> add [options] <args>
+        private string HelpText = @"Usage: dotnet sln <SLN_FILE> add [options] <PROJECT_PATH>
 
 Arguments:
-  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
-  <args>       Add one or more specified projects to the solution.
+  <SLN_FILE>       The solution file to operate on. If not specified, the command will search the current directory for one.
+  <PROJECT_PATH>   The paths to the projects to add to the solution.
 
 Options:
-  -h, --help   Show help information.
-";
+  -h, --help   Show command line help.";
 
         private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
 
 Arguments:
-  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>   The solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
+  -h, --help   Show command line help.
 
 Commands:
-  add <args>      .NET Add project(s) to a solution file Command
-  list            .NET List project(s) in a solution file Command
-  remove <args>   .NET Remove project(s) from a solution file Command
-";
+  add <PROJECT_PATH>      Add one or more projects to a solution file.
+  list                    List all projects in a solution file.
+  remove <PROJECT_PATH>   Remove one or more projects from a solution file.";
 
         private ITestOutputHelper _output;
 
