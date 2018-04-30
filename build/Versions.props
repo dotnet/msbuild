@@ -8,8 +8,8 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionBase>2.1.300</VersionBase>
-    <PreReleaseVersionLabel>rc1</PreReleaseVersionLabel>
+    <VersionPrefix>2.1.300</VersionPrefix>
+    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <!-- Production Dependencies -->
