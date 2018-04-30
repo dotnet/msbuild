@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
                         {
                             ResXFileRef resxFileRef = ((ResXDataNode)dictEntry.Value).FileRef;
                             if (resxFileRef != null)
-                                retVal.Add(resxFileRef.FileName);
+                                retVal.Add(FileUtilities.MaybeAdjustFilePath(resxFileRef.FileName));
                         }
                     }
                 }
