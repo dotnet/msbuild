@@ -596,7 +596,7 @@ copy_files_or_dirs_from_list() {
     local osname="$(get_current_os_name)"
     local override_switch=$(
         if [ "$override" = false ]; then
-            if [[ "$osname" == 'alpine'* ]]; then
+            if [[ "$osname" == "linux-musl" ]]; then
                 printf -- "-u";
             else
                 printf -- "-n";
