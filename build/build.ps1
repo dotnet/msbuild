@@ -123,7 +123,7 @@ function InstallRepoToolset {
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.csproj"
-    $msbuildArgs = "/t:restore", "/m", "/clp:Summary", "/warnaserror", "/v:$verbosity"
+    $msbuildArgs = "/t:build", "/m", "/clp:Summary", "/warnaserror", "/v:$verbosity"
     $msbuildArgs = AddLogCmd "Toolset" $msbuildArgs
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)

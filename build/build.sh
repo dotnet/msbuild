@@ -290,7 +290,7 @@ function InstallRepoToolset {
   if [ ! -d "$RepoToolsetBuildProj" ]
   then
     local ToolsetProj="$ScriptRoot/Toolset.csproj"
-    CallMSBuild $(QQ $ToolsetProj) /t:restore /m /clp:Summary /warnaserror /v:$verbosity $logCmd $properties
+    CallMSBuild $(QQ $ToolsetProj) /t:build /m /clp:Summary /warnaserror /v:$verbosity $logCmd $properties
   fi
 }
 
