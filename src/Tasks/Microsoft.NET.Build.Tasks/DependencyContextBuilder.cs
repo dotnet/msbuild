@@ -20,6 +20,8 @@ namespace Microsoft.NET.Build.Tasks
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly SingleProjectInfo _mainProjectInfo;
         private readonly ProjectContext _projectContext;
+        private readonly bool _includeRuntimeFileVersions;
+        private readonly NuGetPackageResolver _packageResolver;
         private IEnumerable<ReferenceInfo> _referenceAssemblies;
         private IEnumerable<ReferenceInfo> _directReferences;
         private IEnumerable<ReferenceInfo> _dependencyReferences;
@@ -32,13 +34,21 @@ namespace Microsoft.NET.Build.Tasks
         private HashSet<string> _usedLibraryNames;
         private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
 
-        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
+        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
         {
             _mainProjectInfo = mainProjectInfo;
             _projectContext = projectContext;
+            _includeRuntimeFileVersions = includeRuntimeFileVersions;
 
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
+
+            if (_includeRuntimeFileVersions)
+            {
+                //  This is used to look up the paths to package files on disk, which is only needed in this class if
+                //  it needs to read the file versions
+                _packageResolver = NuGetPackageResolver.CreateResolver(projectContext.LockFile, mainProjectInfo.ProjectPath);
+            }
         }
 
         /// <summary>
@@ -436,6 +446,27 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private RuntimeFile CreateRuntimeFile(LockFileTargetLibrary library, LockFileItem item)
+        {
+            //  _packageResolver will be null if _includeRuntimeFileVersions is false, hence the "?."
+            var itemFullPath = _packageResolver?.ResolvePackageAssetPath(library, item.Path);
+            return CreateRuntimeFile(item.Path, itemFullPath);
+        }
+
+        private RuntimeFile CreateRuntimeFile(string path, string fullPath)
+        {
+            if (_includeRuntimeFileVersions)
+            {
+                string fileVersion = FileUtilities.GetFileVersion(fullPath).ToString();
+                string assemblyVersion = FileUtilities.TryGetAssemblyVersion(fullPath)?.ToString();
+                return new RuntimeFile(path, assemblyVersion, fileVersion);
+            }
+            else
+            {
+                return new RuntimeFile(path, null, null);
+            }
+        }
+
         private IReadOnlyList<RuntimeAssetGroup> CreateRuntimeAssemblyGroups(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
         {
             if (targetLibrary.IsProject())
@@ -450,14 +481,14 @@ namespace Microsoft.NET.Build.Tasks
                 assemblyGroups.Add(
                     new RuntimeAssetGroup(
                         string.Empty,
-                        targetLibrary.RuntimeAssemblies.FilterPlaceholderFiles().Select(a => a.Path)));
+                        targetLibrary.RuntimeAssemblies.FilterPlaceholderFiles().Select(a => CreateRuntimeFile(targetLibrary, a))));
 
                 foreach (var runtimeTargetsGroup in targetLibrary.GetRuntimeTargetsGroups("runtime"))
                 {
                     assemblyGroups.Add(
                         new RuntimeAssetGroup(
                             runtimeTargetsGroup.Key,
-                            runtimeTargetsGroup.Select(t => t.Path)));
+                            runtimeTargetsGroup.Select(t => CreateRuntimeFile(targetLibrary, t))));
                 }
 
                 return assemblyGroups;
@@ -471,14 +502,14 @@ namespace Microsoft.NET.Build.Tasks
             nativeGroups.Add(
                 new RuntimeAssetGroup(
                     string.Empty,
-                    export.NativeLibraries.FilterPlaceholderFiles().Select(a => a.Path)));
+                    export.NativeLibraries.FilterPlaceholderFiles().Select(a => CreateRuntimeFile(export, a))));
 
             foreach (var runtimeTargetsGroup in export.GetRuntimeTargetsGroups("native"))
             {
                 nativeGroups.Add(
                     new RuntimeAssetGroup(
                         runtimeTargetsGroup.Key,
-                        runtimeTargetsGroup.Select(t => t.Path)));
+                        runtimeTargetsGroup.Select(t => CreateRuntimeFile(export, t))));
             }
 
             return nativeGroups;
@@ -560,7 +591,7 @@ namespace Microsoft.NET.Build.Tasks
                     name: GetReferenceLibraryName(r),
                     version: r.Version,
                     hash: string.Empty,
-                    runtimeAssemblyGroups: new[] { new RuntimeAssetGroup(string.Empty, r.FileName) },
+                    runtimeAssemblyGroups: new[] { new RuntimeAssetGroup(string.Empty, new[] { CreateRuntimeFile(r.FileName, r.FullPath) }) },
                     nativeLibraryGroups: new RuntimeAssetGroup[] { },
                     resourceAssemblies: CreateResourceAssemblies(r.ResourceAssemblies),
                     dependencies: Enumerable.Empty<Dependency>(),

@@ -79,5 +79,8 @@ namespace Microsoft.NET.Build.Tasks
         // Resource assemblies
         public const string Culture = "Culture";
         public const string DestinationSubDirectory = "DestinationSubDirectory";
+
+        // Expected platform packages
+        public const string ExpectedVersion = "ExpectedVersion";
     }
 }

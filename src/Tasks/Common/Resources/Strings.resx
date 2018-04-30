@@ -324,6 +324,12 @@
   <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
     <value>Pack as tool does not support self contained.</value>
   </data>
+  <data name="DotnetToolOnlySupportNetcoreapp" xml:space="preserve">
+    <value>only supports .NET Core.</value>
+  </data>
+  <data name="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21" xml:space="preserve">
+    <value>DotnetTool does not support target framework lower than netcoreapp2.1.</value>
+  </data>
   <data name="UnsupportedRuntimeIdentifier" xml:space="preserve">
     <value>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</value>
   </data>
@@ -345,5 +351,11 @@
     <comment>{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</comment>
+  </data>
+  <data name="UnableToUsePackageAssetsCache" xml:space="preserve">
+    <value>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</value>
+  </data>
+  <data name="AssetsFileNotSet" xml:space="preserve">
+    <value>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
   </data>
 </root>

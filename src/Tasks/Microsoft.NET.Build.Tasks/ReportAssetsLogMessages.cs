@@ -30,7 +30,6 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// The assets file to process
         /// </summary>
-        [Required]
         public string ProjectAssetsFile
         {
             get; set;

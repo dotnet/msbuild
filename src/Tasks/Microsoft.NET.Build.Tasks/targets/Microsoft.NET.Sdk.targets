@@ -118,7 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeReferenceAssemblies"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
-          Inputs="$(ProjectAssetsFile)"
+          Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
 
     <!--
@@ -142,7 +142,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       FilesToSkip="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      IsSelfContained="$(SelfContained)">
+                      IsSelfContained="$(SelfContained)"
+                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)">
     </GenerateDepsFile>
 
     <ItemGroup>

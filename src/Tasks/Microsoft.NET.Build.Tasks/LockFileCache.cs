@@ -24,6 +24,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public LockFile GetLockFile(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new BuildErrorException(Strings.AssetsFileNotSet);
+            }
             if (!Path.IsPathRooted(path))
             {
                 throw new BuildErrorException(Strings.AssetsFilePathNotRooted, path);

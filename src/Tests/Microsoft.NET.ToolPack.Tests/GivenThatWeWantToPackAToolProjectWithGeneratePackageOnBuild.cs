@@ -39,8 +39,9 @@ namespace Microsoft.NET.ToolPack.Tests
                         XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                         propertyGroup.Add(new XElement(ns + "GeneratePackageOnBuild", "true"));
                     }
-                })
-                .Restore(Log, "App");
+                });
+
+            testAsset.Restore(Log, "App");
 
             return testAsset;
         }
