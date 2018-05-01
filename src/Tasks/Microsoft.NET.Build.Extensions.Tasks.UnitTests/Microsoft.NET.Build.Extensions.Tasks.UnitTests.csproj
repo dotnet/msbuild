@@ -35,4 +35,8 @@
 
   <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
 
+  <!-- Workaround for fixed bug causes duplicate file warnings on pack, so disable it
+       https://github.com/dotnet/roslyn-tools/issues/249 -->
+  <Target Name="WorkaroundIncorrectSatelliteDeployment" />
+  
 </Project>
