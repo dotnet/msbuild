@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli
     {
         public void GenerateAspNetCoreDevelopmentCertificate()
         {
-#if !EXCLUDE_ASPNET
+#if !EXCLUDE_ASPNETCORE
             Microsoft.AspNetCore.DeveloperCertificates.XPlat.CertificateGenerator.GenerateAspNetHttpsCertificate();
 #endif
         }
