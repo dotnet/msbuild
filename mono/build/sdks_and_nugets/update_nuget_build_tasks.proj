@@ -18,7 +18,7 @@
 
         <Message Text="NuGetBuildTasksVersionOnDisk in UpdateNuGetBuildTasks: $(NuGetBuildTasksVersionOnDisk)" />
         <PropertyGroup>
-            <TmpPackageDirectory>$(MSBuildThisFileDirectory)/tmp</TmpPackageDirectory>
+            <TmpPackageDirectory>$(MSBuildThisFileDirectory)/tmp/packages/</TmpPackageDirectory>
         </PropertyGroup>
 
         <RemoveDir Directories="$(TmpPackageDirectory);$(NuGetExtensionsPath);$(NuGetExtensionsPathToolsVersion)" />

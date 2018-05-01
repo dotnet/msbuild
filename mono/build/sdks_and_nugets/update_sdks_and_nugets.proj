@@ -20,6 +20,7 @@
 
         <NuGetExtensionsPath>$(RepoRoot)\nuget-support\tasks-targets</NuGetExtensionsPath>
         <NuGetExtensionsPathToolsVersion>$(RepoRoot)\nuget-support\tv</NuGetExtensionsPathToolsVersion>
+        <TmpDir>$(MSBuildThisFileDirectory)\tmp</TmpDir>
     </PropertyGroup>
 
     <Target Name="DeploySdksAndNuGets">
@@ -62,7 +63,9 @@
             <RuntimeDepsInstallerUrl>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</RuntimeDepsInstallerUrl>
         </PropertyGroup>
 
-        <Exec Command="curl -s $(HostFxrUrl) -o $(MSBuildThisFileDirectory)$(DownloadedHostFxrInstallerFileName)" />
-        <Exec Command="$(MSBuildThisFileDirectory)..\extract_and_copy_hostfxr.sh $(MSBuildThisFileDirectory)$(DownloadedHostFxrInstallerFileName) $(MSBuildSdkResolverOutDir)\" />
+        <MakeDir Directories="$(TmpDir)" />
+        <Exec Command="curl -s $(HostFxrUrl) -o $(TmpDir)\$(DownloadedHostFxrInstallerFileName)" />
+        <Exec Command="$(MSBuildThisFileDirectory)..\extract_and_copy_hostfxr.sh $(TmpDir)\$(DownloadedHostFxrInstallerFileName) $(MSBuildSdkResolverOutDir)\" />
+        <Delete Files="$(TmpDir)\$(DownloadedHostFxrInstallerFileName)" />
     </Target>
 </Project>
