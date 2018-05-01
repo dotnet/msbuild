@@ -288,12 +288,17 @@ function CallMSBuild
 {
   try 
   {
+    Write-Host "=========================="
+    Write-Host "$msbuildHost $msbuildToUse $args"
+    Write-Host "=========================="
+
     if ($msbuildHost)
     {
       & $msbuildHost $msbuildToUse $args
     }
     else
     {
+      
       & $msbuildToUse $args
     }
 
