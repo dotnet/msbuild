@@ -274,6 +274,17 @@ namespace Microsoft.Build.Logging
             var projectId = ReadInt32();
             var targetNames = ReadString();
             var toolsVersion = ReadOptionalString();
+
+            Dictionary<string, string> globalProperties = null;
+
+            if (fileFormatVersion > 6)
+            {
+                if (ReadBoolean())
+                {
+                    globalProperties = ReadStringDictionary();
+                }
+            }
+
             var propertyList = ReadPropertyList();
             var itemList = ReadItems();
 
@@ -286,7 +297,7 @@ namespace Microsoft.Build.Logging
                 propertyList,
                 itemList,
                 parentContext,
-                null,
+                globalProperties,
                 toolsVersion);
             SetCommonFields(e, fields);
             return e;
