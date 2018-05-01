@@ -55,13 +55,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <_DownloadAndExtractItem Include="AspNetCoreSharedFxArchiveFile"
-                             Condition="!Exists('$(AspNetCoreSharedFxArchiveFile)') And ( '$(AspNetCoreSharedFxArchiveRid)' == 'linux-arm' OR !$(Architecture.StartsWith('arm')) )">
-      <Url>$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)$(CoreSetupBlobAccessTokenParam)</Url>
-      <DownloadFileName>$(AspNetCoreSharedFxArchiveFile)</DownloadFileName>
-      <ExtractDestination>$(AspNetCoreSharedFxPublishDirectory)</ExtractDestination>
-    </_DownloadAndExtractItem>
-
     <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
                              Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
       <Url>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(CombinedFrameworkHostCompressedFileName)$(CoreSetupBlobAccessTokenParam)</Url>
@@ -95,6 +88,15 @@
       <Url>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
       <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
       <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
+    <_DownloadAndExtractItem Include="AspNetCoreSharedFxArchiveFile"
+                             Condition="!Exists('$(AspNetCoreSharedFxArchiveFile)') And ( '$(AspNetCoreSharedFxArchiveRid)' == 'linux-arm' OR !$(Architecture.StartsWith('arm')) )">
+      <Url>$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(AspNetCoreSharedFxArchiveFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+      <DownloadFileName>$(AspNetCoreSharedFxArchiveFile)</DownloadFileName>
+      <ExtractDestination>$(AspNetCoreSharedFxPublishDirectory)</ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedAspNetCoreSharedFxInstallerFile"
