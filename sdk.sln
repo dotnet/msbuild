@@ -130,6 +130,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommandLine", "CommandLine"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.ToolPack.Tests", "src\Tests\Microsoft.NET.ToolPack.Tests\Microsoft.NET.ToolPack.Tests.csproj", "{6F72FAA2-4E46-4382-940A-4F0290E070E2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelemetryStdOutLogger", "src\Tests\TelemetryStdOutLogger\TelemetryStdOutLogger.csproj", "{E740A596-2CAE-476C-8062-49705C3A9CF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -188,6 +190,10 @@ Global
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -214,6 +220,7 @@ Global
 		{CAF71BDC-7B7D-4A43-AB8C-E440A1E4F108} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{7C6A88D0-DBCC-4933-A92D-A0AC133DD5FC} = {5293658E-96D2-421F-A789-D0B6BA129570}
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{E740A596-2CAE-476C-8062-49705C3A9CF0} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

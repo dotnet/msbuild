@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <EnableDefaultItems>false</EnableDefaultItems>
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
@@ -42,6 +41,7 @@
     <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" />
     
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\TelemetryStdOutLogger\TelemetryStdOutLogger.csproj" />
   </ItemGroup>
 
   <ItemGroup>
