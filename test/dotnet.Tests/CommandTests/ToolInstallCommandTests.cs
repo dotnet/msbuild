@@ -175,9 +175,11 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenFailedPackageInstallWhenRunWithPackageIdItShouldFail()
         {
+            const string ErrorMessage = "Simulated error";
+
             var toolPackageInstaller =
                 CreateToolPackageInstaller(
-                    installCallback: () => throw new ToolPackageException("Simulated error"));
+                    installCallback: () => throw new ToolPackageException(ErrorMessage));
 
             var installCommand = new ToolInstallCommand(
                 _appliedCommand,
@@ -191,8 +193,9 @@ namespace Microsoft.DotNet.Tests.Commands
 
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(
-                    "Simulated error" + Environment.NewLine
-                                      + string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
+                    ErrorMessage +
+                    Environment.NewLine +
+                    string.Format(LocalizableStrings.ToolInstallationFailedWithRestoreGuidance, PackageId));
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
