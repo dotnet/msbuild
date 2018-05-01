@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="MSBuildServer">
         <source>MSBuild server</source>
-        <target state="new">MSBuild server</target>
+        <target state="translated">MSBuild サーバー</target>
         <note />
       </trans-unit>
       <trans-unit id="VBCSCompilerServer">
         <source>VB/C# compiler server</source>
-        <target state="new">VB/C# compiler server</target>
+        <target state="translated">VB/C# コンパイラ サーバー</target>
         <note />
       </trans-unit>
       <trans-unit id="RazorServer">
         <source>Razor build server</source>
-        <target state="new">Razor build server</target>
+        <target state="translated">Razor ビルド サーバー</target>
         <note />
       </trans-unit>
       <trans-unit id="ShutdownCommandFailed">
         <source>The shutdown command failed: {0}</source>
-        <target state="new">The shutdown command failed: {0}</target>
+        <target state="translated">シャットダウン コマンドが失敗しました: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToReadPidFile">

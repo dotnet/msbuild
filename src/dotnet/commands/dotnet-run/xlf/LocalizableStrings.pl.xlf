@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
         <source>Do not build the project before running. Implies --no-restore.</source>
-        <target state="needs-review-translation">Nie kompiluj projektu przed uruchomieniem. Powoduje przyjęcie, że podano parametr --no-restore.</target>
+        <target state="translated">Nie kompiluj tego projektu przed uruchomieniem. Powoduje przyjęcie, że podano parametr --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">

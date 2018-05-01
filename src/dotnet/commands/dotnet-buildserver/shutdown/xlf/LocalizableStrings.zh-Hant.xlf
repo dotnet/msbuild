@@ -4,57 +4,57 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Shuts down build servers that are started from dotnet. By default, all servers are shut down.</source>
-        <target state="new">Shuts down build servers that are started from dotnet. By default, all servers are shut down.</target>
+        <target state="translated">關閉 dotnet 啟動的組建伺服器。根據預設會關閉所有伺服器。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildOptionDescription">
         <source>Shuts down the MSBuild build server.</source>
-        <target state="new">Shuts down the MSBuild build server.</target>
+        <target state="translated">關閉 MSBuild 組建伺服器。</target>
         <note />
       </trans-unit>
       <trans-unit id="VBCSCompilerOptionDescription">
         <source>Shuts down the VB/C# compiler build server.</source>
-        <target state="new">Shuts down the VB/C# compiler build server.</target>
+        <target state="translated">關閉 VB/C# 編譯器組建伺服器。</target>
         <note />
       </trans-unit>
       <trans-unit id="RazorOptionDescription">
         <source>Shuts down the Razor build server.</source>
-        <target state="new">Shuts down the Razor build server.</target>
+        <target state="translated">關閉 Razor 組建伺服器。</target>
         <note />
       </trans-unit>
       <trans-unit id="ShuttingDownServer">
         <source>Shutting down {0}...</source>
-        <target state="new">Shutting down {0}...</target>
+        <target state="translated">正在關閉 {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="ShutDownSucceeded">
         <source>{0} shut down successfully.</source>
-        <target state="new">{0} shut down successfully.</target>
+        <target state="translated">{0} 關閉成功。</target>
         <note />
       </trans-unit>
       <trans-unit id="ShutDownFailed">
         <source>{0} failed to shut down: {1}</source>
-        <target state="new">{0} failed to shut down: {1}</target>
+        <target state="translated">{0} 無法關閉: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ShuttingDownServerWithPid">
         <source>Shutting down {0} (process {1})...</source>
-        <target state="new">Shutting down {0} (process {1})...</target>
+        <target state="translated">正在關閉 {0} (處理序 {1})...</target>
         <note />
       </trans-unit>
       <trans-unit id="ShutDownSucceededWithPid">
         <source>{0} (process {1}) shut down successfully.</source>
-        <target state="new">{0} (process {1}) shut down successfully.</target>
+        <target state="translated">{0} (處理序 {1}) 已成功關閉。</target>
         <note />
       </trans-unit>
       <trans-unit id="ShutDownFailedWithPid">
         <source>{0} (process {1}) failed to shut down: {2}</source>
-        <target state="new">{0} (process {1}) failed to shut down: {2}</target>
+        <target state="translated">{0} (處理序 {1}) 無法關閉: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="NoServersToShutdown">
         <source>No build servers are running.</source>
-        <target state="new">No build servers are running.</target>
+        <target state="translated">未執行任何組建伺服器。</target>
         <note />
       </trans-unit>
     </body>
