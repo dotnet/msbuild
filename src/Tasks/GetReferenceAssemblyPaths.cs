@@ -121,6 +121,18 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string TargetFrameworkMonikerDisplayName { get; set; }
 
+        /// <summary>
+        /// Target frameworks are looked up in @RootPath. If it cannot be found
+        /// there, then paths in @TargetFrameworkFallbackSearchPaths
+        /// are used for the lookup, in order. This can have multiple paths, separated
+        /// by ';'
+        /// </summary>
+        public string TargetFrameworkFallbackSearchPaths
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         #region ITask Members
@@ -181,7 +193,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                _tfmPaths = GetPaths(RootPath, moniker);
+                _tfmPaths = GetPaths(RootPath, TargetFrameworkFallbackSearchPaths, moniker);
 
                 if (_tfmPaths != null && _tfmPaths.Count > 0)
                 {
@@ -192,7 +204,7 @@ namespace Microsoft.Build.Tasks
                 // There is no point in generating the full framework paths if profile path could not be found.
                 if (targetingProfile && _tfmPaths != null)
                 {
-                    _tfmPathsNoProfile = GetPaths(RootPath, monikerWithNoProfile);
+                    _tfmPathsNoProfile = GetPaths(RootPath, TargetFrameworkFallbackSearchPaths, monikerWithNoProfile);
                 }
 
                 // The path with out the profile is just the reference assembly paths.
@@ -222,11 +234,14 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Generate the set of chained reference assembly paths
         /// </summary>
-        private IList<String> GetPaths(string rootPath, FrameworkNameVersioning frameworkmoniker)
+        private IList<String> GetPaths(string rootPath, string targetFrameworkFallbackSearchPaths, FrameworkNameVersioning frameworkmoniker)
         {
-            IList<string> pathsToReturn = String.IsNullOrEmpty(rootPath) ?
-                ToolLocationHelper.GetPathToReferenceAssemblies(frameworkmoniker) :
-                ToolLocationHelper.GetPathToReferenceAssemblies(rootPath, frameworkmoniker);
+            IList<String> pathsToReturn = ToolLocationHelper.GetPathToReferenceAssemblies(
+                                                frameworkmoniker.Identifier,
+                                                frameworkmoniker.Version.ToString(),
+                                                frameworkmoniker.Profile,
+                                                rootPath,
+                                                targetFrameworkFallbackSearchPaths);
 
             if (!SuppressNotFoundError)
             {

@@ -294,6 +294,45 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        /// <summary>
+        /// Test the case where there is a good target framework moniker passed in.
+        /// </summary>
+        [Fact]
+        public void TestGeneralFrameworkMonikerGoodWithFrameworkInFallbackPaths()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                string frameworkRootDir = Path.Combine(env.DefaultTestDirectory.FolderPath, "framework-root");
+                var framework41Directory = env.CreateFolder(Path.Combine(frameworkRootDir, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar));
+                var redistListDirectory = env.CreateFolder(Path.Combine(framework41Directory.FolderPath, "RedistList"));
+
+                string redistListContents =
+                        "<FileList Redist='Microsoft-Windows-CLRCoreComp' Name='.NET Framework 4.1'>" +
+                            "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
+                             "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
+                        "</FileList >";
+
+                env.CreateFile(redistListDirectory, "FrameworkList.xml", redistListContents);
+
+                string targetFrameworkMoniker = "MyFramework, Version=v4.1";
+                MockEngine engine = new MockEngine();
+                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+                getReferencePaths.BuildEngine = engine;
+                getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
+                getReferencePaths.RootPath = env.CreateFolder().FolderPath;
+                getReferencePaths.RootPath = frameworkRootDir;
+                getReferencePaths.TargetFrameworkFallbackSearchPaths = $"/foo/bar;{frameworkRootDir}";
+                getReferencePaths.Execute();
+                string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
+                string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
+                Assert.Equal(1, returnedPaths.Length);
+                Assert.True(returnedPaths[0].Equals(framework41Directory.FolderPath, StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(0, engine.Log.Length); // "Expected the log to contain nothing"
+                Assert.True(displayName.Equals(".NET Framework 4.1", StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
     }
 }
 #endif
