@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             // On .NET Core 2.1 preview2 + High Sierra it's consistently
             // just 128 for some reason.
             int expectedExitCode = NativeMethodsShared.IsWindows ? -1 :
-                    NativeMethodsShared.IsOSX ? 128 : 143;
+                    (NativeMethodsShared.IsOSX && !NativeMethodsShared.IsMono) ? 128 : 143;
 
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
