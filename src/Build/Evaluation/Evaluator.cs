@@ -203,6 +203,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static readonly EngineFileUtilities.IOCache _fallbackSearchPathsCache = new EngineFileUtilities.IOCache();
 
+        private readonly bool _profileEvaluation;
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
@@ -220,7 +221,8 @@ namespace Microsoft.Build.Evaluation
             ProjectInstance projectInstanceIfAnyForDebuggerOnly,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContext evaluationContext)
+            EvaluationContext evaluationContext,
+            bool profileEvaluation)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -250,7 +252,8 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationContext = evaluationContext;
-            _evaluationProfiler = new EvaluationProfiler((loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0);
+            _profileEvaluation = profileEvaluation;
+            _evaluationProfiler = new EvaluationProfiler(_profileEvaluation);
         }
 
         /// <summary>
@@ -369,6 +372,11 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
+                var profileEvaluation =
+                    ((loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0) ||
+                    loggingService.Loggers.Any(logger =>
+                        logger is IDiagnosticLogger diagnosticLogger &&
+                        ((diagnosticLogger.DiagnosticInformation & DiagnosticInformation.EvaluationProfile) != 0));
                 var evaluator = new Evaluator<P, I, M, D>(
                     data,
                     root,
@@ -381,7 +389,8 @@ namespace Microsoft.Build.Evaluation
                     projectInstanceIfAnyForDebuggerOnly,
                     sdkResolverService,
                     submissionId,
-                    evaluationContext);
+                    evaluationContext,
+                    profileEvaluation);
 
                 return evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
@@ -903,7 +912,7 @@ namespace Microsoft.Build.Evaluation
             {
                 BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                 ProjectFile = projectFile,
-                ProfilerResult = (_loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 ? (ProfilerResult?)_evaluationProfiler.ProfiledResult : null
+                ProfilerResult = _profileEvaluation ? (ProfilerResult?)_evaluationProfiler.ProfiledResult : null
             });
 
             return null;

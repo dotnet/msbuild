@@ -27,12 +27,13 @@ namespace Microsoft.Build.UnitTests
      * up a raw string (fullLog) that contains all messages, warnings, errors.
      *
      */
-    internal sealed class MockLogger : ILogger
+    internal sealed class MockLogger : IDiagnosticLogger
     {
         #region Properties
 
         private StringBuilder _fullLog = new StringBuilder();
-        private ITestOutputHelper _testOutputHelper;
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly bool _profileEvaluation;
 
         /// <summary>
         /// Should the build finished event be logged in the log file. This is to work around the fact we have different
@@ -138,10 +139,8 @@ namespace Microsoft.Build.UnitTests
          * The raw concatenation of all messages, errors and warnings seen so far.
          *
          */
-        internal string FullLog
-        {
-            get { return _fullLog.ToString(); }
-        }
+        internal string FullLog => _fullLog.ToString();
+
         #endregion
 
         #region Minimal ILogger implementation
@@ -154,7 +153,7 @@ namespace Microsoft.Build.UnitTests
          */
         public LoggerVerbosity Verbosity
         {
-            get { return LoggerVerbosity.Normal; }
+            get => LoggerVerbosity.Normal;
             set {/* do nothing */}
         }
 
@@ -166,16 +165,12 @@ namespace Microsoft.Build.UnitTests
          */
         public string Parameters
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                // do nothing
-            }
+            get => null;
+            set {/* do nothing */}
         }
+
+        public DiagnosticInformation DiagnosticInformation =>
+            _profileEvaluation ? DiagnosticInformation.EvaluationProfile : DiagnosticInformation.None;
 
         /*
          * Method:  Initialize
@@ -208,14 +203,10 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        public MockLogger()
-        {
-            _testOutputHelper = null;
-        }
-
-        public MockLogger(ITestOutputHelper testOutputHelper)
+        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false)
         {
             _testOutputHelper = testOutputHelper;
+            _profileEvaluation = profileEvaluation;
         }
 
         public List<Action<object, BuildEventArgs>> AdditionalHandlers { get; set; } = new List<Action<object, BuildEventArgs>>();
@@ -235,21 +226,14 @@ namespace Microsoft.Build.UnitTests
                 handler(sender, eventArgs);
             }
 
-            if (eventArgs is BuildWarningEventArgs)
+            if (eventArgs is BuildWarningEventArgs w)
             {
-                BuildWarningEventArgs w = (BuildWarningEventArgs) eventArgs;
-
                 // hack: disregard the MTA warning.
                 // need the second condition to pass on ploc builds
                 if (w.Code != "MSB4056" && !w.Message.Contains("MSB4056"))
                 {
-                    string logMessage = string.Format("{0}({1},{2}): {3} warning {4}: {5}",
-                        w.File,
-                        w.LineNumber,
-                        w.ColumnNumber,
-                        w.Subcategory,
-                        w.Code,
-                        w.Message);
+                    string logMessage =
+                        $"{w.File}({w.LineNumber},{w.ColumnNumber}): {w.Subcategory} warning {w.Code}: {w.Message}";
 
                     _fullLog.AppendLine(logMessage);
                     _testOutputHelper?.WriteLine(logMessage);
@@ -258,17 +242,10 @@ namespace Microsoft.Build.UnitTests
                     Warnings.Add(w);
                 }
             }
-            else if (eventArgs is BuildErrorEventArgs)
+            else if (eventArgs is BuildErrorEventArgs e)
             {
-                BuildErrorEventArgs e = (BuildErrorEventArgs) eventArgs;
-
-                string logMessage = string.Format("{0}({1},{2}): {3} error {4}: {5}",
-                    e.File,
-                    e.LineNumber,
-                    e.ColumnNumber,
-                    e.Subcategory,
-                    e.Code,
-                    e.Message);
+                string logMessage =
+                    $"{e.File}({e.LineNumber},{e.ColumnNumber}): {e.Subcategory} error {e.Code}: {e.Message}";
                 _fullLog.AppendLine(logMessage);
                 _testOutputHelper?.WriteLine(logMessage);
 
@@ -287,70 +264,61 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            if (eventArgs is ExternalProjectStartedEventArgs)
+            switch (eventArgs)
             {
-                this.ExternalProjectStartedEvents.Add((ExternalProjectStartedEventArgs)eventArgs);
-            }
-            else if (eventArgs is ExternalProjectFinishedEventArgs)
-            {
-                this.ExternalProjectFinishedEvents.Add((ExternalProjectFinishedEventArgs)eventArgs);
-            }
+                case ExternalProjectStartedEventArgs args:
+                    this.ExternalProjectStartedEvents.Add(args);
+                    break;
+                case ExternalProjectFinishedEventArgs finishedEventArgs:
+                    this.ExternalProjectFinishedEvents.Add(finishedEventArgs);
+                    break;
+                case ProjectStartedEventArgs startedEventArgs:
+                    this.ProjectStartedEvents.Add(startedEventArgs);
+                    break;
+                case ProjectFinishedEventArgs finishedEventArgs:
+                    this.ProjectFinishedEvents.Add(finishedEventArgs);
+                    break;
+                case TargetStartedEventArgs targetStartedEventArgs:
+                    this.TargetStartedEvents.Add(targetStartedEventArgs);
+                    break;
+                case TargetFinishedEventArgs targetFinishedEventArgs:
+                    this.TargetFinishedEvents.Add(targetFinishedEventArgs);
+                    break;
+                case TaskStartedEventArgs taskStartedEventArgs:
+                    this.TaskStartedEvents.Add(taskStartedEventArgs);
+                    break;
+                case TaskFinishedEventArgs taskFinishedEventArgs:
+                    this.TaskFinishedEvents.Add(taskFinishedEventArgs);
+                    break;
+                case BuildMessageEventArgs messageEventArgs:
+                    this.BuildMessageEvents.Add(messageEventArgs);
+                    break;
+                case BuildStartedEventArgs buildStartedEventArgs:
+                    this.BuildStartedEvents.Add(buildStartedEventArgs);
+                    break;
+                case BuildFinishedEventArgs buildFinishedEventArgs:
+                    this.BuildFinishedEvents.Add(buildFinishedEventArgs);
 
-            if (eventArgs is ProjectStartedEventArgs)
-            {
-                this.ProjectStartedEvents.Add((ProjectStartedEventArgs)eventArgs);
-            }
-            else if (eventArgs is ProjectFinishedEventArgs)
-            {
-                this.ProjectFinishedEvents.Add((ProjectFinishedEventArgs)eventArgs);
-            }
-            else if (eventArgs is TargetStartedEventArgs)
-            {
-                this.TargetStartedEvents.Add((TargetStartedEventArgs)eventArgs);
-            }
-            else if (eventArgs is TargetFinishedEventArgs)
-            {
-                this.TargetFinishedEvents.Add((TargetFinishedEventArgs)eventArgs);
-            }
-            else if (eventArgs is TaskStartedEventArgs)
-            {
-                this.TaskStartedEvents.Add((TaskStartedEventArgs)eventArgs);
-            }
-            else if (eventArgs is TaskFinishedEventArgs)
-            {
-                this.TaskFinishedEvents.Add((TaskFinishedEventArgs)eventArgs);
-            }
-            else if (eventArgs is BuildMessageEventArgs)
-            {
-                this.BuildMessageEvents.Add((BuildMessageEventArgs)eventArgs);
-            }
-            else if (eventArgs is BuildStartedEventArgs)
-            {
-                this.BuildStartedEvents.Add((BuildStartedEventArgs)eventArgs);
-            }
-            else if (eventArgs is BuildFinishedEventArgs)
-            {
-                this.BuildFinishedEvents.Add((BuildFinishedEventArgs)eventArgs);
+                    if (!AllowTaskCrashes)
+                    {
+                        // We should not have any task crashes. Sometimes a test will validate that their expected error
+                        // code appeared, but not realize it then crashed.
+                        AssertLogDoesntContain("MSB4018");
+                    }
 
-                if (!AllowTaskCrashes)
-                {
-                    // We should not have any task crashes. Sometimes a test will validate that their expected error
-                    // code appeared, but not realize it then crashed.
-                    AssertLogDoesntContain("MSB4018");
-                }
+                    // We should not have any Engine crashes.
+                    AssertLogDoesntContain("MSB0001");
 
-                // We should not have any Engine crashes.
-                AssertLogDoesntContain("MSB0001");
-
-                // Console.Write in the context of a unit test is very expensive.  A hundred
-                // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
-                // do the Console.Write once at the end of the build.
-                Console.Write(FullLog);
+                    // Console.Write in the context of a unit test is very expensive.  A hundred
+                    // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
+                    // do the Console.Write once at the end of the build.
+                    Console.Write(FullLog);
+                    break;
             }
         }
 
         // Lazy-init property returning the MSBuild engine resource manager
-        static private ResourceManager EngineResourceManager
+        private static ResourceManager EngineResourceManager
         {
             get
             {
@@ -363,10 +331,10 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        static private ResourceManager s_engineResourceManager = null;
+        private static ResourceManager s_engineResourceManager = null;
 
         // Gets the resource string given the resource ID
-        static public string GetString(string stringId)
+        public static string GetString(string stringId)
         {
             return EngineResourceManager.GetString(stringId, CultureInfo.CurrentUICulture);
         }
@@ -411,9 +379,9 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 currentLine = reader.ReadLine();
-                if (!isCaseSensitive && currentLine != null)
+                if (!isCaseSensitive)
                 {
-                    currentLine = currentLine.ToUpper();
+                    currentLine = currentLine?.ToUpper();
                 }
             }
             if (index != contains.Length)
@@ -446,7 +414,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Console.WriteLine(FullLog);
                 }
-                Assert.True(false, String.Format("Log was not expected to contain '{0}', but did.", contains));
+                Assert.True(false, $"Log was not expected to contain '{contains}', but did.");
             }
         }
 

@@ -141,6 +141,33 @@ namespace Microsoft.Build.Framework
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
     }
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
+    [System.FlagsAttribute]
+    public enum DiagnosticInformation
+    {
+        BuildFinishedEvent = 2,
+        BuildStartedEvent = 1,
+        CommandLine = 65536,
+        CustomEvent = 32768,
+        ErrorEvent = 1024,
+        EvaluationProfile = 2097152,
+        HighMessageEvent = 4096,
+        LowMessageEvent = 16384,
+        None = 0,
+        NormalMessageEvent = 8192,
+        NoSummary = 262144,
+        PerformanceSummary = 131072,
+        ProjectEvaluationFinishedEvent = 32,
+        ProjectEvaluationStartedEvent = 16,
+        ProjectFinishedEvent = 8,
+        ProjectStartedEvent = 4,
+        ShowCommandLine = 524288,
+        TargetFinishedEvent = 128,
+        TargetStartedEvent = 64,
+        TaskFinishedEvent = 512,
+        TaskInputs = 1048576,
+        TaskStartedEvent = 256,
+        WarningEvent = 2048,
+    }
     public partial class ExternalProjectFinishedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
     {
         protected ExternalProjectFinishedEventArgs() { }
@@ -194,6 +221,10 @@ namespace Microsoft.Build.Framework
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();
+    }
+    public partial interface IDiagnosticLogger : Microsoft.Build.Framework.ILogger
+    {
+        Microsoft.Build.Framework.DiagnosticInformation DiagnosticInformation { get; }
     }
     public partial interface IEventRedirector
     {

@@ -1752,7 +1752,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource2
+        internal class ReusableLogger : INodeLogger, IEventSource2, IDiagnosticLogger
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1965,6 +1965,10 @@ namespace Microsoft.Build.Evaluation
                     _originalLogger.Parameters = value;
                 }
             }
+
+            public DiagnosticInformation DiagnosticInformation => _originalLogger is IDiagnosticLogger diagnosticLogger
+                ? diagnosticLogger.DiagnosticInformation
+                : DiagnosticInformation.None;
 
             /// <summary>
             /// If we haven't yet been initialized, we register for design time events and initialize the logger we are holding.
