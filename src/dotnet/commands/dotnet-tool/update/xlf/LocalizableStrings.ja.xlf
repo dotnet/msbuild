@@ -92,14 +92,14 @@
         <target state="translated">ツール '{0}' を更新できませんでした。原因:</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
+      <trans-unit id="AddSourceOptionDescription">
         <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="translated">更新中に使用する他の NuGet パッケージ ソースを追加します。</target>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
+      <trans-unit id="AddSourceOptionName">
+        <source>ADD_SOURCE</source>
+        <target state="new">ADD_SOURCE</target>
         <note />
       </trans-unit>
     </body>

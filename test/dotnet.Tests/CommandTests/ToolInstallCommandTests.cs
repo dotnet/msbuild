@@ -85,10 +85,10 @@ namespace Microsoft.DotNet.Tests.Commands
         public void WhenRunWithPackageIdWithSourceItShouldCreateValidShim()
         {
             const string sourcePath = "http://mysouce.com";
-            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --source-feed {sourcePath}");
+            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --add-source {sourcePath}");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
             ParseResult parseResult =
-                Parser.Instance.ParseFrom("dotnet tool", new[] { "install", "-g", PackageId, "--source-feed", sourcePath });
+                Parser.Instance.ParseFrom("dotnet tool", new[] { "install", "-g", PackageId, "--add-source", sourcePath });
 
 
             var toolToolPackageInstaller = CreateToolPackageInstaller(
