@@ -28,6 +28,7 @@
 
   <!-- Repo Toolset Features -->
   <PropertyGroup>
+    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
     <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
 
