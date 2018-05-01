@@ -16,6 +16,8 @@
         <Error Text="Run build.proj instead of this." Condition="'$(_RunningFromBuildProject)' != 'true'" />
 
         <ItemGroup>
+            <BundledSdk Remove="Microsoft.Docker.Sdk" />
+
             <SdksToBundle Include="deploy_from_nugets.proj">
                 <Properties>
                     ProjectWithProperties=sdks_props.proj;
