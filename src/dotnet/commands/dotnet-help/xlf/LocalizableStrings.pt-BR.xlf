@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List project references or installed tools.</source>
-        <target state="translated">Listar referências de projeto ou ferramentas instaladas.</target>
+        <source>List references of a .NET project.</source>
+        <target state="needs-review-translation">Listar referências de projeto ou ferramentas instaladas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">

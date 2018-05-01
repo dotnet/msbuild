@@ -193,7 +193,7 @@
     <value>Remove reference from the project.</value>
   </data>
   <data name="ListDefinition" xml:space="preserve">
-    <value>List project references or installed tools.</value>
+    <value>List references of a .NET project.</value>
   </data>
   <data name="AdvancedCommands" xml:space="preserve">
     <value>Advanced Commands</value>
