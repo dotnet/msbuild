@@ -4,6 +4,9 @@
     <ItemGroup>
         <FilesToDownload Include="DependencyVersions.props" />
         <FilesToDownload Include="BundledSdks.props" />
+        <FilesToDownload Include="BundledRuntimes.props" />
+        <FilesToDownload Include="AzureInfo.props" />
+        <FilesToDownload Include="Version.props" />
     </ItemGroup>
 
     <Target Name="Build" DependsOnTargets="FetchAndUpdateSdksAndNuGets" />

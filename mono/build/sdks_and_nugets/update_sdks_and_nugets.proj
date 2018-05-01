@@ -2,6 +2,16 @@
     <Import Project="$(MSBuildThisFileDirectory)\..\common.props" />
     <Import Project="$(MSBuildThisFileDirectory)\..\DependencyVersions.props" />
     <Import Project="$(MSBuildThisFileDirectory)\..\BundledSdks.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\Version.props" />
+
+    <PropertyGroup>
+        <HostOSName Condition="'$(HostOSName)' == ''">osx</HostOSName>
+        <InstallerExtension Condition="'$(InstallerExtension)' == ''">.pkg</InstallerExtension>
+        <HostMonikerRid Condition="'$(HostMonikerRid)' == ''">osx-x64</HostMonikerRid>
+    </PropertyGroup>
+
+    <Import Project="$(MSBuildThisFileDirectory)\..\AzureInfo.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\BundledRuntimes.props" />
 
     <PropertyGroup>
         <SdkOutputDirectory>$(RepoRoot)\sdks</SdkOutputDirectory>
@@ -43,5 +53,16 @@
         <MSBuild Projects="@(SdksToBundle);@(NuGetsToBundle)" />
 
         <MSBuild Projects="$(MSBuildThisFileDirectory)\update_nuget_build_tasks.proj" Targets="UpdateNuGetBuildTasks" />
+    </Target>
+
+    <Target Name="UpdateSdkResolver" AfterTargets="DeploySdksAndNuGets">
+        <PropertyGroup>
+            <HostFxrUrl>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</HostFxrUrl>
+            <MSBuildSdkResolverOutDir>$(RepoRoot)\mono\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverOutDir>
+            <RuntimeDepsInstallerUrl>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</RuntimeDepsInstallerUrl>
+        </PropertyGroup>
+
+        <Exec Command="curl -s $(HostFxrUrl) -o $(MSBuildThisFileDirectory)$(DownloadedHostFxrInstallerFileName)" />
+        <Exec Command="$(MSBuildThisFileDirectory)..\extract_and_copy_hostfxr.sh $(MSBuildThisFileDirectory)$(DownloadedHostFxrInstallerFileName) $(MSBuildSdkResolverOutDir)\" />
     </Target>
 </Project>
