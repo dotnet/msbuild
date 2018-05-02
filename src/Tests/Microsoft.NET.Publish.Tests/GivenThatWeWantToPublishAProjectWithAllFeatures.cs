@@ -69,6 +69,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.GC.Concurrent"": false,
             ""System.GC.Server"": true,
             ""System.GC.RetainVM"": false,
+            ""System.Runtime.TieredCompilation"": true,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,
             ""System.Globalization.Invariant"": true,
