@@ -62,15 +62,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 // Valid pattern is root\(Name)\(Name).dll. No other files should be considered.
                 var d1 = Directory.CreateDirectory(Path.Combine(root, "Resolver1"));
-                var d2 = Directory.CreateDirectory(Path.Combine(root, "NoResolver"));
 
                 // Valid.
                 var f1 = Path.Combine(d1.FullName, "Resolver1.dll");
 
                 // Invalid, won't be considered.
                 var f2 = Path.Combine(d1.FullName, "Dependency.dll");
-                var f3 = Path.Combine(d2.FullName, "InvalidName.dll");
-                var f4 = Path.Combine(d2.FullName, "NoResolver.txt");
+                var f3 = Path.Combine(d1.FullName, "InvalidName.dll");
+                var f4 = Path.Combine(d1.FullName, "NoResolver.txt");
 
                 File.WriteAllText(f1, string.Empty);
                 File.WriteAllText(f2, string.Empty);
@@ -78,7 +77,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 File.WriteAllText(f4, string.Empty);
 
                 var strategy = new SdkResolverLoader();
-                var files = strategy.FindPotentialSdkResolvers(root);
+                var files = strategy.FindPotentialSdkResolvers(root, new MockElementLocation("file"));
 
                 files.Count.ShouldBe(1);
                 files[0].ShouldBe(f1);
@@ -98,7 +97,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
                 LoadResolverAssemblyFunc = (resolverPath, loggingContext, location) => typeof(SdkResolverLoader_Tests).GetTypeInfo().Assembly,
-                FindPotentialSdkResolversFunc = rootFolder => new List<string>
+                FindPotentialSdkResolversFunc = (rootFolder, loc) => new List<string>
                 {
                     "myresolver.dll"
                 },
@@ -130,7 +129,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
                 LoadResolverAssemblyFunc = (resolverPath, loggingContext, location) => typeof(SdkResolverLoader_Tests).GetTypeInfo().Assembly,
-                FindPotentialSdkResolversFunc = rootFolder => new List<string>
+                FindPotentialSdkResolversFunc = (rootFolder, loc) => new List<string>
                 {
                     "myresolver.dll"
                 },
@@ -162,7 +161,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
                 LoadResolverAssemblyFunc = (resolverPath, loggingContext, location) => throw new Exception(expectedMessage),
-                FindPotentialSdkResolversFunc = rootFolder => new List<string>
+                FindPotentialSdkResolversFunc = (rootFolder, loc) => new List<string>
                 {
                     assemblyPath,
                 }
@@ -201,7 +200,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     </SdkResolver>");
 
                 SdkResolverLoader loader = new SdkResolverLoader();
-                var resolversFound = loader.FindPotentialSdkResolvers(root);
+                var resolversFound = loader.FindPotentialSdkResolvers(root, new MockElementLocation("file"));
 
                 resolversFound.Count.ShouldBe(1);
                 resolversFound.First().ShouldBe(assemblyToLoad);
@@ -227,7 +226,48 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 SdkResolverLoader loader = new SdkResolverLoader();
 
-                Should.Throw<SerializationException>(() => loader.FindPotentialSdkResolvers(root));
+                var ex = Should.Throw<InvalidProjectFileException>(() => loader.FindPotentialSdkResolvers(root, new MockElementLocation("file")));
+                ex.ErrorCode.ShouldBe("MSB4245");
+            }
+        }
+
+        [Fact]
+        public void SdkResolverLoaderErrorsWhenNoDllOrAssemblyFound()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var root = env.CreateFolder().FolderPath;
+                var resolverPath = Path.Combine(root, "MyTestResolver");
+
+                Directory.CreateDirectory(resolverPath);
+                SdkResolverLoader loader = new SdkResolverLoader();
+
+                var ex = Should.Throw<InvalidProjectFileException>(() => loader.FindPotentialSdkResolvers(root, new MockElementLocation("file")));
+                ex.ErrorCode.ShouldBe("MSB4246");
+            }
+        }
+
+        [Fact]
+        public void SdkResolverLoaderErrorsWhenManifestTargetMissing()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var root = env.CreateFolder().FolderPath;
+                var resolverPath = Path.Combine(root, "MyTestResolver");
+                var resolverManifest = Path.Combine(resolverPath, "MyTestResolver.xml");
+
+                // Note this does NOT create the file just gets a valid name
+                var assemblyToLoad = env.GetTempFile(".dll").Path;
+
+                Directory.CreateDirectory(resolverPath);
+                File.WriteAllText(resolverManifest, $@"
+                    <SdkResolver>
+                      <Path>{assemblyToLoad}</Path>
+                    </SdkResolver>");
+
+                SdkResolverLoader loader = new SdkResolverLoader();
+                var ex = Should.Throw<InvalidProjectFileException>(() => loader.FindPotentialSdkResolvers(root, new MockElementLocation("file")));
+                ex.ErrorCode.ShouldBe("MSB4247");
             }
         }
 
@@ -270,7 +310,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             public Func<string, LoggingContext, ElementLocation, Assembly> LoadResolverAssemblyFunc { get; set; }
 
-            public Func<string, IList<string>> FindPotentialSdkResolversFunc { get; set; }
+            public Func<string, ElementLocation, IList<string>> FindPotentialSdkResolversFunc { get; set; }
 
             public Func<Assembly, IEnumerable<Type>> GetResolverTypesFunc { get; set; }
 
@@ -294,14 +334,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return base.GetResolverTypes(assembly);
             }
 
-            internal override IList<string> FindPotentialSdkResolvers(string rootFolder)
+            internal override IList<string> FindPotentialSdkResolvers(string rootFolder, ElementLocation location)
             {
                 if (FindPotentialSdkResolversFunc != null)
                 {
-                    return FindPotentialSdkResolversFunc(rootFolder);
+                    return FindPotentialSdkResolversFunc(rootFolder, location);
                 }
 
-                return base.FindPotentialSdkResolvers(rootFolder);
+                return base.FindPotentialSdkResolvers(rootFolder, location);
             }
         }
     }

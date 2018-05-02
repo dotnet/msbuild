@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -26,7 +27,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             var resolvers = new List<SdkResolver> {new DefaultSdkResolver()};
 
             var potentialResolvers = FindPotentialSdkResolvers(
-                Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"));
+                Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
 
             if (potentialResolvers.Count == 0)
             {
@@ -47,7 +48,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         /// <param name="rootFolder"></param>
         /// <returns></returns>
-        internal virtual IList<string> FindPotentialSdkResolvers(string rootFolder)
+        internal virtual IList<string> FindPotentialSdkResolvers(string rootFolder, ElementLocation location)
         {
             var assembliesList = new List<string>();
 
@@ -64,33 +65,55 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 var assemblyAdded = TryAddAssembly(assembly, assembliesList);
                 if (!assemblyAdded)
                 {
-                    AddAssemblyFromManifest(manifest, subfolder.FullName, assembliesList);
+                    assemblyAdded = TryAddAssemblyFromManifest(manifest, subfolder.FullName, assembliesList, location);
+                }
+
+                if (!assemblyAdded)
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), "SdkResolverNoDllOrManifest", subfolder.FullName);
                 }
             }
 
             return assembliesList;
         }
 
-        private void AddAssemblyFromManifest(string pathToManifest, string manifestFolder, List<string> assembliesList)
+        private bool TryAddAssemblyFromManifest(string pathToManifest, string manifestFolder, List<string> assembliesList, ElementLocation location)
         {
-            if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest)) return;
+            if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest)) return false;
 
-            // <SdkResolver>
-            //   <Path>...</Path>
-            // </SdkResolver>
+            string path = null;
 
-            var manifest = SdkResolverManifest.Load(pathToManifest);
-            if (!string.IsNullOrEmpty(manifest?.Path))
+            try
             {
-                var path = manifest.Path;
-                if (!Path.IsPathRooted(path))
+                // <SdkResolver>
+                //   <Path>...</Path>
+                // </SdkResolver>
+                var manifest = SdkResolverManifest.Load(pathToManifest);
+
+                if (manifest == null || string.IsNullOrEmpty(manifest.Path))
                 {
-                    path = Path.Combine(manifestFolder, manifest.Path);
-                    path = Path.GetFullPath(path);
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), "SdkResolverDllInManifestMissing", pathToManifest, string.Empty);
                 }
 
-                TryAddAssembly(path, assembliesList);
+                path = manifest.Path;
             }
+            catch (SerializationException e)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e, "SdkResolverManifestInvalid", pathToManifest, e.Message);
+            }
+
+            if (!Path.IsPathRooted(path))
+            {
+                path = Path.Combine(manifestFolder, path);
+                path = Path.GetFullPath(path);
+            }
+
+            if (!TryAddAssembly(path, assembliesList))
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), "SdkResolverDllInManifestMissing", pathToManifest, path);
+            }
+
+            return true;
         }
 
         private bool TryAddAssembly(string assemblyPath, List<string> assembliesList)
