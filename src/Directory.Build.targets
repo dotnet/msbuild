@@ -21,6 +21,9 @@
       <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.utility.netcoreapp10'">false</CopyToOutputDirectory>
       <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.reporters.netcoreapp10'">false</CopyToOutputDirectory>
     </None>
+
+    <None Include="$(MSBuildThisFileDirectory)Assets\**\*.*" CopyToPublishDirectory="PreserveNewest" 
+          LinkBase="Assets"/>
     
   </ItemGroup>
 
