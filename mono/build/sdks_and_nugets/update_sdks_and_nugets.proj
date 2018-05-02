@@ -2,6 +2,16 @@
     <Import Project="$(MSBuildThisFileDirectory)\..\common.props" />
     <Import Project="$(MSBuildThisFileDirectory)\..\DependencyVersions.props" />
     <Import Project="$(MSBuildThisFileDirectory)\..\BundledSdks.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\Version.props" />
+
+    <PropertyGroup>
+        <HostOSName Condition="'$(HostOSName)' == ''">osx</HostOSName>
+        <InstallerExtension Condition="'$(InstallerExtension)' == ''">.pkg</InstallerExtension>
+        <HostMonikerRid Condition="'$(HostMonikerRid)' == ''">osx-x64</HostMonikerRid>
+    </PropertyGroup>
+
+    <Import Project="$(MSBuildThisFileDirectory)\..\AzureInfo.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\BundledRuntimes.props" />
 
     <PropertyGroup>
         <SdkOutputDirectory>$(RepoRoot)\sdks</SdkOutputDirectory>
@@ -10,12 +20,15 @@
 
         <NuGetExtensionsPath>$(RepoRoot)\nuget-support\tasks-targets</NuGetExtensionsPath>
         <NuGetExtensionsPathToolsVersion>$(RepoRoot)\nuget-support\tv</NuGetExtensionsPathToolsVersion>
+        <TmpDir>$(MSBuildThisFileDirectory)\tmp</TmpDir>
     </PropertyGroup>
 
     <Target Name="DeploySdksAndNuGets">
         <Error Text="Run build.proj instead of this." Condition="'$(_RunningFromBuildProject)' != 'true'" />
 
         <ItemGroup>
+            <BundledSdk Remove="Microsoft.Docker.Sdk" />
+
             <SdksToBundle Include="deploy_from_nugets.proj">
                 <Properties>
                     ProjectWithProperties=sdks_props.proj;
@@ -41,5 +54,18 @@
         <MSBuild Projects="@(SdksToBundle);@(NuGetsToBundle)" />
 
         <MSBuild Projects="$(MSBuildThisFileDirectory)\update_nuget_build_tasks.proj" Targets="UpdateNuGetBuildTasks" />
+    </Target>
+
+    <Target Name="UpdateSdkResolver" AfterTargets="DeploySdksAndNuGets">
+        <PropertyGroup>
+            <HostFxrUrl>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</HostFxrUrl>
+            <MSBuildSdkResolverOutDir>$(RepoRoot)\mono\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverOutDir>
+            <RuntimeDepsInstallerUrl>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</RuntimeDepsInstallerUrl>
+        </PropertyGroup>
+
+        <MakeDir Directories="$(TmpDir)" />
+        <Exec Command="curl -s $(HostFxrUrl) -o $(TmpDir)\$(DownloadedHostFxrInstallerFileName)" />
+        <Exec Command="$(MSBuildThisFileDirectory)..\extract_and_copy_hostfxr.sh $(TmpDir)\$(DownloadedHostFxrInstallerFileName) $(MSBuildSdkResolverOutDir)\" />
+        <Delete Files="$(TmpDir)\$(DownloadedHostFxrInstallerFileName)" />
     </Target>
 </Project>

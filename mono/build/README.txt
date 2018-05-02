@@ -14,3 +14,15 @@ Usage:
 
 Also, whenever this is updated, please add the Microsoft.NET.Build.Extensions version in mono's
 `tools/nuget-hash-extractor/download.sh` and update the denied lists.
+
+MSBuildSdkResolver also needs to be updated in sync with the SDKs. This has two parts:
+
+    1. libhostfxr*: native library. We can get the nuget version for this and can fetch that given a
+       `$(HostMonikerRid)` like `osx-x64`.
+
+    2. The resolver assembly itself which is distributed as part of the CLI sdk nuget, but we can't
+       reliably get the version for that, given a cli commit hash. So, for now we build `cli` repo locally
+       and just copy over the assembly.
+
+       Note: Currently they use commit count to get the full version, but we can't depend on that. And
+       even this version can be overridden when builds are generated.

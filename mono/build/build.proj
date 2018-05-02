@@ -1,13 +1,20 @@
 <Project>
     <Import Project="$(MSBuildThisFileDirectory)\common.props" />
 
+    <ItemGroup>
+        <FilesToDownload Include="DependencyVersions.props" />
+        <FilesToDownload Include="BundledSdks.props" />
+        <FilesToDownload Include="BundledRuntimes.props" />
+        <FilesToDownload Include="AzureInfo.props" />
+        <FilesToDownload Include="Version.props" />
+    </ItemGroup>
+
     <Target Name="Build" DependsOnTargets="FetchAndUpdateSdksAndNuGets" />
 
     <Target Name="FetchAndUpdateSdksAndNuGets">
         <Delete Files="$(SdkVersionsFile)" />
 
-        <Exec Command="curl $(CLIBlobBaseURL)/build/DependencyVersions.props -o DependencyVersions.props" />
-        <Exec Command="curl $(CLIBlobBaseURL)/build/BundledSdks.props -o BundledSdks.props" />
+        <Exec Command="curl -s $(CLIBlobBaseURL)/build/%(FilesToDownload.Identity) -o %(FilesToDownload.Identity)"/>
 
         <WriteLinesToFile File="$(SdkVersionsFile)" Lines="OldCLICommitHash=$(CLICommitHash)%3B" />
 

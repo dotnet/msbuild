@@ -18,7 +18,7 @@
 
         <Message Text="NuGetBuildTasksVersionOnDisk in UpdateNuGetBuildTasks: $(NuGetBuildTasksVersionOnDisk)" />
         <PropertyGroup>
-            <TmpPackageDirectory>$(MSBuildThisFileDirectory)/tmp</TmpPackageDirectory>
+            <TmpPackageDirectory>$(MSBuildThisFileDirectory)/tmp/packages/</TmpPackageDirectory>
         </PropertyGroup>
 
         <RemoveDir Directories="$(TmpPackageDirectory);$(NuGetExtensionsPath);$(NuGetExtensionsPathToolsVersion)" />
@@ -26,7 +26,7 @@
         <MakeDir Directories="$(TmpPackageDirectory);$(NuGetExtensionsPath);$(NuGetExtensionsPathToolsVersion)" />
 
         <Exec
-            Command="nuget install -Source https://dotnet.myget.org/F/cli-deps/api/v3/index.json -Prerelease -OutputDirectory $(TmpPackageDirectory) -Version $(NuGetBuildTasksVersion) NuGet.Build.Tasks"
+            Command="nuget install -Prerelease -OutputDirectory $(TmpPackageDirectory) -Version $(NuGetBuildTasksVersion) NuGet.Build.Tasks"
             Condition="'$(SkipNuGetBuildTasksInstall)' != 'true'" />
 
         <Exec Command="find $(TmpPackageDirectory) -type f -iwholename '*net4[567]*' -a ! -name _._ -exec cp {} $(NuGetExtensionsPath) &quot;;&quot;" />
