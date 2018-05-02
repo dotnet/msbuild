@@ -60,7 +60,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppVersion)" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" PrivateAssets="All"/>
     <PackageReference Condition="'$(DisableNerdbankVersioning)' != 'true'" Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
   </ItemGroup>
   
