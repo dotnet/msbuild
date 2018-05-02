@@ -12,18 +12,6 @@
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
   </PropertyGroup>
 
-  <!-- Repo Toolset Features -->
-  <PropertyGroup>
-    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-  </PropertyGroup>
-
-  <!-- Toolset Dependencies -->
-  <PropertyGroup>
-    <DotNetCliVersion>2.1.300-preview3-008616</DotNetCliVersion>
-    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62615-02</RoslynToolsRepoToolsetVersion>
-    <VSWhereVersion>2.2.7</VSWhereVersion>
-  </PropertyGroup>
-
   <!-- Production Dependencies -->
   <PropertyGroup>
     <MicrosoftBuildFrameworkVersion>15.4.8</MicrosoftBuildFrameworkVersion>
@@ -47,4 +35,11 @@
     <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <RestoreSources>
+      $(RestoreSources);
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;
+      https://dotnet.myget.org/F/nuget-build/api/v3/index.json
+    </RestoreSources>
+  </PropertyGroup>
 </Project>

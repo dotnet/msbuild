@@ -1,33 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
-<Project>
-
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-  </PropertyGroup>
-
-  <Import Project="build\NuGet.props"/>
-  <Import Project="build\Versions.props"/>
-
-  <PropertyGroup>
-    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.repotoolset\$(RoslynToolsRepoToolsetVersion)\tools\</RepoToolsetDir>
-    <RestoreSources>
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;
-      https://dotnet.myget.org/F/nuget-build/api/v3/index.json
-    </RestoreSources>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <ArtifactsDir>$(DOTNET_SDK_ARTIFACTS_DIR)</ArtifactsDir>
-    <ArtifactsDir Condition="'$(ArtifactsDir)' == ''">$(RepoRoot)artifacts\</ArtifactsDir>
-    <ArtifactsDir>$([MSBuild]::EnsureTrailingSlash($(ArtifactsDir)))</ArtifactsDir>
-    <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\</DOTNET_INSTALL_DIR>
-  </PropertyGroup>
-
+<Project>  
   <PropertyGroup>
     <RepositoryUrl>https://github.com/dotnet/sdk</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
   </PropertyGroup>
-
 </Project>
