@@ -228,12 +228,10 @@ namespace Microsoft.Build.BackEnd
                     translator.Translate(ref stringArrayParam);
                     _wrappedParameter = stringArrayParam;
                     break;
-#if FEATURE_BINARY_SERIALIZATION
                 case TaskParameterType.ValueType:
                 case TaskParameterType.ValueTypeArray:
                     translator.TranslateDotNet(ref _wrappedParameter);
                     break;
-#endif
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);
                     break;

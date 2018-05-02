@@ -3135,6 +3135,54 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 }
             }
         }
+
+        [Fact]
+        public void ShouldNotRegenResourcesWhenRebuildingInPresenceOfFileRefWithWindowsPath()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetCurrentDirectory(env.DefaultTestDirectory.FolderPath);
+
+                string fileRef = "<data name=\"TextFile1\" type=\"System.Resources.ResXFileRef, System.Windows.Forms\">" +
+                                $"<value>.\\tmp_dir\\test_file.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value></data>";
+
+                env.CreateFile(
+                        env.CreateFolder(Path.Combine(env.DefaultTestDirectory.FolderPath, "tmp_dir")),
+                        "test_file.txt", "xyz");
+
+                string resxFile = env.CreateFile("test.resx").Path;
+                Utilities.WriteTestResX(false, null, fileRef, false, resxFile);
+
+                GenerateResource ExecuteTask()
+                {
+                    GenerateResource task = Utilities.CreateTask(_output);
+                    task.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                    Utilities.ExecuteTask(task);
+
+                    string outputResourceFile = task.OutputResources[0].ItemSpec;
+                    task.OutputResources[0].ItemSpec.ShouldBe(task.FilesWritten[0].ItemSpec);
+                    Path.GetExtension(outputResourceFile).ShouldBe(".resources");
+
+                    return task;
+                }
+
+                GenerateResource t = ExecuteTask();
+                string resourcesFile = t.OutputResources[0].ItemSpec;
+                DateTime initialWriteTime = File.GetLastWriteTime(resourcesFile);
+
+                // fs granularity on HFS is 1 sec!
+                System.Threading.Thread.Sleep(NativeMethodsShared.IsOSX ? 1000 : 100);
+
+                // Rebuild, it shouldn't regen .resources file since the sources
+                // haven't changed
+                t = ExecuteTask();
+                resourcesFile = t.OutputResources[0].ItemSpec;
+
+                Utilities.FileUpdated(resourcesFile, initialWriteTime).ShouldBeFalse();
+            }
+        }
+
     }
 }
 

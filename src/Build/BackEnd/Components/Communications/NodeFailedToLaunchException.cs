@@ -49,7 +49,6 @@ namespace Microsoft.Build.BackEnd
             ErrorDescription = message;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
@@ -57,7 +56,6 @@ namespace Microsoft.Build.BackEnd
             : base(info, context)
         {
         }
-#endif
 
         /// <summary>
         /// Gets the error code (if any) associated with the exception message.
@@ -79,7 +77,6 @@ namespace Microsoft.Build.BackEnd
             private set;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// ISerializable method which we must override since Exception implements this interface
         /// If we ever add new members to this class, we'll need to update this.
@@ -94,6 +91,5 @@ namespace Microsoft.Build.BackEnd
             info.AddValue("ErrorCode", ErrorCode);
             info.AddValue("ErrorDescription", ErrorDescription);
         }
-#endif
     }
 }

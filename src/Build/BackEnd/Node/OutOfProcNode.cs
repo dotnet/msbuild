@@ -743,13 +743,8 @@ namespace Microsoft.Build.Execution
             }
 
             // Set the culture.
-#if FEATURE_CULTUREINFO_SETTERS
             CultureInfo.CurrentCulture = _buildParameters.Culture;
             CultureInfo.CurrentUICulture = _buildParameters.UICulture;
-#else
-            Thread.CurrentThread.CurrentCulture = _buildParameters.Culture;
-            Thread.CurrentThread.CurrentUICulture = _buildParameters.UICulture;
-#endif
 
             // Get the node ID.
             _buildParameters.NodeId = configuration.NodeId;

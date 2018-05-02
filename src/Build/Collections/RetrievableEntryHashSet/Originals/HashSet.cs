@@ -3,16 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-#if !SILVERLIGHT
-using System.Runtime.Serialization;
-#endif
 using System.Security.Permissions;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
-#if SILVERLIGHT
-using System.Core; // for System.Core.SR
-#endif
 
 namespace System.Collections.Generic {
 
@@ -55,13 +49,9 @@ namespace System.Collections.Generic {
     [DebuggerTypeProxy(typeof(System.Collections.Generic.HashSetDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [SuppressMessage("Microsoft.Naming","CA1710:IdentifiersShouldHaveCorrectSuffix", Justification="By design")]
-#if SILVERLIGHT
-    public class HashSet<T> : ICollection<T>, ISet<T>
-#else
     [Serializable()]
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class HashSet<T> : ICollection<T>, ISerializable, IDeserializationCallback, ISet<T>
-#endif
     {
 
         // store lower 31 bits of hash code

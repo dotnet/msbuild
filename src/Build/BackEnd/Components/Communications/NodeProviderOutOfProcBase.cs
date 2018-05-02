@@ -829,11 +829,7 @@ namespace Microsoft.Build.BackEnd
                     }
 #endif
 
-#if FEATURE_MEMORYSTREAM_GETBUFFER
                     byte[] writeStreamBuffer = writeStream.GetBuffer();
-#else
-                    byte[] writeStreamBuffer = writeStream.ToArray();
-#endif
 
                     for (int i = 0; i < writeStream.Length; i += MaxPacketWriteSize)
                     {

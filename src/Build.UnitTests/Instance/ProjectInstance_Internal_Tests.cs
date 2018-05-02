@@ -21,6 +21,7 @@ using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
@@ -280,6 +281,18 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance p = GetSampleProjectInstance();
 
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
+        }
+
+        [Fact]
+        public void UsingExplicitToolsVersionShouldBeFalseWhenNoToolsetIsReferencedInProject()
+        {
+            var projectInstance = new ProjectInstance(
+                new ProjectRootElement(
+                    XmlReader.Create(new StringReader("<Project></Project>")), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false)
+                );
+
+            projectInstance.UsingDifferentToolsVersionFromProjectFile.ShouldBeFalse();
+
         }
 
         /// <summary>

@@ -50,7 +50,6 @@ namespace Microsoft.Build.Exceptions
         {
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Basic constructor.
         /// </summary>
@@ -61,7 +60,6 @@ namespace Microsoft.Build.Exceptions
 
             errorCode = info.GetString("errorCode");
         }
-#endif
 
         /// <summary>
         /// Constructor that takes an MSBuild error code
@@ -86,7 +84,6 @@ namespace Microsoft.Build.Exceptions
             this.errorCode = errorCode;
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// ISerializable method which we must override since Exception implements this interface
         /// If we ever add new members to this class, we'll need to update this.
@@ -96,7 +93,7 @@ namespace Microsoft.Build.Exceptions
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
-        override public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
@@ -104,7 +101,6 @@ namespace Microsoft.Build.Exceptions
 
             info.AddValue("errorCode", errorCode);
         }
-#endif
 
         /// <summary>
         /// The MSBuild error code corresponding with this exception, or

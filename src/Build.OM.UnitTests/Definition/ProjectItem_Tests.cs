@@ -15,7 +15,9 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
@@ -2712,6 +2714,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal(1, items.Count);
             return items[0];
+        }
+
+        /// <summary>
+        /// Item metadata "Filename" should not depends on platform specific slashes.
+        /// </summary>
+        [Fact]
+        public void FileNameMetadataEvaluationShouldNotDependsFromPlatformSpecificSlashes()
+        {
+            using (var env = TestEnvironment.Create())
+            using (var projectCollection = new ProjectCollection())
+            {
+                var testFiles = env.CreateTestProjectWithFiles(@"<?xml version=`1.0` encoding=`utf-8`?>
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`Validate` xmlns=`msbuildnamespace`>
+                      <ItemGroup>
+                        <A Include=`A\B\C\D.cs` />
+                        <B Include=`@(A->'%(Filename)_test.ext')` />
+                      </ItemGroup>
+                    </Project>");
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), null, projectCollection);
+                var buildManager = BuildManager.DefaultBuildManager;
+                var projectInstance = buildManager.GetProjectInstanceForBuild(project);
+                var itemB = projectInstance.Items.Single(i => i.ItemType == "B").EvaluatedInclude;
+                itemB.ShouldBe("D_test.ext");
+            }
         }
     }
 }

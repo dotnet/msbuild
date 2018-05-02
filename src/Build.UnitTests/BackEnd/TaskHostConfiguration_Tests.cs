@@ -347,7 +347,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains just value types. 
         /// </summary>
@@ -388,7 +387,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(config.TaskParameters["Text"].WrappedParameter, deserializedConfig.TaskParameters["Text"].WrappedParameter);
             Assert.Equal(config.TaskParameters["BoolValue"].WrappedParameter, deserializedConfig.TaskParameters["BoolValue"].WrappedParameter);
         }
-#endif
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 

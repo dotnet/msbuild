@@ -480,6 +480,7 @@ namespace Microsoft.Build.Construction
     {
         EtpSubProject = 5,
         KnownToBeMSBuildFormat = 1,
+        SharedProject = 6,
         SolutionFolder = 2,
         Unknown = 0,
         WebDeploymentProject = 4,

@@ -12,9 +12,7 @@ namespace Microsoft.Build.Framework
     /// Will provide location information for an event, this is especially 
     /// needed in a multi processor environment
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public class BuildEventContext
     {
         #region Data

@@ -1,7 +1,0 @@
-This package includes the files that MSBuild ships into Visual Studio via its .vsix.
-Paths are adjusted to match the corext package MsBuild.Corext.
-
-Files in the MSBuild vsix which are not in this package:
-- msbuild satellite assemblies (no translation needed for corext)
-- MSBuild.exe.config (MsBuild.Corext has manual edits to this file)
-- *pkgdef (VS specific)

@@ -9,7 +9,10 @@
     <TestItems Include="$(MSBuildBinPath)\**\Microsoft.Build.*.dll"/>
   </ItemGroup>
   <Target Name="Build">
-    <Message Text="Loading task from: $(AssemblyPath)"/>
+    <Message Text="Assemblies collected from : $(MSBuildBinPath)" Importance="high"/>
+    <Message Text="Loading task from: $(AssemblyPath)" Importance="high"/>
     <ShowItems Items="@(TestItems)"/>
+    <Error Message="No files found in $(MSBuildBinPath)"
+           Condition="'@(TestItems)' == ''" />
   </Target>
 </Project>

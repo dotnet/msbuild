@@ -11,6 +11,12 @@
    <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
 
+    <!-- The IBCMerge process tries to treat this project as
+         the real Microsoft.Build.dll, producing thousands
+         of avoidable warnings. The real output of this
+         project isn't a product DLL, so just disable PGO. -->
+    <MicroBuild_EnablePGO>false</MicroBuild_EnablePGO>
+
     <!-- Not sure what the right ID is here -->
     <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
   </PropertyGroup>

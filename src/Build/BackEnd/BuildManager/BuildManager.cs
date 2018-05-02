@@ -963,22 +963,14 @@ namespace Microsoft.Build.Execution
 
                 try
                 {
-                    if (CultureInfo.CurrentCulture != _buildParameters.Culture)
+                    if (!Equals(CultureInfo.CurrentCulture, _buildParameters.Culture))
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentCulture = _buildParameters.Culture;
-#else
-                        Thread.CurrentThread.CurrentCulture = _buildParameters.Culture;
-#endif
                     }
 
-                    if (CultureInfo.CurrentUICulture != _buildParameters.UICulture)
+                    if (!Equals(CultureInfo.CurrentUICulture, _buildParameters.UICulture))
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentUICulture = _buildParameters.UICulture;
-#else
-                        Thread.CurrentThread.CurrentUICulture = _buildParameters.UICulture;
-#endif
                     }
 
                     action();
@@ -992,22 +984,14 @@ namespace Microsoft.Build.Execution
                 finally
                 {
                     // Set the culture back to the original one so that if something else reuses this thread then it will not have a culture which it was not expecting.
-                    if (CultureInfo.CurrentCulture != oldCulture)
+                    if (!Equals(CultureInfo.CurrentCulture, oldCulture))
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentCulture = oldCulture;
-#else
-                        Thread.CurrentThread.CurrentCulture = oldCulture;
-#endif
                     }
 
-                    if (CultureInfo.CurrentUICulture != oldUICulture)
+                    if (!Equals(CultureInfo.CurrentUICulture, oldUICulture))
                     {
-#if FEATURE_CULTUREINFO_SETTERS
                         CultureInfo.CurrentUICulture = oldUICulture;
-#else
-                        Thread.CurrentThread.CurrentUICulture = oldUICulture;
-#endif
                     }
                 }
             }
@@ -1067,9 +1051,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleExecuteSubmissionException(BuildSubmission submission, Exception ex)
         {
-            InvalidProjectFileException projectException = ex as InvalidProjectFileException;
-
-            if (projectException != null)
+            if (ex is InvalidProjectFileException projectException)
             {
                 if (projectException.HasBeenLogged != true)
                 {
@@ -1377,8 +1359,7 @@ namespace Microsoft.Build.Execution
 
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(unresolvedConfiguration.ConfigurationId, resolvedConfiguration.ConfigurationId, resolvedConfiguration.ResultsNodeId);
 
-            HashSet<NGen<int>> configurationsOnNode = null;
-            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out configurationsOnNode))
+            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out var configurationsOnNode))
             {
                 configurationsOnNode = new HashSet<NGen<int>>();
                 _nodeIdToKnownConfigurations[node] = configurationsOnNode;
@@ -1774,12 +1755,13 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                loggerMode = (cpuCount == 1 && _buildParameters.UseSynchronousLogging)
-                                 ? LoggerMode.Synchronous
-                                 : LoggerMode.Asynchronous;
+                loggerMode = cpuCount == 1 && _buildParameters.UseSynchronousLogging
+                    ? LoggerMode.Synchronous
+                    : LoggerMode.Asynchronous;
             }
 
-            ILoggingService loggingService = LoggingService.CreateLoggingService(loggerMode, 1 /*This logging service is used for the build manager and the inproc node, therefore it should have the first nodeId*/);
+            ILoggingService loggingService = LoggingService.CreateLoggingService(loggerMode,
+                1 /*This logging service is used for the build manager and the inproc node, therefore it should have the first nodeId*/);
 
             ((IBuildComponent)loggingService).InitializeComponent(this);
             _componentFactories.ReplaceFactory(BuildComponentType.LoggingService, loggingService as IBuildComponent);
@@ -1805,7 +1787,6 @@ namespace Microsoft.Build.Execution
                 {
                     // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
                     // ensuring we receive project started and finished events.
-                    Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
                     LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                         loggerClassName: typeof(ConfigurableForwardingLogger).FullName,
                         loggerAssemblyName: typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
@@ -1913,10 +1894,7 @@ namespace Microsoft.Build.Execution
                         // We should always have finished cleaning up before calling Dispose.
                         RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
 
-                        if (_componentFactories != null)
-                        {
-                            _componentFactories.ShutdownComponents();
-                        }
+                        _componentFactories?.ShutdownComponents();
 
                         if (_workQueue != null)
                         {
