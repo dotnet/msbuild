@@ -95,11 +95,11 @@
 
       <!-- Remove Shared Framework and Debian Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageFileName)" />
+      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageFileName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageFileName)" />
   </Target>
 
   <Target Name="TestSdkDeb"
@@ -130,11 +130,11 @@
 
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageFileName)" />
+      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageFileName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageFileName)" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
