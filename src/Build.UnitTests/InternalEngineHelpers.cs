@@ -40,7 +40,7 @@ namespace Microsoft.Build.Unittest
 
             public ConfigurableMockSdkResolver(SdkResult result)
             {
-                _resultMap = new Dictionary<string, SdkResult> { [result.Sdk.Name] = result };
+                _resultMap = new Dictionary<string, SdkResult> { [result.SdkReference.Name] = result };
             }
 
             public ConfigurableMockSdkResolver(Dictionary<string, SdkResult> resultMap)
