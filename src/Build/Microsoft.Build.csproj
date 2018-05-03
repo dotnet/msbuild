@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="RoslynTools.RepoToolset">
   <PropertyGroup>
     <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
          in .NETStandard. -->

@@ -2,9 +2,6 @@
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
-  <!-- Import common project settings provided by RepoToolset -->
-  <Import Project="$(RepoToolsetDir)Settings.props" />
-
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4'))" />
 
   <!-- Override project defaults provided by Repo toolset -->
@@ -63,7 +60,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppVersion)" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppVersion)" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" PrivateAssets="All"/>
     <PackageReference Condition="'$(DisableNerdbankVersioning)' != 'true'" Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
   </ItemGroup>
   
