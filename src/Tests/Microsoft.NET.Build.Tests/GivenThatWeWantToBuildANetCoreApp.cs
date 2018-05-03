@@ -53,10 +53,10 @@ namespace Microsoft.NET.Build.Tests
         //  Test behavior when implicit version differs for framework-dependent and self-contained apps
         [Theory]
         [InlineData("netcoreapp1.0", false, true, "1.0.5")]
-        [InlineData("netcoreapp1.0", true, true, "1.0.10")]
+        [InlineData("netcoreapp1.0", true, true, "1.0.11")]
         [InlineData("netcoreapp1.0", false, false, "1.0.5")]
         [InlineData("netcoreapp1.1", false, true, "1.1.2")]
-        [InlineData("netcoreapp1.1", true, true, "1.1.7")]
+        [InlineData("netcoreapp1.1", true, true, "1.1.8")]
         [InlineData("netcoreapp1.1", false, false, "1.1.2")]
         [InlineData("netcoreapp2.0", false, true, "2.0.0")]
         [InlineData("netcoreapp2.0", true, true, TestContext.LatestRuntimePatchForNetCoreApp2_0)]
