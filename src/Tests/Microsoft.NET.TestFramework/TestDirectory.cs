@@ -23,6 +23,11 @@ namespace Microsoft.NET.TestFramework
             EnsureExistsAndEmpty(Path, sdkVersion);
         }
 
+        public static TestDirectory Create(string path)
+        {
+            return new TestDirectory(path, TestContext.Current.SdkVersion);
+        }
+
         public string Path { get; private set; }
 
         private static void EnsureExistsAndEmpty(string path, string sdkVersion)

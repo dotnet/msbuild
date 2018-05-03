@@ -148,11 +148,6 @@ namespace Microsoft.NET.TestFramework
             {
                 testContext.SdkVersion = commandLine.SdkVersion;
             }
-            else
-            {
-                var assemblyInformationalVersion = (AssemblyInformationalVersionAttribute)(Attribute.GetCustomAttribute(typeof(TestContext).Assembly, typeof(AssemblyInformationalVersionAttribute)));
-                testContext.SdkVersion = assemblyInformationalVersion.InformationalVersion;
-            }
 
             testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, artifactsDir, repoConfiguration, commandLine);
 

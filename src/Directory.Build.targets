@@ -2,16 +2,16 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
 
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>$(PackageId)</ToolCommandName>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
-    <Compile Include="$(MSBuildThisFileDirectory)Tests\Common\Program.cs" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
     <PackageReference Include="xunit.console" Version="$(XUnitVersion)" Private="true" />
 
@@ -22,9 +22,6 @@
       <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.utility.netcoreapp10'">false</CopyToOutputDirectory>
       <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.reporters.netcoreapp10'">false</CopyToOutputDirectory>
     </None>
-
-    <None Include="$(MSBuildThisFileDirectory)Assets\**\*.*" CopyToPublishDirectory="PreserveNewest" 
-          LinkBase="Assets"/>
     
   </ItemGroup>
 
