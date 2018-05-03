@@ -933,7 +933,7 @@ namespace Microsoft.Build.Evaluation
 
                 UpdateDefaultTargets(currentProjectOrImport);
 
-                // Get all the implicit imports (e.g. <Project Sdk="" />, but not <Import Sdk="" />)
+                // Get all the implicit imports (e.g. <Project Sdk="" />, or <Sdk Name="" />, but not <Import Sdk="" />)
                 List<ProjectImportElement> implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
 
                 // Evaluate the "top" implicit imports as if they were the first entry in the file.
