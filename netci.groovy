@@ -104,7 +104,7 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
 
                     if (runtime == "MonoTest") {
                         // default is to run tests!
-                        script += " -host mono"
+                        script += " -hostType mono"
                     }
 
                     if (runtime == "Mono") {
@@ -119,7 +119,7 @@ def CreateJob(script, runtime, osName, isPR, shouldSkipTestsWhenResultsNotFound=
 
                     if (runtime == "MonoTest") {
                         // default is to run tests!
-                        script += " -host mono"
+                        script += " -hostType mono"
                     }
 
                     if (runtime == "Mono") {
