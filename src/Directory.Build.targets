@@ -53,7 +53,13 @@
 
     <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" />
     <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestProgram.cs" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <!-- Work around https://github.com/dotnet/sdk/issues/2204 by explicitly setting
+         PrivateAssets to keep this reference (auto-added when targeting netcoreapp*)
+         from making it into our NuGet packages. -->
+    <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- GenAPI settings -->
