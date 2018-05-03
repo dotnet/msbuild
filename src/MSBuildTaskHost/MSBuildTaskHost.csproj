@@ -200,7 +200,7 @@
     <Content Include="..\MSBuild.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.14.114" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
     <PackageReference Include="PdbGit" Version="3.0.41" />
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.1.2" />
     <PackageReference Include="LargeAddressAware" Version="$(LargeAddressAwareVersion)" PrivateAssets="All" />
