@@ -147,15 +147,16 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
     }
 }
 
-//sourcebuild
-CreateJob(
-    "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
-    "CoreCLR",
-    "RHEL7.2",
-    true,
-    null,
-    true,
-    true)
+// reenable when nuget / corefx issue on rhel7.2 is fixed: https://github.com/Microsoft/msbuild/issues/3265
+// sourcebuild simulation
+// CreateJob(
+//     "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
+//     "CoreCLR",
+//     "RHEL7.2",
+//     true,
+//     null,
+//     true,
+//     true)
 
 JobReport.Report.generateJobReport(out)
 
