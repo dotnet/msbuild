@@ -4,9 +4,7 @@
 using System;
 using System.IO;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -105,19 +103,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-
-                    // This is needed to be able to restore for RIDs that were not available in Microsoft.NetCore.App 2.0.0.
-                    // M.NC.App 2.0.0 depends on a version of Microsoft.NetCore.Platforms that lacks the mapping for the
-                    // latest RIDs. Given that self-contained apps are pinned to 2.0.0 in this version of the SDK, we
-                    // need a manual roll-forward.
-                    propertyGroup.Add(
-                        new XElement(ns + "RuntimeFrameworkVersion", "2.0.*"));
-                });
+                .WithRestoreFiles();
 
             var testProjectDirectory = testInstance.Root;
 
@@ -184,19 +170,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance($"PublishesSelfContained{selfContained}")
                 .WithSourceFiles()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-
-                    // This is needed to be able to restore for RIDs that were not available in Microsoft.NetCore.App 2.0.0.
-                    // M.NC.App 2.0.0 depends on a version of Microsoft.NetCore.Platforms that lacks the mapping for the
-                    // latest RIDs. Given that self-contained apps are pinned to 2.0.0 in this version of the SDK, we
-                    // need a manual roll-forward.
-                    propertyGroup.Add(
-                        new XElement(ns + "RuntimeFrameworkVersion", "2.0.*"));
-                });
+                .WithRestoreFiles();
 
             var testProjectDirectory = testInstance.Root;
 
