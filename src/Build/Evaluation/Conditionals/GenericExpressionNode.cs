@@ -69,6 +69,12 @@ namespace Microsoft.Build.Evaluation
             return BoolEvaluate(state);
         }
 
+        /// <summary>
+        /// Get display string for this node for use in the debugger.
+        /// </summary>
+        internal virtual string DebuggerDisplay { get; }
+
+
         #region REMOVE_COMPAT_WARNING
         internal virtual bool PossibleAndCollision
         {
