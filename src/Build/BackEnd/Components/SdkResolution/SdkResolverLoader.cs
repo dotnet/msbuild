@@ -99,6 +99,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
             catch (SerializationException e)
             {
+                // Note: Not logging e.ToString() as most of the information is not useful, the Message will contain what is wrong with the XML file.
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), e, "SdkResolverManifestInvalid", pathToManifest, e.Message);
             }
 
