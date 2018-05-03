@@ -19,7 +19,7 @@
     <MicrosoftExtensionsDependencyModelVersion>2.1.0-preview2-26306-03</MicrosoftExtensionsDependencyModelVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <NuGetBuildTasksPackVersion>4.7.0-rtm.5122</NuGetBuildTasksPackVersion>
+    <NuGetBuildTasksPackVersion>4.7.0-rtm.5148</NuGetBuildTasksPackVersion>
     <NuGetPackagingVersion>$(NuGetBuildTasksPackVersion)</NuGetPackagingVersion>
     <NuGetProjectModelVersion>$(NuGetBuildTasksPackVersion)</NuGetProjectModelVersion>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
