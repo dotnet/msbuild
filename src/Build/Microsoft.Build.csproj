@@ -10,8 +10,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
 
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <EnableDefaultItems>false</EnableDefaultItems>
 
     <!-- Generate API only for the more limited .NET Core/Standard flavor. -->
     <GenerateReferenceAssemblySources Condition="'$(TargetFramework)' != 'netcoreapp2.1'">true</GenerateReferenceAssemblySources>
@@ -238,6 +237,7 @@
     <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverContext.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverLoader.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverManifest.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverRequest.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\MainNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverService.cs" />

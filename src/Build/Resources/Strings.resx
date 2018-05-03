@@ -1215,6 +1215,18 @@
     <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
     <comment>{StrBegin="MSB4243: "}</comment>
   </data>
+  <data name="SdkResolverManifestInvalid" UESanitized="false" Visibility="Public">
+    <value>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</value>
+    <comment>{StrBegin="MSB4245: "}</comment>
+  </data>
+  <data name="SdkResolverNoDllOrManifest" UESanitized="false" Visibility="Public">
+    <value>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</value>
+    <comment>{StrBegin="MSB4246: "}</comment>
+  </data>
+  <data name="SdkResolverDllInManifestMissing" UESanitized="false" Visibility="Public">
+    <value>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</value>
+    <comment>{StrBegin="MSB4247: "}</comment>
+  </data>
   <data name="InvalidSdkElementName" UESanitized="false" Visibility="Public">
     <value>MSB4238: The name "{0}" is not a valid SDK name.</value>
     <comment>{StrBegin="MSB4238: "}</comment>
@@ -1680,7 +1692,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4245.
+        Next message code should be MSB4248.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
