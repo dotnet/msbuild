@@ -486,10 +486,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Theory]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "min=1.0.0", null, null, "1.0.0")]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "1.0.0", null, "1.0.0", null)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, "2.0.0", "1.0.0", "2.0.0", "1.0.0")]
-        public void ImplicitImportsShouldHaveParsedSdkInfo(string projectTemplate, string version, string minimumVersion, string expectedVersion, string expectedMinimumVersion)
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "min=1.0.0", null, null, "1.0.0", typeof(ProjectRootElement))]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "1.0.0", null, "1.0.0", null, typeof(ProjectRootElement))]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, "2.0.0", "1.0.0", "2.0.0", "1.0.0", typeof(ProjectSdkElement))]
+        public void ImplicitImportsShouldHaveParsedSdkInfo(
+            string projectTemplate,
+            string version,
+            string minimumVersion,
+            string expectedVersion,
+            string expectedMinimumVersion,
+            Type expectedOriginalElementType)
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
             File.WriteAllText(_sdkPropsPath, _sdkPropsContent);
@@ -503,18 +509,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             for (var i = 0; i < 2; i++)
             {
-                ResolvedImport import = imports[i];
-                import.ImportingElement.Sdk.ShouldBe(SdkName + $"/{version}");
-                import.ImportingElement.ParsedSdkReference.Name.ShouldBe(SdkName);
-                import.ImportingElement.ParsedSdkReference.Version.ShouldBe(expectedVersion);
-                import.ImportingElement.ParsedSdkReference.MinimumVersion.ShouldBe(expectedMinimumVersion);
-                import.ImportingElement.SdkLocation.ShouldBe(ElementLocation.EmptyLocation);
+                var importingElement = imports[i].ImportingElement;
+                importingElement.Sdk.ShouldBe(SdkName + $"/{version}");
+                importingElement.ParsedSdkReference.Name.ShouldBe(SdkName);
+                importingElement.ParsedSdkReference.Version.ShouldBe(expectedVersion);
+                importingElement.ParsedSdkReference.MinimumVersion.ShouldBe(expectedMinimumVersion);
+                importingElement.SdkLocation.ShouldBe(ElementLocation.EmptyLocation);
+                importingElement.OriginalElement.ShouldBeOfType(expectedOriginalElementType);
 
                 var implicitLocation = i == 0
                     ? ImplicitImportLocation.Top
                     : ImplicitImportLocation.Bottom;
 
-                import.ImportingElement.ImplicitImportLocation.ShouldBe(implicitLocation);
+                importingElement.ImplicitImportLocation.ShouldBe(implicitLocation);
             }
         }
 

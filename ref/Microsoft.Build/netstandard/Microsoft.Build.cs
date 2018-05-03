@@ -93,6 +93,7 @@ namespace Microsoft.Build.Construction
         internal ProjectImportElement() { }
         public Microsoft.Build.Construction.ImplicitImportLocation ImplicitImportLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string MinimumVersion { get { throw null; } set { } }
+        public Microsoft.Build.Construction.ProjectElement OriginalElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string Project { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation ProjectLocation { get { throw null; } }
         public string Sdk { get { throw null; } set { } }
