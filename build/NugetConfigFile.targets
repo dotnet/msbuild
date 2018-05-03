@@ -41,7 +41,7 @@
                       Lines="$(NugetConfigHeader)"
                       Overwrite="true" />
 
-    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != '' and '$(DotNetBuildOffline)' != 'true'"
+    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
                       File="$(GeneratedNuGetConfig)"
                       Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Identity)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
                       Overwrite="false" />
