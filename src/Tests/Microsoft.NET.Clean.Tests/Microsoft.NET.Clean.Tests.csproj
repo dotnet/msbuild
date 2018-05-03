@@ -14,6 +14,10 @@
 
   <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
 
+  <PropertyGroup>
+    <PackageId>testSdkClean</PackageId>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />

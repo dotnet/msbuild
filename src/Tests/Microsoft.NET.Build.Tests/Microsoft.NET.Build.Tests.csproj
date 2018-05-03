@@ -17,6 +17,7 @@
   <PropertyGroup>
     <!-- Strip the '-parallel none' flag here -->
     <XUnitRunnerAdditionalArguments></XUnitRunnerAdditionalArguments>
+    <PackageId>testSdkBuild</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

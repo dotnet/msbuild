@@ -15,6 +15,10 @@
 
   <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
 
+    <PropertyGroup>
+    <PackageId>testSdkPerf</PackageId>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="1.0.3-alpha-experimental" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
