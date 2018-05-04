@@ -1820,7 +1820,7 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(importElement))
             {
-                List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement);
+                List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement, out var sdkResult);
 
                 foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                 {
@@ -1931,16 +1931,17 @@ namespace Microsoft.Build.Evaluation
         /// in those additional paths if the default fails.
         /// </remarks>
         /// </summary>
-        private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, ProjectImportElement importElement)
+        private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, ProjectImportElement importElement, out SdkResult sdkResult)
         {
             var fallbackSearchPathMatch = _data.Toolset.GetProjectImportSearchPaths(importElement.Project);
+            sdkResult = null;
 
             // no reference or we need to lookup only the default path,
             // so, use the Import path
             if (fallbackSearchPathMatch.Equals(ProjectImportPathMatch.None))
             {
                 List<ProjectRootElement> projects;
-                ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, out projects);
+                ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, out projects, out sdkResult);
                 return projects;
             }
 
@@ -2088,10 +2089,15 @@ namespace Microsoft.Build.Evaluation
         /// Caches the parsed import into the provided collection, so future
         /// requests can be satisfied without re-parsing it.
         /// </summary>
-        private void ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(string directoryOfImportingFile,
-            ProjectImportElement importElement, out List<ProjectRootElement> projects,
+        private void ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(
+            string directoryOfImportingFile,
+            ProjectImportElement importElement,
+            out List<ProjectRootElement> projects,
+            out SdkResult sdkResult,
             bool throwOnFileNotExistsError = true)
         {
+            sdkResult = null;
+
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
                 ParserOptions.AllowProperties, _projectRootElementCache))
             {
