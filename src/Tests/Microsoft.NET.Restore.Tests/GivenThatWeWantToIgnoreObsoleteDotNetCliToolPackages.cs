@@ -53,7 +53,7 @@ namespace Microsoft.NET.Restore.Tests
             restoreCommand.Execute("/v:n").Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining($"warning : Using DotNetCliToolReference to reference '{obsoletePackageId}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.");
+                .HaveStdOutContaining($"warning : The tool '{obsoletePackageId}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).");
 
             string toolAssetsFilePath = Path.Combine(TestContext.Current.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "99.99.99", toolProject.TargetFrameworks, "project.assets.json");
             Assert.False(File.Exists(toolAssetsFilePath), "Tool assets path should not have been generated");
