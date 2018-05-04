@@ -2136,9 +2136,9 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath)?.Path;
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
 
-                if (string.IsNullOrEmpty(sdkRootPath))
+                if (!sdkResult.Success)
                 {
                     if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports))
                     {
@@ -2165,7 +2165,7 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.ParsedSdkReference.ToString());
                 }
 
-                project = Path.Combine(sdkRootPath, project);
+                project = Path.Combine(sdkResult.Path, project);
             }
 
             ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,

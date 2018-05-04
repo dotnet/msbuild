@@ -164,7 +164,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         // Get the node manager and send the response back to the node that requested the SDK
                         INodeManager nodeManager = Host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                        nodeManager.SendData(request.NodeId, response ?? new SdkResult());
+                        nodeManager.SendData(request.NodeId, response);
                     }
                 }));
             }
