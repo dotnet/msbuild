@@ -2586,17 +2586,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPathToStandardLibrariesWithCustomTargetFrameworkRoot()
         {
-            string frameworkName = "Foo Framework";
-            string frameworkVersion = "v0.1";
-            string rootDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            using (var env = TestEnvironment.Create())
+            {
+                string frameworkName = "Foo Framework";
+                string frameworkVersion = "v0.1";
+                string rootDir = Path.Combine(env.DefaultTestDirectory.FolderPath, "framework-root");
 
-            try {
-                string asmPath = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersion, rootDir);
+                string asmPath = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersion, rootDir);
 
                 string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, rootDir);
                 stdLibPath.ShouldBe(asmPath);
-            } finally {
-                FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
             }
         }
 
@@ -2616,12 +2615,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPathToReferenceAssembliesWithCustomTargetFrameworkRoot()
         {
-            string frameworkName = "Foo Framework";
-            string frameworkVersion = "v0.1";
-            string rootDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            using (var env = TestEnvironment.Create())
+            {
+                string frameworkName = "Foo Framework";
+                string frameworkVersion = "v0.1";
+                string rootDir = Path.Combine(env.DefaultTestDirectory.FolderPath, "framework-root");
 
-            try {
-                string asmPath = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersion, rootDir);
+                string asmPath = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersion, rootDir);
 
                 var stdLibPaths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, rootDir);
                 if (NativeMethodsShared.IsMono)
@@ -2635,9 +2635,6 @@ namespace Microsoft.Build.UnitTests
                     stdLibPaths.Count.ShouldBe(1);
                     stdLibPaths[0].ShouldBe(Path.Combine(rootDir, frameworkName, frameworkVersion) + Path.DirectorySeparatorChar);
                 }
-
-            } finally {
-                FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
             }
         }
 
@@ -2655,7 +2652,7 @@ namespace Microsoft.Build.UnitTests
             v45PathsWithNullRoot.ShouldBe(v45Paths);
         }
 
-        string CreateNewFrameworkAndGetAssembliesPath(string frameworkName, string frameworkVersion, string rootDir)
+        string CreateNewFrameworkAndGetAssembliesPath(TestEnvironment env, string frameworkName, string frameworkVersion, string rootDir)
         {
             string frameworkListXml = null;
             if (NativeMethodsShared.IsMono)
@@ -2674,8 +2671,8 @@ namespace Microsoft.Build.UnitTests
             string redistPath = Path.Combine(rootDir, frameworkName, frameworkVersion, "RedistList");
             string asmPath = Path.Combine(rootDir, frameworkName, frameworkVersion, NativeMethodsShared.IsMono ? "assemblies" : String.Empty);
 
-            Directory.CreateDirectory(redistPath);
-            Directory.CreateDirectory(asmPath);
+            env.CreateFolder(redistPath);
+            env.CreateFolder(asmPath);
 
             File.WriteAllText(Path.Combine(redistPath, "FrameworkList.xml"), String.Format(frameworkListXml, frameworkName));
             File.WriteAllText(Path.Combine(asmPath, "mscorlib.dll"), String.Empty);
