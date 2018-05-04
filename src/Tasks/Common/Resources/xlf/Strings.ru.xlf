@@ -399,6 +399,11 @@
         <target state="translated">Не удается использовать кэш ресурсов пакета из-за ошибки ввода-вывода. Это может происходить при нескольких параллельных сборках одного проекта. Работа может быть замедлена, но результат сборки не изменится.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

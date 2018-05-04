@@ -399,6 +399,11 @@
         <target state="translated">Nie można użyć pamięci podręcznej zasobów pakietu ze względu na błąd we/wy. Do tej sytuacji może dochodzić, gdy ten sam projekt jest kompilowany więcej niż jeden raz jednocześnie. Może wystąpić spadek wydajności, ale nie będzie mieć to wpływu na wyniki kompilacji.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

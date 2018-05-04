@@ -399,6 +399,11 @@
         <target state="translated">I/O 오류로 인해 패키지 자산 캐시를 사용할 수 없습니다. 동일한 프로젝트가 두 번 이상 동시에 빌드되면 이 오류가 발생합니다. 성능이 저하될 수 있지만 빌드 결과는 영향을 받지 않습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

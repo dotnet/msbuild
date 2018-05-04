@@ -399,6 +399,11 @@
         <target state="translated">由于 I/O 错误，不能使用程序包资产缓存。如果不止一次地并行生成同样的项目，也可能出现这种情况。可能会降低性能，但是不影响生成结果。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

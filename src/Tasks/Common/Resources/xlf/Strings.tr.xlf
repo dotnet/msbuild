@@ -399,6 +399,11 @@
         <target state="translated">G/Ç hatasından dolayı paket varlıkları önbelleği kullanılamıyor. Bu, aynı proje paralel olarak birden fazla kez derlendiğinden dolayı oluşabilir. Performans düşebilir, ancak derleme sonucu etkilenmez.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

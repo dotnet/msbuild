@@ -399,6 +399,11 @@
         <target state="translated">Impossible d'utiliser le cache d'actifs du package en raison d'une erreur d'E/S. Cela peut se produire quand un même projet est généré plusieurs fois en parallèle. Les performances peuvent être impactées, mais pas le résultat de la génération.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

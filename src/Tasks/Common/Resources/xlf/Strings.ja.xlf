@@ -399,6 +399,11 @@
         <target state="translated">I/O エラーのため、パッケージ資産のキャッシュを使用できません。これは、同じプロジェクトが同時に複数回ビルドされるときに発生することがあります。パフォーマンスが低下する可能性がありますが、ビルドの結果には影響はありません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

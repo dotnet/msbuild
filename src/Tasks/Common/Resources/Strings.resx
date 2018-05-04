@@ -358,4 +358,7 @@
   <data name="AssetsFileNotSet" xml:space="preserve">
     <value>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
   </data>
+  <data name="PackageNotFound" xml:space="preserve">
+    <value>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</value>
+  </data>
 </root>

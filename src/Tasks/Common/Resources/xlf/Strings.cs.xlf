@@ -399,6 +399,11 @@
         <target state="translated">Kvůli V/V chybě nelze použít mezipaměť prostředků balíčku. Tento problém může nastat, když je stejný projekt sestavován současně více než jednou. Může se snížit výkon, ale výsledek sestavení to neovlivní.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

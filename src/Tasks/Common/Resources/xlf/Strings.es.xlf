@@ -399,6 +399,11 @@
         <target state="translated">No se puede usar la memoria caché de recursos del paquete debido a un error de E/S. Esto puede ocurrir cuando un mismo proyecto se compila más de una vez en paralelo. Puede que se reduzca el rendimiento, pero no afectará al resultado de la compilación.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

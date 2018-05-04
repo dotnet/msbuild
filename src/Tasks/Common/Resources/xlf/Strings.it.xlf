@@ -399,6 +399,11 @@
         <target state="translated">Non è possibile usare la cache delle risorse del pacchetto a causa dell'errore di I/O. Questo problema può verificarsi quando lo stesso progetto viene compilato più volte in parallelo. Può influire sulle prestazioni, ma non sul risultato della compilazione.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
