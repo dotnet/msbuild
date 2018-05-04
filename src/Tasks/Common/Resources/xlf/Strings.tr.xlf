@@ -374,29 +374,29 @@
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
-        <target state="new">The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</target>
+        <target state="translated">Proje {0} sürümü {1} kullanılarak geri yüklendi ancak geçerli ayarlarla bunun yerine {2} sürümü kullanılır. Bu sorunu çözmek için, geri yükleme işleminde ve derleme ya da yayımlama gibi sonraki işlemlerde aynı ayarların kullanıldığından emin olun. Genellikle RuntimeIdentifier özelliği derleme veya yayımlama sırasında ayarlanır ancak geri yükleme sırasında ayarlanmazsa bu durum oluşabilir.</target>
         <note>{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotSet">
         <source>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
-        <target state="new">The path to the project assets file was not set. Run a NuGet package restore to generate this file.</target>
+        <target state="translated">Proje varlıkları dosyasının yolu ayarlanmadı. Bu dosyayı oluşturmak için, NuGet paketi geri yükleme işlemi gerçekleştirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
         <source>only supports .NET Core.</source>
-        <target state="new">only supports .NET Core.</target>
+        <target state="translated">yalnızca .NET Core desteklenir.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
-        <target state="new">DotnetTool does not support target framework lower than netcoreapp2.1.</target>
+        <target state="translated">DotnetTool, netcoreapp2.1’den daha düşük hedef çerçeveleri desteklemez.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache">
         <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <target state="translated">G/Ç hatasından dolayı paket varlıkları önbelleği kullanılamıyor. Bu, aynı proje paralel olarak birden fazla kez derlendiğinden dolayı oluşabilir. Performans düşebilir, ancak derleme sonucu etkilenmez.</target>
         <note />
       </trans-unit>
     </body>
