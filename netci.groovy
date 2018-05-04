@@ -83,11 +83,11 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
             runtimes.add('Full')
         }
 
-        // TODO: make this !windows once Mono 5.0+ is available in an OSX image
-        // if (osName.startsWith('Ubuntu')) {
-        //     runtimes.add('Mono')
-        //     runtimes.add('MonoTest')
-        // }
+        // TODO: make this !windows once RHEL builds are working
+        if (osName.startsWith('Ubuntu') || osName.startsWith('OSX')) {
+            runtimes.add('Mono')
+            runtimes.add('MonoTest')
+        }
 
         def script = "NA"
         def machineAffinityOverride = null
@@ -113,30 +113,30 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
                 case 'OSX10.13':
                     script = "./build/cibuild.sh"
 
-                    if (runtime == "Mono") {
-                        // tests are failing on mono right now
-                        script += " --scope Compile"
+                    if (runtime == "MonoTest") {
+                        // default is to run tests!
+                        script += " -hostType mono"
                     }
 
-                    if (runtime.startsWith("Mono")) {
-                        // Redundantly specify target to override
-                        // "MonoTest" which cibuild.sh doesn't know
-                        script += " --host Mono --target Mono"
+                    if (runtime == "Mono") {
+                        // tests are failing on mono right now, so default to
+                        // skipping tests
+                        script += " -skipTests"
                     }
 
                     break;
                 case { it.startsWith('Ubuntu') }:
                     script = "./build/cibuild.sh"
 
-                    if (runtime == "Mono") {
-                        // tests are failing on mono right now
-                        script += " --scope Compile"
+                    if (runtime == "MonoTest") {
+                        // default is to run tests!
+                        script += " -hostType mono"
                     }
 
-                    if (runtime.startsWith("Mono")) {
-                        // Redundantly specify target to override
-                        // "MonoTest" which cibuild.sh doesn't know
-                        script += " --host Mono --target Mono"
+                    if (runtime == "Mono") {
+                        // tests are failing on mono right now, so default to
+                        // skipping tests
+                        script += " -skipTests"
                     }
 
                     break;

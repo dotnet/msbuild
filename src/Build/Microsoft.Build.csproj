@@ -4,6 +4,7 @@
          in .NETStandard. -->
     <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netstandard2.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
 
@@ -29,6 +30,8 @@
     <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+
+    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

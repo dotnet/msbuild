@@ -27,6 +27,7 @@ dotnetCoreSdkDir=""
 function Help() {
   echo "Common settings:"
   echo "  -configuration <value>  Build configuration Debug, Release"
+  echo "  -hostType <value>       core (default), mono"
   echo "  -verbosity <value>      Msbuild verbosity (q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic])"
   echo "  -help                   Print help and exit"
   echo ""
@@ -43,6 +44,7 @@ function Help() {
   echo "  -ci                     Set when running on CI server"
   echo "  -nolog                  Disable logging"
   echo "  -prepareMachine         Prepare machine for CI run"
+  echo "  -useSystemMSBuild       [mono] Use system msbuild instead of downloading a copy for use with mono"
   echo ""
   echo "Command line arguments not listed above are passed through to MSBuild."
 }
@@ -69,6 +71,10 @@ while [[ $# -gt 0 ]]; do
     -h | -help)
       Help
       exit 0
+      ;;
+    -hosttype)
+      hostType=$2
+      shift 2
       ;;
     -nolog)
       nolog=true
@@ -102,6 +108,10 @@ while [[ $# -gt 0 ]]; do
       bootstrapOnly=true
       shift 1
       ;;
+    -usesystemmsbuild)
+      useSystemMSBuild=true
+      shift 1
+      ;;
     -verbosity)
       verbosity=$2
       shift 2
@@ -120,6 +130,10 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [ "$hostType" = "mono" ]; then
+  configuration="$configuration-MONO"
+fi
 
 function KillProcessWithName {
   echo "Killing processes containing \"$1\""
@@ -192,6 +206,20 @@ function GetLogCmd {
   fi
 
   echo $logCmd
+}
+
+function downloadMSBuildForMono {
+  if [[ -z $useSystemMSBuild && ! -e "$MONO_MSBUILD_DIR/MSBuild.dll" ]]
+  then
+    echo "** Downloading MSBUILD from $MSBUILD_DOWNLOAD_URL"
+    curl -sL -o "$MSBUILD_ZIP" "$MSBUILD_DOWNLOAD_URL"
+
+    unzip -q "$MSBUILD_ZIP" -d "$ArtifactsDir"
+    # rename just to make it obvious when reading logs!
+    mv $ArtifactsDir/msbuild $MONO_MSBUILD_DIR
+    chmod +x $ArtifactsDir/mono-msbuild/MSBuild.dll
+    rm "$MSBUILD_ZIP"
+  fi
 }
 
 function CallMSBuild {
@@ -300,13 +328,21 @@ function ErrorHostType {
 }
 
 function Build {
-  InstallDotNetCli
+  CreateDirectory $ArtifactsDir
 
-  echo "Using dotnet from: $DOTNET_INSTALL_DIR"
+  if [ "$hostType" = "core" ]; then
+    InstallDotNetCli
+    echo "Using dotnet from: $DOTNET_INSTALL_DIR"
+  fi
+
   if $prepareMachine
   then
     CreateDirectory "$NuGetPackageRoot"
-    eval "$(QQ $DOTNET_HOST_PATH) nuget locals all --clear"
+    if [ "$hostType" != "mono" ]; then
+        eval "$(QQ $DOTNET_HOST_PATH) nuget locals all --clear"
+    else
+        eval "nuget locals all -clear"
+    fi
 
     ExitIfError $? "Failed to clear NuGet cache"
   fi
@@ -314,6 +350,16 @@ function Build {
   if [ "$hostType" = "core" ]
   then
     msbuildHost=$(QQ $DOTNET_HOST_PATH)
+  elif [ "$hostType" = "mono" ]
+  then
+    if [ -z $useSystemMSBuild ]; then
+      downloadMSBuildForMono
+      msbuildHost=""
+      msbuildToUse="$MONO_MSBUILD_DIR/msbuild"
+    else
+      msbuildHost=""
+      msbuildToUse="msbuild"
+    fi
   else
     ErrorHostType
   fi
@@ -346,11 +392,18 @@ function Build {
     if [ $hostType = "core" ]
     then
       msbuildToUse=$(QQ "$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll")
+    elif [ "$hostType" = "mono" ]
+    then
+      msbuildToUse="$bootstrapRoot/net461/MSBuild/15.0/Bin/MSBuild.dll"
+      msbuildHost="mono"
+
+      properties="$properties /p:MSBuildExtensionsPath=$bootstrapRoot/net461/MSBuild/"
     else
       ErrorHostType
     fi
 
-    export ArtifactsDir="$ArtifactsDir/2"
+    # forcing the slashes here or they get normalized and lost later
+    export ArtifactsDir="$ArtifactsDir\\2\\"
 
     local logCmd=$(GetLogCmd BuildWithBootstrap)
 
@@ -402,6 +455,9 @@ else
 fi
 
 msbuildToUse="msbuild"
+MONO_MSBUILD_DIR="$ArtifactsDir/mono-msbuild"
+MSBUILD_DOWNLOAD_URL="https://github.com/mono/msbuild/releases/download/v0.05/mono_msbuild_port2-394a6b5e.zip"
+MSBUILD_ZIP="$ArtifactsDir/msbuild.zip"
 
 log=false
 if ! $nolog
@@ -421,7 +477,7 @@ then
   test=true
 fi
 
-if [ "$hostType" != "core" ]; then
+if [ "$hostType" != "core" -a "$hostType" != "mono" ]; then
   ErrorHostType
 fi
 
