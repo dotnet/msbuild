@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Update="Microsoft.Extensions.DependencyModel" ExcludeAssets="Runtime" />
     <PackageReference Update="NuGet.ProjectModel" ExcludeAssets="Runtime" />
   </ItemGroup>
