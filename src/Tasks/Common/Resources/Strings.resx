@@ -341,7 +341,7 @@
     <comment>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</comment>
   </data>
   <data name="ProjectContainsObsoleteDotNetCliTool" xml:space="preserve">
-    <value>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</value>
+    <value>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</value>
   </data>
   <data name="ErrorReadingAssetsFile" xml:space="preserve">
     <value>Error reading assets file: {0}</value>

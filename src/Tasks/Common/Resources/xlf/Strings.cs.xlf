@@ -363,8 +363,8 @@
         <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
-        <target state="translated">Použití DotNetCliToolReference k odkazování na {0} je zastaralé a lze je z tohoto projektu odebrat. Tento nástroj je standardně součástí sady .NET Core SDK.</target>
+        <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <target state="needs-review-translation">Použití DotNetCliToolReference k odkazování na {0} je zastaralé a lze je z tohoto projektu odebrat. Tento nástroj je standardně součástí sady .NET Core SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
