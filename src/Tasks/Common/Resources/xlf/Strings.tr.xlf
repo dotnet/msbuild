@@ -374,7 +374,7 @@
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
-        <target state="new">The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</target>
+        <target state="translated">Proje {0} sürümü {1} kullanılarak geri yüklendi ancak geçerli ayarlarla bunun yerine {2} sürümü kullanılır. Bu sorunu çözmek için, geri yükleme işleminde ve derleme ya da yayımlama gibi sonraki işlemlerde aynı ayarların kullanıldığından emin olun. Genellikle RuntimeIdentifier özelliği derleme veya yayımlama sırasında ayarlanır ancak geri yükleme sırasında ayarlanmazsa bu durum oluşabilir.</target>
         <note>{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
