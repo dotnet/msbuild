@@ -328,13 +328,9 @@ function ErrorHostType {
 }
 
 function Build {
-  CreateDirectory $ArtifactsDir
+  InstallDotNetCli
 
-  if [ "$hostType" = "core" ]; then
-    InstallDotNetCli
-    echo "Using dotnet from: $DOTNET_INSTALL_DIR"
-  fi
-
+  echo "Using dotnet from: $DOTNET_INSTALL_DIR"
   if $prepareMachine
   then
     CreateDirectory "$NuGetPackageRoot"
