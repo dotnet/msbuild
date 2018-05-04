@@ -509,7 +509,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             for (var i = 0; i < 2; i++)
             {
-                var importingElement = imports[i].ImportingElement;
+                var import = imports[i];
+                var importingElement = import.ImportingElement;
                 importingElement.Sdk.ShouldBe(SdkName + $"/{version}");
                 importingElement.ParsedSdkReference.Name.ShouldBe(SdkName);
                 importingElement.ParsedSdkReference.Version.ShouldBe(expectedVersion);
@@ -522,6 +523,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     : ImplicitImportLocation.Bottom;
 
                 importingElement.ImplicitImportLocation.ShouldBe(implicitLocation);
+
+                import.SdkResult.SdkReference.ShouldBeSameAs(importingElement.ParsedSdkReference);
+
+                var expectedSdkPath = i == 0
+                    ? _sdkPropsPath
+                    : _sdkTargetsPath;
+
+                import.SdkResult.Path.ShouldBe(Path.GetDirectoryName(expectedSdkPath));
+                import.SdkResult.Version.ShouldBeEmpty();
             }
         }
 
