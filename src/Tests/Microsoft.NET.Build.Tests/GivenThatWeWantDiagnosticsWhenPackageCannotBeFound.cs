@@ -63,6 +63,10 @@ namespace Microsoft.NET.Build.Tests
 
         private static void RemovePackageFromCache(TestPackageReference package)
         {
+            // NuGet resolver returns null if sha512 file is not found. This is because
+            // it writes it last to mitigate risk of using half-restore packaged. Deleting
+            // only that file here to confirm that behavior and mitigate risk of a typo
+            // here resulting in an overly aggressive recursive directory deletion.
             var shaFile = Path.Combine(
                TestContext.Current.NuGetCachePath,
                package.ID,
