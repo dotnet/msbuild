@@ -34,6 +34,7 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Utilities;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Execution
 {
@@ -1391,7 +1392,11 @@ namespace Microsoft.Build.Execution
         /// Record an import opened during evaluation.
         /// Does nothing: not needed for project instances.
         /// </summary>
-        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
+        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.RecordImport(
+            ProjectImportElement importElement,
+            ProjectRootElement import,
+            int versionEvaluated,
+            SdkResult sdkResult)
         {
         }
 

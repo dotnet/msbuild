@@ -3653,7 +3653,7 @@ namespace Microsoft.Build.Evaluation
             /// If they are dirtied, though, they might affect the evaluated project; and that's why we record them. 
             /// Mostly these will be common imports, so they'll be shared anyway.
             /// </remarks>
-            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
+            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
             {
                 ImportClosure.Add(new Triple<ProjectImportElement, ProjectRootElement, int>(importElement, import, versionEvaluated));
                 RecordImportWithDuplicates(importElement, import, versionEvaluated);

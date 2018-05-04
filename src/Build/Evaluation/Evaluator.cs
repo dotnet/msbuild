@@ -1824,8 +1824,8 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                 {
-                    _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version);
-
+                    _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
+                    
                     PerformDepthFirstPass(importedProjectRootElement);
                 }
             }
