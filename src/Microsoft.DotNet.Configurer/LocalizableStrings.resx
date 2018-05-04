@@ -151,7 +151,7 @@ Here are some options to fix this error:
     <value>ASP.NET Core
 ------------
 Successfully installed the ASP.NET Core HTTPS Development Certificate.
-To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms please refer to the platform specific documentation.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
 For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</value>
   </data>
 </root>
