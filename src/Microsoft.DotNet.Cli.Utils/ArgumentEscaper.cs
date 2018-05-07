@@ -59,14 +59,10 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns></returns>
         private static IEnumerable<string> EscapeArgArray(IEnumerable<string> args)
         {
-            var escapedArgs = new List<string>();
-
             foreach (var arg in args)
             {
-                escapedArgs.Add(EscapeSingleArg(arg));
+                yield return EscapeSingleArg(arg);
             }
-
-            return escapedArgs;
         }
 
         /// <summary>
@@ -79,23 +75,19 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        private static IEnumerable<string> EscapeArgArrayForCmd(IEnumerable<string> arguments)
+        private static IEnumerable<string> EscapeArgArrayForCmd(IEnumerable<string> args)
         {
-            var escapedArgs = new List<string>();
-
-            foreach (var arg in arguments)
+            foreach (var arg in args)
             {
-                escapedArgs.Add(EscapeArgForCmd(arg));
+                yield return EscapeArgForCmd(arg);
             }
-
-            return escapedArgs;
         }
 
-        public static string EscapeSingleArg(string arg)
+        public static string EscapeSingleArg(string arg, bool forceQuotes = false)
         {
             var sb = new StringBuilder();
 
-            var needsQuotes = ShouldSurroundWithQuotes(arg);
+            var needsQuotes = forceQuotes || ShouldSurroundWithQuotes(arg);
             var isQuoted = needsQuotes || IsSurroundedWithQuotes(arg);
 
             if (needsQuotes) sb.Append("\"");

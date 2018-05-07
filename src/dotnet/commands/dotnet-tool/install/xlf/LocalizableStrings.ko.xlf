@@ -104,28 +104,34 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">도구가 설치될 위치입니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
-        <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="translated">설치 중 사용할 추가 NuGet 패키지 소스를 추가합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">'{0}' 도구를 설치하지 못했습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
-        <source>Tool '{0}' failed to install. You may need to specify the version using
+      <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
+        <source>Tool '{0}' failed to install. This failure may have been caused by:
 
-   dotnet tool install -g {0} --version &lt;version&gt;</source>
-        <target state="new">Tool '{0}' failed to install. You may need to specify the version using
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.</source>
+        <target state="translated">'{0}' 도구를 설치하지 못했습니다. 다음과 같은 이유 때문일 수 있습니다.
 
-   dotnet tool install -g {0} --version &lt;version&gt;</target>
+* 미리 보기 릴리스를 설치하려고 하는데 --version 옵션을 사용하여 버전을 지정하지 않았습니다.
+* 이 이름으로 패키지가 검색되었지만 .NET Core 도구가 아니었습니다.
+* 아마도 인터넷 연결 문제 때문에 필요한 NuGet 피드에 액세스할 수 없습니다.
+* 도구 이름을 잘못 입력했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during installation.</source>
+        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
         <note />
       </trans-unit>
     </body>

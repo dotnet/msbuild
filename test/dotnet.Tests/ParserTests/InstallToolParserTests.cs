@@ -55,10 +55,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
             const string expectedSourceValue = "TestSourceValue";
 
             var result =
-                Parser.Instance.Parse($"dotnet tool install -g --source-feed {expectedSourceValue} console.test.app");
+                Parser.Instance.Parse($"dotnet tool install -g --add-source {expectedSourceValue} console.test.app");
 
             var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.ValueOrDefault<string[]>("source-feed").First().Should().Be(expectedSourceValue);
+            appliedOptions.ValueOrDefault<string[]>("add-source").First().Should().Be(expectedSourceValue);
         }
 
         [Fact]
@@ -70,13 +70,13 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(
                     $"dotnet tool install -g " +
-                    $"--source-feed {expectedSourceValue1} " +
-                    $"--source-feed {expectedSourceValue2} console.test.app");
+                    $"--add-source {expectedSourceValue1} " +
+                    $"--add-source {expectedSourceValue2} console.test.app");
 
             var appliedOptions = result["dotnet"]["tool"]["install"];
 
-            appliedOptions.ValueOrDefault<string[]>("source-feed")[0].Should().Be(expectedSourceValue1);
-            appliedOptions.ValueOrDefault<string[]>("source-feed")[1].Should().Be(expectedSourceValue2);
+            appliedOptions.ValueOrDefault<string[]>("add-source")[0].Should().Be(expectedSourceValue1);
+            appliedOptions.ValueOrDefault<string[]>("add-source")[1].Should().Be(expectedSourceValue2);
         }
 
         [Fact]

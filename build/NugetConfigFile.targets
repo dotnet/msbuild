@@ -24,6 +24,7 @@
     <add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" />
     <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
     <add key="container-tools" value="https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json" />
+    <add key="linux-musl-bootstrap-feed" value="https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json" />
         ]]>
       </NugetConfigCLIFeeds>
 
@@ -40,9 +41,9 @@
                       Lines="$(NugetConfigHeader)"
                       Overwrite="true" />
 
-    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != '' and '$(DotNetBuildOffline)' != 'true'"
+    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
                       File="$(GeneratedNuGetConfig)"
-                      Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Filename)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
+                      Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Identity)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
                       Overwrite="false" />
 
     <WriteLinesToFile Condition="'$(DotNetBuildOffline)' != 'true'"

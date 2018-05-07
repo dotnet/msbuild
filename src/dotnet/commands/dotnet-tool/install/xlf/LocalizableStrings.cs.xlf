@@ -104,28 +104,34 @@ Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <target state="translated">Umístění, do kterého se nástroj nainstaluje</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
-        <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="translated">Přidá další zdroj balíčku NuGet, který se použije při instalaci.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">Nástroj {0} se nepodařilo nainstalovat.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
-        <source>Tool '{0}' failed to install. You may need to specify the version using
+      <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
+        <source>Tool '{0}' failed to install. This failure may have been caused by:
 
-   dotnet tool install -g {0} --version &lt;version&gt;</source>
-        <target state="new">Tool '{0}' failed to install. You may need to specify the version using
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.</source>
+        <target state="translated">Nástroj {0} se nepodařilo nainstalovat. Možné příčiny:
 
-   dotnet tool install -g {0} --version &lt;version&gt;</target>
+* Pokoušíte se nainstalovat verzi Preview, ale nespecifikovali jste ji pomocí možnosti --version.
+* Byl nalezen balíček s tímto názvem, ale není to nástroj .NET Core.
+* Požadovaný informační kanál NuGet je nedostupný, pravděpodobně z důvodu potíží s připojením k internetu.
+* Zadali jste chybně název nástroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during installation.</source>
+        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
         <note />
       </trans-unit>
     </body>

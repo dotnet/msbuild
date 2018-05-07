@@ -125,19 +125,6 @@ namespace Microsoft.DotNet.Tools.Test
             return arg;
         }
 
-        private static string[] GetSemiColonEscapedArgs(List<string> args)
-        {
-            int counter = 0;
-            string[] array = new string[args.Count];
-
-            foreach (string arg in args)
-            {
-                array[counter++] = GetSemiColonEscapedString(arg);
-            }
-
-            return array;
-        }
-
         private static void UpdateRunSettingsArgumentsText()
         {
             DefaultHelpViewText.Synopsis.AdditionalArguments = " [[--] <RunSettings arguments>...]]";

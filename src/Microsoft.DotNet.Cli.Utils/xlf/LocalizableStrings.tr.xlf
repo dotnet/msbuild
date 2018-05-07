@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
         <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
-        <target state="needs-review-translation">deps.json oluşturulamadı, zaten oluşturulmuş olabilir: {0}</target>
+        <target state="translated">deps.json oluşturulamıyor, daha önce oluşturulmuş olabilir. Tanılama çıktısı için araç adından önce "-d" seçeneğini belirtebilirsiniz (örneğin, "dotnet -d &lt;araçadı&gt;": {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -246,17 +246,26 @@
       </trans-unit>
       <trans-unit id="MSBuildArgs">
         <source>MSBuild arguments: {0}</source>
-        <target state="new">MSBuild arguments: {0}</target>
+        <target state="translated">MSBuild bağımsız değişkenleri: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
+        <target state="translated">'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama konak yürütülebiliri olarak kullanılamıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
+        <target state="translated">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">'dotnet {0}' komutu bulunamıyor, yüklemek için lütfen aşağıdaki komutu çalıştırın
+
+dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
     </body>

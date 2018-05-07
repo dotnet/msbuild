@@ -129,11 +129,11 @@
   <data name="VersionOptionDescription" xml:space="preserve">
     <value>Version of the tool package in NuGet.</value>
   </data>
-  <data name="SourceFeedOptionDescription" xml:space="preserve">
+  <data name="AddSourceOptionDescription" xml:space="preserve">
     <value>Adds an additional NuGet package source to use during update.</value>
   </data>
-  <data name="SourceFeedOptionName" xml:space="preserve">
-    <value>SOURCE_FEED</value>
+  <data name="AddSourceOptionName" xml:space="preserve">
+    <value>ADD_SOURCE</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
     <value>Updates a tool to the latest stable version for use.</value>

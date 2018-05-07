@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Modify tools.</source>
-        <target state="translated">Modifica gli strumenti.</target>
+        <source>Install or work with tools that extend the .NET experience.</source>
+        <target state="translated">Consente di installare o usare strumenti che estendono l'esperienza .NET.</target>
         <note />
       </trans-unit>
     </body>

@@ -113,13 +113,39 @@
       <_NETCoreAppPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</_NETCoreAppPackageVersion>
       <_NETStandardLibraryPackageVersion>@(_NETStandardLibraryPackageVersions->Distinct())</_NETStandardLibraryPackageVersion>
       <_NETCorePlatformsPackageVersion>@(_NETCorePlatformsPackageVersions->Distinct())</_NETCorePlatformsPackageVersion>
+      <_AspNetCoreAllPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</_AspNetCoreAllPackageVersion>
+      <_AspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</_AspNetCoreAppPackageVersion>
 
       <!-- Use only major and minor in target framework version -->
       <_NETCoreAppTargetFrameworkVersion>$(_NETCoreAppPackageVersion.Split('.')[0]).$(_NETCoreAppPackageVersion.Split('.')[1])</_NETCoreAppTargetFrameworkVersion>
       <_NETStandardTargetFrameworkVersion>$(_NETStandardLibraryPackageVersion.Split('.')[0]).$(_NETStandardLibraryPackageVersion.Split('.')[1])</_NETStandardTargetFrameworkVersion>
+      <_AspNetCoreAllTargetFrameworkVersion>$(_NETCoreAppTargetFrameworkVersion)</_AspNetCoreAllTargetFrameworkVersion>
+      <_AspNetCoreAppTargetFrameworkVersion>$(_AspNetCoreAllTargetFrameworkVersion)</_AspNetCoreAppTargetFrameworkVersion>
 
       <_NETCoreSdkIsPreview Condition=" '$(DropSuffix)' == '' ">true</_NETCoreSdkIsPreview>
+    </PropertyGroup>
 
+    <ItemGroup>
+      <BundledVersionsVariable Include="BundledAspNetCoreAllTargetFrameworkVersion" Value="$(_AspNetCoreAllTargetFrameworkVersion)" />
+      <BundledVersionsVariable Include="BundledAspNetCoreAllPackageVersion" Value="$(_AspNetCoreAllPackageVersion)" />
+      <BundledVersionsVariable Include="BundledAspNetCoreAppTargetFrameworkVersion" Value="$(_AspNetCoreAppTargetFrameworkVersion)" />
+      <BundledVersionsVariable Include="BundledAspNetCoreAppPackageVersion" Value="$(_AspNetCoreAppPackageVersion)" />
+    </ItemGroup>
+
+    <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' == 'false' ">
+      <!--
+        These properties indicate that the ASP.NET Core shared runtime is not bundled on this platform, so the SDK should not
+        treat these packages as the 'platform' base.
+
+        The bundled aspnet packages versions should still be set, however, so the default, version-less PackageReference
+        still works.
+        See also https://github.com/aspnet/Universe/pull/1130.
+      -->
+      <BundledVersionsVariable Include="_AspNetCoreAppSharedFxIsEnabled" Value="false" />
+      <BundledVersionsVariable Include="_AspNetCoreAllSharedFxIsEnabled" Value="false" />
+    </ItemGroup>
+
+    <PropertyGroup>
       <BundledVersionsPropsContent>
 <![CDATA[
 <!--
@@ -140,9 +166,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <BundledNETStandardTargetFrameworkVersion>$(_NETStandardTargetFrameworkVersion)</BundledNETStandardTargetFrameworkVersion>
     <BundledNETStandardPackageVersion>$(_NETStandardLibraryPackageVersion)</BundledNETStandardPackageVersion>
     <BundledNETCorePlatformsPackageVersion>$(_NETCorePlatformsPackageVersion)</BundledNETCorePlatformsPackageVersion>
+    @(BundledVersionsVariable->'<%(Identity)>%(Value)</%(Identity)>', '%0A    ')
     <NETCoreSdkVersion>$(SdkVersion)</NETCoreSdkVersion>
     <_NETCoreSdkIsPreview>$(_NETCoreSdkIsPreview)</_NETCoreSdkIsPreview>
-    
+
     <!-- Latest patch versions for each minor version of .NET Core -->
     <LatestPatchVersionForNetCore1_0 Condition="'$(LatestPatchVersionForNetCore1_0)' == ''">1.0.11</LatestPatchVersionForNetCore1_0>
     <LatestPatchVersionForNetCore1_1 Condition="'$(LatestPatchVersionForNetCore1_1)' == ''">1.1.8</LatestPatchVersionForNetCore1_1>

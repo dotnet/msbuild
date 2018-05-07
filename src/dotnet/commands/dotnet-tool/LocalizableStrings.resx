@@ -121,6 +121,6 @@
     <value>.NET Install Command</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Modify tools.</value>
+    <value>Install or work with tools that extend the .NET experience.</value>
   </data>
 </root>

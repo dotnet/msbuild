@@ -193,7 +193,7 @@
     <value>Remove reference from the project.</value>
   </data>
   <data name="ListDefinition" xml:space="preserve">
-    <value>List project references or installed tools.</value>
+    <value>List references of a .NET project.</value>
   </data>
   <data name="AdvancedCommands" xml:space="preserve">
     <value>Advanced Commands</value>
@@ -268,9 +268,27 @@
     <value>Path to additional deps.json file.</value>
   </data>
   <data name="ToolDefinition" xml:space="preserve">
-    <value>Modify tools.</value>
+    <value>Install or work with tools that extend the .NET experience.</value>
   </data>
   <data name="BuildServerDefinition" xml:space="preserve">
     <value>Interact with servers started by a build.</value>
+  </data>
+  <data name="DevCertsDefinition" xml:space="preserve">
+    <value>Create and manage development certificates.</value>
+  </data>
+  <data name="EfDefinition" xml:space="preserve">
+    <value>Entity Framework Core command-line tools.</value>
+  </data>
+  <data name="SqlCacheDefinition" xml:space="preserve">
+    <value>SQL Server cache command-line tools.</value>
+  </data>
+  <data name="UserSecretsDefinition" xml:space="preserve">
+    <value>Manage development user secrets.</value>
+  </data>
+  <data name="WatchDefinition" xml:space="preserve">
+    <value>Start a file watcher that runs a command when files change.</value>
+  </data>
+  <data name="AdditionalTools" xml:space="preserve">
+    <value>Additional tools ('dotnet [tool-name] --help' for more information):</value>
   </data>
 </root>

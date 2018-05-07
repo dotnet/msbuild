@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
         <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
-        <target state="needs-review-translation">non è possibile generare deps.json. Potrebbe essere già stato generato: {0}</target>
+        <target state="translated">Non è possibile generare deps.json. Potrebbe essere stato già generato. Per ottenere l'output diagnostico, è possibile specificare l'opzione "-d" prima del nome dello strumento, ad esempio "dotnet -d &lt;nome_strumento&gt;": {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -246,17 +246,26 @@
       </trans-unit>
       <trans-unit id="MSBuildArgs">
         <source>MSBuild arguments: {0}</source>
-        <target state="new">MSBuild arguments: {0}</target>
+        <target state="translated">Argomenti di MSBuild: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
+        <target state="translated">Non è possibile usare '{0}' come eseguibile host dell'applicazione perché non contiene la sequenza di byte segnaposto prevista '{1}' che indica dove verrà scritto il nome dell'applicazione.</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
+        <target state="translated">Il nome file specificato '{0}' supera 1024 byte</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">Il comando 'dotnet {0}' non è stato trovato. Per installare, eseguire il comando seguente:
+
+dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
     </body>
