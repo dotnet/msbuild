@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli
                 Accept
                     .OneOrMoreArguments()
                     .WithSuggestionsFrom(_ => Suggest.ProjectReferencesFromProjectFile())
-                    .With(name: "args",
+                    .With(name: "PROJECT_PATH",
                           description: LocalizableStrings.AppHelpText),
                 CommonOptions.HelpOption(),
                 Create.Option(
