@@ -91,6 +91,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
 
         def script = "NA"
         def machineAffinityOverride = null
+        def shouldSkipTestsWhenResultsNotFound = false
 
         runtimes.each { runtime ->
             switch(osName) {
@@ -122,6 +123,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
                         // tests are failing on mono right now, so default to
                         // skipping tests
                         script += " -skipTests"
+                        shouldSkipTestsWhenResultsNotFound = true
                     }
 
                     break;
@@ -137,12 +139,13 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
                         // tests are failing on mono right now, so default to
                         // skipping tests
                         script += " -skipTests"
+                        shouldSkipTestsWhenResultsNotFound = true
                     }
 
                     break;
             }
 
-            CreateJob(script, runtime, osName, isPR, machineAffinityOverride)
+            CreateJob(script, runtime, osName, isPR, machineAffinityOverride, shouldSkipTestsWhenResultsNotFound)
         }
     }
 }
