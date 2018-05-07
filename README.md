@@ -23,9 +23,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux arm Archive|Linux arm64 Archive|Linux Native Installers|RHEL 6 Archive|Alpine 3.6 Archive|
+|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux arm Archive|Linux arm64 Archive|Linux Native Installers|RHEL 6 Archive|Linux-musl Archive|
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linux-arm-build-badge]][linux-arm-build]|[![][linux-arm64-build-badge]][linux-arm64-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][alpine3.6-build-badge]][alpine3.6-build]|
+|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linux-arm-build-badge]][linux-arm-build]|[![][linux-arm64-build-badge]][linux-arm64-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][linux-musl-build-badge]][linux-musl-build]|
 
 [win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6902/badge
 [win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6902
@@ -51,8 +51,8 @@ Build Status
 [rhel6-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7392/badge
 [rhel6-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7392
 
-[alpine3.6-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/8168/badge
-[alpine3.6-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=8168
+[linux-musl-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9036/badge
+[linux-musl-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9036
 
 Installers and Binaries
 -----------------------
@@ -74,7 +74,7 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **Linux arm** | [tar.gz][linux-arm-targz] - [Checksum][linux-arm-targz-checksum] |
 | **Linux arm64** | [tar.gz][linux-arm64-targz] - [Checksum][linux-arm64-targz-checksum] |
 | **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
-| **Alpine 3.6** | [tar.gz][alpine-3.6-targz] - [Checksum][alpine-3.6-targz-checksum] |
+| **Linux-musl** | [tar.gz][linux-musl-targz] - [Checksum][linux-musl-targz-checksum] |
 
 | Latest Coherent Build<sup>2</sup><br>*release/2.1.4xx* |
 |:------:|
@@ -123,8 +123,8 @@ Reference notes:
 [rhel-6-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.1.4xx/dotnet-sdk-latest-rhel.6-x64.tar.gz
 [rhel-6-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.1.4xx/dotnet-sdk-latest-rhel.6-x64.tar.gz.sha
 
-[alpine-3.6-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.1.4xx/dotnet-sdk-latest-alpine.3.6-x64.tar.gz
-[alpine-3.6-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.1.4xx/dotnet-sdk-latest-alpine.3.6-x64.tar.gz.sha
+[linux-musl-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-linux-musl-x64.tar.gz
+[linux-musl-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.1.3xx/dotnet-sdk-latest-linux-musl-x64.tar.gz.sha
 
 # Debian daily feed
 
@@ -173,7 +173,7 @@ apt-cache search dotnet-sdk | grep 2.0.0
 Docker
 ------
 
-You can also use our Docker base images found on https://hub.docker.com/r/microsoft/dotnet to set up your dev or testing environment for usage.  
+You can also use our Docker base images found on https://hub.docker.com/r/microsoft/dotnet to set up your dev or testing environment for usage.
 
 Basic usage
 -----------

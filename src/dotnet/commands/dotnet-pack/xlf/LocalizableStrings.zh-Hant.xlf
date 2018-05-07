@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Do not build the project before packing. Implies --no-restore.</source>
-        <target state="needs-review-translation">請勿在封裝前建置專案。  這意味著 --沒有還原。</target>
+        <target state="translated">請勿在封裝之前建置專案。提示：-no-restore。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">

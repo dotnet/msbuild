@@ -92,14 +92,14 @@
         <target state="translated">다음으로 인해 '{0}' 도구를 업데이트하지 못했습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
+      <trans-unit id="AddSourceOptionDescription">
         <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="translated">업데이트 중 사용할 추가 NuGet 패키지 소스를 추가합니다.</target>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
+      <trans-unit id="AddSourceOptionName">
+        <source>ADD_SOURCE</source>
+        <target state="new">ADD_SOURCE</target>
         <note />
       </trans-unit>
     </body>

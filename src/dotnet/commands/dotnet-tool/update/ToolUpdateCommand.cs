@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _packageId = new PackageId(appliedCommand.Arguments.Single());
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
-            _additionalFeeds = appliedCommand.ValueOrDefault<string[]>("source-feed");
+            _additionalFeeds = appliedCommand.ValueOrDefault<string[]>("add-source");
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");

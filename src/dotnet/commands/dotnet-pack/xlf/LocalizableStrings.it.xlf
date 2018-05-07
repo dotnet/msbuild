@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Do not build the project before packing. Implies --no-restore.</source>
-        <target state="needs-review-translation">Non compila il progetto prima della creazione del pacchetto. Implica --no-restore.</target>
+        <target state="translated">Non compila il progetto prima della creazione del pacchetto. Implica --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
