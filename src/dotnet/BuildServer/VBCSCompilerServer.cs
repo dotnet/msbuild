@@ -10,7 +10,7 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.BuildServer
 {
-    internal class VBCSCompilerServerManager : IBuildServerManager
+    internal class VBCSCompilerServer : IBuildServer
     {
         internal static readonly string VBCSCompilerPath = Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
@@ -20,29 +20,30 @@ namespace Microsoft.DotNet.BuildServer
 
         private readonly ICommandFactory _commandFactory;
 
-        public VBCSCompilerServerManager(ICommandFactory commandFactory = null)
+        public VBCSCompilerServer(ICommandFactory commandFactory = null)
         {
             _commandFactory = commandFactory ?? new DotNetCommandFactory(alwaysRunOutOfProc: true);
         }
 
-        public string ServerName => LocalizableStrings.VBCSCompilerServer;
+        public int ProcessId => 0; // Not yet used
 
-        public Task<Result> ShutdownServerAsync()
+        public string Name => LocalizableStrings.VBCSCompilerServer;
+
+        public void Shutdown()
         {
-            return Task.Run(() => {
-                var command = _commandFactory
-                    .Create("exec", new[] { VBCSCompilerPath, "-shutdown" })
-                    .CaptureStdOut()
-                    .CaptureStdErr();
+            var command = _commandFactory
+                .Create("exec", new[] { VBCSCompilerPath, "-shutdown" })
+                .CaptureStdOut()
+                .CaptureStdErr();
 
-                var result = command.Execute();
-                if (result.ExitCode != 0)
-                {
-                    return new Result(ResultKind.Failure, result.StdErr);
-                }
-
-                return new Result(ResultKind.Success);
-            });
+            var result = command.Execute();
+            if (result.ExitCode != 0)
+            {
+                throw new BuildServerException(
+                    string.Format(
+                        LocalizableStrings.ShutdownCommandFailed,
+                        result.StdErr));
+            }
         }
     }
 }

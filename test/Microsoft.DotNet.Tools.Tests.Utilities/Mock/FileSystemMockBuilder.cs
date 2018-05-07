@@ -94,6 +94,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 int bufferSize,
                 FileOptions fileOptions)
             {
+                if (fileMode == FileMode.Open && fileAccess == FileAccess.Read)
+                {
+                    return OpenRead(path);
+                }
+
                 throw new NotImplementedException();
             }
 
@@ -166,7 +171,15 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
             public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
             {
-                throw new NotImplementedException();
+                if (searchPattern != "*")
+                {
+                    throw new NotImplementedException();
+                }
+
+                foreach (var kvp in _files.Where(kvp => kvp.Key != kvp.Value && Path.GetDirectoryName(kvp.Key) == path))
+                {
+                    yield return kvp.Key;
+                }
             }
 
             public IEnumerable<string> EnumerateFileSystemEntries(string path)

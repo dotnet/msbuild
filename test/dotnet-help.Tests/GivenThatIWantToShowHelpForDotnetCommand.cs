@@ -34,7 +34,7 @@ SDK commands:
   sln              Modify solution (SLN) files.
   add              Add reference to the project.
   remove           Remove reference from the project.
-  list             List project references or installed tools.
+  list             List references of a .NET project.
   nuget            Provides additional NuGet commands.
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.
@@ -60,7 +60,15 @@ runtime-options:
   --additionalprobingpath <path>    Path containing probing policy and assemblies to probe for.
   --fx-version <version>            Version of the installed Shared Framework to use to run the application.
   --roll-forward-on-no-candidate-fx Roll forward on no candidate shared framework is enabled.
-  --additional-deps <path>          Path to additional deps.json file.";
+  --additional-deps <path>          Path to additional deps.json file.
+
+Additional tools ('dotnet [tool-name] --help' for more information):
+  dev-certs      Create and manage development certificates.
+  ef             Entity Framework Core command-line tools.
+  sql-cache      SQL Server cache command-line tools.
+  user-secrets   Manage development user secrets.
+  watch          Start a file watcher that runs a command when files change.
+";
 
         [Theory]
         [InlineData("--help")]

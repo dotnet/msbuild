@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
 {
     internal class BuildServerShutdownCommand : CommandBase
     {
+        private readonly ServerEnumerationFlags _enumerationFlags;
+        private readonly IBuildServerProvider _serverProvider;
         private readonly bool _useOrderedWait;
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
@@ -21,57 +23,63 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
         public BuildServerShutdownCommand(
             AppliedOption options,
             ParseResult result,
-            IEnumerable<IBuildServerManager> managers = null,
+            IBuildServerProvider serverProvider = null,
             bool useOrderedWait = false,
             IReporter reporter = null)
             : base(result)
         {
-            if (managers == null)
+            bool msbuild = options.ValueOrDefault<bool>("msbuild");
+            bool vbcscompiler  = options.ValueOrDefault<bool>("vbcscompiler");
+            bool razor = options.ValueOrDefault<bool>("razor");
+            bool all = !msbuild && !vbcscompiler && !razor;
+
+            _enumerationFlags = ServerEnumerationFlags.None;
+            if (msbuild || all)
             {
-                bool msbuild = options.ValueOrDefault<bool>("msbuild");
-                bool vbcscompiler  = options.ValueOrDefault<bool>("vbcscompiler");
-                bool razor = options.ValueOrDefault<bool>("razor");
-                bool all = !msbuild && !vbcscompiler && !razor;
-
-                var enabledManagers = new List<IBuildServerManager>();
-                if (msbuild || all)
-                {
-                    enabledManagers.Add(new MSBuildServerManager());
-                }
-
-                if (vbcscompiler || all)
-                {
-                    enabledManagers.Add(new VBCSCompilerServerManager());
-                }
-
-                if (razor || all)
-                {
-                    enabledManagers.Add(new RazorServerManager());
-                }
-
-                managers = enabledManagers;
+                _enumerationFlags |= ServerEnumerationFlags.MSBuild;
             }
 
-            Managers = managers;
+            if (vbcscompiler || all)
+            {
+                _enumerationFlags |= ServerEnumerationFlags.VBCSCompiler;
+            }
+
+            if (razor || all)
+            {
+                _enumerationFlags |= ServerEnumerationFlags.Razor;
+            }
+
+            _serverProvider = serverProvider ?? new BuildServerProvider();
             _useOrderedWait = useOrderedWait;
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
         }
 
-        public IEnumerable<IBuildServerManager> Managers { get; }
-
         public override int Execute()
         {
-            bool success = true;
-
             var tasks = StartShutdown();
 
+            if (tasks.Count == 0)
+            {
+                _reporter.WriteLine(LocalizableStrings.NoServersToShutdown.Green());
+                return 0;
+            }
+
+            bool success = true;
             while (tasks.Count > 0)
             {
                 var index = WaitForResult(tasks.Select(t => t.Item2).ToArray());
-                var (manager, task) = tasks[index];
+                var (server, task) = tasks[index];
 
-                success &= HandleResult(manager, task.Result);
+                if (task.IsFaulted)
+                {
+                    success = false;
+                    WriteFailureMessage(server, task.Exception);
+                }
+                else
+                {
+                    WriteSuccessMessage(server);
+                }
 
                 tasks.RemoveAt(index);
             }
@@ -79,14 +87,15 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
             return success ? 0 : 1;
         }
 
-        private List<(IBuildServerManager, Task<Result>)> StartShutdown()
+        private List<(IBuildServer, Task)> StartShutdown()
         {
-            var tasks = new List<(IBuildServerManager, Task<Result>)>();
-            foreach (var manager in Managers)
+            var tasks = new List<(IBuildServer, Task)>();
+            foreach (var server in _serverProvider.EnumerateBuildServers(_enumerationFlags))
             {
-                _reporter.WriteLine(string.Format(LocalizableStrings.ShuttingDownServer, manager.ServerName));
-                tasks.Add((manager, manager.ShutdownServerAsync()));
+                WriteShutdownMessage(server);
+                tasks.Add((server, Task.Run(() => server.Shutdown())));
             }
+
             return tasks;
         }
 
@@ -94,50 +103,72 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
         {
             if (_useOrderedWait)
             {
-                tasks[0].Wait();
-                return 0;
+                return Task.WaitAny(tasks.First());
             }
             return Task.WaitAny(tasks);
         }
 
-        private bool HandleResult(IBuildServerManager manager, Result result)
+        private void WriteShutdownMessage(IBuildServer server)
         {
-            switch (result.Kind)
+            if (server.ProcessId != 0)
             {
-                case ResultKind.Success:
-                    _reporter.WriteLine(
-                        string.Format(
-                            LocalizableStrings.ShutDownSucceeded,
-                            manager.ServerName).Green());
-                    return true;
+                _reporter.WriteLine(
+                    string.Format(
+                        LocalizableStrings.ShuttingDownServerWithPid,
+                        server.Name,
+                        server.ProcessId));
+            }
+            else
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        LocalizableStrings.ShuttingDownServer,
+                        server.Name));
+            }
+        }
 
-                case ResultKind.Skipped:
-                    _reporter.WriteLine(
-                        string.Format(
-                            LocalizableStrings.ShutDownSkipped,
-                            manager.ServerName,
-                            result.Message).Cyan());
-                    return true;
+        private void WriteFailureMessage(IBuildServer server, AggregateException exception)
+        {
+            if (server.ProcessId != 0)
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        LocalizableStrings.ShutDownFailedWithPid,
+                        server.Name,
+                        server.ProcessId,
+                        exception.InnerException.Message).Red());
+            }
+            else
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        LocalizableStrings.ShutDownFailed,
+                        server.Name,
+                        exception.InnerException.Message).Red());
+            }
 
-                case ResultKind.Failure:
-                    _errorReporter.WriteLine(
-                            string.Format(
-                                LocalizableStrings.ShutDownFailed,
-                                manager.ServerName,
-                                result.Message).Red());
+            if (Reporter.IsVerbose)
+            {
+                Reporter.Verbose.WriteLine(exception.ToString().Red());
+            }
+        }
 
-                    if (Reporter.IsVerbose && result.Exception != null)
-                    {
-                        Reporter.Verbose.WriteLine(result.Exception.ToString().Red());
-                    }
-                    return false;
-
-                default:
-                    throw new NotSupportedException(
-                        string.Format(
-                            LocalizableStrings.UnsupportedEnumValue,
-                            result.Kind.ToString(),
-                            nameof(ResultKind)));
+        private void WriteSuccessMessage(IBuildServer server)
+        {
+            if (server.ProcessId != 0)
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        LocalizableStrings.ShutDownSucceededWithPid,
+                        server.Name,
+                        server.ProcessId).Green());
+            }
+            else
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        LocalizableStrings.ShutDownSucceeded,
+                        server.Name).Green());
             }
         }
     }

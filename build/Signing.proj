@@ -109,10 +109,6 @@
       <FilesToSign Include="$(PackagesDirectory)/**/*.cab">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
-      <FilesToSign Include="$(PackagesDirectory)/**/*.nupkg"
-                   Exclude="$(PackagesDirectory)/**/*symbols.nupkg">
-        <Authenticode>$(NugetCertificateId)</Authenticode>
-      </FilesToSign>
     </ItemGroup>
   </Target>
 

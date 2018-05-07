@@ -5,78 +5,116 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.BuildServer;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.BuildServer;
 using Microsoft.DotNet.Tools.BuildServer.Shutdown;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using CommandLocalizableStrings = Microsoft.DotNet.BuildServer.LocalizableStrings;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.Shutdown.LocalizableStrings;
+using TestBuildServerCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildServerCommand;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
-    public class BuildServerShutdownCommandTests
+    public class BuildServerShutdownCommandTests : TestBase
     {
         private readonly BufferedReporter _reporter = new BufferedReporter();
 
         [Fact]
-        public void GivenNoOptionsAllManagersArePresent()
+        public void GivenNoOptionsItEnumeratesAllServers()
         {
-            var command = CreateCommand();
+            var provider = new Mock<IBuildServerProvider>(MockBehavior.Strict);
 
-            command.Managers.Select(m => m.ServerName).Should().Equal(
-                DotNet.BuildServer.LocalizableStrings.MSBuildServer,
-                DotNet.BuildServer.LocalizableStrings.VBCSCompilerServer,
-                DotNet.BuildServer.LocalizableStrings.RazorServer
-            );
+            provider
+                .Setup(p => p.EnumerateBuildServers(ServerEnumerationFlags.All))
+                .Returns(Array.Empty<IBuildServer>());
+
+            var command = CreateCommand(serverProvider: provider.Object);
+
+            command.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().Equal(LocalizableStrings.NoServersToShutdown.Green());
+
+            provider.Verify(p => p.EnumerateBuildServers(ServerEnumerationFlags.All), Times.Once);
         }
 
         [Fact]
-        public void GivenMSBuildOptionOnlyItIsTheOnlyManager()
+        public void GivenMSBuildOptionOnlyItEnumeratesOnlyMSBuildServers()
         {
-            var command = CreateCommand("--msbuild");
+            var provider = new Mock<IBuildServerProvider>(MockBehavior.Strict);
 
-            command.Managers.Select(m => m.ServerName).Should().Equal(
-                DotNet.BuildServer.LocalizableStrings.MSBuildServer
-            );
+            provider
+                .Setup(p => p.EnumerateBuildServers(ServerEnumerationFlags.MSBuild))
+                .Returns(Array.Empty<IBuildServer>());
+
+            var command = CreateCommand(options: "--msbuild", serverProvider: provider.Object);
+
+            command.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().Equal(LocalizableStrings.NoServersToShutdown.Green());
+
+            provider.Verify(p => p.EnumerateBuildServers(ServerEnumerationFlags.MSBuild), Times.Once);
         }
 
         [Fact]
-        public void GivenVBCSCompilerOptionOnlyItIsTheOnlyManager()
+        public void GivenVBCSCompilerOptionOnlyItEnumeratesOnlyVBCSCompilers()
         {
-            var command = CreateCommand("--vbcscompiler");
+            var provider = new Mock<IBuildServerProvider>(MockBehavior.Strict);
 
-            command.Managers.Select(m => m.ServerName).Should().Equal(
-                DotNet.BuildServer.LocalizableStrings.VBCSCompilerServer
-            );
+            provider
+                .Setup(p => p.EnumerateBuildServers(ServerEnumerationFlags.VBCSCompiler))
+                .Returns(Array.Empty<IBuildServer>());
+
+            var command = CreateCommand(options: "--vbcscompiler", serverProvider: provider.Object);
+
+            command.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().Equal(LocalizableStrings.NoServersToShutdown.Green());
+
+            provider.Verify(p => p.EnumerateBuildServers(ServerEnumerationFlags.VBCSCompiler), Times.Once);
         }
 
         [Fact]
-        public void GivenRazorOptionOnlyItIsTheOnlyManager()
+        public void GivenRazorOptionOnlyItEnumeratesOnlyRazorServers()
         {
-            var command = CreateCommand("--razor");
+            var provider = new Mock<IBuildServerProvider>(MockBehavior.Strict);
 
-            command.Managers.Select(m => m.ServerName).Should().Equal(
-                DotNet.BuildServer.LocalizableStrings.RazorServer
-            );
+            provider
+                .Setup(p => p.EnumerateBuildServers(ServerEnumerationFlags.Razor))
+                .Returns(Array.Empty<IBuildServer>());
+
+            var command = CreateCommand(options: "--razor", serverProvider: provider.Object);
+
+            command.Execute().Should().Be(0);
+
+            _reporter.Lines.Should().Equal(LocalizableStrings.NoServersToShutdown.Green());
+
+            provider.Verify(p => p.EnumerateBuildServers(ServerEnumerationFlags.Razor), Times.Once);
         }
 
         [Fact]
         public void GivenSuccessfulShutdownsItPrintsSuccess()
         {
             var mocks = new[] {
-                CreateManagerMock("first", new Result(ResultKind.Success)),
-                CreateManagerMock("second", new Result(ResultKind.Success)),
-                CreateManagerMock("third", new Result(ResultKind.Success))
+                CreateServerMock("first"),
+                CreateServerMock("second"),
+                CreateServerMock("third")
             };
 
-            var command = CreateCommand(managers: mocks.Select(m => m.Object));
+            var provider = new Mock<IBuildServerProvider>(MockBehavior.Strict);
+            provider
+                .Setup(p => p.EnumerateBuildServers(ServerEnumerationFlags.All))
+                .Returns(mocks.Select(m => m.Object));
+
+            var command = CreateCommand(serverProvider: provider.Object);
 
             command.Execute().Should().Be(0);
 
@@ -94,15 +132,21 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenAFailingShutdownItPrintsFailureMessage()
         {
-            const string FailureMessage = "failed!";
+            const string FirstFailureMessage = "first failed!";
+            const string ThirdFailureMessage = "third failed!";
 
             var mocks = new[] {
-                CreateManagerMock("first", new Result(ResultKind.Success)),
-                CreateManagerMock("second", new Result(ResultKind.Failure, FailureMessage)),
-                CreateManagerMock("third", new Result(ResultKind.Success))
+                CreateServerMock("first", exceptionMessage: FirstFailureMessage),
+                CreateServerMock("second"),
+                CreateServerMock("third", exceptionMessage: ThirdFailureMessage)
             };
 
-            var command = CreateCommand(managers: mocks.Select(m => m.Object));
+            var provider = new Mock<IBuildServerProvider>(MockBehavior.Strict);
+            provider
+                .Setup(p => p.EnumerateBuildServers(ServerEnumerationFlags.All))
+                .Returns(mocks.Select(m => m.Object));
+
+            var command = CreateCommand(serverProvider: provider.Object);
 
             command.Execute().Should().Be(1);
 
@@ -110,113 +154,117 @@ namespace Microsoft.DotNet.Tests.Commands
                 FormatShuttingDownMessage(mocks[0].Object),
                 FormatShuttingDownMessage(mocks[1].Object),
                 FormatShuttingDownMessage(mocks[2].Object),
-                FormatSuccessMessage(mocks[0].Object),
-                FormatFailureMessage(mocks[1].Object, FailureMessage),
-                FormatSuccessMessage(mocks[2].Object));
-
-            VerifyShutdownCalls(mocks);
-        }
-
-        [Fact]
-        public void GivenASkippedShutdownItPrintsSkipMessage()
-        {
-            const string SkipMessage = "skipped!";
-
-            var mocks = new[] {
-                CreateManagerMock("first", new Result(ResultKind.Success)),
-                CreateManagerMock("second", new Result(ResultKind.Success)),
-                CreateManagerMock("third", new Result(ResultKind.Skipped, SkipMessage))
-            };
-
-            var command = CreateCommand(managers: mocks.Select(m => m.Object));
-
-            command.Execute().Should().Be(0);
-
-            _reporter.Lines.Should().Equal(
-                FormatShuttingDownMessage(mocks[0].Object),
-                FormatShuttingDownMessage(mocks[1].Object),
-                FormatShuttingDownMessage(mocks[2].Object),
-                FormatSuccessMessage(mocks[0].Object),
+                FormatFailureMessage(mocks[0].Object, FirstFailureMessage),
                 FormatSuccessMessage(mocks[1].Object),
-                FormatSkippedMessage(mocks[2].Object, SkipMessage));
+                FormatFailureMessage(mocks[2].Object, ThirdFailureMessage));
 
             VerifyShutdownCalls(mocks);
         }
 
         [Fact]
-        public void GivenSuccessFailureAndSkippedItPrintsAllThree()
+        public void GivenARunningRazorServerItShutsDownSuccessfully()
         {
-            const string FailureMessage = "failed!";
-            const string SkipMessage = "skipped!";
+            var pipeName = Path.GetRandomFileName();
+            var pidDirectory = Path.GetFullPath(Path.Combine(TempRoot.Root, Path.GetRandomFileName()));
 
-            var mocks = new[] {
-                CreateManagerMock("first", new Result(ResultKind.Success)),
-                CreateManagerMock("second", new Result(ResultKind.Failure, FailureMessage)),
-                CreateManagerMock("third", new Result(ResultKind.Skipped, SkipMessage))
-            };
+            var testInstance = TestAssets.Get("TestRazorApp")
+                .CreateInstance()
+                .WithSourceFiles();
 
-            var command = CreateCommand(managers: mocks.Select(m => m.Object));
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName, pidDirectory)
+                .Execute($"/p:_RazorBuildServerPipeName={pipeName}")
+                .Should()
+                .Pass();
 
-            command.Execute().Should().Be(1);
+            var files = Directory.GetFiles(pidDirectory, RazorPidFile.FilePrefix + "*");
+            files.Length.Should().Be(1);
 
-            _reporter.Lines.Should().Equal(
-                FormatShuttingDownMessage(mocks[0].Object),
-                FormatShuttingDownMessage(mocks[1].Object),
-                FormatShuttingDownMessage(mocks[2].Object),
-                FormatSuccessMessage(mocks[0].Object),
-                FormatFailureMessage(mocks[1].Object, FailureMessage),
-                FormatSkippedMessage(mocks[2].Object, SkipMessage));
+            var pidFile = RazorPidFile.Read(new FilePath(files.First()));
+            pidFile.PipeName.Should().Be(pipeName);
 
-            VerifyShutdownCalls(mocks);
+            new TestBuildServerCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName, pidDirectory)
+                .ExecuteWithCapturedOutput("shutdown --razor")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(
+                    string.Format(
+                        LocalizableStrings.ShutDownSucceededWithPid,
+                        CommandLocalizableStrings.RazorServer,
+                        pidFile.ProcessId));
         }
 
-        private BuildServerShutdownCommand CreateCommand(string options = "", IEnumerable<IBuildServerManager> managers = null)
+        private BuildServerShutdownCommand CreateCommand(
+            string options = "",
+            IBuildServerProvider serverProvider = null,
+            IEnumerable<IBuildServer> buildServers = null,
+            ServerEnumerationFlags expectedFlags = ServerEnumerationFlags.None)
         {
             ParseResult result = Parser.Instance.Parse("dotnet build-server shutdown " + options);
             return new BuildServerShutdownCommand(
                 options: result["dotnet"]["build-server"]["shutdown"],
                 result: result,
-                managers: managers,
+                serverProvider: serverProvider,
                 useOrderedWait: true,
                 reporter: _reporter);
         }
 
-        private Mock<IBuildServerManager> CreateManagerMock(string serverName, Result result)
+        private Mock<IBuildServer> CreateServerMock(string name, int pid = 0, string exceptionMessage = null)
         {
-            var mock = new Mock<IBuildServerManager>(MockBehavior.Strict);
+            var mock = new Mock<IBuildServer>(MockBehavior.Strict);
 
-            mock.SetupGet(m => m.ServerName).Returns(serverName);
-            mock.Setup(m => m.ShutdownServerAsync()).Returns(Task.FromResult(result));
+            mock.SetupGet(s => s.ProcessId).Returns(pid);
+            mock.SetupGet(s => s.Name).Returns(name);
+
+            if (exceptionMessage == null)
+            {
+                mock.Setup(s => s.Shutdown());
+            }
+            else
+            {
+                mock.Setup(s => s.Shutdown()).Throws(new Exception(exceptionMessage));
+            }
 
             return mock;
         }
 
-        private void VerifyShutdownCalls(IEnumerable<Mock<IBuildServerManager>> mocks)
+        private void VerifyShutdownCalls(IEnumerable<Mock<IBuildServer>> mocks)
         {
             foreach (var mock in mocks)
             {
-                mock.Verify(m => m.ShutdownServerAsync(), Times.Once());
+                mock.Verify(s => s.Shutdown(), Times.Once);
             }
         }
 
-        private static string FormatShuttingDownMessage(IBuildServerManager manager)
+        private static string FormatShuttingDownMessage(IBuildServer server)
         {
-            return string.Format(LocalizableStrings.ShuttingDownServer, manager.ServerName);
+            if (server.ProcessId != 0)
+            {
+                return string.Format(LocalizableStrings.ShuttingDownServerWithPid, server.Name, server.ProcessId);
+            }
+            return string.Format(LocalizableStrings.ShuttingDownServer, server.Name);
         }
 
-        private static string FormatSuccessMessage(IBuildServerManager manager)
+        private static string FormatSuccessMessage(IBuildServer server)
         {
-            return string.Format(LocalizableStrings.ShutDownSucceeded, manager.ServerName).Green();
+            if (server.ProcessId != 0)
+            {
+                return string.Format(LocalizableStrings.ShutDownSucceededWithPid, server.Name, server.ProcessId).Green();
+            }
+            return string.Format(LocalizableStrings.ShutDownSucceeded, server.Name).Green();
         }
 
-        private static string FormatFailureMessage(IBuildServerManager manager, string message)
+        private static string FormatFailureMessage(IBuildServer server, string message)
         {
-            return string.Format(LocalizableStrings.ShutDownFailed, manager.ServerName, message).Red();
-        }
-
-        private static string FormatSkippedMessage(IBuildServerManager manager, string message)
-        {
-            return string.Format(LocalizableStrings.ShutDownSkipped, manager.ServerName, message).Cyan();
+            if (server.ProcessId != 0)
+            {
+                return string.Format(LocalizableStrings.ShutDownFailedWithPid, server.Name, server.ProcessId, message).Red();
+            }
+            return string.Format(LocalizableStrings.ShutDownFailed, server.Name, message).Red();
         }
     }
 }

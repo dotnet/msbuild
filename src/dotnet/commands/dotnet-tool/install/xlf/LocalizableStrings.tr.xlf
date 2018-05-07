@@ -104,19 +104,9 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Aracın yükleneceği konum.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
-        <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="translated">Yükleme sırasında kullanılacak ek bir NuGet paket kaynağı ekler.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">'{0}' aracı yüklenemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
@@ -126,12 +116,22 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.</source>
-        <target state="new">Tool '{0}' failed to install. This failure may have been caused by:
+        <target state="translated">'{0}' aracı yüklenemedi. Bu sorun şunlardan kaynaklanıyor olabilir:
 
-* You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
-* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</target>
+* Bir önizleme sürümünü yüklemeye çalışmış ancak sürümü belirtmek için --version seçeneğini kullanmamış olabilirsiniz.
+* Bu ada sahip bir paket bulunmuş olabilir, ancak bu paket bir .NET Core aracı olmayabilir.
+* Olası bir İnternet bağlantısı sorunundan dolayı gerekli NuGet akışına erişilemiyor olabilir.
+* Aracın adını yanlış yazmış olabilirsiniz.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during installation.</source>
+        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
         <note />
       </trans-unit>
     </body>

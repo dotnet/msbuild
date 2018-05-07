@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List project references or installed tools.</source>
-        <target state="translated">Proje başvurularını veya yüklü araçları listeleyin.</target>
+        <source>List references of a .NET project.</source>
+        <target state="needs-review-translation">Proje başvurularını veya yüklü araçları listeleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
@@ -254,12 +254,42 @@
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">Araçları değiştirir.</target>
+        <target state="translated">.NET deneyiminizi genişleten araçları yükleyin veya bu araçlarla çalışın.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
         <source>Interact with servers started by a build.</source>
-        <target state="new">Interact with servers started by a build.</target>
+        <target state="translated">Bir derleme tarafından başlatılan sunucularla etkileşimde bulunun.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevCertsDefinition">
+        <source>Create and manage development certificates.</source>
+        <target state="new">Create and manage development certificates.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EfDefinition">
+        <source>Entity Framework Core command-line tools.</source>
+        <target state="new">Entity Framework Core command-line tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="new">SQL Server cache command-line tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserSecretsDefinition">
+        <source>Manage development user secrets.</source>
+        <target state="new">Manage development user secrets.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WatchDefinition">
+        <source>Start a file watcher that runs a command when files change.</source>
+        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalTools">
+        <source>Additional tools ('dotnet [tool-name] --help' for more information):</source>
+        <target state="new">Additional tools ('dotnet [tool-name] --help' for more information):</target>
         <note />
       </trans-unit>
     </body>

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">Hiermit werden Tools geändert.</target>
+        <target state="translated">Installation oder Arbeit mit Tools zum Erweitern der .NET-Benutzeroberfläche.</target>
         <note />
       </trans-unit>
     </body>

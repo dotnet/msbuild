@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
         <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
-        <target state="needs-review-translation">deps.json을 생성할 수 없습니다. 이미 생성되었을 수 있습니다. {0}</target>
+        <target state="translated">deps.json을 생성할 수 없습니다. 이미 생성되었을 수 있습니다. 진단 출력의 도구 이름 앞에 "-d" 옵션을 지정할 수 있습니다. 예: "dotnet -d &lt;도구 이름&gt;": {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -246,26 +246,26 @@
       </trans-unit>
       <trans-unit id="MSBuildArgs">
         <source>MSBuild arguments: {0}</source>
-        <target state="new">MSBuild arguments: {0}</target>
+        <target state="translated">MSBuild 인수: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
+        <target state="translated">응용 프로그램 이름이 기록되는 위치를 표시하는 '{1}' 예상 자리 표시자 바이트 시퀀스가 포함되지 않아서 '{0}'을(를) 응용 프로그램 호스트 실행 파일로 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
+        <target state="translated">제공한 파일 이름 '{0}'이(가) 1024바이트보다 깁니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
         <source>Cannot find command 'dotnet {0}', please run the following command to install
 
 dotnet tool install --global {1}</source>
-        <target state="new">Cannot find command 'dotnet {0}', please run the following command to install
+        <target state="translated">'dotnet {0}' 명령을 찾을 수 없습니다. 다음 명령을 실행하여
 
-dotnet tool install --global {1}</target>
+dotnet 도구를 설치하세요. install --global {1}</target>
         <note />
       </trans-unit>
     </body>

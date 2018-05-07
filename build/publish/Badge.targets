@@ -31,7 +31,7 @@
     <PropertyGroup>
       <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(Rid)' == 'rhel.6-x64' ">rhel.6_x64</VersionBadgeMoniker>
-      <VersionBadgeMoniker Condition=" '$(Rid)' == 'alpine.3.6-x64' ">alpine.3.6_x64</VersionBadgeMoniker>
+      <VersionBadgeMoniker Condition=" '$(Rid)' == 'linux-musl-x64' ">linux_musl_x64</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(IslinuxPortable)' == 'true' ">linux_$(Architecture)</VersionBadgeMoniker>
       <VersionBadgeMoniker Condition=" '$(IsBuildingAndPublishingAllLinuxDistrosNativeInstallers)' == 'true' ">all_linux_distros_native_installer</VersionBadgeMoniker>
 

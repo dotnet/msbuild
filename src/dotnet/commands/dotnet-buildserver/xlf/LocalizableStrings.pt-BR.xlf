@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Interact with servers started from a build.</source>
-        <target state="new">Interact with servers started from a build.</target>
+        <target state="translated">Interagir com servidores iniciados de um build.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerCommandName">
         <source>.NET Build Server Command</source>
-        <target state="new">.NET Build Server Command</target>
+        <target state="translated">Comando do servidor de build .NET</target>
         <note />
       </trans-unit>
     </body>

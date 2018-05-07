@@ -167,7 +167,17 @@ namespace Microsoft.DotNet.ToolPackage
             var feeds = new List<string>();
             if (additionalFeeds != null)
             {
-                feeds.AddRange(additionalFeeds);
+                foreach (var feed in additionalFeeds)
+                {
+                    if (Uri.IsWellFormedUriString(feed, UriKind.Absolute))
+                    {
+                        feeds.Add(feed);
+                    }
+                    else
+                    {
+                        feeds.Add(Path.GetFullPath(feed));
+                    }
+                }
             }
 
             // use fallbackfolder as feed to enable offline

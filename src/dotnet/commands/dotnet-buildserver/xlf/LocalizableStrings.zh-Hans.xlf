@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Interact with servers started from a build.</source>
-        <target state="new">Interact with servers started from a build.</target>
+        <target state="translated">与从生成版本启动的服务器进行交互。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerCommandName">
         <source>.NET Build Server Command</source>
-        <target state="new">.NET Build Server Command</target>
+        <target state="translated">.NET 生成服务器命令</target>
         <note />
       </trans-unit>
     </body>
