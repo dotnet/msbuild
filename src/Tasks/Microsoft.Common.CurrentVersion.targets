@@ -5945,6 +5945,33 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
+  <!--
+    ============================================================
+                                        ReferenceCopyLocalPathsOutputGroup
+
+    Exposes the set of items that should be copied locally based on the project's references.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <ReferenceCopyLocalPathsOutputGroupDependsOn>
+      $(ReferenceCopyLocalPathsOutputGroupDependsOn);
+      $(CommonOutputGroupsDependsOn)
+    </ReferenceCopyLocalPathsOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <Target
+      Name="ReferenceCopyLocalPathsOutputGroup"
+      DependsOnTargets="$(ReferenceCopyLocalPathsOutputGroupDependsOn)"
+      Returns="@(ReferenceCopyLocalPathsOutputGroupOutput)">
+
+    <ItemGroup>
+      <ReferenceCopyLocalPathsOutputGroupOutput Include="@(ReferenceCopyLocalPaths)">
+        <TargetPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</TargetPath>
+      </ReferenceCopyLocalPathsOutputGroupOutput>
+    </ItemGroup>
+
+  </Target>
+
   <PropertyGroup>
     <CodeAnalysisTargets Condition="'$(CodeAnalysisTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeAnalysis\Microsoft.CodeAnalysis.targets</CodeAnalysisTargets>
   </PropertyGroup>
