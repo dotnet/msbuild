@@ -39,6 +39,8 @@ namespace Microsoft.Build.Tasks
 
                 return possibleLocations.Select(possibleLocation => possibleLocation()).FirstOrDefault(File.Exists);
             }, isThreadSafe: true);
+
+            StandardOutputImportance = MessageImportance.Low.ToString("G");
         }
 
         public bool? Deterministic { get; set; }
@@ -70,10 +72,7 @@ namespace Microsoft.Build.Tasks
             commandLine.AppendTextUnquoted(" ");
 #endif
             commandLine.AppendSwitchIfTrue("/noconfig", NoConfig);
-        }
 
-        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
-        {
             if (References != null)
             {
                 foreach (ITaskItem reference in References)
@@ -103,17 +102,22 @@ namespace Microsoft.Build.Tasks
             return _executablePath.Value;
 #endif
         }
+
+        protected override void LogToolCommand(string message)
+        {
+            Log.LogMessageFromText(message, StandardOutputImportanceToUse);
+        }
     }
 
     internal sealed class RoslynCodeTaskFactoryCSharpCompiler : RoslynCodeTaskFactoryCompilerBase
     {
         protected override string ToolName => "csc.exe";
 
-        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+        protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
             commandLine.AppendPlusOrMinusSwitch("/nostdlib", NoStandardLib);
 
-            base.AddResponseFileCommands(commandLine);
+            base.AddCommandLineCommands(commandLine);
         }
     }
 
@@ -125,13 +129,13 @@ namespace Microsoft.Build.Tasks
 
         protected override string ToolName => "vbc.exe";
 
-        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+        protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
             commandLine.AppendSwitchIfTrue("/nostdlib", NoStandardLib);
             commandLine.AppendPlusOrMinusSwitch("/optionexplicit", OptionExplicit);
             commandLine.AppendSwitchIfNotNull("/rootnamespace:", RootNamespace);
 
-            base.AddResponseFileCommands(commandLine);
+            base.AddCommandLineCommands(commandLine);
         }
     }
 }

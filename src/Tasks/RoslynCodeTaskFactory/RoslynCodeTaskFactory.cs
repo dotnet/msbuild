@@ -5,17 +5,21 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
 namespace Microsoft.Build.Tasks
 {
-    public sealed partial class RoslynCodeTaskFactory : ITaskFactory
+    public sealed class RoslynCodeTaskFactory : ITaskFactory
     {
         /// <summary>
         /// A set of default namespaces to add so that user does not have to include them.  Make sure that these are covered
@@ -154,7 +158,24 @@ namespace Microsoft.Build.Tasks
 
             if (assembly != null)
             {
-                TaskType = assembly.GetExportedTypes().FirstOrDefault(type => type.Name.Equals(taskName));
+                Type[] exportedTypes = assembly.GetExportedTypes();
+
+                // Find an exact match by class name or a partial match by full name
+                TaskType = exportedTypes.FirstOrDefault(type => type.Name.Equals(taskName, StringComparison.OrdinalIgnoreCase))
+                           ?? exportedTypes.Where(i => i.FullName != null).FirstOrDefault(type => type.FullName.Equals(taskName, StringComparison.OrdinalIgnoreCase) || type.FullName.EndsWith(taskName, StringComparison.OrdinalIgnoreCase));
+
+                if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Class && parameterGroup.Count == 0)
+                {
+                    // If the user specified a whole class but nothing in <ParameterGroup />, automatically derive
+                    // the task parameters from their type's properties
+                    _parameters = TaskType?.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                        .Select(i => new TaskPropertyInfo(
+                            i.Name,
+                            i.PropertyType,
+                            i.GetCustomAttribute<OutputAttribute>() != null,
+                            i.GetCustomAttribute<RequiredAttribute>() != null))
+                        .ToArray();
+                }
             }
 
             // Initialization succeeded if we found a type matching the task name from the compiled assembly
@@ -164,15 +185,68 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets the full source code by applying an appropriate template based on the current <see cref="RoslynCodeTaskFactoryCodeType"/>.
         /// </summary>
-        internal static void ApplySourceCodeTemplate(RoslynCodeTaskFactoryTaskInfo taskInfo, ICollection<TaskPropertyInfo> parameters)
+        internal static string GetSourceCode(RoslynCodeTaskFactoryTaskInfo taskInfo, ICollection<TaskPropertyInfo> parameters)
         {
-            if (taskInfo?.SourceCode != null && CodeTemplates.ContainsKey(taskInfo.CodeLanguage) && CodeTemplates[taskInfo.CodeLanguage].ContainsKey(taskInfo.CodeType))
+            if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Class)
             {
-                string usingStatement = String.Join(Environment.NewLine, GetNamespaceStatements(taskInfo.CodeLanguage, DefaultNamespaces.Union(taskInfo.Namespaces, StringComparer.OrdinalIgnoreCase)));
-                string properties = parameters == null ? String.Empty : String.Join(Environment.NewLine, GetPropertyStatements(taskInfo.CodeLanguage, parameters).Select(i => $"        {i}"));
+                return taskInfo.SourceCode;
+            }
 
-                // Apply the corresponding template based on the code type
-                taskInfo.SourceCode = String.Format(CodeTemplates[taskInfo.CodeLanguage][taskInfo.CodeType], usingStatement, taskInfo.Name, properties, taskInfo.SourceCode);
+            CodeTypeDeclaration codeTypeDeclaration = new CodeTypeDeclaration
+            {
+                IsClass = true,
+                Name = taskInfo.Name,
+                TypeAttributes = TypeAttributes.Public,
+                Attributes = MemberAttributes.Final
+            };
+            codeTypeDeclaration.BaseTypes.Add("Microsoft.Build.Utilities.Task");
+
+            foreach (TaskPropertyInfo propertyInfo in parameters)
+            {
+                CreateProperty(codeTypeDeclaration, propertyInfo.Name, propertyInfo.PropertyType);
+            }
+
+            if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Fragment)
+            {
+                CodeMemberProperty successProperty = CreateProperty(codeTypeDeclaration, "Success", typeof(bool), true);
+
+                CodeMemberMethod executeMethod = new CodeMemberMethod
+                {
+                    Name = "Execute",
+                    // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
+                    Attributes = MemberAttributes.Override | MemberAttributes.Public,
+                    ReturnType = new CodeTypeReference(typeof(Boolean))
+                };
+                executeMethod.Statements.Add(new CodeSnippetStatement(taskInfo.SourceCode));
+                executeMethod.Statements.Add(new CodeMethodReturnStatement(new CodePropertyReferenceExpression(null, successProperty.Name)));
+                codeTypeDeclaration.Members.Add(executeMethod);
+            }
+            else
+            {
+                codeTypeDeclaration.Members.Add(new CodeSnippetTypeMember(taskInfo.SourceCode));
+            }
+
+            CodeNamespace codeNamespace = new CodeNamespace("InlineCode");
+            codeNamespace.Imports.AddRange(DefaultNamespaces.Union(taskInfo.Namespaces, StringComparer.OrdinalIgnoreCase).Select(i => new CodeNamespaceImport(i)).ToArray());
+
+            codeNamespace.Types.Add(codeTypeDeclaration);
+
+            CodeCompileUnit codeCompileUnit = new CodeCompileUnit();
+
+            codeCompileUnit.Namespaces.Add(codeNamespace);
+
+            using (CodeDomProvider provider = CodeDomProvider.CreateProvider(taskInfo.CodeLanguage))
+            {
+                using (StringWriter writer = new StringWriter(new StringBuilder(), CultureInfo.CurrentCulture))
+                {
+                    provider.GenerateCodeFromCompileUnit(codeCompileUnit, writer, new CodeGeneratorOptions
+                    {
+                        BlankLinesBetweenMembers = true,
+                        VerbatimOrder = true
+                    });
+
+                    return writer.ToString();
+                }
             }
         }
 
@@ -307,7 +381,6 @@ namespace Microsoft.Build.Tasks
             // a file instead.
             taskInfo.SourceCode = codeElement.Value;
 
-
             // Parse the attributes of the <Code /> element
             XAttribute languageAttribute = null;
             XAttribute sourceAttribute = null;
@@ -321,12 +394,15 @@ namespace Microsoft.Build.Tasks
                     case "Language":
                         languageAttribute = attribute;
                         break;
+
                     case "Source":
                         sourceAttribute = attribute;
                         break;
+
                     case "Type":
                         typeAttribute = attribute;
                         break;
+
                     default:
                         log.LogErrorWithCodeFromResources("CodeTaskFactory.InvalidCodeElementAttribute",
                             attribute.Name.LocalName);
@@ -411,7 +487,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            ApplySourceCodeTemplate(taskInfo, parameters);
+            taskInfo.SourceCode = GetSourceCode(taskInfo, parameters);
 
             return true;
         }
@@ -467,7 +543,7 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, ReferenceAssemblyDirectoryName, assemblyFileName),
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, assemblyFileName)
                 }.FirstOrDefault(File.Exists);
-                
+
                 if (resolvedPath != null)
                 {
                     resolvedAssemblyReferences.Add(resolvedPath);
@@ -487,70 +563,43 @@ namespace Microsoft.Build.Tasks
             return !hasInvalidReference;
         }
 
-        /// <summary>
-        /// Gets the namespace statements for the specified code language.
-        /// </summary>
-        /// <param name="codeLanguage">The code language to use.</param>
-        /// <param name="namespaces">An <see cref="IEnumerable{String}"/> containing namespaces to generate statements for.</param>
-        /// <returns>An <see cref="IEnumerable{String}"/> containing namespace statements for the specified code language.</returns>
-        private static IEnumerable<string> GetNamespaceStatements(string codeLanguage, IEnumerable<string> namespaces)
+        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null)
         {
-            foreach (string @namespace in namespaces.Union(DefaultNamespaces, StringComparer.OrdinalIgnoreCase))
+            CodeMemberField field = new CodeMemberField(new CodeTypeReference(type), "_" + name)
             {
-                switch (codeLanguage)
-                {
-                    case "CS":
-                        yield return $"using {@namespace};";
-                        break;
+                Attributes = MemberAttributes.Private,
+                InitExpression = defaultValue == null ? null : new CodePrimitiveExpression(defaultValue)
+            };
 
-                    case "VB":
-                        yield return $"Imports {@namespace}";
-                        break;
-                }
-            }
-        }
+            codeTypeDeclaration.Members.Add(field);
 
-        /// <summary>
-        /// Gets the property statements for the specified language.
-        /// </summary>
-        /// <param name="codeLanguage">The code language to use.</param>
-        /// <param name="parameters">An <see cref="IEnumerable{TaskPropertyInfo}"/> containing information about the property statements to generate.</param>
-        /// <returns>An <see cref="IEnumerable{String}"/> containing property statements for the specified code language.</returns>
-        private static IEnumerable<string> GetPropertyStatements(string codeLanguage, IEnumerable<TaskPropertyInfo> parameters)
-        {
-            foreach (TaskPropertyInfo taskPropertyInfo in parameters)
+            CodeFieldReferenceExpression fieldReference = new CodeFieldReferenceExpression
             {
-                switch (codeLanguage)
-                {
-                    case "CS":
-                        if (taskPropertyInfo.Output)
-                        {
-                            yield return "[Microsoft.Build.Framework.OutputAttribute]";
-                        }
+                FieldName = field.Name
+            };
 
-                        if (taskPropertyInfo.Required)
-                        {
-                            yield return "[Microsoft.Build.Framework.RequiredAttribute]";
-                        }
+            CodeMemberProperty property = new CodeMemberProperty
+            {
+                Name = name,
+                Type = new CodeTypeReference(type),
+                Attributes = MemberAttributes.Public,
+                HasGet = true,
+                HasSet = true
+            };
 
-                        yield return $"public {taskPropertyInfo.PropertyType.FullName} {taskPropertyInfo.Name} {{ get; set; }}";
-                        break;
+            property.GetStatements.Add(new CodeMethodReturnStatement(fieldReference));
 
-                    case "VB":
-                        if (taskPropertyInfo.Output)
-                        {
-                            yield return "<Microsoft.Build.Framework.OutputAttribute>";
-                        }
+            CodeAssignStatement fieldAssign = new CodeAssignStatement
+            {
+                Left = fieldReference,
+                Right = new CodeArgumentReferenceExpression("value")
+            };
 
-                        if (taskPropertyInfo.Required)
-                        {
-                            yield return "<Microsoft.Build.Framework.RequiredAttribute>";
-                        }
+            property.SetStatements.Add(fieldAssign);
 
-                        yield return $"Public Property {taskPropertyInfo.Name} As {taskPropertyInfo.PropertyType.FullName}";
-                        break;
-                }
-            }
+            codeTypeDeclaration.Members.Add(property);
+
+            return property;
         }
 
         /// <summary>
@@ -566,6 +615,11 @@ namespace Microsoft.Build.Tasks
             if (CompiledAssemblyCache.TryGetValue(taskInfo, out assembly))
             {
                 return true;
+            }
+
+            if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
+            {
+                return false;
             }
 
             // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
@@ -618,15 +672,9 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
-                {
-                    return false;
-                }
-
                 if (managedCompiler != null)
                 {
-                    // Pass a wrapped BuildEngine which will lower the message importance so it doesn't clutter up the build output
-                    managedCompiler.BuildEngine = new RoslynCodeTaskFactoryBuildEngine(buildEngine);
+                    managedCompiler.BuildEngine = buildEngine;
                     managedCompiler.Deterministic = true;
                     managedCompiler.NoConfig = true;
                     managedCompiler.NoLogo = true;
