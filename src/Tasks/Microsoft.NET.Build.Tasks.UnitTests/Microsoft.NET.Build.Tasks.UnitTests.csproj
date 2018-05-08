@@ -12,7 +12,7 @@
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions.Json" Version="$(FluentAssertionsJsonVersion)" />
@@ -36,6 +36,6 @@
     <None Include="LockFiles\*.project.lock.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
 
 </Project>

@@ -363,8 +363,8 @@
         <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
-        <target state="translated">Die Verwendung von DotNetCliToolReference zum Verweisen auf "{0}" ist veraltet und kann aus diesem Projekt entfernt werden. Dieses Tool ist standardmäßig im .NET Core SDK-Paket enthalten.</target>
+        <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <target state="needs-review-translation">Die Verwendung von DotNetCliToolReference zum Verweisen auf "{0}" ist veraltet und kann aus diesem Projekt entfernt werden. Dieses Tool ist standardmäßig im .NET Core SDK-Paket enthalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -381,22 +381,27 @@
       </trans-unit>
       <trans-unit id="AssetsFileNotSet">
         <source>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
-        <target state="new">The path to the project assets file was not set. Run a NuGet package restore to generate this file.</target>
+        <target state="translated">Der Pfad zur Datei mit den Projektassets wurde nicht festgelegt. Führen Sie eine NuGet-Paketwiederherstellung durch, um diese Datei zu generieren.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
         <source>only supports .NET Core.</source>
-        <target state="new">only supports .NET Core.</target>
+        <target state="translated">Unterstützt nur .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
-        <target state="new">DotnetTool does not support target framework lower than netcoreapp2.1.</target>
+        <target state="translated">DotnetTool unterstützt kein Zielframework vor netcoreapp2.1.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache">
         <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <target state="translated">Der Cache für Paketassets kann aufgrund eines E/A-Fehlers nicht verwendet werden. Dieses Problem kann auftreten, wenn dasselbe Projekt parallel mehrfach erstellt wird. Die Leistung ist möglicherweise herabgesetzt, aber das Buildergebnis wird nicht beeinträchtigt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
         <note />
       </trans-unit>
     </body>

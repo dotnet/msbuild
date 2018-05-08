@@ -363,8 +363,8 @@
         <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</source>
-        <target state="translated">DotNetCliToolReference를 사용한 '{0}' 참조는 사용되지 않으며 이 프로젝트에서 제거할 수 있습니다. 이도구는 .NET Core SDK에 기본적으로 포함되어 있습니다.</target>
+        <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <target state="needs-review-translation">DotNetCliToolReference를 사용한 '{0}' 참조는 사용되지 않으며 이 프로젝트에서 제거할 수 있습니다. 이도구는 .NET Core SDK에 기본적으로 포함되어 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -381,22 +381,27 @@
       </trans-unit>
       <trans-unit id="AssetsFileNotSet">
         <source>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
-        <target state="new">The path to the project assets file was not set. Run a NuGet package restore to generate this file.</target>
+        <target state="translated">프로젝트 자산 파일에 대한 경로가 설정되지 않았습니다. NuGet 패키지 복원을 실행하여 이 파일을 생성하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
         <source>only supports .NET Core.</source>
-        <target state="new">only supports .NET Core.</target>
+        <target state="translated">.NET Core만 지원합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
-        <target state="new">DotnetTool does not support target framework lower than netcoreapp2.1.</target>
+        <target state="translated">DotnetTool가 netcoreapp2.1보다 낮은 대상 프레임워크를 지원하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache">
         <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <target state="translated">I/O 오류로 인해 패키지 자산 캐시를 사용할 수 없습니다. 동일한 프로젝트가 두 번 이상 동시에 빌드되면 이 오류가 발생합니다. 성능이 저하될 수 있지만 빌드 결과는 영향을 받지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageNotFound">
+        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
         <note />
       </trans-unit>
     </body>

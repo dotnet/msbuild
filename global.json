@@ -1,0 +1,11 @@
+{
+  "sdk": {
+    "version": "2.1.300-preview3-008616"
+  },
+  "msbuild-sdks": {
+    "RoslynTools.RepoToolset": "1.0.0-beta2-62805-03"
+  },
+  "vswhere": {
+    "version": "2.2.7"
+  }
+}

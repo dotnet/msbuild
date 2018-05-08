@@ -9,6 +9,9 @@ obj/
 # Visual Studio
 ###############################################################################
 .vs/
+.dotnet/
+.tools/
+.packages/
 
 # OS X Device Services Store
 .DS_Store
