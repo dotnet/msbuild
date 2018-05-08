@@ -5781,6 +5781,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
+                                        CommonOutputGroupsDependsOn
+
+    Dependencies common to many of the *OutputGroupDependencies targets.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <CommonOutputGroupsDependsOn>
+      $(CommonOutputGroupsDependsOn);
+      BuildOnlySettings;
+      PrepareForBuild;
+      AssignTargetPaths;
+      ResolveReferences
+    </CommonOutputGroupsDependsOn>
+  </PropertyGroup>
+  
+  <!--
+    ============================================================
                                         AllProjectOutputGroupsDependencies
     ============================================================
     -->
@@ -5802,7 +5819,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
       Name="BuiltProjectOutputGroupDependencies"
-      DependsOnTargets="BuildOnlySettings;PrepareForBuild;AssignTargetPaths;ResolveReferences"
+      DependsOnTargets="$(CommonOutputGroupsDependsOn)"
       Returns="@(BuiltProjectOutputGroupDependency)">
 
     <ItemGroup>
@@ -5825,7 +5842,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="DebugSymbolsProjectOutputGroupDependencies"
       Condition="'$(DebugSymbols)'!='false'"
-      DependsOnTargets="BuildOnlySettings;PrepareForBuild;AssignTargetPaths;ResolveReferences"
+      DependsOnTargets="$(CommonOutputGroupsDependsOn)"
       Returns="@(DebugSymbolsProjectOutputGroupDependency)">
 
     <!-- This item represents dependent PDB's -->
@@ -5844,7 +5861,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
       Name="SatelliteDllsProjectOutputGroupDependencies"
-      DependsOnTargets="BuildOnlySettings;PrepareForBuild;AssignTargetPaths;ResolveReferences"
+      DependsOnTargets="$(CommonOutputGroupsDependsOn)"
       Returns="@(SatelliteDllsProjectOutputGroupDependency)">
 
     <!-- This item represents dependent satellites -->
@@ -5864,7 +5881,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="DocumentationProjectOutputGroupDependencies"
       Condition="'$(DocumentationFile)'!=''"
-      DependsOnTargets="BuildOnlySettings;PrepareForBuild;AssignTargetPaths;ResolveReferences"
+      DependsOnTargets="$(CommonOutputGroupsDependsOn)"
       Returns="@(DocumentationProjectOutputGroupDependency)">
 
     <!-- This item represents dependent XMLs -->
@@ -5883,7 +5900,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
       Name="SGenFilesOutputGroupDependencies"
-      DependsOnTargets="BuildOnlySettings;PrepareForBuild;AssignTargetPaths;ResolveReferences"
+      DependsOnTargets="$(CommonOutputGroupsDependsOn)"
       Returns="@(SGenFilesOutputGroupDependency)">
 
     <!-- This item represents sgen xml serializer dll's -->
