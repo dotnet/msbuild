@@ -114,7 +114,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
                 case 'OSX10.13':
                     script = "./build/cibuild.sh"
 
-                    if (runtime == "MonoTest") {
+                    if (runtime == "MonoTest" || runtime == "Mono") {
                         // default is to run tests!
                         script += " -hostType mono"
                     }
@@ -130,7 +130,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
                 case { it.startsWith('Ubuntu') }:
                     script = "./build/cibuild.sh"
 
-                    if (runtime == "MonoTest") {
+                    if (runtime == "MonoTest" || runtime == "Mono") {
                         // default is to run tests!
                         script += " -hostType mono"
                     }
