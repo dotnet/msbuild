@@ -49,7 +49,7 @@
     <VisualStudioSetupInteropVersion>1.16.30</VisualStudioSetupInteropVersion>
 
     <!-- MSBuild custom overall switch -->
-    <NuGetPackageVersion>4.8.0-preview1.5158</NuGetPackageVersion>
+    <NuGetPackageVersion>4.8.0-preview1.5185</NuGetPackageVersion>
 
     <!-- Prodcon-overrideable, using repo-toolset naming convention -->
     <NuGetBuildTasksVersion>$(NuGetPackageVersion)</NuGetBuildTasksVersion>
