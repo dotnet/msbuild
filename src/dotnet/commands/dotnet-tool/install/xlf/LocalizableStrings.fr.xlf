@@ -104,28 +104,34 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
         <target state="translated">Emplacement où l'outil va être installé.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
-        <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="translated">Ajoute un package NuGet source supplémentaire à utiliser durant l'installation.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">Impossible d'installer l'outil '{0}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
-        <source>Tool '{0}' failed to install. You may need to specify the version using
+      <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
+        <source>Tool '{0}' failed to install. This failure may have been caused by:
 
-   dotnet tool install -g {0} --version &lt;version&gt;</source>
-        <target state="new">Tool '{0}' failed to install. You may need to specify the version using
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.</source>
+        <target state="translated">Échec d'installation de l'outil '{0}'. Causes possibles de cet échec :
 
-   dotnet tool install -g {0} --version &lt;version&gt;</target>
+* Vous essayez d'installer une préversion, mais vous n'avez pas utilisé l'option --version pour spécifier la version.
+* Un package portant ce nom a été trouvé, mais il ne s'agit pas d'un outil .NET Core.
+* Le flux NuGet exigé n'est pas accessible, peut-être en raison d'un problème de connexion Internet.
+* Vous avez mal tapé le nom de l'outil.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during installation.</source>
+        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
         <note />
       </trans-unit>
     </body>

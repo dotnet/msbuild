@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _packageVersion = appliedCommand.ValueOrDefault<string>("version");
             _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
             _framework = appliedCommand.ValueOrDefault<string>("framework");
-            _source = appliedCommand.ValueOrDefault<string[]>("source-feed");
+            _source = appliedCommand.ValueOrDefault<string[]>("add-source");
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");

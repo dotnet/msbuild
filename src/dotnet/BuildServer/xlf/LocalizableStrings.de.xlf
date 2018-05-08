@@ -4,22 +4,27 @@
     <body>
       <trans-unit id="MSBuildServer">
         <source>MSBuild server</source>
-        <target state="new">MSBuild server</target>
+        <target state="translated">MSBuild-Server</target>
         <note />
       </trans-unit>
       <trans-unit id="VBCSCompilerServer">
         <source>VB/C# compiler server</source>
-        <target state="new">VB/C# compiler server</target>
+        <target state="translated">VB/C#-Compilerserver</target>
         <note />
       </trans-unit>
       <trans-unit id="RazorServer">
         <source>Razor build server</source>
-        <target state="new">Razor build server</target>
+        <target state="translated">Razor-Buildserver</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoRazorProjectFound">
-        <source>a Razor project was not found in the current directory.</source>
-        <target state="new">a Razor project was not found in the current directory.</target>
+      <trans-unit id="ShutdownCommandFailed">
+        <source>The shutdown command failed: {0}</source>
+        <target state="translated">Fehler beim Befehl zum Herunterfahren: {0} </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadPidFile">
+        <source>Failed to read pid file '{0}': {1}</source>
+        <target state="new">Failed to read pid file '{0}': {1}</target>
         <note />
       </trans-unit>
     </body>

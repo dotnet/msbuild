@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Do not build the project before packing. Implies --no-restore.</source>
-        <target state="needs-review-translation">No compile el proyecto antes de empaquetarlo. Implica la no restauración.</target>
+        <target state="translated">No compile el proyecto antes de empaquetarlo. Implica --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">

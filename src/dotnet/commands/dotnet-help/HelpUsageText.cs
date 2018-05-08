@@ -29,7 +29,7 @@ path-to-application:
   vstest           {LocalizableStrings.VsTestDefinition}
   store            {LocalizableStrings.StoreDefinition}
   tool             {LocalizableStrings.ToolDefinition}
-  buildserver      {LocalizableStrings.BuildServerDefinition}
+  build-server     {LocalizableStrings.BuildServerDefinition}
   help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:
@@ -50,5 +50,12 @@ runtime-options:
   --fx-version <version>            {LocalizableStrings.FxVersionDefinition}
   --roll-forward-on-no-candidate-fx {LocalizableStrings.RollForwardOnNoCandidateFxDefinition}
   --additional-deps <path>          {LocalizableStrings.AdditionalDeps}
+
+{LocalizableStrings.AdditionalTools}
+  dev-certs      {LocalizableStrings.DevCertsDefinition}
+  ef             {LocalizableStrings.EfDefinition}
+  sql-cache      {LocalizableStrings.SqlCacheDefinition}
+  user-secrets   {LocalizableStrings.UserSecretsDefinition}
+  watch          {LocalizableStrings.WatchDefinition}
 ";
 }

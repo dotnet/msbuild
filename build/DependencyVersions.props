@@ -1,40 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftAspNetCoreAppPackageVersion>2.1.0-preview2-30475</MicrosoftAspNetCoreAppPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview3-26411-06</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftAspNetCoreAllPackageVersion>2.1.0-rc1-30661</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.1.0-rc1-26423-06</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftBuildPackageVersion>15.7.0-preview-000145</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>15.7.177</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftFSharpCompilerPackageVersion>10.1.4-rtm-180406-0</MicrosoftFSharpCompilerPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0-beta4-62811-05</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>10.1.4-rtm-180422-0</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.0-beta4-62827-02</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
-    <MicrosoftNETSdkPackageVersion>2.1.300-preview3-62804-06</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>2.1.300-rtm-62902-01</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkWebPackageVersion>2.1.300-preview2-20180406-1563552</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>2.1.300-rc1-20180422-1618307</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
-    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta3-20180406-1563557</MicrosoftDotNetCommonItemTemplatesPackageVersion>
+    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta3-20180422-1618305</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates20PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
-    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3-20180406-1563557</MicrosoftDotNetTestProjectTemplates20PackageVersion>
-    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta3-20180406-1563557</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3-20180422-1618305</MicrosoftDotNetTestProjectTemplates20PackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta3-20180422-1618305</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
     <MicrosoftTemplateEngineUtilsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineUtilsPackageVersion>
-    <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.1.0-preview3-26411-06</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>2.1.0-preview3-26411-06</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftDotNetCliCommandLinePackageVersion>0.2.1-alpha-62806-05</MicrosoftDotNetCliCommandLinePackageVersion>
-    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.1-alpha-62806-04</MicrosoftDotNetProjectJsonMigrationPackageVersion>
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.1.0-rc1-26423-06</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>2.1.0-rc1-26423-06</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftDotNetCliCommandLinePackageVersion>0.2.1-alpha-62823-01</MicrosoftDotNetCliCommandLinePackageVersion>
+    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.1-alpha-62823-01</MicrosoftDotNetProjectJsonMigrationPackageVersion>
     <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
     <MicrosoftDotNetArchivePackageVersion>0.2.0-beta-62628-01</MicrosoftDotNetArchivePackageVersion>
-    <NuGetBuildTasksPackageVersion>4.7.0-rtm.5081</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>4.8.0-preview1.5158</NuGetBuildTasksPackageVersion>
     <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
@@ -43,7 +44,7 @@
     <NuGetPackagingPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetPackagingPackageVersion>
     <NuGetProjectModelPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelPackageVersion>
     <NuGetVersioningPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetVersioningPackageVersion>
-    <MicrosoftNETTestSdkPackageVersion>15.7.0-preview-20180221-13</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.7.0</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>

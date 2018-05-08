@@ -85,10 +85,10 @@ namespace Microsoft.DotNet.Tests.Commands
         public void WhenRunWithPackageIdWithSourceItShouldCreateValidShim()
         {
             const string sourcePath = "http://mysouce.com";
-            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --source-feed {sourcePath}");
+            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --add-source {sourcePath}");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
             ParseResult parseResult =
-                Parser.Instance.ParseFrom("dotnet tool", new[] { "install", "-g", PackageId, "--source-feed", sourcePath });
+                Parser.Instance.ParseFrom("dotnet tool", new[] { "install", "-g", PackageId, "--add-source", sourcePath });
 
 
             var toolToolPackageInstaller = CreateToolPackageInstaller(
@@ -175,9 +175,11 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenFailedPackageInstallWhenRunWithPackageIdItShouldFail()
         {
+            const string ErrorMessage = "Simulated error";
+
             var toolPackageInstaller =
                 CreateToolPackageInstaller(
-                    installCallback: () => throw new ToolPackageException("Simulated error"));
+                    installCallback: () => throw new ToolPackageException(ErrorMessage));
 
             var installCommand = new ToolInstallCommand(
                 _appliedCommand,
@@ -191,8 +193,9 @@ namespace Microsoft.DotNet.Tests.Commands
 
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(
-                    "Simulated error" + Environment.NewLine
-                                      + string.Format(LocalizableStrings.ToolInstallationFailed, PackageId));
+                    ErrorMessage +
+                    Environment.NewLine +
+                    string.Format(LocalizableStrings.ToolInstallationFailedWithRestoreGuidance, PackageId));
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }
@@ -364,7 +367,7 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(
                     LocalizableStrings.ToolInstallationRestoreFailed +
-                    Environment.NewLine + string.Format(LocalizableStrings.ToolInstallationFailedWithExplicitVersionGuide, PackageId));
+                    Environment.NewLine + string.Format(LocalizableStrings.ToolInstallationFailedWithRestoreGuidance, PackageId));
 
             _fileSystem.Directory.Exists(Path.Combine(PathToPlacePackages, PackageId)).Should().BeFalse();
         }

@@ -865,32 +865,32 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
         <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
-        <target state="new">Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</target>
+        <target state="translated">Version de format supérieure à la version prise en charge. Cet outil risque de ne pas être pris en charge dans cette version du kit SDK. Mettez à jour votre kit SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
         <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="new">Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
+        <target state="translated">Version de format incorrecte. Cet outil risque de ne pas être pris en charge dans cette version du kit SDK. Contactez l'auteur de l'outil.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
         <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="new">Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
+        <target state="translated">Version de format manquante. Cet outil risque de ne pas être pris en charge dans cette version du kit SDK. Contactez l'auteur de l'outil.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="new">Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</target>
+        <target state="translated">Échec de l'ajout de '{0}' à la variable d'environnement PATH. Ajoutez ce répertoire à votre variable PATH pour pouvoir utiliser les outils installés avec 'dotnet tool install'.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">
         <source>More than one packaged shim is available: {0}.</source>
-        <target state="new">More than one packaged shim is available: {0}.</target>
+        <target state="translated">Plusieurs shims empaquetés sont disponibles : {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToReadNuGetLockFile">
         <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
-        <target state="new">Failed to read NuGet LockFile for tool package '{0}': {1}</target>
+        <target state="translated">Échec de la lecture du LockFile NuGet pour le package d'outils '{0}' : {1}</target>
         <note />
       </trans-unit>
     </body>

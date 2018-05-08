@@ -92,14 +92,14 @@
         <target state="translated">Не удалось обновить инструмент "{0}" по следующей причине:</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
+      <trans-unit id="AddSourceOptionDescription">
         <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="translated">Добавляет дополнительный источник пакета NuGet, используемый во время обновления.</target>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
+      <trans-unit id="AddSourceOptionName">
+        <source>ADD_SOURCE</source>
+        <target state="new">ADD_SOURCE</target>
         <note />
       </trans-unit>
     </body>

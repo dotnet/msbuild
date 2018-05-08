@@ -865,32 +865,32 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
         <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
-        <target state="new">Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</target>
+        <target state="translated">格式版本高於支援的版本。此 SDK 版本可能不支援這項工具。請更新您的 SDK。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
         <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="new">Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
+        <target state="translated">格式版本的格式不正確。此 SDK 可能不支援這項工具。請連絡工作的作者。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
         <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="new">Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</target>
+        <target state="translated">缺少格式版本。此 SDK 可能不支援這項工具。請連絡工作的作者。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="new">Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</target>
+        <target state="translated">無法將 '{0}' 新增到 PATH 環境變數。請將此目錄新增到您的 PATH，以使用 'dotnet tool install' 所安裝的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">
         <source>More than one packaged shim is available: {0}.</source>
-        <target state="new">More than one packaged shim is available: {0}.</target>
+        <target state="translated">有多個經過封裝的填充碼可用: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToReadNuGetLockFile">
         <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
-        <target state="new">Failed to read NuGet LockFile for tool package '{0}': {1}</target>
+        <target state="translated">無法讀取工具套件 '{0}' 的 NuGet LockFile: {1}</target>
         <note />
       </trans-unit>
     </body>

@@ -92,14 +92,14 @@
         <target state="translated">工具“{0}”因以下原因而未能更新:</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
+      <trans-unit id="AddSourceOptionDescription">
         <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="translated">添加其他要在更新期间使用的 NuGet 包。</target>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
+      <trans-unit id="AddSourceOptionName">
+        <source>ADD_SOURCE</source>
+        <target state="new">ADD_SOURCE</target>
         <note />
       </trans-unit>
     </body>

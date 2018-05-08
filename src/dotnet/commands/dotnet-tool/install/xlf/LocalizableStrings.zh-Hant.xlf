@@ -104,28 +104,34 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">安裝工具所在的位置。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SourceFeedOptionDescription">
-        <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="translated">新增於安裝期間要使用的額外 NuGet 套件來源。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SourceFeedOptionName">
-        <source>SOURCE_FEED</source>
-        <target state="translated">SOURCE_FEED</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="new">Tool '{0}' failed to install.</target>
+        <target state="translated">工具 '{0}' 無法安裝。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolInstallationFailedWithExplicitVersionGuide">
-        <source>Tool '{0}' failed to install. You may need to specify the version using
+      <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
+        <source>Tool '{0}' failed to install. This failure may have been caused by:
 
-   dotnet tool install -g {0} --version &lt;version&gt;</source>
-        <target state="new">Tool '{0}' failed to install. You may need to specify the version using
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.</source>
+        <target state="translated">工具 '{0}' 無法安裝。此失敗原因可能是因為:
 
-   dotnet tool install -g {0} --version &lt;version&gt;</target>
+* 您嘗試要安裝預覽版，但並未使用 --version 選項來指定版本。
+* 找到此名稱的套件，但其並非為 .NET Core 工具。
+* 無法存取必要的 NuGet 摘要，可能是因為網際網路連線發生問題。
+* 您打錯了工具的名稱。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during installation.</source>
+        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
         <note />
       </trans-unit>
     </body>

@@ -90,12 +90,16 @@ namespace Microsoft.DotNet.Configurer
 
         private bool ShouldGenerateAspNetCertificate()
         {
+#if EXCLUDE_ASPNETCORE
+            return false;
+#else
             var generateAspNetCertificate =
                 _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
 
             return ShouldRunFirstRunExperience() &&
                 generateAspNetCertificate &&
                 !_aspNetCertificateSentinel.Exists();
+#endif
         }
 
         private bool ShouldAddPackageExecutablePath()
@@ -153,7 +157,7 @@ namespace Microsoft.DotNet.Configurer
 
         private bool ShouldRunFirstRunExperience()
         {
-            var skipFirstTimeExperience = 
+            var skipFirstTimeExperience =
                 _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
 
             return !skipFirstTimeExperience;

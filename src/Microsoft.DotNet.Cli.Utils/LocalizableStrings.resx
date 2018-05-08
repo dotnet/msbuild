@@ -271,4 +271,9 @@
   <data name="EmbedAppNameInHostFileNameIsTooLong" xml:space="preserve">
     <value>Given file name '{0}' is longer than 1024 bytes</value>
   </data>
+  <data name="CannotFindCommandAvailableAsTool" xml:space="preserve">
+    <value>Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</value>
+  </data>
 </root>
