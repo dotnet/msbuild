@@ -61,8 +61,8 @@ namespace Microsoft.NET.Clean.Tests
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var lockFilePath = Path.Combine(testAsset.TestRoot, "obj", "project.assets.json");
-            File.Exists(lockFilePath).Should().BeFalse();
+            var assetsFilePath = Path.Combine(testAsset.TestRoot, "obj", "project.assets.json");
+            File.Exists(assetsFilePath).Should().BeFalse();
 
             var cleanCommand = new CleanCommand(Log, testAsset.TestRoot);
 
@@ -72,6 +72,8 @@ namespace Microsoft.NET.Clean.Tests
                 .Pass();
         }
 
+        // Related to https://github.com/dotnet/sdk/issues/2233
+        // This test will fail if the naive fix for not reading assets file during clean is attempted
         [Fact]
         public void It_can_clean_and_build_without_using_rebuild()
         {
@@ -80,10 +82,10 @@ namespace Microsoft.NET.Clean.Tests
               .WithSource()
               .Restore(Log);
 
-            var cleanAndBuildCommand = new CleanCommand(Log, testAsset.TestRoot);
+            var cleanAndBuildCommand = new MSBuildCommand(Log, "Clean;Build", testAsset.TestRoot);
 
             cleanAndBuildCommand
-                .Execute("/t:Build")
+                .Execute()
                 .Should()
                 .Pass();
         }
