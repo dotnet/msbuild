@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Remove Project to Project reference Command</source>
-        <target state="translated">Comando para remover a referência de projeto para projeto do .NET</target>
+        <source>Remove a project-to-project reference from the project.</source>
+        <target state="needs-review-translation">Comando para remover a referência de projeto para projeto do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">

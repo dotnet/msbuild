@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Package reference Command</source>
-        <target state="translated">Comando Aggiungi riferimento al pacchetto .NET</target>
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="needs-review-translation">Comando Aggiungi riferimento al pacchetto .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
