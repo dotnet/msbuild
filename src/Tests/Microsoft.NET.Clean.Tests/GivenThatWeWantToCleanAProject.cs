@@ -53,5 +53,39 @@ namespace Microsoft.NET.Clean.Tests
                 .And
                 .NotHaveStdOutContaining("warning");
         }
+
+        [Fact]
+        public void It_cleans_without_assets_file_present()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource();
+
+            var lockFilePath = Path.Combine(testAsset.TestRoot, "obj", "project.assets.json");
+            File.Exists(lockFilePath).Should().BeFalse();
+
+            var cleanCommand = new CleanCommand(Log, testAsset.TestRoot);
+
+            cleanCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void It_can_clean_and_build_without_using_rebuild()
+        {
+            var testAsset = _testAssetsManager
+              .CopyTestAsset("HelloWorld")
+              .WithSource()
+              .Restore(Log);
+
+            var cleanAndBuildCommand = new CleanCommand(Log, testAsset.TestRoot);
+
+            cleanAndBuildCommand
+                .Execute("/t:Build")
+                .Should()
+                .Pass();
+        }
     }
 }
