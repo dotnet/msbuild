@@ -4,6 +4,7 @@
   <Import Project="$(MSBuildThisFileDirectory)/package/Symbols.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Archive.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Nupkg.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/package/LinuxNativeInstallerDependencyVersions.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.DEB.proj" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.MSI.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.PKG.targets" />
