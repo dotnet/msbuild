@@ -215,7 +215,7 @@
     <value>MSB3884: Could not find rule set file "{0}".</value>
   <comment>{StrBegin="MSB3884: "}</comment>
   </data>
-  Unzip.ErrorCouldNotMakeFileWriteable
+
   <!--
         The Copy message bucket is: MSB3021 - MSB3030
 
