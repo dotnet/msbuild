@@ -278,19 +278,37 @@ function InstallDotNetCli {
 }
 
 function InstallRepoToolset {
+  CreateDirectory "$RepoToolsetDir"
   ReadJson "$RepoRoot/global.json" "RoslynTools.RepoToolset"
   RepoToolsetVersion=$readjsonvalue
-  RepoToolsetDir="$NuGetPackageRoot/roslyntools.repotoolset/$RepoToolsetVersion/tools"
-  RepoToolsetBuildProj="$RepoToolsetDir/Build.proj"
-
+  RepoToolsetLocationFile="$RepoToolsetDir/$RepoToolsetVersion.txt"
+  
   echo "Using repo tools version: $readjsonvalue"
 
-  local logCmd=$(GetLogCmd Toolset)
+  if [[ -a "$RepoToolsetLocationFile" ]]; then
+    local path=`cat $RepoToolsetLocationFile`
+    if [[ -a "$path" ]]; then
+      RepoToolsetBuildProj=$path
+      return
+    fi
+  fi
+  if [[ "$restore" != true ]]; then
+    ExitIfError 2 "Toolset version $RepoToolsetVersion has not been restored."
+  fi
 
-  if [ ! -d "$RepoToolsetBuildProj" ]
-  then
-    local ToolsetProj="$ScriptRoot/Toolset.csproj"
-    CallMSBuild $(QQ $ToolsetProj) /t:build /m /clp:Summary /warnaserror /v:$verbosity $logCmd $properties
+  local proj="$RepoToolsetDir/restore.proj"
+  echo '<Project Sdk="RoslynTools.RepoToolset"/>' > $proj
+
+  local logCmd=$(GetLogCmd Toolset)
+  CallMSBuild $(QQ $proj) /t:__WriteToolsetLocation /m /nologo /clp:None /warnaserror $logCmd /p:__ToolsetLocationOutputFile=$RepoToolsetLocationFile
+  local lastexitcode=$?
+
+  ExitIfError $lastexitcode "Failed to restore toolset (exit code '$lastexitcode')."
+
+  RepoToolsetBuildProj=`cat $RepoToolsetLocationFile`
+
+  if [[ ! -a "$RepoToolsetBuildProj" ]]; then
+    ExitIfError 3 "Invalid toolset path: $RepoToolsetBuildProj"
   fi
 }
 
@@ -392,6 +410,7 @@ ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
 PackagesDir="$ArtifactsConfigurationDir/packages"
 LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
+RepoToolsetDir="$ArtifactsDir/toolset"
 
 #https://github.com/dotnet/source-build
 if $dotnetBuildFromSource
