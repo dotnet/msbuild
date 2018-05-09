@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Project to Project reference Command</source>
-        <target state="translated">Comando Adicionar Referência de Projeto para Projeto do .NET</target>
+        <source>Add a project-to-project reference to the project.</source>
+        <target state="needs-review-translation">Comando Adicionar Referência de Projeto para Projeto do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
