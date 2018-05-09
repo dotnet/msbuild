@@ -109,7 +109,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         _requests = new ConcurrentQueue<SdkResolverRequest>();
 
                         // Create the thread which processes requests
-                        _requestHandler = Task.Run((Action) RequestHandlerPumpProc);
+                        _requestHandler = Task.Factory.StartNew(RequestHandlerPumpProc, TaskCreationOptions.LongRunning);
+                        
                     }
                 }
             }
