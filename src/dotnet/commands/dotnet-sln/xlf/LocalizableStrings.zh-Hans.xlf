@@ -57,6 +57,11 @@
         <target state="translated">创建解决方案文件。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectsHeader">
+        <source>Project(s)</source>
+        <target state="new">Project(s)</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
