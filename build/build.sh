@@ -1,23 +1,52 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+source="${BASH_SOURCE[0]}"
+
+# resolve $source until the file is no longer a symlink
+while [[ -h "$source" ]]; do
+  scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
+  source="$(readlink "$source")"
+  # if $source was a relative symlink, we need to resolve it relative to the path where the
+  # symlink file was located
+  [[ $source != /* ]] && source="$scriptroot/$source"
+done
+scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
 build=false
 ci=false
-configuration="Debug"
-dogfood=false
-log=false
+configuration='Debug'
+help=false
 pack=false
-prepareMachine=false
+prepare_machine=false
 rebuild=false
 restore=false
 sign=false
-solution=""
+projects=''
 test=false
-perf=false
-verbosity="minimal"
-properties=()
+verbosity='minimal'
+properties=''
 
-while [[ $# -gt 0 ]]; do
-  lowerI="$(echo "$1" | awk '{print tolower($0)}')"
+repo_root="$scriptroot/.."
+
+if [[ -z $DOTNET_SDK_ARTIFACTS_DIR ]]; then
+  artifacts_dir="$repo_root/artifacts"
+else
+  artifacts_dir="$DOTNET_SDK_ARTIFACTS_DIR"
+fi
+
+artifacts_configuration_dir="$artifacts_dir/$configuration"
+toolset_dir="$artifacts_dir/toolset"
+log_dir="$artifacts_configuration_dir/log"
+build_log="$log_dir/Build.binlog"
+toolset_restore_log="$log_dir/ToolsetRestore.binlog"
+temp_dir="$artifacts_configuration_dir/tmp"
+
+global_json_file="$repo_root/global.json"
+build_driver=""
+toolset_build_proj=""
+
+while (($# > 0)); do
+  lowerI="$(echo $1 | awk '{print tolower($0)}')"
   case $lowerI in
     --build)
       build=true
@@ -57,22 +86,17 @@ while [[ $# -gt 0 ]]; do
       echo "                           will be ignored."
       echo "  --solution <value>       Path to solution to build"
       echo "  --ci                     Set when running on CI server"
-      echo "  --log                    Enable logging (by default on CI)"
       echo "  --prepareMachine         Prepare machine for CI run"
       echo ""
       echo "Command line arguments not listed above are passed through to MSBuild."
       exit 0
       ;;
-    --log)
-      log=true
-      shift 1
-      ;;
     --pack)
       pack=true
       shift 1
       ;;
-    --prepareMachine)
-      prepareMachine=true
+    --preparemachine)
+      prepare_machine=true
       shift 1
       ;;
     --rebuild)
@@ -104,269 +128,237 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     *)
-      properties+=("$1")
+      properties="$properties $1"
       shift 1
       ;;
   esac
 done
 
-function CreateDirectory {
-  if [ ! -d "$1" ]
-  then
-    mkdir -p "$1"
+# ReadJson [filename] [json key]
+# Result: Sets 'readjsonvalue' to the value of the provided json key
+# Note: this method may return unexpected results if there are duplicate
+# keys in the json
+function ReadJson {
+  local file=$1
+  local key=$2
+
+  local unamestr="$(uname)"
+  local sedextended='-r'
+  if [[ "$unamestr" == 'Darwin' ]]; then
+    sedextended='-E'
+  fi;
+
+  readjsonvalue="$(grep -m 1 "\"$key\"" $file | sed $sedextended 's/^ *//;s/.*: *"//;s/",?//')"
+  if [[ ! "$readjsonvalue" ]]; then
+    echo "Error: Cannot find \"$key\" in $file" >&2;
+    ExitWithExitCode 1
+  fi;
+}
+
+function InitializeDotNetCli {
+  # Disable first run since we want to control all package sources
+  export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
+  # Don't resolve runtime, shared framework, or SDK from other locations to ensure build determinism
+  export DOTNET_MULTILEVEL_LOOKUP=0
+
+  # Source Build uses DotNetCoreSdkDir variable
+  if [[ -n "$DotNetCoreSdkDir" ]]; then
+    export DOTNET_INSTALL_DIR="$DotNetCoreSdkDir"
+  fi
+
+  ReadJson "$global_json_file" "version"
+  local dotnet_sdk_version="$readjsonvalue"
+  local dotnet_root=""
+
+  # Use dotnet installation specified in DOTNET_INSTALL_DIR if it contains the required SDK version, 
+  # otherwise install the dotnet CLI and SDK to repo local .dotnet directory to avoid potential permission issues.
+  if [[ -d "$DOTNET_INSTALL_DIR/sdk/$dotnet_sdk_version" ]]; then
+    dotnet_root="$DOTNET_INSTALL_DIR"
+  else
+    dotnet_root="$repo_root/.dotnet"
+    export DOTNET_INSTALL_DIR="$dotnet_root"
+
+    if [[ "$restore" == true ]]; then
+      InstallDotNetSdk $dotnet_root $dotnet_sdk_version
+    fi
+  fi
+
+  build_driver="$dotnet_root/dotnet"
+}
+
+function InstallDotNetSdk {
+  local root=$1
+  local version=$2
+
+  local install_script=`GetDotNetInstallScript $root`
+
+  bash "$install_script" --version $version --install-dir $root
+  local lastexitcode=$?
+
+  if [[ $lastexitcode != 0 ]]; then
+    echo "Failed to install dotnet SDK (exit code '$lastexitcode')."
+    ExitWithExitCode $lastexitcode
   fi
 }
 
-function GetVersionsPropsVersion {
-  echo "$( awk -F'[<>]' "/<$1>/{print \$3}" "$VersionsProps" )"
-}
+function GetDotNetInstallScript {
+  local root=$1
+  local install_script="$root/dotnet-install.sh"
 
-function InstallDotNetCli {
-  DotNetCliVersion="$( GetVersionsPropsVersion DotNetCliVersion )"
-  DotNetInstallVerbosity=""
+  if [[ ! -a "$install_script" ]]; then
+    mkdir -p "$root"
 
-  if [ -z "$DOTNET_INSTALL_DIR" ]
-  then
-    export DOTNET_INSTALL_DIR="$ArtifactsDir/.dotnet/$DotNetCliVersion"
+    # Use curl if available, otherwise use wget
+    if command -v curl > /dev/null; then
+      curl "https://dot.net/v1/dotnet-install.sh" -sSL --retry 10 --create-dirs -o "$install_script"
+    else
+      wget -q -O "$install_script" "https://dot.net/v1/dotnet-install.sh"
+    fi
   fi
 
-  DotNetRoot=$DOTNET_INSTALL_DIR
+  # return value
+  echo "$install_script"
+}
 
-  if $dogfood
-  then
+function InitializeToolset {
+  ReadJson $global_json_file "RoslynTools.RepoToolset"
+  local toolset_version=$readjsonvalue
+  local toolset_location_file="$toolset_dir/$toolset_version.txt"
+
+  if [[ -a "$toolset_location_file" ]]; then
+    local path=`cat $toolset_location_file`
+    if [[ -a "$path" ]]; then
+      toolset_build_proj=$path
+      return
+    fi
+  fi  
+
+  if [[ "$restore" != true ]]; then
+    echo "Toolset version $toolsetVersion has not been restored."
+    ExitWithExitCode 2
+  fi
+  
+  local proj="$toolset_dir/restore.proj"
+
+  echo '<Project Sdk="RoslynTools.RepoToolset"/>' > $proj
+  "$build_driver" msbuild $proj /t:__WriteToolsetLocation /m /nologo /clp:None /warnaserror /bl:$toolset_restore_log /v:$verbosity /p:__ToolsetLocationOutputFile=$toolset_location_file 
+  local lastexitcode=$?
+
+  if [[ $lastexitcode != 0 ]]; then
+    echo "Failed to restore toolset (exit code '$lastexitcode'). See log: $toolset_restore_log"
+    ExitWithExitCode $lastexitcode
+  fi
+
+  toolset_build_proj=`cat $toolset_location_file`
+}
+
+function InitializeCustomToolset {
+  if [[ "$dogfood" == true ]]; then
     export SDK_REPO_ROOT="$RepoRoot"
     export SDK_CLI_VERSION="$DotNetCliVersion"
     export MSBuildSDKsPath="$ArtifactsConfigurationDir/bin/Sdks"
     export DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR="$MSBuildSDKsPath"
     export NETCoreSdkBundledVersionsProps="$DotNetRoot/sdk/$DotNetCliVersion/Microsoft.NETCoreSdk.BundledVersions.props"
-    export MicrosoftNETBuildExtensionsTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/Microsoft.NET.Build.Extensions.targets"
+    export CustomAfterMicrosoftCommonTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions-ver/Microsoft.Common.Targets/ImportAfter/Microsoft.NET.Build.Extensions.targets"
+    export MicrosoftNETBuildExtensionsTargets="$CustomAfterMicrosoftCommonTargets"
   fi
 
-  DotNetInstallScript="$DotNetRoot/dotnet-install.sh"
-
-  if [ ! -a "$DotNetInstallScript" ]
-  then
-    CreateDirectory "$DotNetRoot"
-    curl "https://dot.net/v1/dotnet-install.sh" -sSL -o "$DotNetInstallScript"
+  if [[ "$restore" != true ]]; then
+    return
   fi
 
-  if [[ "$(echo "$verbosity" | awk '{print tolower($0)}')" == "diagnostic" ]]
-  then
-    DotNetInstallVerbosity="--verbose"
+  # The following frameworks and tools are used only for testing.
+  # Do not attempt to install them in source build.
+  if [[ "$DotNetBuildFromSource" == "true" ]]; then
+    return
   fi
-
-  # Install a stage 0
-  SdkInstallDir="$DotNetRoot/sdk/$DotNetCliVersion"
-
-  if [ ! -d "$SdkInstallDir" ]
-  then
-    bash "$DotNetInstallScript" --version "$DotNetCliVersion" $DotNetInstallVerbosity
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to install stage0"
-      return $LASTEXITCODE
-    fi
-  fi
-
-  # Install 1.0 shared framework
-  NetCoreApp10Version="1.0.5"
-  NetCoreApp10Dir="$DotNetRoot/shared/Microsoft.NETCore.App/$NetCoreApp10Version"
-
-  if [ ! -d "$NetCoreApp10Dir" ]
-  then
-    bash "$DotNetInstallScript" --version $NetCoreApp10Version --shared-runtime $DotNetInstallVerbosity
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to install 1.0 shared framework"
-      return $LASTEXITCODE
-    fi
-  fi
-
-  # Install 1.1 shared framework
-  NetCoreApp11Version="1.1.2"
-  NetCoreApp11Dir="$DotNetRoot/shared/Microsoft.NETCore.App/$NetCoreApp11Version"
-
-  if [ ! -d "$NetCoreApp11Dir" ]
-  then
-    bash "$DotNetInstallScript" --version $NetCoreApp11Version --shared-runtime $DotNetInstallVerbosity
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to install 1.1 shared framework"
-      return $LASTEXITCODE
-    fi
-  fi
-
-  # Install 2.0 shared framework
-  NetCoreApp20Version="2.0.0"
-  NetCoreApp20Dir="$DotNetRoot/shared/Microsoft.NETCore.App/$NetCoreApp20Version"
-
-  if [ ! -d "$NetCoreApp20Dir" ]
-  then
-    bash "$DotNetInstallScript" --version $NetCoreApp20Version --shared-runtime $DotNetInstallVerbosity
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to install 2.0 shared framework"
-      return $LASTEXITCODE
-    fi
-  fi
-
-  # Put the stage 0 on the path
-  export PATH="$DotNetRoot:$PATH"
-
-  # Disable first run since we want to control all package sources
-  export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-
-  # Don't resolve runtime, shared framework, or SDK from other locations
-  export DOTNET_MULTILEVEL_LOOKUP=0
+  
+  InstallDotNetSharedFramework $DOTNET_INSTALL_DIR "1.0.5"
+  InstallDotNetSharedFramework $DOTNET_INSTALL_DIR "1.1.2"
+  InstallDotNetSharedFramework $DOTNET_INSTALL_DIR "2.0.0"
 }
 
-function InstallRepoToolset {
-  RepoToolsetVersion="$( GetVersionsPropsVersion RoslynToolsRepoToolsetVersion )"
-  RepoToolsetDir="$NuGetPackageRoot/roslyntools.repotoolset/$RepoToolsetVersion/tools"
-  RepoToolsetBuildProj="$RepoToolsetDir/Build.proj"
+# Installs additional shared frameworks for testing purposes
+function InstallDotNetSharedFramework {
+  local dotnet_root=$1
+  local version=$2
+  local fx_dir="$dotnet_root/shared/Microsoft.NETCore.App/$version"
 
-  if $ci || $log
-  then
-    CreateDirectory "$LogDir"
-    logCmd="/bl:$LogDir/Build.binlog"
-  else
-    logCmd=""
-  fi
-
-  if [ ! -d "$RepoToolsetBuildProj" ]
-  then
-    ToolsetProj="$ScriptRoot/Toolset.proj"
-    dotnet msbuild "$ToolsetProj" /t:restore /m /nologo /clp:Summary /warnaserror "/v:$verbosity" $logCmd
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to build $ToolsetProj"
-      return $LASTEXITCODE
+  if [[ ! -d "$fx_dir" ]]; then
+    local install_script=`GetDotNetInstallScript $dotnet_root`
+    
+    bash "$install_script" --version $version --install-dir $dotnet_root --shared-runtime
+    local lastexitcode=$?
+    
+    if [[ $lastexitcode != 0 ]]; then
+      echo "Failed to install Shared Framework $version to '$dotnet_root' (exit code '$lastexitcode')."
+      ExitWithExitCode $lastexitcode
     fi
   fi
 }
 
 function Build {
-  if ! InstallDotNetCli
-  then
-    return $?
+  "$build_driver" msbuild $toolset_build_proj /m /nologo /clp:Summary /warnaserror \
+    /v:$verbosity /bl:$build_log /p:Configuration=$configuration /p:Projects=$projects /p:RepoRoot="$repo_root" \
+    /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci \
+    $properties
+  local lastexitcode=$?
+
+  if [[ $lastexitcode != 0 ]]; then
+    echo "Failed to build $toolset_build_proj"
+    ExitWithExitCode $lastexitcode
   fi
+}
 
-  if ! InstallRepoToolset
-  then
-    return $?
+function ExitWithExitCode {
+  if [[ "$ci" == true && "$prepare_machine" == true ]]; then
+    StopProcesses
   fi
-
-  if $prepareMachine
-  then
-    CreateDirectory "$NuGetPackageRoot"
-    dotnet nuget locals all --clear
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to clear NuGet cache"
-      return $LASTEXITCODE
-    fi
-  fi
-
-  if [ $dogfood != true ]
-  then
-    if $ci || $log
-    then
-      CreateDirectory "$LogDir"
-      logCmd="/bl:$LogDir/Build.binlog"
-    else
-      logCmd=""
-    fi
-
-    if [ -z "$solution" ]
-    then
-      solution="$RepoRoot/sdk.sln"
-    fi
-
-    dotnet msbuild $RepoToolsetBuildProj /m /nologo /clp:Summary /warnaserror "/v:$verbosity" $logCmd "/p:Configuration=$configuration" "/p:SolutionPath=$solution" /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:PerformanceTest=$perf /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci "${properties[@]}"
-    LASTEXITCODE=$?
-
-    if [ $LASTEXITCODE != 0 ]
-    then
-      echo "Failed to build $RepoToolsetBuildProj"
-      return $LASTEXITCODE
-    fi
-  fi
+  exit $1
 }
 
 function StopProcesses {
   echo "Killing running build processes..."
-  pkill -9 "msbuild"
+  pkill -9 "dotnet"
   pkill -9 "vbcscompiler"
 }
 
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$ScriptRoot/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+function Main {
+  # HOME may not be defined in some scenarios, but it is required by NuGet
+  if [[ -z $HOME ]]; then
+    export HOME="$repo_root/artifacts/.home/"
+    mkdir -p "$HOME"
+  fi
 
-RepoRoot="$ScriptRoot/.."
-if [ -z $DOTNET_SDK_ARTIFACTS_DIR ]
-then
-  ArtifactsDir="$RepoRoot/artifacts"
-else
-  ArtifactsDir="$DOTNET_SDK_ARTIFACTS_DIR"
-fi
+  if [[ -z $projects ]]; then
+    projects="$repo_root/*.sln"
+  fi
 
+  if [[ -z $NUGET_PACKAGES ]]; then
+    if [[ $ci ]]; then
+      export NUGET_PACKAGES="$repo_root/.packages"
+    else
+      export NUGET_PACKAGES="$HOME/.nuget/packages"
+    fi
+  fi
 
-ArtifactsConfigurationDir="$ArtifactsDir/$configuration"
-LogDir="$ArtifactsConfigurationDir/log"
-VersionsProps="$ScriptRoot/Versions.props"
+  mkdir -p "$toolset_dir"
+  mkdir -p "$log_dir"
+  
+  if [[ $ci ]]; then
+    mkdir -p "$temp_dir"
+    export TEMP="$temp_dir"
+    export TMP="$temp_dir"
+  fi
 
-# HOME may not be defined in some scenarios, but it is required by NuGet
-if [ -z "$HOME" ]
-then
-  export HOME="$ArtifactsDir/.home/"
-  CreateDirectory "$HOME"
-fi
+  InitializeDotNetCli
+  InitializeToolset
+  InitializeCustomToolset
 
-if $ci
-then
-  TempDir="$ArtifactsConfigurationDir/tmp"
-  CreateDirectory "$TempDir"
+  if [[ "$dogfood" != true ]]; then
+    Build
+  fi
+}
 
-  export TEMP="$TempDir"
-  export TMP="$TempDir"
-fi
-
-if [ -z "$NUGET_PACKAGES" ]
-then
-  export NUGET_PACKAGES="$HOME/.nuget/packages"
-fi
-
-NuGetPackageRoot=$NUGET_PACKAGES
-
-Build
-LASTEXITCODE=$?
-
-if $ci && $prepareMachine
-then
-  StopProcesses
-fi
-
-# The script should be sourced if using --dogfood, which means in that case we don't want to exit
-if [ $dogfood = true ]
-then
-  return $LASTEXITCODE
-else
-  exit $LASTEXITCODE
-fi
+Main

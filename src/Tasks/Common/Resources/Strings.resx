@@ -341,7 +341,7 @@
     <comment>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</comment>
   </data>
   <data name="ProjectContainsObsoleteDotNetCliTool" xml:space="preserve">
-    <value>Using DotNetCliToolReference to reference '{0}' is obsolete and can be removed from this project. This tool is bundled by default in the .NET Core SDK.</value>
+    <value>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</value>
   </data>
   <data name="ErrorReadingAssetsFile" xml:space="preserve">
     <value>Error reading assets file: {0}</value>
@@ -357,5 +357,8 @@
   </data>
   <data name="AssetsFileNotSet" xml:space="preserve">
     <value>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
+  </data>
+  <data name="PackageNotFound" xml:space="preserve">
+    <value>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</value>
   </data>
 </root>

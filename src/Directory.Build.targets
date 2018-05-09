@@ -10,6 +10,4 @@
     <PackageReference Include="xunit.console" Version="$(XUnitVersion)" Private="true" />
   </ItemGroup>
 
-  <Import Project="$(RepoToolsetDir)Imports.targets" />
-
 </Project>

@@ -100,7 +100,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public static string GetSourcePath(ITaskItem item)
         {
-            var sourcePath = item.GetMetadata(MetadataNames.HintPath);
+            var sourcePath = item.GetMetadata(MetadataNames.HintPath)?.Trim();
 
             if (String.IsNullOrWhiteSpace(sourcePath))
             {
@@ -121,7 +121,7 @@ namespace Microsoft.NET.Build.Tasks
             // (for example the target path for lib/netcoreapp2.0/lib.dll is just lib.dll)
             foreach (var metadata in s_targetPathMetadata)
             {
-                var value = item.GetMetadata(metadata);
+                var value = item.GetMetadata(metadata)?.Trim();
 
                 if (!String.IsNullOrWhiteSpace(value))
                 {

@@ -19,7 +19,7 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
 
   <PropertyGroup>
     <!-- MSBuild Task DLLs need to be versioned with every build -->
@@ -47,8 +47,13 @@
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackVersion)" ExcludeAssets="All" />
   </ItemGroup>
 
+  <!-- System.Reflection.Metadata is in-box for .NET Core 2.0, so we only need to reference it for .NET Framework -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+  </ItemGroup>
+
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Update="Microsoft.Extensions.DependencyModel" ExcludeAssets="Runtime" />
     <PackageReference Update="NuGet.ProjectModel" ExcludeAssets="Runtime" />
   </ItemGroup>
@@ -78,7 +83,7 @@
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
       <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackVersion)</_NugetBuildTasksPackPath>
-      <_Stage0SdksFolder>$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks</_Stage0SdksFolder>
+      <_Stage0SdksFolder>$(DOTNET_INSTALL_DIR)\sdk\$(NETCoreSdkVersion)\Sdks</_Stage0SdksFolder>
     </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
@@ -123,6 +128,6 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
 
 </Project>
