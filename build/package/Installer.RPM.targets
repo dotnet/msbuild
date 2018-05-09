@@ -68,13 +68,13 @@
     <!-- Replace config json variables -->
     <ItemGroup>
       <SDKTokenValue Include="%SHARED_HOST_RPM_VERSION%">
-        <ReplacementString>$(MicrosoftNETCoreAppMajorMinorVersion)</ReplacementString>
+        <ReplacementString>$(MicrosoftNETCoreAppMajorMinorPatchVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%ASPNETCORE_SHAREDFX_RPM_PACKAGE_NAME%">
         <ReplacementString>$(AspNetCoreSharedFxRpmPackageName)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%ASPNETCORE_SHAREDFX_RPM_PACKAGE_VERSION%">
-        <ReplacementString>$(AspNetCoreVersion)</ReplacementString>
+        <ReplacementString>$(AspNetCoreMajorMinorPatchVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%SHARED_HOST_RPM_NAME%">
         <ReplacementString>$(SharedFxRpmPackageName)</ReplacementString>
