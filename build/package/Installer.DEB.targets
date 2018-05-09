@@ -106,6 +106,12 @@
       <DebianConfigTokenValues Include="%CLI_SDK_BRAND_NAME%">
         <ReplacementString>$(SdkBrandName)</ReplacementString>
       </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_VERSIONS%">
+        <ReplacementString>$(MicrosoftNETCoreAppPackageVersion)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%ASPNETCORE_SHAREDFX_DEBIAN_PACKAGE_VERSION%">
+        <ReplacementString>$(AspNetCoreVersion)</ReplacementString>
+      </DebianConfigTokenValues>
 
       <DebianPostInstTokenValues Include="%SDK_VERSION%">
         <ReplacementString>$(SdkVersion)</ReplacementString>
