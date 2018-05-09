@@ -17,6 +17,11 @@
       <AspNetCoreVersionPreReleaseSeparator>$(AspNetCoreVersion.IndexOf('-'))</AspNetCoreVersionPreReleaseSeparator>
       <AspNetCoreMajorMinorPatchVersion>$(AspNetCoreVersion)</AspNetCoreMajorMinorPatchVersion>
       <AspNetCoreMajorMinorPatchVersion Condition=" '$(AspNetCoreVersionPreReleaseSeparator)' != -1 ">$(AspNetCoreVersion.Substring(0, $(AspNetCoreVersionPreReleaseSeparator)))</AspNetCoreMajorMinorPatchVersion>
+
+      <HostFxrVersionPatchSeparatorIndex>$([MSBuild]::Add($(HostFxrVersion.IndexOf('.')), 1))</HostFxrVersionPatchSeparatorIndex>
+      <HostFxrVersionPatchSeparatorIndex>$(HostFxrVersion.IndexOf('.', $(HostFxrVersionPatchSeparatorIndex)))</HostFxrVersionPatchSeparatorIndex>
+      <HostFxrMajorMinorVersion>$(HostFxrVersion.Substring(0, $(HostFxrVersionPatchSeparatorIndex)))</HostFxrMajorMinorVersion>
+
     </PropertyGroup>
   </Target>
 </Project>
