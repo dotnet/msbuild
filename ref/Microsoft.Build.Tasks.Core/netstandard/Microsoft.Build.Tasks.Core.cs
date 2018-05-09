@@ -376,6 +376,8 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion471Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkVersion472Path { get { throw null; } }
+        [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion47Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string Path { get { throw null; } }
