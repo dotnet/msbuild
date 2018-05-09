@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Cli
                         {
                             aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
-                            toolPathSentinel = new NoOpFileSentinel();
+                            toolPathSentinel = new NoOpFileSentinel(exists: false);
                             hasSuperUserAccess = true;
                         }
 
