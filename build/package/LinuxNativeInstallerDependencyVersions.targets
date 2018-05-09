@@ -9,6 +9,10 @@
       <MicrosoftNETCoreAppVersionPreReleaseSeparator>$(MicrosoftNETCoreAppPackageVersion.IndexOf('-'))</MicrosoftNETCoreAppVersionPreReleaseSeparator>
       <MicrosoftNETCoreAppMajorMinorPatchVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreAppMajorMinorPatchVersion>
       <MicrosoftNETCoreAppMajorMinorPatchVersion Condition=" '$(MicrosoftNETCoreAppVersionPreReleaseSeparator)' != -1 ">$(MicrosoftNETCoreAppPackageVersion.Substring(0, $(MicrosoftNETCoreAppVersionPreReleaseSeparator)))</MicrosoftNETCoreAppMajorMinorPatchVersion>
+      <MicrosoftNETCoreAppVersionPreReleaseSeparatorStartIndex>$([MSBuild]::Add($(MicrosoftNETCoreAppVersionPreReleaseSeparator), 1))</MicrosoftNETCoreAppVersionPreReleaseSeparatorStartIndex>
+      <MicrosoftNETCoreVersionSuffix Condition=" '$(MicrosoftNETCoreAppVersionPreReleaseSeparator)' != -1 ">$(MicrosoftNETCoreAppPackageVersion.Substring($(MicrosoftNETCoreAppVersionPreReleaseSeparatorStartIndex)))</MicrosoftNETCoreVersionSuffix>
+      <MicrosoftNETCoreAppPackageVersionWithTilda>$(MicrosoftNETCoreAppMajorMinorPatchVersion)</MicrosoftNETCoreAppPackageVersionWithTilda>
+      <MicrosoftNETCoreAppPackageVersionWithTilda Condition=" '$(MicrosoftNETCoreAppVersionPreReleaseSeparator)' != -1 ">$(MicrosoftNETCoreAppMajorMinorPatchVersion)~$(MicrosoftNETCoreVersionSuffix)</MicrosoftNETCoreAppPackageVersionWithTilda>
 
       <AspNetCoreVersionPatchSeparatorIndex>$([MSBuild]::Add($(AspNetCoreVersion.IndexOf('.')), 1))</AspNetCoreVersionPatchSeparatorIndex>
       <AspNetCoreVersionPatchSeparatorIndex>$(AspNetCoreVersion.IndexOf('.', $(AspNetCoreVersionPatchSeparatorIndex)))</AspNetCoreVersionPatchSeparatorIndex>
@@ -17,6 +21,10 @@
       <AspNetCoreVersionPreReleaseSeparator>$(AspNetCoreVersion.IndexOf('-'))</AspNetCoreVersionPreReleaseSeparator>
       <AspNetCoreMajorMinorPatchVersion>$(AspNetCoreVersion)</AspNetCoreMajorMinorPatchVersion>
       <AspNetCoreMajorMinorPatchVersion Condition=" '$(AspNetCoreVersionPreReleaseSeparator)' != -1 ">$(AspNetCoreVersion.Substring(0, $(AspNetCoreVersionPreReleaseSeparator)))</AspNetCoreMajorMinorPatchVersion>
+      <AspNetCoreVersionPreReleaseSeparatorStartIndex>$([MSBuild]::Add($(AspNetCoreVersionPreReleaseSeparator), 1))</AspNetCoreVersionPreReleaseSeparatorStartIndex>
+      <AspNetCoreVersionSuffix Condition=" '$(AspNetCoreVersionPreReleaseSeparator)' != -1 ">$(AspNetCoreVersion.Substring($(AspNetCoreVersionPreReleaseSeparatorStartIndex)))</AspNetCoreVersionSuffix>
+      <AspNetCoreVersionWithTilda>$(AspNetCoreMajorMinorPatchVersion)</AspNetCoreVersionWithTilda>
+      <AspNetCoreVersionWithTilda Condition=" '$(AspNetCoreVersionPreReleaseSeparator)' != -1 ">$(AspNetCoreMajorMinorPatchVersion)~$(AspNetCoreVersionSuffix)</AspNetCoreVersionWithTilda>
 
       <HostFxrVersionPatchSeparatorIndex>$([MSBuild]::Add($(HostFxrVersion.IndexOf('.')), 1))</HostFxrVersionPatchSeparatorIndex>
       <HostFxrVersionPatchSeparatorIndex>$(HostFxrVersion.IndexOf('.', $(HostFxrVersionPatchSeparatorIndex)))</HostFxrVersionPatchSeparatorIndex>
