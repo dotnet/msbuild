@@ -282,6 +282,8 @@ function InstallRepoToolset {
   ReadJson "$RepoRoot/global.json" "RoslynTools.RepoToolset"
   RepoToolsetVersion=$readjsonvalue
   RepoToolsetLocationFile="$RepoToolsetDir/$RepoToolsetVersion.txt"
+  
+  echo "Using repo tools version: $readjsonvalue"
 
   if [[ -a "$RepoToolsetLocationFile" ]]; then
     local path=`cat $RepoToolsetLocationFile`
@@ -294,7 +296,6 @@ function InstallRepoToolset {
     ExitIfError 2 "Toolset version $RepoToolsetVersion has not been restored."
   fi
 
-  echo "Using repo tools version: $readjsonvalue"
   local proj="$RepoToolsetDir/restore.proj"
   echo '<Project Sdk="RoslynTools.RepoToolset"/>' > $proj
 
