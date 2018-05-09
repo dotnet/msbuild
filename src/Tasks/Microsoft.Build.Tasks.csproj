@@ -508,6 +508,7 @@
     <Compile Include="Dependencies.cs" />
     <Compile Include="SystemState.cs" />
     <Compile Include="DependencyFile.cs" />
+    <Compile Include="ZipDirectory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">

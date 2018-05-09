@@ -41,6 +41,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> with a destination folder path to unzip the files to.
         /// </summary>
+        [Required]
         public ITaskItem DestinationFolder { get; set; }
 
         /// <summary>
@@ -81,7 +82,6 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e)
             {
-                // TODO: Resource
                 Log.LogErrorFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.ItemSpec, e.Message);
 
                 return false;
@@ -91,7 +91,6 @@ namespace Microsoft.Build.Tasks
             {
                 if (!File.Exists(sourceFile.ItemSpec))
                 {
-                    // TODO: Resource
                     Log.LogErrorFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
                     continue;
                 }
@@ -118,7 +117,6 @@ namespace Microsoft.Build.Tasks
                 catch (Exception e)
                 {
                     // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
-                    // TODO: Resource
                     Log.LogErrorFromResources("Unzip.ErrorCouldNotOpenFile", e.Message);
                 }
             }
@@ -142,11 +140,10 @@ namespace Microsoft.Build.Tasks
                 {
                     // ExtractToDirectory() throws an IOException for this but since we're extracting one file at a time
                     // for logging and cancellation, we need to check for it ourselves.
-                    // TODO: Resource
-                    Log.LogErrorFromResources("Unzip.ExtractingResultsInFilesOutsideDestination", destinationPath.FullName, destinationDirectory.FullName);
+                    Log.LogErrorFromResources("Unzip.ErrorExtractingResultsInFilesOutsideDestination", destinationPath.FullName, destinationDirectory.FullName);
                     continue;
                 }
-
+                
                 TaskItem taskItem = new TaskItem(EscapingUtilities.Escape(destinationPath.FullName));
 
                 sourceTaskItem.CopyMetadataTo(taskItem);
@@ -155,8 +152,7 @@ namespace Microsoft.Build.Tasks
 
                 if (ShouldSkipEntry(zipArchiveEntry, destinationPath))
                 {
-                    // TODO: Resource
-                    Log.LogMessageFromResources(MessageImportance.Low, "Copy.DidNotCopyBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
+                    Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
                     continue;
                 }
 
@@ -166,8 +162,7 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    // TODO: Resource
-                    Log.LogErrorWithCodeFromResources("Copy.ErrorCouldNotCreateDestinationDirectory", destinationPath.DirectoryName, e.Message);
+                    Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", destinationPath.DirectoryName, e.Message);
                     continue;
                 }
 
@@ -179,16 +174,14 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e)
                     {
-                        // TODO: Resource
-                        Log.LogErrorWithCodeFromResources("Copy.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
                         continue;
                     }
                 }
 
                 try
                 {
-                    // TODO: Resource
-                    Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
+                    Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
 
                     zipArchiveEntry.ExtractToFile(destinationPath.FullName, overwrite: true);
 
@@ -196,8 +189,7 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (IOException e)
                 {
-                    // TODO: Resource
-                    Log.LogErrorWithCodeFromResources("Copy.ErrorCouldNotExtractFile", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
+                    Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotExtractFile", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
                 }
             }
         }

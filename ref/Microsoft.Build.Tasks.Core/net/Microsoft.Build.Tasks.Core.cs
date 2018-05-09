@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] TypeLibFiles { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
-    public partial class Unzip : Microsoft.Build.Tasks.TaskExtension, Microsoft.Build.Framework.ICancelableTask, Microsoft.Build.Framework.ITask
+    public sealed partial class Unzip : Microsoft.Build.Tasks.TaskExtension, Microsoft.Build.Framework.ICancelableTask, Microsoft.Build.Framework.ITask
     {
         public Unzip() { }
         [Microsoft.Build.Framework.OutputAttribute]
@@ -1294,6 +1294,15 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem XslCompiledDllPath { get { throw null; } set { } }
         public string XslContent { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem XslInputPath { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
+    public sealed partial class ZipDirectory : Microsoft.Build.Tasks.TaskExtension
+    {
+        public ZipDirectory() { }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem DestinationFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem SourceDirectory { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
 }
