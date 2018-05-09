@@ -3,7 +3,7 @@
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
   
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -17,6 +17,6 @@
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
   </ItemGroup>
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   
 </Project>

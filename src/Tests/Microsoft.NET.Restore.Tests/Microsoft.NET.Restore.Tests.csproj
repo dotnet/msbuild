@@ -12,7 +12,7 @@
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <PackageId>testSdkRestore</PackageId>
@@ -35,11 +35,6 @@
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
   </ItemGroup>
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
-
-  <!-- Workaround for fixed bug causes duplicate file warnings on pack, so disable it
-       https://github.com/dotnet/roslyn-tools/issues/249 -->
-  <Target Name="WorkaroundIncorrectSatelliteDeployment" />
-
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
