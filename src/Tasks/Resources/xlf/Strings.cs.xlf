@@ -291,6 +291,36 @@
         <target state="translated">Soubor {0} neexistuje. Bude vynechán.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
+        <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
+        <target state="new">Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.Downloading">
+        <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
+        <target state="new">Downloading from "{0}" to "{1}" ({2:N0} bytes).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorDownloading">
+        <source>MSB3923: Failed to download file "{0}".  {1}</source>
+        <target state="new">MSB3923: Failed to download file "{0}".  {1}</target>
+        <note>{StrBegin="MSB3923: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorInvalidUrl">
+        <source>MSB3921: The specified URL "{0}" is not valid.</source>
+        <target state="new">MSB3921: The specified URL "{0}" is not valid.</target>
+        <note>{StrBegin="MSB3921: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorUnknownFileName">
+        <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
+        <target state="new">MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</target>
+        <note>{StrBegin="MSB3922: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.Retrying">
+        <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
+        <target state="new">MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <note>{StrBegin="MSB3924: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
         <target state="translated">MSB3071: Všechna písmena jednotek od A: po Z: jsou aktuálně použita. Protože pracovní adresář {0} je cesta UNC, potřebuje úloha Exec volné písmeno jednotky pro namapování cesty UNC. Odpojením některých sdílených prostředků uvolněte písmena jednotek. Můžete také zadat místní pracovní adresář. Potom spusťte příkaz znovu.</target>
