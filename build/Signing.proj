@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project InitialTargets="SetSigningProperties" DefaultTargets="SignFiles" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- The signing infrastructure runs using MSBuild 14, which doesn't support some of the new syntax we're using.  So set the BuildingSingingProject
+         property here to avoid importing files we don't need for signing which would cause errors if imported when using MSBuild 14. -->
+    <BuildingSigningProject>true</BuildingSigningProject>
+    <ExternalCertificateId Condition="'$(ExternalCertificateId)' == ''">135020001</ExternalCertificateId>
+    <InternalCertificateId Condition="'$(InternalCertificateId)' == ''">Microsoft402</InternalCertificateId>
+    <NugetCertificateId Condition="'$(NugetCertificateId)' == ''">NuGet</NugetCertificateId>
+  </PropertyGroup>
+  
+  <Import Project="..\dir.props" />
   <Import Project="MicroBuild.props" />
   <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props" />
-  <Import Project="InitRepo.props" />
-  <Import Project="$(BuildInfoProps)" />
 
   <!-- This will be overridden if we're building with MicroBuild. -->
   <Target Name="SignFiles">
@@ -13,10 +22,6 @@
   <Target Name="SetSigningProperties">
     <Error Condition="'$(Rid)' == ''" Text="Missing required property 'Rid'." />
     <PropertyGroup>
-      <BaseOutputDirectory Condition="'$(BaseOutputDirectory)' == ''">$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
-      <OutputDirectory Condition="'$(OutputDirectory)' == ''">$(BaseOutputDirectory)/stage2</OutputDirectory>
-      <CompilationDirectory Condition="'$(CompilationDirectory)' == ''">$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
-      <PackagesDirectory Condition="'$(PackagesDirectory)' == ''">$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SdkResolverOutputDirectory>$(BaseOutputDirectory)/intermediate/MSBuildExtensionsLayout/MSBuildSdkResolver</SdkResolverOutputDirectory>
 
       <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
@@ -26,7 +31,7 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="PostCompileSign" DependsOnTargets="GetPostCompileSignFiles;SignFiles" />
+  <Target Name="PostCompileSign" DependsOnTargets="GetPostCompileSignFiles;GetSignNuPkgContentsFiles;GetSignSdkResolverContentsFiles;SignFiles" />
 
   <Target Name="GetPostCompileSignFiles">
     <ItemGroup>
@@ -69,26 +74,24 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="SignNuPkgContents" DependsOnTargets="GetSignNuPkgContentsFiles;SignFiles" />
+  <!-- Keeping this target around so as not to break existing build definitions. -->
+  <Target Name="SignNuPkgContents" />
 
   <Target Name="GetSignNuPkgContentsFiles">
-    <PropertyGroup>
-      <OutDir>$(RepoRoot)/src/Microsoft.DotNet.Cli.Utils</OutDir>
-    </PropertyGroup>
     <ItemGroup>
       <!-- NuPkg contents -->
-      <FilesToSign Include="$(OutDir)/bin/**/Microsoft.DotNet.Cli.Utils.dll">
+      <FilesToSign Include="$(BaseOutputDirectory)/bin/Microsoft.DotNet.Cli.Utils/**/Microsoft.DotNet.Cli.Utils.dll;
+                            $(BaseOutputDirectory)/bin/Microsoft.DotNet.Cli.Utils/**/Microsoft.DotNet.Cli.Utils.resources.dll;
+                            $(BaseOutputDirectory)/bin/Microsoft.DotNet.MSBuildSdkResolver/**/Microsoft.DotNet.MSBuildSdkResolver.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
   </Target>
 
-  <Target Name="SignSdkResolverContents" DependsOnTargets="GetSignSdkResolverContentsFiles;SignFiles" />
+  <!-- Keeping this target around so as not to break existing build definitions. -->
+  <Target Name="SignSdkResolverContents" />
 
   <Target Name="GetSignSdkResolverContentsFiles">
-    <PropertyGroup>
-      <OutDir>$(SdkResolverOutputDirectory)</OutDir>
-    </PropertyGroup>
     <ItemGroup>
       <FilesToSign Include="$(SdkResolverOutputDirectory)/Microsoft.DotNet.MSBuildSdkResolver.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
@@ -99,9 +102,6 @@
   <Target Name="SignMsiAndCab" DependsOnTargets="GetSignMsiAndCabFiles;SignFiles" />
 
   <Target Name="GetSignMsiAndCabFiles">
-    <PropertyGroup>
-      <OutDir>$(PackagesDirectory)</OutDir>
-    </PropertyGroup>
     <ItemGroup>
       <FilesToSign Include="$(PackagesDirectory)/**/*.msi">
         <Authenticode>$(InternalCertificateId)</Authenticode>
@@ -115,9 +115,6 @@
   <Target Name="SignEngine" DependsOnTargets="GetSignEngineFiles;SignFiles" />
 
   <Target Name="GetSignEngineFiles">
-    <PropertyGroup>
-      <OutDir>$(PackagesDirectory)</OutDir>
-    </PropertyGroup>
     <ItemGroup>
       <FilesToSign Include="$(PackagesDirectory)/**/*engine.exe">
         <Authenticode>$(InternalCertificateId)</Authenticode>
@@ -128,9 +125,6 @@
   <Target Name="SignCliBundle" DependsOnTargets="GetSignCliBundleFiles;SignFiles" />
 
   <Target Name="GetSignCliBundleFiles">
-    <PropertyGroup>
-      <OutDir>$(PackagesDirectory)</OutDir>
-    </PropertyGroup>
     <ItemGroup>
       <FilesToSign Include="$(PackagesDirectory)/**/*.exe">
         <Authenticode>$(InternalCertificateId)</Authenticode>

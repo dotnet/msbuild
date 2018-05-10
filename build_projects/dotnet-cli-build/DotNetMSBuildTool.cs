@@ -13,11 +13,13 @@ namespace Microsoft.DotNet.Cli.Build
 
         public string Verbosity { get; set; }
 
+        public string AdditionalParameters { get; set; }
+
         protected override string Args
         {
             get
             {
-                return $"{GetVerbosityArg()} {GetMaxCpuCountArg()}";
+                return $"{GetVerbosityArg()} {GetMaxCpuCountArg()} {GetAdditionalParameters()}";
             }
         }
 
@@ -39,6 +41,11 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return null;
+        }
+
+        private string GetAdditionalParameters()
+        {
+            return AdditionalParameters;
         }
     }
 }

@@ -30,10 +30,10 @@ namespace Microsoft.DotNet.Tools.Test
         {
             var msbuildArgs = new List<string>()
             {
-                "/t:VSTest",
-                "/v:quiet",
-                "/nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
-                "/nologo"
+                "-target:VSTest",
+                "-verbosity:quiet",
+                "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
+                "-nologo"
             };
 
             var parser = Parser.Instance;
@@ -57,21 +57,21 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 var runSettingsArg = string.Join(";", runSettingsOptions);
 
-                msbuildArgs.Add($"/p:VSTestCLIRunSettings=\"{runSettingsArg}\"");
+                msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
-            var verbosityArg = msbuildArgs.LastOrDefault(arg => arg.StartsWith("/verbosity"));
+            var verbosityArg = msbuildArgs.LastOrDefault(arg => arg.StartsWith("-verbosity"));
 
             if (!string.IsNullOrEmpty(verbosityArg))
             {
                 var verbosity = verbosityArg.Split(':');
                 if (verbosity.Length == 2)
                 {
-                    msbuildArgs.Add($"/p:VSTestVerbosity={verbosity[1]}");
+                    msbuildArgs.Add($"-property:VSTestVerbosity={verbosity[1]}");
                 }
             }
 
-            bool noRestore = parsedTest.HasOption("--no-restore");
+            bool noRestore = parsedTest.HasOption("--no-restore") || parsedTest.HasOption("--no-build");
 
             return new TestCommand(
                 msbuildArgs,

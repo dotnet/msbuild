@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
@@ -146,17 +146,16 @@ namespace Microsoft.DotNet.Tools.Run
 
         private void EnsureProjectIsBuilt()
         {
-            List<string> buildArgs = new List<string>();
-
-            buildArgs.Add(Project);
-
-            buildArgs.Add("/nologo");
-            buildArgs.Add("/verbosity:quiet");
-
-            buildArgs.AddRange(RestoreArgs);
+            var restoreArgs = GetRestoreArguments();
 
             var buildResult =
-                new RestoringCommand(buildArgs, RestoreArgs, new [] { Project }, NoRestore).Execute();
+                new RestoringCommand(
+                    restoreArgs.Prepend(Project),
+                    restoreArgs,
+                    new [] { Project },
+                    NoRestore
+                ).Execute();
+
             if (buildResult != 0)
             {
                 Reporter.Error.WriteLine();
@@ -164,10 +163,30 @@ namespace Microsoft.DotNet.Tools.Run
             }
         }
 
+        private List<string> GetRestoreArguments()
+        {
+            List<string> args = new List<string>()
+            {
+                "-nologo"
+            };
+
+            if (!RestoreArgs.Any(a => a.StartsWith("-verbosity:")))
+            {
+                args.Add("-verbosity:quiet");
+            }
+
+            args.AddRange(RestoreArgs);
+
+            return args;
+        }
+
         private ICommand GetRunCommand()
         {
-            var globalProperties = new Dictionary<string, string>
+            var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
+                // This property disables default item globbing to improve performance
+                // This should be safe because we are not evaluating items, only properties
+                { Constants.EnableDefaultItems,    "false" },
                 { Constants.MSBuildExtensionsPath, AppContext.BaseDirectory }
             };
 
@@ -181,7 +200,7 @@ namespace Microsoft.DotNet.Tools.Run
                 globalProperties.Add("TargetFramework", Framework);
             }
 
-            Project project = new Project(Project, globalProperties, null);
+            var project = new ProjectInstance(Project, globalProperties, null);
 
             string runProgram = project.GetPropertyValue("RunCommand");
             if (string.IsNullOrEmpty(runProgram))
@@ -204,7 +223,7 @@ namespace Microsoft.DotNet.Tools.Run
                 .WorkingDirectory(runWorkingDirectory);
         }
 
-        private void ThrowUnableToRunError(Project project)
+        private void ThrowUnableToRunError(ProjectInstance project)
         {
             string targetFrameworks = project.GetPropertyValue("TargetFrameworks");
             if (!string.IsNullOrEmpty(targetFrameworks))

@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Lists installed tools in the current development environment.</source>
+        <target state="translated">Elenca gli strumenti installati nell'ambiente di sviluppo corrente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>List user wide tools.</source>
+        <target state="translated">Elenca gli strumenti a livello di utente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">Versione</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">Comandi</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">ID pacchetto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackageWarning">
+        <source>Warning: tool package '{0}' is invalid: {1}</source>
+        <target state="translated">Avviso: il pacchetto '{0}' dello strumento non è valido: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tools are installed.</source>
+        <target state="translated">Percorso in cui sono installati gli strumenti.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">Specificare l'opzione globale (--global) o quella relativa al percorso dello strumento (--tool-path).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalAndToolPathConflict">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="translated">(--global) è in conflitto con l'opzione relativa al percorso dello strumento (--tool-path). Specificare solo una delle opzioni.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="translated">Il percorso '{0}' dello strumento non esiste.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

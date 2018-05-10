@@ -11,26 +11,26 @@
     <Copy SourceFiles="@(TemplateContent)"
           DestinationFiles="@(TemplateContent->'$(TemplateLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
     
-    <Message Text="Copied template $(TemplatePackageName) from $(TemplateNuPkgPath) to $(TemplateLayoutDirectory)."
+    <Message Text="Copied template $(TemplateFillInPackageName) from $(TemplateNuPkgPath) to $(TemplateLayoutDirectory)."
              Importance="High" />
   </Target>
 
   <Target Name="GetTemplateItemsToCopy">
     <ItemGroup>
-      <TemplateContent Include="$(TemplateNuPkgPath)/$(TemplatePackageName.ToLower()).$(TemplatePackageVersion.ToLower()).nupkg" />
+      <TemplateContent Include="$(TemplateNuPkgPath)/$(TemplateFillInPackageName.ToLower()).$(TemplateFillInPackageVersion.ToLower()).nupkg" />
     </ItemGroup>
   </Target>
 
   <Target Name="EnsureTemplateRestored"
-          Condition="!Exists('$(TemplateNuPkgPath)/$(TemplatePackageName.ToLower()).nuspec')">
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+          Condition="!Exists('$(TemplateNuPkgPath)/$(TemplateFillInPackageName.ToLower()).nuspec')">
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="$(MSBuildThisFileDirectory)/templates/templates.csproj"
-                   AdditionalParameters="/p:TemplatePackageName=$(TemplatePackageName) /p:TemplatePackageVersion=$(TemplatePackageVersion)" />
+                   AdditionalParameters="/p:TargetFramework=netcoreapp1.0 /p:TemplateFillInPackageName=$(TemplateFillInPackageName) /p:TemplateFillInPackageVersion=$(TemplateFillInPackageVersion)" />
   </Target>
 
   <Target Name="PrepareBundledTemplateProps">
     <PropertyGroup>
-      <TemplateNuPkgPath>$(NuGetPackagesDir)/$(TemplatePackageName.ToLower())/$(TemplatePackageVersion.ToLower())</TemplateNuPkgPath>
+      <TemplateNuPkgPath>$(NuGetPackagesDir)/$(TemplateFillInPackageName.ToLower())/$(TemplateFillInPackageVersion.ToLower())</TemplateNuPkgPath>
     </PropertyGroup>
   </Target>
 </Project>

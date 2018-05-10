@@ -1,22 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)/package/Layout.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/package/Symbols.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Archive.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Nupkg.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/package/LinuxNativeInstallerDependencyVersions.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.DEB.proj" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.MSI.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.PKG.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.RPM.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/package/CopySandBoxPackageOut.targets" />
 
   <Target Name="GenerateInstallers"
-          Condition=" '$(SkipBuildingInstallers)' != 'true' "
-          DependsOnTargets="Init;Layout;GeneratePkgs;GenerateDebs;GenerateMsis;GenerateRpms" />
+          Condition=" '$(SkipBuildingInstallers)' != 'true' And !$(Architecture.StartsWith('arm')) "
+          DependsOnTargets="Prepare;
+                            Layout;
+                            GeneratePkgs;
+                            GenerateDebs;
+                            GenerateMsis;
+                            GenerateRpms" />
 
   <Target Name="Package"
           DependsOnTargets="BuildDotnetCliBuildFramework;
                             Init;
                             Layout;
                             GenerateNugetPackages;
+                            GenerateSymbolsNugetPackages;
                             GenerateArchives;
-                            GenerateInstallers"  />
+                            GenerateInstallers" />
+
+  <Target Name="GenerateInstallersAndCopyOutOfSandBox"
+          DependsOnTargets="SandBoxPrepare;
+                            Layout;
+                            GenerateDebs;
+                            GenerateRpms;
+                            CopySandBoxPackageOut" />
+
 </Project>

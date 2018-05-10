@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
@@ -30,15 +28,38 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161024-02" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="Moq" Version="4.7.25" />
-    <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
+    <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
+
+  <Target Name="CreateDotnetToolsTestAsset" AfterTargets="Build">
+
+    <PropertyGroup>
+      <testAssetSourceRoot>$(OutputPath)/TestDotnetToolsLayoutDirectory</testAssetSourceRoot>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <TestDotnetTools Include="$(RepoRoot)/build/BundledDotnetTools.proj">
+        <Properties>
+          DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
+          TemplateFillInPackageName=dotnet-watch;
+          TemplateFillInPackageVersion=$(AspNetCoreVersion);
+          PreviousStageDirectory=$(PreviousStageDirectory);
+          DotnetToolsLayoutDirectory=$(testAssetSourceRoot);
+          DotnetToolsRestoreProjectStyle=DotnetToolReference
+        </Properties>
+      </TestDotnetTools>
+    </ItemGroup>
+    <MSBuild BuildInParallel="False" Projects="@(TestDotnetTools)" />
+  </Target>
+
 </Project>

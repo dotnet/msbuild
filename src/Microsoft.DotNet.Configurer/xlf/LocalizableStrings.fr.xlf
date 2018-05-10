@@ -5,22 +5,24 @@
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
---------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">Bienvenue dans .NET Core !
 ---------------------
-En savoir plus sur .NET Core @ https://aka.ms/dotnet-docs. Utilisez dotnet --help pour voir les commandes disponibles, ou accédez à https://aka.ms/dotnet-cli-docs.
+En savoir plus sur .NET Core : https://aka.ms/dotnet-docs.
+Utilisez 'dotnet --help' pour voir les commandes disponibles ou visitez : https://aka.ms/dotnet-cli-docs
 
 Télémétrie
---------------
-Les outils .NET Core collectent des données d'utilisation pour améliorer votre expérience utilisateur. Ces données sont anonymes et n'incluent aucun argument de ligne de commande. Les données sont collectées par Microsoft et partagées par la communauté.
-Vous pouvez refuser l'adhésion à la télémétrie en affectant la valeur 1 à la variable d'environnement DOTNET_CLI_TELEMETRY_OPTOUT via l'interpréteur de commandes de votre choix.
-Pour plus d'informations sur la télémétrie des outils .NET Core, consultez https://aka.ms/dotnet-cli-telemetry.</target>
+---------
+Les outils .NET Core collectent des données d'utilisation pour nous aider à améliorer votre expérience utilisateur. Ces données sont anonymes et n'incluent aucun argument de ligne de commande. Elles sont collectées par Microsoft et partagées avec la communauté. Vous pouvez refuser la télémétrie en affectant la valeur '1' ou 'true' à la variable d'environnement DOTNET_CLI_TELEMETRY_OPTOUT via l'interpréteur de commandes de votre choix.
+
+En savoir plus sur la télémétrie des outils .NET Core CLI : https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -30,18 +32,18 @@ Pour plus d'informations sur la télémétrie des outils .NET Core, consultez ht
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="translated">Configuration en cours...
--------------------
-Une commande s'exécute pour remplir votre cache de package local, améliorer la vitesse de restauration et activer l'accès hors connexion. L'exécution de cette commande peut prendre jusqu'à une minute et n'a lieu qu'une seule fois.</target>
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
+        <target state="translated">Configuration en cours
+--------------
+Une commande s'exécute pour remplir votre cache de package local afin d'améliorer la vitesse de restauration et activer l'accès hors connexion. Cette commande peut prendre jusqu'à une minute et ne s'exécute qu'une seule fois.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -49,11 +51,24 @@ Here are some options to fix this error:
         <target state="translated">Autorisation refusée pour la modification du dossier '{0}'.
 
 Voici quelques options pour corriger cette erreur :
----------------------
+----------------------------------------
 1. Réexécutez cette commande avec un accès élevé.
 2. Désactivez l'introduction de l'interface logicielle lors de la première utilisation en affectant la valeur true à la variable d'environnement DOTNET_SKIP_FIRST_TIME_EXPERIENCE.
-3. Copiez le kit .NET Core SDK à un emplacement non protégé à partir duquel vous l'utiliserez ensuite.
+3. Copiez le kit .NET Core SDK dans un emplacement non protégé à partir duquel vous l'utiliserez ensuite.
     </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AspNetCertificateInstalled">
+        <source>ASP.NET Core
+------------
+Successfully installed the ASP.NET Core HTTPS Development Certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
+For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
+        <target state="needs-review-translation">ASP.NET Core
+------------
+Installation réussie du certificat de développement HTTPS ASP.NET Core.
+Pour approuver le certificat (Windows et macOS uniquement), installez d'abord l'outil dev-certs en exécutant 'dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final', puis exécutez 'dotnet-dev-certs https --trust'.
+Pour plus d'informations sur la configuration du protocole HTTPS, consultez https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
     </body>

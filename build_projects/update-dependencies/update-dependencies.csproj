@@ -4,7 +4,11 @@
   <PropertyGroup>
     <Description>Updates the repos dependencies</Description>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RestoreSources>
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      https://api.nuget.org/v3/index.json;
+    </RestoreSources>
   </PropertyGroup>
 
   <ItemGroup>

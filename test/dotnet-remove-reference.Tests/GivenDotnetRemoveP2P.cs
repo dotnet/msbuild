@@ -506,5 +506,56 @@ Commands:
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(validref.Name).Should().Be(0);
         }
+
+        [Fact]
+        public void WhenDirectoryContainingProjectIsGivenReferenceIsRemoved()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+            var libref = AddLibRef(setup, lib);
+
+            var result = new RemoveReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute($"\"{libref.CsProjPath}\"");
+
+            result.Should().Pass();
+            result.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, Path.Combine("Lib", setup.LibCsprojName)));
+            result.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsNoProjectsItCancelsWholeOperation()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+
+            var reference = "Empty";
+            var result = new RemoveReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute(reference);
+
+            result.Should().Fail();
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsMultipleProjectsItCancelsWholeOperation()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+
+            var reference = "MoreThanOne";
+            var result = new RemoveReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute(reference);
+
+            result.Should().Fail();
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
+        }
     }
 }

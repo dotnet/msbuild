@@ -1,26 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
   <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
   <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
-    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
+    <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <PublishDir>$(SdkOutputDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
+    <PackageReference Condition=" '$(DotNetBuildFromSource)' != 'true' " Include="NuGet.Localization" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNETCoreCompilersPackageVersion)">
       <ExcludeAssets>All</ExcludeAssets>
@@ -29,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj" />
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
@@ -40,15 +38,15 @@
     </Content>
   </ItemGroup>
 
-  <Target Name="PublishAspNetRuntimePackageStore"
+  <Target Name="PublishAspNetSharedFramework"
           AfterTargets="CrossgenPublishDir">
     <ItemGroup>
-      <AspNetRuntimePackageStore Remove="*" />
-      <AspNetRuntimePackageStore Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
+      <AspNetSharedFramework Remove="*" />
+      <AspNetSharedFramework Include="$(AspNetCoreSharedFxPublishDirectory)/**/*" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(AspNetRuntimePackageStore)"
-          DestinationFiles="@(AspNetRuntimePackageStore->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AspNetSharedFramework)"
+          DestinationFiles="@(AspNetSharedFramework->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishSharedFramework"
@@ -72,34 +70,21 @@
 
   <Target Name="PublishRoslyn"
           BeforeTargets="Publish">
-          
+
     <ItemGroup>
       <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <ItemGroup>
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/csc.runtimeconfig.json" />
-      <RoslynRuntimeConfigs Include="$(RoslynDirectory)/bincore/vbc.runtimeconfig.json" />
-      <RoslynDeps Include="$(RoslynDirectory)/bincore/csc.deps.json" />
-      <RoslynDeps Include="$(RoslynDirectory)/bincore/vbc.deps.json" />
       <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>
     </ItemGroup>
-    <PropertyGroup>
-      <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
-    </PropertyGroup>
-    <ReplaceFileContents
-      InputFile="%(RoslynRuntimeConfigs.Identity)"
-      DestinationFile="%(RoslynRuntimeConfigs.Identity)"
-      ReplacementPatterns="$(ReplacementPattern)"
-      ReplacementStrings="$(ReplacementString)" />
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
   <Target Name="PublishFSharp"
           BeforeTargets="Publish">
-          
-    <DotNetPublish ToolPath="$(Stage0Directory)"
+
+    <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
   </Target>
@@ -135,7 +120,7 @@
         <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
       </MSBuildExtensionsContent>
     </ItemGroup>
-    
+
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
             DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
 
@@ -178,7 +163,7 @@
           SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);
           DependencyPackageVersion=%(BundledSdk.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </SdksToBundle>
     </ItemGroup>
@@ -195,9 +180,9 @@
       <TemplatesToBundle Include="$(RepoRoot)/build/BundledTemplates.proj">
         <Properties>
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
-          TemplatePackageName=%(BundledTemplate.Identity);
-          TemplatePackageVersion=%(BundledTemplate.Version);
-          Stage0Directory=$(Stage0Directory)
+          TemplateFillInPackageName=%(BundledTemplate.Identity);
+          TemplateFillInPackageVersion=%(BundledTemplate.Version);
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </TemplatesToBundle>
     </ItemGroup>
@@ -208,6 +193,64 @@
     </MSBuild>
   </Target>
 
+  <Target Name="PublishDotnetTools"
+          Condition="'$(CLIBUILD_SKIP_BUNDLEDDOTNETTOOLS)' != 'true'"
+          AfterTargets="Publish">
+    <ItemGroup>
+      <DotnetToolsToBundle Include="$(RepoRoot)/build/BundledDotnetTools.proj">
+        <Properties>
+          DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
+          TemplateFillInPackageName=%(BundledDotnetTools.Identity);
+          TemplateFillInPackageVersion=%(BundledDotnetTools.Version);
+          PreviousStageDirectory=$(PreviousStageDirectory)
+        </Properties>
+      </DotnetToolsToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(DotnetToolsToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishAppHostTemplate"
+          AfterTargets="Publish">
+
+    <PropertyGroup>
+      <NETCoreDotNetAppHostPackageName>Microsoft.NETCore.DotNetAppHost</NETCoreDotNetAppHostPackageName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <NETCoreDotNetAppHostPackageVersions Include="@(PackageDefinitions->'%(Version)')"
+                                           Condition="%(PackageDefinitions.Name) == $(NETCoreDotNetAppHostPackageName)" />
+    </ItemGroup>
+
+    <Error Condition="@(NETCoreDotNetAppHostPackageVersions->Distinct()->Count()) != 1"
+           Text="Failed to determine the $(NETCoreDotNetAppHostPackageName) version pulled in Microsoft.NETCore.App" />
+
+    <PropertyGroup>
+      <_NETCoreDotNetAppHostPackageVersion>@(NETCoreDotNetAppHostPackageVersions->Distinct())</_NETCoreDotNetAppHostPackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AppHostTemplate Include="$(RepoRoot)/build/AppHostTemplate.proj">
+        <Properties>
+          AppHostTemplatePath=$(SdkOutputDirectory)/AppHostTemplate;
+          TemplateFillInPackageName=$(NETCoreDotNetAppHostPackageName);
+          TemplateFillInPackageVersion=$(_NETCoreDotNetAppHostPackageVersion);
+          PreviousStageDirectory=$(PreviousStageDirectory);
+          AppHostIntermediateDirectory=$(IntermediateDirectory)/AppHostIntermediate
+        </Properties>
+      </AppHostTemplate>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(AppHostTemplate)">
+    </MSBuild>
+
+  </Target>
+
   <Target Name="PublishLzmaArchive"
           Condition="'$(CLIBUILD_SKIP_LZMA)' != 'true'"
           DependsOnTargets="GetNuGetPackagesArchive"
@@ -215,8 +258,8 @@
   </Target>
 
   <Target Name="CrossgenPublishDir"
-          Condition=" '$(DISABLE_CROSSGEN)' == '' "
-          AfterTargets="GenerateCliRuntimeConfigurationFiles">
+          Condition=" '$(DISABLE_CROSSGEN)' == '' And !$(Architecture.StartsWith('arm')) "
+          AfterTargets="PublishSdks">
     <ItemGroup>
       <RoslynFiles Include="$(PublishDir)Roslyn\bincore\**\*" />
       <FSharpFiles Include="$(PublishDir)FSharp\**\*" Exclude="$(PublishDir)FSharp\FSharp.Build.dll" />
@@ -225,12 +268,14 @@
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
       <RemainingFiles Remove="$(PublishDir)TestHost*\**\*" />
       <RemainingFiles Remove="$(PublishDir)Sdks\**\*" />
+      <RemainingFiles Remove="$(PublishDir)**\Microsoft.TestPlatform.Extensions.EventLogCollector.dll" />
+
+      <!-- Add back the .NET Core assemblies in the Sdks folder -->
+      <RemainingFiles Include="$(PublishDir)Sdks\Microsoft.NET.Sdk\tools\netcoreapp2.0\**\*" />
+      <RemainingFiles Include="$(PublishDir)Sdks\NuGet.Build.Tasks.Pack\CoreCLR\**\*" />
 
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
       <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
-
-      <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
-      <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
 
       <!-- Don't crossgen satellite assemblies -->
       <RoslynFiles Remove="$(PublishDir)Roslyn\bincore\**\*.resources.dll" />
@@ -254,11 +299,11 @@
       <RoslynTargets Include="%(RoslynFilesWithPEMarker.FullPath)" Condition=" '%(RoslynFilesWithPEMarker.IsPE)' == 'True' " />
       <FSharpTargets Include="%(FSharpFilesWithPEMarker.FullPath)" Condition=" '%(FSharpFilesWithPEMarker.IsPE)' == 'True' " />
       <RemainingTargets Include="%(RemainingFilesWithPEMarker.FullPath)" Condition=" '%(RemainingFilesWithPEMarker.IsPE)' == 'True' " />
- 
+
       <RoslynFolders Include="@(RoslynTargets-&gt;DirectoryName()-&gt;Distinct())" />
       <FSharpFolders Include="@(FSharpTargets-&gt;DirectoryName()-&gt;Distinct())" />
       <RemainingFolders Include="@(RemainingTargets-&gt;DirectoryName()-&gt;Distinct())" />
- 
+
       <!-- FSharp.Build.dll causes the FSharp folder to be included. Remove it, as we don't want other FSharp dlls being included in the crossgen. -->
       <RemainingFolders Remove="$(PublishDir)FSharp\**\*" />
     </ItemGroup>
@@ -283,7 +328,7 @@
         CreateSymbols="$(CreateCrossgenSymbols)"
         DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(RoslynFolders);$(SharedFrameworkNameVersionPath)" />
- 
+
     <Crossgen
         SourceAssembly="%(FSharpTargets.FullPath)"
         DestinationPath="%(FSharpTargets.FullPath)"
@@ -293,7 +338,7 @@
         CreateSymbols="$(CreateCrossgenSymbols)"
         DiasymReaderPath="@(DiasymReaderPath)"
         PlatformAssemblyPaths="@(PlatformAssemblies);@(FSharpFolders);$(SharedFrameworkNameVersionPath)" />
- 
+
     <Crossgen
         SourceAssembly="%(RemainingTargets.FullPath)"
         DestinationPath="%(RemainingTargets.FullPath)"
@@ -308,21 +353,20 @@
   <Target Name="ChmodPublishDir"
           AfterTargets="CrossgenPublishDir"
           Condition=" '$(OSName)' != 'win' ">
-    
+
     <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
   </Target>
 
   <Target Name="SeparateSymbolsFromPublishDir"
-          AfterTargets="CrossgenPublishDir"
-          Condition="'$(SeparateSymbolsArchive)' != 'false'">
+          AfterTargets="CrossgenPublishDir">
     <ItemGroup>
       <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
       <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Move SourceFiles="@(PdbsToMove)" 
+    <Move SourceFiles="@(PdbsToMove)"
           DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
@@ -352,8 +396,8 @@
       <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
-      InputFile="$(VSTestRuntimeConfigPath)"
-      DestinationFile="$(VSTestRuntimeConfigPath)"
+      InputFiles="$(VSTestRuntimeConfigPath)"
+      DestinationFiles="$(VSTestRuntimeConfigPath)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
   </Target>
