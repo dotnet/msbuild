@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;net46</TargetFrameworks>
 
+    <!-- Don't warn on incompatability MSIL vs x86 since this isn't an actual working DLL -->
+    <MSBuildWarningsAsMessages>MSB3270</MSBuildWarningsAsMessages>
+
     <!-- For mono builds we only use TF=net461, so using this project with TF=netcoreapp2.1
          will cause build failures because the projects are compatible. So, instead we use
          TF=net461 here and let this set up the `bootstrap/` folder. And to avoid the

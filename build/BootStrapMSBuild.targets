@@ -14,7 +14,7 @@
     <!-- TODO: Mono build should use BootstrapNetCore logic -->
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
-   
+
   </PropertyGroup>
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
@@ -37,6 +37,20 @@
 
         <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
         <_NuGetRuntimeDependencies Include="%(ResolvedRuntimeTargets.Identity)" Condition="'@(ResolvedRuntimeTargets->Contains('NuGet.'))' == 'True'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveExtraAssemblyReferences" BeforeTargets="ResolveAssemblyReferences">
+    <!-- This is really hacky, but these references will cause issues when trying to 'build' this project. We are using
+         the PackageReference so that NuGet will do the compabability check on references and grab the right one. At
+         'bootstrap' time these runtime depdendncies need to be in a specific location that does not mesh with NuGet.
+         To resolve this, remove them from the Reference ItemGroup before RAR runs and avoid the warnings -->
+    <ItemGroup>
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build.Utilities.v4.0'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build.Framework'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'True'" />
     </ItemGroup>
   </Target>
 
