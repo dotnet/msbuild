@@ -2143,10 +2143,10 @@ namespace Microsoft.Build.Execution
                 // been set to log diagnostic then the existing/default value will be persisted.
                 parameters.LogTaskInputs =
                     parameters.LogTaskInputs ||
-                    loggers.Any(logger =>
-                        logger.Verbosity == LoggerVerbosity.Diagnostic ||
-                        (logger is IDiagnosticLogger diagnosticLogger &&
-                         (diagnosticLogger.DiagnosticInformation & DiagnosticInformation.TaskInputs) != 0));
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggers.OfType<ILoggerRequirementsProvider>().SelectMany(provider => provider.Requirements).Any(
+                        requirement => string.Equals(requirement, StandardRequirements.TaskInputs,
+                            StringComparison.OrdinalIgnoreCase));
             }
 
             if (remoteLoggers != null)

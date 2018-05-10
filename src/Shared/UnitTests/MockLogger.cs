@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Text;
@@ -27,7 +28,7 @@ namespace Microsoft.Build.UnitTests
      * up a raw string (fullLog) that contains all messages, warnings, errors.
      *
      */
-    internal sealed class MockLogger : IDiagnosticLogger
+    internal sealed class MockLogger : ILogger, ILoggerRequirementsProvider
     {
         #region Properties
 
@@ -169,8 +170,8 @@ namespace Microsoft.Build.UnitTests
             set {/* do nothing */}
         }
 
-        public DiagnosticInformation DiagnosticInformation =>
-            _profileEvaluation ? DiagnosticInformation.EvaluationProfile : DiagnosticInformation.None;
+        public IEnumerable<string> Requirements =>
+            _profileEvaluation ? new []{StandardRequirements.EvaluationProfile} : Enumerable.Empty<string>();
 
         /*
          * Method:  Initialize

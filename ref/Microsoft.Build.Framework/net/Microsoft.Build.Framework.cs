@@ -141,33 +141,6 @@ namespace Microsoft.Build.Framework
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
     }
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
-    [System.FlagsAttribute]
-    public enum DiagnosticInformation
-    {
-        BuildFinishedEvent = 2,
-        BuildStartedEvent = 1,
-        CommandLine = 65536,
-        CustomEvent = 32768,
-        ErrorEvent = 1024,
-        EvaluationProfile = 2097152,
-        HighMessageEvent = 4096,
-        LowMessageEvent = 16384,
-        None = 0,
-        NormalMessageEvent = 8192,
-        NoSummary = 262144,
-        PerformanceSummary = 131072,
-        ProjectEvaluationFinishedEvent = 32,
-        ProjectEvaluationStartedEvent = 16,
-        ProjectFinishedEvent = 8,
-        ProjectStartedEvent = 4,
-        ShowCommandLine = 524288,
-        TargetFinishedEvent = 128,
-        TargetStartedEvent = 64,
-        TaskFinishedEvent = 512,
-        TaskInputs = 1048576,
-        TaskStartedEvent = 256,
-        WarningEvent = 2048,
-    }
     public partial class ExternalProjectFinishedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
     {
         protected ExternalProjectFinishedEventArgs() { }
@@ -222,10 +195,6 @@ namespace Microsoft.Build.Framework
     {
         void Cancel();
     }
-    public partial interface IDiagnosticLogger : Microsoft.Build.Framework.ILogger
-    {
-        Microsoft.Build.Framework.DiagnosticInformation DiagnosticInformation { get; }
-    }
     public partial interface IEventRedirector
     {
         void ForwardEvent(Microsoft.Build.Framework.BuildEventArgs buildEvent);
@@ -268,6 +237,10 @@ namespace Microsoft.Build.Framework
         Microsoft.Build.Framework.LoggerVerbosity Verbosity { get; set; }
         void Initialize(Microsoft.Build.Framework.IEventSource eventSource);
         void Shutdown();
+    }
+    public partial interface ILoggerRequirementsProvider
+    {
+        System.Collections.Generic.IEnumerable<string> Requirements { get; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial interface INodeLogger : Microsoft.Build.Framework.ILogger
@@ -489,6 +462,11 @@ namespace Microsoft.Build.Framework
         protected SdkResultFactory() { }
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
+    }
+    public static partial class StandardRequirements
+    {
+        public const string EvaluationProfile = "EvaluationProfile";
+        public const string TaskInputs = "TaskInputs";
     }
     public enum TargetBuiltReason
     {

@@ -203,7 +203,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static readonly EngineFileUtilities.IOCache _fallbackSearchPathsCache = new EngineFileUtilities.IOCache();
 
-        private readonly bool _profileEvaluation;
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
@@ -252,8 +251,7 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationContext = evaluationContext;
-            _profileEvaluation = profileEvaluation;
-            _evaluationProfiler = new EvaluationProfiler(_profileEvaluation);
+            _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
         }
 
         /// <summary>
@@ -373,10 +371,10 @@ namespace Microsoft.Build.Evaluation
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
                 var profileEvaluation =
-                    ((loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0) ||
-                    loggingService.Loggers.Any(logger =>
-                        logger is IDiagnosticLogger diagnosticLogger &&
-                        ((diagnosticLogger.DiagnosticInformation & DiagnosticInformation.EvaluationProfile) != 0));
+                    (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 ||
+                    loggingService.Loggers.OfType<ILoggerRequirementsProvider>()
+                        .SelectMany(provider => provider.Requirements).Any(requirement =>
+                            string.Equals(requirement, StandardRequirements.EvaluationProfile, StringComparison.OrdinalIgnoreCase));
                 var evaluator = new Evaluator<P, I, M, D>(
                     data,
                     root,
@@ -912,7 +910,7 @@ namespace Microsoft.Build.Evaluation
             {
                 BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                 ProjectFile = projectFile,
-                ProfilerResult = _profileEvaluation ? (ProfilerResult?)_evaluationProfiler.ProfiledResult : null
+                ProfilerResult = _evaluationProfiler.ProfiledResult
             });
 
             return null;
