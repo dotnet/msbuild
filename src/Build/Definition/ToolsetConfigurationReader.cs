@@ -41,12 +41,6 @@ namespace Microsoft.Build.Evaluation
         private bool _configurationReadAttempted = false;
 
         /// <summary>
-        /// Character used to separate search paths specified for MSBuildExtensionsPath* in
-        /// the config file
-        /// </summary>
-        private char _separatorForExtensionsPathSearchPaths = ';';
-
-        /// <summary>
         /// Cached values of tools version -> project import search paths table
         /// </summary>
         private readonly Dictionary<string, Dictionary<string, ProjectImportPathMatch>> _projectImportSearchPathsCache;
@@ -239,13 +233,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                //FIXME: handle ; in path on Unix
-                var paths = property.Value
-                    .Split(new[] {_separatorForExtensionsPathSearchPaths}, StringSplitOptions.RemoveEmptyEntries)
-                    .Distinct()
-                    .Where(path => !string.IsNullOrEmpty(path));
-
-                pathsTable.Add(property.Name, new ProjectImportPathMatch(property.Name, paths.ToList()));
+                pathsTable.Add(property.Name, new ProjectImportPathMatch(property.Name, property.Value));
             }
 
             return pathsTable;
