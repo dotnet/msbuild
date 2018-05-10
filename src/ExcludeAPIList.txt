@@ -1,4 +1,5 @@
-﻿T:Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances
+﻿P:Microsoft.Build.Execution.BuildManager.WaitForDebugger
+T:Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances
 T:Microsoft.VisualStudio.Setup.Configuration.InstanceState
 T:Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration
 T:Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration2
