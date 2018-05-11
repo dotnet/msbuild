@@ -115,9 +115,7 @@
           DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\" />
     <Copy SourceFiles="@(NuGetSdkResolverManifest)"
           DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver" />
-    
-    <Message Text="@(_NuGetRuntimeDependencies)" Importance="High" />
-    
+
     <!-- Delete shim projects, because they point where we can't follow. -->
     <!-- It would be better to just not copy these. -->
     <Delete Files="@(ShimTargets->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(FileName)%(Extension)')" />
