@@ -93,6 +93,7 @@ namespace Microsoft.Build.Construction
         internal ProjectImportElement() { }
         public Microsoft.Build.Construction.ImplicitImportLocation ImplicitImportLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string MinimumVersion { get { throw null; } set { } }
+        public Microsoft.Build.Construction.ProjectElement OriginalElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string Project { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation ProjectLocation { get { throw null; } }
         public string Sdk { get { throw null; } set { } }
@@ -838,9 +839,10 @@ namespace Microsoft.Build.Evaluation
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ResolvedImport
     {
-        public Microsoft.Build.Construction.ProjectRootElement ImportedProject { get { throw null; } }
-        public Microsoft.Build.Construction.ProjectImportElement ImportingElement { get { throw null; } }
-        public bool IsImported { get { throw null; } }
+        public Microsoft.Build.Construction.ProjectRootElement ImportedProject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Construction.ProjectImportElement ImportingElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsImported { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Framework.SdkResult SdkResult { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("SubToolsetVersion={SubToolsetVersion} #Properties={_properties.Count}")]
     public partial class SubToolset

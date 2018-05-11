@@ -20,13 +20,11 @@ namespace Microsoft.Build.Unittest
 {
     internal static class SdkUtilities
     {
-        public static ProjectOptions CreateProjectOptionsWithResolverFileMapping(Dictionary<string, string> mapping)
+        public static ProjectOptions CreateProjectOptionsWithResolver(SdkResolver resolver)
         {
-            var resolver = new FileBasedMockSdkResolver(mapping);
-
             var context = EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
             var sdkService = (SdkResolverService)context.SdkResolverService;
-            sdkService.InitializeForTests(null, new List<SdkResolver>(){resolver});
+            sdkService.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
             return new ProjectOptions
             {
@@ -42,7 +40,7 @@ namespace Microsoft.Build.Unittest
 
             public ConfigurableMockSdkResolver(SdkResult result)
             {
-                _resultMap = new Dictionary<string, SdkResult> { [result.Sdk.Name] = result };
+                _resultMap = new Dictionary<string, SdkResult> { [result.SdkReference.Name] = result };
             }
 
             public ConfigurableMockSdkResolver(Dictionary<string, SdkResult> resultMap)
