@@ -74,12 +74,6 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            if (!TryGetFileName(uri, out string filename))
-            {
-                Log.LogErrorFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
-                return false;
-            }
-
             int retryAttemptCount = 0;
             bool canRetry = false;
 
@@ -87,7 +81,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    Download(uri, filename);
+                    Download(uri);
                     break;
                 }
                 catch (TaskCanceledException)
@@ -119,7 +113,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="uri">The parsed <see cref="Uri"/> of the request.</param>
         /// <param name="filename">The filename to use when downloading the file.</param>
-        private void Download(Uri uri, string filename)
+        private void Download(Uri uri)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
             using (HttpClient client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
@@ -139,6 +133,13 @@ namespace Microsoft.Build.Tasks
                         // HttpRequestException does not have the status code so its wrapped and thrown here so that later on we can determine
                         // if a retry is possible based on the status code
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
+                    }
+
+
+                    if (!TryGetFileName(response, out string filename))
+                    {
+                        Log.LogErrorFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
+                        return;
                     }
 
                     DirectoryInfo destinationDirectory = Directory.CreateDirectory(DestinationFolder.ItemSpec);
@@ -248,17 +249,23 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Attempts to get the file name to use when downloading the file.
         /// </summary>
-        /// <param name="uri">The <see cref="Uri"/>.</param>
+        /// <param name="response">The <see cref="HttpResponseMessage"/> with information about the response.</param>
         /// <param name="filename">Receives the name of the file.</param>
         /// <returns><code>true</code> if a file name could be determined, otherwise <code>false</code>.</returns>
-        private bool TryGetFileName(Uri uri, out string filename)
+        private bool TryGetFileName(HttpResponseMessage response, out string filename)
         {
+            if (response == null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+
             // Not all URIs contain a file name so users will have to specify one
             // Example: http://www.download.com/file/1/
 
             filename = !String.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
                 ? DestinationFileName.ItemSpec // Get the file name from what the user specified
-                : Path.GetFileName(uri.LocalPath); // Otherwise attempt to get a file name from the URI
+                : response.Content?.Headers?.ContentDisposition?.FileName // Attempt to get the file name from the content-disposition header value
+                  ?? Path.GetFileName(response.RequestMessage.RequestUri.LocalPath); // Otherwise attempt to get a file name from the URI
 
             return !String.IsNullOrWhiteSpace(filename);
         }

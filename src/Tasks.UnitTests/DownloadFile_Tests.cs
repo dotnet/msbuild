@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,7 +81,52 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void CanRenameFile()
+        public void CanGetFileNameFromResponseHeader()
+        {
+            const string filename = "C6DDD10A99E149F78FA11F133127BF38.txt";
+
+            HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("Success!")
+                {
+                    Headers =
+                    {
+                        ContentDisposition = new ContentDispositionHeaderValue(DispositionTypeNames.Attachment)
+                        {
+                            FileName = filename
+                        }
+                    }
+                },
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://success/foo.txt")
+            };
+
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
+
+                DownloadFile downloadFile = new DownloadFile
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFileName = new TaskItem(filename),
+                    HttpMessageHandler = new MockHttpMessageHandler((message, token) => response),
+                    SourceUrl = "http://success/foo.txt"
+                };
+
+                downloadFile.Execute().ShouldBeTrue();
+
+                FileInfo file = new FileInfo(Path.Combine(folder.FolderPath, filename));
+
+                file.Exists.ShouldBeTrue(() => file.FullName);
+
+                File.ReadAllText(file.FullName).ShouldBe("Success!");
+
+                downloadFile.DownloadedFile.ItemSpec.ShouldBe(file.FullName);
+            }
+        }
+
+        [Fact]
+        public void CanSpecifyFileName()
         {
             const string filename = "4FD96E4A322842ACB70C40FC16E69A55.txt";
 
@@ -167,7 +214,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                             }
 
                             return new MemoryStream(Encoding.Unicode.GetBytes(content)).CopyToAsync(stream);
-                        })
+                        }),
+                        RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://success/foo.txt")
                     }),
                     Retries = 1,
                     RetryDelayMilliseconds = 100,
@@ -231,6 +279,11 @@ namespace Microsoft.Build.Tasks.UnitTests
             DownloadFile downloadFile = new DownloadFile()
             {
                 BuildEngine = _mockEngine,
+                HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("Success!"),
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://unknown/")
+                }),
                 SourceUrl = "http://unknown/"
             };
 
