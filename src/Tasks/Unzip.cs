@@ -18,25 +18,9 @@ namespace Microsoft.Build.Tasks
     public sealed class Unzip : TaskExtension, ICancelableTask
     {
         /// <summary>
-        /// Stores a collection of all destination files.
-        /// </summary>
-        private readonly Collection<ITaskItem> _destinationFiles = new Collection<ITaskItem>();
-
-        /// <summary>
-        /// Stores a collection of all files that were unzipped.
-        /// </summary>
-        private readonly Collection<ITaskItem> _unzippedFiles = new Collection<ITaskItem>();
-
-        /// <summary>
         /// Stores a value indicating if a cancellation was requested.
         /// </summary>
         private bool _canceling;
-
-        /// <summary>
-        /// Gets an array of <see cref="ITaskItem"/> objects containing details about all of the destination files.
-        /// </summary>
-        [Output]
-        public ITaskItem[] DestinationFiles => _destinationFiles.ToArray();
 
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> with a destination folder path to unzip the files to.
@@ -59,12 +43,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Required]
         public ITaskItem[] SourceFiles { get; set; }
-
-        /// <summary>
-        /// Gets an array of <see cref="ITaskItem"/> objects containing details about only the files that were unzipped.
-        /// </summary>
-        [Output]
-        public ITaskItem[] UnzippedFiles => _unzippedFiles.ToArray();
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -117,7 +95,7 @@ namespace Microsoft.Build.Tasks
                 catch (Exception e)
                 {
                     // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
-                    Log.LogErrorFromResources("Unzip.ErrorCouldNotOpenFile", e.Message);
+                    Log.LogErrorFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
                 }
             }
 
@@ -144,12 +122,6 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
                 
-                TaskItem taskItem = new TaskItem(EscapingUtilities.Escape(destinationPath.FullName));
-
-                sourceTaskItem.CopyMetadataTo(taskItem);
-
-                _destinationFiles.Add(taskItem);
-
                 if (ShouldSkipEntry(zipArchiveEntry, destinationPath))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
@@ -166,7 +138,7 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                if (OverwriteReadOnlyFiles && destinationPath.IsReadOnly)
+                if (OverwriteReadOnlyFiles && destinationPath.Exists && destinationPath.IsReadOnly)
                 {
                     try
                     {
@@ -185,7 +157,6 @@ namespace Microsoft.Build.Tasks
 
                     zipArchiveEntry.ExtractToFile(destinationPath.FullName, overwrite: true);
 
-                    _unzippedFiles.Add(taskItem);
                 }
                 catch (IOException e)
                 {
