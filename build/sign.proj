@@ -47,7 +47,7 @@
   
     <ItemGroup>
       <!-- Adding the assemblies to sign -->
-      <FilesToSign Include="$(OutDir)bin\**\*.nupkg" Exclude="$(OutDir)bin\**\*.symbols.nupkg">
+      <FilesToSign Include="$(OutDir)bin\**\*.nupkg">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
