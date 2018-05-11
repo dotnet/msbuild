@@ -370,11 +370,7 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
-                var profileEvaluation =
-                    (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 ||
-                    loggingService.Loggers.OfType<ILoggerRequirementsProvider>()
-                        .SelectMany(provider => provider.Requirements).Any(requirement =>
-                            string.Equals(requirement, StandardRequirements.EvaluationProfile, StringComparison.OrdinalIgnoreCase));
+                var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
                 var evaluator = new Evaluator<P, I, M, D>(
                     data,
                     root,

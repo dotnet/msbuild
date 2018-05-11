@@ -220,6 +220,11 @@ namespace Microsoft.Build.Framework
     {
         event Microsoft.Build.Framework.TelemetryEventHandler TelemetryLogged;
     }
+    public partial interface IEventSource3 : Microsoft.Build.Framework.IEventSource
+    {
+        void IncludeEvaluationProfiles();
+        void IncludeTaskInputs();
+    }
     public partial interface IForwardingLogger : Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
         Microsoft.Build.Framework.IEventRedirector BuildEventRedirector { get; set; }
@@ -237,10 +242,6 @@ namespace Microsoft.Build.Framework
         Microsoft.Build.Framework.LoggerVerbosity Verbosity { get; set; }
         void Initialize(Microsoft.Build.Framework.IEventSource eventSource);
         void Shutdown();
-    }
-    public partial interface ILoggerRequirementsProvider
-    {
-        System.Collections.Generic.IEnumerable<string> Requirements { get; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial interface INodeLogger : Microsoft.Build.Framework.ILogger
@@ -461,11 +462,6 @@ namespace Microsoft.Build.Framework
         protected SdkResultFactory() { }
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
-    }
-    public static partial class StandardRequirements
-    {
-        public const string EvaluationProfile = "EvaluationProfile";
-        public const string TaskInputs = "TaskInputs";
     }
     public enum TargetBuiltReason
     {

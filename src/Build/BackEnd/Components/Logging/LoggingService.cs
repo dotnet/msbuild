@@ -225,16 +225,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private LoggerMode _logMode = NativeMethodsShared.IsMono ? LoggerMode.Synchronous : LoggerMode.Asynchronous;
 
-        /// <summary>
-        /// A list of warnings to treat as errors.
-        /// </summary>
-        private ISet<string> _warningsAsErrors = null;
-
-        /// <summary>
-        /// A list of warnings to treat as low importance messages.
-        /// </summary>
-        private ISet<string> _warningsAsMessages = null;
-
         #endregion
 
         #endregion
@@ -404,13 +394,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Is it starting to shutdown
         /// Has it shutdown
         /// </summary>
-        public LoggingServiceState ServiceState
-        {
-            get
-            {
-                return _serviceState;
-            }
-        }
+        public LoggingServiceState ServiceState => _serviceState;
 
         /// <summary>
         /// Use to optimize away status messages. When this is set to true, only "critical"
@@ -418,15 +402,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool OnlyLogCriticalEvents
         {
-            get
-            {
-                return _onlyLogCriticalEvents;
-            }
+            get => _onlyLogCriticalEvents;
 
-            set
-            {
-                _onlyLogCriticalEvents = value;
-            }
+            set => _onlyLogCriticalEvents = value;
         }
 
         /// <summary>
@@ -434,15 +412,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public int MaxCPUCount
         {
-            get
-            {
-                return _maxCPUCount;
-            }
+            get => _maxCPUCount;
 
-            set
-            {
-                _maxCPUCount = value;
-            }
+            set => _maxCPUCount = value;
         }
 
         /// <summary>
@@ -450,51 +422,40 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This is used by the node provider to get a list of registered descriptions so that 
         /// they can be transmitted to child nodes.
         /// </summary>
-        public ICollection<LoggerDescription> LoggerDescriptions
-        {
-            get
-            {
-                return _loggerDescriptions;
-            }
-        }
+        public ICollection<LoggerDescription> LoggerDescriptions => _loggerDescriptions;
 
         /// <summary>
         /// Enumerator over all registered loggers.
         /// </summary>
-        public ICollection<ILogger> Loggers
-        {
-            get { return _iloggerList; }
-        }
+        public ICollection<ILogger> Loggers => _iloggerList;
 
         /// <summary>
         /// What type of logging mode is the logger running under. 
         /// Is it Synchronous or Asynchronous
         /// </summary>
-        public LoggerMode LoggingMode
-        {
-            get
-            {
-                return _logMode;
-            }
-        }
+        public LoggerMode LoggingMode => _logMode;
 
         /// <summary>
         /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
         /// </summary>
         public ISet<string> WarningsAsErrors
         {
-            get { return _warningsAsErrors; }
-            set { _warningsAsErrors = value; }
-        }
+            get;
+            set;
+        } = null;
 
         /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
         {
-            get { return _warningsAsMessages; }
-            set { _warningsAsMessages = value; }
-        }
+            get;
+            set;
+        } = null;
+
+        public bool IncludeEvaluationProfile => _filterEventSource?.IncludeEvaluationProfile == true;
+
+        public bool IncludeTaskInputs => _filterEventSource?.IncludeTaskInputs == true;
 
         /// <summary>
         /// Determines if the specified submission has logged an errors.

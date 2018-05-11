@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
      * up a raw string (fullLog) that contains all messages, warnings, errors.
      *
      */
-    internal sealed class MockLogger : ILogger, ILoggerRequirementsProvider
+    internal sealed class MockLogger : ILogger
     {
         #region Properties
 
@@ -170,9 +170,6 @@ namespace Microsoft.Build.UnitTests
             set {/* do nothing */}
         }
 
-        public IEnumerable<string> Requirements =>
-            _profileEvaluation ? new []{StandardRequirements.EvaluationProfile} : Enumerable.Empty<string>();
-
         /*
          * Method:  Initialize
          *
@@ -182,6 +179,11 @@ namespace Microsoft.Build.UnitTests
         public void Initialize(IEventSource eventSource)
         {
             eventSource.AnyEventRaised += LoggerEventHandler;
+
+            if (eventSource is IEventSource3 eventSource3 && _profileEvaluation)
+            {
+                eventSource3.IncludeEvaluationProfiles();
+            }
         }
 
         /// <summary>

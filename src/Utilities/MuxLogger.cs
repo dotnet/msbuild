@@ -325,7 +325,7 @@ namespace Microsoft.Build.Utilities
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
-            IEventSource2
+            IEventSource3
         {
             #region Fields
             /// <summary>
@@ -547,6 +547,22 @@ namespace Microsoft.Build.Utilities
             public event TelemetryEventHandler TelemetryLogged;
 
             #endregion
+
+            public void IncludeEvaluationProfiles()
+            {
+                if (_eventSourceForBuild is IEventSource3 eventSource3)
+                {
+                    eventSource3.IncludeEvaluationProfiles();
+                }
+            }
+
+            public void IncludeTaskInputs()
+            {
+                if (_eventSourceForBuild is IEventSource3 eventSource3)
+                {
+                    eventSource3.IncludeTaskInputs();
+                }
+            }
 
             #region Internal Methods
             /// <summary>

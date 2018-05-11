@@ -1752,7 +1752,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource2, ILoggerRequirementsProvider
+        internal class ReusableLogger : INodeLogger, IEventSource3
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1930,24 +1930,53 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
 
-#endregion
+            public void IncludeEvaluationProfiles()
+            {
+                if (_buildTimeEventSource != null)
+                {
+                    if (_buildTimeEventSource is IEventSource3 eventSource3)
+                    {
+                        eventSource3.IncludeEvaluationProfiles();
+                    }
+                }
+                else
+                {
+                    if (_designTimeEventSource is IEventSource3 eventSource3)
+                    {
+                        eventSource3.IncludeEvaluationProfiles();
+                    }
+                }
+            }
 
-#region ILogger Members
+            public void IncludeTaskInputs()
+            {
+                if (_buildTimeEventSource != null)
+                {
+                    if (_buildTimeEventSource is IEventSource3 eventSource3)
+                    {
+                        eventSource3.IncludeTaskInputs();
+                    }
+                }
+                else
+                {
+                    if (_designTimeEventSource is IEventSource3 eventSource3)
+                    {
+                        eventSource3.IncludeTaskInputs();
+                    }
+                }
+            }
+            #endregion
+
+            #region ILogger Members
 
             /// <summary>
             /// The logger verbosity
             /// </summary>
             public LoggerVerbosity Verbosity
             {
-                get
-                {
-                    return _originalLogger.Verbosity;
-                }
+                get => _originalLogger.Verbosity;
 
-                set
-                {
-                    _originalLogger.Verbosity = value;
-                }
+                set => _originalLogger.Verbosity = value;
             }
 
             /// <summary>
@@ -1955,20 +1984,10 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string Parameters
             {
-                get
-                {
-                    return _originalLogger.Parameters;
-                }
+                get => _originalLogger.Parameters;
 
-                set
-                {
-                    _originalLogger.Parameters = value;
-                }
+                set => _originalLogger.Parameters = value;
             }
-
-            public IEnumerable<string> Requirements => _originalLogger is ILoggerRequirementsProvider requirementsProvider
-                ? requirementsProvider.Requirements
-                : Enumerable.Empty<string>();
 
             /// <summary>
             /// If we haven't yet been initialized, we register for design time events and initialize the logger we are holding.

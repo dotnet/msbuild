@@ -172,6 +172,17 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
+        bool IncludeEvaluationProfile
+        {
+            get;
+        }
+
+        bool IncludeTaskInputs
+        {
+            get;
+        }
+
         #endregion
 
         /// <summary>

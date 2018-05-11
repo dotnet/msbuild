@@ -190,6 +190,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set;
         }
 
+        public bool IncludeEvaluationProfile => false;
+
+        public bool IncludeTaskInputs => false;
+
         public void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes)
         {
             throw new NotImplementedException();

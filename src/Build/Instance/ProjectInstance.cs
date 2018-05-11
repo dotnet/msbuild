@@ -2144,15 +2144,13 @@ namespace Microsoft.Build.Execution
                 parameters.LogTaskInputs =
                     parameters.LogTaskInputs ||
                     loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
-                    loggers.OfType<ILoggerRequirementsProvider>().SelectMany(provider => provider.Requirements).Any(
-                        requirement => string.Equals(requirement, StandardRequirements.TaskInputs,
-                            StringComparison.OrdinalIgnoreCase));
+                    loggingService?.IncludeTaskInputs == true;
             }
 
             if (remoteLoggers != null)
             {
-                parameters.ForwardingLoggers = (remoteLoggers is ICollection<ForwardingLoggerRecord>) ?
-                    ((ICollection<ForwardingLoggerRecord>)remoteLoggers) :
+                parameters.ForwardingLoggers = remoteLoggers is ICollection<ForwardingLoggerRecord> records ?
+                    records :
                     new List<ForwardingLoggerRecord>(remoteLoggers);
             }
 

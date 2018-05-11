@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IEventSource2, IBuildEventSink
+        IEventSource3, IBuildEventSink
     {
         #region Events
 
@@ -174,10 +174,36 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get;
         } = new HashSet<int>();
-        
+
+        public bool IncludeEvaluationProfile
+        {
+            get;
+            private set;
+        }
+
+        public bool IncludeTaskInputs
+        {
+            get;
+            private set;
+        }
+
         #endregion
 
         #region Methods
+
+        #region IEventSource3 Methods
+
+        void IEventSource3.IncludeEvaluationProfiles()
+        {
+            IncludeEvaluationProfile = true;
+        }
+
+        void IEventSource3.IncludeTaskInputs()
+        {
+            IncludeTaskInputs = true;
+        }
+
+        #endregion
 
         #region IEventSink Methods
 
