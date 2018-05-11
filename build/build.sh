@@ -167,6 +167,9 @@ function InitializeDotNetCli {
     export DOTNET_INSTALL_DIR="$DotNetCoreSdkDir"
   fi
 
+  # Save MSBuild crash files info to log directory so that they are captured as build artifacts
+  export MSBUILDDEBUGPATH="$log_dir"
+
   ReadJson "$global_json_file" "version"
   local dotnet_sdk_version="$readjsonvalue"
   local dotnet_root=""
