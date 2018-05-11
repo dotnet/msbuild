@@ -422,7 +422,7 @@ LogDir="$ArtifactsConfigurationDir/log"
 VersionsProps="$ScriptRoot/Versions.props"
 
 MONO_MSBUILD_DIR="$ArtifactsDir/mono-msbuild"
-MSBUILD_DOWNLOAD_URL="https://github.com/mono/msbuild/releases/download/v0.05/mono_msbuild_port2-394a6b5e.zip"
+MSBUILD_DOWNLOAD_URL="https://github.com/mono/msbuild/releases/download/0.06/mono_msbuild_xplat-master-3c930fa8.zip"
 MSBUILD_ZIP="$ArtifactsDir/msbuild.zip"
 
 #https://github.com/dotnet/source-build
