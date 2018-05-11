@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks
                     Download(uri);
                     break;
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                 }
                 catch (Exception e)
@@ -162,14 +162,13 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
-                            using (Task task = response.Content.CopyToAsync(target))
-                            {
-                                task.ConfigureAwait(continueOnCapturedContext: false);
+                            Task task = response.Content.CopyToAsync(target);
 
-                                task.Wait(_cancellationTokenSource.Token);
+                            task.ConfigureAwait(continueOnCapturedContext: false);
 
-                                DownloadedFile = new TaskItem(destinationFile.FullName);
-                            }
+                            task.Wait(_cancellationTokenSource.Token);
+
+                            DownloadedFile = new TaskItem(destinationFile.FullName);
                         }
                     }
                     finally
