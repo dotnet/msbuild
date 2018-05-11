@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks
                     FileInfo destinationFile = new FileInfo(Path.Combine(destinationDirectory.FullName, filename));
 
                     // The file is considered up-to-date if its the same length.  This could be inaccurate, we can consider alternatives in the future
-                    if (SkipUnchangedFiles && destinationFile.Exists && destinationFile.Length == response.Content.Headers.ContentLength)
+                    if (ShouldSkip(response, destinationFile))
                     {
                         Log.LogMessageFromResources(MessageImportance.Normal, "DownloadFile.DidNotDownloadBecauseOfFileMatch", SourceUrl, destinationFile.FullName, nameof(SkipUnchangedFiles), "true");
 
@@ -281,6 +281,16 @@ namespace Microsoft.Build.Tasks
             }
 
             public HttpStatusCode StatusCode { get; }
+        }
+
+        private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
+        {
+            return SkipUnchangedFiles
+                   && destinationFile.Exists
+                   && destinationFile.Length == response.Content.Headers.ContentLength
+                   && response.Content.Headers.LastModified.HasValue
+                   && destinationFile.LastWriteTimeUtc < response.Content.Headers.LastModified.Value.UtcDateTime;
+
         }
     }
 }

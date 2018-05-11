@@ -260,7 +260,13 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(folder.FolderPath),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent("C197675A3CC64CAA80680128CF4578C9"),
+                        Content = new StringContent("C197675A3CC64CAA80680128CF4578C9")
+                        {
+                            Headers =
+                            {
+                                LastModified = DateTimeOffset.UtcNow
+                            }
+                        },
                         RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://success/foo.txt")
                     }),
                     SkipUnchangedFiles = true,
@@ -269,7 +275,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Execute().ShouldBeTrue();
 
-                _mockEngine.Log.ShouldContain("Did not download file from \"http://success/foo.txt\"");
+                _mockEngine.Log.ShouldContain("Did not download file from \"http://success/foo.txt\"", () => _mockEngine.Log);
             }
         }
 
