@@ -33,7 +33,7 @@ rm $MSBUILD_DST_DIR/System.Reflection.Metadata.dll
 
 # wrapper script
 cat > $MSBUILD_DST_DIR/msbuild << 'EOL'
-#!/bin/sh
+#!/bin/bash
 ABSOLUTE_PATH=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)/`basename "${BASH_SOURCE[0]}"`
 THIS_DIR=`dirname $ABSOLUTE_PATH`
 MONO_GC_PARAMS="nursery-size=64m,$MONO_GC_PARAMS" exec mono $MONO_OPTIONS $THIS_DIR/MSBuild.dll /p:MSBuildExtensionsPath=$THIS_DIR/Extensions "$@"
