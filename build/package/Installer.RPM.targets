@@ -68,13 +68,13 @@
     <!-- Replace config json variables -->
     <ItemGroup>
       <SDKTokenValue Include="%SHARED_HOST_RPM_VERSION%">
-        <ReplacementString>$(MicrosoftNETCoreAppPackageVersion)</ReplacementString>
+        <ReplacementString>$(MicrosoftNETCoreAppMajorMinorPatchVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%ASPNETCORE_SHAREDFX_RPM_PACKAGE_NAME%">
         <ReplacementString>$(AspNetCoreSharedFxRpmPackageName)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%ASPNETCORE_SHAREDFX_RPM_PACKAGE_VERSION%">
-        <ReplacementString>$(AspNetCoreVersion)</ReplacementString>
+        <ReplacementString>$(AspNetCoreMajorMinorPatchVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%SHARED_HOST_RPM_NAME%">
         <ReplacementString>$(SharedFxRpmPackageName)</ReplacementString>
@@ -143,10 +143,10 @@
 
   </Target>
 
-  <Target Name="SetupRpmProps">
+  <Target Name="SetupRpmProps" DependsOnTargets="CalculateLinuxNativeInstallerDependencyVersions">
     <PropertyGroup>
       <RuntimeDepsPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeDepsPackageVersion>
-      <RuntimeDepsPackageName>dotnet-runtime-deps-$(RuntimeDepsPackageVersion)</RuntimeDepsPackageName>
+      <RuntimeDepsPackageFileName>dotnet-runtime-deps-$(RuntimeDepsPackageVersion)</RuntimeDepsPackageFileName>
       <RpmPackageVersion>$(SdkVersion)</RpmPackageVersion>
       <InputRoot>$(OutputDirectory)/sdk</InputRoot>
       <SdkInstallerFile>$(InstallerOutputDirectory)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkInstallerFile>
@@ -168,17 +168,22 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <SdkRpmPackageVersion>$(SdkVersion)</SdkRpmPackageVersion>
+      <SdkRpmPackageVersion>$(MajorMinorVersion)</SdkRpmPackageVersion>
       <SdkRpmPackageName>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkRpmPackageVersion)</SdkRpmPackageName>
-      <SharedFxRpmPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxRpmPackageVersion>
+      <SharedFxRpmPackageVersion>$(MicrosoftNETCoreAppMajorMinorVersion)</SharedFxRpmPackageVersion>
+      <SharedFxRpmPackageFileVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxRpmPackageFileVersion>
       <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageVersion)</SharedFxRpmPackageName>
       <SharedFxRpmPackageName>$(SharedFxRpmPackageName.ToLower())</SharedFxRpmPackageName>
+      <SharedFxRpmPackageFileName>dotnet-runtime-$(SharedFxRpmPackageFileVersion)</SharedFxRpmPackageFileName>
+      <SharedFxRpmPackageFileName>$(SharedFxRpmPackageFileName.ToLower())</SharedFxRpmPackageFileName>
       <HostFxrRpmPackageVersion>$(HostFxrVersion)</HostFxrRpmPackageVersion>
       <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
       <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
       <HostRpmPackageName>dotnet-host</HostRpmPackageName>
-      <AspNetCoreSharedFxRpmPackageName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxRpmPackageName>
+      <AspNetCoreSharedFxRpmPackageName>aspnetcore-runtime-$(AspNetCoreMajorMinorVersion)</AspNetCoreSharedFxRpmPackageName>
       <AspNetCoreSharedFxRpmPackageName>$(AspNetCoreSharedFxRpmPackageName.ToLower())</AspNetCoreSharedFxRpmPackageName>
+      <AspNetCoreSharedFxRpmPackageFileName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxRpmPackageFileName>
+      <AspNetCoreSharedFxRpmPackageFileName>$(AspNetCoreSharedFxRpmPackageFileName.ToLower())</AspNetCoreSharedFxRpmPackageFileName>
       <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
       <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
     </PropertyGroup>
@@ -238,10 +243,10 @@
     <!-- Clean up Packages -->
     <Exec Command="sudo yum remove -y $(SdkRpmPackageName)" />
 
-    <Exec Command="sudo yum remove -y $(AspNetCoreSharedFxRpmPackageName)" />
-    <Exec Command="sudo yum remove -y $(SharedFxRpmPackageName)" />
+    <Exec Command="sudo yum remove -y $(AspNetCoreSharedFxRpmPackageFileName)" />
+    <Exec Command="sudo yum remove -y $(SharedFxRpmPackageFileName)" />
     <Exec Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostRpmPackageName)" />
-    <Exec Command="sudo yum remove -y $(RuntimeDepsPackageName)" />
+    <Exec Command="sudo yum remove -y $(RuntimeDepsPackageFileName)" />
   </Target>
 </Project>
