@@ -1688,9 +1688,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <!--
          Remove the items we've touched from _MSBuildProjectReferenceExistent. This will leave all projects where
-         SkipGetTargetFrameworkProperties was set. Then add all AnnotatedProjects back.
+         SkipGetTargetFrameworkProperties was set.
       -->
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'" />
+
+      <!-- If we skipped querying the other project, ensure we don't pollute it with the TargetFramework/RuntimeIdentifier
+           that may be set for this project as a global property (if we're in an inner build). -->
+      <_MSBuildProjectReferenceExistent>
+          <UndefineProperties>%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework;RuntimeIdentifier</UndefineProperties>
+      </_MSBuildProjectReferenceExistent>
+
+      <!-- Then add all AnnotatedProjects back. -->
       <_MSBuildProjectReferenceExistent Include="@(AnnotatedProjects)" />
     </ItemGroup>
   </Target>
