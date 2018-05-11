@@ -1844,6 +1844,10 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private TelemetryEventHandler _telemetryEventHandler;
 
+            private bool _includeEvaluationProfiles;
+
+            private bool _includeTaskInputs;
+
             /// <summary>
             /// Constructor.
             /// </summary>
@@ -1932,38 +1936,32 @@ namespace Microsoft.Build.Evaluation
 
             public void IncludeEvaluationProfiles()
             {
-                if (_buildTimeEventSource != null)
+                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
                 {
-                    if (_buildTimeEventSource is IEventSource3 eventSource3)
-                    {
-                        eventSource3.IncludeEvaluationProfiles();
-                    }
+                    buildEventSource3.IncludeEvaluationProfiles();
                 }
-                else
+
+                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
                 {
-                    if (_designTimeEventSource is IEventSource3 eventSource3)
-                    {
-                        eventSource3.IncludeEvaluationProfiles();
-                    }
+                    designTimeEventSource3.IncludeEvaluationProfiles();
                 }
+
+                _includeEvaluationProfiles = true;
             }
 
             public void IncludeTaskInputs()
             {
-                if (_buildTimeEventSource != null)
+                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
                 {
-                    if (_buildTimeEventSource is IEventSource3 eventSource3)
-                    {
-                        eventSource3.IncludeTaskInputs();
-                    }
+                    buildEventSource3.IncludeTaskInputs();
                 }
-                else
+
+                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
                 {
-                    if (_designTimeEventSource is IEventSource3 eventSource3)
-                    {
-                        eventSource3.IncludeTaskInputs();
-                    }
+                    designTimeEventSource3.IncludeTaskInputs();
                 }
+
+                _includeTaskInputs = true;
             }
             #endregion
 
@@ -2000,9 +1998,9 @@ namespace Microsoft.Build.Evaluation
                     _designTimeEventSource = eventSource;
                     RegisterForEvents(_designTimeEventSource);
 
-                    if (_originalLogger is INodeLogger)
+                    if (_originalLogger is INodeLogger logger)
                     {
-                        ((INodeLogger)_originalLogger).Initialize(this, nodeCount);
+                        logger.Initialize(this, nodeCount);
                     }
                     else
                     {
@@ -2090,6 +2088,19 @@ namespace Microsoft.Build.Evaluation
                 if (eventSource is IEventSource2 eventSource2)
                 {
                     eventSource2.TelemetryLogged += _telemetryEventHandler;
+                }
+
+                if (eventSource is IEventSource3 eventSource3)
+                {
+                    if (_includeEvaluationProfiles)
+                    {
+                        eventSource3.IncludeEvaluationProfiles();
+                    }
+
+                    if (_includeTaskInputs)
+                    {
+                        eventSource3.IncludeTaskInputs();
+                    }
                 }
             }
 

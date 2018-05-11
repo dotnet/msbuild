@@ -13,7 +13,7 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Framework;
-
+using Shouldly;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Xunit;
 using Xunit.Abstractions;
@@ -180,8 +180,10 @@ namespace Microsoft.Build.UnitTests
         {
             eventSource.AnyEventRaised += LoggerEventHandler;
 
-            if (eventSource is IEventSource3 eventSource3 && _profileEvaluation)
+            if (_profileEvaluation)
             {
+                var eventSource3 = eventSource as IEventSource3;
+                eventSource3.ShouldNotBeNull();
                 eventSource3.IncludeEvaluationProfiles();
             }
         }
