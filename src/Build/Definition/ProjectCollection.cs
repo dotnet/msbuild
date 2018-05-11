@@ -1934,6 +1934,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
 
+            /// <summary>
+            /// Should evaluation events include profiling information?
+            /// </summary>
             public void IncludeEvaluationProfiles()
             {
                 if (_buildTimeEventSource is IEventSource3 buildEventSource3)
@@ -1949,6 +1952,9 @@ namespace Microsoft.Build.Evaluation
                 _includeEvaluationProfiles = true;
             }
 
+            /// <summary>
+            /// Should task events include task inputs?
+            /// </summary>
             public void IncludeTaskInputs()
             {
                 if (_buildTimeEventSource is IEventSource3 buildEventSource3)

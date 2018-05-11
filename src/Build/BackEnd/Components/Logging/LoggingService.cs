@@ -453,8 +453,14 @@ namespace Microsoft.Build.BackEnd.Logging
             set;
         } = null;
 
-        public bool IncludeEvaluationProfile => _centralForwardingLoggerSinkId != -1 && ((EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId]).IncludeEvaluationProfile;
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        public bool IncludeEvaluationProfile => _centralForwardingLoggerSinkId != -1 && ((EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId]).IncludeEvaluationProfiles;
 
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
         public bool IncludeTaskInputs => _centralForwardingLoggerSinkId != -1 && ((EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId]).IncludeTaskInputs;
 
         /// <summary>

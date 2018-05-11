@@ -548,6 +548,9 @@ namespace Microsoft.Build.Utilities
 
             #endregion
 
+            /// <summary>
+            /// Should evaluation events include profiling information?
+            /// </summary>
             public void IncludeEvaluationProfiles()
             {
                 if (_eventSourceForBuild is IEventSource3 eventSource3)
@@ -556,6 +559,9 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
+            /// <summary>
+            /// Should task events include task inputs?
+            /// </summary>
             public void IncludeTaskInputs()
             {
                 if (_eventSourceForBuild is IEventSource3 eventSource3)

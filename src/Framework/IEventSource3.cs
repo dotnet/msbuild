@@ -10,8 +10,14 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public interface IEventSource3 : IEventSource
     {
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
         void IncludeEvaluationProfiles();
 
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
         void IncludeTaskInputs();
     }
 }

@@ -175,12 +175,18 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
         } = new HashSet<int>();
 
-        public bool IncludeEvaluationProfile
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        public bool IncludeEvaluationProfiles
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
         public bool IncludeTaskInputs
         {
             get;
@@ -195,7 +201,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         void IEventSource3.IncludeEvaluationProfiles()
         {
-            IncludeEvaluationProfile = true;
+            IncludeEvaluationProfiles = true;
         }
 
         void IEventSource3.IncludeTaskInputs()
