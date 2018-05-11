@@ -154,9 +154,14 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
+                    
+                    using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (Stream stream = zipArchiveEntry.Open())
+                    {
+                        stream.CopyTo(destination);
+                    }
 
-                    zipArchiveEntry.ExtractToFile(destinationPath.FullName, overwrite: true);
-
+                    destinationPath.LastWriteTimeUtc = zipArchiveEntry.LastWriteTime.UtcDateTime;
                 }
                 catch (IOException e)
                 {
