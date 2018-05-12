@@ -111,6 +111,27 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [Fact]
+        public void GivenAFailingTestItDisplaysFailureDetails()
+        {
+            var testInstance = TestAssets.Get("XunitCore")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            var result = new DotnetTestCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput();
+
+            result.ExitCode.Should().Be(1);
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+                result.StdOut.Should().Contain("Assert.Equal() Failure");
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            }
+        }
+
+        [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
