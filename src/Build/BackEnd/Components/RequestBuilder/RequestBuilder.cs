@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -45,6 +46,11 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class RequestBuilder : IRequestBuilder, IRequestBuilderCallback, IBuildComponent
     {
+        /// <summary>
+        /// The dedicated scheduler object.
+        /// </summary>
+        private static readonly TaskScheduler s_dedicatedScheduler = new DedicatedThreadsTaskScheduler();
+
         /// <summary>
         /// The event used to signal that this request should immediately terminate.
         /// </summary>
@@ -629,8 +635,8 @@ namespace Microsoft.Build.BackEnd
                             return this.RequestThreadProc(setThreadParameters: true);
                         },
                         _cancellationTokenSource.Token,
-                        TaskCreationOptions.LongRunning,
-                        TaskScheduler.Default).Unwrap();
+                        TaskCreationOptions.None,
+                        s_dedicatedScheduler).Unwrap();
                 }
             }
         }
@@ -658,8 +664,10 @@ namespace Microsoft.Build.BackEnd
                 threadName = "RequestBuilder STA thread";
             }
 #endif
-
-            Thread.CurrentThread.Name = threadName;
+            if (string.IsNullOrEmpty(Thread.CurrentThread.Name))
+            {
+                Thread.CurrentThread.Name = threadName;
+            }
         }
 
         /// <summary>
@@ -1316,6 +1324,58 @@ namespace Microsoft.Build.BackEnd
             }
             
             return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+        }
+
+        private sealed class DedicatedThreadsTaskScheduler : TaskScheduler
+        {
+            private readonly BlockingCollection<Task> _tasks = new BlockingCollection<Task>();
+            private int _availableThreads = 0;
+
+            protected override void QueueTask(Task task)
+            {
+                RequestThread();
+                _tasks.Add(task);
+            }
+
+            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) => false;
+
+            protected override IEnumerable<Task> GetScheduledTasks() => _tasks;
+
+            private void RequestThread()
+            {
+                // Decrement available thread count; don't drop below zero
+                // Prior value is stored in count
+                var count = Volatile.Read(ref _availableThreads);
+                while (count > 0)
+                {
+                    var prev = Interlocked.CompareExchange(ref _availableThreads, count - 1, count);
+                    if (prev == count)
+                    {
+                        break;
+                    }
+                    count = prev;
+                }
+
+                if (count == 0)
+                {
+                    // No threads were available for request
+                    InjectThread();
+                }
+            }
+
+            private void InjectThread()
+            {
+                var thread = new Thread(() =>
+                {
+                    foreach (Task t in _tasks.GetConsumingEnumerable())
+                    {
+                        TryExecuteTask(t);
+                        Interlocked.Increment(ref _availableThreads);
+                    }
+                });
+                thread.IsBackground = true;
+                thread.Start();
+            }
         }
     }
 }

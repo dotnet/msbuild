@@ -178,6 +178,22 @@ namespace Microsoft.Build.Tasks
         public void Cancel() { }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class DownloadFile : Microsoft.Build.Tasks.TaskExtension, Microsoft.Build.Framework.ICancelableTask, Microsoft.Build.Framework.ITask
+    {
+        public DownloadFile() { }
+        public Microsoft.Build.Framework.ITaskItem DestinationFileName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem DestinationFolder { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem DownloadedFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int Retries { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int RetryDelayMilliseconds { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool SkipUnchangedFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string SourceUrl { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public void Cancel() { }
+        public override bool Execute() { throw null; }
+    }
     public sealed partial class Error : Microsoft.Build.Tasks.TaskExtension
     {
         public Error() { }
@@ -375,6 +391,8 @@ namespace Microsoft.Build.Tasks
         public string FrameworkVersion46Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion471Path { get { throw null; } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkVersion472Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion47Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]

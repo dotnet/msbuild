@@ -2664,6 +2664,33 @@
     <value>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</value>
     <comment>{StrBegin="MSB4801: "}</comment>
   </data>
+
+  <!--
+        MSB3921 - MSB3930   Task: DownloadFile
+  -->
+  <data name="DownloadFile.ErrorInvalidUrl" xml:space="preserve">
+    <value>MSB3921: The specified URL "{0}" is not valid.</value>
+    <comment>{StrBegin="MSB3921: "}</comment>
+  </data>
+  <data name="DownloadFile.ErrorUnknownFileName" xml:space="preserve">
+    <value>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</value>
+    <comment>{StrBegin="MSB3922: "}</comment>
+  </data>
+  <data name="DownloadFile.ErrorDownloading" xml:space="preserve">
+    <value>MSB3923: Failed to download file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB3923: "}</comment>
+  </data>
+  <data name="DownloadFile.Retrying" xml:space="preserve">
+    <value>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</value>
+    <comment>{StrBegin="MSB3924: "}</comment>
+  </data>
+  <data name="DownloadFile.DidNotDownloadBecauseOfFileMatch">
+    <value>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</value>
+  </data>
+  <data name="DownloadFile.Downloading">
+    <value>Downloading from "{0}" to "{1}" ({2:N0} bytes).</value>
+  </data>
+
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -2743,6 +2770,7 @@
             MSB3891 - MSB3900   Overflow: Copy
             MSB3901 - MSB3910   Task: Telemetry
             MSB3911 - MSB3920   Task: CodeTaskFactory
+            MSB3921 - MSB3930   Task: DownloadFile
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
