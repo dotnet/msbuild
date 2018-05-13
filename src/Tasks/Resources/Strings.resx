@@ -2331,6 +2331,7 @@
 
  <!--
         MSB3751 - MSB3761   Task: CodeTaskFactory
+        MSB3911 - MSB3920   Task: CodeTaskFactory
         CodeTaskFactory Exception messagse
         If this bucket overflows, pls. contact 'vsppbdev'.
  -->
@@ -2342,6 +2343,10 @@
     <value>MSB3752: The "{0}" attribute has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
     <comment>{StrBegin="MSB3752: "}</comment>
   </data>
+  <data name="CodeTaskFactory.AttributeEmptyWithElement" xml:space="preserve">
+    <value>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
+    <comment>{StrBegin="MSB3752: "}</comment>
+  </data>
   <data name="CodeTaskFactory.NeedsITaskInterface" xml:space="preserve">
     <value>MSB3753: The task could not be instantiated because it does not implement the ITask interface. Make sure the task implements the Microsoft.Build.Framework.ITask interface.</value>
     <comment>{StrBegin="MSB3753: "}</comment>
@@ -2351,15 +2356,15 @@
     <comment>{StrBegin="MSB3754: "}</comment>
   </data>
   <data name="CodeTaskFactory.CouldNotFindReferenceAssembly" xml:space="preserve">
-    <value>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors."</value>
+    <value>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</value>
     <comment>{StrBegin="MSB3755: "}</comment>
   </data>
   <data name="CodeTaskFactory.InvalidElementLocation" xml:space="preserve">
-    <value>MSB3756: The xml element "{0}" is not valid under the xml element "{1}".</value>
+    <value>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</value>
     <comment>{StrBegin="MSB3756: "}</comment>
   </data>
   <data name="CodeTaskFactory.MultipleCodeNodes" xml:space="preserve">
-    <value>MSB3757: Multiple Code xml elements have been found, this is not allowed. To fix this issue remove any additional Code xml elements from the task.</value>
+    <value>MSB3757: Only one &lt;Code&gt; element can be specified.</value>
     <comment>{StrBegin="MSB3757: "}</comment>
   </data>
   <data name="CodeTaskFactory.CompilerError" xml:space="preserve">
@@ -2375,7 +2380,29 @@
   <data name="CodeTaskFactory.HaveReflectionOnlyAssembly" xml:space="preserve">
     <value>The reference assembly "{0}" is a metadata only assembly.</value>
   </data>
-
+  <data name="CodeTaskFactory.InvalidCodeType" xml:space="preserve">
+    <value>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</value>
+    <comment>{StrBegin="MSB3759: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.InvalidCodeLanguage" xml:space="preserve">
+    <value>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</value>
+    <comment>{StrBegin="MSB3759: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.NoSourceCode" xml:space="preserve">
+    <value>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</value>
+    <comment>{StrBegin="MSB3760: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.CompilingAssembly" xml:space="preserve">
+    <value>Compiling task source code</value>
+  </data>
+  <data name="CodeTaskFactory.InvalidTaskXml" xml:space="preserve">
+    <value>MSB3761: The specified task XML is invalid.  {0}</value>
+    <comment>{StrBegin="MSB3761: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.InvalidCodeElementAttribute" xml:space="preserve">
+    <value>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</value>
+    <comment>{StrBegin="MSB3756: "}</comment>
+  </data>
   <!--
         MSB3773 - MSB3783   Task: ResolveSDKReference
         MSB3841 - MSB3850   
@@ -2742,6 +2769,7 @@
             MSB3881 - MSB3890   Task: Compiler
             MSB3891 - MSB3900   Overflow: Copy
             MSB3901 - MSB3910   Task: Telemetry
+            MSB3911 - MSB3920   Task: CodeTaskFactory
             MSB3921 - MSB3930   Task: DownloadFile
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)

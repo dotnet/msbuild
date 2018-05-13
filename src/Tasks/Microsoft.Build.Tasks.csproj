@@ -475,6 +475,10 @@
     <Compile Include="ResolveProjectBase.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactory.cs" />
+    <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
+    <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
+    <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
     <Compile Include="TaskExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -937,6 +941,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    
+    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" />
+    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
@@ -944,10 +951,10 @@
 
     <!-- Reference compilers package without using assets, so we can copy them to the output directory under the Roslyn folder -->
     <PackageReference Include="Microsoft.Net.Compilers" Version="$(MicrosoftNetCompilersVersion)" ExcludeAssets="All" />
-
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <PackageReference Include="System.CodeDom" Version="4.4.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
     <PackageReference Include="System.Linq.Parallel" Version="4.0.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.0" />

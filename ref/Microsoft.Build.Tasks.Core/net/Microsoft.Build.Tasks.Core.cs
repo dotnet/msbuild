@@ -1058,6 +1058,16 @@ namespace Microsoft.Build.Tasks
         public bool WarnOnMissingPlatformVersion { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class RoslynCodeTaskFactory : Microsoft.Build.Framework.ITaskFactory
+    {
+        public RoslynCodeTaskFactory() { }
+        public string FactoryName { get { throw null; } }
+        public System.Type TaskType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public void CleanupTask(Microsoft.Build.Framework.ITask task) { }
+        public Microsoft.Build.Framework.ITask CreateTask(Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+        public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
+        public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+    }
     public partial class SGen : Microsoft.Build.Tasks.ToolTaskExtension
     {
         public SGen() { }

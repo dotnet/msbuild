@@ -611,6 +611,16 @@ namespace Microsoft.Build.Tasks
         protected System.Xml.XmlElement GetProjectElement(Microsoft.Build.Framework.ITaskItem projectRef) { throw null; }
         protected string GetProjectItem(Microsoft.Build.Framework.ITaskItem projectRef) { throw null; }
     }
+    public sealed partial class RoslynCodeTaskFactory : Microsoft.Build.Framework.ITaskFactory
+    {
+        public RoslynCodeTaskFactory() { }
+        public string FactoryName { get { throw null; } }
+        public System.Type TaskType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public void CleanupTask(Microsoft.Build.Framework.ITask task) { }
+        public Microsoft.Build.Framework.ITask CreateTask(Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+        public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
+        public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+    }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
     {
         internal TaskExtension() { }
