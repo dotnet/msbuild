@@ -1955,6 +1955,53 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain(guid2);
         }
 
+        [Fact]
+        public void RestoreIgnoresMissingImports()
+        {
+            string guid1 = Guid.NewGuid().ToString("N");
+            string guid2 = Guid.NewGuid().ToString("N");
+            string restoreFirstProps = $"{Guid.NewGuid():N}.props";
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+
+  <PropertyGroup>
+    <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
+  </PropertyGroup>
+  
+  <Import Project=""$(RestoreFirstProps)"" />
+
+  <Target Name=""Build"">
+    <Error Text=""PropertyA does not have a value defined"" Condition="" '$(PropertyA)' == '' "" />
+    <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
+  </Target>
+
+  <Target Name=""Restore"">
+    <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
+    <ItemGroup>
+      <Lines Include=""&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+    </ItemGroup>
+    
+    <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
+  </Target>
+  
+</Project>");
+
+            IDictionary<string, string> preExistingProps = new Dictionary<string, string>
+            {
+                { restoreFirstProps, $@"<Project ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  <PropertyGroup>
+    <PropertyA>{guid1}</PropertyA>
+  </PropertyGroup>
+</Project>"
+                }
+            };
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, preExistingProps, "/restore");
+
+            logContents.ShouldContain(guid1);
+            logContents.ShouldContain(guid2);
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;

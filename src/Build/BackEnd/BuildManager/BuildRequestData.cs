@@ -76,6 +76,12 @@ namespace Microsoft.Build.Execution
         /// explicitly-requested properties, items, and metadata.
         /// </summary>
         ProvideSubsetOfStateAfterBuild = 1 << 5,
+
+        /// <summary>
+        /// When this flag is present, projects loaded during build will ignore missing imports (<see cref="ProjectLoadSettings.IgnoreMissingImports"/> and <see cref="ProjectLoadSettings.IgnoreInvalidImports"/>).
+        /// This is especially useful during a restore since some imports might come from packages that haven't been restored yet.
+        /// </summary>
+        IgnoreMissingEmptyAndInvalidImports = 1 << 6,
     }
 
     /// <summary>

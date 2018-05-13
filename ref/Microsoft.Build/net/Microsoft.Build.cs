@@ -1026,6 +1026,7 @@ namespace Microsoft.Build.Execution
     {
         ClearCachesAfterBuild = 8,
         IgnoreExistingProjectState = 4,
+        IgnoreMissingEmptyAndInvalidImports = 64,
         None = 0,
         ProvideProjectStateAfterBuild = 2,
         ProvideSubsetOfStateAfterBuild = 32,

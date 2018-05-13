@@ -1163,6 +1163,14 @@ namespace Microsoft.Build.BackEnd
             // Get the hosted ISdkResolverService.  This returns either the MainNodeSdkResolverService or the OutOfProcNodeSdkResolverService depending on who created the current RequestBuilder
             ISdkResolverService sdkResolverService = _componentHost.GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
 
+            // Use different project load settings if the build request indicates to do so
+            ProjectLoadSettings projectLoadSettings = _componentHost.BuildParameters.ProjectLoadSettings;
+
+            if (_requestEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
+            {
+                projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
+            }
+
             return new ProjectInstance(
                 _requestEntry.RequestConfiguration.ProjectFullPath,
                 globalProperties,
@@ -1177,8 +1185,9 @@ namespace Microsoft.Build.BackEnd
                     BuildEventContext.InvalidProjectContextId,
                     BuildEventContext.InvalidTargetId,
                     BuildEventContext.InvalidTaskId),
-                    sdkResolverService,
-                    _requestEntry.Request.SubmissionId);
+                sdkResolverService,
+                _requestEntry.Request.SubmissionId,
+                projectLoadSettings);
         }
 
         /// <summary>
