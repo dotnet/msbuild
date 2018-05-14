@@ -41,10 +41,12 @@
   </Target>
 
   <Target Name="RemoveExtraAssemblyReferences" BeforeTargets="ResolveAssemblyReferences">
-    <!-- This is really hacky, but these references will cause issues when trying to 'build' this project. We are using
-         the PackageReference so that NuGet will do the compabability check on references and grab the right one. At
-         'bootstrap' time these runtime depdendncies need to be in a specific location that does not mesh with NuGet.
-         To resolve this, remove them from the Reference ItemGroup before RAR runs and avoid the warnings -->
+    <!-- This is really hacky, but these references will cause issues when trying to 'build' this project.
+         To acquire the NuGet binaries we depend on for local run-time ('bootstrap'), we we are using a PackageReference (to
+         'NuGet.Build.Tasks' and 'Microsoft.Build.NuGetSdkResolver'). This has the advantage of using NuGets compatibility
+         check to ensure we choose the right version of those assemblies. But, at 'bootstrap' time these runtime dependencies
+         need to be in a specific location that does not mesh with NuGet. To resolve this, we include the default
+         PackageReference assets but will remove them from the Reference ItemGroup before RAR runs and avoid the warnings -->
     <ItemGroup>
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build.Utilities.v4.0'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build.Framework'))' == 'True'" />
