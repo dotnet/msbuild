@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -191,6 +192,49 @@ namespace Microsoft.DotNet.Tests
             result.StdOut
                 .Should()
                 .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled);
+        }
+
+        [LinuxOnlyFact]
+        public void ItCreatesTheProfileFileOnLinuxWhenInvokedFromNativeInstaller()
+        {
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+
+            var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = emptyHome;
+            command.Environment["USERPROFILE"] = emptyHome;
+            command.Environment["APPDATA"] = emptyHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            File.Exists(profiled).Should().BeTrue();
+            File.ReadAllText(profiled).Should().Be(
+                $"export PATH=\"$PATH:{new CliFolderPathCalculator().ToolsShimPathInUnix.PathWithDollar}\"");
+        }
+
+        [MacOsOnlyFact]
+        public void ItCreatesThePathDFileOnMacOSWhenInvokedFromNativeInstaller()
+        {
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
+
+            var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = emptyHome;
+            command.Environment["USERPROFILE"] = emptyHome;
+            command.Environment["APPDATA"] = emptyHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
+            command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            File.Exists(pathsd).Should().BeTrue();
+            File.ReadAllText(pathsd).Should().Be(new CliFolderPathCalculator().ToolsShimPathInUnix.PathWithTilde);
         }
 
         [Fact]

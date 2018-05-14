@@ -7,9 +7,16 @@ namespace Microsoft.DotNet.Configurer
 {
     public class NoOpFileSentinel : IFileSentinel
     {
+        private bool _exists;
+
+        public NoOpFileSentinel(bool exists)
+        {
+            _exists = exists;
+        }
+
         public bool Exists()
         {
-            return true;
+            return _exists;
         }
 
         public void Create()
