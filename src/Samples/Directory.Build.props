@@ -3,6 +3,7 @@
   <PropertyGroup>
     <!-- Use Samples subdirectory for samples in output folder -->
     <OutDirName>Samples\$(MSBuildProjectName)</OutDirName>
+	<DisableNerdbankVersioning>true</DisableNerdbankVersioning>
   </PropertyGroup>
 
   <!-- Import parent props -->

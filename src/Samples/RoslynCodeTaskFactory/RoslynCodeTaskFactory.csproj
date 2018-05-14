@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <!--
+    RoslynCodeTaskFactory was added in 15.8.59, previous versions of MSBuild will just fail so don't import the targets
+  -->
+  <Import Project="RoslynCodeTaskFactory.targets" Condition=" '$(MSBuildVersion)' != '' And '$(MSBuildVersion)' &gt;= '15.8.59' " />
+
+</Project>
