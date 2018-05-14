@@ -7,7 +7,6 @@
                       SetTargetFramework="TargetFramework=$(TargetFramework)"/>
     <ProjectReference Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
     <ProjectReference Include="..\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildConversionResolvedProjectReferencePath" />
-    <ProjectReference Include="..\..\NuGetSdkResolver\NuGet.MSBuildSdkResolver.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="NuGetMSBuildSdkResolverResolvedProjectReferencePath" />
 
     <!-- Set up items to build projects where the Platform is set to x64, when we need the x64 versions of the files.
          We have to treat these separately from normal project references, as the AssignProjectConfiguration task would overwrite
@@ -34,7 +33,6 @@
       <MSBuildTaskHostBinPath>@(MSBuildTaskHostResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostBinPath>
       <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
       <MSBuildConversionBinPath>@(MSBuildConversionResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildConversionBinPath>
-      <NuGetMSBuildSdkResolverPath>@(NuGetMSBuildSdkResolverResolvedProjectReferencePath->'%(RootDir)%(Directory)')</NuGetMSBuildSdkResolverPath>
     </PropertyGroup>
   </Target>
 

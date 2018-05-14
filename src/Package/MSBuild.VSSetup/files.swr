@@ -57,37 +57,8 @@ folder InstallDir:\MSBuild\15.0\Bin\ref
   file source=$(X86BinPath)ref\mscorlib.dll
   file source=$(X86BinPath)ref\netstandard.dll
 
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\NuGet.MSBuildSdkResolver.dll
-
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\cs
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\cs\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\de
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\de\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\en
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\en\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\es
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\es\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\fr
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\fr\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\it
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\it\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\ja
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\ja\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\ko
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\ko\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\pl
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\pl\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\pt-BR
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\pt-BR\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\ru
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\ru\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\tr
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\tr\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hans
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hans\NuGet.MSBuildSdkResolver.resources.dll
-folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hant
-  file source=$(X86BinPath)SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hant\NuGet.MSBuildSdkResolver.resources.dll
+folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver
+  file source=$(SourceDir)MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml
 
 folder InstallDir:\MSBuild\15.0\Bin\cs
   file source=$(X86BinPath)cs\Microsoft.Build.resources.dll vs.file.ngenArchitecture=all

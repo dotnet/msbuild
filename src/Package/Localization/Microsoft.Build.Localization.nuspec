@@ -82,22 +82,5 @@
     <file src="tr\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\tr\Microsoft.Build.Utilities.Core.resources.dll" />
     <file src="zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" />
     <file src="zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" />
-
-        <!-- NuGet.MSBuildSdkResolver.dll -->
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\cs\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\cs\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\de\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\de\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\en\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\en\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\es\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\es\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\fr\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\fr\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\it\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\it\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\ja\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\ja\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\ko\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\ko\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\pl\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\pl\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\pt-BR\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\pt-BR\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\ru\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\ru\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\tr\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\tr\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hans\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hans\NuGet.MSBuildSdkResolver.resources.dll"/>
-    <file src="SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hant\NuGet.MSBuildSdkResolver.resources.dll" target="contentFiles\any\netstandard1.3\SdkResolvers\NuGet.MSBuildSdkResolver\zh-Hant\NuGet.MSBuildSdkResolver.resources.dll"/>
-
   </files>
 </package>
