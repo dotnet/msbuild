@@ -19,6 +19,6 @@
     
   </ItemGroup>
 
-  <Import Project="..\Directory.Build.targets" />
+  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
 
 </Project>
