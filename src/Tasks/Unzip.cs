@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 
 namespace Microsoft.Build.Tasks
 {
@@ -16,9 +17,9 @@ namespace Microsoft.Build.Tasks
     public sealed class Unzip : TaskExtension, ICancelableTask
     {
         /// <summary>
-        /// Stores a value indicating if a cancellation was requested.
+        /// Stores a <see cref="CancellationTokenSource"/> used for cancellation.
         /// </summary>
-        private bool _canceling;
+        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
 
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> with a destination folder path to unzip the files to.
@@ -45,7 +46,7 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
         {
-            _canceling = true;
+            _cancellationToken.Cancel();
         }
 
         /// <inheritdoc cref="Task.Execute"/>
@@ -63,7 +64,9 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_canceling))
+            BuildEngine3.Yield();
+
+            foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
                 if (!File.Exists(sourceFile.ItemSpec))
                 {
@@ -90,6 +93,10 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
                 catch (Exception e)
                 {
                     // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
@@ -97,7 +104,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return !_canceling && !Log.HasLoggedErrors;
+            BuildEngine3.Reacquire();
+
+            return !_cancellationToken.IsCancellationRequested && !Log.HasLoggedErrors;
         }
 
         /// <summary>
@@ -108,7 +117,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ITaskItem sourceTaskItem, ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
-            foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_canceling))
+            foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
                 FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
 
@@ -156,7 +165,7 @@ namespace Microsoft.Build.Tasks
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                     using (Stream stream = zipArchiveEntry.Open())
                     {
-                        stream.CopyTo(destination);
+                        stream.CopyToAsync(destination, 81920, _cancellationToken.Token);
                     }
 
                     destinationPath.LastWriteTimeUtc = zipArchiveEntry.LastWriteTime.UtcDateTime;
