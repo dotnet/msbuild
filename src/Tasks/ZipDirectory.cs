@@ -10,35 +10,55 @@ namespace Microsoft.Build.Tasks
 {
     public sealed class ZipDirectory : TaskExtension
     {
+        /// <summary>
+        /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the destination file to create.
+        /// </summary>
         [Required]
         public ITaskItem DestinationFile { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating if the destination file should be overwritten.
+        /// </summary>
+        public bool Overwrite { get; set; }
+
+        /// <summary>
+        /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the source directory to create a zip archive from.
+        /// </summary>
         [Required]
         public ITaskItem SourceDirectory { get; set; }
 
         public override bool Execute()
         {
-            if (!Directory.Exists(SourceDirectory.ItemSpec))
+            DirectoryInfo sourceDirectory = new DirectoryInfo(SourceDirectory.ItemSpec);
+
+            if (!sourceDirectory.Exists)
             {
-                Log.LogErrorFromResources("ZipDirectory.ErrorDirectoryDoesNotExist", SourceDirectory.ItemSpec);
+                Log.LogErrorFromResources("ZipDirectory.ErrorDirectoryDoesNotExist", sourceDirectory.FullName);
                 return false;
             }
 
-            if (File.Exists(DestinationFile.ItemSpec))
-            {
-                Log.LogErrorFromResources("ZipDirectory.ErrorFileExists", DestinationFile.ItemSpec);
+            FileInfo destinationFile = new FileInfo(DestinationFile.ItemSpec);
 
-                return false;
+            if (destinationFile.Exists)
+            {
+                if(!Overwrite)
+                {
+                    Log.LogErrorFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
+
+                    return false;
+                }
+
+                File.Delete(destinationFile.FullName);
             }
 
             try
             {
-                Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", SourceDirectory.ItemSpec, DestinationFile.ItemSpec);
-                ZipFile.CreateFromDirectory(SourceDirectory.ItemSpec, DestinationFile.ItemSpec);
+                Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
+                ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
             }
             catch (Exception e)
             {
-                Log.LogErrorFromResources("ZipDirectory.ErrorFailed", SourceDirectory.ItemSpec, DestinationFile.ItemSpec, e.Message);
+                Log.LogErrorFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
             }
 
             return !Log.HasLoggedErrors;

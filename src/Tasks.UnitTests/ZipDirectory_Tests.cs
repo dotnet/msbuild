@@ -59,6 +59,48 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void CanOvewriteExistingFile()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "F1C22D660B0D4DAAA296C1B980320B03.txt", "F1C22D660B0D4DAAA296C1B980320B03");
+                testEnvironment.CreateFile(sourceFolder, "AA825D1CB154492BAA58E1002CE1DFEB.txt", "AA825D1CB154492BAA58E1002CE1DFEB");
+
+                TransientTestFile file = testEnvironment.CreateFile(testEnvironment.DefaultTestDirectory, "test.zip", contents: "test");
+
+                ZipDirectory zipDirectory = new ZipDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(file.Path),
+                    Overwrite = true,
+                    SourceDirectory = new TaskItem(sourceFolder.FolderPath)
+                };
+
+                zipDirectory.Execute().ShouldBeTrue(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain(sourceFolder.FolderPath, () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(file.Path, () => _mockEngine.Log);
+
+                using (FileStream stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
+                {
+                    archive.Entries
+                        .Select(i => i.FullName)
+                        .ToList()
+                        .ShouldBe(
+                            new List<string>
+                            {
+                                "F1C22D660B0D4DAAA296C1B980320B03.txt",
+                                "AA825D1CB154492BAA58E1002CE1DFEB.txt"
+                            },
+                            ignoreOrder: true);
+                }
+            }
+        }
+
+        [Fact]
         public void LogsErrorIfDestinationExists()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
