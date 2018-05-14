@@ -3476,7 +3476,7 @@ namespace Microsoft.Build.CommandLine
             const string frameworkName = ".NET Framework";
 #endif
 
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ThisAssembly.AssemblyInformationalVersion, frameworkName));
         }
 
         /// <summary>
