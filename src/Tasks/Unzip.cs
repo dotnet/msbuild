@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -121,7 +119,7 @@ namespace Microsoft.Build.Tasks
                     Log.LogErrorFromResources("Unzip.ErrorExtractingResultsInFilesOutsideDestination", destinationPath.FullName, destinationDirectory.FullName);
                     continue;
                 }
-                
+
                 if (ShouldSkipEntry(zipArchiveEntry, destinationPath))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
@@ -154,7 +152,7 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
-                    
+
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                     using (Stream stream = zipArchiveEntry.Open())
                     {

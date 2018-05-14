@@ -47,11 +47,13 @@ namespace Microsoft.Build.Tasks.UnitTests
                     archive.Entries
                         .Select(i => i.FullName)
                         .ToList()
-                        .ShouldBe(new List<string>
-                        {
-                            "6DE6060259C44DB6B145159376751C22.txt",
-                            "CDA3DD8C25A54A7CAC638A444CB1EAD0.txt"
-                        });
+                        .ShouldBe(
+                            new List<string>
+                            {
+                                "6DE6060259C44DB6B145159376751C22.txt",
+                                "CDA3DD8C25A54A7CAC638A444CB1EAD0.txt"
+                            },
+                            ignoreOrder: true);
                 }
             }
         }

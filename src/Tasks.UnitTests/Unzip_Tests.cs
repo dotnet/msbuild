@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
@@ -70,19 +71,24 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+#if  RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "Can't figure out how to make CreateDirectory throw on non-Windows")]
+#else
         [Fact]
+#endif
         public void LogsErrorIfDirectoryCannotBeCreated()
         {
             Unzip unzip = new Unzip
             {
                 BuildEngine = _mockEngine,
-                DestinationFolder = new TaskItem(@"Y:\foo")
+                DestinationFolder = new TaskItem(String.Empty)
             };
 
             unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3911", () => _mockEngine.Log);
+            _mockEngine.Log.ShouldContain("MSB3931", () => _mockEngine.Log);
         }
+
 
         [Fact]
         public void LogsErrorIfReadOnlyFileCannotBeOverwitten()
@@ -130,7 +136,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3913", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3933", () => _mockEngine.Log);
             }
         }
 
@@ -150,7 +156,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3912", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3932", () => _mockEngine.Log);
             }
         }
     }
