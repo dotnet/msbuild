@@ -82,7 +82,7 @@ namespace Microsoft.Build.Tasks
                         {
                             try
                             {
-                                Extract(sourceFile, zipArchive, destinationDirectory);
+                                Extract(zipArchive, destinationDirectory);
                             }
                             catch (Exception e)
                             {
@@ -112,10 +112,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Extracts all files to the specified directory.
         /// </summary>
-        /// <param name="sourceTaskItem">The original <see cref="ITaskItem"/> containing details about the source file.</param>
         /// <param name="sourceArchive">The <see cref="ZipArchive"/> containing the files to extract.</param>
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
-        private void Extract(ITaskItem sourceTaskItem, ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
+        private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
