@@ -9,14 +9,14 @@
     <CliVersionNoSuffix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>
     <CliVersionPrefix>$(CliVersionNoSuffix)-$(ReleaseSuffix)</CliVersionPrefix>
     <CliBrandingVersion>$(CliVersionNoSuffix) - $(ReleaseSuffix)</CliBrandingVersion>
-    <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(CliVersionNoSuffix).$(CommitCount)</SimpleVersion>
+    <SimpleVersion Condition=" '$(DropSuffix)' != 'true' ">$(CliVersionNoSuffix).$(CommitCount)</SimpleVersion>
     <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(CliVersionNoSuffix)</SimpleVersion>
 
-    <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
+    <VersionSuffix Condition=" '$(DropSuffix)' != 'true' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
 
     <FullNugetVersion>$(CliVersionNoSuffix)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion>
 
-    <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(FullNugetVersion)</NugetVersion>
+    <NugetVersion Condition=" '$(DropSuffix)' != 'true' ">$(FullNugetVersion)</NugetVersion>
     <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(CliVersionNoSuffix)</NugetVersion>
 
     <SdkVersion>$(NugetVersion)</SdkVersion>
