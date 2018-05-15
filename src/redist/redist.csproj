@@ -283,6 +283,9 @@
       <RemainingFiles Remove="$(PublishDir)**\*.resources.dll" />
 
       <DiasymReaderPath Include="$(SharedFrameworkNameVersionPath)/Microsoft.DiaSymReader.Native.*.dll" />
+
+      <!-- MSBuild includes reference assemblies to compile in-memory tasks. Don't try to crossgen. -->
+      <RemainingFiles Remove="$(PublishDir)ref\*.dll" />
     </ItemGroup>
 
     <AddMetadataIsPE Items="@(RoslynFiles)">
