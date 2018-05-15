@@ -42,6 +42,11 @@
         <target state="translated">Publique o tempo de execução .NET Core com seu aplicativo para que o tempo de execução não precise ser instalado no computador de destino. Assumirá 'true' como padrão se um identificador de tempo de execução for especificado.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="translated">Não compile o projeto antes de publicar. Implica em --no-restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

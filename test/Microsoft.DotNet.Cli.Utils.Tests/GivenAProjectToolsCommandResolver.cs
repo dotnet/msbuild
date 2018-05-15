@@ -12,13 +12,14 @@ using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Xunit;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Tests
 {
     public class GivenAProjectToolsCommandResolver : TestBase
     {
         private static readonly NuGetFramework s_toolPackageFramework =
-            FrameworkConstants.CommonFrameworks.NetCoreApp20;
+            NuGetFrameworks.NetCoreApp21;
 
         private const string TestProjectName = "AppWithToolDependency";
 
@@ -303,7 +304,7 @@ namespace Microsoft.DotNet.Tests
 
             result.Should().NotBeNull();
 
-            result.Args.Should().Contain("--fx-version 2.0.7");
+            result.Args.Should().Contain("--fx-version 2.1.0");
         }
 
         [Fact]
@@ -369,7 +370,7 @@ namespace Microsoft.DotNet.Tests
                 "dotnet-fallbackfoldertool",
                 "1.0.0",
                 "lib",
-                "netcoreapp2.0",
+                "netcoreapp2.1",
                 "dotnet-fallbackfoldertool.dll"));
         }
 
@@ -456,7 +457,7 @@ namespace Microsoft.DotNet.Tests
         {
             //  When using the product, the ToolDepsJsonGeneratorProject property is used to get this path, but for testing
             //  we'll hard code the path inside the SDK since we don't have a project to evaluate here
-            return Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "Sdks", "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
+            return Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "Sdks", "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
         }
     }
 }

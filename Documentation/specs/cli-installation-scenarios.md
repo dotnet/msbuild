@@ -17,6 +17,8 @@ Obtaining .NET CLI
 * [Acquisition modes](#acquisition-modes)
   * [Native installers](#native-installers)
   * [Installation script](#installation-script)
+    * [Windows one-liner](#windows-command)
+    * [OSX/Linux one-liner](#osxlinux-shell-command)
   * [Complete manual installation](#complete-manual-installation)
   * [Docker](#docker)
   * [NuGet Packages](#nuget-packages)
@@ -254,6 +256,18 @@ Windows:
 OSX/Linux:
 ```
 ./dotnet-install.sh --channel 2.0
+```
+
+#### Windows obtain one-liner example
+
+```
+@powershell -NoProfile -ExecutionPolicy unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -useb 'https://dot.net/v1/dotnet-install.ps1'))) <additional installation-script args>"
+```
+
+#### OSX/Linux obtain one-liner
+
+```
+curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin <additional installation-script args>
 ```
 
 ### Docker 

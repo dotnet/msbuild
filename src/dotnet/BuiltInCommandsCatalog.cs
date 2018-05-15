@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Build;
+using Microsoft.DotNet.Tools.BuildServer;
 using Microsoft.DotNet.Tools.Clean;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.List;
@@ -20,6 +21,7 @@ using Microsoft.DotNet.Tools.Store;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
+using Microsoft.DotNet.Tools.Tool;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -143,6 +145,16 @@ namespace Microsoft.DotNet.Cli
             ["parse"] = new BuiltInCommandMetadata
             {
                 Command = ParseCommand.Run
+            },
+            ["tool"] = new BuiltInCommandMetadata
+            {
+                Command = ToolCommand.Run,
+                DocLink = "https://aka.ms/dotnet-tool"
+            },
+            ["build-server"] = new BuiltInCommandMetadata
+            {
+                Command = BuildServerCommand.Run,
+                DocLink = "https://aka.ms/dotnet-build-server"
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {

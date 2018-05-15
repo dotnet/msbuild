@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkSymbolsLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkSymbols)</SdkSymbolsLayoutOutputDirectory>
     <CombinedHostHostFxrFrameworkSdkOutputDirectory>$(LayoutDirectory)/$(ArtifactNameCombinedHostHostFxrFrameworkSdk)</CombinedHostHostFxrFrameworkSdkOutputDirectory>
     <SdkLanguagePackOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkLanguagePack)</SdkLanguagePackOutputDirectory>
     <SatelliteAssemblies>*.resources.dll</SatelliteAssemblies>
@@ -12,11 +11,10 @@
     <!-- Set up Items with Layout Input Files -->
     <ItemGroup>
       <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
-      <SdkSymbolsLayoutInput Include="$(SymbolsDirectory)/sdk/**/*" />
       <CombinedHostHostFxrFrameworkSdkInput Include="$(OutputDirectory)/**/*" />
       <SdkLanguagePackInput Include="$(OutputDirectory)/sdk/**/$(SatelliteAssemblies)" />
 
-      <AspNetRuntimeFilesInput Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
+      <AspNetRuntimeFilesInput Include="$(AspNetCoreSharedFxPublishDirectory)/**/*" />
 
       <MSBuildExtensionsInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions/**/*" />
       <MSBuildExtensionsVerInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions-ver/**/*" />
@@ -28,12 +26,6 @@
       Path1="$(OutputDirectory)/"
       Path2="%(SdkLayoutInput.Identity)" >
       <Output TaskParameter="RelativePath" ItemName="SdkRelativeOutputFiles" />
-    </MakeRelative>
-    <MakeRelative
-      Condition="'$(SeparateSymbolsArchive)' != 'false'"
-      Path1="$(SymbolsDirectory)/"
-      Path2="%(SdkSymbolsLayoutInput.Identity)" >
-      <Output TaskParameter="RelativePath" ItemName="SdkSymbolsRelativeOutputFiles" />
     </MakeRelative>
     <MakeRelative
       Path1="$(OutputDirectory)/"
@@ -69,13 +61,6 @@
         <OutputFiles>@(SdkRelativeOutputFiles -> '$(SdkLayoutOutputDirectory)/%(Identity)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdk)</NameWithVersion>
         <Name>$(ArtifactNameSdk)</Name>
-      </LayoutDefinition>
-
-      <LayoutDefinition Include="SdkSymbols" Condition="'$(SeparateSymbolsArchive)' != 'false'">
-        <InputFiles>@(SdkSymbolsLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkSymbolsRelativeOutputFiles -> '$(SdkSymbolsLayoutOutputDirectory)/%(Identity)')</OutputFiles>
-        <NameWithVersion>$(ArtifactNameWithVersionSdkSymbols)</NameWithVersion>
-        <Name>$(ArtifactNameSdkSymbols)</Name>
       </LayoutDefinition>
 
       <LayoutDefinition Include="CombinedHostHostFxrFrameworkSdk">

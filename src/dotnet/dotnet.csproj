@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
+    <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
+    <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
@@ -17,34 +17,38 @@
     <EmbeddedResource Include="commands\dotnet-new\*.zip" />
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
     <EmbeddedResource Update="*.resx" Namespace="Microsoft.DotNet.Tools" />
-    <EmbeddedResource Update="**\dotnet-add\*.resx" Namespace="Microsoft.DotNet.Tools.Add" />
+    <EmbeddedResource Update="BuildServer\*.resx" Namespace="Microsoft.DotNet.BuildServer" />
     <EmbeddedResource Update="**\dotnet-add-package\*.resx" Namespace="Microsoft.DotNet.Tools.Add.PackageReference" />
-    <EmbeddedResource Update="**\dotnet-add-proj\*.resx" Namespace="Microsoft.DotNet.Tools.Add.ProjectToSolution" />
     <EmbeddedResource Update="**\dotnet-add-reference\*.resx" Namespace="Microsoft.DotNet.Tools.Add.ProjectToProjectReference" />
+    <EmbeddedResource Update="**\dotnet-add\*.resx" Namespace="Microsoft.DotNet.Tools.Add" />
     <EmbeddedResource Update="**\dotnet-build\*.resx" Namespace="Microsoft.DotNet.Tools.Build" />
+    <EmbeddedResource Update="**\dotnet-buildserver\*.resx" Namespace="Microsoft.DotNet.Tools.BuildServer" />
+    <EmbeddedResource Update="**\dotnet-buildserver\shutdown\*.resx" Namespace="Microsoft.DotNet.Tools.BuildServer.Shutdown" />
     <EmbeddedResource Update="**\dotnet-clean\*.resx" Namespace="Microsoft.DotNet.Tools.Clean" />
     <EmbeddedResource Update="**\dotnet-help\*.resx" Namespace="Microsoft.DotNet.Tools.Help" />
-    <EmbeddedResource Update="**\dotnet-list\*.resx" Namespace="Microsoft.DotNet.Tools.List" />
-    <EmbeddedResource Update="**\dotnet-list-proj\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectsInSolution" />
     <EmbeddedResource Update="**\dotnet-list-reference\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectToProjectReferences" />
+    <EmbeddedResource Update="**\dotnet-list\*.resx" Namespace="Microsoft.DotNet.Tools.List" />
     <EmbeddedResource Update="**\dotnet-migrate\*.resx" Namespace="Microsoft.DotNet.Tools.Migrate" />
     <EmbeddedResource Update="**\dotnet-msbuild\*.resx" Namespace="Microsoft.DotNet.Tools.MSBuild" />
     <EmbeddedResource Update="**\dotnet-pack\*.resx" Namespace="Microsoft.DotNet.Tools.Pack" />
     <EmbeddedResource Update="**\dotnet-publish\*.resx" Namespace="Microsoft.DotNet.Tools.Publish" />
-    <EmbeddedResource Update="**\dotnet-remove\*.resx" Namespace="Microsoft.DotNet.Tools.Remove" />
     <EmbeddedResource Update="**\dotnet-remove-package\*.resx" Namespace="Microsoft.DotNet.Tools.Remove.PackageReference" />
-    <EmbeddedResource Update="**\dotnet-remove-proj\*.resx" Namespace="Microsoft.DotNet.Tools.Remove.ProjectFromSolution" />
     <EmbeddedResource Update="**\dotnet-remove-reference\*.resx" Namespace="Microsoft.DotNet.Tools.Remove.ProjectToProjectReference" />
+    <EmbeddedResource Update="**\dotnet-remove\*.resx" Namespace="Microsoft.DotNet.Tools.Remove" />
     <EmbeddedResource Update="**\dotnet-restore\*.resx" Namespace="Microsoft.DotNet.Tools.Restore" />
     <EmbeddedResource Update="**\dotnet-run\*.resx" Namespace="Microsoft.DotNet.Tools.Run" />
     <EmbeddedResource Update="**\dotnet-sln\*.resx" Namespace="Microsoft.DotNet.Tools.Sln" />
     <EmbeddedResource Update="**\dotnet-store\*.resx" Namespace="Microsoft.DotNet.Tools.Store" />
     <EmbeddedResource Update="**\dotnet-test\*.resx" Namespace="Microsoft.DotNet.Tools.Test" />
+    <EmbeddedResource Update="**\dotnet-tool\*.resx" Namespace="Microsoft.DotNet.Tools.Tool" />
+    <EmbeddedResource Update="**\dotnet-tool\list\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.List" />
+    <EmbeddedResource Update="**\dotnet-tool\uninstall\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Uninstall" />
+    <EmbeddedResource Update="**\dotnet-tool\install\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Install" />
+    <EmbeddedResource Update="**\dotnet-tool\update\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Update" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.InternalAbstractions/Microsoft.DotNet.InternalAbstractions.csproj" />
-    <ProjectReference Include="../Microsoft.DotNet.Archive/Microsoft.DotNet.Archive.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Sln.Internal/Microsoft.DotNet.Cli.Sln.Internal.csproj" />
   </ItemGroup>
@@ -68,10 +72,17 @@
     <PackageReference Include="Microsoft.TemplateEngine.Cli.Localization" Version="$(MicrosoftTemplateEngineCliLocalizationPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(MicrosoftTemplateEngineUtilsPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
+
+  <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
+    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(AspNetCoreVersion)" />
+  </ItemGroup>
+
   <ItemGroup>
     <Folder Include="commands\dotnet-migrate\xlf" />
     <Folder Include="dotnet-complete\commands\" />
   </ItemGroup>
+
 </Project>

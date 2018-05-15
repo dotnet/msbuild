@@ -1,11 +1,11 @@
-<Project ToolsVersion="15.0">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <BundledTemplate Include="Microsoft.DotNet.Common.ItemTemplates" Version="$(MicrosoftDotNetCommonItemTemplatesPackageVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Common.ProjectTemplates.2.0" Version="$(MicrosoftDotNetCommonProjectTemplates20PackageVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Test.ProjectTemplates.2.0" Version="$(MicrosoftDotNetTestProjectTemplates20PackageVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" Version="$(MicrosoftDotNetCommonProjectTemplates20PackageVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Test.ProjectTemplates.2.1" Version="$(MicrosoftDotNetTestProjectTemplates20PackageVersion)" />
 
-    <BundledTemplate Include="Microsoft.DotNet.Web.ItemTemplates" Version="$(AspNetCoreTemplatePackageVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.0" Version="$(AspNetCoreTemplatePackageVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Web.Spa.ProjectTemplates" Version="$(AspNetCoreTemplatePackageVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ItemTemplates" Version="$(AspNetCoreVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.1" Version="$(AspNetCoreVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.Spa.ProjectTemplates" Version="$(AspNetCoreVersion)" />
   </ItemGroup>
 </Project>

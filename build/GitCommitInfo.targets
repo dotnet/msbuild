@@ -1,12 +1,14 @@
 <Project ToolsVersion="15.0">
   <Target Name="WriteGitCommitInfoProps">
     <Exec Command="git rev-list --count HEAD" 
-          ConsoleToMSBuild="true">
+          ConsoleToMSBuild="true"
+          Condition=" '$(GitInfoCommitCount)' == '' ">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitInfoCommitCount" />
     </Exec>
 
     <Exec Command="git rev-parse HEAD" 
-          ConsoleToMSBuild="true">
+          ConsoleToMSBuild="true"
+          Condition=" '$(GitInfoCommitHash)' == '' ">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitInfoCommitHash" />
     </Exec>
 
@@ -23,7 +25,7 @@
       <GitInfoCommitHash>%(GitInfoCommitHashLines.Identity)</GitInfoCommitHash>
 
       <GitCommitInfoPropsContent>
-&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
     &lt;PropertyGroup&gt;
         &lt;CommitCount&gt;$(GitInfoCommitCount)&lt;/CommitCount&gt;
         &lt;CommitHash&gt;$(GitInfoCommitHash)&lt;/CommitHash&gt;
