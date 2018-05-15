@@ -42,7 +42,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            result.ShouldBeNull();
+            result.Success.ShouldBeFalse();
+            result.ShouldNotBeNull();
+            result.SdkReference.ShouldNotBeNull();
+            result.SdkReference.Name.ShouldBe("notfound");
+            result.SdkReference.Version.ShouldBe("referencedVersion");
+            result.SdkReference.MinimumVersion.ShouldBe("minimumVersion");
 
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver2 running");

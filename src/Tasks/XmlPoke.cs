@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The output file.
+        /// The value to be inserted into the specified location.
         /// </summary>
         [Required]
         public ITaskItem Value

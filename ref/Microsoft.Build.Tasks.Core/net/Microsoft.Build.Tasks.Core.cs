@@ -248,6 +248,22 @@ namespace Microsoft.Build.Tasks
         public void Cancel() { }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class DownloadFile : Microsoft.Build.Tasks.TaskExtension, Microsoft.Build.Framework.ICancelableTask, Microsoft.Build.Framework.ITask
+    {
+        public DownloadFile() { }
+        public Microsoft.Build.Framework.ITaskItem DestinationFileName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem DestinationFolder { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem DownloadedFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int Retries { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int RetryDelayMilliseconds { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool SkipUnchangedFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string SourceUrl { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public void Cancel() { }
+        public override bool Execute() { throw null; }
+    }
     public sealed partial class Error : Microsoft.Build.Tasks.TaskExtension
     {
         public Error() { }
@@ -581,6 +597,8 @@ namespace Microsoft.Build.Tasks
         public string FrameworkVersion46Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion471Path { get { throw null; } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkVersion472Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion47Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
@@ -1039,6 +1057,16 @@ namespace Microsoft.Build.Tasks
         public string TargetPlatformVersion { get { throw null; } set { } }
         public bool WarnOnMissingPlatformVersion { get { throw null; } set { } }
         public override bool Execute() { throw null; }
+    }
+    public sealed partial class RoslynCodeTaskFactory : Microsoft.Build.Framework.ITaskFactory
+    {
+        public RoslynCodeTaskFactory() { }
+        public string FactoryName { get { throw null; } }
+        public System.Type TaskType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public void CleanupTask(Microsoft.Build.Framework.ITask task) { }
+        public Microsoft.Build.Framework.ITask CreateTask(Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+        public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
+        public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
     }
     public partial class SGen : Microsoft.Build.Tasks.ToolTaskExtension
     {

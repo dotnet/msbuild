@@ -140,7 +140,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The projects loaded into this collection.
         /// </summary>
-        private LoadedProjectCollection _loadedProjects;
+        private readonly LoadedProjectCollection _loadedProjects;
 
         /// <summary>
         /// The component host for this collection.
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The locations where we look for toolsets.
         /// </summary>
-        private ToolsetDefinitionLocations _toolsetDefinitionLocations;
+        private readonly ToolsetDefinitionLocations _toolsetDefinitionLocations;
 
         /// <summary>
         /// A mapping of tools versions to Toolsets, which contain the public Toolsets.
@@ -172,7 +172,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The default global properties.
         /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
+        private readonly PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
         /// <summary>
         /// The properties representing the environment.
@@ -563,9 +563,9 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_locker.EnterUpgradeableReadLock())
                 {
-                    return (_loggingService.Loggers == null) ?
-                    (ICollection<ILogger>)ReadOnlyEmptyCollection<ILogger>.Instance :
-                    new List<ILogger>(_loggingService.Loggers);
+                    return _loggingService.Loggers == null
+                        ? (ICollection<ILogger>) ReadOnlyEmptyCollection<ILogger>.Instance
+                        : new List<ILogger>(_loggingService.Loggers);
                 }
             }
         }
@@ -994,8 +994,7 @@ namespace Microsoft.Build.Evaluation
             {
                 ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
 
-                Toolset toolset;
-                _toolsets.TryGetValue(toolsVersion, out toolset);
+                _toolsets.TryGetValue(toolsVersion, out var toolset);
 
                 return toolset;
             }
@@ -1009,7 +1008,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The ToolsVersion we should use to build this project.  Should never be null.</returns>
         public string GetEffectiveToolsVersion(string explicitToolsVersion, string toolsVersionFromProject)
         {
-            return Utilities.GenerateToolsVersionToUse(explicitToolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion);
+            return Utilities.GenerateToolsVersionToUse(explicitToolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
         }
 
         /// <summary>
@@ -1108,7 +1107,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion);
+                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
                 Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
 
                 if (project == null)
@@ -1319,10 +1318,7 @@ namespace Microsoft.Build.Evaluation
 
                     // We're removing every entry from the project collection
                     // so unregister any and all host objects for each project
-                    if (_hostServices != null)
-                    {
-                        _hostServices.UnregisterProject(project.FullPath);
-                    }
+                    _hostServices?.UnregisterProject(project.FullPath);
                 }
 
                 _loadedProjects.RemoveAllProjects();
@@ -1579,10 +1575,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ProjectRootElementCache_ProjectRootElementAddedHandler(object sender, ProjectRootElementCache.ProjectRootElementCacheAddEntryEventArgs e)
         {
-            if (ProjectAdded != null)
-            {
-                ProjectAdded(this, new ProjectAddedToProjectCollectionEventArgs(e.RootElement));
-            }
+            ProjectAdded?.Invoke(this, new ProjectAddedToProjectCollectionEventArgs(e.RootElement));
         }
 
         /// <summary>
@@ -1607,11 +1600,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="e">The event arguments that indicate ProjectRootElement-specific details.</param>
         private void OnProjectXmlChanged(ProjectXmlChangedEventArgs e)
         {
-            var projectXmlChanged = ProjectXmlChanged;
-            if (projectXmlChanged != null)
-            {
-                projectXmlChanged(this, e);
-            }
+            ProjectXmlChanged?.Invoke(this, e);
         }
 
         /// <summary>
@@ -1620,11 +1609,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="e">The event arguments that indicate Project-specific details.</param>
         private void OnProjectChanged(ProjectChangedEventArgs e)
         {
-            var projectChanged = ProjectChanged;
-            if (projectChanged != null)
-            {
-                projectChanged(this, e);
-            }
+            ProjectChanged?.Invoke(this, e);
         }
 
         /// <summary>
@@ -1634,11 +1619,7 @@ namespace Microsoft.Build.Evaluation
         private void OnProjectCollectionChanged(ProjectCollectionChangedEventArgs e)
         {
             Debug.Assert(!_locker.IsWriteLockHeld, "We should never raise events while holding a private lock.");
-            var projectCollectionChanged = ProjectCollectionChanged;
-            if (projectCollectionChanged != null)
-            {
-                projectCollectionChanged(this, e);
-            }
+            ProjectCollectionChanged?.Invoke(this, e);
         }
 
         /// <summary>
@@ -1751,7 +1732,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Root element which was added to the project collection.
             /// </summary>
-            private ProjectRootElement _rootElement;
+            private readonly ProjectRootElement _rootElement;
 
             /// <summary>
             /// The root element which was added to the project collection.
@@ -1764,10 +1745,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Root element which was added to the project collection.
             /// </summary>
-            public ProjectRootElement ProjectRootElement
-            {
-                get { return _rootElement; }
-            }
+            public ProjectRootElement ProjectRootElement => _rootElement;
         }
 
         /// <summary>
@@ -1779,7 +1757,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The logger we are wrapping.
             /// </summary>
-            private ILogger _originalLogger;
+            private readonly ILogger _originalLogger;
 
             /// <summary>
             /// The design-time event source
@@ -2054,21 +2032,21 @@ namespace Microsoft.Build.Evaluation
             private void RegisterForEvents(IEventSource eventSource)
             {
                 // Create the handlers.
-                _anyEventHandler = new AnyEventHandler(AnyEventRaisedHandler);
-                _buildFinishedEventHandler = new BuildFinishedEventHandler(BuildFinishedHandler);
-                _buildStartedEventHandler = new BuildStartedEventHandler(BuildStartedHandler);
-                _customBuildEventHandler = new CustomBuildEventHandler(CustomEventRaisedHandler);
-                _buildErrorEventHandler = new BuildErrorEventHandler(ErrorRaisedHandler);
-                _buildMessageEventHandler = new BuildMessageEventHandler(MessageRaisedHandler);
-                _projectFinishedEventHandler = new ProjectFinishedEventHandler(ProjectFinishedHandler);
-                _projectStartedEventHandler = new ProjectStartedEventHandler(ProjectStartedHandler);
-                _buildStatusEventHandler = new BuildStatusEventHandler(StatusEventRaisedHandler);
-                _targetFinishedEventHandler = new TargetFinishedEventHandler(TargetFinishedHandler);
-                _targetStartedEventHandler = new TargetStartedEventHandler(TargetStartedHandler);
-                _taskFinishedEventHandler = new TaskFinishedEventHandler(TaskFinishedHandler);
-                _taskStartedEventHandler = new TaskStartedEventHandler(TaskStartedHandler);
-                _buildWarningEventHandler = new BuildWarningEventHandler(WarningRaisedHandler);
-                _telemetryEventHandler = new TelemetryEventHandler(TelemetryLoggedHandler);
+                _anyEventHandler = AnyEventRaisedHandler;
+                _buildFinishedEventHandler = BuildFinishedHandler;
+                _buildStartedEventHandler = BuildStartedHandler;
+                _customBuildEventHandler = CustomEventRaisedHandler;
+                _buildErrorEventHandler = ErrorRaisedHandler;
+                _buildMessageEventHandler = MessageRaisedHandler;
+                _projectFinishedEventHandler = ProjectFinishedHandler;
+                _projectStartedEventHandler = ProjectStartedHandler;
+                _buildStatusEventHandler = StatusEventRaisedHandler;
+                _targetFinishedEventHandler = TargetFinishedHandler;
+                _targetStartedEventHandler = TargetStartedHandler;
+                _taskFinishedEventHandler = TaskFinishedHandler;
+                _taskStartedEventHandler = TaskStartedHandler;
+                _buildWarningEventHandler = WarningRaisedHandler;
+                _telemetryEventHandler = TelemetryLoggedHandler;
 
                 // Register for the events.
                 eventSource.AnyEventRaised += _anyEventHandler;
@@ -2086,8 +2064,7 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskStarted += _taskStartedEventHandler;
                 eventSource.WarningRaised += _buildWarningEventHandler;
 
-                IEventSource2 eventSource2 = eventSource as IEventSource2;
-                if (eventSource2 != null)
+                if (eventSource is IEventSource2 eventSource2)
                 {
                     eventSource2.TelemetryLogged += _telemetryEventHandler;
                 }
@@ -2114,8 +2091,7 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskStarted -= _taskStartedEventHandler;
                 eventSource.WarningRaised -= _buildWarningEventHandler;
 
-                IEventSource2 eventSource2 = eventSource as IEventSource2;
-                if (eventSource2 != null)
+                if (eventSource is IEventSource2 eventSource2)
                 {
                     eventSource2.TelemetryLogged -= _telemetryEventHandler;
                 }
@@ -2143,10 +2119,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void WarningRaisedHandler(object sender, BuildWarningEventArgs e)
             {
-                if (WarningRaised != null)
-                {
-                    WarningRaised(sender, e);
-                }
+                WarningRaised?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2154,10 +2127,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void TaskStartedHandler(object sender, TaskStartedEventArgs e)
             {
-                if (TaskStarted != null)
-                {
-                    TaskStarted(sender, e);
-                }
+                TaskStarted?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2165,10 +2135,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
             {
-                if (TaskFinished != null)
-                {
-                    TaskFinished(sender, e);
-                }
+                TaskFinished?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2176,10 +2143,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void TargetStartedHandler(object sender, TargetStartedEventArgs e)
             {
-                if (TargetStarted != null)
-                {
-                    TargetStarted(sender, e);
-                }
+                TargetStarted?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2187,10 +2151,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void TargetFinishedHandler(object sender, TargetFinishedEventArgs e)
             {
-                if (TargetFinished != null)
-                {
-                    TargetFinished(sender, e);
-                }
+                TargetFinished?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2198,10 +2159,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void StatusEventRaisedHandler(object sender, BuildStatusEventArgs e)
             {
-                if (StatusEventRaised != null)
-                {
-                    StatusEventRaised(sender, e);
-                }
+                StatusEventRaised?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2209,10 +2167,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void ProjectStartedHandler(object sender, ProjectStartedEventArgs e)
             {
-                if (ProjectStarted != null)
-                {
-                    ProjectStarted(sender, e);
-                }
+                ProjectStarted?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2220,10 +2175,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
             {
-                if (ProjectFinished != null)
-                {
-                    ProjectFinished(sender, e);
-                }
+                ProjectFinished?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2231,10 +2183,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void MessageRaisedHandler(object sender, BuildMessageEventArgs e)
             {
-                if (MessageRaised != null)
-                {
-                    MessageRaised(sender, e);
-                }
+                MessageRaised?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2242,10 +2191,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void ErrorRaisedHandler(object sender, BuildErrorEventArgs e)
             {
-                if (ErrorRaised != null)
-                {
-                    ErrorRaised(sender, e);
-                }
+                ErrorRaised?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2253,10 +2199,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void CustomEventRaisedHandler(object sender, CustomBuildEventArgs e)
             {
-                if (CustomEventRaised != null)
-                {
-                    CustomEventRaised(sender, e);
-                }
+                CustomEventRaised?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2264,10 +2207,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void BuildStartedHandler(object sender, BuildStartedEventArgs e)
             {
-                if (BuildStarted != null)
-                {
-                    BuildStarted(sender, e);
-                }
+                BuildStarted?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2275,10 +2215,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
             {
-                if (BuildFinished != null)
-                {
-                    BuildFinished(sender, e);
-                }
+                BuildFinished?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2286,10 +2223,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void AnyEventRaisedHandler(object sender, BuildEventArgs e)
             {
-                if (AnyEventRaised != null)
-                {
-                    AnyEventRaised(sender, e);
-                }
+                AnyEventRaised?.Invoke(sender, e);
             }
 
             /// <summary>
@@ -2297,10 +2231,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private void TelemetryLoggedHandler(object sender, TelemetryEventArgs e)
             {
-                if (TelemetryLogged != null)
-                {
-                    TelemetryLogged(sender, e);
-                }
+                TelemetryLogged?.Invoke(sender, e);
             }
         }
 
@@ -2387,9 +2318,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    List<Project> candidates;
-
-                    _loadedProjects.TryGetValue(fullPath, out candidates);
+                    _loadedProjects.TryGetValue(fullPath, out var candidates);
 
                     return candidates ?? (IList<Project>)Enumerable.Empty<Project>();
                 }
@@ -2404,8 +2333,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    List<Project> candidates;
-                    if (_loadedProjects.TryGetValue(fullPath, out candidates))
+                    if (_loadedProjects.TryGetValue(fullPath, out var candidates))
                     {
                         foreach (Project candidate in candidates)
                         {
@@ -2428,8 +2356,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    List<Project> projectList;
-                    if (!_loadedProjects.TryGetValue(project.FullPath, out projectList))
+                    if (!_loadedProjects.TryGetValue(project.FullPath, out var projectList))
                     {
                         projectList = new List<Project>();
                         _loadedProjects.Add(project.FullPath, projectList);
@@ -2465,8 +2392,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    List<Project> projectList;
-                    if (!_loadedProjects.TryGetValue(projectFullPath, out projectList))
+                    if (!_loadedProjects.TryGetValue(projectFullPath, out var projectList))
                     {
                         return false;
                     }
@@ -2517,8 +2443,7 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (KeyValuePair<string, string> leftProperty in project.GlobalProperties)
                 {
-                    string rightValue;
-                    if (!globalProperties.TryGetValue(leftProperty.Key, out rightValue))
+                    if (!globalProperties.TryGetValue(leftProperty.Key, out var rightValue))
                     {
                         return false;
                     }

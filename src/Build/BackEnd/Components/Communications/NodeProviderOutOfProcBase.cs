@@ -366,7 +366,11 @@ namespace Microsoft.Build.BackEnd
                 nodeStream.WriteLongForHandshake(hostHandshake);
 
                 CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+#if NETCOREAPP2_1
+                long handshake = nodeStream.ReadLongForHandshake(timeout);
+#else
                 long handshake = nodeStream.ReadLongForHandshake();
+#endif
 
                 if (handshake != clientHandshake)
                 {
@@ -825,11 +829,7 @@ namespace Microsoft.Build.BackEnd
                     }
 #endif
 
-#if FEATURE_MEMORYSTREAM_GETBUFFER
                     byte[] writeStreamBuffer = writeStream.GetBuffer();
-#else
-                    byte[] writeStreamBuffer = writeStream.ToArray();
-#endif
 
                     for (int i = 0; i < writeStream.Length; i += MaxPacketWriteSize)
                     {

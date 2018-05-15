@@ -79,7 +79,6 @@ namespace Microsoft.Build.Exceptions
 
         #endregion
 
-#if FEATURE_BINARY_SERIALIZATION
         #region Serialization (update when adding new class members)
 
         /// <summary>
@@ -127,7 +126,6 @@ namespace Microsoft.Build.Exceptions
         }
 
         #endregion
-#endif
 
         #region Rich constructors
 

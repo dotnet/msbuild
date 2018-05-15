@@ -278,7 +278,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void WriteToStream(INodePacketTranslator translator)
         {
-#if FEATURE_BINARY_SERIALIZATION
             if (_eventType != LoggingEventType.CustomEvent)
             {
                 MethodInfo methodInfo = null;
@@ -327,9 +326,6 @@ namespace Microsoft.Build.Shared
 #endif
                 translator.TranslateDotNet(ref _buildEvent);
             }
-#else
-            translator.TranslateBuildEventArgs(ref _buildEvent);
-#endif
         }
 
         /// <summary>
@@ -337,7 +333,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void ReadFromStream(INodePacketTranslator translator)
         {
-#if FEATURE_BINARY_SERIALIZATION
             if (LoggingEventType.CustomEvent != _eventType)
             {
                 _buildEvent = GetBuildEventArgFromId();
@@ -420,9 +415,6 @@ namespace Microsoft.Build.Shared
 #endif
                 }
             }
-#else
-            translator.TranslateBuildEventArgs(ref _buildEvent);
-#endif
 
             _eventType = GetLoggingEventId(_buildEvent);
         }

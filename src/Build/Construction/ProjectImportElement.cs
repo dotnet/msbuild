@@ -42,12 +42,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Project
         {
-            get
-            {
-                return
-                    FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
-            }
-
+            get => FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
@@ -67,12 +62,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Sdk
         {
-            get
-            {
-                return
-                    FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk));
-            }
-
+            get => FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
@@ -87,7 +77,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Version
         {
-            get { return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion); }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion);
             set
             {
                 if (!CheckUpdatedSdk()) return;
@@ -101,7 +91,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string MinimumVersion
         {
-            get { return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion); }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion);
             set
             {
                 if (!CheckUpdatedSdk()) return;
@@ -123,6 +113,13 @@ namespace Microsoft.Build.Construction
         public ImplicitImportLocation ImplicitImportLocation { get; internal set; }
 
         /// <summary>
+        /// If the import is an implicit one (<see cref="ImplicitImportLocation"/> != None) then this element points
+        /// to the original element which generated this implicit import.
+        /// </summary>
+        public ProjectElement OriginalElement { get; internal set; }
+
+
+        /// <summary>
         /// <see cref="SdkReference"/> if applicable to this import element.
         /// </summary>
         internal SdkReference ParsedSdkReference { get; set; }
@@ -142,7 +139,12 @@ namespace Microsoft.Build.Construction
         /// Creates an implicit ProjectImportElement as if it was in the project.
         /// </summary>
         /// <returns></returns>
-        internal static ProjectImportElement CreateImplicit(string project, ProjectRootElement containingProject, ImplicitImportLocation implicitImportLocation, SdkReference sdkReference)
+        internal static ProjectImportElement CreateImplicit(
+            string project,
+            ProjectRootElement containingProject,
+            ImplicitImportLocation implicitImportLocation,
+            SdkReference sdkReference,
+            ProjectElement originalElement)
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.import);
             return new ProjectImportElement(element, containingProject)
@@ -150,7 +152,8 @@ namespace Microsoft.Build.Construction
                 Project = project,
                 Sdk = sdkReference.ToString(),
                 ImplicitImportLocation = implicitImportLocation,
-                ParsedSdkReference = sdkReference
+                ParsedSdkReference = sdkReference,
+                OriginalElement = originalElement
             };
         }
 

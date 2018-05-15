@@ -8,9 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -200,7 +198,6 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Equal(clone["test"], "2");
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialize basic case
         /// </summary>
@@ -248,6 +245,5 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 Assert.Equal(typeof(MSBuildNameIgnoreCaseComparer), dictionary2.Comparer.GetType());
             }
         }
-#endif
     }
 }

@@ -8,9 +8,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the target skipped event.
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     public class TargetSkippedEventArgs : BuildMessageEventArgs
     {
         /// <summary>

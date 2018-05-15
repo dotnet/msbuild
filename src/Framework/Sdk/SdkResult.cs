@@ -15,6 +15,26 @@ namespace Microsoft.Build.Framework
         /// <summary>
         ///     Indicates the resolution was successful.
         /// </summary>
-        public bool Success { get; protected set; }
+        public virtual bool Success { get; protected set; }
+
+        /// <summary>
+        ///     Resolved path to the SDK.
+        /// 
+        ///     Null if <see cref="Success"/> == false
+        /// </summary>
+        public virtual string Path { get; protected set; }
+
+        /// <summary>
+        ///     Resolved version of the SDK.
+        ///     Can be null or empty if the resolver did not provide a version (e.g. a path based resolver)
+        /// 
+        ///     Null if <see cref="Success"/> == false
+        /// </summary>
+        public virtual string Version { get; protected set; }
+
+        /// <summary>
+        ///     The Sdk reference
+        /// </summary>
+        public virtual SdkReference SdkReference { get; protected set; }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.Build.Collections;
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 
@@ -280,9 +281,9 @@ namespace Microsoft.Build.Evaluation
                 _wrappedData.InitializeForEvaluation(toolsetProvider);
             }
 
-            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
+            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
             {
-                _wrappedData.RecordImport(importElement, import, versionEvaluated);
+                _wrappedData.RecordImport(importElement, import, versionEvaluated, sdkResult);
             }
 
             public void RecordImportWithDuplicates(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)

@@ -72,7 +72,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(externalStartedEvent, LoggingEventType.CustomEvent);
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Tests serialization of LogMessagePacket with each kind of event type.
         /// </summary>
@@ -83,39 +82,41 @@ namespace Microsoft.Build.UnitTests.BackEnd
             List<TaskItem> targetOutputs = new List<TaskItem>();
             targetOutputs.Add(item);
 
+            string _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
-            BuildEventArgs[] testArgs = new BuildEventArgs[]
-            {
-                new BuildFinishedEventArgs("Message", "Keyword", true),
-                new BuildStartedEventArgs("Message", "Help"),
-                new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low),
-                new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName"),
-                new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true),
-                new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low),
-                new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
-                new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
-                new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile"),
-                new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true, targetOutputs),
-                new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null),
-                new ProjectFinishedEventArgs("message", "help", "ProjectFile", true),
-                new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames")
-            };
+            try {
+                BuildEventArgs[] testArgs = new BuildEventArgs[]
+                {
+                    new BuildFinishedEventArgs("Message", "Keyword", true),
+                    new BuildStartedEventArgs("Message", "Help"),
+                    new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low),
+                    new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName"),
+                    new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true),
+                    new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low),
+                    new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
+                    new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
+                    new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile"),
+                    new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true, targetOutputs),
+                    new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null),
+                    new ProjectFinishedEventArgs("message", "help", "ProjectFile", true),
+                    new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames")
+                };
 
-            foreach (BuildEventArgs arg in testArgs)
-            {
-                LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, arg));
+                foreach (BuildEventArgs arg in testArgs)
+                {
+                    LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, arg));
 
-                ((INodePacketTranslatable)packet).Translate(TranslationHelpers.GetWriteTranslator());
-                INodePacket tempPacket = LogMessagePacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator()) as LogMessagePacket;
+                    ((INodePacketTranslatable)packet).Translate(TranslationHelpers.GetWriteTranslator());
+                    INodePacket tempPacket = LogMessagePacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator()) as LogMessagePacket;
 
-                LogMessagePacket deserializedPacket = tempPacket as LogMessagePacket;
+                    LogMessagePacket deserializedPacket = tempPacket as LogMessagePacket;
 
-                CompareLogMessagePackets(packet, deserializedPacket);
+                    CompareLogMessagePackets(packet, deserializedPacket);
+                }
+            } finally {
+                Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             }
-
-            Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", null);
         }
-#endif
 
         /// <summary>
         /// Verify the LoggingMessagePacket is properly created from a build event. 

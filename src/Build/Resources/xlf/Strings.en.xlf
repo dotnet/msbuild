@@ -2117,6 +2117,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</target>
         <target state="new">MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
+      <trans-unit id="SdkResolverManifestInvalid">
+        <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
+        <target state="new">MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</target>
+        <note>{StrBegin="MSB4245: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverNoDllOrManifest">
+        <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
+        <target state="new">MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</target>
+        <note>{StrBegin="MSB4246: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverDllInManifestMissing">
+        <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
+        <target state="new">MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</target>
+        <note>{StrBegin="MSB4247: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -116,13 +116,14 @@ function InstallNuGet {
 }
 
 function InstallRepoToolset {
-  $RepoToolsetVersion = GetVersionsPropsVersion -Name "RoslynToolsRepoToolsetVersion"
+  $GlobalJson = Get-Content(Join-Path $RepoRoot "global.json") | ConvertFrom-Json
+  $RepoToolsetVersion = $GlobalJson.'msbuild-sdks'.'RoslynTools.RepoToolset'
   $RepoToolsetDir = Join-Path $NuGetPackageRoot "roslyntools.repotoolset\$RepoToolsetVersion\tools"
   $RepoToolsetBuildProj = Join-Path $RepoToolsetDir "Build.proj"
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
-    $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
-    $msbuildArgs = "/t:restore", "/m", "/clp:Summary", "/warnaserror", "/v:$verbosity"
+    $ToolsetProj = Join-Path $PSScriptRoot "Toolset.csproj"
+    $msbuildArgs = "/t:build", "/m", "/clp:Summary", "/warnaserror", "/v:$verbosity"
     $msbuildArgs = AddLogCmd "Toolset" $msbuildArgs
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)
@@ -207,9 +208,11 @@ function Build {
 
   $RepoToolsetBuildProj = InstallRepoToolset
 
+  echo "Repo toolset used from: $RepoToolsetBuildProj"
+
   $solution = Join-Path $RepoRoot "MSBuild.sln"
 
-  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:SolutionPath=$solution", "/p:CIBuild=$ci"
+  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=$solution", "/p:CIBuild=$ci", "/p:RepoRoot=$reporoot"
   if ($ci)
   {
     # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
@@ -285,12 +288,17 @@ function CallMSBuild
 {
   try 
   {
+    Write-Host "=========================="
+    Write-Host "$msbuildHost $msbuildToUse $args"
+    Write-Host "=========================="
+
     if ($msbuildHost)
     {
       & $msbuildHost $msbuildToUse $args
     }
     else
     {
+      
       & $msbuildToUse $args
     }
 

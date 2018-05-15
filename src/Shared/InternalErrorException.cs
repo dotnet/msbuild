@@ -10,9 +10,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
-#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -27,9 +25,7 @@ namespace Microsoft.Build.Shared
     /// !~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~
     ///     
     /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
-#endif
     internal sealed class InternalErrorException : Exception
     {
         /// <summary>
@@ -69,7 +65,6 @@ namespace Microsoft.Build.Shared
             ConsiderDebuggerLaunch(message, innerException);
         }
 
-#if FEATURE_BINARY_SERIALIZATION
         #region Serialization (update when adding new class members)
 
         /// <summary>
@@ -84,7 +79,6 @@ namespace Microsoft.Build.Shared
 
         // Base implementation of GetObjectData() is sufficient; we have no fields
         #endregion
-#endif
 
         #region ConsiderDebuggerLaunch
         /// <summary>
