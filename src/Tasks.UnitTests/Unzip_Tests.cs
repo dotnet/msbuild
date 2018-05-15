@@ -71,11 +71,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-#if  RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "Can't figure out how to make CreateDirectory throw on non-Windows")]
-#else
+        [PlatformSpecific(TestPlatforms.Windows)] // Can't figure out how to make CreateDirectory throw on non-Windows
         [Fact]
-#endif
         public void LogsErrorIfDirectoryCannotBeCreated()
         {
             Unzip unzip = new Unzip
