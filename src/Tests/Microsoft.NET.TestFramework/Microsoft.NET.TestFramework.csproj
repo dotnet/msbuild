@@ -31,22 +31,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)..\Common\Empty.props" />
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)..\Common\Empty.targets" />
+    <None Include="SetupTestRoot.targets" />
   </ItemGroup>
 
-  <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.props" />
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
-  </ItemGroup>
-
-  <Target Name="_CopyDirectoryBuildTestDependencies" AfterTargets="Build" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
-    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
-  </Target>
-  <Target Name="_CopyTestNuGetConfig" AfterTargets="Build">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\..\Assets\NuGet.Config" DestinationFolder="$(ArtifactsTmpDir)" SkipUnchangedFiles="true" />
-  </Target>
+  <Import Project="SetupTestRoot.targets" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
+  <PropertyGroup>
+    <_DotNetSdkVersionFile>$(IntermediateOutputPath)\DotNetSdkVersion.g.cs</_DotNetSdkVersionFile>
+  </PropertyGroup>
+
+  <Target Name="_GenerateSdkVersionAttribute" BeforeTargets="CoreCompile" Outputs="$(_DotNetSdkVersionFile)">
+    <ItemGroup>
+      <_Attribute Include="Microsoft.NET.TestFramework.DotNetSdkVersionAttribute">
+        <_Parameter1>$(NETCoreSdkVersion)</_Parameter1>
+      </_Attribute>
+    </ItemGroup>
+    
+    <WriteCodeFragment AssemblyAttributes="@(_Attribute)" Language="$(Language)" OutputFile="$(_DotNetSdkVersionFile)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />    
+    </WriteCodeFragment>
+  </Target>
 </Project>

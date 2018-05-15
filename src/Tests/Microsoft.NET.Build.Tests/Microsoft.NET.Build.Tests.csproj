@@ -4,11 +4,10 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <EnableDefaultItems>false</EnableDefaultItems>
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
@@ -18,6 +17,7 @@
   <PropertyGroup>
     <!-- Strip the '-parallel none' flag here -->
     <XUnitRunnerAdditionalArguments></XUnitRunnerAdditionalArguments>
+    <PackageId>testSdkBuild</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,11 +31,18 @@
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetProjectModelVersion)" />
+
+    <!-- Referenced explicitly here because Microsoft.DotNet.Cli.Utils references a lower version at the moment, which causes
+         RAR conflicts (though ideally I would think NuGet would resolve this) -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
+    <!-- Make sure tasks project is built, but don't directly reference it as an assembly. -->
+    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" />
+    
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\TelemetryStdOutLogger\TelemetryStdOutLogger.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,8 +51,11 @@
 
   <ItemGroup>
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
+
+    <!-- Use string resources from tasks in order to validate test output. -->
+    <EmbeddedResource Include="..\..\Tasks\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-
+  
 </Project>

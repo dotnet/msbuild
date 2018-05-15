@@ -155,8 +155,8 @@ namespace Microsoft.NET.Restore.Tests
                             PackageSaveMode.Defaultv3,
                             XmlDocFileSaveMode.None,
                             NullLogger.Instance,
-                        signedPackageVerifier: null,
-                        signedPackageVerifierSettings: null),
+                            signedPackageVerifier: null,
+                            signedPackageVerifierSettings: null),
                         token: CancellationToken.None).Wait();
                 }
             }

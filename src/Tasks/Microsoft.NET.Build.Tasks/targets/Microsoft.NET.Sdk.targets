@@ -92,14 +92,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <CoreCleanDependsOn>
-      SuppressAssetsLogMessages;
+      _SdkBeforeClean
       $(CoreCleanDependsOn)
     </CoreCleanDependsOn>
   </PropertyGroup>
 
   <PropertyGroup>
     <RebuildDependsOn>
-      UnsuppressAssetsLogMessages;
+      _SdkBeforeRebuild;
       $(RebuildDependsOn)
     </RebuildDependsOn>
   </PropertyGroup>
@@ -118,7 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ComputeReferenceAssemblies"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
-          Inputs="$(ProjectAssetsFile)"
+          Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
 
     <!--
@@ -142,7 +142,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       FilesToSkip="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      IsSelfContained="$(SelfContained)">
+                      IsSelfContained="$(SelfContained)"
+                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)">
     </GenerateDepsFile>
 
     <ItemGroup>
@@ -199,29 +200,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <!--
-    ============================================================
-                                        SuppressAssetsLogMessages
-
-    Suppresses log messages from an existing project assets file.
-    ============================================================
-    -->
-  <Target Name="SuppressAssetsLogMessages" Condition="'$(UnsuppressAssetsLogMessages)' != 'true'">
-    <PropertyGroup>
+  <Target Name="_SdkBeforeClean">
+    <PropertyGroup Condition="'$(_CleaningWithoutRebuilding)' == ''">
+      <_CleaningWithoutRebuilding>true</_CleaningWithoutRebuilding>
       <EmitAssetsLogMessages>false</EmitAssetsLogMessages>
     </PropertyGroup>
   </Target>
 
-  <!--
-    ============================================================
-                                        UnsuppressAssetsLogMessages
-
-    Unsuppresses log messages from an existing project assets file.
-    ============================================================
-    -->
-  <Target Name="UnsuppressAssetsLogMessages">
+  <Target Name="_SdkBeforeRebuild">
     <PropertyGroup>
-      <UnsuppressAssetsLogMessages>true</UnsuppressAssetsLogMessages>
+      <_CleaningWithoutRebuilding>false</_CleaningWithoutRebuilding>
     </PropertyGroup>
   </Target>
 
@@ -245,6 +233,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.GC.RetainVM"
                                     Condition="'$(RetainVMGarbageCollection)' != ''"
                                     Value="$(RetainVMGarbageCollection)" />
+
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation"
+                                    Condition="'$(TieredCompilation)' != ''"
+                                    Value="$(TieredCompilation)" />
 
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
                                     Condition="'$(ThreadPoolMinThreads)' != ''"

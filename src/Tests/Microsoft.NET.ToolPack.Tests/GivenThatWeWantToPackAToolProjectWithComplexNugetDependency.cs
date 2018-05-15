@@ -42,10 +42,12 @@ namespace Microsoft.NET.ToolPack.Tests
                                             if (multiTarget)
                                             {
                                                 propertyGroup.Element(ns + "TargetFramework").Remove();
-                                                propertyGroup.Add(new XElement(ns + "TargetFrameworks", "netcoreapp1.1;netcoreapp2.0"));
+                                                propertyGroup.Add(new XElement(ns + "TargetFrameworks", "netcoreapp2.1"));
                                             }
-                                        })
-                                        .Restore(Log);
+                                        });
+
+            helloWorldAsset.Restore(Log);
+
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
             packCommand.Execute();
             var nugetPackage = packCommand.GetNuGetPackage();

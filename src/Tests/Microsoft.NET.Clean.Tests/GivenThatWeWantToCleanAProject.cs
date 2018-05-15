@@ -53,5 +53,41 @@ namespace Microsoft.NET.Clean.Tests
                 .And
                 .NotHaveStdOutContaining("warning");
         }
+
+        [Fact]
+        public void It_cleans_without_assets_file_present()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource();
+
+            var assetsFilePath = Path.Combine(testAsset.TestRoot, "obj", "project.assets.json");
+            File.Exists(assetsFilePath).Should().BeFalse();
+
+            var cleanCommand = new CleanCommand(Log, testAsset.TestRoot);
+
+            cleanCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        // Related to https://github.com/dotnet/sdk/issues/2233
+        // This test will fail if the naive fix for not reading assets file during clean is attempted
+        [Fact]
+        public void It_can_clean_and_build_without_using_rebuild()
+        {
+            var testAsset = _testAssetsManager
+              .CopyTestAsset("HelloWorld")
+              .WithSource()
+              .Restore(Log);
+
+            var cleanAndBuildCommand = new MSBuildCommand(Log, "Clean;Build", testAsset.TestRoot);
+
+            cleanAndBuildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }

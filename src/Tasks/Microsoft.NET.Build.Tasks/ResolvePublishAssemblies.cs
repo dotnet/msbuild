@@ -20,7 +20,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string ProjectPath { get; set; }
 
-        [Required]
         public string AssetsFilePath { get; set; }
 
         [Required]

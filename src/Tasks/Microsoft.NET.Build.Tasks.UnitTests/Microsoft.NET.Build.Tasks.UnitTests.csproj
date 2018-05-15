@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <Compile Include="..\..\Tests\Common\CommandLine\TestCommandLine.Default.cs" />
+    <Compile Include="..\..\Tests\Common\Program.UnitTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,5 +37,5 @@
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-
+  
 </Project>

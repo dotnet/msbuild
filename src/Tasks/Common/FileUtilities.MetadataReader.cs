@@ -1,7 +1,16 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if NETCOREAPP2_0
+//  Use MetadataReader version of GetAssemblyVersion for:
+//  - netcoreapp version of Microsoft.NET.Build.Extensions.Tasks
+//  - All versions of Microsoft.NET.Build.Tasks
+
+//  We don't use it for the .NET Framework version of Microsoft.NET.Build.Extensions in order to
+//  avoid loading the System.Reflection.Metadata assembly in vanilla .NET Framework build scenarios
+
+//  We do use the MetadataReader version for the SDK tasks in order to correctly read the assembly
+//  versions of cross-gened assemblies.  See https://github.com/dotnet/sdk/issues/1502
+#if NETCOREAPP2_0 || !EXTENSIONS
 
 using System;
 using System.IO;
