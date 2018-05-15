@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="DownloadLicense"
+          AfterTargets="PrepareForBuild">
+
+    <!-- Download a file -->
+    <DownloadFile
+      SourceUrl="https://raw.githubusercontent.com/Microsoft/msbuild/master/LICENSE"
+      DestinationFolder="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="DownloadedFile" ItemName="Content" />
+    </DownloadFile>
+
+    <!-- Include the f-->
+    <ItemGroup>
+      <Content Include="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+</Project>
