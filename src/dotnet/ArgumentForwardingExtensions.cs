@@ -35,6 +35,9 @@ namespace Microsoft.DotNet.Cli
                    .OfType<ForwardedArgument>()
                    .SelectMany(o => o.Values);
 
+        public static IEnumerable<string> ForwardedOptionValues(this AppliedOption command, string alias) =>
+            (command.ValueOrDefault<ForwardedArgument>(alias)?.Values ?? Array.Empty<string>());
+
         private class ForwardedArgument
         {
             public ForwardedArgument(params string[] values)
