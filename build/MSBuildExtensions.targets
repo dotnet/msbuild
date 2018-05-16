@@ -122,7 +122,7 @@
       <_AspNetCoreAllTargetFrameworkVersion>$(_NETCoreAppTargetFrameworkVersion)</_AspNetCoreAllTargetFrameworkVersion>
       <_AspNetCoreAppTargetFrameworkVersion>$(_AspNetCoreAllTargetFrameworkVersion)</_AspNetCoreAppTargetFrameworkVersion>
 
-      <_NETCoreSdkIsPreview Condition=" '$(DropSuffix)' == '' ">true</_NETCoreSdkIsPreview>
+      <_NETCoreSdkIsPreview Condition=" '$(DropSuffix)' != 'true' ">true</_NETCoreSdkIsPreview>
     </PropertyGroup>
 
     <ItemGroup>
