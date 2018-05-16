@@ -14,6 +14,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     {
         private HashSet<ITaskItem> referenceConflicts = new HashSet<ITaskItem>();
         private HashSet<ITaskItem> copyLocalConflicts = new HashSet<ITaskItem>();
+        private HashSet<ConflictItem> compilePlatformWinners = new HashSet<ConflictItem>();
         private HashSet<ConflictItem> allConflicts = new HashSet<ConflictItem>();
 
         public ITaskItem[] References { get; set; }
@@ -85,6 +86,9 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     HandleCompileConflict);
             }
 
+            //  Remove platform items which won a conflict with a reference but subsequently lost to something else
+            compilePlatformWinners.ExceptWith(allConflicts);
+
             // resolve conflicts that class in output
             var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, packageOverrides, log);
 
@@ -115,7 +119,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 platformItems = platformItems.Concat(compilePlatformItems);
             }
 
-            platformConflictScope.ResolveConflicts(platformItems, pi => pi.FileName, pi => { });
+            platformConflictScope.ResolveConflicts(platformItems, pi => pi.FileName, (winner, loser) => { });
             platformConflictScope.ResolveConflicts(referenceItems.Where(ri => !referenceConflicts.Contains(ri.OriginalItem)),
                                                    ri => ItemUtilities.GetReferenceTargetFileName(ri.OriginalItem),
                                                    HandleRuntimeConflict,
@@ -132,6 +136,50 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             ReferencesWithoutConflicts = RemoveConflicts(References, referenceConflicts);
             ReferenceCopyLocalPathsWithoutConflicts = RemoveConflicts(ReferenceCopyLocalPaths, copyLocalConflicts);
             Conflicts = CreateConflictTaskItems(allConflicts);
+
+            //  This handles the issue described here: https://github.com/dotnet/sdk/issues/2221
+            //  The issue is that before conflict resolution runs, references to assemblies in the framework
+            //  that also match an assembly coming from a NuGet package are either removed (in non-SDK targets
+            //  via the ResolveNuGetPackageAssets target in Microsoft.NuGet.targets) or transformed to refer
+            //  to the assembly coming from the NuGet package (for SDK projects in the ResolveLockFileReferences
+            //  task).
+            //  In either case, there ends up being no Reference item which will resolve to the DLL in
+            //  the reference assemblies.  This is a problem if the platform item from the reference
+            //  assemblies wins a conflict in the compile scope, as the reference to the assembly from
+            //  the NuGet package will be removed, but there will be no reference to the Framework assembly
+            //  passed to the compiler.
+            //  So what we do is keep track of Platform items that win conflicts with Reference items in
+            //  the compile scope, and explicitly add references to them here.
+            ReferencesWithoutConflicts = SafeConcat(ReferencesWithoutConflicts,
+                compilePlatformWinners.Select(c => new TaskItem(c.FileName)));
+        }
+
+        //  Concatanate two things, either of which may be null.  Interpret null as empty,
+        //  and return null if the result would be empty.
+        private ITaskItem[] SafeConcat(ITaskItem[] first, IEnumerable<ITaskItem> second)
+        {
+            if (first == null)
+            {
+                if (second == null || !second.Any())
+                {
+                    return null;
+                }
+                else
+                {
+                    return second.ToArray();
+                }
+            }
+            else
+            {
+                if (second == null || !second.Any())
+                {
+                    return first;
+                }
+                else
+                {
+                    return first.Concat(second).ToArray();
+                }
+            }
         }
 
         private ITaskItem[] CreateConflictTaskItems(ICollection<ConflictItem> conflicts)
@@ -164,26 +212,31 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             return (items != null) ? items.Select(i => new ConflictItem(i, itemType)) : Enumerable.Empty<ConflictItem>();
         }
 
-        private void HandleCompileConflict(ConflictItem conflictItem)
+        private void HandleCompileConflict(ConflictItem winner, ConflictItem loser)
         {
-            if (conflictItem.ItemType == ConflictItemType.Reference)
+            if (loser.ItemType == ConflictItemType.Reference)
             {
-                referenceConflicts.Add(conflictItem.OriginalItem);
+                referenceConflicts.Add(loser.OriginalItem);
+
+                if (winner.ItemType == ConflictItemType.Platform)
+                {
+                    compilePlatformWinners.Add(winner);
+                }
             }
-            allConflicts.Add(conflictItem);
+            allConflicts.Add(loser);
         }
 
-        private void HandleRuntimeConflict(ConflictItem conflictItem)
+        private void HandleRuntimeConflict(ConflictItem winner, ConflictItem loser)
         {
-            if (conflictItem.ItemType == ConflictItemType.Reference)
+            if (loser.ItemType == ConflictItemType.Reference)
             {
-                conflictItem.OriginalItem.SetMetadata(MetadataNames.Private, "False");
+                loser.OriginalItem.SetMetadata(MetadataNames.Private, "False");
             }
-            else if (conflictItem.ItemType == ConflictItemType.CopyLocal)
+            else if (loser.ItemType == ConflictItemType.CopyLocal)
             {
-                copyLocalConflicts.Add(conflictItem.OriginalItem);
+                copyLocalConflicts.Add(loser.OriginalItem);
             }
-            allConflicts.Add(conflictItem);
+            allConflicts.Add(loser);
         }
 
         /// <summary>

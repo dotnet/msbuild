@@ -9,6 +9,7 @@ using System.Globalization;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
+    internal delegate void ConflictCallback<T>(T winner, T loser);
     //  The conflict resolver finds conflicting items, and if there are any of them it reports the "losing" item via the foundConflict callback
     internal class ConflictResolver<TConflictItem> where TConflictItem : class, IConflictItem
     {
@@ -25,7 +26,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         }
 
         public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey,
-            Action<TConflictItem> foundConflict, bool commitWinner = true,
+            ConflictCallback<TConflictItem> foundConflict, bool commitWinner = true,
             Action<TConflictItem> unresolvedConflict = null)
         {
             if (conflictItems == null)
@@ -76,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     }
 
-                    foundConflict(loser);
+                    foundConflict(winner, loser);
                 }
                 else if (commitWinner)
                 {

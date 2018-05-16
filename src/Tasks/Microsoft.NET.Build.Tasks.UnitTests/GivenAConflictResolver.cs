@@ -384,9 +384,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             ConflictResults ret = new ConflictResults();
 
-            void ConflictHandler(MockConflictItem item)
+            void ConflictHandler(MockConflictItem winner, MockConflictItem loser)
             {
-                ret.Conflicts.Add(item);
+                ret.Conflicts.Add(loser);
             }
 
             void UnresolvedConflictHandler(MockConflictItem item)
