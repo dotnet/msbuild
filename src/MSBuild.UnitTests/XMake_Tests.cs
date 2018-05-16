@@ -2002,6 +2002,27 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain(guid2);
         }
 
+        /// <summary>
+        /// We check if there is only one target name specified and this logic caused a regression: https://github.com/Microsoft/msbuild/issues/3317
+        /// </summary>
+        [Fact]
+        public void MultipleTargetsDoesNotCrash()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  <Target Name=""Target1"">
+    <Message Text=""7514CB1641A948D0A3930C5EC2DC1940"" />
+  </Target>
+  <Target Name=""Target2"">
+    <Message Text=""E2C73B5843F94B63B067D9BEB2C4EC52"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:Target1 /t:Target2");
+
+            logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", () => logContents);
+            logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", () => logContents);
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;
@@ -2066,7 +2087,7 @@ namespace Microsoft.Build.UnitTests
 
                 string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success, _output);
 
-                success.ShouldBeTrue();
+                success.ShouldBeTrue(() => output);
 
                 return output;
             }
