@@ -515,16 +515,31 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        // Fall-back path that has a property in it: $(FallbackExpandDir1)
-        [Fact]
-        public void ExpandExtensionsPathFallback()
+        [Theory]
+        [InlineData(
+                "/a/b;$(FallbackPaths);/x/y",
+                @"<IndirectRefProperty>$(FallbackExpandDir1);/a/b</IndirectRefProperty>
+                <FallbackPaths>/xyz/tmp;$(IndirectRefProperty)</FallbackPaths>", null, false)]
+        // has fallback paths, but won't point to the valid one
+        [InlineData(
+                "/a/b;$(NonExistantProperty)",
+                "",
+                typeof (InvalidProjectFileException), true)]
+        // no fallback paths after expansion, so should ignore fallback-paths code path
+        [InlineData(
+                "$(NonExistantProperty)",
+                @"", typeof(InvalidProjectFileException), false)]
+        // no fallback paths after expansion, so should ignore fallback-paths code path
+        [InlineData(
+                "",
+                @"", typeof(InvalidProjectFileException), false)]
+        public void ExpandExtensionsPathFallback(string fallbackPathsInAppConfig, string propertiesInMainProject, Type expectedException, bool exceptionHasFallbacks)
         {
             string extnTargetsFileContentTemplate = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                     <Target Name='FromExtn'>
                         <Message Text='Running FromExtn'/>
                     </Target>
-                    <Import Project='$(MSBuildExtensionsPath)\\foo\\extn.proj' Condition=""Exists('$(MSBuildExtensionsPath)\foo\extn.proj')"" />
                 </Project>";
 
             var configFileContents = @"
@@ -538,7 +553,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                        <property name=""MSBuildBinPath"" value="".""/>
                        <projectImportSearchPaths>
                          <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
-                           <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1)"" />
+                           <property name=""MSBuildExtensionsPath"" value=""" + fallbackPathsInAppConfig + @""" />
                          </searchPaths>
                        </projectImportSearchPaths>
                       </toolset>
@@ -550,24 +565,57 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
+                string mainTargetsFileContent = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <PropertyGroup>
+                            {0}
+                        </PropertyGroup>
+
+                        <Target Name='Main' DependsOnTargets='FromExtn'>
+                            <Message Text='PropertyFromExtn1: $(PropertyFromExtn1)'/>
+                        </Target>
+
+                        <Import Project='$({1})\foo\extn.proj'/>
+                    </Project>";
+
+                mainTargetsFileContent = string.Format(mainTargetsFileContent, propertiesInMainProject, "MSBuildExtensionsPath");
+                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
+
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"),
                     extnTargetsFileContentTemplate);
-
-                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj",
-                    GetMainTargetFileContent());
 
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
-                var projectCollection = new ProjectCollection(new Dictionary<string, string> {["FallbackExpandDir1"] = extnDir1});
-
-                projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
-                projectCollection.RegisterLogger(logger);
+                try {
+                    var projectCollection = new ProjectCollection(new Dictionary<string, string> {["FallbackExpandDir1"] = extnDir1});
 
-                var project = projectCollection.LoadProject(mainProjectPath);
-                Assert.True(project.Build("Main"));
-                logger.AssertLogContains("Running FromExtn");
+                    projectCollection.ResetToolsetsForTests(reader);
+                    projectCollection.RegisterLogger(logger);
+
+                    var project = projectCollection.LoadProject(mainProjectPath);
+                    Assert.True(project.Build("Main"));
+                    logger.AssertLogContains("Running FromExtn");
+
+                    Assert.True(expectedException == null, $"Didn't get any exception. Expected: {expectedException}");
+                }
+                catch (Exception ex)
+                {
+                    if (expectedException == null)
+                        throw;
+
+                    Assert.Equal(ex.GetType(), expectedException);
+
+                    if (exceptionHasFallbacks)
+                    {
+                        logger.AssertLogContains("in the fallback search path");
+                    }
+                    else
+                    {
+                        logger.AssertLogDoesntContain("in the fallback search path");
+                    }
+                }
             }
             finally
             {

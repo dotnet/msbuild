@@ -1935,9 +1935,11 @@ namespace Microsoft.Build.Evaluation
         {
             var fallbackSearchPathMatch = _data.Toolset.GetProjectImportSearchPaths(importElement.Project);
 
+            IList<string> onlyFallbackSearchPaths = fallbackSearchPathMatch.GetExpandedSearchPaths(fallbackPath => _data.ExpandString(fallbackPath));
+
             // no reference or we need to lookup only the default path,
             // so, use the Import path
-            if (fallbackSearchPathMatch.Equals(ProjectImportPathMatch.None))
+            if (fallbackSearchPathMatch.Equals(ProjectImportPathMatch.None) || onlyFallbackSearchPaths.Count == 0)
             {
                 List<ProjectRootElement> projects;
                 ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, out projects);
@@ -1989,15 +1991,16 @@ namespace Microsoft.Build.Evaluation
             // Adding the value of $(MSBuildExtensionsPath*) property to the list of search paths
             var prop = _data.GetProperty(fallbackSearchPathMatch.PropertyName);
 
-            var pathsToSearch = new string[fallbackSearchPathMatch.SearchPaths.Count + 1];
-            pathsToSearch[0] = prop?.EvaluatedValue;                       // The actual value of the property, with no fallbacks
-            fallbackSearchPathMatch.SearchPaths.CopyTo(pathsToSearch, 1);  // The list of fallbacks, in order
-            
+            var expandedPathsToSearch = new List<string>();
+            expandedPathsToSearch.Add(prop?.EvaluatedValue);                       // The actual value of the property, with no fallbacks
+
+            expandedPathsToSearch.AddRange(onlyFallbackSearchPaths);
+
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
-                                        String.Join(";", pathsToSearch));
+                                        String.Join(";", expandedPathsToSearch));
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
@@ -2009,14 +2012,12 @@ namespace Microsoft.Build.Evaluation
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
             // 2. 1 or more project files *found* but ignored (like circular, self imports)
-            foreach (var extensionPath in pathsToSearch)
+            foreach (var extensionPathExpanded in expandedPathsToSearch)
             {
                 // In the rare case that the property we've enabled for search paths hasn't been defined
                 // we will skip it, but continue with other paths in the fallback order.
-                if (string.IsNullOrEmpty(extensionPath))
+                if (string.IsNullOrEmpty(extensionPathExpanded))
                     continue;
-
-                string extensionPathExpanded = _data.ExpandString(extensionPath);
 
                 if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
@@ -2076,7 +2077,7 @@ namespace Microsoft.Build.Evaluation
                 atleastOneExactFilePathWasLookedAtAndNotFound &&
                 (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
-                ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
+                ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, onlyFallbackSearchPaths, importElement);
             }
 
             return allProjects;
@@ -2651,7 +2652,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="searchPathMatch">MSBuildExtensionsPath reference kind found in the Project attribute of the Import element</param>
         /// <param name="importElement">The importing element for this import</param>
         /// </summary>
-        private void ThrowForImportedProjectWithSearchPathsNotFound(ProjectImportPathMatch searchPathMatch, ProjectImportElement importElement)
+        private void ThrowForImportedProjectWithSearchPathsNotFound(ProjectImportPathMatch searchPathMatch, IList<string> onlyFallbackSearchPaths, ProjectImportElement importElement)
         {
             var extensionsPathProp = _data.GetProperty(searchPathMatch.PropertyName);
             string importExpandedWithDefaultPath;
@@ -2675,8 +2676,6 @@ namespace Microsoft.Build.Evaluation
                 importExpandedWithDefaultPath = importElement.Project;
                 relativeProjectPath = importElement.Project;
             }
-
-            var onlyFallbackSearchPaths = searchPathMatch.SearchPaths.Select(s => _data.ExpandString(s)).ToList();
 
             string stringifiedListOfSearchPaths = StringifyList(onlyFallbackSearchPaths);
 
