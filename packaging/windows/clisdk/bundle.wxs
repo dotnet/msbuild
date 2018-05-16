@@ -24,6 +24,9 @@
 
     <Variable Name="DOTNETHOME" Type="string" Value="[ProgramFiles6432Folder]dotnet" bal:Overridable="no" />
     <Variable Name="BUNDLEMONIKER" Type="string" Value="$(var.ProductMoniker)" bal:Overridable="no" />
+    <Variable Name="DOTNETSDKVERSION" Type="string" Value="$(var.DisplayVersion)" bal:Overridable="no" />
+    <Variable Name="DOTNETRUNTIMEVERSION" Type="string" Value="$(var.DotNetRuntimeVersion)" bal:Overridable="no" />
+    <Variable Name="ASPNETCOREVERSION" Type="string" Value="$(var.AspNetCoreVersion)" bal:Overridable="no" />
 
     <Chain DisableSystemRestore="yes" ParallelCache="yes">
       <MsiPackage SourceFile="$(var.SharedFXMsiSourcePath)">
@@ -40,9 +43,9 @@
         <MsiProperty Name="EXEFULLPATH" Value="[WixBundleOriginalSource]" />
       </MsiPackage>
       <?if $(var.Platform)=x86?>
-        <PackageGroupRef Id="PG_AspNetCorePackageStore_x86"/>
+        <PackageGroupRef Id="PG_AspNetCoreSharedFramework_x86"/>
       <?elseif $(var.Platform)=x64?>
-        <PackageGroupRef Id="PG_AspNetCorePackageStore_x64"/>
+        <PackageGroupRef Id="PG_AspNetCoreSharedFramework_x64"/>
       <?endif?>
     </Chain>
   </Bundle>

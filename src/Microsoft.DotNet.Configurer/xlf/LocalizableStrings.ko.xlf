@@ -5,22 +5,24 @@
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
---------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
-        <target state="translated">.NET Core를 시작합니다!
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="translated">.NET Core를 시작합니다.
 ---------------------
-.NET Core에 대한 자세한 내용은 https://aka.ms/dotnet-docs를 참조하세요. 사용 가능한 명령을 보려면 dotnet --help를 사용하거나 https://aka.ms/dotnet-cli-docs를 방문하세요.
+.NET Core에 대한 자세한 내용은 https://aka.ms/dotnet-docs를 참조하세요. 사용 가능한 명령을 보려면 'dotnet --help'를 사용하거나 https://aka.ms/dotnet-cli-docs를 방문하세요.
 
 원격 분석
---------------
+---------
 .NET Core 도구는 사용자 환경 개선을 위해 사용량 데이터를 수집합니다. 데이터는 익명이며 명령줄 인수를 포함하지 않습니다. Microsoft에서 데이터를 수집하여 커뮤니티와 공유합니다.
-자주 사용하는 셸에서 DOTNET_CLI_TELEMETRY_OPTOUT 환경 변수를 1로 설정하여 원격 분석을 옵트아웃할 수 있습니다.
-.NET Core 도구 원격 분석에 대한 자세한 내용은 https://aka.ms/dotnet-cli-telemetry에서 확인할 수 있습니다.</target>
+자주 사용하는 셸에서 DOTNET_CLI_TELEMETRY_OPTOUT 환경 변수를 '1' 또는 'true'로 설정하여 원격 분석을 옵트아웃할 수 있습니다.
+
+.NET Core CLI 도구 원격 분석에 대한 자세한 내용은 https://aka.ms/dotnet-cli-telemetry에서 확인할 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -30,18 +32,18 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">구성 중...
--------------------
-초기에 로컬 패키지 캐시를 채우고, 복원 속도를 개선하고, 오프라인 액세스를 사용하도록 설정하기 위한 명령을 실행하고 있습니다. 완료하는 데 최대 1분이 소요되며 한 번만 실행됩니다.</target>
+--------------
+로컬 패키지 캐시를 채워 복원 속도를 개선하고 오프라인 액세스를 사용하도록 설정하기 위한 명령을 실행하고 있습니다. 완료하는 데 최대 1분이 소요되며 한 번만 실행됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -49,11 +51,24 @@ Here are some options to fix this error:
         <target state="translated">'{0}' 폴더를 수정하는 데 필요한 사용 권한이 거부되었습니다.
 
 이 오류를 해결하기 위한 옵션을 다음과 같습니다.
----------------------
+----------------------------------------
 1. 높은 액세스 권한으로 이 명령을 다시 실행합니다.
-2. 환경 변수 DOTNET_SKIP_FIRST_TIME_EXPERIENCE를 true로 설정하여 첫 실행 경험을 사용하지 않습니다.
+2. 환경 변수 DOTNET_SKIP_FIRST_TIME_EXPERIENCE를 true로 설정하여 첫 번째 실행 환경을 사용하지 않습니다.
 3. .NET Core SDK를 보호되지 않은 위치로 복사한 후 이 위치에서 사용합니다.
     </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AspNetCertificateInstalled">
+        <source>ASP.NET Core
+------------
+Successfully installed the ASP.NET Core HTTPS Development Certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
+For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
+        <target state="needs-review-translation">ASP.NET Core
+------------
+ASP.NET Core HTTPS 개발 인증서를 설치했습니다.
+인증서를 신뢰하려면(Windows 및 macOS만 해당) 먼저 'dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final'을 실행하여 dev-certs 도구를 설치한 다음, 'dotnet-dev-certs https --trust'를 실행하세요.
+HTTPS 구성에 대한 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=848054를 참조하세요.</target>
         <note />
       </trans-unit>
     </body>

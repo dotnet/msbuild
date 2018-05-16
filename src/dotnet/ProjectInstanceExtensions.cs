@@ -4,6 +4,7 @@
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common
@@ -19,31 +20,29 @@ namespace Microsoft.DotNet.Tools.Common
             return projectGuid.ToString("B").ToUpper();
         }
 
-        public static string GetProjectTypeGuid(this ProjectInstance projectInstance)
+        public static string GetDefaultProjectTypeGuid(this ProjectInstance projectInstance)
         {
-            string projectTypeGuid = null;
+            return projectInstance.GetPropertyValue("DefaultProjectTypeGuid");
+        }
 
-            var projectTypeGuidProperty = projectInstance.GetPropertyValue("ProjectTypeGuid");
-            if (!string.IsNullOrEmpty(projectTypeGuidProperty))
-            {
-                projectTypeGuid = projectTypeGuidProperty.Split(';').Last();
-            }
-            else
-            {
-                projectTypeGuid = projectInstance.GetPropertyValue("DefaultProjectTypeGuid");
-            }
+        public static IEnumerable<string> GetPlatforms(this ProjectInstance projectInstance)
+        {
+            return (projectInstance.GetPropertyValue("Platforms") ?? "")
+                .Split(
+                    new char[] { ';' },
+                    StringSplitOptions.RemoveEmptyEntries)
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .DefaultIfEmpty("AnyCPU");
+        }
 
-            if (string.IsNullOrEmpty(projectTypeGuid))
-            {
-                //ISSUE: https://github.com/dotnet/sdk/issues/522
-                //The real behavior we want (once DefaultProjectTypeGuid support is in) is to throw
-                //when we cannot find ProjectTypeGuid or DefaultProjectTypeGuid. But for now we
-                //need to default to the C# one.
-                //throw new GracefulException(CommonLocalizableStrings.UnsupportedProjectType);
-                projectTypeGuid = ProjectTypeGuids.CSharpProjectTypeGuid;
-            }
-
-            return projectTypeGuid;
+        public static IEnumerable<string> GetConfigurations(this ProjectInstance projectInstance)
+        {
+            return (projectInstance.GetPropertyValue("Configurations") ?? "Debug;Release")
+                .Split(
+                    new char[] { ';' },
+                    StringSplitOptions.RemoveEmptyEntries)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .DefaultIfEmpty("Debug");
         }
     }
 }

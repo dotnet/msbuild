@@ -18,8 +18,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static readonly string MSBUILD_EXE_PATH = "MSBUILD_EXE_PATH";
         public static readonly string MSBuildExtensionsPath = "MSBuildExtensionsPath";
+        public static readonly string EnableDefaultItems = "EnableDefaultItems";
 
         public static readonly string ProjectArgumentName = "<PROJECT>";
         public static readonly string SolutionArgumentName = "<SLN_FILE>";
+        public static readonly string ToolPackageArgumentName = "<PACKAGE_ID>";
     }
 }

@@ -13,23 +13,27 @@
           Condition=" '$(IsDebianBaseDistro)' == 'True' "
           Outputs="@(GeneratedInstallers)"/>
 
+  <Target Name="GetAspNetSharedFxInstallArgs" DependsOnTargets="EvaluateRuntimeCoherence">
+    <PropertyGroup>
+      <!-- Ignored because versions of aspnetcore-runtime may be in incoherent with the version of dotnet-runtime we want to use. -->
+      <InstallAspNetCoreSharedFxArgs>--ignore-depends=dotnet-runtime-$(AspNetCoreSharedFxBaseRuntimeVersion)</InstallAspNetCoreSharedFxArgs>
+    </PropertyGroup>
+  </Target>
+
   <Target Name="BuildSdkDeb"
       Condition=" '$(IsDebianBaseDistro)' == 'True' AND '$(DebuildPresent)'  == 'true' "
       DependsOnTargets="PrepareDotnetDebDirectories;
                         PrepareDotnetDebTool;
-                        DownloadAspNetCoreRuntimeDebInstaller;"
+                        GetAspNetSharedFxInstallArgs;"
       Inputs="@(CLISdkFiles)"
       Outputs="$(SdkInstallerFile)" >
-
-      <ItemGroup>
-        <AspNetCoreDebInstallerFileReversed Include="@(AspNetCoreDebInstallerFile->Reverse())" />
-      </ItemGroup>
-
       <!-- Install Shared Framework Packages -->
+
+      <Exec Command="sudo dpkg -i $(DownloadedRuntimeDepsInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFileReversed.Identity)" />
+      <Exec Command="sudo dpkg $(InstallAspNetCoreSharedFxArgs) -i $(DownloadedAspNetCoreSharedFxInstallerFile)" />
 
       <!-- Create layout: Binaries -->
       <Copy
@@ -49,8 +53,8 @@
 
       <!-- Create layout: Generate and Place postinst -->
       <ReplaceFileContents
-        InputFile="$(DebianPostinstTemplateFile)"
-        DestinationFile="$(DebianPostinstFile)"
+        InputFiles="$(DebianPostinstTemplateFile)"
+        DestinationFiles="$(DebianPostinstFile)"
         ReplacementItems="@(DebianPostInstTokenValues)" />
 
       <Chmod
@@ -59,8 +63,8 @@
 
       <!-- Create layout: Generate and Place debian_config.json -->
       <ReplaceFileContents
-        InputFile="$(DebianConfigTemplateFile)"
-        DestinationFile="$(DebianConfigJsonFile)"
+        InputFiles="$(DebianConfigTemplateFile)"
+        DestinationFiles="$(DebianConfigJsonFile)"
         ReplacementItems="@(DebianConfigTokenValues)" />
 
       <Chmod
@@ -68,7 +72,7 @@
         Mode="u+x" />
 
       <!-- Build SDK Deb package -->
-      <DotNetDebTool ToolPath="$(Stage0Directory)"
+      <DotNetDebTool ToolPath="$(PreviousStageDirectory)"
                      InputDirectory="$(LayoutDirectory)"
                      OutputDirectory="$(DotNetDebToolOutputDirectory)"
                      PackageName="$(SdkDebianPackageName)"
@@ -91,32 +95,28 @@
 
       <!-- Remove Shared Framework and Debian Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r %(AspNetCoreDebInstallerFile.PackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="TestSdkDeb"
-      Condition=" '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' and '$(IsSharedFrameworkPreReleaseVersion)' != 'True' "
-      DependsOnTargets="RestoreTests"
+      Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' and '$(IsDebianBaseDistro)' == 'True' and '$(DebuildPresent)'  == 'true' "
+      DependsOnTargets="RestoreTests;GetAspNetSharedFxInstallArgs"
       Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);
-              @(AspNetCoreDebInstallerFile);
               $(SdkInstallerFile);"
       Outputs="$(DebianTestResultsXmlFile)" >
 
-      <ItemGroup>
-        <AspNetCoreDebInstallerFileReversed Include="@(AspNetCoreDebInstallerFile->Reverse())" />
-      </ItemGroup>
-
       <!-- Install Dependencies and SDK Packages -->
+      <Exec Command="sudo dpkg -i $(DownloadedRuntimeDepsInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-      <Exec Command="sudo dpkg -i %(AspNetCoreDebInstallerFileReversed.Identity)" />
+      <Exec Command="sudo dpkg $(InstallAspNetCoreSharedFxArgs) -i $(DownloadedAspNetCoreSharedFxInstallerFile)" />
 
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
@@ -130,11 +130,11 @@
 
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r %(AspNetCoreDebInstallerFile.PackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
@@ -165,20 +165,10 @@
     <MakeDir Directories="$(DotNetDebToolOutputDirectory)" />
   </Target>
 
-  <Target Name="PrepareDotnetDebTool"
-          DependsOnTargets="WriteDotnetDebToolProject">
+  <Target Name="PrepareDotnetDebTool">
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    WorkingDirectory="$(DotnetDebToolDir)" />
-  </Target>
-
-  <Target Name="WriteDotnetDebToolProject"
-          Inputs="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
-          Outputs="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)">
-
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
-          DestinationFiles="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)" />
-
   </Target>
 
   <Target Name="TestDebuild">

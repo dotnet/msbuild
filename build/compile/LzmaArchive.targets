@@ -3,9 +3,9 @@
 
     <PropertyGroup>
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
-      <NugetPackagesArchiveName>nuGetPackagesArchive.$(AspNetCoreRuntimePackageFlavor).lzma</NugetPackagesArchiveName>
+      <NugetPackagesArchiveName>nuGetPackagesArchive-$(AspNetCoreVersion).lzma</NugetPackagesArchiveName>
       <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
-      <NugetPackagesArchiveBlobUrl>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
+      <NugetPackagesArchiveBlobUrl>$(AspNetCoreSharedFxRootUrl)$(AspNetCoreVersion)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
     </PropertyGroup>
 
     <Target Name="GetNuGetPackagesArchive"

@@ -33,7 +33,7 @@
 
   <Target Name="EnsureDependencyRestored"
           Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')">
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
                    AdditionalParameters="/p:DependencyPackageName=$(DependencyPackageName) /p:DependencyPackageVersion=$(DependencyPackageVersion)" />
   </Target>

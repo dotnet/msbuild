@@ -180,6 +180,9 @@
   <data name="MigrateDefinition" xml:space="preserve">
     <value>Migrates a project.json based project to a msbuild based project.</value>
   </data>
+  <data name="StoreDefinition" xml:space="preserve">
+    <value>Stores the specified assemblies in the runtime store.</value>
+  </data>
   <data name="ProjectModificationCommands" xml:space="preserve">
     <value>Project modification commands</value>
   </data>
@@ -190,7 +193,7 @@
     <value>Remove reference from the project.</value>
   </data>
   <data name="ListDefinition" xml:space="preserve">
-    <value>List reference in the project.</value>
+    <value>List references of a .NET project.</value>
   </data>
   <data name="AdvancedCommands" xml:space="preserve">
     <value>Advanced Commands</value>
@@ -229,10 +232,16 @@
     <value>The path to an application .dll file to execute.</value>
   </data>
   <data name="SDKVersionCommandDefinition" xml:space="preserve">
-    <value>Display .NET Core SDK version.</value>
+    <value>Display .NET Core SDK version in use.</value>
   </data>
   <data name="SDKInfoCommandDefinition" xml:space="preserve">
     <value>Display .NET Core information.</value>
+  </data>
+  <data name="SDKListSdksCommandDefinition" xml:space="preserve">
+    <value>Display the installed SDKs.</value>
+  </data>
+  <data name="SDKListRuntimesCommandDefinition" xml:space="preserve">
+    <value>Display the installed runtimes.</value>
   </data>
   <data name="SDKDiagnosticsCommandDefinition" xml:space="preserve">
     <value>Enable diagnostic output.</value>
@@ -256,6 +265,30 @@
     <value>Roll forward on no candidate shared framework is enabled.</value>
   </data>
   <data name="AdditionalDeps" xml:space="preserve">
-    <value>Path to additonal deps.json file.</value>
+    <value>Path to additional deps.json file.</value>
+  </data>
+  <data name="ToolDefinition" xml:space="preserve">
+    <value>Install or work with tools that extend the .NET experience.</value>
+  </data>
+  <data name="BuildServerDefinition" xml:space="preserve">
+    <value>Interact with servers started by a build.</value>
+  </data>
+  <data name="DevCertsDefinition" xml:space="preserve">
+    <value>Create and manage development certificates.</value>
+  </data>
+  <data name="EfDefinition" xml:space="preserve">
+    <value>Entity Framework Core command-line tools.</value>
+  </data>
+  <data name="SqlCacheDefinition" xml:space="preserve">
+    <value>SQL Server cache command-line tools.</value>
+  </data>
+  <data name="UserSecretsDefinition" xml:space="preserve">
+    <value>Manage development user secrets.</value>
+  </data>
+  <data name="WatchDefinition" xml:space="preserve">
+    <value>Start a file watcher that runs a command when files change.</value>
+  </data>
+  <data name="AdditionalTools" xml:space="preserve">
+    <value>Additional tools ('dotnet [tool-name] --help' for more information):</value>
   </data>
 </root>

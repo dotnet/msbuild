@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.Configurer
 
         private string SentinelPath => Path.Combine(_dotnetUserProfileFolderPath, SENTINEL);
 
-        public FirstTimeUseNoticeSentinel(CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator) :
+        public FirstTimeUseNoticeSentinel(CliFolderPathCalculator cliFolderPathCalculator) :
             this(
-                cliFallbackFolderPathCalculator.DotnetUserProfileFolderPath,
+                CliFolderPathCalculator.DotnetUserProfileFolderPath,
                 FileSystemWrapper.Default.File,
                 FileSystemWrapper.Default.Directory)
         {

@@ -6,7 +6,7 @@
     <!-- Properties for pkg build -->
     <SharedHostComponentId>com.microsoft.dotnet.sharedhost.$(SharedHostVersion).component.osx.x64</SharedHostComponentId>
     <HostFxrComponentId>com.microsoft.dotnet.hostfxr.$(HostFxrVersion).component.osx.x64</HostFxrComponentId>
-    <SharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(SharedFrameworkVersion).component.osx.x64</SharedFrameworkComponentId>
+    <SharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(MicrosoftNETCoreAppPackageVersion).component.osx.x64</SharedFrameworkComponentId>
     <SdkComponentId>com.microsoft.dotnet.dev.$(SdkVersion).component.osx.x64</SdkComponentId>
     <SdkProductArchiveId>com.microsoft.dotnet.dev.$(SdkVersion).osx.x64</SdkProductArchiveId>
 
@@ -17,7 +17,7 @@
     <SdkPkgScriptTemplateFile>$(SdkPkgScriptsDirectory)/postinstall</SdkPkgScriptTemplateFile>
     <SdkPkgDestinationScriptsDirectory>$(PkgIntermediateDirectory)/scripts</SdkPkgDestinationScriptsDirectory>
     <SdkPkgScriptFile>$(SdkPkgDestinationScriptsDirectory)/postinstall</SdkPkgScriptFile>
-    <SdkProductArchiveResourcesDirectory>$(SdkPkgSourcesRootDirectory)/resources</SdkProductArchiveResourcesDirectory>
+    <SdkProductArchiveResourcesDirectory>$(PkgIntermediateDirectory)/resources</SdkProductArchiveResourcesDirectory>
 
     <SdkProductArchiveDistributionTemplateFile>$(SdkPkgSourcesRootDirectory)/Distribution-Template</SdkProductArchiveDistributionTemplateFile>
     <SdkProductArchiveDistributionFile>$(PkgIntermediateDirectory)/CLI-SDK-Formatted-Distribution-Template.xml</SdkProductArchiveDistributionFile>
@@ -61,6 +61,16 @@
         <PostInstallScriptReplacement Include="%SDK_VERSION%">
           <ReplacementString>$(SdkVersion)</ReplacementString>
         </PostInstallScriptReplacement>
+
+        <ResourcesReplacement Include="{DOTNETSDKVERSION}">
+          <ReplacementString>$(SdkVersion)</ReplacementString>
+        </ResourcesReplacement>
+        <ResourcesReplacement Include="{DOTNETRUNTIMEVERSION}">
+          <ReplacementString>$(MicrosoftNETCoreAppPackageVersion)</ReplacementString>
+        </ResourcesReplacement>
+        <ResourcesReplacement Include="{ASPNETCOREVERSION}">
+          <ReplacementString>$(AspNetCoreVersion)</ReplacementString>
+        </ResourcesReplacement>
       </ItemGroup>
       
       <!-- Consumed By Publish -->
@@ -69,6 +79,8 @@
       </ItemGroup>
 
       <ItemGroup>
+        <SdkProductArchiveResourcesTemplateFiles Include="$(SdkPkgSourcesRootDirectory)/resources/**/*" />
+
         <GenerateSdkPkgInputs Include="$(SdkLayoutOutputDirectory)/**/*" />
         <GenerateSdkPkgInputs Include="$(SdkPkgScriptsDirectory)/**/*" />
 
@@ -77,7 +89,7 @@
         <GenerateSdkProductArchiveInputs Include="$(DownloadedHostFxrInstallerFile)" />
         <GenerateSdkProductArchiveInputs Include="$(DownloadedSharedHostInstallerFile)" />
         <GenerateSdkProductArchiveInputs Include="$(SdkProductArchiveDistributionTemplateFile)" />
-        <GenerateSdkProductArchiveInputs Include="$(SdkProductArchiveResourcesDirectory)/**/*" />
+        <GenerateSdkProductArchiveInputs Include="@(SdkProductArchiveResourcesTemplateFiles)" />
       </ItemGroup>
     </Target>
 
@@ -91,10 +103,16 @@
             DestinationFiles="@(AspNetRuntimeFilesInput->'$(SdkLayoutOutputDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
 
       <ReplaceFileContents
-        InputFile="$(SdkPkgScriptTemplateFile)"
-        DestinationFile="$(SdkPkgScriptFile)"
+        InputFiles="$(SdkPkgScriptTemplateFile)"
+        DestinationFiles="$(SdkPkgScriptFile)"
         ReplacementPatterns="@(PostInstallScriptReplacement -> '%(Identity)')"
         ReplacementStrings="@(PostInstallScriptReplacement -> '%(ReplacementString)')" />
+
+      <ReplaceFileContents 
+        InputFiles="@(SdkProductArchiveResourcesTemplateFiles)"
+        DestinationFiles="@(SdkProductArchiveResourcesTemplateFiles -> '$(SdkProductArchiveResourcesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')"
+        ReplacementPatterns="@(ResourcesReplacement -> '%(Identity)')"
+        ReplacementStrings="@(ResourcesReplacement -> '%(ReplacementString)')" />
 
       <Chmod
         Glob="$(SdkPkgScriptFile)"
@@ -130,8 +148,8 @@
 
       <!-- Fill out parameters in the Distribution Template -->
       <ReplaceFileContents
-        InputFile="$(SdkProductArchiveDistributionTemplateFile)"
-        DestinationFile="$(SdkProductArchiveDistributionFile)"
+        InputFiles="$(SdkProductArchiveDistributionTemplateFile)"
+        DestinationFiles="$(SdkProductArchiveDistributionFile)"
         ReplacementPatterns="@(DistributionTemplateReplacement -> '%(Identity)')"
         ReplacementStrings="@(DistributionTemplateReplacement -> '%(ReplacementString)')" />
 
