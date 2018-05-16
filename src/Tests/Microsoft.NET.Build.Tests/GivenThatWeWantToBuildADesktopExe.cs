@@ -478,6 +478,70 @@ namespace DefaultReferences
             buildResult.Should().NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
+        [FullMSBuildOnlyFact]
+        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution()
+        {
+            Test_inbox_assembly_wins_conflict_resolution(false);
+        }
+
+        [Fact]
+        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution_sdk()
+        {
+            Test_inbox_assembly_wins_conflict_resolution(true);
+        }
+
+        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopInBoxConflictResolution",
+                IsExe = true
+            };
+
+            if (useSdkProject)
+            {
+                testProject.IsSdkProject = true;
+                testProject.TargetFrameworks = "net472";
+            }
+            else
+            {
+                testProject.IsSdkProject = false;
+                testProject.TargetFrameworkVersion = "v4.7.2";
+            }
+
+            testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", "4.3.3"));
+
+            testProject.SourceFiles["Program.cs"] = @"using System;
+using System.Net.Http;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        HttpClient client = new HttpClient();
+    }
+}";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name,
+                                                                 identifier: useSdkProject ? "SDK" : "")
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "Reference",
+                                    new XAttribute("Include", "System.Net.Http")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+        }
+
         [WindowsOnlyFact]
         public void It_generates_binding_redirects_if_needed()
         {
