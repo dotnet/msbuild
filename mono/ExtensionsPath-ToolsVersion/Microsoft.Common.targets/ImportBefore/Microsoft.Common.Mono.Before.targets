@@ -24,6 +24,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
         <!-- Disable generation of serialization assemblies for now. workaround for bxc #55697 -->
         <GenerateSerializationAssemblies Condition="'$(GenerateSerializationAssemblies)' == ''">Off</GenerateSerializationAssemblies>
+
+        <TargetFrameworkFallbackSearchPaths Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworkFallbackSearchPaths);/Library/Frameworks/Mono.framework/External/xbuild-frameworks</TargetFrameworkFallbackSearchPaths>
     </PropertyGroup>
 
 </Project>
