@@ -19,8 +19,10 @@ using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -117,7 +119,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
  <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -315,7 +317,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <ItemGroup>
        <InitialProperty Include='$([System.Diagnostics.Process]::GetCurrentProcess().Id)'/>
     </ItemGroup>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ";
@@ -448,7 +450,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
 <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -489,7 +491,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
 <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -530,7 +532,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
 <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -581,7 +583,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
 <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -700,7 +702,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
 <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -806,7 +808,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
 <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");            _env.SetEnvironmentVariable("MsBuildForwardPropertiesFromChild", null);
@@ -834,7 +836,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Error Text='[fail]'/>
+    <Error Text='[fail]'/>
  </Target>
 </Project>
 ");
@@ -1069,7 +1071,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(1)) + @"'/>
-	<Message Text='[success 1]'/>
+    <Message Text='[success 1]'/>
  </Target>
 </Project>
 ");
@@ -1093,7 +1095,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Message Text='[success 1]'/>
+    <Message Text='[success 1]'/>
  </Target>
 </Project>
 ");
@@ -1124,7 +1126,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Message Text='[success 1]'/>
+    <Message Text='[success 1]'/>
  </Target>
 </Project>
 ");
@@ -1132,7 +1134,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents2 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Message Text='[success 2]'/>
+    <Message Text='[success 2]'/>
  </Target>
 </Project>
 ");
@@ -1161,7 +1163,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"'/>
-	<Message Text='[success 1]'/>
+    <Message Text='[success 1]'/>
  </Target>
 </Project>
 ");
@@ -1169,7 +1171,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents2 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Message Text='[success 2]'/>
+    <Message Text='[success 2]'/>
  </Target>
 </Project>
 ");
@@ -1284,7 +1286,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1304,7 +1306,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1326,7 +1328,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(60)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(60)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1357,7 +1359,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(5)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(5)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1392,7 +1394,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1427,7 +1429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1460,7 +1462,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1642,7 +1644,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <PropertyGroup>
         <Foo>bar</Foo>
     </PropertyGroup>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -1668,7 +1670,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <PropertyGroup>
         <Foo>bar</Foo>
     </PropertyGroup>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -1700,7 +1702,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <PropertyGroup>
         <Foo>bar</Foo>
     </PropertyGroup>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -1882,7 +1884,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
  <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -1919,7 +1921,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
  <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -1947,7 +1949,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
        <InitialProperty3>InitialProperty3</InitialProperty3>
 </PropertyGroup>
  <Target Name='test'>
-	<Message Text='[success]'/>
+    <Message Text='[success]'/>
  </Target>
 </Project>
 ");
@@ -3806,5 +3808,101 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 result.OverallResult.ShouldBe(BuildResultCode.Success);
             }
         }
-    }	
+
+        [Fact]
+        public void IdenticalSubmissionsShouldCompleteAndNotHangTheBuildOnMissingTargetExceptions()
+        {
+            var projectContents =
+$@"<Project InitialTargets=`Sleep`>
+
+  <Target Name=`Sleep`>
+    <!-- Add a sleep to give the Scheduler time to register both submissions -->
+    <Exec Command='{Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(200))}' />
+  </Target>
+
+  <!-- The nonexistent target will force the TargetBuilder to not include a result for the Build target,
+       thus causing a BuildResult cache miss in the Scheduler, which causes the Scheduler to
+       handoff logging completion to the BuildManager.
+  -->
+  <Target Name='Build' DependsOnTargets='NonExistent'>
+  </Target>
+
+</Project>";
+
+            Exception exception = null;
+            var manager = new BuildManager();
+
+            using (var env = TestEnvironment.Create())
+            {
+                try
+                {
+                    var testFiles = env.CreateTestProjectWithFiles(projectContents);
+
+                    var parameters = new BuildParameters
+                    {
+                        MaxNodeCount = 1,
+                        DisableInProcNode = false,
+                        ShutdownInProcNodeOnBuildFinish = false,
+                        UseSynchronousLogging = false,
+                    };
+
+                    /*
+                     * When the scheduler completes a request, it looks ahead at the queue of unscheduled requests and
+                     * preemptively completes identical ones (same global properties, path, toolsversion, AND requested targets).
+                     * When the BuildResult has a result for the unscheduled identical request (most of the times), then the scheduler
+                     * simulates the ProjectStarted / ProjectEnded events for the unscheduled request and completes it.
+                     *
+                     * However, when the initial build fails in such a way that there is no result for the requested targets,
+                     * the initial BuildResult cannot satisfy the unscheduled submission. In this scenario the Scheduler still completes
+                     * the request but does not simulate the ProjectStarted / ProjectEnded events. It also leaves logging completion to the
+                     * BuildManager.
+                     */
+                    var request1 = new BuildRequestData(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, new[] {"Build"}, null);
+                    var request2 = new BuildRequestData(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, new[] {"Build"}, null);
+
+                    /* During builds, msbuild changes the current directory.
+                     * When this test fails, the build never finishes so the current directory never gets restored.
+                     * Force it to restore via the TestEnvironment, otherwise the true test failure gets masked by the current directory not getting restored.
+                     */
+                    env.SetCurrentDirectory(Environment.CurrentDirectory);
+
+                    manager.BeginBuild(parameters);
+
+                    /* Executing async will make the Scheduler aware that there are two identical submissions under consideration.
+                     * Otherwise it builds both sequentually and does not perform the lookahead optimization.
+                     */
+                    var submission1 = manager.PendBuildRequest(request1);
+                    var submission2 = manager.PendBuildRequest(request2);
+
+                    submission1.ExecuteAsync(null, null);
+                    submission2.ExecuteAsync(null, null);
+
+                    submission1.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+                    submission2.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+
+                    submission1.IsCompleted.ShouldBeTrue();
+                    submission2.IsCompleted.ShouldBeTrue();
+
+                    submission1.BuildResult.Exception.ShouldBeOfType<InvalidProjectFileException>();
+                    submission2.BuildResult.Exception.ShouldBeOfType<InvalidProjectFileException>();
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+                finally
+                {
+                    // Only cleanup the manager when the test does not fail with Shouldly assertions (actual assert failures).
+                    // If the assert exceptions hit then EndBuild hangs, waiting for submissions which will never complete.
+                    if (exception is ShouldAssertException)
+                    {
+                        throw exception;
+                    }
+
+                    manager.EndBuild();
+                    manager.Dispose();
+                }
+            }
+        }
+    }
 }

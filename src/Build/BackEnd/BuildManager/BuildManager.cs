@@ -1581,18 +1581,22 @@ namespace Microsoft.Build.Execution
                 {
                     BuildSubmission submission = _buildSubmissions[result.SubmissionId];
 
-                    submission.CompleteResults(result);
-
-                    // If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
-                    // this submission, therefore set the logging as complete. IntrnalLoggerExceptions are unhandled exceptions from the logger. If the logger author does
-                    // not handle an exception the eventsource wraps all exceptions (except a logging exception) into an internal logging exception.
-                    // These exceptions will have their stack logged on the commandline as an unexpected failure. If a logger author wants the logger
-                    // to fail gracefully then can catch an exception and log a LoggerException. This has the same effect of stopping the build but it logs only
-                    // the exception error message rather than the whole stack trace.
-                    if (result.Exception is InternalLoggerException || result.Exception is LoggerException || result.Exception is InvalidOperationException)
+                    /* If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
+                     * this submission, therefore set the logging as complete. InternalLoggerExceptions are unhandled exceptions from the logger. If the logger author does
+                     * not handle an exception the eventsource wraps all exceptions (except a logging exception) into an internal logging exception.
+                     * These exceptions will have their stack logged on the commandline as an unexpected failure. If a logger author wants the logger
+                     * to fail gracefully then can catch an exception and log a LoggerException. This has the same effect of stopping the build but it logs only
+                     * the exception error message rather than the whole stack trace.
+                     * 
+                     * If any other exception happened and logging is not completed, then go ahead and complete it now since this is the last place to do it.
+                     * Otherwise the submission would remain uncompleted, potentially causing hangs (EndBuild waiting on all BuildSubmissions, users waiting on BuildSubmission, or expecting a callback, etc)
+                    */
+                    if (!submission.LoggingCompleted && result.Exception != null)
                     {
-                        submission.CompleteLogging(false /* waitForLoggingThread */);
+                        submission.CompleteLogging(waitForLoggingThread: false);
                     }
+
+                    submission.CompleteResults(result);
 
                     _overallBuildSuccess = _overallBuildSuccess && (_buildSubmissions[result.SubmissionId].BuildResult.OverallResult == BuildResultCode.Success);
 
