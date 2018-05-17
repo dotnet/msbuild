@@ -5,10 +5,20 @@ namespace Microsoft.DotNet.Configurer
 {
     public class DotnetFirstRunConfiguration
     {
-        public bool GenerateAspNetCertificate { get; set; }
+        public bool GenerateAspNetCertificate { get; }
 
-        public bool PrintTelemetryMessage { get; set; }
+        public bool PrintTelemetryMessage { get; }
 
-        public bool SkipFirstRunExperience { get; set; }
+        public bool SkipFirstRunExperience { get; }
+
+        public DotnetFirstRunConfiguration(
+            bool generateAspNetCertificate,
+            bool printTelemetryMessage,
+            bool skipFirstRunExperience)
+        {
+            GenerateAspNetCertificate = generateAspNetCertificate;
+            PrintTelemetryMessage = printTelemetryMessage;
+            SkipFirstRunExperience = skipFirstRunExperience;
+        }
     }
 }

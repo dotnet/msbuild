@@ -49,10 +49,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -76,10 +77,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = true,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: true
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -103,10 +105,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = false
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: false,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -130,10 +133,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -157,10 +161,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -183,10 +188,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -209,10 +215,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -235,10 +242,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = true,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: true
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -261,10 +269,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -288,10 +297,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -318,10 +328,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -349,10 +360,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -376,11 +388,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true,
-                    GenerateAspNetCertificate = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -404,10 +416,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -438,10 +451,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -464,10 +478,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -491,10 +506,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: true
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -518,10 +534,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true
-                },
+                (
+                    generateAspNetCertificate: false,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -545,11 +562,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true,
-                    GenerateAspNetCertificate = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -573,11 +590,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = false,
-                    PrintTelemetryMessage = true,
-                    GenerateAspNetCertificate = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: false
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);
@@ -598,11 +615,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _aspNetCoreCertificateGeneratorMock.Object,
                 _toolPathSentinelMock.Object,
                 new DotnetFirstRunConfiguration
-                {
-                    SkipFirstRunExperience = true,
-                    PrintTelemetryMessage = true,
-                    GenerateAspNetCertificate = true
-                },
+                (
+                    generateAspNetCertificate: true,
+                    printTelemetryMessage: true,
+                    skipFirstRunExperience: true
+                ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
                 _pathAdderMock.Object);

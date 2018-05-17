@@ -164,12 +164,10 @@ namespace Microsoft.DotNet.Cli
                             skipFirstRunExperience = false;
                         }
 
-                        var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration
-                        {
-                            GenerateAspNetCertificate = generateAspNetCertificate,
-                            PrintTelemetryMessage = printTelemetryMessage,
-                            SkipFirstRunExperience = skipFirstRunExperience
-                        };
+                        var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
+                            generateAspNetCertificate,
+                            printTelemetryMessage,
+                            skipFirstRunExperience);
 
                         ConfigureDotNetForFirstTimeUse(
                             nugetCacheSentinel,
