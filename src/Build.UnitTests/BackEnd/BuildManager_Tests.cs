@@ -3891,8 +3891,8 @@ $@"<Project InitialTargets=`Sleep`>
                 }
                 finally
                 {
-                    // Only cleanup the manager if the test did not fail with the expected exception.
-                    // Otherwise EndBuild would hang forever waiting for all submissions to complete.
+                    // Only cleanup the manager when the test does not fail with Shouldly assertions (actual assert failures).
+                    // If the assert exceptions hit then EndBuild hangs, waiting for submissions which will never complete.
                     if (exception is ShouldAssertException)
                     {
                         throw exception;
