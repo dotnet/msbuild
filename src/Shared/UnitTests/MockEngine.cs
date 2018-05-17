@@ -28,57 +28,37 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    sealed internal class MockEngine : IBuildEngine5
+    internal sealed class MockEngine : IBuildEngine5
     {
         private readonly ITestOutputHelper _output;
 
-        private bool _isRunningMultipleNodes;
-        private int _messages = 0;
-        private int _warnings = 0;
-        private int _errors = 0;
-        private StringBuilder _log = new StringBuilder();
-        private ProjectCollection _projectCollection = new ProjectCollection();
-        private bool _logToConsole = false;
-        private MockLogger _mockLogger = null;
-        private Dictionary<object, object> _objectCashe = new Dictionary<object, object>();
+        private readonly StringBuilder _log = new StringBuilder();
+        private readonly ProjectCollection _projectCollection = new ProjectCollection();
+        private readonly bool _logToConsole;
+        private readonly Dictionary<object, object> _objectCashe = new Dictionary<object, object>();
 
         internal MockEngine() : this(false)
         {
         }
 
-        internal int Messages
-        {
-            set { _messages = value; }
-            get { return _messages; }
-        }
+        internal int Messages { set; get; }
 
-        internal int Warnings
-        {
-            set { _warnings = value; }
-            get { return _warnings; }
-        }
+        internal int Warnings { set; get; }
 
-        internal int Errors
-        {
-            set { _errors = value; }
-            get { return _errors; }
-        }
+        internal int Errors { set; get; }
 
-        internal MockLogger MockLogger
-        {
-            get { return _mockLogger; }
-        }
+        internal MockLogger MockLogger { get; }
 
         public MockEngine(bool logToConsole)
         {
-            _mockLogger = new MockLogger();
+            MockLogger = new MockLogger();
             _logToConsole = logToConsole;
         }
 
         public MockEngine(ITestOutputHelper output)
         {
             _output = output;
-            _mockLogger = new MockLogger(output);
+            MockLogger = new MockLogger(output);
             _logToConsole = false; // We have a better place to put it.
         }
 
@@ -86,13 +66,13 @@ namespace Microsoft.Build.UnitTests
         {
             string message = string.Empty;
 
-            if (eventArgs.File != null && eventArgs.File.Length > 0)
+            if (!string.IsNullOrEmpty(eventArgs.File))
             {
-                message += String.Format("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
+                message += $"{eventArgs.File}({eventArgs.LineNumber},{eventArgs.ColumnNumber}): ";
             }
 
             message += "ERROR " + eventArgs.Code + ": ";
-            ++_errors;
+            ++Errors;
 
             message += eventArgs.Message;
 
@@ -106,13 +86,13 @@ namespace Microsoft.Build.UnitTests
         {
             string message = string.Empty;
 
-            if (eventArgs.File != null && eventArgs.File.Length > 0)
+            if (!string.IsNullOrEmpty(eventArgs.File))
             {
-                message += String.Format("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
+                message += $"{eventArgs.File}({eventArgs.LineNumber},{eventArgs.ColumnNumber}): ";
             }
 
             message += "WARNING " + eventArgs.Code + ": ";
-            ++_warnings;
+            ++Warnings;
 
             message += eventArgs.Message;
 
@@ -136,7 +116,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(eventArgs.Message);
             _output?.WriteLine(eventArgs.Message);
             _log.AppendLine(eventArgs.Message);
-            ++_messages;
+            ++Messages;
         }
 
         public void LogTelemetry(string eventName, IDictionary<string, string> properties)
@@ -155,37 +135,13 @@ namespace Microsoft.Build.UnitTests
             _log.AppendLine(message);
         }
 
-        public bool ContinueOnError
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool ContinueOnError => false;
 
-        public string ProjectFileOfTaskNode
-        {
-            get
-            {
-                return String.Empty;
-            }
-        }
+        public string ProjectFileOfTaskNode => String.Empty;
 
-        public int LineNumberOfTaskNode
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int LineNumberOfTaskNode => 0;
 
-        public int ColumnNumberOfTaskNode
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int ColumnNumberOfTaskNode => 0;
 
         internal string Log
         {
@@ -198,14 +154,10 @@ namespace Microsoft.Build.UnitTests
 
                 _log.Clear();
             }
-            get { return _log.ToString(); }
+            get => _log.ToString();
         }
 
-        public bool IsRunningMultipleNodes
-        {
-            get { return _isRunningMultipleNodes; }
-            set { _isRunningMultipleNodes = value; }
-        }
+        public bool IsRunningMultipleNodes { get; set; }
 
         public bool BuildProjectFile
             (
@@ -215,7 +167,7 @@ namespace Microsoft.Build.UnitTests
             IDictionary targetOutputs
             )
         {
-            ILogger[] loggers = new ILogger[2] { _mockLogger, new ConsoleLogger() };
+            ILogger[] loggers = new ILogger[2] { MockLogger, new ConsoleLogger() };
 
             return this.BuildProjectFile(projectFileName, targetNames, globalPropertiesPassedIntoTask, targetOutputs, null);
         }
@@ -242,7 +194,7 @@ namespace Microsoft.Build.UnitTests
 
             Project project = _projectCollection.LoadProject(projectFileName, finalGlobalProperties, toolsVersion);
 
-            ILogger[] loggers = new ILogger[2] { _mockLogger, new ConsoleLogger() };
+            ILogger[] loggers = new ILogger[2] { MockLogger, new ConsoleLogger() };
 
             return project.Build(targetNames, loggers);
         }
@@ -291,7 +243,7 @@ namespace Microsoft.Build.UnitTests
         {
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
 
-            ILogger[] loggers = new ILogger[2] { _mockLogger, new ConsoleLogger() };
+            ILogger[] loggers = new ILogger[2] { MockLogger, new ConsoleLogger() };
 
             bool allSucceeded = true;
 
@@ -424,7 +376,7 @@ namespace Microsoft.Build.UnitTests
                     _output.WriteLine(logText);
                 }
 
-                _mockLogger.AssertLogContains(contains);
+                MockLogger.AssertLogContains(contains);
             }
         }
 
@@ -451,7 +403,7 @@ namespace Microsoft.Build.UnitTests
             // If we do not contain this string than pass it to
             // MockLogger. Since MockLogger is also registered as
             // a logger it may have this string.
-            _mockLogger.AssertLogDoesntContain(contains);
+            MockLogger.AssertLogDoesntContain(contains);
         }
 
         /// <summary>
@@ -461,8 +413,7 @@ namespace Microsoft.Build.UnitTests
 
         public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
         {
-            object obj = null;
-            _objectCashe.TryGetValue(key, out obj);
+            _objectCashe.TryGetValue(key, out object obj);
             return obj;
         }
 
