@@ -404,6 +404,11 @@
         <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotFindApphostForRid">
+        <source>Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
+        <target state="new">Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
