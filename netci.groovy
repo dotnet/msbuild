@@ -3,6 +3,7 @@
 
 // Import the utility functionality.
 
+import jobs.generation.ArchivalSettings;
 import jobs.generation.Utilities;
 
 def project = GithubProject
@@ -62,6 +63,12 @@ platformList.each { platform ->
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     Utilities.addMSTestResults(newJob, '**/*.trx')
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${architecture} ${configuration} Build")
+
+	def archiveSettings = new ArchivalSettings()
+	archiveSettings.addFiles("test/**/*.trx")
+	archiveSettings.setFailIfNothingArchived()
+	archiveSettings.setArchiveOnFailure()
+    Utilities.addArchival(newJob, archiveSettings)
 }
 
 // Make the call to generate the help job
