@@ -2,11 +2,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
 
   <PropertyGroup>
-    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <PublishDir>$(FSharpDirectory)</PublishDir>
-    <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
   
   <ItemGroup>
