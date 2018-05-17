@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using CommandLocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
@@ -160,7 +161,7 @@ Commands:
         }
 
         [Fact]
-        public void WhenNoProjectReferencesArePresentInTheSolutionItPrintsANoProjectMessage()
+        public void WhenNoProjectsArePresentInTheSolutionItPrintsANoProjectMessage()
         {
             var projectDirectory = TestAssets
                 .Get("TestAppWithEmptySln")
@@ -177,11 +178,10 @@ Commands:
         }
 
         [Fact]
-        public void WhenProjectReferencesArePresentInTheSolutionItListsThem()
+        public void WhenProjectsPresentInTheSolutionItListsThem()
         {
-            string OutputText = CommonLocalizableStrings.ProjectReferenceOneOrMore;
-            OutputText += $@"
-{new string('-', OutputText.Length)}
+            var expectedOutput = $@"{CommandLocalizableStrings.ProjectsHeader}
+{new string('-', CommandLocalizableStrings.ProjectsHeader.Length)}
 {Path.Combine("App", "App.csproj")}
 {Path.Combine("Lib", "Lib.csproj")}";
 
@@ -196,7 +196,7 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(OutputText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
         }
     }
 }

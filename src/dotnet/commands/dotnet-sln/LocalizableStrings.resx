@@ -150,4 +150,7 @@
   <data name="CreateSubcommandHelpText" xml:space="preserve">
     <value>Create a solution file.</value>
   </data>
+  <data name="ProjectsHeader" xml:space="preserve">
+    <value>Project(s)</value>
+  </data>
 </root>

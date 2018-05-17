@@ -86,7 +86,7 @@
 
     <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
+                   ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" MSBuildArgs="/p:PublishDir=$(FSharpDirectory)" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"

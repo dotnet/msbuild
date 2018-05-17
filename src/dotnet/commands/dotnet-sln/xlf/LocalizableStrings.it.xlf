@@ -57,6 +57,11 @@
         <target state="translated">Consente di creare un file di soluzione.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectsHeader">
+        <source>Project(s)</source>
+        <target state="new">Project(s)</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
