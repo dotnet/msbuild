@@ -15,9 +15,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void It_does_not_return_same_path_for_tools_package_and_tool_shim()
         {
             // shim name will conflict with the folder that is PackageId, if commandName and packageId are the same.
-            var cliFolderPathCalculator = new CliFolderPathCalculator();
-            cliFolderPathCalculator.ToolsPackagePath.Should().NotBe(cliFolderPathCalculator.ToolsShimPath);
-            cliFolderPathCalculator.ToolsPackagePath.Should().NotBe(cliFolderPathCalculator.ToolsShimPathInUnix.Path);
+            CliFolderPathCalculator.ToolsPackagePath.Should().NotBe(CliFolderPathCalculator.ToolsShimPath);
+            CliFolderPathCalculator.ToolsPackagePath.Should().NotBe(CliFolderPathCalculator.ToolsShimPathInUnix.Path);
         }
     }
 }

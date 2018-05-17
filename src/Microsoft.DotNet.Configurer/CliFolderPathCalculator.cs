@@ -8,16 +8,20 @@ using NuGet.Common;
 
 namespace Microsoft.DotNet.Configurer
 {
-    public class CliFolderPathCalculator
+    public static class CliFolderPathCalculator
     {
         private const string DotnetProfileDirectoryName = ".dotnet";
         private const string ToolsShimFolderName = "tools";
 
-        public string CliFallbackFolderPath => Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
-                                               Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
-        public string ToolsShimPath => Path.Combine(DotnetUserProfileFolderPath, ToolsShimFolderName);
-        public string ToolsPackagePath => ToolPackageFolderPathCalculator.GetToolPackageFolderPath(ToolsShimPath);
-        public BashPathUnderHomeDirectory ToolsShimPathInUnix
+        public static string CliFallbackFolderPath =>
+            Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
+                Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
+
+        public static string ToolsShimPath => Path.Combine(DotnetUserProfileFolderPath, ToolsShimFolderName);
+
+        public static string ToolsPackagePath => ToolPackageFolderPathCalculator.GetToolPackageFolderPath(ToolsShimPath);
+
+        public static BashPathUnderHomeDirectory ToolsShimPathInUnix
         {
             get
             {
@@ -37,7 +41,7 @@ namespace Microsoft.DotNet.Configurer
             }
         }
 
-        public string NuGetUserSettingsDirectory =>
+        public static string NuGetUserSettingsDirectory =>
             NuGetEnvironment.GetFolderPath(NuGetFolderPath.UserSettingsDirectory);
     }
 }

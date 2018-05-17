@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
     public sealed class MSBuildLogger : INodeLogger
     {
         private readonly IFirstTimeUseNoticeSentinel _sentinel =
-            new FirstTimeUseNoticeSentinel(new CliFolderPathCalculator());
+            new FirstTimeUseNoticeSentinel();
         private readonly ITelemetry _telemetry;
         private const string NewEventName = "msbuild";
         private const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
