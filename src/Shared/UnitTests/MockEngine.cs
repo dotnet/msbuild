@@ -31,7 +31,6 @@ namespace Microsoft.Build.UnitTests
     internal sealed class MockEngine : IBuildEngine5
     {
         private readonly ITestOutputHelper _output;
-
         private readonly StringBuilder _log = new StringBuilder();
         private readonly ProjectCollection _projectCollection = new ProjectCollection();
         private readonly bool _logToConsole;
@@ -41,11 +40,11 @@ namespace Microsoft.Build.UnitTests
         {
         }
 
-        internal int Messages { set; get; }
+        internal int Messages { get; set; }
 
-        internal int Warnings { set; get; }
+        internal int Warnings { get; set; }
 
-        internal int Errors { set; get; }
+        internal int Errors { get; set; }
 
         internal MockLogger MockLogger { get; }
 
@@ -77,7 +76,9 @@ namespace Microsoft.Build.UnitTests
             message += eventArgs.Message;
 
             if (_logToConsole)
+            {
                 Console.WriteLine(message);
+            }
             _output?.WriteLine(message);
             _log.AppendLine(message);
         }
@@ -97,7 +98,9 @@ namespace Microsoft.Build.UnitTests
             message += eventArgs.Message;
 
             if (_logToConsole)
+            {
                 Console.WriteLine(message);
+            }
             _output?.WriteLine(message);
             _log.AppendLine(message);
         }
@@ -105,7 +108,9 @@ namespace Microsoft.Build.UnitTests
         public void LogCustomEvent(CustomBuildEventArgs eventArgs)
         {
             if (_logToConsole)
+            {
                 Console.WriteLine(eventArgs.Message);
+            }
             _output?.WriteLine(eventArgs.Message);
             _log.AppendLine(eventArgs.Message);
         }
@@ -113,7 +118,9 @@ namespace Microsoft.Build.UnitTests
         public void LogMessageEvent(BuildMessageEventArgs eventArgs)
         {
             if (_logToConsole)
+            {
                 Console.WriteLine(eventArgs.Message);
+            }
             _output?.WriteLine(eventArgs.Message);
             _log.AppendLine(eventArgs.Message);
             ++Messages;
@@ -145,6 +152,7 @@ namespace Microsoft.Build.UnitTests
 
         internal string Log
         {
+            get => _log.ToString();
             set
             {
                 if (!string.IsNullOrEmpty(value))
@@ -154,7 +162,6 @@ namespace Microsoft.Build.UnitTests
 
                 _log.Clear();
             }
-            get => _log.ToString();
         }
 
         public bool IsRunningMultipleNodes { get; set; }
@@ -167,9 +174,9 @@ namespace Microsoft.Build.UnitTests
             IDictionary targetOutputs
             )
         {
-            ILogger[] loggers = new ILogger[2] { MockLogger, new ConsoleLogger() };
+            ILogger[] loggers = { MockLogger, new ConsoleLogger() };
 
-            return this.BuildProjectFile(projectFileName, targetNames, globalPropertiesPassedIntoTask, targetOutputs, null);
+            return BuildProjectFile(projectFileName, targetNames, globalPropertiesPassedIntoTask, targetOutputs, null);
         }
 
         public bool BuildProjectFile
@@ -181,7 +188,7 @@ namespace Microsoft.Build.UnitTests
             string toolsVersion
             )
         {
-            Dictionary<string, string> finalGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var finalGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Finally, whatever global properties were passed into the task ... those are the final winners.
             if (globalPropertiesPassedIntoTask != null)
@@ -194,7 +201,7 @@ namespace Microsoft.Build.UnitTests
 
             Project project = _projectCollection.LoadProject(projectFileName, finalGlobalProperties, toolsVersion);
 
-            ILogger[] loggers = new ILogger[2] { MockLogger, new ConsoleLogger() };
+            ILogger[] loggers = { MockLogger, new ConsoleLogger() };
 
             return project.Build(targetNames, loggers);
         }
@@ -243,7 +250,7 @@ namespace Microsoft.Build.UnitTests
         {
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
 
-            ILogger[] loggers = new ILogger[2] { MockLogger, new ConsoleLogger() };
+            ILogger[] loggers = { MockLogger, new ConsoleLogger() };
 
             bool allSucceeded = true;
 
@@ -265,8 +272,7 @@ namespace Microsoft.Build.UnitTests
 
                 ProjectInstance instance = _projectCollection.LoadProject((string)projectFileNames[i], finalGlobalProperties, null).CreateProjectInstance();
 
-                IDictionary<string, TargetResult> targetOutputs;
-                bool success = instance.Build(targetNames, loggers, out targetOutputs);
+                bool success = instance.Build(targetNames, loggers, out IDictionary<string, TargetResult> targetOutputs);
 
                 if (targetOutputsPerProject != null)
                 {
