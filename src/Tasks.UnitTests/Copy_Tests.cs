@@ -393,7 +393,6 @@ namespace Microsoft.Build.UnitTests
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source2, true))
                 {
-
                     sw.Write("This is a source file2.");
                 }
 
