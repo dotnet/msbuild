@@ -1588,8 +1588,8 @@ namespace Microsoft.Build.Execution
                      * to fail gracefully then can catch an exception and log a LoggerException. This has the same effect of stopping the build but it logs only
                      * the exception error message rather than the whole stack trace.
                      * 
-                     * If any other exception happened and logging is not completed, then go ahead and completed now since this is the last place to do it.
-                     * Otherwise the submission would remain uncompleted and the build would hang.
+                     * If any other exception happened and logging is not completed, then go ahead and complete it now since this is the last place to do it.
+                     * Otherwise the submission would remain uncompleted, potentially causing hangs (EndBuild waiting on all BuildSubmissions, users waiting on BuildSubmission, or expecting a callback, etc)
                     */
                     if (!submission.LoggingCompleted && result.Exception != null)
                     {
