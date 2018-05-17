@@ -14,6 +14,8 @@ Param(
   [switch] $bootstrapOnly,
   [string] $verbosity = "minimal",
   [string] $hostType,
+  [switch] $DotNetBuildFromSource,
+  [string] $DotNetCoreSdkDir = "",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -179,7 +181,13 @@ function KillProcessesFromRepo {
 }
 
 function Build {
-  InstallDotNetCli
+  if (![string]::IsNullOrEmpty($DotNetCoreSdkDir) -and (Test-Path -Path $DotNetCoreSdkDir)) {
+    $env:DOTNET_INSTALL_DIR = $DotNetCoreSdkDir
+  }
+  else {
+    InstallDotNetCli
+  }
+
   $env:DOTNET_HOST_PATH = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
 
   if ($prepareMachine) {
@@ -210,9 +218,18 @@ function Build {
 
   echo "Repo toolset used from: $RepoToolsetBuildProj"
 
-  $solution = Join-Path $RepoRoot "MSBuild.sln"
+  $createTlb = $true
+  if ($DotNetBuildFromSource)
+  {
+    $solution = Join-Path $RepoRoot "MSBuild.SourceBuild.sln"
+    $createTlb = $false
+  }
+  else
+  {
+    $solution = Join-Path $RepoRoot "MSBuild.sln"
+  }
 
-  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=$solution", "/p:CIBuild=$ci", "/p:RepoRoot=$reporoot"
+  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=$solution", "/p:CIBuild=$ci", "/p:RepoRoot=$reporoot", "/p:DisableNerdbankVersioning=$DotNetBuildFromSource", "/p:CreateTlb=$createTlb"
   if ($ci)
   {
     # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
