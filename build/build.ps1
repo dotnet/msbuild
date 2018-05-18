@@ -218,23 +218,26 @@ function Build {
 
   echo "Repo toolset used from: $RepoToolsetBuildProj"
 
-  $createTlb = $true
   if ($DotNetBuildFromSource)
   {
     $solution = Join-Path $RepoRoot "MSBuild.SourceBuild.sln"
-    $createTlb = $false
   }
   else
   {
     $solution = Join-Path $RepoRoot "MSBuild.sln"
   }
 
-  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=$solution", "/p:CIBuild=$ci", "/p:RepoRoot=$reporoot", "/p:DisableNerdbankVersioning=$DotNetBuildFromSource", "/p:CreateTlb=$createTlb"
+  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=$solution", "/p:CIBuild=$ci", "/p:RepoRoot=$reporoot"
   if ($ci)
   {
     # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
     # the C++ tools aren't installed, and we don't want this to fail the build
     $commonMSBuildArgs = $commonMSBuildArgs + "/warnaserror"
+  }
+
+  if ($DotnetBuildFromSource)
+  {
+    $commonMSBuildArgs = $commonMSBuildArgs + "/p:CreateTlb=false"
   }
 
   if ($hostType -ne 'full')
