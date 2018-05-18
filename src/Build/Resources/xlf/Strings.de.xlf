@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="needs-review-translation">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Herunterfahren. Diagnoseinformationen finden Sie in den Dateien des Verzeichnisses für temporäre Dateien mit dem Namen MSBuild_*.failure.txt.</target>
+        <target state="translated">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Vorgang zum Herunterfahren wird durchgeführt. Diagnoseinformationen finden Sie in den Dateien namens "MSBuild_*.failure.txt" unter "{1}". Dieser Speicherort kann geändert werden, indem Sie die Umgebungsvariable MSBUILDDEBUGPATH auf ein anderes Verzeichnis festlegen.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -241,7 +241,7 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="needs-review-translation">Der Import der Datei "{0}" in die Datei "{1}" führt zu einer Ringabhängigkeit.</target>
+        <target state="translated">Der Import der Datei "{0}" in die Datei "{1}" führt zu einer Ringabhängigkeit.</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
@@ -663,7 +663,7 @@
       </trans-unit>
       <trans-unit id="InternalLoggerExceptionOnlyThrownByEngine">
         <source>An InternalLoggerException can only be thrown by the MSBuild engine. The public constructors of this class cannot be used to create an instance of the exception.</source>
-        <target state="translated">Eine InternalLoggerException kann nur durch das MSBuild-Modul ausgelöst werden. Die öffentlichen Konstruktoren dieser Klasse können nicht verwendet werden, um eine Instanz der Ausnahme zu erstellen.</target>
+        <target state="translated">Eine InternalLoggerException kann nur durch die MSBuild-Engine ausgelöst werden. Die öffentlichen Konstruktoren dieser Klasse können nicht verwendet werden, um eine Instanz der Ausnahme zu erstellen.</target>
         <note>UE: This message is shown when a user tries to instantiate a special exception called InternalLoggerException through the OM --
     only the engine is allowed to create and throw this exception.
     LOCALIZATION: "InternalLoggerException" and "MSBuild" should not be localized.</note>
@@ -2098,7 +2098,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="needs-review-translation">MSB4240: Es können nicht mehrere Versionen für dasselbe SDK "{0}" angegeben werden. Die bereits von "{2}" angegebene SDK-Version "{1}" wird verwendet, die Version "{3}" wird ignoriert.</target>
+        <target state="translated">MSB4240: Es können nicht mehrere Versionen desselben SDK "{0}" angegeben werden. Die zuvor aufgelöste SDK-Version "{1}" am Speicherort "{2}" wird verwendet, und die Version "{3}" wird ignoriert.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>

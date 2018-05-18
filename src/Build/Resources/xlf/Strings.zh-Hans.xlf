@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="needs-review-translation">MSB4166: 子节点“{0}”过早退出。正在关闭。可以在临时文件目录中名为 MSBuild_*.failure.txt 的文件内找到诊断信息。</target>
+        <target state="translated">MSB4166: 子节点“{0}”过早退出。正在关闭。可以在“{1}”中的文件中找到诊断信息，并将其命名为 MSBuild_*.failure.txt。通过将 MSBUILDDEBUGPATH 环境变量设为其他目录，可更改此位置。</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -241,7 +241,7 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="needs-review-translation">若将文件“{0}”导入到文件“{1}”中，将会产生循环依赖项。</target>
+        <target state="translated">若将文件“{0}”导入到文件“{1}”中，将会产生循环依赖项。</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
@@ -2098,7 +2098,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="needs-review-translation">MSB4240: 无法指定同一 SDK“{0}”的多个版本。将使用已由“{2}”指定的 SDK 版本“{1}”，并忽略版本“{3}”。</target>
+        <target state="translated">MSB4240: 无法指定同一 SDK“{0}”的多个版本。将使用以前从位置“{2}”解析的 SDK 版本“{1}”，并忽略版本“{3}”。</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
