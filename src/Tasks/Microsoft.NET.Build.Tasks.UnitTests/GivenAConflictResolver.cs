@@ -216,6 +216,25 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
+        [Theory]
+        [InlineData(new[] { 1, 1, 2}, 2)]
+        [InlineData(new[] { 1, 2, 1}, 1)]
+        [InlineData(new[] { 2, 1, 1}, 0)]
+        [InlineData(new[] { 1, 1, 2, 1, 2, 2, 3 }, 6)]
+        [InlineData(new[] { 1, 1, 2, 3, 1, 2, 2 }, 3)]
+        [InlineData(new[] { 3, 1, 1, 2, 1, 2, 2 }, 0)]
+
+        public void ItemsWithNoWinnerWillCountAsConflictsIfAnotherItemWins(int[] versions, int winnerIndex)
+        {
+            var items = versions.Select(v => new MockConflictItem() { FileVersion = new Version(v, 0, 0, 0) })
+                .ToArray();
+
+            var result = GetConflicts(items);
+
+            result.Conflicts.Should().BeEquivalentTo(items.Except(new[] { items[winnerIndex] }));
+            result.UnresolvedConflicts.Should().BeEmpty();
+        }
+
         [Fact]
         public void WhenItemsConflictAndBothArePlatformItemsTheConflictCannotBeResolved()
         {

@@ -6,6 +6,7 @@ using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
@@ -34,6 +35,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 return;
             }
 
+            Dictionary<string, List<TConflictItem>> unresolvedConflictItems = new Dictionary<string, List<TConflictItem>>();
+
             foreach (var conflictItem in conflictItems)
             {
                 var itemKey = getItemKey(conflictItem);
@@ -52,11 +55,18 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (winner == null)
                     {
-                        // no winner, skip it.
-                        // don't add to conflict list and just use the existing item for future conflicts.
+                        //  No winner.  Keep track of the conflictItem, so that if a subsequent
+                        //  item wins for this key, both items (for which there was no winner when
+                        //  compared to each other) can be counted as conflicts and removed from
+                        //  the corresponding list.
 
-                        //  Report unresolved conflict (currently just used as a test hook)
-                        unresolvedConflict?.Invoke(conflictItem);
+                        List<TConflictItem> unresolvedConflictsForKey;
+                        if (!unresolvedConflictItems.TryGetValue(itemKey, out unresolvedConflictsForKey))
+                        {
+                            unresolvedConflictsForKey = new List<TConflictItem>();
+                            unresolvedConflictItems[itemKey] = unresolvedConflictsForKey;
+                        }
+                        unresolvedConflictsForKey.Add(conflictItem);
 
                         continue;
                     }
@@ -74,15 +84,32 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                             winningItemsByKey.Remove(itemKey);
                         }
                         loser = existingItem;
-
                     }
 
                     foundConflict(winner, loser);
+
+                    //  If there were any other items that tied with the loser, report them as conflicts here
+                    List<TConflictItem> previouslyUnresolvedConflicts;
+                    if (unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts))
+                    {
+                        foreach (var previouslyUnresolvedItem in previouslyUnresolvedConflicts)
+                        {
+                            foundConflict(winner, previouslyUnresolvedItem);
+                        }
+                        unresolvedConflictItems.Remove(itemKey);
+                    }
                 }
                 else if (commitWinner)
                 {
                     winningItemsByKey[itemKey] = conflictItem;
                 }
+            }
+
+            //  Report unresolved conflict items that didn't end up losing subsequently
+            foreach (var unresolvedConflictItem in unresolvedConflictItems.Values.SelectMany(v => v))
+            {
+                //  Report unresolved conflict (currently just used as a test hook)
+                unresolvedConflict?.Invoke(unresolvedConflictItem);
             }
         }
 
