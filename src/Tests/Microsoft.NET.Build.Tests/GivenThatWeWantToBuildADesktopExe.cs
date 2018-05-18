@@ -478,19 +478,23 @@ namespace DefaultReferences
             buildResult.Should().NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
-        [FullMSBuildOnlyFact]
-        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution()
+        [FullMSBuildOnlyTheory]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution(string httpPackageVersion)
         {
-            Test_inbox_assembly_wins_conflict_resolution(false);
+            Test_inbox_assembly_wins_conflict_resolution(false, httpPackageVersion);
         }
 
-        [Fact]
-        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution_sdk()
+        [Theory]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution_sdk(string httpPackageVersion)
         {
-            Test_inbox_assembly_wins_conflict_resolution(true);
+            Test_inbox_assembly_wins_conflict_resolution(true, httpPackageVersion);
         }
 
-        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject)
+        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject, string httpPackageVersion)
         {
             var testProject = new TestProject()
             {
@@ -509,7 +513,7 @@ namespace DefaultReferences
                 testProject.TargetFrameworkVersion = "v4.7.2";
             }
 
-            testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", "4.3.3"));
+            testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", httpPackageVersion));
 
             testProject.SourceFiles["Program.cs"] = @"using System;
 using System.Net.Http;
@@ -523,7 +527,7 @@ class Program
 }";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name,
-                                                                 identifier: useSdkProject ? "SDK" : "")
+                                                                 identifier: (useSdkProject ? "_SDK_" : "_") + httpPackageVersion)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;
@@ -537,9 +541,13 @@ class Program
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
-            buildCommand.Execute()
+            buildCommand
+                .Execute("/v:normal")
                 .Should()
-                .Pass();
+                .Pass()
+                .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
+                .And.NotHaveStdOutContaining("Could not determine");
         }
 
         [WindowsOnlyFact]
