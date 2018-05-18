@@ -486,7 +486,7 @@ namespace DefaultReferences
             Test_inbox_assembly_wins_conflict_resolution(false, httpPackageVersion);
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("4.3.3")]
         [InlineData("4.1.0")]
         public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution_sdk(string httpPackageVersion)

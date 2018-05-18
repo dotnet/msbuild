@@ -158,28 +158,17 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         //  and return null if the result would be empty.
         private ITaskItem[] SafeConcat(ITaskItem[] first, IEnumerable<ITaskItem> second)
         {
-            if (first == null)
+            if (first == null || first.Length == 0)
             {
-                if (second == null || !second.Any())
-                {
-                    return null;
-                }
-                else
-                {
-                    return second.ToArray();
-                }
+                return second?.ToArray();
             }
-            else
+
+            if (second == null || !second.Any())
             {
-                if (second == null || !second.Any())
-                {
-                    return first;
-                }
-                else
-                {
-                    return first.Concat(second).ToArray();
-                }
+                return first;
             }
+
+            return first.Concat(second).ToArray();
         }
 
         private ITaskItem[] CreateConflictTaskItems(ICollection<ConflictItem> conflicts)
