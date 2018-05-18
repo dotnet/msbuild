@@ -67,6 +67,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -112,6 +113,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -153,6 +155,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -205,6 +208,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -262,6 +266,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -304,6 +309,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
