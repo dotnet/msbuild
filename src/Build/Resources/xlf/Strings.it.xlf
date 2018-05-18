@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="needs-review-translation">MSB4166: il nodo figlio "{0}" è stato interrotto in modo anomalo. Chiusura in corso. Le informazioni diagnostiche sono disponibili nei file presenti nella directory dei file temporanei denominata MSBuild_*.failure.txt.</target>
+        <target state="translated">MSB4166: il nodo figlio "{0}" è stato interrotto in modo anomalo. Arresto in corso. Eventuali informazioni diagnostiche sono disponibili nei file presenti in "{1}" il cui nome è MSBuild_*.failure.txt. È possibile cambiare questo percorso, impostando la variabile di ambiente MSBUILDDEBUGPATH su una directory diversa.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -241,7 +241,7 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="needs-review-translation">L'importazione del file "{0}" nel file "{1}" causa una dipendenza circolare.</target>
+        <target state="translated">L'importazione del file "{0}" nel file "{1}" causa una dipendenza circolare.</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
@@ -2098,7 +2098,7 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="needs-review-translation">MSB4240: non è possibile specificare più versioni dello stesso SDK "{0}". Verrà usata La versione "{1}" dell'SDK già specificata da "{2}", mentre la versione "{3}" verrà ignorata.</target>
+        <target state="translated">MSB4240: non è possibile specificare più versioni dello stesso SDK "{0}". Verrà usata la versione dell'SDK "{1}" risolta in precedenza dal percorso "{2}", mentre la versione "{3}" verrà ignorata.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>

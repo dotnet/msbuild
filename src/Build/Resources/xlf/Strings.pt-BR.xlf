@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="needs-review-translation">MSB4166: O nó filho "{0}" foi encerrado prematuramente. Desligando. É possível encontrar informações de diagnóstico em arquivos do diretório de arquivos temporários chamado MSBuild_*.failure.txt.</target>
+        <target state="translated">MSB4166: O nó filho "{0}" foi encerrado prematuramente. Desligando. Informações de diagnóstico poderão ser encontradas nos arquivos em "{1}" e estarão nomeadas como MSBuild_*.failure.txt. Esse local pode ser alterado por meio da configuração da variável de ambiente MSBUILDDEBUGPATH para um diretório diferente.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -241,7 +241,7 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="needs-review-translation">A importação do arquivo "{0}" no arquivo "{1}" resultará em uma dependência circular.</target>
+        <target state="translated">A importação do arquivo "{0}" no arquivo "{1}" resultará em uma dependência circular.</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
@@ -2083,7 +2083,7 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ErrorWritingProfilerReport">
         <source>MSBUILD : error MSB4239: Error writing profiling report. {0}</source>
-        <target state="translated">MSBUILD: erro MSB4239: erro ao gravar relatório de criação de perfil. {0}</target>
+        <target state="translated">MSBUILD : erro MSB4239: erro ao gravar relatório de criação de perfil. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingProfilerReport">
@@ -2098,14 +2098,14 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="needs-review-translation">MSB4240: não é possível especificar várias versões do mesmo SDK "{0}". A versão "{1}" do SDK já especificada por "{2}" será usada e a versão "{3}" será ignorada.</target>
+        <target state="translated">MSB4240: Não é possível especificar várias versões do mesmo "{0}" do SDK. A versão do SDK resolvida anteriormente "{1}" do local "{2}" será usada e a versão "{3}" será ignorada.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: a referência do SDK "{0}" versão "{1}" foi resolvida para a versão "{2}". Talvez você estava usando uma versão diferente que a esperada caso não tenha atualizado a versão referenciada de maneira correspondente.</target>
+        <target state="translated">MSB4241: a referência do SDK "{0}" versão "{1}" foi resolvida para a versão "{2}". Talvez você estava usando um versão diferente que a esperada caso não tenha atualizado a versão referenciada de maneira correspondente.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>

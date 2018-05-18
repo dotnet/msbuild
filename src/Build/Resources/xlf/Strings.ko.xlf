@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="needs-review-translation">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료합니다. 임시 파일 디렉터리의 파일(MSBuild_*.failure.txt)에서 진단 정보를 찾을 수 있습니다.</target>
+        <target state="translated">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료하는 중입니다. 진단 정보는 "{1}"의 파일에서 MSBuild_*.failure.txt 이름으로 찾을 수 있습니다. 이 위치는 MSBUILDDEBUGPATH 환경 변수를 다른 디렉터리로 설정하여 변경할 수 있습니다.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -241,7 +241,7 @@
       </trans-unit>
       <trans-unit id="ImportIntroducesCircularity">
         <source>Importing the file "{0}" into the file "{1}" results in a circular dependency.</source>
-        <target state="needs-review-translation">"{0}" 파일을 "{1}" 파일로 가져오면 순환 종속성이 발생합니다.</target>
+        <target state="translated">"{0}" 파일을 "{1}" 파일로 가져오면 순환 종속성이 발생합니다.</target>
         <note>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
@@ -2098,7 +2098,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="needs-review-translation">MSB4240: 동일한 SDK "{0}"의 여러 버전을 지정할 수 없습니다. "{2}"에서 이미 지정한 SDK 버전 "{1}"이(가) 사용되며 "{3}" 버전은 무시됩니다.</target>
+        <target state="translated">MSB4240: 동일한 SDK "{0}"의 여러 버전을 지정할 수 없습니다. "{2}" 위치에서 이전에 확인된 SDK 버전 "{1}"이(가) 사용되고 "{3}" 버전은 무시됩니다.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
