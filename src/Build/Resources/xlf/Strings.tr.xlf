@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: "{0}" alt düğümü beklenenden önce çıktı. Kapatılıyor. Tanılama bilgileri, "{1}" konumunda bulunabilir ve MSBuild_*.failure.txt olarak adlandırılır. MSBUILDDEBUGPATH ortam değişkeni farklı bir dizine ayarlanarak bu konum değiştirilebilir.</target>
+        <target state="translated">MSB4166: "{0}" alt düğümü beklenenden önce çıktı. Kapatılıyor. Tanılama bilgileri, "{1}" konumunda bulunabilir ve MSBuild_*.failure.txt olarak adlandırılır. Bu konum, MSBUILDDEBUGPATH ortam değişkeni farklı bir dizine ayarlanarak değiştirilebilir.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -806,7 +806,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: Projenin varsayılan XML ad alanı, MSBuild XML ad alanı olmalı veya herhangi bir ad alanı olmamalıdır. Proje MSBuild 2003 biçiminde yazıldıysa lütfen &lt;Project&gt; öğesine xmlns="{0}" ekleyin. Proje eski 1.0 veya 1.2 biçiminde yazıldıysa lütfen MSBuild 2003 biçimine dönüştürün.</target>
+        <target state="translated">MSB4041: Projenin varsayılan XML ad alanı, MSBuild XML ad alanı veya boş olmalıdır. Proje MSBuild 2003 biçiminde yazıldıysa lütfen &lt;Project&gt; öğesine xmlns="{0}" ekleyin. Proje eski 1.0 veya 1.2 biçiminde yazıldıysa lütfen MSBuild 2003 biçimine dönüştürün.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1948,7 +1948,7 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: "{0}" görevi "{1}" öğesinden başlatılamadı. Bu MSBuild sürümü, {2} öğesini desteklemiyor.</target>
+        <target state="translated">MSB4802: "{0}" görevinin örneği "{1}" üzerinden oluşturulamadı. {2}, MSBuild’in bu sürümü tarafından desteklenmiyor</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -1983,7 +1983,7 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: Geçersiz ikili günlükçü parametreleri: "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</target>
+        <target state="translated">MSB4234: İkili günlükçü parametreleri geçersiz: "{0}". Beklenen: ProjectImports={{None,Embed,ZipFile}} ve/veya [LogFile=]filePath.binlog (günlük dosyası adı veya yolu ".binlog" uzantısına sahip olmalıdır).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2068,7 +2068,7 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: NuGet bütünleştirilmiş kodları bulunamadığından, NuGet tabanlı SDK çözümleyici çalıştırılamadı.  MSBuild yüklemenizi denetleyin veya "{0}" ortam değişkenini, gerekli NuGet bütünleştirilmiş kodlarını içeren klasöre ayarlayın. {1}</target>
+        <target state="translated">MSB4243: NuGet bütünleştirilmiş kodları bulunamadığından NuGet tabanlı SDK çözümleyicisi çalıştırılamadı. MSBuild yüklemenizi denetleyin veya "{0}" ortam değişkenini gerekli NuGet bütünleştirilmiş kodlarını içeren klasör olarak ayarlayın. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2098,14 +2098,14 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: Aynı "{0}" SDK’sının birden çok sürümü belirtilemez. "{2}" konumundaki önceden çözümlenen "{1}" SDK sürümü kullanılacak ve "{3}" sürümü yok sayılacak.</target>
+        <target state="translated">MSB4240: "{0}" SDK’sının birden çok sürümü belirtilemez. "{2}" konumundaki önceden çözümlenen "{1}" SDK sürümü kullanılacak ve "{3}" sürümü yok sayılacak.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: "{0}" SDK başvurusunun "{1}" sürümü, bunun yerine sürüm "{2}" olarak çözümlendi.  Başvurulan sürümü eşleşecek şekilde güncelleştirmezseniz beklenen sürümden farklı bir sürüm kullanıyor olabilirsiniz.</target>
+        <target state="translated">MSB4241: "{0}" SDK başvurusunun "{1}" sürümü, bunun yerine sürüm "{2}" olarak çözümlendi. Başvurulan sürümü eşleşecek şekilde güncelleştirmezseniz beklenen sürümden farklı bir sürüm kullanıyor olabilirsiniz.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2119,17 +2119,17 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="SdkResolverManifestInvalid">
         <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
-        <target state="new">MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</target>
+        <target state="translated">MSB4245: SDK Çözümleyicisi bildirim dosyası geçersiz. Bu, MSBuild yüklemesinin bozuk veya geçersiz olduğu anlamına gelebilir. Bildirim dosyasının yolu: '{0}'. İleti: {1}</target>
         <note>{StrBegin="MSB4245: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverNoDllOrManifest">
         <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
-        <target state="new">MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</target>
+        <target state="translated">MSB4246: SDK Çözümleyicisi klasörü var, ancak SDK Çözümleyicisi DLL veya bildirim dosyası içermiyor. Bu, MSBuild yüklemesinin bozuk veya geçersiz olduğu anlamına gelebilir. SDK çözümleyicisinin yolu: {0}</target>
         <note>{StrBegin="MSB4246: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverDllInManifestMissing">
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
-        <target state="new">MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</target>
+        <target state="translated">MSB4247: SDK Çözümleyicisi yüklenemedi. Bir bildirim dosyası var, ancak SDK Çözümleyicisi DLL dosyasının yolu bulunamadı. Bildirim dosyasının yolu: '{0}'. SDK çözümleyicisinin yolu: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>

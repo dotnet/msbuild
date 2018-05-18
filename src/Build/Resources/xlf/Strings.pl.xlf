@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: Działanie węzła podrzędnego „{0}” zostało przedwcześnie zakończone. Nastąpi zamknięcie. Informacje diagnostyczne znajdują się w plikach w katalogu „{1}” o nazwie MSBuild_*.failure.txt. Tę lokalizację można zmienić, ustawiając zmienną środowiskową MSBUILDDEBUGPATH na inny katalog.</target>
+        <target state="translated">MSB4166: Działanie węzła podrzędnego „{0}” zostało przedwcześnie zakończone. Trwa zamykanie. Informacje diagnostyczne znajdują się w katalogu „{1}” w plikach o nazwie MSBuild_*.failure.txt. Tę lokalizację można zmienić, ustawiając zmienną środowiskową MSBUILDDEBUGPATH na inny katalog.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -1943,12 +1943,12 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: Wartość „{0}” jest nieprawidłowa dla specyfikacji zestawu SDK. Atrybut musi mieć postać listy oddzielonych średnikami par nazwy zestawu SDK i minimalnej wersji z ukośnikiem między nimi.</target>
+        <target state="translated">MSB4229: wartość „{0}” jest nieprawidłowa dla specyfikacji zestawu SDK. Atrybut musi mieć postać listy oddzielonych średnikami par nazwy zestawu SDK i minimalnej wersji z ukośnikiem między nimi.</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: Nie można utworzyć wystąpienia zadania „{0}” na podstawie elementu „{1}”. Ta wersja programu MSBuild nie obsługuje elementu {2}.</target>
+        <target state="translated">MSB4802: nie można utworzyć wystąpienia zadania „{0}” z elementu „{1}”. Ta wersja programu MSBuild nie obsługuje elementu {2}.</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -1983,7 +1983,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: Nieprawidłowe parametry rejestratora binarnego: „{0}”. Oczekiwano: ProjectImports={{None,Embed,ZipFile}} i/lub [LogFile=]ścieżkaPliku.binlog (nazwa lub ścieżka pliku dziennika, musi mieć rozszerzenie „binlog”).</target>
+        <target state="translated">MSB4234: Nieprawidłowe parametry rejestratora binarnego: „{0}”. Oczekiwano: ProjectImports={{None,Embed,ZipFile}} i/lub [LogFile=]ścieżkaPliku.binlog (nazwa lub ścieżka pliku dziennika musi mieć rozszerzenie „binlog”).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2043,7 +2043,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="translated">Pominięto element docelowy „{0}”. Element docelowy nie istnieje w projekcie, a parametr SkipNonexistentTargets ma wartość true.</target>
+        <target state="translated">Element docelowy „{0}” został pominięty. Element docelowy nie istnieje w projekcie, a parametr SkipNonexistentTargets ma wartość true.</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
@@ -2068,7 +2068,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: Nie można uruchomić programu rozpoznawania zestawu SDK opartego na narzędziu NuGet, ponieważ nie można zlokalizować zestawów NuGet.  Sprawdź instalację programu MSBuild lub ustaw zmienną środowiskową „{0}” na folder zawierający wymagane zestawy NuGet. {1}</target>
+        <target state="translated">MSB4243: Nie można uruchomić programu rozpoznawania zestawu SDK opartego na narzędziu NuGet, ponieważ nie można zlokalizować zestawów NuGet. Sprawdź instalację programu MSBuild lub ustaw zmienną środowiskową „{0}” na folder zawierający wymagane zestawy NuGet. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2105,7 +2105,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: Odwołanie do zestawu SDK „{0}” w wersji „{1}” zostało rozpoznane jako wersja „{2}”.  Może zostać użyta inna wersja niż oczekiwana, jeśli nie zaktualizujesz wersji określonej w odwołaniu, tak aby była zgodna.</target>
+        <target state="translated">MSB4241: Odwołanie do zestawu SDK „{0}” w wersji „{1}” zostało rozpoznane jako wersja „{2}”. Może zostać użyta inna wersja niż oczekiwana, jeśli nie zaktualizujesz wersji określonej w odwołaniu, tak aby była zgodna.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2119,17 +2119,17 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="SdkResolverManifestInvalid">
         <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
-        <target state="new">MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</target>
+        <target state="translated">MSB4245: Plik manifestu mechanizmu rozpoznawania zestawów SDK jest nieprawidłowy. Może to oznaczać, że instalacja programu MSBuild jest uszkodzona lub nieprawidłowa. Ścieżka do pliku manifestu: „{0}”. Komunikat: {1}</target>
         <note>{StrBegin="MSB4245: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverNoDllOrManifest">
         <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
-        <target state="new">MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</target>
+        <target state="translated">MSB4246: Folder mechanizmu rozpoznawania zestawów SDK istnieje, ale nie zawiera biblioteki DLL lub pliku manifestu mechanizmu rozpoznawania zestawów SDK. Może to oznaczać, że instalacja programu MSBuild jest uszkodzona lub nieprawidłowa. Ścieżka do mechanizmu rozpoznawania zestawów SDK: „{0}”.</target>
         <note>{StrBegin="MSB4246: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverDllInManifestMissing">
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
-        <target state="new">MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</target>
+        <target state="translated">MSB4247: Nie można załadować mechanizmu rozpoznawania zestawów SDK. Plik manifestu istnieje, ale nie można odnaleźć ścieżki do biblioteki DLL mechanizmu rozpoznawania zestawów SDK. Ścieżka do pliku manifestu: „{0}”. Ścieżka do mechanizmu rozpoznawania zestawów SDK: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>
