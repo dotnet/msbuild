@@ -71,6 +71,11 @@ For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?l
 有关配置 HTTPS 的详细信息，请参阅 https://go.microsoft.com/fwlink/?linkid=848054。</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
