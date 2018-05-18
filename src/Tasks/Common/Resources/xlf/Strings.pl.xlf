@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">Używanie elementu DotNetCliToolReference w celu odwołania do elementu „{0}” jest przestarzałe i może zostać usunięte z tego projektu. To narzędzie domyślnie znajduje się w zestawie .NET Core SDK.</target>
+        <target state="translated">Narzędzie „{0}” jest teraz dołączone do zestawu .NET Core SDK. Informacje dotyczące sposobu rozwiązania problemu wskazanego w ostrzeżeniu można znaleźć na stronie https://aka.ms/dotnetclitools-in-box.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -401,7 +401,7 @@
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="translated">Nie odnaleziono pakietu {0} w wersji {1}. Mógł on zostać usunięty po przywróceniu pakietu NuGet. W innym przypadku przywrócenie pakietu NuGet mogło zostać ukończone tylko częściowo, co mogło być spowodowane ograniczeniami wynikającymi z maksymalnej długości ścieżki.</target>
         <note />
       </trans-unit>
     </body>

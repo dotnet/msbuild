@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">Použití DotNetCliToolReference k odkazování na {0} je zastaralé a lze je z tohoto projektu odebrat. Tento nástroj je standardně součástí sady .NET Core SDK.</target>
+        <target state="translated">Nástroj {0} je teď zahrnutý v sadě .NET Core SDK. Informace o tom, jak vyřešit toto upozornění, jsou dostupné na adrese https://aka.ms/dotnetclitools-in-box.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -374,7 +374,7 @@
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
-        <target state="translated">Projekt byl obnoven ve verzi {0} {1}, ale při současném nastavení by se místo toho použila verze {2}. Tento problém vyřešíte tak, že zajistíte, aby se při obnovování i následujících operacích, jako je sestavení nebo publikování, použila stejná nastavení. K tomuto problému může obvykle dojít, když je vlastnost RuntimeIdentifier nastavena během sestavování nebo publikování, ale ne během obnovování.</target>
+        <target state="translated">Projekt byl obnoven ve verzi {0} {1}, ale při současném nastavení by se místo toho použila verze {2}. Tento problém vyřešíte tak, že zajistíte, aby se při obnovení i následujících operacích, jako je sestavení nebo publikování, použila stejná nastavení. K tomuto problému může obvykle dojít, když je vlastnost RuntimeIdentifier nastavena během sestavování nebo publikování, ale ne během obnovení.</target>
         <note>{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
@@ -401,7 +401,7 @@
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="translated">Balíček {0} verze {1} se nenašel. Je možné, že se od obnovení NuGet odstranil. Jinak je možné, že obnovení NuGet se provedlo jenom částečně, důvodem mohla být omezení pro maximální délku cesty.</target>
         <note />
       </trans-unit>
     </body>
