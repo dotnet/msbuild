@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  
+  <!--
+    The DownloadFile task was added in 15.8.59, previous versions of MSBuild will just fail so don't import the targets
+  -->
+  <Import Project="DownloadFile.targets" Condition=" '$(MSBuildVersion)' != '' And '$(MSBuildVersion)' &gt;= '15.8.59' " />
+
+</Project>

@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- A simple in-line task that logs some messages and returns a string -->
+  <UsingTask TaskName="MySample"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildBinPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Parameter1 ParameterType="System.String" Required="true" />
+      <Parameter2 ParameterType="System.String" />
+      <Parameter3 ParameterType="System.String" Output="true" />
+
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Code Type="Fragment" Language="C#">
+        <![CDATA[
+          Log.LogMessage(MessageImportance.High, "Hello from an inline task created by Roslyn!");
+          Log.LogMessageFromText($"Parameter1: '{Parameter1}'", MessageImportance.High);
+          Log.LogMessageFromText($"Parameter2: '{Parameter2}'", MessageImportance.High);
+          Parameter3 = "A value from the Roslyn CodeTaskFactory";
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <!-- A simple in-line task that combines paths -->
+  <UsingTask TaskName="PathCombine"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildBinPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Paths ParameterType="System.String[]" Required="true" />
+      <Combined ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Code Type="Fragment" Language="C#">
+        <![CDATA[
+          Combined = Path.Combine(Paths);
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <!-- A simple in-line task that gets the file name of a path -->
+  <UsingTask TaskName="PathGetFileName"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildBinPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Path ParameterType="System.String" Required="true" />
+      <FileName ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+
+      <Using Namespace="System" />
+      <Code Type="Fragment" Language="C#">
+        <![CDATA[
+          FileName = System.IO.Path.GetFileName(Path);
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <!-- A simple in-line class task which inherits parameters from its base class -->
+  <UsingTask TaskName="InterceptingCopy"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildBinPath)\Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <Reference Include="Microsoft.Build.Tasks.Core"/>
+      <Code Type="Class" Language="cs">
+        <![CDATA[
+          using Microsoft.Build.Framework;
+          using System;
+
+          public class InterceptingCopy : Microsoft.Build.Tasks.Copy
+          {
+            public override bool Execute()
+            {
+              Log.LogMessage(MessageImportance.High, "Copying '{0}' to '{1}'", String.Join(", ", (object[])SourceFiles), String.Join(", ", (object[])DestinationFiles));
+              return base.Execute();
+            }
+          }
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="RunSampleTask" AfterTargets="Build">
+    <!-- Call the compiled task -->
+    <MySample Parameter1="A value for parameter 1" Parameter2="A value for parameter 2">
+      <Output TaskParameter="Parameter3" PropertyName="NewProperty" />
+    </MySample>
+
+    <!-- Log whatever text is in NewProperty that came from Parameter3 -->
+    <Message Text="NewProperty: '$(NewProperty)'" Importance="High" />
+
+    <PathCombine Paths="$(Temp);MyFolder;$([System.Guid]::NewGuid()).txt">
+      <Output TaskParameter="Combined" PropertyName="MyCombinedPaths" />
+    </PathCombine>
+
+    <Message Text="Combined Paths: '$(MyCombinedPaths)'" Importance="High" />
+
+    <PathGetFileName Path="$(MyCombinedPaths)">
+      <Output TaskParameter="FileName" PropertyName="MyFileName" />
+    </PathGetFileName>
+
+    <Message Text="File name: '$(MyFileName)'" Importance="High" />
+
+    <InterceptingCopy SourceFiles="Class1.cs" DestinationFiles="$(OutputPath)CopyOfClass1.cs" />
+  </Target>
+
+</Project>
