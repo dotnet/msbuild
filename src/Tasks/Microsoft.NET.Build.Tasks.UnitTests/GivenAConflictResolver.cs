@@ -223,7 +223,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [InlineData(new[] { 1, 1, 2, 1, 2, 2, 3 }, 6)]
         [InlineData(new[] { 1, 1, 2, 3, 1, 2, 2 }, 3)]
         [InlineData(new[] { 3, 1, 1, 2, 1, 2, 2 }, 0)]
-
         public void ItemsWithNoWinnerWillCountAsConflictsIfAnotherItemWins(int[] versions, int winnerIndex)
         {
             var items = versions.Select(v => new MockConflictItem() { FileVersion = new Version(v, 0, 0, 0) })

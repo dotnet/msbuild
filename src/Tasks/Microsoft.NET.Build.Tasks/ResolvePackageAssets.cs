@@ -732,7 +732,7 @@ namespace Microsoft.NET.Build.Tasks
                 //  and may improve perf.  If you really want to know all the packages
                 //  that brought in a framework assembly, you can look in the assets
                 //  file.
-                var writtenFrameworkAssemblies = new HashSet<string>();
+                var writtenFrameworkAssemblies = new HashSet<string>(StringComparer.Ordinal);
 
                 foreach (var library in _compileTimeTarget.Libraries)
                 {

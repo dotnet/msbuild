@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 return;
             }
 
-            Dictionary<string, List<TConflictItem>> unresolvedConflictItems = new Dictionary<string, List<TConflictItem>>();
+            var unresolvedConflictItems = new Dictionary<string, List<TConflictItem>>(StringComparer.Ordinal);
 
             foreach (var conflictItem in conflictItems)
             {
