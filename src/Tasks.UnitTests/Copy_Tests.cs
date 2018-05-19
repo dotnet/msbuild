@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
@@ -25,6 +27,13 @@ namespace Microsoft.Build.UnitTests
         public bool UseHardLinks { get; protected set; }
 
         public bool UseSymbolicLinks { get; protected set; }
+
+        /// <summary>
+        /// Max copy parallelism to provide to the Copy task.
+        /// </summary>
+        public int ParallelismThreadCount { get; set; } = int.MaxValue;
+
+        private const int NoParallelismThreadCount = 1;
 
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSOVERWRITEREADONLYFILES, so that we can run 
@@ -49,11 +58,11 @@ namespace Microsoft.Build.UnitTests
         public Copy_Tests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
-            _alwaysRetry = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
+            _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
+            _alwaysRetry = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", String.Empty);
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, String.Empty);
 
             Copy.RefreshInternalEnvironmentValues();
         }
@@ -63,10 +72,22 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void Dispose()
         {
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", _alwaysOverwriteReadOnlyFiles);
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", _alwaysRetry);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, _alwaysOverwriteReadOnlyFiles);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, _alwaysRetry);
 
             Copy.RefreshInternalEnvironmentValues();
+        }
+
+        [Fact]
+        public void DontCopyOverSameFile_Parallel()
+        {
+            DontCopyOverSameFile(ParallelismThreadCount);
+        }
+
+        [Fact]
+        public void DontCopyOverSameFile_SingleThreaded()
+        {
+            DontCopyOverSameFile(NoParallelismThreadCount);
         }
 
         /*
@@ -75,8 +96,7 @@ namespace Microsoft.Build.UnitTests
         * If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
         * have the same date and time.
         */
-        [Fact]
-        public void DontCopyOverSameFile()
+        private void DontCopyOverSameFile(int parallelism)
         {
             string file = FileUtilities.GetTemporaryFile();
             try
@@ -101,7 +121,7 @@ namespace Microsoft.Build.UnitTests
                     UseHardlinksIfPossible = UseHardLinks
                 };
 
-                t.Execute(m.CopyFile);
+                t.Execute(m.CopyFile, parallelism);
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -187,11 +207,11 @@ namespace Microsoft.Build.UnitTests
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
-            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
+            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", "1   ");
+                Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, "1   ");
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                 {
@@ -234,7 +254,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", oldAlwaysOverwriteValue);
+                Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, oldAlwaysOverwriteValue);
 
                 File.Delete(source);
                 File.Delete(destination);
@@ -252,11 +272,11 @@ namespace Microsoft.Build.UnitTests
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
-            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
+            string oldAlwaysRetryValue = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", "1   ");
+                Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, "1   ");
                 Copy.RefreshInternalEnvironmentValues();
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
@@ -302,7 +322,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", oldAlwaysOverwriteValue);
+                Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, oldAlwaysRetryValue);
                 Copy.RefreshInternalEnvironmentValues();
 
                 File.SetAttributes(destination, FileAttributes.Normal);
@@ -906,7 +926,7 @@ namespace Microsoft.Build.UnitTests
             */
             internal bool? CopyFile(FileState source, FileState destination)
             {
-                ++copyCount;
+                Interlocked.Increment(ref copyCount);
                 return true;
             }
         }
@@ -1308,12 +1328,23 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void CopyWithDuplicatesUsingFolder_Parallel()
+        {
+            CopyWithDuplicatesUsingFolder(ParallelismThreadCount);
+        }
+
+        [Fact]
+        public void CopyWithDuplicatesUsingFolder_SingleThreaded()
+        {
+            CopyWithDuplicatesUsingFolder(NoParallelismThreadCount);
+        }
+
         /// <summary>
         /// Copying duplicates should only perform the actual copy once for each unique source/destination pair
         /// but should still produce outputs for all specified source/destination pairs.
         /// </summary>
-        [Fact]
-        public void CopyWithDuplicatesUsingFolder()
+        private void CopyWithDuplicatesUsingFolder(int parallelism)
         {
             string tempPath = Path.GetTempPath();
 
@@ -1346,25 +1377,49 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
             {
-                filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                lock (filesActuallyCopied)
+                {
+                    filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                }
                 return true;
-            });
+            }, parallelism);
 
             Assert.True(success);
             Assert.Equal(2, filesActuallyCopied.Count);
             Assert.Equal(4, t.CopiedFiles.Length);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), filesActuallyCopied[1].Key.Name);
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+
+            string aPath = Path.Combine(tempPath, "foo", "a.cs");
+            var aCopies = filesActuallyCopied.Where(f => f.Value.Name == aPath).ToList();
+            Assert.Equal(1, aCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), aCopies[0].Key.Name);
+
+            string bPath = Path.Combine(tempPath, "foo", "b.cs");
+            var bCopies = filesActuallyCopied.Where(f => f.Value.Name == bPath).ToList();
+            Assert.Equal(1, bCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "b.cs"), bCopies[0].Key.Name);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+        }
+
+        [Fact]
+        private void CopyWithDuplicatesUsingFiles_Parallel()
+        {
+            CopyWithDuplicatesUsingFiles(ParallelismThreadCount);
+        }
+
+        [Fact]
+        private void CopyWithDuplicatesUsingFiles_SingleThreaded()
+        {
+            CopyWithDuplicatesUsingFiles(NoParallelismThreadCount);
         }
 
         /// <summary>
         /// Copying duplicates should only perform the actual copy once for each unique source/destination pair
         /// but should still produce outputs for all specified source/destination pairs.
         /// </summary>
-        [Fact]
-        public void CopyWithDuplicatesUsingFiles()
+        private void CopyWithDuplicatesUsingFiles(int parallelism)
         {
             string tempPath = Path.GetTempPath();
 
@@ -1390,7 +1445,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // b.cs -> xa.cs should copy because it's a different source
                 new TaskItem(Path.Combine(tempPath, @"xb.cs")), // a.cs -> xb.cs should copy because it's a different destination
-                new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should copy because it's a different source
+                new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should copy because it's a different source from the b.cs copy done previously
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should not copy because it's the same source
             };
 
@@ -1407,21 +1462,30 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
             {
-                filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                lock (filesActuallyCopied)
+                {
+                    filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                }
                 return true;
-            });
+            }, parallelism);
 
             Assert.True(success);
             Assert.Equal(4, filesActuallyCopied.Count);
             Assert.Equal(5, t.CopiedFiles.Length);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), filesActuallyCopied[1].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[2].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[3].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[0].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[1].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xb.cs"), filesActuallyCopied[2].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[3].Value.Name);
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+
+            string xaPath = Path.Combine(tempPath, "xa.cs");
+            var xaCopies = filesActuallyCopied.Where(f => f.Value.Name == xaPath).ToList();
+            Assert.Equal(3, xaCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[0].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "b.cs"), xaCopies[1].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[2].Key.Name);
+
+            string xbPath = Path.Combine(tempPath, "xb.cs");
+            var xbCopies = filesActuallyCopied.Where(f => f.Value.Name == xbPath).ToList();
+            Assert.Equal(1, xbCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xbCopies[0].Key.Name);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -1625,12 +1689,23 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3029");
         }
 
+        [Fact]
+        public void FailureWithNoRetries_Parallel()
+        {
+            FailureWithNoRetries(ParallelismThreadCount);
+        }
+
+        [Fact]
+        public void FailureWithNoRetries_SingleThreaded()
+        {
+            FailureWithNoRetries(NoParallelismThreadCount);
+        }
+
         /// <summary>
         /// Verifies that we do not log the retrying warning if we didn't request
         /// retries.
         /// </summary>
-        [Fact]
-        public void FailureWithNoRetries()
+        private void FailureWithNoRetries(int parallelism)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1644,7 +1719,7 @@ namespace Microsoft.Build.UnitTests
             };
             
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, parallelism);
 
             Assert.Equal(false, result);
             engine.AssertLogDoesntContain("MSB3026");
@@ -1690,12 +1765,23 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(false, t.UseHardlinksIfPossible);
         }
 
+        [Fact]
+        public void SuccessAfterOneRetry_Parallel()
+        {
+            SuccessAfterOneRetry(ParallelismThreadCount);
+        }
+
+        [Fact]
+        public void SuccessAfterOneRetry_SingleThreaded()
+        {
+            SuccessAfterOneRetry(NoParallelismThreadCount);
+        }
+
         /// <summary>
         /// Verifies that we get the one retry we ask for after the first attempt fails,
         /// and we get appropriate messages.
         /// </summary>
-        [Fact]
-        public void SuccessAfterOneRetry()
+        public void SuccessAfterOneRetry(int parallelism)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1709,18 +1795,29 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, parallelism);
 
             Assert.Equal(true, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogDoesntContain("MSB3027");
         }
 
+        [Fact]
+        public void SuccessAfterOneRetryContinueToNextFile_Parallel()
+        {
+            SuccessAfterOneRetryContinueToNextFile(ParallelismThreadCount);
+        }
+
+        [Fact]
+        public void SuccessAfterOneRetryContinueToNextFile_SingleThreaded()
+        {
+            SuccessAfterOneRetryContinueToNextFile(NoParallelismThreadCount);
+        }
+
         /// <summary>
         /// Verifies that after a successful retry we continue to the next file
         /// </summary>
-        [Fact]
-        public void SuccessAfterOneRetryContinueToNextFile()
+        private void SuccessAfterOneRetryContinueToNextFile(int parallelism)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1734,21 +1831,34 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, parallelism);
 
             Assert.Equal(true, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogDoesntContain("MSB3027");
-            Assert.Equal(copyFunctor.FilesCopiedSuccessfully[0].Name, FileUtilities.FixFilePath("c:\\source"));
-            Assert.Equal(copyFunctor.FilesCopiedSuccessfully[1].Name, FileUtilities.FixFilePath("c:\\source2"));
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+            Assert.True(copyFunctor.FilesCopiedSuccessfully.Any(f => f.Name == FileUtilities.FixFilePath("c:\\source")));
+            Assert.True(copyFunctor.FilesCopiedSuccessfully.Any(f => f.Name == FileUtilities.FixFilePath("c:\\source2")));
+        }
+
+        [Fact]
+        public void TooFewRetriesReturnsFalse_Parallel()
+        {
+            TooFewRetriesReturnsFalse(ParallelismThreadCount);
+        }
+
+        [Fact]
+        public void TooFewRetriesReturnsFalse_SingleThreaded()
+        {
+            TooFewRetriesReturnsFalse(NoParallelismThreadCount);
         }
 
         /// <summary>
         /// The copy delegate can return false, or throw on failure.
         /// This test tests returning false.
         /// </summary>
-        [Fact]
-        public void TooFewRetriesReturnsFalse()
+        private void TooFewRetriesReturnsFalse(int parallelism)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1762,19 +1872,30 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(4, false /* do not throw */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, parallelism);
 
             Assert.Equal(false, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogContains("MSB3027");
         }
 
+        [Fact]
+        public void TooFewRetriesThrows_Parallel()
+        {
+            TooFewRetriesThrows(ParallelismThreadCount);
+        }
+
+        [Fact]
+        public void TooFewRetriesThrows_SingleThreaded()
+        {
+            TooFewRetriesThrows(NoParallelismThreadCount);
+        }
+
         /// <summary>
         /// The copy delegate can return false, or throw on failure.
         /// This test tests the throw case.
         /// </summary>
-        [Fact]
-        public void TooFewRetriesThrows()
+        private void TooFewRetriesThrows(int parallelism)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1788,7 +1909,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(3, true /* throw */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, parallelism);
 
             Assert.Equal(false, result);
             engine.AssertLogContains("MSB3026");
@@ -1802,6 +1923,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private class CopyFunctor
         {
+            /// <summary>
+            /// Protects the counts and lists below.
+            /// </summary>
+            private readonly object _lockObj = new object();
+
             /// <summary>
             /// On what attempt count should we stop failing?
             /// </summary>
@@ -1820,7 +1946,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Which files we actually copied
             /// </summary>
-            internal List<FileState> FilesCopiedSuccessfully { get; }
+            internal List<FileState> FilesCopiedSuccessfully { get; } = new List<FileState>();
 
             /// <summary>
             /// Constructor
@@ -1829,8 +1955,6 @@ namespace Microsoft.Build.UnitTests
             {
                 _countOfSuccess = countOfSuccess;
                 _throwOnFailure = throwOnFailure;
-                _tries = 0;
-                FilesCopiedSuccessfully = new List<FileState>();
             }
 
             /// <summary>
@@ -1838,14 +1962,17 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             internal bool? Copy(FileState source, FileState destination)
             {
-                _tries++;
-
-                // 2nd and subsequent copies always succeed
-                if (FilesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
+                lock (_lockObj)
                 {
-                    Console.WriteLine("Copied {0} to {1} OK", source, destination);
-                    FilesCopiedSuccessfully.Add(source);
-                    return true;
+                    _tries++;
+
+                    // 2nd and subsequent copies always succeed
+                    if (FilesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
+                    {
+                        Console.WriteLine("Copied {0} to {1} OK", source, destination);
+                        FilesCopiedSuccessfully.Add(source);
+                        return true;
+                    }
                 }
 
                 if (_throwOnFailure)
