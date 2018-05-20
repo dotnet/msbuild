@@ -32,14 +32,9 @@
         <target state="translated">모든 명령에 공통된 옵션입니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommonOptions">
-        <source>Common options</source>
-        <target state="translated">공통 옵션</target>
-        <note />
-      </trans-unit>
       <trans-unit id="HelpDefinition">
-        <source>Show help.</source>
-        <target state="translated">도움말을 표시합니다.</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">도움말을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -63,43 +58,43 @@
         <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
-        <source>Initialize .NET projects.</source>
-        <target state="translated">.NET 프로젝트를 초기화합니다.</target>
+        <source>Create a new .NET project or file.</source>
+        <target state="needs-review-translation">.NET 프로젝트를 초기화합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the .NET project.</source>
-        <target state="translated">.NET 프로젝트에 지정된 종속성을 복원합니다.</target>
+        <source>Restore dependencies specified in a .NET project.</source>
+        <target state="needs-review-translation">.NET 프로젝트에 지정된 종속성을 복원합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
-        <source>Builds a .NET project.</source>
-        <target state="translated">.NET 프로젝트를 빌드합니다.</target>
+        <source>Build a .NET project.</source>
+        <target state="needs-review-translation">.NET 프로젝트를 빌드합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
-        <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="translated">배포할 .NET 프로젝트를 게시합니다(런타임 포함).</target>
+        <source>Publish a .NET project for deployment.</source>
+        <target state="needs-review-translation">배포할 .NET 프로젝트를 게시합니다(런타임 포함).</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a .NET project.</source>
-        <target state="translated">.NET 프로젝트를 컴파일하고 즉시 실행합니다.</target>
+        <source>Build and run a .NET project output.</source>
+        <target state="needs-review-translation">.NET 프로젝트를 컴파일하고 즉시 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
-        <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="translated">프로젝트에 지정된 Test Runner를 사용하여 유닛 테스트를 실행합니다.</target>
+        <source>Run unit tests using the test runner specified in a .NET project.</source>
+        <target state="needs-review-translation">프로젝트에 지정된 Test Runner를 사용하여 유닛 테스트를 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
-        <source>Creates a NuGet package.</source>
-        <target state="translated">NuGet 패키지를 만듭니다.</target>
+        <source>Create a NuGet package.</source>
+        <target state="needs-review-translation">NuGet 패키지를 만듭니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
-        <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="translated">project.json 기반 프로젝트를 msbuild 기반 프로젝트로 마이그레이션합니다.</target>
+        <source>Migrate a project.json project to an MSBuild project.</source>
+        <target state="needs-review-translation">project.json 기반 프로젝트를 msbuild 기반 프로젝트로 마이그레이션합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -108,13 +103,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
-        <source>Add reference to the project.</source>
-        <target state="translated">프로젝트에 참조를 추가합니다.</target>
+        <source>Add a package or reference to a .NET project.</source>
+        <target state="needs-review-translation">프로젝트에 참조를 추가합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
-        <source>Remove reference from the project.</source>
-        <target state="translated">프로젝트에서 참조를 제거합니다.</target>
+        <source>Remove a package or reference from a .NET project.</source>
+        <target state="needs-review-translation">프로젝트에서 참조를 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -128,13 +123,13 @@
         <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
-        <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="translated">Microsoft Build Engine(MSBuild)을 실행합니다.</target>
+        <source>Run Microsoft Build Engine (MSBuild) commands.</source>
+        <target state="needs-review-translation">Microsoft Build Engine(MSBuild)을 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
-        <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="translated">Microsoft Test Execution 명령줄 도구를 실행합니다.</target>
+        <source>Run Microsoft Test Engine (VSTest) commands.</source>
+        <target state="needs-review-translation">Microsoft Test Execution 명령줄 도구를 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -143,23 +138,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
-        <source>Clean build output(s).</source>
-        <target state="translated">빌드 출력을 정리합니다.</target>
+        <source>Clean build outputs of a .NET project.</source>
+        <target state="needs-review-translation">빌드 출력을 정리합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
-        <source>Modify solution (SLN) files.</source>
-        <target state="translated">솔루션(SLN) 파일을 수정합니다.</target>
+        <source>Modify Visual Studio solution files.</source>
+        <target state="needs-review-translation">솔루션(SLN) 파일을 수정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List references of a .NET project.</source>
+        <source>List project references of a .NET project.</source>
         <target state="needs-review-translation">프로젝트 참조 또는 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</source>
-        <target state="translated">지정된 명령 '{0}'은(는) 유효한 CLI 명령이 아닙니다. 유효한 CLI 명령을 지정하세요. 자세한 내용은 dotnet 도움말을 실행하세요.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="needs-review-translation">지정된 명령 '{0}'은(는) 유효한 CLI 명령이 아닙니다. 유효한 CLI 명령을 지정하세요. 자세한 내용은 dotnet 도움말을 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -168,8 +163,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Utility to get more detailed help about each of the CLI commands.</source>
-        <target state="translated">각 CLI 명령에 대해 더 자세한 도움말을 얻는 유틸리티입니다.</target>
+        <source>Utility to get more detailed help about each of the SDK commands.</source>
+        <target state="needs-review-translation">각 CLI 명령에 대해 더 자세한 도움말을 얻는 유틸리티입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -178,8 +173,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
-        <source>CLI command for which to view more detailed help.</source>
-        <target state="translated">더 자세한 도움말을 보는 CLI 명령입니다.</target>
+        <source>The SDK command to launch online help for.</source>
+        <target state="needs-review-translation">더 자세한 도움말을 보는 CLI 명령입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -213,8 +208,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
-        <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
-        <target state="translated">명령에 대한 자세한 정보를 보려면 'dotnet COMMAND --help'를 실행합니다.</target>
+        <source>Run 'dotnet [command] --help' for more information on a command.</source>
+        <target state="needs-review-translation">명령에 대한 자세한 정보를 보려면 'dotnet COMMAND --help'를 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -248,13 +243,13 @@
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
-        <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="translated">지정된 어셈블리를 런타임 저장소에 저장합니다.</target>
+        <source>Store the specified assemblies in the runtime package store.</source>
+        <target state="needs-review-translation">지정된 어셈블리를 런타임 저장소에 저장합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
-        <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="translated">.NET 환경을 확장하는 도구를 설치하거나 도구로 작업합니다.</target>
+        <source>Install or manage tools that extend the .NET experience.</source>
+        <target state="needs-review-translation">.NET 환경을 확장하는 도구를 설치하거나 도구로 작업합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -288,8 +283,18 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
-        <source>Additional tools ('dotnet [tool-name] --help' for more information):</source>
-        <target state="new">Additional tools ('dotnet [tool-name] --help' for more information):</target>
+        <source>Additional commands from bundled tools:</source>
+        <target state="new">Additional commands from bundled tools:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKCommandUsageDescription">
+        <source>Execute a .NET Core SDK command.</source>
+        <target state="new">Execute a .NET Core SDK command.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutionUsageDescription">
+        <source>Execute a .NET Core application.</source>
+        <target state="new">Execute a .NET Core application.</target>
         <note />
       </trans-unit>
     </body>

@@ -19,12 +19,11 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
 
 Arguments:
   <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <PROJECT_PATH>   Project to project references to add
+  <PROJECT_PATH>   The paths to the projects to add as references.
 
 Options:
-  -h, --help                    Show help information.
-  -f, --framework <FRAMEWORK>   Add reference only when targeting a specific framework
-";
+  -h, --help                    Show command line help.
+  -f, --framework <FRAMEWORK>   Add the reference only when targeting a specific framework.";
 
         private const string AddCommandHelpText = @"Usage: dotnet add [options] <PROJECT> [command]
 
@@ -32,12 +31,11 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
+  -h, --help   Show command line help.
 
 Commands:
   package <PACKAGE_NAME>     Add a NuGet package reference to the project.
-  reference <PROJECT_PATH>   Add a project-to-project reference to the project.
-";
+  reference <PROJECT_PATH>   Add a project-to-project reference to the project.";
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";

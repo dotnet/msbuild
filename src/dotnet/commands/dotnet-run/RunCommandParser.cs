@@ -33,8 +33,8 @@ namespace Microsoft.DotNet.Cli
                 options: new[]
                 {
                     CommonOptions.HelpOption(),
-                    CommonOptions.ConfigurationOption(),
-                    CommonOptions.FrameworkOption(),
+                    CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
+                    CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                     Create.Option(
                         "-p|--project",
                         LocalizableStrings.CommandOptionProjectDescription,

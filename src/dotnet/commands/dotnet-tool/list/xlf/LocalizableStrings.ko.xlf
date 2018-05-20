@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Lists installed tools in the current development environment.</source>
-        <target state="translated">현재 개발 환경에 설치된 도구를 나열합니다.</target>
+        <source>List tools installed in the current development environment.</source>
+        <target state="needs-review-translation">현재 개발 환경에 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>List user wide tools.</source>
-        <target state="translated">사용자 전체 도구를 나열합니다.</target>
+        <source>List tools in the current user's tools directory.</source>
+        <target state="needs-review-translation">사용자 전체 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -32,11 +32,6 @@
         <target state="translated">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tools are installed.</source>
-        <target state="translated">도구가 설치되는 위치입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
         <target state="translated">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
@@ -50,6 +45,16 @@
       <trans-unit id="InvalidToolPathOption">
         <source>Tool path '{0}' does not exist.</source>
         <target state="translated">'{0}' 도구 경로가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tools to list.</source>
+        <target state="new">The directory containing the tools to list.</target>
         <note />
       </trans-unit>
     </body>

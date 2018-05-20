@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <source>PATH</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -33,13 +33,15 @@ Výchozí hodnota je aktuální adresář (pokud není zadaný jiný adresář).
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
-        <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="translated">Základní šablona souboru MSBuild, která se použije pro migrovanou aplikaci. Výchozí hodnotou je projekt v příkazu dotnet new.</target>
+        <source>The base MSBuild template to use for the migrated project.
+The default is the project included in dotnet new.</source>
+        <target state="needs-review-translation">Základní šablona souboru MSBuild, která se použije pro migrovanou aplikaci. Výchozí hodnotou je projekt v příkazu dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="translated">Verze balíčku sady SDK, na kterou bude odkazovat migrovaná aplikace. Výchozí hodnotou je verze sady SDK v příkazu dotnet new.</target>
+        <source>The version of the SDK package that will be referenced in the migrated project.
+The default is the version of the SDK in dotnet new.</source>
+        <target state="needs-review-translation">Verze balíčku sady SDK, na kterou bude odkazovat migrovaná aplikace. Výchozí hodnotou je verze sady SDK v příkazu dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

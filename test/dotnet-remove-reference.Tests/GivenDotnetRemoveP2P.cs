@@ -18,12 +18,11 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 
 Arguments:
   <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <PROJECT_PATH>   Project to project references to remove
+  <PROJECT_PATH>   The paths to the referenced projects to remove.
 
 Options:
-  -h, --help                    Show help information.
-  -f, --framework <FRAMEWORK>   Remove reference only when targeting a specific framework
-";
+  -h, --help                    Show command line help.
+  -f, --framework <FRAMEWORK>   Remove the reference only when targeting a specific framework.";
 
         private const string RemoveCommandHelpText = @"Usage: dotnet remove [options] <PROJECT> [command]
 
@@ -31,12 +30,11 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
+  -h, --help   Show command line help.
 
 Commands:
   package <PACKAGE_NAME>     Remove a NuGet package reference from the project.
-  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.
-";
+  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.";
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";

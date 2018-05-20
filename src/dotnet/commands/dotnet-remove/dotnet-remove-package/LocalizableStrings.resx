@@ -124,7 +124,7 @@
     <value>Command to remove package reference.</value>
   </data>
   <data name="AppHelpText" xml:space="preserve">
-    <value>Package reference to remove.</value>
+    <value>The package reference to remove.</value>
   </data>
   <data name="SpecifyExactlyOnePackageReference" xml:space="preserve">
     <value>Please specify only one package reference to remove.</value>

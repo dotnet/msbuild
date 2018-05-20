@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to uninstall.</source>
-        <target state="translated">Идентификатор пакета NuGet удаляемого инструмента.</target>
+        <source>The NuGet Package Id of the tool to uninstall.</source>
+        <target state="needs-review-translation">Идентификатор пакета NuGet удаляемого инструмента.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstalls a tool.</source>
-        <target state="translated">Удаляет инструмент.</target>
+        <source>Uninstall a tool from the current development environment.</source>
+        <target state="needs-review-translation">Удаляет инструмент.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Uninstall user wide.</source>
-        <target state="translated">Удаление на уровне пользователя.</target>
+        <source>Uninstall the tool from the current user's tools directory.</source>
+        <target state="needs-review-translation">Удаление на уровне пользователя.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -52,11 +52,6 @@
         <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool was previously installed.</source>
-        <target state="translated">Расположение предыдущей установки средства.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
         <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
@@ -65,6 +60,16 @@
       <trans-unit id="InvalidToolPathOption">
         <source>Tool path '{0}' does not exist.</source>
         <target state="translated">Путь к средству "{0}" не существует.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to uninstall.</source>
+        <target state="new">The directory containing the tool to uninstall.</target>
         <note />
       </trans-unit>
     </body>

@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place built packages.</source>
-        <target state="translated">Diretório no qual os pacotes compilados serão colocados.</target>
+        <source>The output directory to place built packages in.</source>
+        <target state="needs-review-translation">Diretório no qual os pacotes compilados serão colocados.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -33,13 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
-        <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
-        <target state="translated">Incluir os arquivos de origem e os PDBs. Os arquivos de origem vão para a pasta de origem no pacote nuget resultante</target>
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="needs-review-translation">Incluir os arquivos de origem e os PDBs. Os arquivos de origem vão para a pasta de origem no pacote nuget resultante</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">Defina o sinalizador operacional no pacote. Para obter mais informações, consulte https://aka.ms/nupkgservicing.</target>
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="needs-review-translation">Defina o sinalizador operacional no pacote. Para obter mais informações, consulte https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -50,6 +50,11 @@
       <trans-unit id="CmdArgumentDescription">
         <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
         <target state="translated">O projeto a ser empacotado, usa como padrão o arquivo de projeto no diretório atual. Pode ser um caminho para qualquer arquivo de projeto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>
