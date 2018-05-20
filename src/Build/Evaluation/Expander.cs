@@ -262,8 +262,8 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
+            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
             return result;
