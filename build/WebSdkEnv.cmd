@@ -4,6 +4,10 @@ if not defined BuildConfiguration (
     set "BuildConfiguration=Release"
 )
 
+if defined DotNetCoreSdkDir (
+	set "DOTNET_INSTALL_DIR=%DotNetCoreSdkDir%"
+)
+
 if not defined DOTNET_INSTALL_DIR (
     set "DOTNET_INSTALL_DIR=%LocalAppData%\Microsoft\dotnet"
 )
