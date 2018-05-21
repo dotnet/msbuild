@@ -16,6 +16,11 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class Unzip : TaskExtension, ICancelableTask
     {
+        // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
+        // The CopyTo/CopyToAsync buffer is short-lived and is likely to be collected at Gen0, and it offers a significant
+        // improvement in Copy performance.
+        private const int _DefaultCopyBufferSize = 81920;
+
         /// <summary>
         /// Stores a <see cref="CancellationTokenSource"/> used for cancellation.
         /// </summary>
@@ -66,45 +71,50 @@ namespace Microsoft.Build.Tasks
 
             BuildEngine3.Yield();
 
-            foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
+            try
             {
-                if (!File.Exists(sourceFile.ItemSpec))
+                foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                 {
-                    Log.LogErrorFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
-                    continue;
-                }
-
-                try
-                {
-                    using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
+                    if (!File.Exists(sourceFile.ItemSpec))
                     {
-                        using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
+                        Log.LogErrorFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
+                        continue;
+                    }
+
+                    try
+                    {
+                        using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                         {
-                            try
+                            using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
                             {
-                                Extract(zipArchive, destinationDirectory);
-                            }
-                            catch (Exception e)
-                            {
-                                // Unhandled exception in Extract() is a bug!
-                                Log.LogErrorFromException(e, showStackTrace: true);
-                                return false;
+                                try
+                                {
+                                    Extract(zipArchive, destinationDirectory);
+                                }
+                                catch (Exception e)
+                                {
+                                    // Unhandled exception in Extract() is a bug!
+                                    Log.LogErrorFromException(e, showStackTrace: true);
+                                    return false;
+                                }
                             }
                         }
                     }
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                catch (Exception e)
-                {
-                    // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
-                    Log.LogErrorFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                        // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
+                        Log.LogErrorFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                    }
                 }
             }
-
-            BuildEngine3.Reacquire();
+            finally
+            {
+                BuildEngine3.Reacquire();
+            }
 
             return !_cancellationToken.IsCancellationRequested && !Log.HasLoggedErrors;
         }
@@ -164,7 +174,10 @@ namespace Microsoft.Build.Tasks
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                     using (Stream stream = zipArchiveEntry.Open())
                     {
-                        stream.CopyToAsync(destination, 81920, _cancellationToken.Token);
+                        stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
+                            .ConfigureAwait(continueOnCapturedContext: false)
+                            .GetAwaiter()
+                            .GetResult();
                     }
 
                     destinationPath.LastWriteTimeUtc = zipArchiveEntry.LastWriteTime.UtcDateTime;

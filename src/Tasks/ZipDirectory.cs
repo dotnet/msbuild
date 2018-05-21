@@ -48,7 +48,16 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                File.Delete(destinationFile.FullName);
+                try
+                {
+                    File.Delete(destinationFile.FullName);
+                }
+                catch (Exception e)
+                {
+                    Log.LogErrorFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
+
+                    return false;
+                }
             }
 
             try
