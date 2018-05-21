@@ -2118,10 +2118,12 @@ namespace Microsoft.Build.UnitTests
             int errorCode = Marshal.GetHRForLastWin32Error();
             Marshal.GetExceptionForHR(errorCode);
 
-            string sourceFile = FileUtilities.GetTemporaryFile();
+            string sourceFile1 = FileUtilities.GetTemporaryFile();
+            string sourceFile2 = FileUtilities.GetTemporaryFile();
             const string temp = @"\\localhost\c$\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            string destFile1 = Path.Combine(destFolder, Path.GetFileName(sourceFile1));
+            string destFile2 = Path.Combine(destFolder, Path.GetFileName(sourceFile2));
 
             try
             {
@@ -2132,16 +2134,22 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception)
             {
-                Console.WriteLine("CopyToDestinationFolderWithHardLinkFallbackNetwork test could not access the network.");
+                Console.WriteLine("CopyToDestinationFolderWithHardLinkFallbackNetwork test could not access the network as expected.");
                 // Something caused us to not be able to access our "network" share, don't fail.
                 return;
             }
 
             try
             {
-                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+                // Create 2 files to ensure we test with parallel copy.
+                File.WriteAllText(sourceFile1, "This is source temp file 1."); // HIGHCHAR: Test writes in UTF8 without preamble.
+                File.WriteAllText(sourceFile2, "This is source temp file 2.");
 
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles =
+                {
+                    new TaskItem(sourceFile1),
+                    new TaskItem(sourceFile2)
+                };
 
                 var me = new MockEngine(true);
                 var t = new Copy
@@ -2157,40 +2165,47 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.True(success); // "success"
-                Assert.True(File.Exists(destFile)); // "destination exists"
+                Assert.True(File.Exists(destFile1)); // "destination exists"
+                Assert.True(File.Exists(destFile2)); // "destination exists"
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile1, destFile1);
 
                 // Can't do this below, because the real message doesn't end with String.Empty, it ends with a CLR exception string, and so matching breaks in PLOC.
-                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this
-                // The system cannot move the file to a different disk drive. (Exception from HRESULT: 0x80070011)
+                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this:
+                //   The system cannot move the file to a different disk drive. (Exception from HRESULT: 0x80070011)
                 // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
                 me.AssertLogContains("0x80070011");
 
-                string destinationFileContents = File.ReadAllText(destFile);
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                string destinationFileContents = File.ReadAllText(destFile1);
+                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                destinationFileContents = File.ReadAllText(destFile2);
+                Assert.Equal("This is source temp file 2.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
-                Assert.Equal(1, t.DestinationFiles.Length);
-                Assert.Equal(1, t.CopiedFiles.Length);
-                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
+                Assert.Equal(2, t.DestinationFiles.Length);
+                Assert.Equal(2, t.CopiedFiles.Length);
+                Assert.Equal(destFile1, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile2, t.DestinationFiles[1].ItemSpec);
+                Assert.Equal(destFile1, t.CopiedFiles[0].ItemSpec);
+                Assert.Equal(destFile2, t.CopiedFiles[1].ItemSpec);
 
-                // Now we will write new content to the source file
+                // Now we will write new content to a source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                File.WriteAllText(sourceFile, "This is another source temp file.");  // HIGHCHAR: Test writes in UTF8 without preamble.
+                File.WriteAllText(sourceFile1, "This is another source temp file.");  // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                destinationFileContents = File.ReadAllText(destFile);
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
+                destinationFileContents = File.ReadAllText(destFile1);
+                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
             finally
             {
-                File.Delete(sourceFile);
-                File.Delete(destFile);
+                File.Delete(sourceFile1);
+                File.Delete(sourceFile2);
+                File.Delete(destFile1);
+                File.Delete(destFile2);
                 FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
