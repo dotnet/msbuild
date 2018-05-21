@@ -251,9 +251,9 @@ namespace Microsoft.Build.Shared
             private static StringBuilder s_sharedBuilder;
 
             /// <summary>
-            /// Weak reference to the last builder we used that was bigger than <see cref="MaxBuilderSize"/>.
+            /// Weak reference to the last <see cref="StringBuilder"/> we used that was bigger than <see cref="MaxBuilderSize"/>.
             /// </summary>
-            private static WeakReference<StringBuilder> s_largeSharedBuilder = new WeakReference<StringBuilder>(null);
+            private static WeakReference s_largeSharedBuilder = new WeakReference(null);
 
 #if DEBUG
             /// <summary>
@@ -308,9 +308,9 @@ namespace Microsoft.Build.Shared
                 {
                     lock (s_largeSharedBuilder)
                     {
-                        s_largeSharedBuilder.TryGetTarget(out returned);
+                        returned = (StringBuilder)s_largeSharedBuilder.Target;
 
-                        s_largeSharedBuilder.SetTarget(null);
+                        s_largeSharedBuilder.Target = null;
                     }
                 }
 
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Shared
                 {
                     lock (s_largeSharedBuilder)
                     {
-                        s_largeSharedBuilder.TryGetTarget(out var currentlyCached);
+                        var currentlyCached = (StringBuilder)s_largeSharedBuilder.Target;
 
                         if (currentlyCached?.Capacity > returningBuilder.Capacity)
                         {
@@ -386,7 +386,7 @@ namespace Microsoft.Build.Shared
                             return;
                         }
 
-                        s_largeSharedBuilder.SetTarget(returningBuilder);
+                        s_largeSharedBuilder.Target =returningBuilder;
 #if DEBUG
                         Interlocked.Increment(ref s_accepts);
 #endif
