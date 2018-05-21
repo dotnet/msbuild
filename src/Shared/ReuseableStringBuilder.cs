@@ -241,9 +241,7 @@ namespace Microsoft.Build.Shared
         private static class ReuseableStringBuilderFactory
         {
             /// <summary>
-            /// Made up limit beyond which we won't share the builder
-            /// because we could otherwise hold a huge builder indefinitely.
-            /// This size seems reasonable for MSBuild uses (mostly expression expansion)
+            /// Limit beyond which we won't hold a strong reference to the builder indefinitely.
             /// </summary>
             private const int MaxBuilderSize = 1024;
 
@@ -251,6 +249,11 @@ namespace Microsoft.Build.Shared
             /// The shared builder.
             /// </summary>
             private static StringBuilder s_sharedBuilder;
+
+            /// <summary>
+            /// Weak reference to the last builder we used that was bigger than <see cref="MaxBuilderSize"/>.
+            /// </summary>
+            private static WeakReference<StringBuilder> s_largeSharedBuilder = new WeakReference<StringBuilder>(null);
 
 #if DEBUG
             /// <summary>
@@ -294,7 +297,22 @@ namespace Microsoft.Build.Shared
 #if DEBUG
                 bool missed = false;
 #endif
-                var returned = Interlocked.Exchange(ref s_sharedBuilder, null);
+
+                StringBuilder returned;
+
+                if (capacity <= MaxBuilderSize)
+                {
+                    returned = Interlocked.Exchange(ref s_sharedBuilder, null);
+                }
+                else
+                {
+                    lock (s_largeSharedBuilder)
+                    {
+                        s_largeSharedBuilder.TryGetTarget(out returned);
+
+                        s_largeSharedBuilder.SetTarget(null);
+                    }
+                }
 
                 if (returned == null)
                 {
@@ -348,11 +366,31 @@ namespace Microsoft.Build.Shared
                     Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
 #if DEBUG
                     Interlocked.Increment(ref s_accepts);
+#endif
                 }
                 else
                 {
-                    Interlocked.Increment(ref s_discards);
+                    lock (s_largeSharedBuilder)
+                    {
+                        s_largeSharedBuilder.TryGetTarget(out var currentlyCached);
+
+                        if (currentlyCached?.Capacity > returningBuilder.Capacity)
+                        {
+                            // We already have a bigger builder, so just let
+                            // the returning one be GCed.
+                            returningBuilder = currentlyCached;
+
+#if DEBUG
+                            Interlocked.Increment(ref s_discards);
 #endif
+                            return;
+                        }
+
+                        s_largeSharedBuilder.SetTarget(returningBuilder);
+#if DEBUG
+                        Interlocked.Increment(ref s_accepts);
+#endif
+                    }
                 }
             }
         }
