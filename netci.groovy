@@ -3,6 +3,7 @@
 
 // Import the utility functionality.
 
+import jobs.generation.ArchivalSettings;
 import jobs.generation.Utilities;
 
 def project = GithubProject
@@ -108,6 +109,12 @@ set DOTNET_CLI_UI_LANGUAGE=es
         Utilities.addMSTestResults(newJob, '**/*.trx')
     }
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${architecture} ${configuration} Build")
+
+	def archiveSettings = new ArchivalSettings()
+	archiveSettings.addFiles("test/**/*.trx")
+	archiveSettings.setFailIfNothingArchived()
+	archiveSettings.setArchiveOnFailure()
+    Utilities.addArchival(newJob, archiveSettings)
 }
 
 // Make the call to generate the help job
