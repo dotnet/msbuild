@@ -297,50 +297,50 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                if (eventArgs is ExternalProjectStartedEventArgs)
+                if (eventArgs is ExternalProjectStartedEventArgs args)
                 {
-                    this.ExternalProjectStartedEvents.Add((ExternalProjectStartedEventArgs) eventArgs);
+                    ExternalProjectStartedEvents.Add(args);
                 }
                 else if (eventArgs is ExternalProjectFinishedEventArgs)
                 {
-                    this.ExternalProjectFinishedEvents.Add((ExternalProjectFinishedEventArgs) eventArgs);
+                    ExternalProjectFinishedEvents.Add((ExternalProjectFinishedEventArgs) eventArgs);
                 }
 
-                if (eventArgs is ProjectStartedEventArgs)
+                if (eventArgs is ProjectStartedEventArgs startedEventArgs)
                 {
-                    this.ProjectStartedEvents.Add((ProjectStartedEventArgs) eventArgs);
+                    ProjectStartedEvents.Add(startedEventArgs);
                 }
                 else if (eventArgs is ProjectFinishedEventArgs)
                 {
-                    this.ProjectFinishedEvents.Add((ProjectFinishedEventArgs) eventArgs);
+                    ProjectFinishedEvents.Add((ProjectFinishedEventArgs) eventArgs);
                 }
                 else if (eventArgs is TargetStartedEventArgs)
                 {
-                    this.TargetStartedEvents.Add((TargetStartedEventArgs) eventArgs);
+                    TargetStartedEvents.Add((TargetStartedEventArgs) eventArgs);
                 }
                 else if (eventArgs is TargetFinishedEventArgs)
                 {
-                    this.TargetFinishedEvents.Add((TargetFinishedEventArgs) eventArgs);
+                    TargetFinishedEvents.Add((TargetFinishedEventArgs) eventArgs);
                 }
                 else if (eventArgs is TaskStartedEventArgs)
                 {
-                    this.TaskStartedEvents.Add((TaskStartedEventArgs) eventArgs);
+                    TaskStartedEvents.Add((TaskStartedEventArgs) eventArgs);
                 }
                 else if (eventArgs is TaskFinishedEventArgs)
                 {
-                    this.TaskFinishedEvents.Add((TaskFinishedEventArgs) eventArgs);
+                    TaskFinishedEvents.Add((TaskFinishedEventArgs) eventArgs);
                 }
                 else if (eventArgs is BuildMessageEventArgs)
                 {
-                    this.BuildMessageEvents.Add((BuildMessageEventArgs) eventArgs);
+                    BuildMessageEvents.Add((BuildMessageEventArgs) eventArgs);
                 }
                 else if (eventArgs is BuildStartedEventArgs)
                 {
-                    this.BuildStartedEvents.Add((BuildStartedEventArgs) eventArgs);
+                    BuildStartedEvents.Add((BuildStartedEventArgs) eventArgs);
                 }
                 else if (eventArgs is BuildFinishedEventArgs)
                 {
-                    this.BuildFinishedEvents.Add((BuildFinishedEventArgs) eventArgs);
+                    BuildFinishedEvents.Add((BuildFinishedEventArgs) eventArgs);
 
                     if (!AllowTaskCrashes)
                     {
