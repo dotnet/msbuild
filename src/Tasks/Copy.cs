@@ -33,7 +33,12 @@ namespace Microsoft.Build.Tasks
         // 2-core (4 hyperthreaded) M.2 SSD laptop | 22.3  17.5  13.4  12.6  13.1  9.52  11.3  10.9
         // 12-core (24 HT) SATA2 SSD 2012 desktop  | 15.1  10.2  9.57  7.29  7.64  7.41  7.67  7.79
         // 12-core (24 HT) 1TB spinny disk         | 22.7  15.03 11.1  9.23  11.7  11.1  9.27  11.1
-        private const int DefaultCopyParallelism = int.MaxValue;
+        //
+        // However note that since we are relying on synchronous File.Copy() - which will hold threadpool
+        // threads at the advantage of performing file copies more quickly in the kernel - we must avoid
+        // taking up the whole threadpool esp. when hosted in Visual Studio. IOW we use a specific number
+        // instead of int.MaxValue.
+        private static readonly int DefaultCopyParallelism = Environment.ProcessorCount > 4 ? 6 : 4;
 
         /// <summary>
         /// Constructor.
@@ -850,15 +855,7 @@ namespace Microsoft.Build.Tasks
         {
             string fullSourcePath = Path.GetFullPath(source);
             string fullDestinationPath = Path.GetFullPath(destination);
-            StringComparison filenameComparison;
-            if (NativeMethodsShared.IsWindows)
-            {
-                filenameComparison = StringComparison.OrdinalIgnoreCase;
-            }
-            else
-            {
-                filenameComparison = StringComparison.Ordinal;
-            }
+            StringComparison filenameComparison = NativeMethodsShared.IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             return (0 == String.Compare(fullSourcePath, fullDestinationPath, filenameComparison));
         }
 

@@ -2039,7 +2039,7 @@ namespace Microsoft.Build.UnitTests
         public CopyHardLink_Tests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            this.UseHardLinks = true;
+            UseHardLinks = true;
         }
 
         /// <summary>
@@ -2054,10 +2054,7 @@ namespace Microsoft.Build.UnitTests
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is a source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Don't create the dest folder, let task do that
 
@@ -2082,12 +2079,7 @@ namespace Microsoft.Build.UnitTests
 
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                string destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
@@ -2098,17 +2090,10 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is another source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
@@ -2154,10 +2139,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is a source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
@@ -2186,12 +2168,7 @@ namespace Microsoft.Build.UnitTests
                 // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
                 me.AssertLogContains("0x80070011");
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                string destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
@@ -2202,17 +2179,10 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is another source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is another source temp file.");  // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
@@ -2246,13 +2216,9 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
-                if (!Directory.Exists(destFolder))
-                {
-                    Directory.CreateDirectory(destFolder);
-                }
+                Directory.CreateDirectory(destFolder);
 
                 // Exhaust the number (1024) of directory entries that can be created for a file
                 // This is 1 + (1 x hard links)
@@ -2291,12 +2257,7 @@ namespace Microsoft.Build.UnitTests
                 // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
                 me.AssertLogContains("0x80070476");
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                string destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
@@ -2307,17 +2268,10 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is another source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
@@ -2364,10 +2318,7 @@ namespace Microsoft.Build.UnitTests
                 string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
                 try
                 {
-                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                    {
-                        sw.Write("This is a source temp file.");
-                    }
+                    File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                     // Don't create the dest folder, let task do that
 
@@ -2393,11 +2344,7 @@ namespace Microsoft.Build.UnitTests
 
                     me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
 
-                    string destinationFileContents;
-
-                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                        destinationFileContents = sr.ReadToEnd();
-
+                    string destinationFileContents = File.ReadAllText(destFile);
                     Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
 
                     Assert.Equal(1, t.DestinationFiles.Length);
@@ -2409,21 +2356,13 @@ namespace Microsoft.Build.UnitTests
                     // we'll then check that the destination file automatically
                     // has the same content (i.e. it's been hard linked)
 
-                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                    {
-                        sw.Write("This is another source temp file.");
-                    }
+                    File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                     // Read the destination file (it should have the same modified content as the source)
-                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    {
-                        destinationFileContents = sr.ReadToEnd();
-                    }
-
+                    destinationFileContents = File.ReadAllText(destFile);
                     Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                     ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
-
                 }
                 finally
                 {
