@@ -362,7 +362,10 @@ namespace Microsoft.Build.Tasks
 
             // Track successfully copied subset.
             List <ITaskItem> destinationFilesSuccessfullyCopied;
-            bool success = parallelism == 1
+
+            // Use single-threaded code path when requested or when there is only copy to make
+            // (no need to create all the parallel infrastructure for that case).
+            bool success = parallelism == 1 || DestinationFiles.Length == 1
                 ? CopySingleThreaded(copyFile, out destinationFilesSuccessfullyCopied)
                 : CopyParallel(copyFile, parallelism, out destinationFilesSuccessfullyCopied);
 
@@ -374,15 +377,14 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Original copy code that performs single-threaded copies.
-        /// Kept as-is for comparison to parallel algo. We can eliminate this algo once that has enough mileage
-        /// (parallelism=1 can be handled by the ActionBlock in the parallel implementation).
+        /// Used for single-file copies and when parallelism is 1.
         /// </summary>
         private bool CopySingleThreaded(
             CopyFileWithState copyFile,
             out List<ITaskItem> destinationFilesSuccessfullyCopied)
         {
             bool success = true;
-            destinationFilesSuccessfullyCopied = new List<ITaskItem>();
+            destinationFilesSuccessfullyCopied = new List<ITaskItem>(DestinationFiles.Length);
 
             // Set of files we actually copied and the location from which they were originally copied.  The purpose
             // of this collection is to let us skip copying duplicate files.  We will only copy the file if it 
@@ -542,7 +544,7 @@ namespace Microsoft.Build.Tasks
             partitionCopyActionBlock.Completion.GetAwaiter().GetResult();
 
             // Assemble an in-order list of destination items that succeeded.
-            destinationFilesSuccessfullyCopied = new List<ITaskItem>(successIndices.Count);
+            destinationFilesSuccessfullyCopied = new List<ITaskItem>(DestinationFiles.Length);
             int[] successIndicesSorted = successIndices.ToArray();
             Array.Sort(successIndicesSorted);
             foreach (int successIndex in successIndicesSorted)
