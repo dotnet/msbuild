@@ -69,7 +69,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_NativeExecutableExtension Condition="'$(_NativeExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_NativeExecutableExtension>
 
     <_DotNetHostExecutableName>dotnet$(_NativeExecutableExtension)</_DotNetHostExecutableName>
-    <_DotNetAppHostExecutableName>apphost$(_NativeExecutableExtension)</_DotNetAppHostExecutableName>
+    <_DotNetAppHostExecutableNameWithoutExtension>apphost</_DotNetAppHostExecutableNameWithoutExtension>
+    <_DotNetAppHostExecutableName>$(_DotNetAppHostExecutableNameWithoutExtension)$(_NativeExecutableExtension)</_DotNetAppHostExecutableName>
 
     <_DotNetHostPolicyLibraryName>$(_NativeLibraryPrefix)hostpolicy$(_NativeLibraryExtension)</_DotNetHostPolicyLibraryName>
     <_DotNetHostFxrLibraryName>$(_NativeLibraryPrefix)hostfxr$(_NativeLibraryExtension)</_DotNetHostFxrLibraryName>
@@ -92,14 +93,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <CoreCleanDependsOn>
-      SuppressAssetsLogMessages;
+      _SdkBeforeClean
       $(CoreCleanDependsOn)
     </CoreCleanDependsOn>
   </PropertyGroup>
 
   <PropertyGroup>
     <RebuildDependsOn>
-      UnsuppressAssetsLogMessages;
+      _SdkBeforeRebuild;
       $(RebuildDependsOn)
     </RebuildDependsOn>
   </PropertyGroup>
@@ -200,29 +201,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <!--
-    ============================================================
-                                        SuppressAssetsLogMessages
-
-    Suppresses log messages from an existing project assets file.
-    ============================================================
-    -->
-  <Target Name="SuppressAssetsLogMessages" Condition="'$(UnsuppressAssetsLogMessages)' != 'true'">
-    <PropertyGroup>
+  <Target Name="_SdkBeforeClean">
+    <PropertyGroup Condition="'$(_CleaningWithoutRebuilding)' == ''">
+      <_CleaningWithoutRebuilding>true</_CleaningWithoutRebuilding>
       <EmitAssetsLogMessages>false</EmitAssetsLogMessages>
     </PropertyGroup>
   </Target>
 
-  <!--
-    ============================================================
-                                        UnsuppressAssetsLogMessages
-
-    Unsuppresses log messages from an existing project assets file.
-    ============================================================
-    -->
-  <Target Name="UnsuppressAssetsLogMessages">
+  <Target Name="_SdkBeforeRebuild">
     <PropertyGroup>
-      <UnsuppressAssetsLogMessages>true</UnsuppressAssetsLogMessages>
+      <_CleaningWithoutRebuilding>false</_CleaningWithoutRebuilding>
     </PropertyGroup>
   </Target>
 

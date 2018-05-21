@@ -126,7 +126,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
+          Condition=" ('$(DesignTimeBuild)' != 'true' and '$(_CleaningWithoutRebuilding)' != 'true')
+                      Or Exists('$(ProjectAssetsFile)')"
           BeforeTargets="AssignProjectConfiguration"
           DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
 

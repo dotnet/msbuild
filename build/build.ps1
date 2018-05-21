@@ -92,6 +92,9 @@ function InitializeDotNetCli {
     $env:DOTNET_INSTALL_DIR = $env:DotNetCoreSdkDir    
   }
 
+  # Save MSBuild crash files info to log directory so that they are captured as build artifacts
+  $env:MSBUILDDEBUGPATH=$LogDir
+
   # Use dotnet installation specified in DOTNET_INSTALL_DIR if it contains the required SDK version, 
   # otherwise install the dotnet CLI and SDK to repo local .dotnet directory to avoid potential permission issues.
   if (($env:DOTNET_INSTALL_DIR -ne $null) -and (Test-Path(Join-Path $env:DOTNET_INSTALL_DIR "sdk\$($GlobalJson.sdk.version)"))) {

@@ -50,6 +50,8 @@ namespace Microsoft.NET.TestFramework
 
         public void AddTestEnvironmentVariables(SdkCommandSpec command)
         {
+            string dotnetRoot = Path.GetDirectoryName(DotNetHostPath);
+
             if (SdksPath != null)
             {
                 command.Environment["MSBuildSDKsPath"] = SdksPath;
@@ -62,11 +64,19 @@ namespace Microsoft.NET.TestFramework
                     command.Environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions",
                         "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
                 }
+
+                if (Environment.Is64BitProcess)
+                {
+                    command.Environment.Add("DOTNET_ROOT", dotnetRoot);
+                }
+                else
+                {
+                    command.Environment.Add("DOTNET_ROOT(x86)", dotnetRoot);
+                }
             }
 
             if (!string.IsNullOrEmpty(CliVersionForBundledVersions))
             {
-                string dotnetRoot = Path.GetDirectoryName(DotNetHostPath);
                 string stage0SdkPath = Path.Combine(dotnetRoot, "sdk", CliVersionForBundledVersions); ;
                 command.Environment["NETCoreSdkBundledVersionsProps"] = Path.Combine(stage0SdkPath, "Microsoft.NETCoreSdk.BundledVersions.props");
             }
