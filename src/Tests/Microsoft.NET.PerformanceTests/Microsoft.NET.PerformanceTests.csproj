@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <NoWarn>$(NoWarn);xUnit1004</NoWarn>
   </PropertyGroup>
 
@@ -13,8 +13,12 @@
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
+    <PropertyGroup>
+    <PackageId>testSdkPerf</PackageId>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="1.0.3-alpha-experimental" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
@@ -34,6 +38,6 @@
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
   </ItemGroup>
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

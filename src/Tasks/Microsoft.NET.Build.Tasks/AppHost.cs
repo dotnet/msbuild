@@ -17,13 +17,15 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// Create an AppHost with embedded configuration of app binary location
         /// </summary>
-        /// <param name="appHostSourceFilePath">The path of AppHost template, which has the place holder</param>
+        /// <param name="appHostSourceFilePath">The path of Apphost template, which has the place holder</param>
         /// <param name="appHostDestinationFilePath">The destination path for desired location to place, including the file name</param>
-        /// <param name="appBinaryFilePath">Full path to app binary or relative path to appHostDestinationFilePath</param>
+        /// <param name="appBinaryFilePath">Full path to app binary or relative path to the result apphost file</param>
+        /// <param name="overwriteExisting">If override the file existed in <paramref name="appHostDestinationFilePath"/></param>
         public static void Create(
             string appHostSourceFilePath,
             string appHostDestinationFilePath,
-            string appBinaryFilePath)
+            string appBinaryFilePath,
+            bool overwriteExisting = false)
         {
             var hostExtension = Path.GetExtension(appHostSourceFilePath);
             var appbaseName = Path.GetFileNameWithoutExtension(appBinaryFilePath);
@@ -51,7 +53,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             // Copy AppHostSourcePath to ModifiedAppHostPath so it inherits the same attributes\permissions.
-            File.Copy(appHostSourceFilePath, appHostDestinationFilePath);
+            File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwriteExisting);
 
             // Re-write ModifiedAppHostPath with the proper contents.
             using (FileStream fs = new FileStream(appHostDestinationFilePath, FileMode.Truncate, FileAccess.ReadWrite, FileShare.Read))
