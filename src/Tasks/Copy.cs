@@ -482,7 +482,7 @@ namespace Microsoft.Build.Tasks
                 sourceIndices.Add(i);
             }
 
-            var successIndices = new ConcurrentBag<int>();
+            var successFlags = new IntPtr[DestinationFiles.Length];  // Lockless flags updated from each thread.
             var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = parallelism };
             var partitionCopyActionBlock = new ActionBlock<List<int>>(
                 async (List<int> partition) =>
@@ -523,7 +523,7 @@ namespace Microsoft.Build.Tasks
                         if (copyComplete)
                         {
                             sourceItem.CopyMetadataTo(destItem);
-                            successIndices.Add(fileIndex);
+                            successFlags[fileIndex] = (IntPtr)1;
                         }
                     }
                 },
@@ -545,11 +545,12 @@ namespace Microsoft.Build.Tasks
 
             // Assemble an in-order list of destination items that succeeded.
             destinationFilesSuccessfullyCopied = new List<ITaskItem>(DestinationFiles.Length);
-            int[] successIndicesSorted = successIndices.ToArray();
-            Array.Sort(successIndicesSorted);
-            foreach (int successIndex in successIndicesSorted)
+            for (int i = 0; i < successFlags.Length; i++)
             {
-                destinationFilesSuccessfullyCopied.Add(DestinationFiles[successIndex]);
+                if (successFlags[i] != (IntPtr)0)
+                {
+                    destinationFilesSuccessfullyCopied.Add(DestinationFiles[i]);
+                }
             }
 
             return success;
