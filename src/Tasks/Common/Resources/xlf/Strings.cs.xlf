@@ -92,7 +92,7 @@
         <target state="translated">Neplatný řetězec verze NuGet: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="NU1008">
+      <trans-unit id="UnsupportedFramework">
         <source>{0} is an unsupported framework.</source>
         <target state="translated">{0} není podporovaná platforma.</target>
         <note />

@@ -92,7 +92,7 @@
         <target state="translated">NuGet 버전 문자열 '{0}'이(가) 잘못되었습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NU1008">
+      <trans-unit id="UnsupportedFramework">
         <source>{0} is an unsupported framework.</source>
         <target state="translated">{0}은(는) 지원되지 않는 프레임워크입니다.</target>
         <note />

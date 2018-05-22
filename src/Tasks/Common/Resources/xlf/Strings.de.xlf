@@ -92,7 +92,7 @@
         <target state="translated">Ungültige NuGet-Versionszeichenfolge: {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NU1008">
+      <trans-unit id="UnsupportedFramework">
         <source>{0} is an unsupported framework.</source>
         <target state="translated">{0} ist ein nicht unterstütztes Framework.</target>
         <note />

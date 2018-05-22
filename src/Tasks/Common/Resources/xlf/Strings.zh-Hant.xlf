@@ -92,7 +92,7 @@
         <target state="translated">無效的 NuGet 版本字串: '{0}'。</target>
         <note />
       </trans-unit>
-      <trans-unit id="NU1008">
+      <trans-unit id="UnsupportedFramework">
         <source>{0} is an unsupported framework.</source>
         <target state="translated">{0} 為不受支援的架構。</target>
         <note />

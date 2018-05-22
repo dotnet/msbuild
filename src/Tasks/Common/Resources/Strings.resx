@@ -171,7 +171,7 @@
   <data name="InvalidNuGetVersionString" xml:space="preserve">
     <value>Invalid NuGet version string: '{0}'.</value>
   </data>
-  <data name="NU1008" xml:space="preserve">
+  <data name="UnsupportedFramework" xml:space="preserve">
     <value>{0} is an unsupported framework.</value>
   </data>
   <data name="IncorrectPackageRoot" xml:space="preserve">

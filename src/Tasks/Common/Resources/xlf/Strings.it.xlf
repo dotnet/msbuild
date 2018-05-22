@@ -92,7 +92,7 @@
         <target state="translated">La stringa di versione '{0}' di NuGet non è valida.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NU1008">
+      <trans-unit id="UnsupportedFramework">
         <source>{0} is an unsupported framework.</source>
         <target state="translated">{0} è un framework non supportato.</target>
         <note />
