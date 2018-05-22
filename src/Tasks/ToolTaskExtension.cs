@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -42,52 +41,26 @@ namespace Microsoft.Build.Tasks
         /// Gets an instance of a TaskLoggingHelperExtension class containing task logging methods.
         /// </summary>
         /// <value>The logging helper object.</value>
-        new public TaskLoggingHelper Log
-        {
-            get
-            {
-                return _logExtension;
-            }
-        }
+        public new TaskLoggingHelper Log => _logExtension;
 
         // the logging helper
-        private TaskLoggingHelperExtension _logExtension;
+        private readonly TaskLoggingHelperExtension _logExtension;
 
         /// <summary>
         /// Whether this ToolTaskExtension has logged any errors
         /// </summary>
-        protected override bool HasLoggedErrors
-        {
-            get
-            {
-                return (Log.HasLoggedErrors || base.HasLoggedErrors);
-            }
-        }
+        protected override bool HasLoggedErrors => (Log.HasLoggedErrors || base.HasLoggedErrors);
 
         /// <summary>
         /// Gets the collection of parameters used by the derived task class.
         /// </summary>
         /// <value>Parameter bag.</value>
-        protected internal Hashtable Bag
-        {
-            get
-            {
-                return _bag;
-            }
-        }
-
-        private Hashtable _bag = new Hashtable();
+        protected internal Hashtable Bag { get; } = new Hashtable();
 
         /// <summary>
         /// When set to true, the response file will use new lines instead of spaces to separate arguments.
         /// </summary>
-        protected virtual bool UseNewLineSeparatorInResponseFile
-        {
-            get
-            {
-                return false;
-            }
-        }
+        protected virtual bool UseNewLineSeparatorInResponseFile => false;
 
         #endregion
 
@@ -97,13 +70,9 @@ namespace Microsoft.Build.Tasks
         /// Get a bool parameter and return a default if its not present
         /// in the hash table.
         /// </summary>
-        /// <param name="parameters"></param>
-        /// <param name="parameterName"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
         protected internal bool GetBoolParameterWithDefault(string parameterName, bool defaultValue)
         {
-            object obj = _bag[parameterName];
+            object obj = Bag[parameterName];
             return (obj == null) ? defaultValue : (bool)obj;
         }
 
@@ -111,13 +80,9 @@ namespace Microsoft.Build.Tasks
         /// Get an int parameter and return a default if its not present
         /// in the hash table.
         /// </summary>
-        /// <param name="parameters"></param>
-        /// <param name="parameterName"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
         protected internal int GetIntParameterWithDefault(string parameterName, int defaultValue)
         {
-            object obj = _bag[parameterName];
+            object obj = Bag[parameterName];
             return (obj == null) ? defaultValue : (int)obj;
         }
 
@@ -128,9 +93,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="responseFilePath">full path to the temporarily created response file</param>
         /// <returns></returns>
-        override protected string GenerateResponseFileCommands()
+        protected override string GenerateResponseFileCommands()
         {
-            CommandLineBuilderExtension commandLineBuilder = new CommandLineBuilderExtension(quoteHyphensOnCommandLine: false, useNewLineSeparator: UseNewLineSeparatorInResponseFile);
+            var commandLineBuilder = new CommandLineBuilderExtension(quoteHyphensOnCommandLine: false, useNewLineSeparator: UseNewLineSeparatorInResponseFile);
             AddResponseFileCommands(commandLineBuilder);
             return commandLineBuilder.ToString();
         }
@@ -141,9 +106,9 @@ namespace Microsoft.Build.Tasks
         /// Called after ValidateParameters and SkipTaskExecution
         /// </summary>
         /// <returns></returns>
-        override protected string GenerateCommandLineCommands()
+        protected override string GenerateCommandLineCommands()
         {
-            CommandLineBuilderExtension commandLineBuilder = new CommandLineBuilderExtension();
+            var commandLineBuilder = new CommandLineBuilderExtension();
             AddCommandLineCommands(commandLineBuilder);
             return commandLineBuilder.ToString();
         }
@@ -151,7 +116,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Fills the provided CommandLineBuilderExtension with those switches and other information that can go into a response file.
         /// </summary>
-        /// <param name="commandLine"></param>
         protected internal virtual void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
         }
@@ -160,7 +124,6 @@ namespace Microsoft.Build.Tasks
         /// Fills the provided CommandLineBuilderExtension with those switches and other information that can't go into a response file and
         /// must go directly onto the command line.
         /// </summary>
-        /// <param name="commandLine"></param>
         /// <returns>true, if successful</returns>
         protected internal virtual void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {

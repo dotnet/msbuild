@@ -1,15 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -18,52 +12,25 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class UpdateManifest : Task
     {
-        private string _applicationPath;
-        private string _targetFrameworkVersion;
-        private ITaskItem _applicationManifest;
-        private ITaskItem _inputManifest;
-        private ITaskItem _outputManifest;
+        [Required]
+        public string ApplicationPath { get; set; }
+
+        public string TargetFrameworkVersion { get; set; }
 
         [Required]
-        public string ApplicationPath
-        {
-            get { return _applicationPath; }
-            set { _applicationPath = value; }
-        }
-
-        public string TargetFrameworkVersion
-        {
-            get { return _targetFrameworkVersion; }
-            set { _targetFrameworkVersion = value; }
-        }
+        public ITaskItem ApplicationManifest { get; set; }
 
         [Required]
-        public ITaskItem ApplicationManifest
-        {
-            get { return _applicationManifest; }
-            set { _applicationManifest = value; }
-        }
-
-        [Required]
-        public ITaskItem InputManifest
-        {
-            get { return _inputManifest; }
-            set { _inputManifest = value; }
-        }
+        public ITaskItem InputManifest { get; set; }
 
         [Output]
-        public ITaskItem OutputManifest
-        {
-            get { return _outputManifest; }
-            set { _outputManifest = value; }
-        }
+        public ITaskItem OutputManifest { get; set; }
 
         public override bool Execute()
         {
-            Manifest.UpdateEntryPoint(InputManifest.ItemSpec, OutputManifest.ItemSpec, ApplicationPath, ApplicationManifest.ItemSpec, _targetFrameworkVersion);
+            Manifest.UpdateEntryPoint(InputManifest.ItemSpec, OutputManifest.ItemSpec, ApplicationPath, ApplicationManifest.ItemSpec, TargetFrameworkVersion);
 
             return true;
         }
     }
 }
-

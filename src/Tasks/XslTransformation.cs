@@ -5,20 +5,16 @@
 // <summary>Transforms Xml with Xsl.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
-using System.Text;
 using System.Xml;
 using System.Xml.Xsl;
 using System.Xml.XPath;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -29,127 +25,39 @@ namespace Microsoft.Build.Tasks
     public class XslTransformation : TaskExtension
     {
         #region Members
-        /// <summary>
-        /// The XML input as file paths.
-        /// </summary>
-        private ITaskItem[] _xmlInputPaths;
-
-        /// <summary>
-        /// The XML input as string.
-        /// </summary>
-        private string _xmlString;
-
-        /// <summary>
-        /// The XSLT input as file path.
-        /// </summary>
-        private ITaskItem _xsltFile;
-
-        /// <summary>
-        /// The XSLT input as string.
-        /// </summary>
-        private string _xsltString;
-
-        /// <summary>
-        /// The XSLT input as compiled dll.
-        /// </summary>
-        private ITaskItem _xsltCompiledDll;
 
         /// <summary>
         /// The output files.
         /// </summary>
         private ITaskItem[] _outputPaths;
 
-        /// <summary>
-        /// The parameters to XSLT Input document.
-        /// </summary>
-        private string _parameters;
-
-        /// <summary>
-        /// Determines whether or not to use trusted settings when loading the Xslt file
-        /// </summary>
-        private bool _useTrustedSettings = false;
         #endregion
 
         #region Properties
         /// <summary>
         /// The XML input as file path.
         /// </summary>
-        public ITaskItem[] XmlInputPaths
-        {
-            get
-            {
-                return _xmlInputPaths;
-            }
-
-            set
-            {
-                _xmlInputPaths = value;
-            }
-        }
+        public ITaskItem[] XmlInputPaths { get; set; }
 
         /// <summary>
         /// The XML input as string.
         /// </summary>
-        public string XmlContent
-        {
-            get
-            {
-                return _xmlString;
-            }
-
-            set
-            {
-                _xmlString = value;
-            }
-        }
+        public string XmlContent { get; set; }
 
         /// <summary>
         /// The XSLT input as file path.
         /// </summary>
-        public ITaskItem XslInputPath
-        {
-            get
-            {
-                return _xsltFile;
-            }
-
-            set
-            {
-                _xsltFile = value;
-            }
-        }
+        public ITaskItem XslInputPath { get; set; }
 
         /// <summary>
         /// The XSLT input as string.
         /// </summary>
-        public string XslContent
-        {
-            get
-            {
-                return _xsltString;
-            }
-
-            set
-            {
-                _xsltString = value;
-            }
-        }
+        public string XslContent { get; set; }
 
         /// <summary>
         /// The XSLT input as compiled dll.
         /// </summary>
-        public ITaskItem XslCompiledDllPath
-        {
-            get
-            {
-                return _xsltCompiledDll;
-            }
-
-            set
-            {
-                _xsltCompiledDll = value;
-            }
-        }
+        public ITaskItem XslCompiledDllPath { get; set; }
 
         /// <summary>
         /// The output file.
@@ -163,43 +71,19 @@ namespace Microsoft.Build.Tasks
                 return _outputPaths;
             }
 
-            set
-            {
-                _outputPaths = value;
-            }
+            set => _outputPaths = value;
         }
 
         /// <summary>
         /// The parameters to XSLT Input document.
         /// </summary>
-        public string Parameters
-        {
-            get
-            {
-                return _parameters;
-            }
-
-            set
-            {
-                _parameters = value;
-            }
-        }
+        public string Parameters { get; set; }
 
         /// <summary>
         /// Determines whether or not to use trusted settings. Default is false.
         /// </summary>
-        public bool UseTrustedSettings
-        {
-            get
-            {
-                return _useTrustedSettings;
-            }
+        public bool UseTrustedSettings { get; set; }
 
-            set
-            {
-                _useTrustedSettings = value;
-            }
-        }
         #endregion
 
         /// <summary>
@@ -215,8 +99,8 @@ namespace Microsoft.Build.Tasks
             // Load XmlInput, XsltInput parameters
             try
             {
-                xmlinput = new XmlInput(_xmlInputPaths, _xmlString);
-                xsltinput = new XsltInput(_xsltFile, _xsltString, _xsltCompiledDll, Log);
+                xmlinput = new XmlInput(XmlInputPaths, XmlContent);
+                xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log);
             }
             catch (Exception e)
             {
@@ -230,14 +114,14 @@ namespace Microsoft.Build.Tasks
             }
 
             // Check if OutputPath has same number of parameters as xmlInputPaths.
-            if (_xmlInputPaths != null && _xmlInputPaths.Length != _outputPaths.Length)
+            if (XmlInputPaths != null && XmlInputPaths.Length != _outputPaths.Length)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, _xmlInputPaths.Length, "XmlContent", "XmlInputPaths");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, XmlInputPaths.Length, "XmlContent", "XmlInputPaths");
                 return false;
             }
 
             // Check if OutputPath has 1 parameter if xmlString is specified.
-            if (_xmlString != null && _outputPaths.Length != 1)
+            if (XmlContent != null && _outputPaths.Length != 1)
             {
                 Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, 1, "XmlContent", "OutputPaths");
                 return false;
@@ -248,7 +132,7 @@ namespace Microsoft.Build.Tasks
             // Arguments parameters
             try
             {
-                arguments = ProcessXsltArguments(_parameters);
+                arguments = ProcessXsltArguments(Parameters);
             }
             catch (Exception e)
             {
@@ -309,9 +193,9 @@ namespace Microsoft.Build.Tasks
             // Copy Metadata
             if (xmlinput.XmlMode == XmlInput.XmlModes.XmlFile)
             {
-                for (int i = 0; i < _xmlInputPaths.Length; i++)
+                for (int i = 0; i < XmlInputPaths.Length; i++)
                 {
-                    _xmlInputPaths[i].CopyMetadataTo(_outputPaths[i]);
+                    XmlInputPaths[i].CopyMetadataTo(_outputPaths[i]);
                 }
             }
 
@@ -334,8 +218,7 @@ namespace Microsoft.Build.Tasks
             XmlDocument doc = new XmlDocument();
             try
             {
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Ignore;
+                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 XmlReader reader = XmlReader.Create(new StringReader("<XsltParameters>" + xsltParametersXml + "</XsltParameters>"), settings);
                 doc.Load(reader);
             }
@@ -379,14 +262,9 @@ namespace Microsoft.Build.Tasks
         internal class XmlInput
         {
             /// <summary>
-            /// What XML input type are we at.
-            /// </summary>
-            private XmlModes _xmlMode;
-
-            /// <summary>
             /// This either contains the raw Xml or the path to Xml file.
             /// </summary>
-            private string[] _data;
+            private readonly string[] _data;
 
             /// <summary>
             /// Constructor.
@@ -407,7 +285,7 @@ namespace Microsoft.Build.Tasks
 
                 if (xmlFile != null)
                 {
-                    _xmlMode = XmlModes.XmlFile;
+                    XmlMode = XmlModes.XmlFile;
                     _data = new string[xmlFile.Length];
                     for (int i = 0; i < xmlFile.Length; i++)
                     {
@@ -416,8 +294,8 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    _xmlMode = XmlModes.Xml;
-                    _data = new string[] { xml };
+                    XmlMode = XmlModes.Xml;
+                    _data = new[] { xml };
                 }
             }
 
@@ -440,24 +318,12 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Returns the count of Xml Inputs
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return _data.Length;
-                }
-            }
+            public int Count => _data.Length;
 
             /// <summary>
             /// Returns the current mode of the XmlInput
             /// </summary>
-            public XmlModes XmlMode
-            {
-                get
-                {
-                    return _xmlMode;
-                }
-            }
+            public XmlModes XmlMode { get; }
 
             /// <summary>
             /// Creates correct reader based on the input type.
@@ -465,7 +331,7 @@ namespace Microsoft.Build.Tasks
             /// <returns>The XmlReader object</returns>
             public XmlReader CreateReader(int itemPos)
             {
-                if (_xmlMode == XmlModes.XmlFile)
+                if (XmlMode == XmlModes.XmlFile)
                 {
                     return XmlReader.Create(_data[itemPos]);
                 }
@@ -484,19 +350,19 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// What XSLT input type are we at.
             /// </summary>
-            private XslModes _xslMode;
+            private readonly XslModes _xslMode;
 
             /// <summary>
             /// Contains the raw XSLT 
             /// or the path to XSLT file
             /// or the path to compiled XSLT dll.
             /// </summary>
-            private string _data;
+            private readonly string _data;
 
             /// <summary>
             /// Tool for logging build messages, warnings, and errors
             /// </summary>
-            private TaskLoggingHelper _log;
+            private readonly TaskLoggingHelper _log;
 
             /// <summary>
             /// Constructer.
@@ -505,6 +371,7 @@ namespace Microsoft.Build.Tasks
             /// <param name="xsltFile">The path to XSLT file or null.</param>
             /// <param name="xslt">The raw to XSLT or null.</param>
             /// <param name="xsltCompiledDll">The path to compiled XSLT file or null.</param>
+            /// <param name="logTool">Log helper.</param>
             public XsltInput(ITaskItem xsltFile, string xslt, ITaskItem xsltCompiledDll, TaskLoggingHelper logTool)
             {
                 _log = logTool;
@@ -621,8 +488,7 @@ namespace Microsoft.Build.Tasks
             /// <returns>Found type.</returns>
             private static Type FindType(string assemblyPath, string typeName)
             {
-                AssemblyName assemblyName = new AssemblyName();
-                assemblyName.CodeBase = assemblyPath;
+                AssemblyName assemblyName = new AssemblyName { CodeBase = assemblyPath };
                 Assembly loadedAssembly = Assembly.Load(assemblyName);
                 if (typeName != null)
                 {
