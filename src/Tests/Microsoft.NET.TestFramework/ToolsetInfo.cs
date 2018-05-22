@@ -5,9 +5,11 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using System.Xml.Linq;
 using System.Reflection;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -19,27 +21,25 @@ namespace Microsoft.NET.TestFramework
 
         public string SdksPath { get; set; }
 
-        public string BuildExtensionsMSBuildPath
+        public string GetMicrosoftNETBuildExtensionsPath(ITestOutputHelper log)
         {
-            get
+            if (!string.IsNullOrEmpty(SdksPath))
             {
-                if (!string.IsNullOrEmpty(SdksPath))
+                var buildExtensionsSdkPath = Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions");
+                return Path.Combine(buildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
+            }
+            else
+            {
+                var msbuildBinPath = Path.GetDirectoryName(FullFrameworkMSBuildPath);
+                if (ShouldUseFullFrameworkMSBuild)
                 {
-                    var buildExtensionsSdkPath = Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions");
-                    return Path.Combine(buildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
+                    var msbuildRoot = Directory.GetParent(msbuildBinPath).Parent.FullName;
+                    return Path.Combine(msbuildRoot, @"Microsoft\Microsoft.NET.Build.Extensions");
                 }
                 else
                 {
-                    var msbuildBinPath = Path.GetDirectoryName(FullFrameworkMSBuildPath);
-                    if (ShouldUseFullFrameworkMSBuild)
-                    {
-                        var msbuildRoot = Directory.GetParent(msbuildBinPath).Parent.FullName;
-                        return Path.Combine(msbuildRoot, @"Microsoft\Microsoft.NET.Build.Extensions");
-                    }
-                    else
-                    {
-                        return Path.Combine(msbuildBinPath, @"Microsoft\Microsoft.NET.Build.Extensions");
-                    }
+                    var dotnetSdkDir = GetDotnetSdkDir(log);
+                    return Path.Combine(dotnetSdkDir, @"Microsoft\Microsoft.NET.Build.Extensions");
                 }
             }
         }
@@ -48,6 +48,21 @@ namespace Microsoft.NET.TestFramework
 
         public string FullFrameworkMSBuildPath { get; set; }
 
+        public string GetDotnetSdkDir(ITestOutputHelper log)
+        {
+            var command = new DotnetCommand(log, "--version");
+            var testDirectory = TestDirectory.Create(Path.Combine(TestContext.Current.TestExecutionDirectory, "sdkversion"));
+
+            command.WorkingDirectory = testDirectory.Path;
+
+            var result = command.Execute();
+
+            result.Should().Pass();
+
+            var sdkVersion = result.StdOut.Trim();
+            string dotnetDir = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);
+            return Path.Combine(dotnetDir, "sdk", sdkVersion);
+        }
         public void AddTestEnvironmentVariables(SdkCommandSpec command)
         {
             string dotnetRoot = Path.GetDirectoryName(DotNetHostPath);
@@ -57,7 +72,10 @@ namespace Microsoft.NET.TestFramework
                 command.Environment["MSBuildSDKsPath"] = SdksPath;
                 command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR"] = SdksPath;
 
-                command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets");
+                //  OK to pass in null as the logger here because SdksPath is set so it won't go down the code path
+                //  that uses the logger
+                var microsoftNETBuildExtensionsPath = GetMicrosoftNETBuildExtensionsPath(null);
+                command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(microsoftNETBuildExtensionsPath, "Microsoft.NET.Build.Extensions.targets");
 
                 if (UsingFullMSBuildWithoutExtensionsTargets())
                 {
