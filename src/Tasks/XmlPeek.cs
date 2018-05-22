@@ -227,20 +227,22 @@ namespace Microsoft.Build.Tasks
             }
 
             XmlNodeList xnl = doc.SelectNodes("/Namespaces/*[local-name() = 'Namespace']");
-            for (int i = 0; i < xnl.Count; i++)
+            for (int i = 0; i < xnl?.Count; i++)
             {
                 XmlNode xn = xnl[i];
 
-                XmlAttribute prefix = xn.Attributes["Prefix"];
+                const string prefixAttr = "Prefix";
+                XmlAttribute prefix = xn.Attributes?[prefixAttr];
                 if (prefix == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", "Prefix"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", prefixAttr));
                 }
 
-                XmlAttribute uri = xn.Attributes["Uri"];
+                const string uriAttr = "Uri";
+                XmlAttribute uri = xn.Attributes[uriAttr];
                 if (uri == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", "Uri"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", uriAttr));
                 }
 
                 namespaceManager.AddNamespace(prefix.Value, uri.Value);
