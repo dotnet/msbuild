@@ -37,11 +37,6 @@
         <target state="translated">'{0}' için proje bilgisi bulunamıyor. Bu durum, eksik bir proje başvurusu olduğunu gösteriyor olabilir.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
-        <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="translated">'{0}' içerik dosyası beklenen üst paket bilgilerini içermiyor.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">'{1}' öğesi '{2}' üzerinde '{0}' meta verileri eksik.</target>
@@ -82,19 +77,9 @@
         <target state="translated">'{0}' ön işlemci belirtecine birden fazla değer verildi. Değer olarak '{1}' seçiliyor.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
-        <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="translated">'{0}' uydu bütünleştirilmiş kodu yayılırken hatalar oluştu.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
         <target state="translated">'{0}' için çözümlenmiş yol bulunamıyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
-        <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="translated">Sürüm numarası olmayan, beklenmeyen bağımlılık: '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -107,74 +92,9 @@
         <target state="translated">Geçersiz NuGet sürüm dizesi: '{0}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DOTNET1011">
-        <source>Framework not installed: {0} in {1}</source>
-        <target state="translated">Çerçeve yüklenmedi: {1} içinde {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1012">
-        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="translated">Başvuru bütünleştirilmiş kodları dizini belirtilmedi. DOTNET_REFERENCE_ASSEMBLIES_PATH ortam değişkenini kullanarak konumu ayarlayabilirsiniz.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1013">
-        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="translated">Aşağıdaki bağımlılıklar 'platform' türüyle işaretlendi ancak yalnızca bir bağımlılık bu türe sahip olabilir: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1014">
-        <source>Failed to read lock file</source>
-        <target state="translated">Kilit dosyası okunamadı</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1017">
-        <source>Project file does not exist '{0}'.</source>
-        <target state="translated">Proje dosyası yok: '{0}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1001">
-        <source>The dependency '{0}' could not be resolved.</source>
-        <target state="translated">'{0}' bağımlılığı çözülemedi.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1002">
-        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="translated">'{1}' projesi içindeki '{0}' bağımlılığı '{2}' çerçevesini desteklemiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1006">
-        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">{0}. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' komutunu çalıştırın.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1007">
-        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="translated">Belirtilen bağımlılık '{0}' ancak '{1}' alındı.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
         <target state="translated">{0} çerçevesi desteklenmiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1009">
-        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">Beklenen varlık dosyası yok. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' komutunu çalıştırın.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1010">
-        <source>The dependency type was changed</source>
-        <target state="translated">Bağımlılık türü değiştirildi</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1011">
-        <source>The dependency target '{0}' is unsupported.</source>
-        <target state="translated">Bağımlılık hedefi ('{0}') desteklenmiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1012">
-        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">Bağımlılık çakışması. '{0}' '{1}' bekliyordu ancak '{2}' alındı</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">

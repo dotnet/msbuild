@@ -37,11 +37,6 @@
         <target state="translated">Le informazioni del progetto per '{0}' non sono state trovate. Questo errore può indicare la mancanza di un riferimento al progetto.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
-        <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="translated">Il file di contenuto '{0}' non contiene le informazioni previste sul pacchetto padre.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">Mancano i metadati di '{0}' sull'elemento '{2}' di '{1}'.</target>
@@ -82,19 +77,9 @@
         <target state="translated">Al token di preprocessore '{0}' è stato assegnato più di un valore. Come valore verrà scelto '{1}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
-        <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="translated">Si sono verificati errori durante la creazione dell'assembly satellite '{0}'.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
         <target state="translated">Il percorso risolto per '{0}' non è stato trovato.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
-        <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="translated">La dipendenza '{0}' è imprevista e non ha numero di versione.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -107,74 +92,9 @@
         <target state="translated">La stringa di versione '{0}' di NuGet non è valida.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DOTNET1011">
-        <source>Framework not installed: {0} in {1}</source>
-        <target state="translated">Framework non installato: {0} in {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1012">
-        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="translated">La directory degli assembly di riferimento non è stata specificata. È possibile impostare il percorso con la variabile di ambiente DOTNET_REFERENCE_ASSEMBLIES_PATH.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1013">
-        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="translated">Le dipendenze seguenti sono contrassegnate dal tipo 'platform', tuttavia questo tipo può essere assegnato a una sola dipendenza: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1014">
-        <source>Failed to read lock file</source>
-        <target state="translated">Non è stato possibile leggere il file di blocco</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1017">
-        <source>Project file does not exist '{0}'.</source>
-        <target state="translated">Il file di progetto '{0}' non esiste.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1001">
-        <source>The dependency '{0}' could not be resolved.</source>
-        <target state="translated">Non è stato possibile risolvere la dipendenza '{0}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1002">
-        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="translated">La dipendenza '{0}' nel progetto '{1}' non supporta il framework '{2}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1006">
-        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">{0}. Per generare un nuovo file di risorse, eseguire 'dotnet restore'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1007">
-        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="translated">La dipendenza specificata era '{0}' ma è risultata essere '{1}'.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
         <target state="translated">{0} è un framework non supportato.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1009">
-        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">Il file di risorse previsto non esiste. Per generare un nuovo file di risorse, eseguire 'dotnet restore'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1010">
-        <source>The dependency type was changed</source>
-        <target state="translated">Il tipo di dipendenza è cambiato</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1011">
-        <source>The dependency target '{0}' is unsupported.</source>
-        <target state="translated">La destinazione '{0}' della dipendenza non è supportata.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1012">
-        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">Conflitto di dipendenze. In '{0}' è previsto '{1}', ma è stato ricevuto '{2}'</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">

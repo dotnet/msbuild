@@ -138,9 +138,6 @@
   <data name="CannotFindProjectInfo" xml:space="preserve">
     <value>Cannot find project info for '{0}'. This can indicate a missing project reference.</value>
   </data>
-  <data name="ContentFileDoesNotContainExpectedParentPackageInformation" xml:space="preserve">
-    <value>Content file '{0}' does not contain expected parent package information.</value>
-  </data>
   <data name="MissingItemMetadata" xml:space="preserve">
     <value>Missing '{0}' metadata on '{1}' item '{2}'.</value>
   </data>
@@ -165,14 +162,8 @@
   <data name="DuplicatePreprocessorToken" xml:space="preserve">
     <value>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</value>
   </data>
-  <data name="ErrorsOccurredWhenEmittingSatelliteAssembly" xml:space="preserve">
-    <value>Errors occured when emitting satellite assembly '{0}'.</value>
-  </data>
   <data name="UnableToFindResolvedPath" xml:space="preserve">
     <value>Unable to find resolved path for '{0}'.</value>
-  </data>
-  <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
-    <value>Unexpected dependency '{0}' with no version number.</value>
   </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>Asset preprocessor must be configured before assets are processed.</value>
@@ -180,47 +171,8 @@
   <data name="InvalidNuGetVersionString" xml:space="preserve">
     <value>Invalid NuGet version string: '{0}'.</value>
   </data>
-  <data name="DOTNET1011" xml:space="preserve">
-    <value>Framework not installed: {0} in {1}</value>
-  </data>
-  <data name="DOTNET1012" xml:space="preserve">
-    <value>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</value>
-  </data>
-  <data name="DOTNET1013" xml:space="preserve">
-    <value>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</value>
-  </data>
-  <data name="DOTNET1014" xml:space="preserve">
-    <value>Failed to read lock file</value>
-  </data>
-  <data name="DOTNET1017" xml:space="preserve">
-    <value>Project file does not exist '{0}'.</value>
-  </data>
-  <data name="NU1001" xml:space="preserve">
-    <value>The dependency '{0}' could not be resolved.</value>
-  </data>
-  <data name="NU1002" xml:space="preserve">
-    <value>The dependency '{0}' in project '{1}' does not support framework '{2}'.</value>
-  </data>
-  <data name="NU1006" xml:space="preserve">
-    <value>{0}. Please run 'dotnet restore' to generate a new asset file.</value>
-  </data>
-  <data name="NU1007" xml:space="preserve">
-    <value>Dependency specified was '{0}' but ended up with '{1}'.</value>
-  </data>
   <data name="NU1008" xml:space="preserve">
     <value>{0} is an unsupported framework.</value>
-  </data>
-  <data name="NU1009" xml:space="preserve">
-    <value>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</value>
-  </data>
-  <data name="NU1010" xml:space="preserve">
-    <value>The dependency type was changed</value>
-  </data>
-  <data name="NU1011" xml:space="preserve">
-    <value>The dependency target '{0}' is unsupported.</value>
-  </data>
-  <data name="NU1012" xml:space="preserve">
-    <value>Dependency conflict. '{0}' expected '{1}' but received '{2}'</value>
   </data>
   <data name="IncorrectPackageRoot" xml:space="preserve">
     <value>Package Root {0} was incorrectly given for Resolved library {1}</value>
