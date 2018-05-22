@@ -121,6 +121,41 @@
         <target state="new">MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
+        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.CompilingAssembly">
+        <source>Compiling task source code</source>
+        <target state="new">Compiling task source code</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
+        <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
+        <target state="new">MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</target>
+        <note>{StrBegin="MSB3756: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
+        <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
+        <target state="new">MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeType">
+        <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
+        <target state="new">MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidTaskXml">
+        <source>MSB3761: The specified task XML is invalid.  {0}</source>
+        <target state="new">MSB3761: The specified task XML is invalid.  {0}</target>
+        <note>{StrBegin="MSB3761: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.NoSourceCode">
+        <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
+        <target state="new">MSB3760: You must specify source code within the Code element or a path to a file containing source code.</target>
+        <note>{StrBegin="MSB3760: "}</note>
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="new">MSB3881: Fatal Error: more than {0} command line arguments.</target>
@@ -2373,6 +2408,46 @@
         <target state="new">MSB3394: Type library "{0}" is not registered, cannot unregister.</target>
         <note>{StrBegin="MSB3394: "}</note>
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
+        <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="new">Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
+        <target state="new">MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</target>
+        <note>{StrBegin="MSB3931: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotExtractFile">
+        <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
+        <target state="new">MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</target>
+        <note>{StrBegin="MSB3936: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
+        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</target>
+        <note>{StrBegin="MSB3935: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotOpenFile">
+        <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
+        <target state="new">MSB3933: Failed to open zip file "{0}".  {1}</target>
+        <note>{StrBegin="MSB3933: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="new">MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <note>{StrBegin="MSB3934: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorFileDoesNotExist">
+        <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="new">MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3932: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.FileComment">
+        <source>Unzipping file "{0}" to "{1}".</source>
+        <target state="new">Unzipping file "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="new">MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</target>
@@ -3038,40 +3113,25 @@
         <target state="new">MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</target>
         <note>{StrBegin="MSB4801: "}</note>
       </trans-unit>
-      <trans-unit id="CodeTaskFactory.InvalidCodeType">
-        <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
-        <target state="new">MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</target>
-        <note>{StrBegin="MSB3759: "}</note>
-      </trans-unit>
-      <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
-        <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
-        <target state="new">MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</target>
-        <note>{StrBegin="MSB3759: "}</note>
-      </trans-unit>
-      <trans-unit id="CodeTaskFactory.NoSourceCode">
-        <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
-        <target state="new">MSB3760: You must specify source code within the Code element or a path to a file containing source code.</target>
-        <note>{StrBegin="MSB3760: "}</note>
-      </trans-unit>
-      <trans-unit id="CodeTaskFactory.CompilingAssembly">
-        <source>Compiling task source code</source>
-        <target state="new">Compiling task source code</target>
+      <trans-unit id="ZipDirectory.Comment">
+        <source>Zipping directory "{0}" to "{1}".</source>
+        <target state="new">Zipping directory "{0}" to "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="CodeTaskFactory.InvalidTaskXml">
-        <source>MSB3761: The specified task XML is invalid.  {0}</source>
-        <target state="new">MSB3761: The specified task XML is invalid.  {0}</target>
-        <note>{StrBegin="MSB3761: "}</note>
+      <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="new">MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
-      <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
-        <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="new">MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</target>
-        <note>{StrBegin="MSB3756: "}</note>
+      <trans-unit id="ZipDirectory.ErrorFailed">
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
+        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</target>
+        <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
-      <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
-        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</target>
-        <note>{StrBegin="MSB3752: "}</note>
+      <trans-unit id="ZipDirectory.ErrorFileExists">
+        <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="new">MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>
   </file>

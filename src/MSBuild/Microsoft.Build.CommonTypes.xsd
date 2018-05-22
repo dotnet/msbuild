@@ -5114,6 +5114,21 @@ elementFormDefault="qualified">
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="Unzip" substitutionGroup="msb:Task">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:TaskType">
+                    <xs:attribute name="DestinationFiles" />
+                    <xs:attribute name="DestinationFolder" use="required" />
+                    <xs:attribute name="OverwriteReadOnlyFiles" type="msb:boolean" />
+                    <xs:attribute name="SkipUnchangedFiles" type="msb:boolean" />
+                    <xs:attribute name="SourceFiles" use="required" />
+                    <xs:attribute name="UnzippedFiles" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="UpdateAppxManifestForBundle" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5225,6 +5240,18 @@ elementFormDefault="qualified">
                     <xs:attribute name="RetryDelayMilliseconds" />
                     <xs:attribute name="SkipUnchangedFiles" />
                     <xs:attribute name="SourceUrl" use="required" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="ZipDirectory" substitutionGroup="msb:Task">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:TaskType">
+                    <xs:attribute name="DestinationFile" use="required" />
+                    <xs:attribute name="Overwrite" type="msb:boolean" />
+                    <xs:attribute name="SourceDirectory" type="msb:boolean" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
