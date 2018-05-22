@@ -609,64 +609,29 @@
         <target state="translated">Neplatné řešení {0}. {1}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ArgumentsProjectDescription">
-        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="translated">Soubor projektu, s kterým se má pracovat. Pokud soubor není zadaný, příkaz ho bude hledat v aktuálním adresáři.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsSolutionDescription">
-        <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="translated">Soubor řešení, s kterým se má pracovat. Pokud není zadaný, příkaz ho bude hledat v aktuálním adresáři.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdSlnFile">
-        <source>SLN_FILE</source>
-        <target state="translated">SLN_FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdProjectFile">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
         <source>Invalid project `{0}`. {1}.</source>
         <target state="translated">Neplatný projekt {0}. {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
-        <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="translated">Nastavte úroveň podrobností příkazu. Povolené hodnoty jsou q [tichý], m [minimální], n [normální], d [podrobný] a diag [diagnostický].</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Cílová platforma pro publikování. Cílová platforma musí být v souboru projektu zadaná.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="translated">Publikuje projekt pro daný modul runtime. Používá se při vytváření nezávislého nasazení. Výchozí možnost je publikování aplikace závislé na platformě.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfigurace použitá k sestavení projektu.  Výchozí možnost u většiny projektů je „Debug“.</target>
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="needs-review-translation">Nastavte úroveň podrobností příkazu. Povolené hodnoty jsou q [tichý], m [minimální], n [normální], d [podrobný] a diag [diagnostický].</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">Definuje hodnotu vlastnosti $(VersionSuffix) v projektu.</target>
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="needs-review-translation">Definuje hodnotu vlastnosti $(VersionSuffix) v projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
-        <source>Show help information.</source>
-        <target state="translated">Zobrazí informace nápovědy.</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">Zobrazí informace nápovědy.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
-        <source>Does not do an implicit restore when executing the command.</source>
-        <target state="translated">Při spuštění příkazu neprovede implicitní obnovení.</target>
+        <source>Do not restore the project before building.</source>
+        <target state="needs-review-translation">Při spuštění příkazu neprovede implicitní obnovení.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -891,6 +856,41 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToReadNuGetLockFile">
         <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
         <target state="translated">Nepovedlo se přečíst soubor LockFile NuGet pro balíček nástroje {0}: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="new">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="new">CONFIGURATION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="new">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

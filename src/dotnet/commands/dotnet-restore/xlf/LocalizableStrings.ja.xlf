@@ -28,23 +28,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
-        <source>Specifies a NuGet package source to use during the restore.</source>
-        <target state="translated">復元中に使用する NuGet パッケージ ソースを指定します。</target>
+        <source>The NuGet package source to use for the restore.</source>
+        <target state="needs-review-translation">復元中に使用する NuGet パッケージ ソースを指定します。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>PACKAGES_DIRECTORY</source>
-        <target state="translated">PACKAGES_DIRECTORY</target>
+        <source>PACKAGES_DIR</source>
+        <target state="needs-review-translation">PACKAGES_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
-        <source>Directory to install packages in.</source>
-        <target state="translated">パッケージをインストールするディレクトリ。</target>
+        <source>The directory to restore packages to.</source>
+        <target state="needs-review-translation">パッケージをインストールするディレクトリ。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
-        <source>Disables restoring multiple projects in parallel.</source>
-        <target state="translated">複数のプロジェクトを並行して復元できないようにします。</target>
+        <source>Prevent restoring multiple projects in parallel.</source>
+        <target state="needs-review-translation">複数のプロジェクトを並行して復元できないようにします。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -68,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only restore the root project.</source>
-        <target state="translated">プロジェクト間参照を無視して、ルート プロジェクトのみを復元するには、このフラグを設定します。</target>
+        <source>Do not restore project-to-project references and only restore the specified project.</source>
+        <target state="needs-review-translation">プロジェクト間参照を無視して、ルート プロジェクトのみを復元するには、このフラグを設定します。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -78,13 +78,14 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
-        <source>Target runtime to restore packages for.</source>
-        <target state="translated">パッケージ復元用のターゲット ランタイム。</target>
+        <source>The target runtime to restore packages for.</source>
+        <target state="needs-review-translation">パッケージ復元用のターゲット ランタイム。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
-        <source>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</source>
-        <target state="translated">このフラグを設定すると、最後に行われた復元が成功した場合でも強制的にすべての依存関係を解決します。これは、project.assets.json を削除することと同じです。</target>
+        <source>Force all dependencies to be resolved even if the last restore was successful.
+This is equivalent to deleting project.assets.json.</source>
+        <target state="needs-review-translation">このフラグを設定すると、最後に行われた復元が成功した場合でも強制的にすべての依存関係を解決します。これは、project.assets.json を削除することと同じです。</target>
         <note />
       </trans-unit>
     </body>

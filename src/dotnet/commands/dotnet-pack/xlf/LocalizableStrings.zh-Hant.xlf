@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place built packages.</source>
-        <target state="translated">要放置建置套件的目錄。</target>
+        <source>The output directory to place built packages in.</source>
+        <target state="needs-review-translation">要放置建置套件的目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -33,13 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
-        <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
-        <target state="translated">包含 PDB 和來源檔案。來源檔案會傳入產生之 NuGet 套件中的 src 資料夾</target>
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="needs-review-translation">包含 PDB 和來源檔案。來源檔案會傳入產生之 NuGet 套件中的 src 資料夾</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">設定套件中提供服務的旗標。如需詳細資訊，請參閱 https://aka.ms/nupkgservicing。</target>
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="needs-review-translation">設定套件中提供服務的旗標。如需詳細資訊，請參閱 https://aka.ms/nupkgservicing。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -50,6 +50,11 @@
       <trans-unit id="CmdArgumentDescription">
         <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
         <target state="translated">要封裝的專案，預設為目前目錄中的專案檔。可以是任何專案檔的路徑</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

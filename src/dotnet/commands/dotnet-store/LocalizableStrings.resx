@@ -130,30 +130,36 @@
     <value>OUTPUT_DIR</value>
   </data>
   <data name="OutputOptionDescription" xml:space="preserve">
-    <value>Output directory in which to store the given assemblies.</value>
+    <value>The output directory to store the given assemblies in.</value>
   </data>
   <data name="FrameworkVersionOption" xml:space="preserve">
-    <value>FrameworkVersion</value>
+    <value>FRAMEWORK_VERSION</value>
   </data>
   <data name="FrameworkVersionOptionDescription" xml:space="preserve">
     <value>The Microsoft.NETCore.App package version that will be used to run the assemblies.</value>
   </data>
   <data name="SkipOptimizationOptionDescription" xml:space="preserve">
-    <value>Skips the optimization phase.</value>
+    <value>Skip the optimization phase.</value>
   </data>
   <data name="SkipSymbolsOptionDescription" xml:space="preserve">
-    <value>Skips creating symbol files which can be used for profiling the optimized assemblies.</value>
+    <value>Skip creating symbol files which can be used for profiling the optimized assemblies.</value>
   </data>
   <data name="IntermediateWorkingDirOption" xml:space="preserve">
-    <value>IntermediateWorkingDir</value>
+    <value>WORKING_DIR</value>
   </data>
   <data name="IntermediateWorkingDirOptionDescription" xml:space="preserve">
-    <value>The directory used by the command to execute.</value>
+    <value>The working directory used by the command to execute.</value>
   </data>
   <data name="SpecifyManifests" xml:space="preserve">
     <value>Specify at least one manifest with --manifest.</value>
   </data>
   <data name="IntermediateDirExists" xml:space="preserve">
     <value>Intermediate working directory {0} already exists. Remove {0} or specify another directory with -w.</value>
+  </data>
+  <data name="FrameworkOptionDescription" xml:space="preserve">
+    <value>The target framework to store packages for. The target framework has to be specified in the project file.</value>
+  </data>
+  <data name="RuntimeOptionDescription" xml:space="preserve">
+    <value>The target runtime to store packages for.</value>
   </data>
 </root>

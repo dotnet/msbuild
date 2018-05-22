@@ -121,16 +121,16 @@
     <value>PACKAGE_ID</value>
   </data>
   <data name="PackageIdArgumentDescription" xml:space="preserve">
-    <value>NuGet Package Id of the tool to uninstall.</value>
+    <value>The NuGet Package Id of the tool to uninstall.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
     <value>Please specify one tool Package Id to uninstall.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Uninstalls a tool.</value>
+    <value>Uninstall a tool from the current development environment.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
-    <value>Uninstall user wide.</value>
+    <value>Uninstall the tool from the current user's tools directory.</value>
   </data>
   <data name="UninstallSucceeded" xml:space="preserve">
     <value>Tool '{0}' (version '{1}') was successfully uninstalled.</value>
@@ -147,8 +147,11 @@
   <data name="UninstallToolCommandNeedGlobalOrToolPath" xml:space="preserve">
     <value>Please specify either the global option (--global) or the tool path option (--tool-path).</value>
   </data>
-  <data name="ToolPathDescription" xml:space="preserve">
-    <value>Location where the tool was previously installed.</value>
+  <data name="ToolPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="ToolPathOptionDescription" xml:space="preserve">
+    <value>The directory containing the tool to uninstall.</value>
   </data>
   <data name="UninstallToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
     <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>

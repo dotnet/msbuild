@@ -121,13 +121,13 @@
     <value>Shuts down build servers that are started from dotnet. By default, all servers are shut down.</value>
   </data>
   <data name="MSBuildOptionDescription" xml:space="preserve">
-    <value>Shuts down the MSBuild build server.</value>
+    <value>Shut down the MSBuild build server.</value>
   </data>
   <data name="VBCSCompilerOptionDescription" xml:space="preserve">
-    <value>Shuts down the VB/C# compiler build server.</value>
+    <value>Shut down the VB/C# compiler build server.</value>
   </data>
   <data name="RazorOptionDescription" xml:space="preserve">
-    <value>Shuts down the Razor build server.</value>
+    <value>Shut down the Razor build server.</value>
   </data>
   <data name="ShuttingDownServer" xml:space="preserve">
     <value>Shutting down {0}...</value>

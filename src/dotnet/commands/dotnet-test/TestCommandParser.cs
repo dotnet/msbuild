@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.Cli
                   "test",
                   LocalizableStrings.AppFullName,
                   Accept.ZeroOrMoreArguments()
-                        .With(name: LocalizableStrings.CmdArgProject,
-                              description: LocalizableStrings.CmdArgDescription),
+                        .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                              description: CommonLocalizableStrings.ProjectArgumentDescription),
                   false,
                   CommonOptions.HelpOption(),
                   Create.Option(
@@ -54,8 +54,8 @@ namespace Microsoft.DotNet.Cli
 
                                           return $"-property:VSTestLogger=\"{loggersString}\"";
                                     })),
-                  CommonOptions.ConfigurationOption(),
-                  CommonOptions.FrameworkOption(),
+                  CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
+                  CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                   Create.Option(
                         "-o|--output",
                         LocalizableStrings.CmdOutputDescription,

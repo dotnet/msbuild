@@ -121,25 +121,34 @@
     <value>PACKAGE_ID</value>
   </data>
   <data name="PackageIdArgumentDescription" xml:space="preserve">
-    <value>NuGet Package Id of the tool to install.</value>
+    <value>The NuGet Package Id of the tool to install.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
     <value>Please specify one tool Package Id to install.</value>
   </data>
-  <data name="VersionOptionDescription" xml:space="preserve">
-    <value>Version of the tool package in NuGet.</value>
+  <data name="VersionOptionName" xml:space="preserve">
+    <value>VERSION</value>
   </data>
-  <data name="AddSourceOptionDescription" xml:space="preserve">
-    <value>Adds an additional NuGet package source to use during installation.</value>
+  <data name="VersionOptionDescription" xml:space="preserve">
+    <value>The version of the tool package to install.</value>
   </data>
   <data name="AddSourceOptionName" xml:space="preserve">
     <value>SOURCE</value>
   </data>
+  <data name="AddSourceOptionDescription" xml:space="preserve">
+    <value>Add an additional NuGet package source to use during installation.</value>
+  </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Installs a tool for use on the command line.</value>
+    <value>Install a tool for use on the command line.</value>
+  </data>
+  <data name="ConfigFileOptionName" xml:space="preserve">
+    <value>FILE</value>
   </data>
   <data name="ConfigFileOptionDescription" xml:space="preserve">
     <value>The NuGet configuration file to use.</value>
+  </data>
+  <data name="FrameworkOptionName" xml:space="preserve">
+    <value>FRAMEWORK</value>
   </data>
   <data name="FrameworkOptionDescription" xml:space="preserve">
     <value>The target framework to install the tool for.</value>
@@ -152,7 +161,7 @@
 Tool '{1}' (version '{2}') was successfully installed.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
-    <value>Install user wide.</value>
+    <value>Install the tool to the current user's tools directory.</value>
   </data>
   <data name="InstallFullCommandNameLocalized" xml:space="preserve">
     <value>.NET Install Command</value>
@@ -192,7 +201,10 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   <data name="InstallToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
     <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>
   </data>
-  <data name="ToolPathDescription" xml:space="preserve">
-    <value>Location where the tool will be installed.</value>
+  <data name="ToolPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="ToolPathOptionDescription" xml:space="preserve">
+    <value>The directory where the tool will be installed. The directory will be created if it does not exist.</value>
   </data>
 </root>

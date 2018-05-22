@@ -15,8 +15,8 @@ namespace Microsoft.DotNet.Cli
             LocalizableStrings.NetListCommand,
             Accept.ZeroOrOneArgument()
                 .With(
-                    name: CommonLocalizableStrings.CmdProjectFile,
-                    description: CommonLocalizableStrings.ArgumentsProjectDescription)
+                    name: CommonLocalizableStrings.ProjectArgumentName,
+                    description: CommonLocalizableStrings.ProjectArgumentDescription)
                 .DefaultToCurrentDirectory(),
             CommonOptions.HelpOption(),
             ListProjectToProjectReferencesCommandParser.ListProjectToProjectReferences());

@@ -121,7 +121,7 @@
     <value>PACKAGE_ID</value>
   </data>
   <data name="PackageIdArgumentDescription" xml:space="preserve">
-    <value>NuGet Package Id of the tool to update.</value>
+    <value>The NuGet Package Id of the tool to update.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
     <value>Please specify one tool Package Id to update.</value>
@@ -130,16 +130,22 @@
     <value>Version of the tool package in NuGet.</value>
   </data>
   <data name="AddSourceOptionDescription" xml:space="preserve">
-    <value>Adds an additional NuGet package source to use during update.</value>
+    <value>Add an additional NuGet package source to use during the update.</value>
   </data>
   <data name="AddSourceOptionName" xml:space="preserve">
-    <value>ADD_SOURCE</value>
+    <value>SOURCE</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Updates a tool to the latest stable version for use.</value>
+    <value>Update a tool to the latest stable version.</value>
+  </data>
+  <data name="ConfigFileOptionName" xml:space="preserve">
+    <value>FILE</value>
   </data>
   <data name="ConfigFileOptionDescription" xml:space="preserve">
     <value>The NuGet configuration file to use.</value>
+  </data>
+  <data name="FrameworkOptionName" xml:space="preserve">
+    <value>FRAMEWORK</value>
   </data>
   <data name="FrameworkOptionDescription" xml:space="preserve">
     <value>The target framework to update the tool for.</value>
@@ -151,7 +157,7 @@
     <value>Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
-    <value>Update user wide.</value>
+    <value>Update the tool in the current user's tools directory.</value>
   </data>
   <data name="UpdateFullCommandNameLocalized" xml:space="preserve">
     <value>.NET update Command</value>
@@ -162,8 +168,11 @@
   <data name="UpdateToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
     <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>
   </data>
-  <data name="ToolPathDescription" xml:space="preserve">
-    <value>Location where the tool will be installed.</value>
+  <data name="ToolPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="ToolPathOptionDescription" xml:space="preserve">
+    <value>The directory containing the tool to update.</value>
   </data>
   <data name="ToolHasMultipleVersionsInstalled" xml:space="preserve">
     <value>Tool '{0}' has multiple versions installed and cannot be updated.</value>

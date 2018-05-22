@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">要為其發行的目標 Framework。其必須在專案檔中指定。</target>
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="needs-review-translation">要為其發行的目標 Framework。其必須在專案檔中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -23,13 +23,13 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to place the published artifacts.</source>
-        <target state="translated">要放置發行之成品的輸出目錄。</target>
+        <source>The output directory to place the published artifacts in.</source>
+        <target state="needs-review-translation">要放置發行之成品的輸出目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
-        <source>manifest.xml</source>
-        <target state="translated">manifest.xml</target>
+        <source>MANIFEST</source>
+        <target state="needs-review-translation">manifest.xml</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -38,13 +38,26 @@
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="translated">隨著應用程式一併發行 .NET Core 執行階段，因此不需要在目標電腦上安裝此執行階段。若指定了執行階段識別碼，則預設為 'true'。</target>
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">隨著應用程式一併發行 .NET Core 執行階段，因此不需要在目標電腦上安裝此執行階段。若指定了執行階段識別碼，則預設為 'true'。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">請勿在執行之前建置專案。提示：-no-restore。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish for. This is used when creating self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
+The default is to publish a framework-dependent application.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>
