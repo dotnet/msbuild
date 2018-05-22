@@ -49,9 +49,15 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ITaskItem> directReferencePaths = referencePaths
                 .Where(r => r.HasMetadataValue("CopyLocal", "true") &&
                             r.HasMetadataValue("ReferenceSourceTarget", "ResolveAssemblyReference") &&
-                            string.IsNullOrEmpty(r.GetMetadata("NuGetSourceType")));
+                            !IsNuGetReference(r));
 
             return CreateFilteredReferenceInfos(directReferencePaths, referenceSatellitePaths);
+        }
+
+        private static bool IsNuGetReference(ITaskItem reference)
+        {
+            return !string.IsNullOrEmpty(reference.GetMetadata("NuGetSourceType")) &&
+                   reference.GetMetadata("NuGetIsFrameworkReference") != "true";
         }
 
         public static IEnumerable<ReferenceInfo> CreateDependencyReferenceInfos(
@@ -60,7 +66,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             IEnumerable<ITaskItem> indirectReferencePaths = referenceDependencyPaths
                 .Where(r => r.HasMetadataValue("CopyLocal", "true") &&
-                            string.IsNullOrEmpty(r.GetMetadata("NuGetSourceType")));
+                            !IsNuGetReference(r));
 
             return CreateFilteredReferenceInfos(indirectReferencePaths, referenceSatellitePaths);
         }
