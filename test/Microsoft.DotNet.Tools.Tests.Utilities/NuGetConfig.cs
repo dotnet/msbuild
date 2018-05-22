@@ -23,5 +23,23 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             File.WriteAllText(path, contents);
         }
+        
+        public static void Write(string directory, string configname, string localFeedPath)
+        {
+            const string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+<packageSources>
+<!--To inherit the global NuGet package sources remove the <clear/> line below -->
+<clear />
+<add key=""Test Source"" value=""{0}"" />
+<add key=""api.nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+<add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
+</packageSources>
+</configuration>";
+
+            var path = Path.Combine(directory, configname);
+
+            File.WriteAllText(path, string.Format(template, localFeedPath));
+        }
     }
 }

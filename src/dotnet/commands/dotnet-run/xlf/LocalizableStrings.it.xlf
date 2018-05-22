@@ -33,13 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
-        <source>Skip building the project prior to running. By default, the project will be built.</source>
-        <target state="translated">Consente di ignorare la compilazione del progetto prima dell'esecuzione. Per impostazione predefinita, il progetto verrà compilato.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandOptionNoBuild">
-        <source>Do not build the project before running.</source>
-        <target state="translated">Non compilare il progetto prima dell'esecuzione.</target>
+        <source>Do not build the project before running. Implies --no-restore.</source>
+        <target state="translated">Non compila il progetto prima dell'esecuzione. Implica --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
@@ -103,8 +98,8 @@ Il valore corrente di {1} è '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>Launch profile is not a JSON object.</source>
-        <target state="translated">Il profilo di avvio non è un oggetto JSON.</target>
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">Non è stato possibile trovare alcun profilo con il nome specificato oppure il profilo non è un oggetto JSON valido.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

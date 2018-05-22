@@ -64,9 +64,7 @@ namespace Microsoft.DotNet.Migration.Tests
             slnProject.FilePath.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
 
             slnProject = nonSolutionFolderProjects.Where((p) => p.Name == "subdir").Single();
-            //ISSUE: https://github.com/dotnet/sdk/issues/522
-            //Once we have that change migrate will always burn in the C# guid
-            //slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CSharpProjectTypeGuid);
+            slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CSharpProjectTypeGuid);
             slnProject.FilePath.Should().Be(Path.Combine("src", "subdir", "subdir.csproj"));
         }
     }

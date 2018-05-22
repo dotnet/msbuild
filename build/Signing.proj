@@ -5,6 +5,9 @@
     <!-- The signing infrastructure runs using MSBuild 14, which doesn't support some of the new syntax we're using.  So set the BuildingSingingProject
          property here to avoid importing files we don't need for signing which would cause errors if imported when using MSBuild 14. -->
     <BuildingSigningProject>true</BuildingSigningProject>
+    <ExternalCertificateId Condition="'$(ExternalCertificateId)' == ''">135020001</ExternalCertificateId>
+    <InternalCertificateId Condition="'$(InternalCertificateId)' == ''">Microsoft402</InternalCertificateId>
+    <NugetCertificateId Condition="'$(NugetCertificateId)' == ''">NuGet</NugetCertificateId>
   </PropertyGroup>
   
   <Import Project="..\dir.props" />
@@ -27,7 +30,7 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="PostCompileSign" DependsOnTargets="GetPostCompileSignFiles;SignFiles" />
+  <Target Name="PostCompileSign" DependsOnTargets="GetPostCompileSignFiles;GetSignNuPkgContentsFiles;GetSignSdkResolverContentsFiles;SignFiles" />
 
   <Target Name="GetPostCompileSignFiles">
     <ItemGroup>
@@ -39,6 +42,7 @@
       <!-- Built binaries -->
       <FilesToSign Include="$(OutputDirectory)/sdk/**/csc.exe;
                             $(OutputDirectory)/sdk/**/csc.dll;
+                            $(OutputDirectory)/sdk/**/VBCSCompiler.dll;
                             $(OutputDirectory)/sdk/**/vbc.exe;
                             $(OutputDirectory)/sdk/**/vbc.dll;
                             $(OutputDirectory)/sdk/**/fsc.exe;
@@ -69,18 +73,22 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="SignNuPkgContents" DependsOnTargets="GetSignNuPkgContentsFiles;SignFiles" />
+  <!-- Keeping this target around so as not to break existing build definitions. -->
+  <Target Name="SignNuPkgContents" />
 
   <Target Name="GetSignNuPkgContentsFiles">
     <ItemGroup>
       <!-- NuPkg contents -->
-      <FilesToSign Include="$(BaseOutputDirectory)/bin/Microsoft.DotNet.Cli.Utils/**/Microsoft.DotNet.Cli.Utils.dll">
+      <FilesToSign Include="$(BaseOutputDirectory)/bin/Microsoft.DotNet.Cli.Utils/**/Microsoft.DotNet.Cli.Utils.dll;
+                            $(BaseOutputDirectory)/bin/Microsoft.DotNet.Cli.Utils/**/Microsoft.DotNet.Cli.Utils.resources.dll;
+                            $(BaseOutputDirectory)/bin/Microsoft.DotNet.MSBuildSdkResolver/**/Microsoft.DotNet.MSBuildSdkResolver.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
   </Target>
 
-  <Target Name="SignSdkResolverContents" DependsOnTargets="GetSignSdkResolverContentsFiles;SignFiles" />
+  <!-- Keeping this target around so as not to break existing build definitions. -->
+  <Target Name="SignSdkResolverContents" />
 
   <Target Name="GetSignSdkResolverContentsFiles">
     <ItemGroup>

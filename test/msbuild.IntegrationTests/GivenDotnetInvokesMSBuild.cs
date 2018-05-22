@@ -34,7 +34,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
 
         [Theory]
         [InlineData("build")]
-        [InlineData("clean")]
         [InlineData("msbuild")]
         [InlineData("pack")]
         [InlineData("publish")]

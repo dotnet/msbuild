@@ -32,9 +32,6 @@ fi
 
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-if [ ! -d "$DOTNET_INSTALL_DIR" ]; then
-    mkdir -p $DOTNET_INSTALL_DIR
-fi
 # Install a stage 0
 echo "Installing .NET Core CLI Stage 0"
 

@@ -19,7 +19,10 @@ namespace Microsoft.DotNet.Tools.Clean
 
         public static CleanCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var msbuildArgs = new List<string>();
+            var msbuildArgs = new List<string>
+            {
+                "-verbosity:normal"
+            };
 
             var parser = Parser.Instance;
 
@@ -31,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Clean
 
             msbuildArgs.AddRange(parsedClean.Arguments);
                 
-            msbuildArgs.Add("/t:Clean");
+            msbuildArgs.Add("-target:Clean");
 
             msbuildArgs.AddRange(parsedClean.OptionValuesToBeForwarded());
 

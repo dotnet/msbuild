@@ -23,19 +23,18 @@ namespace Microsoft.DotNet.Cli.Utils
             new Dictionary<string, string>
             {
                 { "MSBuildExtensionsPath", AppContext.BaseDirectory },
-                { "CscToolExe", GetRunCscPath() },
-                { "VbcToolExe", GetRunVbcPath() },
-                { "MSBuildSDKsPath", GetMSBuildSDKsPath() }
+                { "MSBuildSDKsPath", GetMSBuildSDKsPath() },
+                { "DOTNET_HOST_PATH", GetDotnetPath() },
             };
 
         private readonly IEnumerable<string> _msbuildRequiredParameters =
-            new List<string> { "/m", "/v:m" };
+            new List<string> { "-maxcpucount", "-verbosity:m" };
 
         public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null)
         {
             _forwardingApp = new ForwardingAppImplementation(
                 msbuildPath ?? GetMSBuildExePath(),
-                _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
+                _msbuildRequiredParameters.Concat(argsToForward.Select(QuotePropertyValue)),
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
@@ -49,13 +48,6 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return GetProcessStartInfo().Execute();
         }
-
-        private static string Escape(string arg) =>
-             // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
-             (arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase)) ?
-                arg.Replace(";", "%3B")
-                   .Replace("://", ":%2F%2F") :
-                arg;
 
         private static string GetMSBuildExePath()
         {
@@ -78,20 +70,42 @@ namespace Microsoft.DotNet.Cli.Utils
                 SdksDirectoryName);
         }
 
-        private static string GetRunVbcPath()
+        private static string GetDotnetPath()
         {
-            return GetRunToolPath("Vbc");
-        }        
-
-        private static string GetRunCscPath()
-        {
-            return GetRunToolPath("Csc");
+            return new Muxer().MuxerPath;
         }
 
-        private static string GetRunToolPath(string compilerName)
+        private static bool IsPropertyArgument(string arg)
         {
-            var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : ".sh";
-            return Path.Combine(AppContext.BaseDirectory, "Roslyn", $"Run{compilerName}{scriptExtension}");
+            return
+                arg.StartsWith("/p:", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("/property:", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("-p:", StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith("-property:", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string QuotePropertyValue(string arg)
+        {
+            if (!IsPropertyArgument(arg))
+            {
+                return arg;
+            }
+
+            var parts = arg.Split(new[] { '=' }, 2);
+            if (parts.Length != 2)
+            {
+                return arg;
+            }
+
+            // Escaping `://` is a workaround for https://github.com/Microsoft/msbuild/issues/1622
+            // The issue is that MSBuild is collapsing multiple slashes to a single slash due to a bad regex.
+            var value = parts[1].Replace("://", ":%2f%2f");
+            if (ArgumentEscaper.IsSurroundedWithQuotes(value))
+            {
+                return $"{parts[0]}={value}";
+            }
+
+            return $"{parts[0]}={ArgumentEscaper.EscapeSingleArg(value, forceQuotes: true)}";
         }
     }
 }

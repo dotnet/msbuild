@@ -120,13 +120,18 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 Dictionary<string, string> eventProperties = GetEventProperties(properties);
                 Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
 
-                _client.TrackEvent(eventName, eventProperties, eventMeasurements);
+                _client.TrackEvent(PrependProducerNamespace(eventName), eventProperties, eventMeasurements);
                 _client.Flush();
             }
             catch (Exception e)
             {
                 Debug.Fail(e.ToString());
             }
+        }
+
+        private static string PrependProducerNamespace(string eventName)
+        {
+            return "dotnet/cli/" + eventName;
         }
 
         private Dictionary<string, double> GetEventMeasures(IDictionary<string, double> measurements)

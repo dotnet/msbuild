@@ -28,11 +28,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 try
                 {
                     Type loggerType = typeof(MSBuildLogger);
+                    Type forwardingLoggerType = typeof(MSBuildForwardingLogger);
 
                     return argsToForward
                         .Concat(new[]
                         {
-                            $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
+                            $"-distributedlogger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}*{forwardingLoggerType.FullName},{forwardingLoggerType.GetTypeInfo().Assembly.Location}"
                         });
                 }
                 catch (Exception)

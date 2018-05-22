@@ -140,8 +140,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
-        <source>unable to generate deps.json, it may have been already generated: {0}</source>
-        <target state="translated">无法生成 deps.json，该文件可能已生成: {0}</target>
+        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
+        <target state="translated">无法生成 deps.json，它可能已经生成。可在诊断输出的工具名称之前指定 "-d" 选项（例如，"dotnet -d &lt;toolname&gt;"）: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -232,6 +232,40 @@
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
         <target state="translated">找不到可为“{0}”执行的命令。可能未还原项目或还原失败 - 运行 `dotnet restore`</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="translated">.NET Core SDK（反映任何 global.json）:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="translated">运行时环境:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildArgs">
+        <source>MSBuild arguments: {0}</source>
+        <target state="translated">MSBuild 参数: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">未能将“{0}”用作应用程序主机可执行文件，因为它没有必需的占位符字节序列“{1}”，该序列会标记应用程序名称的写入位置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">给定文件名“{0}”的长度超过 1024 个字节</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">没有找到命令 "dotnet {0}"，请运行以下命令安装
+
+dotnet 工具安装 -- 全局 {1}</target>
         <note />
       </trans-unit>
     </body>

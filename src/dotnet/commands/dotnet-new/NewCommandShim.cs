@@ -24,15 +24,15 @@ namespace Microsoft.DotNet.Tools.New
 {
     internal class NewCommandShim
     {
+        public const string CommandName = "new";
         private const string HostIdentifier = "dotnetcli";
-        private const string CommandName = "new";
 
         public static int Run(string[] args)
         {
             var sessionId =
                 Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
             var telemetry =
-                new Telemetry(new FirstTimeUseNoticeSentinel(new CliFallbackFolderPathCalculator()), sessionId);
+                new Telemetry(new FirstTimeUseNoticeSentinel(new CliFolderPathCalculator()), sessionId);
             var logger = new TelemetryLogger(null);
 
             if (telemetry.Enabled)
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.New
                 {
                     if (telemetry.Enabled)
                     {
-                        telemetry.TrackEvent(name, props, measures);
+                        telemetry.TrackEvent($"template/{name}", props, measures);
                     }
                 });
             }

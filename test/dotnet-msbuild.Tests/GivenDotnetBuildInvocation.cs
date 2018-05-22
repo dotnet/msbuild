@@ -9,34 +9,62 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetBuildInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m";
-        const string ExpectedSuffix = "/clp:Summary";
+        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
 
         [Theory]
-        [InlineData(new string[] { }, "/t:Build")]
-        [InlineData(new string[] { "-o", "foo" }, "/t:Build /p:OutputPath=foo")]
-        [InlineData(new string[] { "-p:Verbosity=diag" }, "/t:Build -p:Verbosity=diag")]
-        [InlineData(new string[] { "--output", "foo" }, "/t:Build /p:OutputPath=foo")]
-        [InlineData(new string[] { "-o", "foo1 foo2" }, "/t:Build \"/p:OutputPath=foo1 foo2\"")]
-        [InlineData(new string[] { "--no-incremental" }, "/t:Rebuild")]
-        [InlineData(new string[] { "-f", "tfm" }, "/t:Build /p:TargetFramework=tfm")]
-        [InlineData(new string[] { "--framework", "tfm" }, "/t:Build /p:TargetFramework=tfm")]
-        [InlineData(new string[] { "-r", "rid" }, "/t:Build /p:RuntimeIdentifier=rid")]
-        [InlineData(new string[] { "--runtime", "rid" }, "/t:Build /p:RuntimeIdentifier=rid")]
-        [InlineData(new string[] { "-c", "config" }, "/t:Build /p:Configuration=config")]
-        [InlineData(new string[] { "--configuration", "config" }, "/t:Build /p:Configuration=config")]
-        [InlineData(new string[] { "--version-suffix", "mysuffix" }, "/t:Build /p:VersionSuffix=mysuffix")]
-        [InlineData(new string[] { "--no-dependencies" }, "/t:Build /p:BuildProjectReferences=false")]
-        [InlineData(new string[] { "-v", "diag" }, "/t:Build /verbosity:diag")]
-        [InlineData(new string[] { "--verbosity", "diag" }, "/t:Build /verbosity:diag")]
-        [InlineData(new string[] { "--no-incremental", "-o", "myoutput", "-r", "myruntime", "-v", "diag" }, "/t:Rebuild /p:OutputPath=myoutput /p:RuntimeIdentifier=myruntime /verbosity:diag")]
+        [InlineData(new string[] { }, "-target:Build")]
+        [InlineData(new string[] { "-o", "foo" }, @"-target:Build -property:OutputPath=\""foo\""")]
+        [InlineData(new string[] { "-property:Verbosity=diag" }, @"-target:Build -property:Verbosity=\""diag\""")]
+        [InlineData(new string[] { "--output", "foo" }, @"-target:Build -property:OutputPath=\""foo\""")]
+        [InlineData(new string[] { "-o", "foo1 foo2" }, @"-target:Build ""-property:OutputPath=\""foo1 foo2\""""")]
+        [InlineData(new string[] { "--no-incremental" }, "-target:Rebuild")]
+        [InlineData(new string[] { "-r", "rid" }, @"-target:Build -property:RuntimeIdentifier=\""rid\""")]
+        [InlineData(new string[] { "--runtime", "rid" }, @"-target:Build -property:RuntimeIdentifier=\""rid\""")]
+        [InlineData(new string[] { "-c", "config" }, @"-target:Build -property:Configuration=\""config\""")]
+        [InlineData(new string[] { "--configuration", "config" }, @"-target:Build -property:Configuration=\""config\""")]
+        [InlineData(new string[] { "--version-suffix", "mysuffix" }, @"-target:Build -property:VersionSuffix=\""mysuffix\""")]
+        [InlineData(new string[] { "--no-dependencies" }, @"-target:Build -property:BuildProjectReferences=\""false\""")]
+        [InlineData(new string[] { "-v", "diag" }, "-target:Build -verbosity:diag")]
+        [InlineData(new string[] { "--verbosity", "diag" }, "-target:Build -verbosity:diag")]
+        [InlineData(new string[] { "--no-incremental", "-o", "myoutput", "-r", "myruntime", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
+                                  @"-target:Rebuild -property:OutputPath=\""myoutput\"" -property:RuntimeIdentifier=\""myruntime\"" -verbosity:diag /ArbitrarySwitchForMSBuild")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
 
             var msbuildPath = "<msbuildpath>";
-            BuildCommand.FromArgs(args, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs} {ExpectedSuffix}");
+            var command = BuildCommand.FromArgs(args, msbuildPath);
+
+            command.SeparateRestoreCommand.Should().BeNull();
+
+            command.GetProcessStartInfo()
+                   .Arguments.Should()
+                   .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary{expectedAdditionalArgs}");
+        }
+
+        [Theory]
+        [InlineData(new string[] { "-f", "tfm" }, "-target:Restore", @"-target:Build -property:TargetFramework=\""tfm\""")]
+        [InlineData(new string[] { "-o", "myoutput", "-f", "tfm", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
+                                  @"-target:Restore -property:OutputPath=\""myoutput\"" -verbosity:diag /ArbitrarySwitchForMSBuild",
+                                  @"-target:Build -property:OutputPath=\""myoutput\"" -property:TargetFramework=\""tfm\"" -verbosity:diag /ArbitrarySwitchForMSBuild")]
+        public void MsbuildInvocationIsCorrectForSeparateRestore(
+            string[] args, 
+            string expectedAdditionalArgsForRestore, 
+            string expectedAdditionalArgs)
+        {
+            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+
+            var msbuildPath = "<msbuildpath>";
+            var command = BuildCommand.FromArgs(args, msbuildPath);
+
+            command.SeparateRestoreCommand.GetProcessStartInfo()
+                   .Arguments.Should()
+                   .Be($"{ExpectedPrefix} {expectedAdditionalArgsForRestore}");
+
+            command.GetProcessStartInfo()
+                   .Arguments.Should()
+                   .Be($"{ExpectedPrefix} -nologo -consoleloggerparameters:Summary{expectedAdditionalArgs}");
+
         }
     }
 }

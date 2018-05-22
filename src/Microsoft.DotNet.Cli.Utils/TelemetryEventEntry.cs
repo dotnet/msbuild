@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -83,5 +84,11 @@ namespace Microsoft.DotNet.Cli.Utils
         public string EventName { get; }
         public IDictionary<string, string> Properties { get; }
         public IDictionary<string, double> Measurements { get; }
+
+        public ApplicationInsightsEntryFormat WithAppliedToPropertiesValue(Func<string, string> func)
+        {
+            var appliedProperties = Properties.ToDictionary(p => p.Key, p => func(p.Value));
+            return new ApplicationInsightsEntryFormat(EventName, appliedProperties, Measurements);
+        }
     }
 }

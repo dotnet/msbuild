@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli
             try
             {
                 var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                var response = httpClient.GetAsync($"https://api-v2v3search-0.nuget.org/query?q={match}&skip=0&take=100&prerelease=true", cancellation.Token)
+                var response = httpClient.GetAsync($"https://api-v2v3search-0.nuget.org/autocomplete?q={match}&skip=0&take=100", cancellation.Token)
                                          .Result;
 
                 result = response.Content.ReadAsStreamAsync().Result;
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Cli
 
             foreach (var id in json["data"])
             {
-                yield return id["id"].Value<string>();
+                yield return id.Value<string>();
             }
         }
     }

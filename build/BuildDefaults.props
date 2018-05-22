@@ -8,11 +8,13 @@
 
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <!-- Currently, 'arm*' SDK's do not include the LZMA for performance upon extraction of the NuGet archive. -->
+    <!-- https://github.com/dotnet/cli/issues/8800 -->
+    <IncludeNuGetPackageArchive Condition=" $(Architecture.StartsWith('arm')) ">false</IncludeNuGetPackageArchive>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
-    <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
     <IncludeAspNetCoreRuntime Condition="'$(IncludeAspNetCoreRuntime)' == ''">true</IncludeAspNetCoreRuntime>
     <IncludeMSBuildSdkResolver Condition="'$(IncludeMSBuildSdkResolver)' == ''">true</IncludeMSBuildSdkResolver>
-    <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' ">true</UsePortableLinuxSharedFramework>
+    <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' AND '$(Rid)' != 'rhel.6-x64' AND '$(Rid)' != 'linux-musl-x64' ">true</UsePortableLinuxSharedFramework>
 
     <HighEntropyVA>true</HighEntropyVA>
 
@@ -24,7 +26,5 @@
     <NoWarn>NU1701</NoWarn>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
-    <DefineConstants Condition="'$(DotNetBuildFromSource)' == 'true'">$(DefineConstants);SOURCE_BUILD</DefineConstants>
   </PropertyGroup>
 </Project>

@@ -52,8 +52,26 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="WriteExpectedTargetFrameworkMoniker" BeforeTargets="BeforeBuild" DependsOnTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ExpectedTargetFrameworkMonikerFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedTargetFrameworkMoniker.txt</ExpectedTargetFrameworkMonikerFileInIntermediateFolder>
+      <VersionFileContent>$(TargetFrameworkMoniker)</VersionFileContent>
+      <ExistingVersionFileContent Condition=" Exists('$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)') ">
+        $([System.IO.File]::ReadAllText($(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)))
+      </ExistingVersionFileContent>
+      <ShouldOverwriteVersionFile>false</ShouldOverwriteVersionFile>
+      <ShouldOverwriteVersionFile Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" Lines="$(VersionFileContent)" Condition=" '$(ShouldOverwriteVersionFile)' == 'true' " Overwrite="true" />
+    <ItemGroup>
+      <Content Include="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />
+      <FileWrites Include="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
@@ -63,7 +81,9 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="Moq" Version="4.7.25" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
 </Project>

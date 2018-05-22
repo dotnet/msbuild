@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="UnsupportedProjectType" xml:space="preserve">
-    <value>Unsupported project type. Please check with your sdk provider.</value>
+    <value>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</value>
   </data>
   <data name="ProjectAlreadyHasAreference" xml:space="preserve">
     <value>Project already has a reference to `{0}`.</value>
@@ -345,9 +345,6 @@
   <data name="SolutionDoesNotExist" xml:space="preserve">
     <value>Specified solution file {0} does not exist, or there is no solution file in the directory.</value>
   </data>
-  <data name="ReferenceDoesNotExist" xml:space="preserve">
-    <value>Reference {0} does not exist.</value>
-  </data>
   <data name="ReferenceIsInvalid" xml:space="preserve">
     <value>Reference `{0}` is invalid.</value>
   </data>
@@ -383,6 +380,9 @@
   </data>
   <data name="ProjectAddedToTheSolution" xml:space="preserve">
     <value>Project `{0}` added to the solution.</value>
+  </data>
+  <data name="ProjectRemovedFromTheSolution" xml:space="preserve">
+    <value>Project `{0}` removed from the solution.</value>
   </data>
   <data name="SolutionAlreadyContainsProject" xml:space="preserve">
     <value>Solution {0} already contains project {1}.</value>
@@ -519,5 +519,131 @@
   </data>
   <data name="NoRestoreDescription" xml:space="preserve">
     <value>Does not do an implicit restore when executing the command.</value>
+  </data>
+  <data name="ToolSettingsInvalidXml" xml:space="preserve">
+    <value>Invalid XML: {0}</value>
+  </data>
+  <data name="ToolSettingsMissingCommandName" xml:space="preserve">
+    <value>Tool defines a command with a missing name setting.</value>
+  </data>
+  <data name="ToolSettingsMissingEntryPoint" xml:space="preserve">
+    <value>Command '{0}' is missing an entry point setting.</value>
+  </data>
+  <data name="ToolSettingsInvalidCommandName" xml:space="preserve">
+    <value>Command '{0}' contains one or more of the following invalid characters: {1}.</value>
+  </data>
+  <data name="ToolSettingsMoreThanOneCommand" xml:space="preserve">
+    <value>More than one command is defined for the tool.</value>
+  </data>
+  <data name="ToolSettingsUnsupportedRunner" xml:space="preserve">
+    <value>Command '{0}' uses unsupported runner '{1}'."</value>
+  </data>
+  <data name="ShellShimConflict" xml:space="preserve">
+    <value>Command '{0}' conflicts with an existing command from another tool.</value>
+  </data>
+  <data name="CannotCreateShimForEmptyExecutablePath" xml:space="preserve">
+    <value>Cannot create shell shim for an empty executable path.</value>
+  </data>
+  <data name="CannotCreateShimForEmptyCommand" xml:space="preserve">
+    <value>Cannot create shell shim for an empty command.</value>
+  </data>
+  <data name="FailedToRetrieveToolConfiguration" xml:space="preserve">
+    <value>Failed to retrieve tool configuration: {0}</value>
+  </data>
+  <data name="EnvironmentPathLinuxManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathLinuxNeedLogout" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</value>
+  </data>
+  <data name="EnvironmentPathOSXManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathOSXNeedReopen" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</value>
+  </data>
+  <data name="EnvironmentPathWindowsManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathWindowsNeedReopen" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</value>
+  </data>
+  <data name="FailedToSetToolsPathEnvironmentVariable" xml:space="preserve">
+    <value>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</value>
+  </data>
+  <data name="FailedToCreateShellShim" xml:space="preserve">
+    <value>Failed to create tool shim for command '{0}': {1}</value>
+  </data>
+  <data name="FailedToRemoveShellShim" xml:space="preserve">
+    <value>Failed to remove tool shim for command '{0}': {1}</value>
+  </data>
+  <data name="FailedSettingShimPermissions" xml:space="preserve">
+    <value>Failed to set user executable permissions for shell shim: {0}</value>
+  </data>
+  <data name="FailedToInstallToolPackage" xml:space="preserve">
+    <value>Failed to install tool package '{0}': {1}</value>
+  </data>
+  <data name="FailedToUninstallToolPackage" xml:space="preserve">
+    <value>Failed to uninstall tool package '{0}': {1}</value>
+  </data>
+  <data name="MissingToolEntryPointFile" xml:space="preserve">
+    <value>Entry point file '{0}' for command '{1}' was not found in the package.</value>
+  </data>
+  <data name="MissingToolSettingsFile" xml:space="preserve">
+    <value>Settings file 'DotnetToolSettings.xml' was not found in the package.</value>
+  </data>
+  <data name="ToolPackageConflictPackageId" xml:space="preserve">
+    <value>Tool '{0}' (version '{1}') is already installed.</value>
+  </data>
+  <data name="FailedToFindStagedToolPackage" xml:space="preserve">
+    <value>Failed to find staged tool package '{0}'.</value>
+  </data>
+  <data name="ColumnMaxWidthMustBeGreaterThanZero" xml:space="preserve">
+    <value>Column maximum width must be greater than zero.</value>
+  </data>
+  <data name="ToolSettingsInvalidLeadingDotCommandName" xml:space="preserve">
+    <value>The command name '{0}' cannot begin with a leading dot (.).</value>
+  </data>
+  <data name="FormatVersionIsHigher" xml:space="preserve">
+    <value>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</value>
+  </data>
+  <data name="FormatVersionIsMalformed" xml:space="preserve">
+    <value>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</value>
+  </data>
+  <data name="FormatVersionIsMissing" xml:space="preserve">
+    <value>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</value>
+  </data>
+  <data name="MoreThanOnePackagedShimAvailable" xml:space="preserve">
+    <value>More than one packaged shim is available: {0}.</value>
+  </data>
+  <data name="FailedToReadNuGetLockFile" xml:space="preserve">
+    <value>Failed to read NuGet LockFile for tool package '{0}': {1}</value>
   </data>
 </root>

@@ -28,8 +28,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -52,8 +52,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -111,23 +111,78 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [Fact]
+        public void GivenAFailingTestItDisplaysFailureDetails()
+        {
+            var testInstance = TestAssets.Get("XunitCore")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            var result = new DotnetTestCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName)
+                .ExecuteWithCapturedOutput();
+
+            result.ExitCode.Should().Be(1);
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+                result.StdOut.Should().Contain("Assert.Equal() Failure");
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            }
+        }
+
+        [Fact]
+        public void ItAcceptsMultipleLoggersAsCliArguments()
+        {
+            // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("10");
+
+            string trxLoggerDirectory = Path.Combine(testProjectDirectory, "RD");
+
+            // Delete trxLoggerDirectory if it exist
+            if (Directory.Exists(trxLoggerDirectory))
+            {
+                Directory.Delete(trxLoggerDirectory, true);
+            }
+
+            // Call test with logger enable
+            CommandResult result = new DotnetTestCommand()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" --logger console;verbosity=normal -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
+
+            // Verify
+            var trxFilePath = Path.Combine(trxLoggerDirectory, "custom.trx");
+            Assert.True(File.Exists(trxFilePath));
+            result.StdOut.Should().Contain(trxFilePath);
+            result.StdOut.Should().Contain("Passed   VSTestPassTest");
+            result.StdOut.Should().Contain("Failed   VSTestFailTest");
+
+            // Cleanup trxLoggerDirectory if it exist
+            if (Directory.Exists(trxLoggerDirectory))
+            {
+                Directory.Delete(trxLoggerDirectory, true);
+            }
+        }
+
+        [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("5");
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp2.0", "VSTestCore.dll");
+                                   configuration, "netcoreapp2.1", "VSTestCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--no-build");
+                                       .ExecuteWithCapturedOutput("--no-build -v:m");
 
             // Verify
             if (!DotnetUnderTest.IsLocalized())
             {
+                result.StdOut.Should().NotContain("Restore");
                 result.StdErr.Should().Contain(expectedError);
             }
 
@@ -227,8 +282,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!DotnetUnderTest.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);

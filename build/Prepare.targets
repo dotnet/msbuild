@@ -25,7 +25,7 @@
     <ItemGroup>
       <PreviousStageFiles Include="$(PreviousStageDirectory)/**/*" />
     </ItemGroup>
-    
+
     <DownloadFile Condition=" '@(_DownloadAndExtractItem)' != '' "
                   Uri="%(_DownloadAndExtractItem.Url)"
                   DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />
@@ -131,3 +131,4 @@
   </Target>
 
 </Project>
+

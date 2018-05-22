@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -22,7 +21,12 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns></returns>
         public static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
         { 
-            return string.Join(" ", EscapeArgArray(args));
+            var escaped = EscapeArgArray(args);
+#if NET35
+            return string.Join(" ", escaped.ToArray());
+#else
+            return string.Join(" ", escaped);
+#endif
         }
 
         /// <summary>
@@ -36,7 +40,12 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns></returns>
         public static string EscapeAndConcatenateArgArrayForCmdProcessStart(IEnumerable<string> args)
         {
-            return string.Join(" ", EscapeArgArrayForCmd(args));
+            var escaped = EscapeArgArrayForCmd(args);
+#if NET35
+            return string.Join(" ", escaped.ToArray());
+#else
+            return string.Join(" ", escaped);
+#endif
         }
 
         /// <summary>
@@ -50,14 +59,10 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns></returns>
         private static IEnumerable<string> EscapeArgArray(IEnumerable<string> args)
         {
-            var escapedArgs = new List<string>();
-
             foreach (var arg in args)
             {
-                escapedArgs.Add(EscapeSingleArg(arg));
+                yield return EscapeSingleArg(arg);
             }
-
-            return escapedArgs;
         }
 
         /// <summary>
@@ -70,23 +75,19 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        private static IEnumerable<string> EscapeArgArrayForCmd(IEnumerable<string> arguments)
+        private static IEnumerable<string> EscapeArgArrayForCmd(IEnumerable<string> args)
         {
-            var escapedArgs = new List<string>();
-
-            foreach (var arg in arguments)
+            foreach (var arg in args)
             {
-                escapedArgs.Add(EscapeArgForCmd(arg));
+                yield return EscapeArgForCmd(arg);
             }
-
-            return escapedArgs;
         }
 
-        public static string EscapeSingleArg(string arg)
+        public static string EscapeSingleArg(string arg, bool forceQuotes = false)
         {
             var sb = new StringBuilder();
 
-            var needsQuotes = ShouldSurroundWithQuotes(arg);
+            var needsQuotes = forceQuotes || ShouldSurroundWithQuotes(arg);
             var isQuoted = needsQuotes || IsSurroundedWithQuotes(arg);
 
             if (needsQuotes) sb.Append("\"");
@@ -176,12 +177,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         internal static bool ShouldSurroundWithQuotes(string argument)
         {
-            // Don't quote already quoted strings
-            if (IsSurroundedWithQuotes(argument))
-            {
-                return false;
-            }
-
             // Only quote if whitespace exists in the string
             return ArgumentContainsWhitespace(argument);
         }
