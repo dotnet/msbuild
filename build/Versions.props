@@ -60,7 +60,7 @@
   <!-- Test Dependencies -->
   <PropertyGroup>
     <MicrosoftCodeAnalysisBuildTasksVersion>3.0.0-beta1-61516-01</MicrosoftCodeAnalysisBuildTasksVersion>
-    <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
+    <MicrosoftExtensionsDependencyModelVersion>2.1.0-rc1</MicrosoftExtensionsDependencyModelVersion>
     <ShouldlyVersion>3.0.0</ShouldlyVersion>
   </PropertyGroup>
 
