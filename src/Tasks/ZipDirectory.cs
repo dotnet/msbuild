@@ -39,35 +39,44 @@ namespace Microsoft.Build.Tasks
 
             FileInfo destinationFile = new FileInfo(DestinationFile.ItemSpec);
 
-            if (destinationFile.Exists)
-            {
-                if(!Overwrite)
-                {
-                    Log.LogErrorFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
+            BuildEngine3.Yield();
 
-                    return false;
+            try
+            {
+                if (destinationFile.Exists)
+                {
+                    if (!Overwrite)
+                    {
+                        Log.LogErrorFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
+
+                        return false;
+                    }
+
+                    try
+                    {
+                        File.Delete(destinationFile.FullName);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogErrorFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
+
+                        return false;
+                    }
                 }
 
                 try
                 {
-                    File.Delete(destinationFile.FullName);
+                    Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
+                    ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
                 }
                 catch (Exception e)
                 {
                     Log.LogErrorFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
-
-                    return false;
                 }
             }
-
-            try
+            finally
             {
-                Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
-                ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
-            }
-            catch (Exception e)
-            {
-                Log.LogErrorFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
+                BuildEngine3.Reacquire();
             }
 
             return !Log.HasLoggedErrors;
