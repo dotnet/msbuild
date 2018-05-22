@@ -6,8 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -35,7 +33,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (s_fileInfoExists == null)
                 {
-                    s_fileInfoExists = new FileExists(FileExists);
+                    s_fileInfoExists = FileExists;
                 }
 
                 return s_fileInfoExists;
@@ -57,7 +55,7 @@ namespace Microsoft.Build.Tasks
             string pathToTool = null;
             if (!String.IsNullOrEmpty(sdkToolsPath))
             {
-                string processorSpecificToolDirectory = String.Empty;
+                string processorSpecificToolDirectory;
                 try
                 {
                     switch (currentArchitecture)
