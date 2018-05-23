@@ -533,7 +533,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Skip all characters until we find the matching quote character
-        /// </summary>re
+        /// </summary>
         private static int ScanForClosingQuote(char quoteChar, string expression, int index)
         {
             unsafe
@@ -760,8 +760,6 @@ namespace Microsoft.Build.Evaluation
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
                                 string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
-
-                                replacementResult = replacementResult;
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
