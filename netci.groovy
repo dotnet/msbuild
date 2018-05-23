@@ -26,11 +26,11 @@ def static getBuildJobName(def configuration, def os) {
             // Calculate the build command
             if (os == 'Windows_NT') {
                 buildCommand = ".\\build\\cibuild.cmd -configuration $config"
-                machineAffinity = 'latest-dev15-5'
+                machineAffinity = 'Windows.10.Amd64.ClientRS4.DevEx.Open'
             } else if (os == 'Windows_NT_FullFramework') {
                 buildCommand = ".\\build\\cibuild.cmd -configuration $config -fullMSBuild"
                 osBase = 'Windows_NT'
-                machineAffinity = 'latest-dev15-5'
+                machineAffinity = 'Windows.10.Amd64.ClientRS4.DevEx.Open'
             } else {
                 // Jenkins non-Ubuntu CI machines don't have docker
                 buildCommand = "./build/cibuild.sh --configuration $config"
@@ -50,7 +50,12 @@ def static getBuildJobName(def configuration, def os) {
                 }
             }
 
-            Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
+            if (os == 'Windows_NT' || os == 'Windows_NT_FullFramework') {
+                Utilities.setMachineAffinity(newJob, machineAffinity)
+            }
+            else {
+                Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
+            }
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
 
             if (isPR) {
