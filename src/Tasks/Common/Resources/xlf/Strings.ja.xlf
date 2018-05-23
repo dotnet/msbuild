@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">DotNetCliToolReference を使用して '{0}' を参照するのは古い方法であるため、このプロジェクトから削除できます。既定で、このツールは .NET Core SDK にバンドルされています。</target>
+        <target state="translated">ツール '{0}' が .NET Core SDK に含まれました。この警告の解決に関する情報は、(https://aka.ms/dotnetclitools-in-box) で入手できます。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -401,7 +401,7 @@
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="translated">パッケージ {0}、バージョン {1} が見つかりませんでした。NuGet の復元により、削除された可能性があります。それ以外の場合、NuGet の復元が最大パス長の制限のために一部分しか完了していない可能性があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">

@@ -364,7 +364,7 @@
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">'{0}' başvurusuna yönelik DotNetCliToolReference kullanımı kalktı ve bu projeden kaldırılabilir. Bu araç varsayılan olarak .NET Core SDK’sında paketlenmiştir.</target>
+        <target state="translated">'{0}' aracı .NET Core SDK’sına eklendi. Bu uyarının çözümlenmesiyle ilgili bilgi edinmek için bkz. (https://aka.ms/dotnetclitools-in-box).</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -401,7 +401,7 @@
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="translated">{0} paketinin {1} sürümü bulunamadı. NuGet geri yükleme işleminden sonra silinmiş olabilir. Silinmediyse, NuGet geri yükleme işlemi muhtemelen en fazla yol uzunluğu kısıtlamaları nedeniyle yalnızca kısmen başarılı olmuş olabilir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
