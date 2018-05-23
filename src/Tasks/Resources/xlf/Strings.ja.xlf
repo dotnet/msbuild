@@ -2358,6 +2358,46 @@
         <target state="translated">MSB3394: タイプ ライブラリ "{0}" は登録されていないため、登録解除できません。</target>
         <note>{StrBegin="MSB3394: "}</note>
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
+        <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="new">Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
+        <target state="new">MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</target>
+        <note>{StrBegin="MSB3931: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotExtractFile">
+        <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
+        <target state="new">MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</target>
+        <note>{StrBegin="MSB3936: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
+        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</target>
+        <note>{StrBegin="MSB3935: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotOpenFile">
+        <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
+        <target state="new">MSB3933: Failed to open zip file "{0}".  {1}</target>
+        <note>{StrBegin="MSB3933: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="new">MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <note>{StrBegin="MSB3934: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorFileDoesNotExist">
+        <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="new">MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3932: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.FileComment">
+        <source>Unzipping file "{0}" to "{1}".</source>
+        <target state="new">Unzipping file "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}" は "{0}" パラメーターに対して無効な値です。有効な値は {2} です。</target>
@@ -3072,6 +3112,26 @@
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
         <target state="translated">MSB3752: &lt;{1}&gt; 要素の "{0}" 属性が設定されていますが空白です。"{0}" 属性を設定する場合は空白にはできません。</target>
         <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.Comment">
+        <source>Zipping directory "{0}" to "{1}".</source>
+        <target state="new">Zipping directory "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="new">MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3941: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFailed">
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
+        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</target>
+        <note>{StrBegin="MSB3943: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFileExists">
+        <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="new">MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>
   </file>
