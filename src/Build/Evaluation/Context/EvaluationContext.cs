@@ -7,6 +7,7 @@ using System;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Evaluation.Context
 {
@@ -32,6 +33,7 @@ namespace Microsoft.Build.Evaluation.Context
         internal SharingPolicy Policy { get; }
 
         internal virtual ISdkResolverService SdkResolverService { get; } = new CachingSdkResolverService();
+        internal IFileSystemAbstraction FileSystem { get; } = ManagedFileSystem.Singleton();
 
         internal EvaluationContext(SharingPolicy policy)
         {

@@ -14,10 +14,10 @@ namespace Microsoft.Build.Shared.FileSystem
         public static IFileSystemAbstraction GetFileSystem()
         {
             // The windows-specific file system is only available on Windows Vista or higher
-            if (IsWinVistaOrHigher())
-            {
-                return WindowsFileSystem.Singleton();
-            }
+            //if (IsWinVistaOrHigher())
+            //{
+            //    return WindowsFileSystem.Singleton();
+            //}
 
             // Otherwise we fall back into the standard managed file system API
             return ManagedFileSystem.Singleton();

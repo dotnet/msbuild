@@ -35,6 +35,7 @@ using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
@@ -199,6 +200,7 @@ namespace Microsoft.Build.Evaluation
         private static readonly EngineFileUtilities.IOCache _fallbackSearchPathsCache = new EngineFileUtilities.IOCache();
 
         private readonly EvaluationProfiler _evaluationProfiler;
+        private IFileSystemAbstraction _fileSystem;
 
         /// <summary>
         /// Private constructor called by the static Evaluate method.
@@ -245,6 +247,7 @@ namespace Microsoft.Build.Evaluation
             _submissionId = submissionId;
             _evaluationContext = evaluationContext;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+            _fileSystem = evaluationContext?.FileSystem ?? FileSystemFactory.GetFileSystem();
         }
 
         /// <summary>
