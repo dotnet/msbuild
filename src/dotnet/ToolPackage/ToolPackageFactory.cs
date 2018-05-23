@@ -34,8 +34,7 @@ namespace Microsoft.DotNet.ToolPackage
 
         private static DirectoryPath GetPackageLocation()
         {
-            var cliFolderPathCalculator = new CliFolderPathCalculator();
-            return new DirectoryPath(cliFolderPathCalculator.ToolsPackagePath);
+            return new DirectoryPath(CliFolderPathCalculator.ToolsPackagePath);
         }
     }
 }

@@ -5,8 +5,11 @@ using System;
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
+
+using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -31,6 +34,20 @@ namespace Microsoft.DotNet.Tests
                 .ExecuteWithCapturedOutput("crash")
                 .Should().Fail()
                      .And.HaveStdErrContaining(string.Format(LocalizableStrings.NoExecutableFoundMatchingCommand, "dotnet-crash"));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void GivenAMissingHomeVariableItPrintsErrorMessage(string value)
+        {
+            new TestCommand("dotnet")
+                .WithEnvironmentVariable(CliFolderPathCalculator.PlatformHomeVariableName, value)
+                .ExecuteWithCapturedOutput("--help")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(CliFolderPathCalculator.DotnetHomeVariableName);
         }
     }
 }

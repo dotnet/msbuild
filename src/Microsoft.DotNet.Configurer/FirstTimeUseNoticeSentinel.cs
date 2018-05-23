@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Configurer
 
         private string SentinelPath => Path.Combine(_dotnetUserProfileFolderPath, SENTINEL);
 
-        public FirstTimeUseNoticeSentinel(CliFolderPathCalculator cliFolderPathCalculator) :
+        public FirstTimeUseNoticeSentinel() :
             this(
                 CliFolderPathCalculator.DotnetUserProfileFolderPath,
                 FileSystemWrapper.Default.File,

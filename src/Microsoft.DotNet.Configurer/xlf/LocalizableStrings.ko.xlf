@@ -71,6 +71,11 @@ ASP.NET Core HTTPS 개발 인증서를 설치했습니다.
 HTTPS 구성에 대한 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=848054를 참조하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

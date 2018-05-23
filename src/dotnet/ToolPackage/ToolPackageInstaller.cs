@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ToolPackage
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _projectRestorer = projectRestorer ?? throw new ArgumentNullException(nameof(projectRestorer));
             _tempProject = tempProject;
-            _offlineFeed = offlineFeed ?? new DirectoryPath(new CliFolderPathCalculator().CliFallbackFolderPath);
+            _offlineFeed = offlineFeed ?? new DirectoryPath(CliFolderPathCalculator.CliFallbackFolderPath);
         }
 
         public IToolPackage InstallPackage(PackageId packageId,

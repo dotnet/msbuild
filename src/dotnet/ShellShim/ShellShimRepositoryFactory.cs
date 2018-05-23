@@ -15,8 +15,7 @@ namespace Microsoft.DotNet.ShellShim
 
         private static DirectoryPath GetShimLocation()
         {
-            var cliFolderPathCalculator = new CliFolderPathCalculator();
-            return new DirectoryPath(cliFolderPathCalculator.ToolsShimPath);
+            return new DirectoryPath(CliFolderPathCalculator.ToolsShimPath);
         }
     }
 }
