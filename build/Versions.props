@@ -2,11 +2,18 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(DotNetRestoreSourcePropsPath)"
+          Condition="'$(DotNetRestoreSourcePropsPath)' != ''"/>
+
   <PropertyGroup>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn/api/v3/index.json</RestoreSources>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/nuget-build/api/v3/index.json</RestoreSources>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json</RestoreSources>
-    <RestoreSources>$(RestoreSources);https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json</RestoreSources>
+    <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
+    <RestoreSources  Condition="'$(DotNetBuildOffline)' != 'true'">
+        $(RestoreSources);
+        https://dotnet.myget.org/F/roslyn/api/v3/index.json;
+        https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
+        https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
+        https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
+    </RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
@@ -22,16 +29,14 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup>
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-
     <UsingToolVSSDK>true</UsingToolVSSDK>
-    <!-- Tell repo toolset not to define the GetBuildVersion target, as it would conflict with NerdBank.GitVersioning -->
-    <DefineGetBuildVersionTargetForVsix>false</DefineGetBuildVersionTargetForVsix>
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.300-preview2-008293</DotNetCliVersion>
-    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62705-01</RoslynToolsRepoToolsetVersion>
+    <DotNetCliVersion>2.1.300-rtm-008866</DotNetCliVersion>
+    <!-- We are pretty much always on a preview SDK. No need to warn about it. -->
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
     <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
@@ -41,16 +46,21 @@
 
   <!-- Production Dependencies -->
   <PropertyGroup>
-  </PropertyGroup>
+    <VisualStudioSetupInteropVersion>1.16.30</VisualStudioSetupInteropVersion>
+
+    <!-- MSBuild custom overall switch -->
+    <NuGetPackageVersion>4.8.0-preview1.5185</NuGetPackageVersion>
+
+    <!-- Prodcon-overrideable, using repo-toolset naming convention -->
+    <NuGetBuildTasksVersion>$(NuGetPackageVersion)</NuGetBuildTasksVersion>
+    <NuGetCommandsVersion>$(NuGetPackageVersion)</NuGetCommandsVersion>
+    <NuGetProtocolVersion>$(NuGetPackageVersion)</NuGetProtocolVersion>
+</PropertyGroup>
 
   <!-- Test Dependencies -->
   <PropertyGroup>
-    <MicrosoftNetCompilersVersion>2.4.0</MicrosoftNetCompilersVersion>
-    <MicrosoftNetCoreCompilersVersion>2.6.0-beta3-62309-01</MicrosoftNetCoreCompilersVersion>
     <MicrosoftCodeAnalysisBuildTasksVersion>3.0.0-beta1-61516-01</MicrosoftCodeAnalysisBuildTasksVersion>
-    <NuGetPackageVersion>4.7.0-preview3.5039</NuGetPackageVersion>
-    <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
-    <!--<NuGetVersion>4.6.0-rtm-4822</NuGetVersion>-->
+    <MicrosoftExtensionsDependencyModelVersion>2.1.0-rc1</MicrosoftExtensionsDependencyModelVersion>
     <ShouldlyVersion>3.0.0</ShouldlyVersion>
   </PropertyGroup>
 

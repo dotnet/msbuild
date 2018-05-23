@@ -39,7 +39,7 @@ To get started on **Visual Studio 2017**:
 2. Clone the source code (see above).
 2. Open a `Developer Command Prompt for VS 2017` prompt.
 3. Build the code using the `build.cmd` script. This also restores packages needed to open the projects in Visual Studio.
-5. Open `src/MSBuild.sln` in Visual Studio 2017.
+5. Open `MSBuild.sln` in Visual Studio 2017.
 
 ### Building MSBuild in Unix (Mac & Linux)
 

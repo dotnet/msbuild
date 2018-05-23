@@ -1,18 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
-using System.Globalization;
-using System.IO;
 using System;
-
-using Microsoft.Build.Shared;
+using System.Diagnostics;
 
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// Compares for left >= right
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class GreaterThanOrEqualExpressionNode : NumericComparisonExpressionNode
     {
         /// <summary>
@@ -61,5 +58,7 @@ namespace Microsoft.Build.Evaluation
             // "larger" regardless of what those dots are (e.g. 6.0.0.0 > 6 is a true statement)
             return false;
         }
+
+        internal override string DebuggerDisplay => $"(>= {LeftChild.DebuggerDisplay} {RightChild.DebuggerDisplay})";
     }
 }

@@ -113,8 +113,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string TypeLibName
             {
-                get { return (string)Bag["TypeLibName"]; }
-                set { Bag["TypeLibName"] = value; }
+                get => (string)Bag[nameof(TypeLibName)];
+                set => Bag[nameof(TypeLibName)] = value;
             }
 
             /// <summary>
@@ -122,8 +122,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string AssemblyNamespace
             {
-                get { return (string)Bag["AssemblyNamespace"]; }
-                set { Bag["AssemblyNamespace"] = value; }
+                get => (string)Bag[nameof(AssemblyNamespace)];
+                set => Bag[nameof(AssemblyNamespace)] = value;
             }
 
             /// <summary>
@@ -131,8 +131,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public Version AssemblyVersion
             {
-                get { return (Version)Bag["AssemblyVersion"]; }
-                set { Bag["AssemblyVersion"] = value; }
+                get => (Version)Bag[nameof(AssemblyVersion)];
+                set => Bag[nameof(AssemblyVersion)] = value;
             }
 
             /// <summary>
@@ -145,8 +145,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string Machine
             {
-                get { return (string)Bag["Machine"]; }
-                set { Bag["Machine"] = value; }
+                get => (string)Bag[nameof(Machine)];
+                set => Bag[nameof(Machine)] = value;
             }
 
             /// <summary>
@@ -154,8 +154,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool NoLogo
             {
-                get { return GetBoolParameterWithDefault("NoLogo", false); }
-                set { Bag["NoLogo"] = value; }
+                get => GetBoolParameterWithDefault(nameof(NoLogo), false);
+                set => Bag[nameof(NoLogo)] = value;
             }
 
             /// <summary>
@@ -163,8 +163,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string OutputAssembly
             {
-                get { return (string)Bag["OutputAssembly"]; }
-                set { Bag["OutputAssembly"] = value; }
+                get => (string)Bag[nameof(OutputAssembly)];
+                set => Bag[nameof(OutputAssembly)] = value;
             }
 
             /// <summary>
@@ -172,8 +172,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool PreventClassMembers
             {
-                get { return GetBoolParameterWithDefault("PreventClassMembers", false); }
-                set { Bag["PreventClassMembers"] = value; }
+                get => GetBoolParameterWithDefault(nameof(PreventClassMembers), false);
+                set => Bag[nameof(PreventClassMembers)] = value;
             }
 
             /// <summary>
@@ -181,8 +181,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool SafeArrayAsSystemArray
             {
-                get { return GetBoolParameterWithDefault("SafeArrayAsSystemArray", false); }
-                set { Bag["SafeArrayAsSystemArray"] = value; }
+                get => GetBoolParameterWithDefault(nameof(SafeArrayAsSystemArray), false);
+                set => Bag[nameof(SafeArrayAsSystemArray)] = value;
             }
 
             /// <summary>
@@ -190,8 +190,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool Silent
             {
-                get { return GetBoolParameterWithDefault("Silent", false); }
-                set { Bag["Silent"] = value; }
+                get => GetBoolParameterWithDefault(nameof(Silent), false);
+                set => Bag[nameof(Silent)] = value;
             }
 
             /// <summary>
@@ -199,8 +199,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public TlbImpTransformFlags Transform
             {
-                get { return GetTlbImpTransformFlagsParameterWithDefault("Transform", TlbImpTransformFlags.None); }
-                set { Bag["Transform"] = value; }
+                get => GetTlbImpTransformFlagsParameterWithDefault(nameof(Transform), TlbImpTransformFlags.None);
+                set => Bag[nameof(Transform)] = value;
             }
 
             /// <summary>
@@ -208,8 +208,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool Verbose
             {
-                get { return GetBoolParameterWithDefault("Verbose", false); }
-                set { Bag["Verbose"] = value; }
+                get => GetBoolParameterWithDefault(nameof(Verbose), false);
+                set => Bag[nameof(Verbose)] = value;
             }
 
             /// <summary>
@@ -217,8 +217,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string[] ReferenceFiles
             {
-                get { return (string[])Bag["ReferenceFiles"]; }
-                set { Bag["ReferenceFiles"] = value; }
+                get => (string[])Bag[nameof(ReferenceFiles)];
+                set => Bag[nameof(ReferenceFiles)] = value;
             }
 
             #endregion // Properties
@@ -228,10 +228,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Returns the name of the tool to execute
             /// </summary>
-            protected override string ToolName
-            {
-                get { return "TlbImp.exe"; }
-            }
+            protected override string ToolName => "TlbImp.exe";
 
             /// <summary>
             /// Fills the provided CommandLineBuilderExtension with all the command line options used when
@@ -330,7 +327,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <param name="flags">The TlbImpTransformFlags being converted</param>
             /// <returns>A string that can be passed to /transform: on the command line</returns>
-            private string ConvertTransformFlagsToCommandLineCommand(TlbImpTransformFlags flags)
+            private static string ConvertTransformFlagsToCommandLineCommand(TlbImpTransformFlags flags)
             {
                 switch (flags)
                 {

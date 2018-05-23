@@ -1348,6 +1348,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
         /// </summary>
         [MemberData(nameof(GetInvalidFilenames))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         [Theory]
         public void ProcessProfileEvaluationInvalidFilename(string filename)
         {

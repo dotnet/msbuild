@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests
                 properties: new List<DictionaryEntry>() { new DictionaryEntry("Key", "Value") },
                 items: new List<DictionaryEntry>() { new DictionaryEntry("Key", new MyTaskItem() { ItemSpec = "TestItemSpec" }) },
                 parentBuildEventContext: new BuildEventContext(7, 8, 9, 10, 11, 12),
-                globalProperties: null, // we do not serialize GlobalProperties
+                globalProperties: new Dictionary<string, string>() { { "GlobalKey", "GlobalValue" } },
                 toolsVersion: "15.0");
             args.BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6);
 

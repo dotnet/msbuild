@@ -375,7 +375,7 @@
       </trans-unit>
       <trans-unit id="CannotSetDefaultToolsVersionAfterLoadingProjects">
         <source>MSB4134: DefaultToolsVersion cannot be set after a project has been loaded into the Engine.</source>
-        <target state="translated">MSB4134: DefaultToolsVersion darf nicht festgelegt werden, nachdem ein Projekt in das Modul geladen wurde.</target>
+        <target state="translated">MSB4134: DefaultToolsVersion darf nicht festgelegt werden, nachdem ein Projekt in die Engine geladen wurde.</target>
         <note>{StrBegin="MSB4134: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4134: DefaultToolsVersion darf nicht festgelegt werden, nachdem ein Projekt in das Modul geladen wurde.</target>
@@ -1197,7 +1197,7 @@
       </trans-unit>
       <trans-unit id="InternalLoggerExceptionOnlyThrownByEngine">
         <source>An InternalLoggerException can only be thrown by the MSBuild engine. The public constructors of this class cannot be used to create an instance of the exception.</source>
-        <target state="translated">Eine InternalLoggerException kann nur durch das MSBuild-Modul ausgelöst werden. Die öffentlichen Konstruktoren dieser Klasse können nicht verwendet werden, um eine Instanz der Ausnahme zu erstellen.</target>
+        <target state="translated">Eine InternalLoggerException kann nur durch die MSBuild-Engine ausgelöst werden. Die öffentlichen Konstruktoren dieser Klasse können nicht verwendet werden, um eine Instanz der Ausnahme zu erstellen.</target>
         <note>UE: This message is shown when a user tries to instantiate a special exception called InternalLoggerException through the OM --
     only the engine is allowed to create and throw this exception.
     LOCALIZATION: "InternalLoggerException" and "MSBuild" should not be localized.</note>
@@ -1419,7 +1419,7 @@
       </trans-unit>
       <trans-unit id="ProjectInvalidUnloaded">
         <source>This project object has been unloaded from the MSBuild engine and is no longer valid.</source>
-        <target state="translated">Dieses Projektobjekt wurde aus dem MSBuild-Modul entladen und ist nicht mehr gültig.</target>
+        <target state="translated">Dieses Projektobjekt wurde aus der MSBuild-Engine entladen und ist nicht mehr gültig.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Dieses Projektobjekt wurde aus dem MSBuild-Modul entladen und ist nicht mehr gültig.</target>
@@ -1963,7 +1963,7 @@
       </trans-unit>
       <trans-unit id="STARequired">
         <source>MSB4056: The MSBuild engine must be called on a single-threaded-apartment. Current threading model is "{0}". Proceeding, but some tasks may not function correctly.</source>
-        <target state="translated">MSB4056: Das MSBuild-Modul muss in einem Singlethread-Apartment aufgerufen werden. Das aktuelle Threadmodell ist {0}. Der Vorgang wird fortgesetzt, aber einige Aufgaben werden möglicherweise nicht ordnungsgemäß ausgeführt.</target>
+        <target state="translated">MSB4056: Die MSBuild-Engine muss in einem Singlethread-Apartment aufgerufen werden. Das aktuelle Threadmodell ist {0}. Der Vorgang wird fortgesetzt, aber einige Aufgaben werden möglicherweise nicht ordnungsgemäß ausgeführt.</target>
         <note>{StrBegin="MSB4056: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4056: Das MSBuild-Modul muss in einem Singlethread-Apartment aufgerufen werden. Das aktuelle Threadmodell ist {0}. Der Vorgang wird fortgesetzt, aber einige Aufgaben werden möglicherweise nicht ordnungsgemäß ausgeführt.</target>

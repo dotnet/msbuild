@@ -6,10 +6,16 @@
        <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
    </PropertyGroup>
 
-   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+   <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.props" />
 
    <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
+
+    <!-- The IBCMerge process tries to treat this project as
+         the real Microsoft.Build.dll, producing thousands
+         of avoidable warnings. The real output of this
+         project isn't a product DLL, so just disable PGO. -->
+    <MicroBuild_EnablePGO>false</MicroBuild_EnablePGO>
 
     <!-- Not sure what the right ID is here -->
     <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
@@ -43,5 +49,5 @@
 
   <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+  <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.targets" />
 </Project>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="RoslynTools.RepoToolset">
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
     <TargetFramework>net46</TargetFramework>

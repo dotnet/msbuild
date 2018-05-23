@@ -82,6 +82,21 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        /// <summary>
+        /// Set a boolean switch only if its value exists.
+        /// </summary>
+        internal void AppendPlusOrMinusSwitch
+            (
+            string switchName,
+            bool? value
+            )
+        {
+            if (value.HasValue)
+            {
+                AppendSwitchUnquotedIfNotNull(switchName, value.Value ? "+" : "-");
+            }
+        }
+
 
         /// <summary>
         /// Set a switch if its value exists by choosing from the input choices
@@ -316,6 +331,21 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Appends a switch if the specified value is <code>true</code>.
+        /// </summary>
+        internal void AppendSwitchIfTrue
+            (
+            string switchName,
+            bool? value
+            )
+        {
+            if (value.HasValue && value.Value)
+            {
+                AppendSwitch(switchName);
             }
         }
     }

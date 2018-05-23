@@ -29,7 +29,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         Unknown,
         /// <summary>
-        /// C#, VB, and VJ# projects
+        /// C#, VB, F#, and VJ# projects
         /// </summary>
         KnownToBeMSBuildFormat,
         /// <summary>
@@ -47,7 +47,11 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Project inside an Enterprise Template project
         /// </summary>
-        EtpSubProject
+        EtpSubProject,
+        /// <summary>
+        /// A shared project represents a collection of shared files that is not buildable on its own.
+        /// </summary>
+        SharedProject
     }
 
     internal struct AspNetCompilerParameters
@@ -158,8 +162,14 @@ namespace Microsoft.Build.Construction
             get { return _relativePath; }
             internal set
             {
+#if NETFRAMEWORK && !MONO
+                // Avoid loading System.Runtime.InteropServices.RuntimeInformation in full-framework
+                // cases. It caused https://github.com/NuGet/Home/issues/6918.
+                _relativePath = value;
+#else
                 _relativePath = FileUtilities.MaybeAdjustFilePath(value,
                                                     baseDirectory:this.ParentSolution.SolutionFileDirectory ?? String.Empty);
+#endif
             }
         }
 

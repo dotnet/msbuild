@@ -4,17 +4,14 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(PlatformTarget)' == 'x64'">
-    <OutputPath>$(OutputPath)$(Platform)\$(TargetFramework.ToLowerInvariant())\</OutputPath>
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(Platform)\$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(PlatformTarget)' != 'x64'">
+  <PropertyGroup>
     <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
+    <DefineConstants Condition="'$(DisableNerdbankVersioning)' != 'true'">$(DefineConstants);THISASSEMBLY</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) Or $(TargetFramework.StartsWith('net3'))">

@@ -101,6 +101,7 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.CreateProperty"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.CreateVisualBasicManifestResourceName" AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Delete"                                AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.DownloadFile"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Error"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.ErrorFromResources"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Exec"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
@@ -161,6 +162,7 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR2" Condition="('$(MSBuildAssemblyVersion)' != '') and '$(DisableOutOfProcTaskHost)' == ''" />
 
     <UsingTask TaskName="Microsoft.Build.Tasks.UpdateManifest"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Unzip"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Warning"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.WriteCodeFragment"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.WriteLinesToFile"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
@@ -168,6 +170,7 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ZipDirectory"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
 
     <!-- Roslyn tasks are now in an assembly owned and shipped by Roslyn -->
     <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(MSBuildAssemblyVersion)' != ''" />

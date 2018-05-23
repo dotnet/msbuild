@@ -595,7 +595,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
-                    if (preprocessWriter != null)
+                    if (preprocessWriter != null && !BuildEnvironmentHelper.Instance.RunningTests)
                     {
                         // Indicate to the engine that it can NOT toss extraneous file content: we want to 
                         // see that in preprocessing/debugging
@@ -1117,7 +1117,10 @@ namespace Microsoft.Build.CommandLine
                     {
                         try
                         {
-                            if (enableRestore)
+                            // Determine if the user specified /Target:Restore which means we should only execute a restore in the fancy way that /restore is executed
+                            bool restoreOnly = request.TargetNames.Count == 1 && String.Equals(request.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
+
+                            if (enableRestore || restoreOnly)
                             {
                                 results = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
 
@@ -1127,7 +1130,10 @@ namespace Microsoft.Build.CommandLine
                                 }
                             }
 
-                            results = ExecuteBuild(buildManager, request);
+                            if (!restoreOnly)
+                            {
+                                results = ExecuteBuild(buildManager, request);
+                            }
                         }
                         finally
                         {
@@ -1234,15 +1240,18 @@ namespace Microsoft.Build.CommandLine
             // The initializer syntax can't be used just in case a user set this property to a value
             restoreGlobalProperties["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D");
 
-            // Create a new request with a Restore target only and specify the ClearProjectRootElementCacheAfterBuild flag to ensure the projects will
-            // be reloaded from disk for subsequent builds
+            // Create a new request with a Restore target only and specify:
+            //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
+            //  - BuildRequestDataFlags.SkipNonexistentTargets to ignore missing targets since Restore does not require that all targets exist
+            //  - BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports to ignore imports that don't exist, are empty, or are invalid because restore might
+            //     make available an import that doesn't exist yet and the <Import /> might be missing a condition.
             BuildRequestData restoreRequest = new BuildRequestData(
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets);
+                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }
@@ -3467,7 +3476,11 @@ namespace Microsoft.Build.CommandLine
             const string frameworkName = ".NET Framework";
 #endif
 
+#if THISASSEMBLY
+            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ThisAssembly.AssemblyInformationalVersion, frameworkName));
+#else
             Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
+#endif
         }
 
         /// <summary>
