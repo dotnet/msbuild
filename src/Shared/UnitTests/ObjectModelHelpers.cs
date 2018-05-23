@@ -1607,11 +1607,25 @@ namespace Microsoft.Build.UnitTests
         /// <param name="timeSpan">A <see cref="TimeSpan"/> representing the amount of time to sleep.</param>
         internal static string GetSleepCommand(TimeSpan timeSpan)
         {
+            return string.Format(
+                GetSleepCommandTemplate(),
+                NativeMethodsShared.IsWindows
+                    ? timeSpan.TotalMilliseconds // powershell can't handle floating point seconds, so give it milliseconds
+                    : timeSpan.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Gets a command template that can be used by an Exec task to sleep for the specified amount of time. The string has to be formatted with the number of seconds to sleep
+        /// </summary>
+        internal static string GetSleepCommandTemplate()
+        {
             return
                 NativeMethodsShared.IsWindows
-                ? $"@powershell -NoLogo -NoProfile -command &quot;Start-Sleep -Milliseconds {(int)timeSpan.TotalMilliseconds}&quot; &gt;nul"
-                : $"sleep {timeSpan.TotalSeconds}";
+                    ? "@powershell -NoLogo -NoProfile -command &quot;Start-Sleep -Milliseconds {0}&quot; &gt;nul"
+                    : "sleep {0}";
         }
+
+
 
         /// <summary>
         /// Break the provided string into an array, on newlines

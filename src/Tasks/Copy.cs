@@ -23,19 +23,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Copy()
         {
-            this.RetryDelayMilliseconds = RetryDelayMillisecondsDefault;
+            RetryDelayMilliseconds = RetryDelayMillisecondsDefault;
         }
 
         #region Properties
 
-        private ITaskItem[] _sourceFiles = null;
-        private ITaskItem _destinationFolder = null;
-        private ITaskItem[] _destinationFiles = null;
-        private bool _skipUnchangedFiles = false;
-        private ITaskItem[] _copiedFiles = null;
-        private bool _canceling = false;
-        private bool _overwriteReadOnlyFiles = false;
-        private HashSet<string> _directoriesKnownToExist = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private bool _canceling;
+        private readonly HashSet<string> _directoriesKnownToExist = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Force the copy to retry even when it hits ERROR_ACCESS_DENIED -- normally we wouldn't retry in this case since 
@@ -45,44 +39,14 @@ namespace Microsoft.Build.Tasks
         private static bool s_alwaysRetryCopy = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY") != null;
 
         /// <summary>
-        /// Default to retrying "on". This is for robustness. We know that there are some files (eg interop assys) that are 
-        /// just prone to colliding in shared output directories -- we will still warn, so that they can improve things, and
-        /// spot the other case where there's an actual build process bug, but we don't want to break the build for the 
-        /// sake of purity.
-        /// </summary>
-        private int _retries = 10;
-
-        /// <summary>
         /// Default milliseconds to wait between necessary retries
         /// </summary>
         private const int RetryDelayMillisecondsDefault = 1000;
 
         [Required]
-        public ITaskItem[] SourceFiles
-        {
-            get
-            {
-                return _sourceFiles;
-            }
+        public ITaskItem[] SourceFiles { get; set; }
 
-            set
-            {
-                _sourceFiles = value;
-            }
-        }
-
-        public ITaskItem DestinationFolder
-        {
-            get
-            {
-                return _destinationFolder;
-            }
-
-            set
-            {
-                _destinationFolder = value;
-            }
-        }
+        public ITaskItem DestinationFolder { get; set; }
 
         /// <summary>
         /// How many times to attempt to copy, if all previous
@@ -90,92 +54,38 @@ namespace Microsoft.Build.Tasks
         /// Warning: using retries may mask a synchronization problem in your
         /// build process.
         /// </summary>
-        public int Retries
-        {
-            get { return _retries; }
-            set { _retries = value; }
-        }
+        public int Retries { get; set; } = 10;
 
         /// <summary>
         /// Delay between any necessary retries.
         /// Defaults to <see cref="RetryDelayMillisecondsDefault">RetryDelayMillisecondsDefault</see>
         /// </summary>
-        public int RetryDelayMilliseconds
-        {
-            get;
-            set;
-        }
+        public int RetryDelayMilliseconds { get; set; }
 
         /// <summary>
         /// Create Hard Links for the copied files rather than copy the files if possible to do so
         /// </summary>
-        public bool UseHardlinksIfPossible
-        {
-            get;
-            set;
-        }
+        public bool UseHardlinksIfPossible { get; set; }
 
         /// <summary>
         /// Create Symbolic Links for the copied files rather than copy the files if possible to do so
         /// </summary>
-        public bool UseSymboliclinksIfPossible
-        {
-            get;
-            set;
-        }
+        public bool UseSymboliclinksIfPossible { get; set; }
 
-        public bool SkipUnchangedFiles
-        {
-            get
-            {
-                return _skipUnchangedFiles;
-            }
-
-            set
-            {
-                _skipUnchangedFiles = value;
-            }
-        }
+        public bool SkipUnchangedFiles { get; set; }
 
         [Output]
-        public ITaskItem[] DestinationFiles
-        {
-            get
-            {
-                return _destinationFiles;
-            }
-
-            set
-            {
-                _destinationFiles = value;
-            }
-        }
+        public ITaskItem[] DestinationFiles { get; set; }
 
         // Subset that were successfully copied
         [Output]
-        public ITaskItem[] CopiedFiles
-        {
-            get
-            {
-                return _copiedFiles;
-            }
-        }
+        public ITaskItem[] CopiedFiles { get; private set; }
 
         /// <summary>
         /// Whether to overwrite files in the destination
         /// that have the read-only attribute set.
         /// </summary>
-        public bool OverwriteReadOnlyFiles
-        {
-            get
-            {
-                return _overwriteReadOnlyFiles;
-            }
-            set
-            {
-                _overwriteReadOnlyFiles = value;
-            }
-        }
+        public bool OverwriteReadOnlyFiles { get; set; }
 
         #endregion
 
@@ -283,7 +193,7 @@ namespace Microsoft.Build.Tasks
 
             string destinationFolder = Path.GetDirectoryName(destinationFileState.Name);
 
-            if (destinationFolder != null && destinationFolder.Length > 0 && !_directoriesKnownToExist.Contains(destinationFolder))
+            if (!string.IsNullOrEmpty(destinationFolder) && !_directoriesKnownToExist.Contains(destinationFolder))
             {
                 if (!Directory.Exists(destinationFolder))
                 {
@@ -297,7 +207,7 @@ namespace Microsoft.Build.Tasks
                 _directoriesKnownToExist.Add(destinationFolder);
             }
 
-            if (_overwriteReadOnlyFiles)
+            if (OverwriteReadOnlyFiles)
             {
                 MakeFileWriteable(destinationFileState, true);
                 destinationFileExists = destinationFileState.FileExists;
@@ -308,9 +218,13 @@ namespace Microsoft.Build.Tasks
 
             // If we want to create hard or symbolic links, then try that first
             if (UseHardlinksIfPossible)
-                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
+            {
+                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
+            }
             else if (UseSymboliclinksIfPossible)
-                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
+            {
+                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
+            }
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
@@ -334,12 +248,12 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
+        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessageFromResources(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
 
-            if (!_overwriteReadOnlyFiles)
+            if (!OverwriteReadOnlyFiles)
             {
                 destinationFileExists = destinationFileState.FileExists;
             }
@@ -397,10 +311,10 @@ namespace Microsoft.Build.Tasks
         )
         {
             // If there are no source files then just return success.
-            if (_sourceFiles == null || _sourceFiles.Length == 0)
+            if (SourceFiles == null || SourceFiles.Length == 0)
             {
-                _destinationFiles = Array.Empty<TaskItem>();
-                _copiedFiles = Array.Empty<TaskItem>();
+                DestinationFiles = Array.Empty<TaskItem>();
+                CopiedFiles = Array.Empty<TaskItem>();
                 return true;
             }
 
@@ -414,7 +328,7 @@ namespace Microsoft.Build.Tasks
             // Environment variable stomps on user-requested value if it's set. 
             if (Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES") != null)
             {
-                _overwriteReadOnlyFiles = true;
+                OverwriteReadOnlyFiles = true;
             }
 
             // Build up the sucessfully copied subset
@@ -428,13 +342,12 @@ namespace Microsoft.Build.Tasks
             Dictionary<string, string> filesActuallyCopied = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Now that we have a list of destinationFolder files, copy from source to destinationFolder.
-            for (int i = 0; i < _sourceFiles.Length && !_canceling; ++i)
+            for (int i = 0; i < SourceFiles.Length && !_canceling; ++i)
             {
                 bool copyComplete = false;
-                string originalSource;
-                if (filesActuallyCopied.TryGetValue(_destinationFiles[i].ItemSpec, out originalSource))
+                if (filesActuallyCopied.TryGetValue(DestinationFiles[i].ItemSpec, out string originalSource))
                 {
-                    if (String.Equals(originalSource, _sourceFiles[i].ItemSpec, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(originalSource, SourceFiles[i].ItemSpec, StringComparison.OrdinalIgnoreCase))
                     {
                         // Already copied from this location, don't copy again.
                         copyComplete = true;
@@ -443,9 +356,9 @@ namespace Microsoft.Build.Tasks
 
                 if (!copyComplete)
                 {
-                    if (DoCopyIfNecessary(new FileState(_sourceFiles[i].ItemSpec), new FileState(_destinationFiles[i].ItemSpec), copyFile))
+                    if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec), new FileState(DestinationFiles[i].ItemSpec), copyFile))
                     {
-                        filesActuallyCopied[_destinationFiles[i].ItemSpec] = _sourceFiles[i].ItemSpec;
+                        filesActuallyCopied[DestinationFiles[i].ItemSpec] = SourceFiles[i].ItemSpec;
                         copyComplete = true;
                     }
                     else
@@ -456,13 +369,13 @@ namespace Microsoft.Build.Tasks
 
                 if (copyComplete)
                 {
-                    _sourceFiles[i].CopyMetadataTo(_destinationFiles[i]);
-                    destinationFilesSuccessfullyCopied.Add(_destinationFiles[i]);
+                    SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
+                    destinationFilesSuccessfullyCopied.Add(DestinationFiles[i]);
                 }
             }
 
             // copiedFiles contains only the copies that were successful.
-            _copiedFiles = (ITaskItem[])destinationFilesSuccessfullyCopied.ToArray();
+            CopiedFiles = destinationFilesSuccessfullyCopied.ToArray();
 
             return success && !_canceling;
         }
@@ -470,7 +383,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Verify that the inputs are correct.
         /// </summary>
-        /// <returns></returns>
         private bool ValidateInputs()
         {
             if (Retries < 0)
@@ -486,23 +398,23 @@ namespace Microsoft.Build.Tasks
             }
 
             // There must be a destinationFolder (either files or directory).
-            if (_destinationFiles == null && _destinationFolder == null)
+            if (DestinationFiles == null && DestinationFolder == null)
             {
                 Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "DestinationFiles", "DestinationFolder");
                 return false;
             }
 
             // There can't be two kinds of destination.
-            if (_destinationFiles != null && _destinationFolder != null)
+            if (DestinationFiles != null && DestinationFolder != null)
             {
                 Log.LogErrorWithCodeFromResources("Copy.ExactlyOneTypeOfDestination", "DestinationFiles", "DestinationFolder");
                 return false;
             }
 
             // If the caller passed in DestinationFiles, then its length must match SourceFiles.
-            if (_destinationFiles != null && _destinationFiles.Length != _sourceFiles.Length)
+            if (DestinationFiles != null && DestinationFiles.Length != SourceFiles.Length)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _destinationFiles.Length, _sourceFiles.Length, "DestinationFiles", "SourceFiles");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", DestinationFiles.Length, SourceFiles.Length, "DestinationFiles", "SourceFiles");
                 return false;
             }
 
@@ -522,34 +434,34 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private bool InitializeDestinationFiles()
         {
-            if (_destinationFiles == null)
+            if (DestinationFiles == null)
             {
                 // If the caller passed in DestinationFolder, convert it to DestinationFiles
-                _destinationFiles = new ITaskItem[_sourceFiles.Length];
+                DestinationFiles = new ITaskItem[SourceFiles.Length];
 
-                for (int i = 0; i < _sourceFiles.Length; ++i)
+                for (int i = 0; i < SourceFiles.Length; ++i)
                 {
                     // Build the correct path.
                     string destinationFile;
                     try
                     {
-                        destinationFile = Path.Combine(_destinationFolder.ItemSpec, Path.GetFileName(_sourceFiles[i].ItemSpec));
+                        destinationFile = Path.Combine(DestinationFolder.ItemSpec, Path.GetFileName(SourceFiles[i].ItemSpec));
                     }
                     catch (ArgumentException e)
                     {
-                        Log.LogErrorWithCodeFromResources("Copy.Error", _sourceFiles[i].ItemSpec, _destinationFolder.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("Copy.Error", SourceFiles[i].ItemSpec, DestinationFolder.ItemSpec, e.Message);
                         // Clear the outputs.
-                        _destinationFiles = Array.Empty<ITaskItem>();
+                        DestinationFiles = Array.Empty<ITaskItem>();
                         return false;
                     }
 
                     // Initialize the destinationFolder item.
                     // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to 
                     // make sure to re-escape it here. 
-                    _destinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
+                    DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
 
                     // Copy meta-data from source to destinationFolder.
-                    _sourceFiles[i].CopyMetadataTo(_destinationFiles[i]);
+                    SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
                 }
             }
 
@@ -569,7 +481,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (_skipUnchangedFiles && IsMatchingSizeAndTimeStamp(sourceFileState, destinationFileState))
+                if (SkipUnchangedFiles && IsMatchingSizeAndTimeStamp(sourceFileState, destinationFileState))
                 {
                     // If we got here, then the file's time and size match AND
                     // the user set the SkipUnchangedFiles flag which means we
@@ -611,14 +523,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool DoCopyWithRetries(FileState sourceFileState, FileState destinationFileState, CopyFileWithState copyFile)
         {
-            bool? result = null;
             int retries = 0;
 
-            while (true && !_canceling)
+            while (!_canceling)
             {
                 try
                 {
-                    result = copyFile(sourceFileState, destinationFileState);
+                    bool? result = copyFile(sourceFileState, destinationFileState);
                     if (result.HasValue)
                     {
                         return result.Value;
@@ -639,7 +550,7 @@ namespace Microsoft.Build.Tasks
                         int code = Marshal.GetHRForException(e);
 
                         LogDiagnostic("Got {0} copying {1} to {2} and HR is {3}", e.ToString(), sourceFileState.Name, destinationFileState.Name, code);
-                        if (code == Microsoft.Build.Tasks.NativeMethods.ERROR_ACCESS_DENIED)
+                        if (code == NativeMethods.ERROR_ACCESS_DENIED)
                         {
                             // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
                             // In either case, that's likely not a race, and retrying won't help.
@@ -734,7 +645,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Try to get a message to inform the user which processes have a lock on a given file.
         /// </summary>
-        private string GetLockedFileMessage(string file)
+        private static string GetLockedFileMessage(string file)
         {
             string message = string.Empty;
 #if !RUNTIME_TYPE_NETCORE && !MONO
@@ -760,17 +671,14 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            return Execute
-            (
-                new CopyFileWithState(CopyFileWithLogging)
-            );
+            return Execute(CopyFileWithLogging);
         }
 
         /// <summary>
         /// Compares two paths to see if they refer to the same file. We can't solve the general
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
-        private bool PathsAreIdentical(string source, string destination)
+        private static bool PathsAreIdentical(string source, string destination)
         {
             string fullSourcePath = Path.GetFullPath(source);
             string fullDestinationPath = Path.GetFullPath(destination);

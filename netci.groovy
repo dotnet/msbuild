@@ -15,7 +15,7 @@ imageVersionMap = ['Windows_NT':'latest-dev15-5',
                     'RHEL7.2' : 'latest']
 
 def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, shouldSkipTestsWhenResultsNotFound = false, isSourceBuild = false) {
-    def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}${isSourceBuild ? '_SourceBuild' : ''}", isPR)
+    def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}${isSourceBuild ? '_SourceBuild_' : ''}", isPR)
 
     // Create a new job with the specified name.  The brace opens a new closure
     // and calls made within that closure apply to the newly created job.
@@ -150,16 +150,15 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
     }
 }
 
-// reenable when nuget / corefx issue on rhel7.2 is fixed: https://github.com/Microsoft/msbuild/issues/3265
 // sourcebuild simulation
-// CreateJob(
-//     "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
-//     "CoreCLR",
-//     "RHEL7.2",
-//     true,
-//     null,
-//     true,
-//     true)
+CreateJob(
+    "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
+    "CoreCLR",
+    "RHEL7.2",
+    true,
+    null,
+    true,
+    true)
 
 JobReport.Report.generateJobReport(out)
 

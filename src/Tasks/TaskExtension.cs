@@ -9,7 +9,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A small intermediate class for MSBuild tasks, see also TaskLoadInSeparateAppDomainExtension
     /// </summary>
-    abstract public class TaskExtension : Task
+    public abstract class TaskExtension : Task
     {
         #region Constructors
 
@@ -31,16 +31,10 @@ namespace Microsoft.Build.Tasks
         /// Gets an instance of a TaskLoggingHelperExtension class containing task logging methods.
         /// </summary>
         /// <value>The logging helper object.</value>
-        new public TaskLoggingHelper Log
-        {
-            get
-            {
-                return _logExtension;
-            }
-        }
+        public new TaskLoggingHelper Log => _logExtension;
 
         // the logging helper
-        private TaskLoggingHelperExtension _logExtension;
+        private readonly TaskLoggingHelperExtension _logExtension;
 
         #endregion
     }

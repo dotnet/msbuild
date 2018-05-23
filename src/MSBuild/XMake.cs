@@ -1118,7 +1118,7 @@ namespace Microsoft.Build.CommandLine
                         try
                         {
                             // Determine if the user specified /Target:Restore which means we should only execute a restore in the fancy way that /restore is executed
-                            bool restoreOnly = String.Equals(request.TargetNames.SingleOrDefault(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
+                            bool restoreOnly = request.TargetNames.Count == 1 && String.Equals(request.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
 
                             if (enableRestore || restoreOnly)
                             {
@@ -3476,7 +3476,11 @@ namespace Microsoft.Build.CommandLine
             const string frameworkName = ".NET Framework";
 #endif
 
+#if THISASSEMBLY
+            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ThisAssembly.AssemblyInformationalVersion, frameworkName));
+#else
             Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
+#endif
         }
 
         /// <summary>
