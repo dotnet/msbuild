@@ -421,14 +421,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             var overrideResolver = new PackageOverrideResolver<MockConflictItem>(packageOverrides);
 
-            var resolver = new ConflictResolver<MockConflictItem>(new PackageRank(packagesForRank), overrideResolver, new MockLog());
+            using (var resolver = new ConflictResolver<MockConflictItem>(new PackageRank(packagesForRank), overrideResolver, new MockLog()))
+            {
+                resolver.UnresolvedConflictHandler = UnresolvedConflictHandler;
 
-            resolver.ResolveConflicts(itemsToCommit, GetItemKey, ConflictHandler,
-                unresolvedConflict: UnresolvedConflictHandler);
+                resolver.ResolveConflicts(itemsToCommit, GetItemKey, ConflictHandler);
 
-            resolver.ResolveConflicts(itemsNotToCommit, GetItemKey, ConflictHandler,
-                commitWinner: false,
-                unresolvedConflict: UnresolvedConflictHandler);
+                resolver.ResolveConflicts(itemsNotToCommit, GetItemKey, ConflictHandler,
+                    commitWinner: false);
+            }
 
             return ret;
         }
