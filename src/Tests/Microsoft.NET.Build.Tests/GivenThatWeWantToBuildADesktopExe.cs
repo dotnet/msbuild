@@ -496,12 +496,6 @@ namespace DefaultReferences
 
         void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject, string httpPackageVersion)
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!ToolsetInfo.ReferenceAssembliesInstalled("v4.7.2"))
-            {
-                return;
-            }
-
             var testProject = new TestProject()
             {
                 Name = "DesktopInBoxConflictResolution",

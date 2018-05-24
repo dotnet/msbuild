@@ -44,11 +44,6 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_builds_a_net471_app()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App",
@@ -81,11 +76,6 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_builds_a_net471_app_referencing_netstandard20()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App_Referencing_NetStandard20",
@@ -130,11 +120,6 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_does_not_include_facades_from_nuget_packages()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471_NuGetFacades",
@@ -176,11 +161,6 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_includes_shims_when_net471_app_references_netstandard16()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App_Referencing_NetStandard16",
@@ -226,11 +206,6 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_does_not_include_shims_when_app_references_471_library_and_461_library()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App_Referencing_Net471Library",
@@ -284,11 +259,6 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_contains_shims_if_override_property_is_set()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App",
@@ -319,11 +289,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.exe.config", // We have now added binding redirects so we should expect a config flag to be dropped to the output directory.
             }.Concat(net471Shims));
-        }
-
-        static bool Net471ReferenceAssembliesAreInstalled()
-        {
-            return ToolsetInfo.ReferenceAssembliesInstalled("v4.7.1");
         }
     }
 }
