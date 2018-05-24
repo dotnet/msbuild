@@ -100,10 +100,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     List<TConflictItem> previouslyUnresolvedConflicts;
                     if (_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts))
                     {
-                        //  Skip the first item in the list of items that had unresolved conflicts, as it should
-                        //  be the same as the losing item which was just reported.
-                        foreach (var previouslyUnresolvedItem in previouslyUnresolvedConflicts.Skip(1))
+                        foreach (var previouslyUnresolvedItem in previouslyUnresolvedConflicts)
                         {
+                            //  Don't re-report the item that just lost and was already reported
+                            if (object.ReferenceEquals(previouslyUnresolvedItem, loser))
+                            {
+                                continue;
+                            }
+
                             //  Call ResolveConflict with the new winner and item that previously had an unresolved
                             //  conflict, so that the correct message will be logged recording that the winner
                             //  won and why

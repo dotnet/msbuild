@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 compilePlatformItems = TargetFrameworkDirectories.SelectMany(tfd =>
                 {
                     return frameworkListReader.GetConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
-                }).ToList();
+                }).ToArray();
             }
 
             // resolve conflicts at compile time
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             //  Remove platform items which won a conflict with a reference but subsequently lost to something else
             compilePlatformWinners.ExceptWith(allConflicts);
 
-            // resolve conflicts that class in output
+            // resolve conflicts that clash in output
             IEnumerable<ConflictItem> copyLocalItems;
             IEnumerable<ConflictItem> otherRuntimeItems;
             using (var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, packageOverrides, log))
