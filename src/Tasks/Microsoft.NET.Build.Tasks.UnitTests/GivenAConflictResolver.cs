@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         
@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -137,7 +137,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -243,7 +243,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -255,7 +255,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -297,7 +297,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(new[] { committedItem }, uncommittedItem1, uncommittedItem2, uncommittedItem3);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(uncommittedItem1, uncommittedItem2, uncommittedItem3);
+            result.UnresolvedConflicts.Should().Equal(committedItem, uncommittedItem1, uncommittedItem2, uncommittedItem3);
         }
 
         [Fact]
