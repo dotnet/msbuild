@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SymbolsProjectFileName>$(MSBuildThisFileDirectory)/Symbols.csproj</SymbolsProjectFileName>
-    <SymbolsNupkgPackageId>runtime.$(ProductMonikerRid).Microsoft.DotNet.SDK</SymbolsNupkgPackageId>
+    <SymbolsNupkgPackageId>Microsoft.DotNet.Cli</SymbolsNupkgPackageId>
   </PropertyGroup>
 
   <Target Name="GenerateSymbolsNugetPackages"

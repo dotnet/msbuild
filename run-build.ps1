@@ -106,6 +106,8 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
 Write-Output "$dotnetInstallPath -version ""$dotnetCliVersion"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 Invoke-Expression "$dotnetInstallPath -version ""$dotnetCliVersion"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 
+Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -SharedRuntime -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+
 if ($LastExitCode -ne 0)
 {
     Copy-Item -Recurse -Force $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
@@ -121,6 +123,7 @@ if ($NoBuild)
 }
 else
 {
+    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:BuildDotnetCliBuildFramework $ExtraParametersNoTargets
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }

@@ -55,7 +55,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <Import Project="build/BuildDefaults.props" />
     <Import Project="build/SetupPreviousStage.props" />
-    <Import Project="build/BundledDotnetTools.props" />
 
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>

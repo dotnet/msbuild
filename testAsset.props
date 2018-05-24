@@ -2,7 +2,6 @@
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
   </PropertyGroup>
-  <Import Project="build/InitRepo.props" />
   <Import Project="build/DependencyVersions.props" />
   <PropertyGroup>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>

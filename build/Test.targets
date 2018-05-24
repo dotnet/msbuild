@@ -11,11 +11,12 @@
     <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
+    <RoslynDirectory>$(SdkOutputDirectory)/sdk/$(SdkVersion)/Roslyn</RoslynDirectory>
   </PropertyGroup>
 
   <Target Name="Test"
           Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' And !$(Architecture.StartsWith('arm')) "
-          DependsOnTargets="TestsForBuildItself;BuildTests;">
+          DependsOnTargets="BuildTests;">
 
     <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->
     <MakeDir Directories="$(TestPackagesDir)" />
@@ -88,11 +89,6 @@
                 ToolPath="$(SdkOutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
-  </Target>
-
-  <Target Name="TestsForBuildItself">
-    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/test/MsBuildScript.Tests/runtests.target"
-                   ToolPath="$(PreviousStageDirectory)" />
   </Target>
 
   <Target Name="EnsureStageSeparation">

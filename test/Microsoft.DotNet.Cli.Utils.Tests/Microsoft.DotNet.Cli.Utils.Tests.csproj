@@ -41,25 +41,4 @@
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
 
-  <Target Name="CreateDotnetToolsTestAsset" AfterTargets="Build">
-
-    <PropertyGroup>
-      <testAssetSourceRoot>$(OutputPath)/TestDotnetToolsLayoutDirectory</testAssetSourceRoot>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <TestDotnetTools Include="$(RepoRoot)/build/BundledDotnetTools.proj">
-        <Properties>
-          DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
-          TemplateFillInPackageName=dotnet-watch;
-          TemplateFillInPackageVersion=$(AspNetCoreVersion);
-          PreviousStageDirectory=$(PreviousStageDirectory);
-          DotnetToolsLayoutDirectory=$(testAssetSourceRoot);
-          DotnetToolsRestoreProjectStyle=DotnetToolReference
-        </Properties>
-      </TestDotnetTools>
-    </ItemGroup>
-    <MSBuild BuildInParallel="False" Projects="@(TestDotnetTools)" />
-  </Target>
-
 </Project>

@@ -169,6 +169,7 @@ fi
 
 if [ "$STAGE0_SOURCE_DIR" == "" ]; then
     (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "$DotNetCliVersion" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$INSTALL_ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --shared-runtime --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE")
 else
     echo "Copying bootstrap cli from $STAGE0_SOURCE_DIR"
     cp -r $STAGE0_SOURCE_DIR/* "$DOTNET_INSTALL_DIR"
@@ -195,6 +196,7 @@ fi
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 if [ $BUILD -eq 1 ]; then
+    dotnet msbuild build.proj /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:BuildDotnetCliBuildFramework ${argsnotargets[@]}
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args
 else
     echo "Not building due to --nobuild"

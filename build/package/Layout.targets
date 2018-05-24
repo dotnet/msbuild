@@ -5,7 +5,6 @@
     <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
     <MSBuildExtensionsOutputDirectory>$(LayoutDirectory)/$(ArtifactNameMSBuildExtensions)</MSBuildExtensionsOutputDirectory>
     <SdkDebugLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkDebug)</SdkDebugLayoutOutputDirectory>
-    <SdkSymbolsLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkSymbols)</SdkSymbolsLayoutOutputDirectory>
     <SdkLanguagePackOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkLanguagePack)</SdkLanguagePackOutputDirectory>
     <SatelliteAssemblies>*.resources.dll</SatelliteAssemblies>
   </PropertyGroup>
@@ -15,7 +14,6 @@
     <ItemGroup>
       <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
       <SdkDebugLayoutInput Include="$(SymbolsDirectory)/sdk/**/*" />
-      <SdkSymbolsLayoutInput Include="$(SymbolsDirectory)/sdk/**/*" />
       <SdkLanguagePackInput Include="$(OutputDirectory)/sdk/**/$(SatelliteAssemblies)" />
       <MSBuildExtensionsInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions/**/*" />
       <MSBuildExtensionsVerInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions-ver/**/*" />
@@ -57,13 +55,6 @@
         <OutputFiles>@(SdkRelativeOutputFiles -> '$(SdkLayoutOutputDirectory)/%(Identity)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdk)</NameWithVersion>
         <Name>$(ArtifactNameSdk)</Name>
-      </LayoutDefinition>
-
-      <LayoutDefinition Include="SdkSymbols" Condition="'$(SeparateSymbolsArchive)' != 'false'">
-        <InputFiles>@(SdkSymbolsLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkSymbolsRelativeOutputFiles -> '$(SdkSymbolsLayoutOutputDirectory)/%(Identity)')</OutputFiles>
-        <NameWithVersion>$(ArtifactNameWithVersionSdkSymbols)</NameWithVersion>
-        <Name>$(ArtifactNameSdkSymbols)</Name>
       </LayoutDefinition>
 
       <LayoutDefinition Include="SdkLanguagePack">
