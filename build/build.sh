@@ -304,7 +304,7 @@ function InstallDotNetSharedFramework {
 function Build {
   "$build_driver" msbuild $toolset_build_proj /m /nologo /clp:Summary /warnaserror \
     /v:$verbosity /bl:$build_log /p:Configuration=$configuration /p:Projects=$projects /p:RepoRoot="$repo_root" \
-    /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci \
+    /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:PerformanceTest=$perf /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci \
     $properties
   local lastexitcode=$?
 
