@@ -10,6 +10,7 @@
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
 
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
