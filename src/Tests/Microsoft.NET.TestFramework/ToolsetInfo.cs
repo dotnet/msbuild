@@ -8,6 +8,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
 using System.Xml.Linq;
 using System.Reflection;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -103,6 +104,21 @@ namespace Microsoft.NET.TestFramework
             TestContext.Current.AddTestEnvironmentVariables(ret);
 
             return ret;
+        }
+
+        public static bool ReferenceAssembliesInstalled(string version)
+        {
+            //  The version of the MSBuild libraries we are referencing doesn't have an enum value for the versions of .NET we want reference assemblies
+            //  for. So we use the MSBuild API to find the path to the 4.6.1 reference assemblies, and locate the
+            //  desired reference assemblies relative to that.
+            var net461referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version461);
+            if (net461referenceAssemblies == null)
+            {
+                //  4.6.1 reference assemblies not found, assume that the ones we want aren't available either
+                return false;
+            }
+            var requestedReferenceAssemblies = Path.Combine(new DirectoryInfo(net461referenceAssemblies).Parent.FullName, version);
+            return Directory.Exists(requestedReferenceAssemblies);
         }
 
         public static ToolsetInfo Create(string repoRoot, string repoArtifactsDir, string configuration, TestCommandLine commandLine)

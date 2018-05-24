@@ -323,16 +323,7 @@ namespace Microsoft.NET.Build.Tests
 
         static bool Net471ReferenceAssembliesAreInstalled()
         {
-            // The version of the MSBuild libraries we are referencing doesn't have an enum value for .NET 4.7.1. So we use the MSBuild API to find 
-            // the path to the 4.6.1 reference assemblies, and locate the 4.7.1 reference assemblies relative to that.
-            var net461referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version461);
-            if (net461referenceAssemblies == null)
-            {
-                //  4.6.1 reference assemblies not found, assume that 4.7.1 isn't available either
-                return false;
-            }
-            var net471referenceAssemblies = Path.Combine(new DirectoryInfo(net461referenceAssemblies).Parent.FullName, "v4.7.1");
-            return Directory.Exists(net471referenceAssemblies);
+            return ToolsetInfo.ReferenceAssembliesInstalled("v4.7.1");
         }
     }
 }
