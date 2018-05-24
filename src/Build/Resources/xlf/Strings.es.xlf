@@ -806,7 +806,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: El espacio de nombres XML predeterminado del proyecto debe ser el espacio de nombres XML de MSBuild o ningún espacio de nombres. Si el proyecto se creó con el formato MSBuild 2003, agregue xmlns="{0}" al elemento &lt;Project&gt;. Si se creó con el formato 1.0 ó 1.2 anterior, conviértalo al formato MSBuild 2003.</target>
+        <target state="translated">MSB4041: El espacio de nombres XML predeterminado del proyecto debe ser el espacio de nombres XML de MSBuild o ninguno. Si el proyecto se creó con el formato MSBuild 2003, agregue xmlns="{0}" al elemento &lt;Project&gt;. Si se creó con el formato 1.0 o 1.2 anterior, conviértalo al formato MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1943,7 +1943,7 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: El valor "{0}" no es válido para una especificación SDK. El atributo debe ser una lista delimitada por puntos y coma de pares nombre-SDK/versión-mínima, separados por una barra diagonal.</target>
+        <target state="translated">MSB4229: El valor "{0}" no es válido para una especificación de SDK. El atributo debe ser una lista delimitada por puntos y coma de pares nombre-SDK/versión-mínima, separados por una barra diagonal.</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
@@ -1983,7 +1983,7 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: Parámetros no válidos del registrador binario: "{0}". Se esperaba: ProjectImports={{None,Embed,ZipFile}} o [LogFile=]rutaDeAccesoDelArchivo.binlog (nombre o ruta de acceso del archivo de registro, que debe tener la extensión ".binlog").</target>
+        <target state="translated">MSB4234: Parámetros no válidos del registrador binario: "{0}". Se esperaba: ProjectImports={{None,Embed,ZipFile}} y/o [LogFile=]rutaDeAccesoDelArchivo.binlog (nombre o ruta de acceso del archivo de registro, que debe tener la extensión ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2068,7 +2068,7 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: La resolución del SDK basado en NuGet no se pudo ejecutar porque no se encontraron los ensamblados de NuGet.  Compruebe su instalación de MSBuild o configure la variable de entorno "{0}" en la carpeta que contiene los ensamblados de NuGet requeridos. {1}</target>
+        <target state="translated">MSB4243: La resolución del SDK basado en NuGet no se pudo ejecutar porque no se encontraron los ensamblados de NuGet. Compruebe su instalación de MSBuild o configure la variable del entorno "{0}" en la carpeta que contiene los ensamblados de NuGet requeridos. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2098,14 +2098,14 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: No se pueden especificar varias versiones del mismo SDK "{0}" Se utilizará la versión del SDK previamente resuelta "{1\}" de la ubicación "{2}", y la versión "{3}" se ignorará.</target>
+        <target state="translated">MSB4240: No se pueden especificar varias versiones del mismo SDK "{0}". Se utilizará la versión del SDK previamente resuelta "{1\}" de la ubicación "{2}", y la versión "{3}" se ignorará.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: La referencia del SKD "{0}", versión "{1}", se resolvió en la versión "{2}".  Podría estar utilizando una versión diferente de la esperada si no actualiza la versión de referencia para que coincida.</target>
+        <target state="translated">MSB4241: La referencia del SKD "{0}", versión "{1}", se resolvió en la versión "{2}". Podría estar utilizando una versión diferente de la esperada si no actualiza la versión de referencia para que coincida.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2119,17 +2119,17 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="SdkResolverManifestInvalid">
         <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
-        <target state="new">MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</target>
+        <target state="translated">MSB4245: El archivo de manifiesto de la resolución de SDK no es válido. Esto puede indicar una instalación dañada o no válida de MSBuild. Ruta de acceso de archivo de manifiesto "{0}". Mensaje: {1}</target>
         <note>{StrBegin="MSB4245: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverNoDllOrManifest">
         <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
-        <target state="new">MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</target>
+        <target state="translated">MSB4246: La carpeta de resolución del SDK existe pero sin un archivo de manifiesto o DLL de resolución de SDK. Esto puede indicar una instalación dañada o no válida de MSBuild. Ruta de acceso de resolución de SDK: {0}</target>
         <note>{StrBegin="MSB4246: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverDllInManifestMissing">
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
-        <target state="new">MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</target>
+        <target state="translated">MSB4247: No se pudo cargar la resolución de SDK. Existe un archivo de manifiesto, pero no se encuentra la ruta de acceso al archivo DLL de la resolución del SDK. Ruta de acceso del archivo de manifiesto: {0}. Ruta de acceso de resolución de SDK: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>
