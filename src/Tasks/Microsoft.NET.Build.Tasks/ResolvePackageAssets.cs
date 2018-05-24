@@ -282,22 +282,25 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var item in _logMessages)
             {
-                string message = item.ItemSpec;
-                string severity = item.GetMetadata(MetadataKeys.Severity);
-                string code = item.GetMetadata(MetadataKeys.DiagnosticCode);
+                Log.Log(
+                    new Message(
+                        text: item.ItemSpec,
+                        level: GetMessageLevel(item.GetMetadata(MetadataKeys.Severity)),
+                        code: item.GetMetadata(MetadataKeys.DiagnosticCode),
+                        file: ProjectPath));
+            }
+        }
 
-                switch (severity)
-                {
-                    case nameof(LogLevel.Error):
-                        Log.LogError(null, code, null, ProjectPath, 0, 0, 0, 0, message);
-                        break;
-                    case nameof(LogLevel.Warning):
-                        Log.LogWarning(null, code, null, ProjectPath, 0, 0, 0, 0, message);
-                        break;
-                    default:
-                        Log.LogMessage(null, code, null, ProjectPath, 0, 0, 0, 0, message);
-                        break;
-                }
+        private static MessageLevel GetMessageLevel(string severity)
+        {
+            switch (severity)
+            {
+                case nameof(LogLevel.Error):
+                    return MessageLevel.Error;
+                case nameof(LogLevel.Warning):
+                    return MessageLevel.Warning;
+                default:
+                    return MessageLevel.NormalImportance;
             }
         }
 
