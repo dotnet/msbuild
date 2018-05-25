@@ -39,8 +39,8 @@ namespace Microsoft.DotNet.ShellShim
                 appHostSourcePath = Path.Combine(_appHostSourceDirectory, ApphostNameWithoutExtension);
             }
 
-            var appHostDestinationFilePath = shimPath.Value;
-            var appBinaryFilePath = PathUtility.GetRelativePath(appHostDestinationFilePath, entryPoint.Value);
+            var appHostDestinationFilePath = Path.GetFullPath(shimPath.Value);
+            var appBinaryFilePath = Path.GetRelativePath(Path.GetDirectoryName(appHostDestinationFilePath), Path.GetFullPath(entryPoint.Value));
 
             EmbedAppNameInHost.EmbedAndReturnModifiedAppHostPath(
                 appHostSourceFilePath: appHostSourcePath,
