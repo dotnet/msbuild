@@ -43,9 +43,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Warnings.Add(e);
         }
 
-        public ICollection<CustomBuildEventArgs> CustomEvents { get; } = new List<CustomBuildEventArgs>();
-        public ICollection<BuildErrorEventArgs> Errors { get; } = new List<BuildErrorEventArgs>();
-        public ICollection<BuildMessageEventArgs> Messages { get; } = new List<BuildMessageEventArgs>();
-        public ICollection<BuildWarningEventArgs> Warnings { get; } = new List<BuildWarningEventArgs>();
+        public IList<CustomBuildEventArgs> CustomEvents { get; } = new List<CustomBuildEventArgs>();
+        public IList<BuildErrorEventArgs> Errors { get; } = new List<BuildErrorEventArgs>();
+        public IList<BuildMessageEventArgs> Messages { get; } = new List<BuildMessageEventArgs>();
+        public IList<BuildWarningEventArgs> Warnings { get; } = new List<BuildWarningEventArgs>();
     }
 }
