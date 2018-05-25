@@ -478,6 +478,78 @@ namespace DefaultReferences
             buildResult.Should().NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
+        [FullMSBuildOnlyTheory]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution(string httpPackageVersion)
+        {
+            Test_inbox_assembly_wins_conflict_resolution(false, httpPackageVersion);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void It_builds_successfully_if_inbox_assembly_wins_conflict_resolution_sdk(string httpPackageVersion)
+        {
+            Test_inbox_assembly_wins_conflict_resolution(true, httpPackageVersion);
+        }
+
+        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject, string httpPackageVersion)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopInBoxConflictResolution",
+                IsExe = true
+            };
+
+            if (useSdkProject)
+            {
+                testProject.IsSdkProject = true;
+                testProject.TargetFrameworks = "net472";
+            }
+            else
+            {
+                testProject.IsSdkProject = false;
+                testProject.TargetFrameworkVersion = "v4.7.2";
+            }
+
+            testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", httpPackageVersion));
+
+            testProject.SourceFiles["Program.cs"] = @"using System;
+using System.Net.Http;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        HttpClient client = new HttpClient();
+    }
+}";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name,
+                                                                 identifier: (useSdkProject ? "_SDK_" : "_") + httpPackageVersion)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "Reference",
+                                    new XAttribute("Include", "System.Net.Http")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:normal")
+                .Should()
+                .Pass()
+                .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
+                .And.NotHaveStdOutContaining("Could not determine");
+        }
+
         [WindowsOnlyFact]
         public void It_generates_binding_redirects_if_needed()
         {

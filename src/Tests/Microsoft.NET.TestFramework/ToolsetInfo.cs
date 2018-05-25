@@ -10,6 +10,7 @@ using Microsoft.NET.TestFramework.Commands;
 using System.Xml.Linq;
 using System.Reflection;
 using Xunit.Abstractions;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -132,7 +133,6 @@ namespace Microsoft.NET.TestFramework
 
             return ret;
         }
-
         public static ToolsetInfo Create(string repoRoot, string repoArtifactsDir, string configuration, TestCommandLine commandLine)
         {
             var ret = new ToolsetInfo();
