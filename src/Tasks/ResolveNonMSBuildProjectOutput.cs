@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Xml;
 using Microsoft.Build.Framework;
@@ -40,37 +40,13 @@ namespace Microsoft.Build.Tasks
         /// A special XML string containing resolved project outputs - we need to simply match the projects and
         /// return the appropriate paths
         /// </summary>
-        public string PreresolvedProjectOutputs
-        {
-            get
-            {
-                return _preresolvedProjectOutputs;
-            }
-            set
-            {
-                _preresolvedProjectOutputs = value;
-            }
-        }
-
-        private string _preresolvedProjectOutputs = null;
+        public string PreresolvedProjectOutputs { get; set; }
 
         /// <summary>
         /// The list of resolved reference paths (preserving the original project reference attributes)
         /// </summary>
         [Output]
-        public ITaskItem[] ResolvedOutputPaths
-        {
-            get
-            {
-                return _resolvedOutputPaths;
-            }
-            set
-            {
-                _resolvedOutputPaths = value;
-            }
-        }
-
-        private ITaskItem[] _resolvedOutputPaths = null;
+        public ITaskItem[] ResolvedOutputPaths { get; set; }
 
         /// <summary>
         /// The list of project reference items that could not be resolved using the pre-resolved list of outputs.
@@ -78,19 +54,7 @@ namespace Microsoft.Build.Tasks
         /// are in the MSBuild format.
         /// </summary>
         [Output]
-        public ITaskItem[] UnresolvedProjectReferences
-        {
-            get
-            {
-                return _unresolvedProjectReferences;
-            }
-            set
-            {
-                _unresolvedProjectReferences = value;
-            }
-        }
-
-        private ITaskItem[] _unresolvedProjectReferences = null;
+        public ITaskItem[] UnresolvedProjectReferences { get; set; }
 
         /// <summary>
         /// A delegate with a signature that matches AssemblyName.GetAssemblyName.
@@ -109,7 +73,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Main task method
         /// </summary>
-        /// <returns></returns>
         public override bool Execute()
         {
             // Allow unit tests to inject a non-file system dependent version of this.
@@ -121,22 +84,20 @@ namespace Microsoft.Build.Tasks
             try
             {
                 if (!VerifyProjectReferenceItems(ProjectReferences, false /* treat problems as warnings */))
+                {
                     return false;
+                }
 
-                ArrayList resolvedPaths = new ArrayList(ProjectReferences.GetLength(0));
-                ArrayList unresolvedReferences = new ArrayList(ProjectReferences.GetLength(0));
+                var resolvedPaths = new List<ITaskItem>(ProjectReferences.GetLength(0));
+                var unresolvedReferences = new List<ITaskItem>(ProjectReferences.GetLength(0));
 
                 CacheProjectElementsFromXml(PreresolvedProjectOutputs);
 
                 foreach (ITaskItem projectRef in ProjectReferences)
                 {
-                    bool resolveSuccess = false;
-                    ITaskItem resolvedPath;
-
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveNonMSBuildProjectOutput.ProjectReferenceResolutionStarting", projectRef.ItemSpec);
 
-                    resolveSuccess = ResolveProject(projectRef, out resolvedPath);
-
+                    bool resolveSuccess = ResolveProject(projectRef, out ITaskItem resolvedPath);
                     if (resolveSuccess)
                     {
                         if (resolvedPath.ItemSpec.Length > 0)
@@ -177,8 +138,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                ResolvedOutputPaths = (ITaskItem[])resolvedPaths.ToArray(typeof(ITaskItem));
-                UnresolvedProjectReferences = (ITaskItem[])unresolvedReferences.ToArray(typeof(ITaskItem));
+                ResolvedOutputPaths = resolvedPaths.ToArray();
+                UnresolvedProjectReferences = unresolvedReferences.ToArray();
             }
             catch (XmlException e)
             {

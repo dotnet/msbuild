@@ -5,12 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -18,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for ResolveNonMSBuildProjectOutput and AssignProjectConfiguration, since they have
     /// similar architecture
     /// </summary>
-    abstract public class ResolveProjectBase : TaskExtension
+    public abstract class ResolveProjectBase : TaskExtension
     {
         #region Properties
 
@@ -30,34 +29,31 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_projectReferences, "projectReferences");
+                ErrorUtilities.VerifyThrowArgumentNull(_projectReferences, nameof(ProjectReferences));
                 return _projectReferences;
             }
-            set
-            {
-                _projectReferences = value;
-            }
+            set => _projectReferences = value;
         }
 
-        private ITaskItem[] _projectReferences = null;
+        private ITaskItem[] _projectReferences;
 
         // This field stores all the distinct project references by project absolute path
-        private HashSet<string> _cachedProjectReferencesByAbsolutePath = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _cachedProjectReferencesByAbsolutePath = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // This field stores pre-cached project elements for project guids for quicker access by project guid
-        private Dictionary<string, XmlElement> _cachedProjectElements = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, XmlElement> _cachedProjectElements = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
 
         // This field stores pre-cached project elements for project guids for quicker access by project absolute path
-        private Dictionary<string, XmlElement> _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, XmlElement> _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
 
         // This field stores the project absolute path for quicker access by project guid
-        private Dictionary<string, string> _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // This field stores the project guid for quicker access by project absolute path
-        private Dictionary<string, string> _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // This field stores the list of dependency project guids by depending project guid
-        private Dictionary<string, List<string>> _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, List<string>> _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
         private const string attributeProject = "Project";
 
@@ -80,8 +76,7 @@ namespace Microsoft.Build.Tasks
             if (attrValue.Length > 0)
             {
                 // invalid project GUID format?
-                Guid guid;
-                if (!Guid.TryParse(attrValue, out guid))
+                if (!Guid.TryParse(attrValue, out _))
                 {
                     return false;
                 }
@@ -99,13 +94,12 @@ namespace Microsoft.Build.Tasks
         internal bool VerifyProjectReferenceItems(ITaskItem[] references, bool treatAsError)
         {
             bool referencesValid = true;
-            string missingAttribute;
 
             foreach (ITaskItem reference in references)
             {
                 _cachedProjectReferencesByAbsolutePath.Add(reference.GetMetadata("FullPath")); // metadata is cached and used again later
 
-                if (!VerifyReferenceAttributes(reference, out missingAttribute))
+                if (!VerifyReferenceAttributes(reference, out string missingAttribute))
                 {
                     if (treatAsError)
                     {
@@ -125,7 +119,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Pre-cache individual project elements from the XML string in a hashtable for quicker access.
         /// </summary>
-        /// <param name="doc"></param>
         internal void CacheProjectElementsFromXml(string xmlString)
         {
             XmlDocument doc = null;
@@ -133,9 +126,7 @@ namespace Microsoft.Build.Tasks
             if (!string.IsNullOrEmpty(xmlString))
             {
                 doc = new XmlDocument();
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Ignore;
-
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader reader = XmlReader.Create(new StringReader(xmlString), settings))
                 {
                     doc.Load(reader);
@@ -150,7 +141,7 @@ namespace Microsoft.Build.Tasks
             //  <ProjectConfiguration Project="{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}" AbsolutePath="c:foo\Project3\C.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
             //</SolutionConfiguration>
             //
-            if (doc != null && doc.DocumentElement != null)
+            if (doc?.DocumentElement != null)
             {
                 foreach (XmlElement xmlElement in doc.DocumentElement.ChildNodes)
                 {
@@ -195,8 +186,7 @@ namespace Microsoft.Build.Tasks
                                 continue;
                             }
 
-                            List<string> list;
-                            if (!_cachedDependencyProjectGuidsByDependingProjectGuid.TryGetValue(projectGuid, out list))
+                            if (!_cachedDependencyProjectGuidsByDependingProjectGuid.TryGetValue(projectGuid, out List<string> list))
                             {
                                 list = new List<string>();
                                 _cachedDependencyProjectGuidsByDependingProjectGuid.Add(projectGuid, list);
@@ -212,13 +202,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper method for retrieving whatever was stored in the XML string for the given project
         /// </summary>
-        /// <param name="projectRef"></param>
-        /// <param name="projectItem"></param>
-        /// <returns></returns>
         protected string GetProjectItem(ITaskItem projectRef)
         {
             XmlElement projectElement = GetProjectElement(projectRef);
-            return projectElement != null ? projectElement.InnerText : null;
+            return projectElement?.InnerText;
         }
 
         /// <summary>
@@ -228,9 +215,8 @@ namespace Microsoft.Build.Tasks
         protected XmlElement GetProjectElement(ITaskItem projectRef)
         {
             string projectGuid = projectRef.GetMetadata(attributeProject);
-            XmlElement projectElement = null;
 
-            if ((_cachedProjectElements.TryGetValue(projectGuid, out projectElement)) && (projectElement != null))
+            if ((_cachedProjectElements.TryGetValue(projectGuid, out XmlElement projectElement)) && (projectElement != null))
             {
                 return projectElement;
             }
@@ -254,16 +240,14 @@ namespace Microsoft.Build.Tasks
         protected void AddSyntheticProjectReferences(string currentProjectAbsolutePath)
         {
             // Get the guid for this project
-            string projectGuid;
-            if (!_cachedProjectGuidsByAbsolutePath.TryGetValue(currentProjectAbsolutePath, out projectGuid))
+            if (!_cachedProjectGuidsByAbsolutePath.TryGetValue(currentProjectAbsolutePath, out string projectGuid))
             {
                 // We were passed a blob, but we weren't listed in it. Odd. Return.
                 return;
             }
 
             // Use the guid to look up the dependencies for it
-            List<string> guids;
-            if (!_cachedDependencyProjectGuidsByDependingProjectGuid.TryGetValue(projectGuid, out guids))
+            if (!_cachedDependencyProjectGuidsByDependingProjectGuid.TryGetValue(projectGuid, out List<string> guids))
             {
                 // We didn't have dependencies listed in the blob
                 return;
@@ -275,8 +259,7 @@ namespace Microsoft.Build.Tasks
             foreach (string guid in guids)
             {
                 // Get the absolute path of the dependency, using the blob
-                string path;
-                if (!_cachedProjectAbsolutePathsByGuid.TryGetValue(guid, out path))
+                if (!_cachedProjectAbsolutePathsByGuid.TryGetValue(guid, out string path))
                 {
                     // We had a dependency listed in the blob that wasn't itself in the blob. Odd. Return.
                     continue;
