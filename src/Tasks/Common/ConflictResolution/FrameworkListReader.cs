@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             _buildEngine = buildEngine;
         }
 
-        public IEnumerable<ConflictItem> GetConflictItems(string frameworkListPath, ILog log)
+        public IEnumerable<ConflictItem> GetConflictItems(string frameworkListPath, Logger log)
         {
             if (frameworkListPath == null)
             {
@@ -60,7 +60,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             return result;
         }
 
-        private static IEnumerable<ConflictItem> LoadConflictItems(string frameworkListPath, ILog log)
+        private static IEnumerable<ConflictItem> LoadConflictItems(string frameworkListPath, Logger log)
         {
             if (!File.Exists(frameworkListPath))
             {

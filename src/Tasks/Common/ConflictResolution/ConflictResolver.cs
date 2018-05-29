@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     internal class ConflictResolver<TConflictItem> : IDisposable where TConflictItem : class, IConflictItem
     {
         private Dictionary<string, TConflictItem> _winningItemsByKey = new Dictionary<string, TConflictItem>();
-        private ILog _log;
+        private Logger _log;
         private PackageRank _packageRank;
         private PackageOverrideResolver<TConflictItem> _packageOverrideResolver;
         private Dictionary<string, List<TConflictItem>> _unresolvedConflictItems = new Dictionary<string, List<TConflictItem>>(StringComparer.Ordinal);
@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         //  Callback for unresolved conflicts, currently just used as a test hook
         public Action<TConflictItem> UnresolvedConflictHandler { get; set; }
 
-        public ConflictResolver(PackageRank packageRank, PackageOverrideResolver<TConflictItem> packageOverrideResolver, ILog log)
+        public ConflictResolver(PackageRank packageRank, PackageOverrideResolver<TConflictItem> packageOverrideResolver, Logger log)
         {
             this._log = log;
             this._packageRank = packageRank;

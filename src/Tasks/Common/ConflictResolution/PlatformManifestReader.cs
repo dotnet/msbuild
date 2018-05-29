@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     static class PlatformManifestReader
     {
         static readonly char[] s_manifestLineSeparator = new[] { '|' };
-        public static IEnumerable<ConflictItem> LoadConflictItems(string manifestPath, ILog log)
+        public static IEnumerable<ConflictItem> LoadConflictItems(string manifestPath, Logger log)
         {
             if (manifestPath == null)
             {
