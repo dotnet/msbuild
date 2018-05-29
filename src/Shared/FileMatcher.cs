@@ -54,13 +54,12 @@ namespace Microsoft.Build.Shared
         private readonly GetFileSystemEntries _getFileSystemEntries;
         private readonly DirectoryExists _directoryExists;
 
-        public static FileMatcher Default = new FileMatcher();
+        /// <summary>
+        /// The Default FileMatcher does not cache directory enumeration.
+        /// </summary>
+        public static FileMatcher Default = new FileMatcher(FileSystemFactory.GetFileSystem(), null);
 
-        private FileMatcher() : this(FileSystemFactory.GetFileSystem())
-        {
-        }
-
-        public FileMatcher(IFileSystemAbstraction fileSystem) : this(
+        public FileMatcher(IFileSystemAbstraction fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null) : this(
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
                 entityType,
@@ -68,13 +67,32 @@ namespace Microsoft.Build.Shared
                 pattern,
                 projectDirectory,
                 stripProjectDirectory),
-            fileSystem.DirectoryExists)
+            fileSystem.DirectoryExists,
+            getFileSystemDirectoryEntriesCache)
         {
         }
 
-        public FileMatcher(GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists)
+        public FileMatcher(GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null)
         {
-            _getFileSystemEntries = getFileSystemEntries;
+            _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
+                ? getFileSystemEntries
+                : (type, path, pattern, directory, projectDirectory) =>
+                {
+                    // Cache only directories, for files we won't hit the cache because the file name patterns tend to be unique
+                    if (type == FileSystemEntity.Directories)
+                    {
+                        return getFileSystemDirectoryEntriesCache.GetOrAdd(
+                            $"{path};{pattern ?? "*"}",
+                            s => getFileSystemEntries(
+                                type,
+                                path,
+                                pattern,
+                                directory,
+                                projectDirectory));
+                    }
+                    return getFileSystemEntries(type, path, pattern, directory, projectDirectory);
+                };
+
             _directoryExists = directoryExists;
         }
 
@@ -1694,30 +1712,14 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
-        /// <param name="entriesCache">Cache used for caching IO operation results</param>
         /// <returns>The array of files.</returns>
         internal string[] GetFiles
         (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IEnumerable<string> excludeSpecsUnescaped = null,
-            ConcurrentDictionary<string, ImmutableArray<string>> entriesCache = null
+            IEnumerable<string> excludeSpecsUnescaped = null
         )
         {
-            var getFileSystemEntries = entriesCache == null
-                ? _getFileSystemEntries
-                : (type, path, pattern, directory, projectDirectory) =>
-                {
-                    // Cache only directories, for files we won't ever hit the cache while open a project
-                    if (type == FileSystemEntity.Directories)
-                    {
-                        return entriesCache.GetOrAdd($"{path};{pattern ?? "*"}",
-                            s => _getFileSystemEntries(type, path, pattern,
-                                directory, projectDirectory));
-                    }
-                    return _getFileSystemEntries(type, path, pattern, directory, projectDirectory);
-                };
-
             // Possible future improvement: make sure file existence caching happens only at evaluation time, and maybe only within a build session. https://github.com/Microsoft/msbuild/issues/2306
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -1735,7 +1737,7 @@ namespace Microsoft.Build.Shared
                                 s_cachedFileEnumerations.Value.GetOrAdd(
                                     filesKey,
                                     (_) =>
-                                        GetFiles(
+                                        GetFilesImplementation(
                                             projectDirectoryUnescaped,
                                             filespecUnescaped,
                                             excludeSpecsUnescaped));
@@ -1750,7 +1752,7 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                string[] files = GetFiles(
+                string[] files = GetFilesImplementation(
                     projectDirectoryUnescaped,
                     filespecUnescaped,
                     excludeSpecsUnescaped);
@@ -2008,7 +2010,7 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The array of files.</returns>
-        internal string[] GetFiles(
+        internal string[] GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             IEnumerable<string> excludeSpecsUnescaped)
