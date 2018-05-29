@@ -999,7 +999,7 @@ namespace Microsoft.Build.Tasks
             private static string GetItemMetadataTrimmed(ITaskItem item, string metadataName)
             {
                 string metadataValue = item.GetMetadata(metadataName);
-                return metadataValue?.Trim() ?? metadataValue;
+                return metadataValue?.Trim();
             }
 
             /// <summary>
