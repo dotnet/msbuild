@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         
@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -137,7 +137,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -216,6 +216,24 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
+        [Theory]
+        [InlineData(new[] { 1, 1, 2}, 2)]
+        [InlineData(new[] { 1, 2, 1}, 1)]
+        [InlineData(new[] { 2, 1, 1}, 0)]
+        [InlineData(new[] { 1, 1, 2, 1, 2, 2, 3 }, 6)]
+        [InlineData(new[] { 1, 1, 2, 3, 1, 2, 2 }, 3)]
+        [InlineData(new[] { 3, 1, 1, 2, 1, 2, 2 }, 0)]
+        public void ItemsWithNoWinnerWillCountAsConflictsIfAnotherItemWins(int[] versions, int winnerIndex)
+        {
+            var items = versions.Select(v => new MockConflictItem() { FileVersion = new Version(v, 0, 0, 0) })
+                .ToArray();
+
+            var result = GetConflicts(items);
+
+            result.Conflicts.Should().BeEquivalentTo(items.Except(new[] { items[winnerIndex] }));
+            result.UnresolvedConflicts.Should().BeEmpty();
+        }
+
         [Fact]
         public void WhenItemsConflictAndBothArePlatformItemsTheConflictCannotBeResolved()
         {
@@ -225,7 +243,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -237,7 +255,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(item1, item2);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(item2);
+            result.UnresolvedConflicts.Should().Equal(item1, item2);
         }
 
         [Fact]
@@ -279,7 +297,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var result = GetConflicts(new[] { committedItem }, uncommittedItem1, uncommittedItem2, uncommittedItem3);
 
             result.Conflicts.Should().BeEmpty();
-            result.UnresolvedConflicts.Should().Equal(uncommittedItem1, uncommittedItem2, uncommittedItem3);
+            result.UnresolvedConflicts.Should().Equal(committedItem, uncommittedItem1, uncommittedItem2, uncommittedItem3);
         }
 
         [Fact]
@@ -384,9 +402,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             ConflictResults ret = new ConflictResults();
 
-            void ConflictHandler(MockConflictItem item)
+            void ConflictHandler(MockConflictItem winner, MockConflictItem loser)
             {
-                ret.Conflicts.Add(item);
+                ret.Conflicts.Add(loser);
             }
 
             void UnresolvedConflictHandler(MockConflictItem item)
@@ -403,14 +421,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             var overrideResolver = new PackageOverrideResolver<MockConflictItem>(packageOverrides);
 
-            var resolver = new ConflictResolver<MockConflictItem>(new PackageRank(packagesForRank), overrideResolver, new MockLog());
+            using (var resolver = new ConflictResolver<MockConflictItem>(new PackageRank(packagesForRank), overrideResolver, new MockLog()))
+            {
+                resolver.UnresolvedConflictHandler = UnresolvedConflictHandler;
 
-            resolver.ResolveConflicts(itemsToCommit, GetItemKey, ConflictHandler,
-                unresolvedConflict: UnresolvedConflictHandler);
+                resolver.ResolveConflicts(itemsToCommit, GetItemKey, ConflictHandler);
 
-            resolver.ResolveConflicts(itemsNotToCommit, GetItemKey, ConflictHandler,
-                commitWinner: false,
-                unresolvedConflict: UnresolvedConflictHandler);
+                resolver.ResolveConflicts(itemsNotToCommit, GetItemKey, ConflictHandler,
+                    commitWinner: false);
+            }
 
             return ret;
         }
