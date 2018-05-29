@@ -265,7 +265,7 @@ namespace Microsoft.Build.Tasks
 
             // On dogfood build machines, v3.5 is not formally installed, so this returns null.
             // We don't use redist lists in this case.            
-            string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>(): GetRedistListPathsFromDisk(referenceAssembliesPath);
+            string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(referenceAssembliesPath);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
@@ -349,6 +349,7 @@ namespace Microsoft.Build.Tasks
 
                 redistList = new RedistList(assemblyTables);
                 s_cachedRedistList.Add(key, redistList);
+
                 return redistList;
             }
         }
@@ -456,7 +457,7 @@ namespace Microsoft.Build.Tasks
         public string GetUnifiedAssemblyName(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            return entry != null ? entry.FullName : assemblyName;
+            return entry?.FullName ?? assemblyName;
         }
 
         /// <summary>

@@ -334,7 +334,7 @@ namespace Microsoft.Build.Tasks
                         ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(
                             "resgen.exe",
                             TargetDotNetFrameworkVersion.Version35),
-                        StringComparison.OrdinalIgnoreCase)
+                            StringComparison.OrdinalIgnoreCase)
                     && String.IsNullOrEmpty(StronglyTypedLanguage))
                 {
                     // 4.0 resgen.exe does support response files, so we can return the resgen arguments here!

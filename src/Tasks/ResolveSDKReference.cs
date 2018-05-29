@@ -999,7 +999,7 @@ namespace Microsoft.Build.Tasks
             private static string GetItemMetadataTrimmed(ITaskItem item, string metadataName)
             {
                 string metadataValue = item.GetMetadata(metadataName);
-                return metadataValue != null ? metadataValue.Trim() : metadataValue;
+                return metadataValue?.Trim() ?? metadataValue;
             }
 
             /// <summary>
@@ -1461,9 +1461,14 @@ namespace Microsoft.Build.Tasks
 
                 if (!hasExpandReferenceAssemblies)
                 {
-                    ResolvedItem.SetMetadata(
-                        SDKManifest.Attributes.ExpandReferenceAssemblies,
-                        referenceItemHasSDKName ? "false" : "true");
+                    if (referenceItemHasSDKName)
+                    {
+                        ResolvedItem.SetMetadata(SDKManifest.Attributes.ExpandReferenceAssemblies, "false");
+                    }
+                    else
+                    {
+                        ResolvedItem.SetMetadata(SDKManifest.Attributes.ExpandReferenceAssemblies, "true");
+                    }
                 }
 
                 if (!hasCopyRedist)

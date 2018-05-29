@@ -6,9 +6,9 @@ using System.Collections;
 
 namespace Microsoft.Build.Tasks
 {
-    /// <remarks>
+    /// <summary>
     /// Represents a cache of inputs to a compilation-style task.
-    /// </remarks>
+    /// </summary>
     /// <remarks>On-disk serialization format, don't change field names or types or use readonly.</remarks>
     [Serializable]
     internal class Dependencies
