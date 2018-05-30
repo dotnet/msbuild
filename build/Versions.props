@@ -27,6 +27,11 @@
     <SystemReflectionMetadataVersion>1.5.0</SystemReflectionMetadataVersion>
   </PropertyGroup>
 
+  <!-- Get .NET Framework reference assemblies from NuGet packages -->
+  <PropertyGroup>
+    <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
+  </PropertyGroup>
+
   <!-- Test Dependencies -->
   <PropertyGroup>
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
