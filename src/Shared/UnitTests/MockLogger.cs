@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else if (eventArgs is BuildErrorEventArgs)
                 {
-                    BuildErrorEventArgs e = (BuildErrorEventArgs) eventArgs;
+                    var e = (BuildErrorEventArgs) eventArgs;
 
                     string logMessage = string.Format(
                         "{0}({1},{2}): {3} error {4}: {5}",
@@ -288,8 +288,7 @@ namespace Microsoft.Build.UnitTests
                 else
                 {
                     // Log the message unless we are a build finished event and logBuildFinished is set to false.
-                    bool logMessage = !(eventArgs is BuildFinishedEventArgs) ||
-                                      (eventArgs is BuildFinishedEventArgs && LogBuildFinished);
+                    bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
                     if (logMessage)
                     {
                         _fullLog.AppendLine(eventArgs.Message);
@@ -365,12 +364,9 @@ namespace Microsoft.Build.UnitTests
         {
             get
             {
-                if (s_engineResourceManager == null)
-                {
-                     s_engineResourceManager = new ResourceManager("Microsoft.Build.Strings", typeof(ProjectCollection).GetTypeInfo().Assembly);
-                }
-
-                return s_engineResourceManager;
+                return s_engineResourceManager ?? (s_engineResourceManager = new ResourceManager(
+                           "Microsoft.Build.Strings",
+                           typeof(ProjectCollection).GetTypeInfo().Assembly));
             }
         }
 
@@ -400,7 +396,7 @@ namespace Microsoft.Build.UnitTests
         {
             lock (_lockObj)
             {
-                StringReader reader = new StringReader(FullLog);
+                var reader = new StringReader(FullLog);
                 int index = 0;
 
                 string currentLine = reader.ReadLine();

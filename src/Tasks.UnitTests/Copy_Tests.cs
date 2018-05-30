@@ -17,6 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,7 +32,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Max copy parallelism to provide to the Copy task.
         /// </summary>
-        public int ParallelismThreadCount { get; set; } = int.MaxValue;
+        private const int ParallelismThreadCount = int.MaxValue;
 
         private const int NoParallelismThreadCount = 1;
 
@@ -1389,16 +1390,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(4, t.CopiedFiles.Length);
 
             // Copy calls to different destinations can come in any order when running in parallel.
-
-            string aPath = Path.Combine(tempPath, "foo", "a.cs");
-            var aCopies = filesActuallyCopied.Where(f => f.Value.Name == aPath).ToList();
-            Assert.Equal(1, aCopies.Count);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), aCopies[0].Key.Name);
-
-            string bPath = Path.Combine(tempPath, "foo", "b.cs");
-            var bCopies = filesActuallyCopied.Where(f => f.Value.Name == bPath).ToList();
-            Assert.Equal(1, bCopies.Count);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), bCopies[0].Key.Name);
+            filesActuallyCopied.Select(f => f.Key.Name).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -1474,7 +1466,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(5, t.CopiedFiles.Length);
 
             // Copy calls to different destinations can come in any order when running in parallel.
-
             string xaPath = Path.Combine(tempPath, "xa.cs");
             var xaCopies = filesActuallyCopied.Where(f => f.Value.Name == xaPath).ToList();
             Assert.Equal(3, xaCopies.Count);

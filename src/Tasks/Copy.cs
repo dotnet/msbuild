@@ -361,7 +361,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Track successfully copied subset.
-            List <ITaskItem> destinationFilesSuccessfullyCopied;
+            List<ITaskItem> destinationFilesSuccessfullyCopied;
 
             // Use single-threaded code path when requested or when there is only copy to make
             // (no need to create all the parallel infrastructure for that case).
@@ -482,7 +482,8 @@ namespace Microsoft.Build.Tasks
                 sourceIndices.Add(i);
             }
 
-            var successFlags = new IntPtr[DestinationFiles.Length];  // Lockless flags updated from each thread.
+            // Lockless flags updated from each thread - each needs to be a processor word for atomicity.
+            var successFlags = new IntPtr[DestinationFiles.Length];
             var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = parallelism };
             var partitionCopyActionBlock = new ActionBlock<List<int>>(
                 async (List<int> partition) =>
@@ -535,8 +536,8 @@ namespace Microsoft.Build.Tasks
                 if (!partitionAccepted)
                 {
                     // Retail assert...
-                    throw new InvalidOperationException(
-                        "BUGCHECK: Failed posting a file copy to an ActionBlock. Should not happen with block at max int capacity");
+                    ErrorUtilities.VerifyThrow(partitionAccepted,
+                        "Failed posting a file copy to an ActionBlock. Should not happen with block at max int capacity.");
                 }
             }
 
