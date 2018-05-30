@@ -92,11 +92,6 @@
         <target state="needs-review-translation">Geçersiz NuGet sürüm dizesi: '{0}'.</target>
         <note>{StrBegin="NETSDK1018: "}</note>
       </trans-unit>
-      <trans-unit id="UnsupportedFramework">
-        <source>NETSDK1019: {0} is an unsupported framework.</source>
-        <target state="needs-review-translation">{0} çerçevesi desteklenmiyor.</target>
-        <note>{StrBegin="NETSDK1019: "}</note>
-      </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
         <target state="needs-review-translation">Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Daha fazla bilgi için bkz. {4}. Yinelenen öğeler: {3}</target>
@@ -217,6 +212,11 @@
         <target state="needs-review-translation">'{0}' konumundaki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. {2} '{3}' geçersizdi.</target>
         <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="new">NETSDK1019: {0} is an unsupported framework.</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="needs-review-translation">Geçerli .NET SDK’sı {0} {1} sürümünü hedeflemeyi desteklemiyor. {0} {2} veya daha düşük bir sürümü hedefleyin veya {0} {1} destekleyen bir .NET SDK’sı kullanın.</target>
@@ -285,7 +285,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">'{0}' başvurusuna yönelik DotNetCliToolReference kullanımı kalktı ve bu projeden kaldırılabilir. Bu araç varsayılan olarak .NET Core SDK’sında paketlenmiştir.</target>
+        <target state="needs-review-translation">'{0}' aracı .NET Core SDK’sına eklendi. Bu uyarının çözümlenmesiyle ilgili bilgi edinmek için bkz. (https://aka.ms/dotnetclitools-in-box).</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -323,7 +323,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="needs-review-translation">{0} paketinin {1} sürümü bulunamadı. NuGet geri yükleme işleminden sonra silinmiş olabilir. Silinmediyse, NuGet geri yükleme işlemi muhtemelen en fazla yol uzunluğu kısıtlamaları nedeniyle yalnızca kısmen başarılı olmuş olabilir.</target>
         <note>{StrBegin="NETSDK1064: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">

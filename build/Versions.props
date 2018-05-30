@@ -8,8 +8,8 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>2.1.400</VersionPrefix>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <VersionPrefix>2.2.100</VersionPrefix>
+    <PreReleaseVersionLabel>preview1</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <!-- Production Dependencies -->

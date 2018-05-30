@@ -285,7 +285,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">使用 DotNetCliToolReference 來參考 '{0}' 的作法已過時，並可以從此專案中移除。此工具預設包含在 .NET Core SDK 中。</target>
+        <target state="needs-review-translation">工具 '{0}' 現已包含在 .NET Core SDK。解決此警告的資訊可於 (https://aka.ms/dotnetclitools-in-box) 取得。</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -323,7 +323,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="needs-review-translation">找不到套件 {0}，版本 {1}。該套件可能因 NuGet restore 而刪除，或是可能因路徑最大長度限制使 NuGet restore 僅部分完成所致。</target>
         <note>{StrBegin="NETSDK1064: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">

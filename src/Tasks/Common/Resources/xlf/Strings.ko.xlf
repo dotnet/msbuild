@@ -92,11 +92,6 @@
         <target state="needs-review-translation">NuGet 버전 문자열 '{0}'이(가) 잘못되었습니다.</target>
         <note>{StrBegin="NETSDK1018: "}</note>
       </trans-unit>
-      <trans-unit id="UnsupportedFramework">
-        <source>NETSDK1019: {0} is an unsupported framework.</source>
-        <target state="needs-review-translation">{0}은(는) 지원되지 않는 프레임워크입니다.</target>
-        <note>{StrBegin="NETSDK1019: "}</note>
-      </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
         <target state="needs-review-translation">{0}' 중복 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 해당 항목을 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 자세한 내용은 {4}을(를) 참조하세요. 중복 항목은 다음과 같습니다. {3}</target>
@@ -217,6 +212,11 @@
         <target state="needs-review-translation">'{0}' 줄 {1}에서 PlatformManifest를 구문 분석하는 중 오류가 발생했습니다. {2} '{3}'이(가) 잘못되었습니다.</target>
         <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="new">NETSDK1019: {0} is an unsupported framework.</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="needs-review-translation">현재 .NET SDK에서는 {0} {1}을(를) 대상으로 하는 것을 지원하지 않습니다. {0} {2} 이하를 대상으로 하거나 {0} {1}을(를) 지원하는 .NET SDK 버전을 사용하세요.</target>
@@ -285,7 +285,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">DotNetCliToolReference를 사용한 '{0}' 참조는 사용되지 않으며 이 프로젝트에서 제거할 수 있습니다. 이도구는 .NET Core SDK에 기본적으로 포함되어 있습니다.</target>
+        <target state="needs-review-translation">'{0}' 도구가 현재 .NET Core SDK에 포함되어 있습니다. 이 경고를 해결하는 방법은 https://aka.ms/dotnetclitools-in-box를 참조하세요.</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -323,7 +323,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="needs-review-translation">패키지 {0}, 버전 {1}을(를) 찾을 수 없습니다. NuGet 복원 이후 삭제되었을 수 있습니다. 아니면, 최대 경로 길이 제한으로 인해 NuGet 복원이 부분적으로만 완료되었을 수 있습니다.</target>
         <note>{StrBegin="NETSDK1064: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">

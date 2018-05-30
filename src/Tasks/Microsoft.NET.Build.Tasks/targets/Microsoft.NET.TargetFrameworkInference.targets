@@ -126,8 +126,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' == ''">
-    <!-- Once we've bundled a 2.1 version of .NET Core with the CLI, reset this property to use $(BundledNETCoreAppTargetFrameworkVersion) -->
-    <NETCoreAppMaximumVersion>2.1</NETCoreAppMaximumVersion>
+    <!-- Once we've bundled a 2.2 version of .NET Core with the CLI, reset this property to use $(BundledNETCoreAppTargetFrameworkVersion) -->
+    <NETCoreAppMaximumVersion>2.2</NETCoreAppMaximumVersion>
     <!--<NETCoreAppMaximumVersion>$(BundledNETCoreAppTargetFrameworkVersion)</NETCoreAppMaximumVersion>-->
   </PropertyGroup>
     

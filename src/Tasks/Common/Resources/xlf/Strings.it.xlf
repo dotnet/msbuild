@@ -92,11 +92,6 @@
         <target state="needs-review-translation">La stringa di versione '{0}' di NuGet non è valida.</target>
         <note>{StrBegin="NETSDK1018: "}</note>
       </trans-unit>
-      <trans-unit id="UnsupportedFramework">
-        <source>NETSDK1019: {0} is an unsupported framework.</source>
-        <target state="needs-review-translation">{0} è un framework non supportato.</target>
-        <note>{StrBegin="NETSDK1019: "}</note>
-      </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
         <target state="needs-review-translation">Sono stati inclusi '{0}' elementi duplicati. Per impostazione predefinita, .NET SDK include '{0}' elementi della directory del progetto. È possibile rimuovere tali elementi dal file di progetto oppure impostare la proprietà '{1}' su '{2}' se si vuole includerli esplicitamente nel file di progetto. Per altre informazioni, vedere {4}. Gli elementi duplicati sono: {3}</target>
@@ -217,6 +212,11 @@
         <target state="needs-review-translation">Si è verificato un errore durante l'analisi di PlatformManifest da '{0}' alla riga {1}. Il valore {2} '{3}' non è valido.</target>
         <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="new">NETSDK1019: {0} is an unsupported framework.</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="needs-review-translation">La versione corrente di .NET SDK non supporta {0} {1} come destinazione. Impostare come destinazione {0} {2} o una versione precedente oppure usare una versione di .NET SDK che supporta {0} {1}.</target>
@@ -285,7 +285,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">L'uso di DotNetCliToolReference per fare riferimento a '{0}' è obsoleto e può essere da questo progetto. Questo strumento è incluso in .NET Core SDK per impostazione predefinita.</target>
+        <target state="needs-review-translation">Lo strumento '{0}' è ora incluso in .NET Core SDK. Per informazioni sulla risoluzione di questo avviso, vedere (https://aka.ms/dotnetclitools-in-box).</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
@@ -323,7 +323,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <target state="needs-review-translation">Il pacchetto {0} versione {1} non è stato trovato. Potrebbe essere stato eliminato dopo il ripristino di NuGet. In caso contrario, il ripristino di NuGet potrebbe essere stato completato solo parzialmente, a causa delle restrizioni relative alla lunghezza massima del percorso.</target>
         <note>{StrBegin="NETSDK1064: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
