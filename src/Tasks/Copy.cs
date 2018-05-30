@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        private bool _canceling;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         // Bool is just a placeholder, we're mainly interested in a threadsafe key set.
         private readonly ConcurrentDictionary<string, bool> _directoriesKnownToExist = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public void Cancel()
         {
-            _canceling = true;
+            _cancellationTokenSource.Cancel();
         }
 
         #region ITask Members
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Tasks
             // copiedFiles contains only the copies that were successful.
             CopiedFiles = destinationFilesSuccessfullyCopied.ToArray();
 
-            return success && !_canceling;
+            return success && !_cancellationTokenSource.IsCancellationRequested;
         }
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace Microsoft.Build.Tasks
                 StringComparer.OrdinalIgnoreCase);
 
             // Now that we have a list of destinationFolder files, copy from source to destinationFolder.
-            for (int i = 0; i < SourceFiles.Length && !_canceling; ++i)
+            for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
                 bool copyComplete = false;
                 string destPath = DestinationFiles[i].ItemSpec;
@@ -469,7 +469,7 @@ namespace Microsoft.Build.Tasks
                 DestinationFiles.Length, // Set length to common case of 1:1 source->dest.
                 StringComparer.OrdinalIgnoreCase);
 
-            for (int i = 0; i < SourceFiles.Length && !_canceling; ++i)
+            for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
                 ITaskItem destItem = DestinationFiles[i];
                 string destPath = destItem.ItemSpec;
@@ -484,14 +484,18 @@ namespace Microsoft.Build.Tasks
 
             // Lockless flags updated from each thread - each needs to be a processor word for atomicity.
             var successFlags = new IntPtr[DestinationFiles.Length];
-            var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = parallelism };
+            var actionBlockOptions = new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = parallelism,
+                CancellationToken = _cancellationTokenSource.Token
+            };
             var partitionCopyActionBlock = new ActionBlock<List<int>>(
                 async (List<int> partition) =>
                 {
                     // Break from synchronous thread context of caller to get onto thread pool thread.
                     await System.Threading.Tasks.Task.Yield();
 
-                    for (int partitionIndex = 0; partitionIndex < partition.Count; partitionIndex++)
+                    for (int partitionIndex = 0; partitionIndex < partition.Count && !_cancellationTokenSource.IsCancellationRequested; partitionIndex++)
                     {
                         int fileIndex = partition[partitionIndex];
                         ITaskItem sourceItem = SourceFiles[fileIndex];
@@ -536,7 +540,7 @@ namespace Microsoft.Build.Tasks
                 if (!partitionAccepted)
                 {
                     // Retail assert...
-                    ErrorUtilities.VerifyThrow(partitionAccepted,
+                    ErrorUtilities.VerifyThrow(false,
                         "Failed posting a file copy to an ActionBlock. Should not happen with block at max int capacity.");
                 }
             }
@@ -661,8 +665,7 @@ namespace Microsoft.Build.Tasks
                     // If we got here, then the file's time and size match AND
                     // the user set the SkipUnchangedFiles flag which means we
                     // should skip matching files.
-                    Log.LogMessageFromResources
-                    (
+                    Log.LogMessageFromResources(
                         MessageImportance.Low,
                         "Copy.DidNotCopyBecauseOfFileMatch",
                         sourceFileState.Name,
@@ -674,10 +677,17 @@ namespace Microsoft.Build.Tasks
                 // We only do the cheap check for identicalness here, we try the more expensive check
                 // of comparing the fullpaths of source and destination to see if they are identical,
                 // in the exception handler lower down.
-                else if (0 != String.Compare(sourceFileState.Name, destinationFileState.Name, StringComparison.OrdinalIgnoreCase))
+                else if (0 != String.Compare(
+                             sourceFileState.Name,
+                             destinationFileState.Name,
+                             StringComparison.OrdinalIgnoreCase))
                 {
                     success = DoCopyWithRetries(sourceFileState, destinationFileState, copyFile);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                success = false;
             }
             catch (PathTooLongException e)
             {
@@ -700,7 +710,7 @@ namespace Microsoft.Build.Tasks
         {
             int retries = 0;
 
-            while (!_canceling)
+            while (!_cancellationTokenSource.IsCancellationRequested)
             {
                 try
                 {
@@ -709,6 +719,10 @@ namespace Microsoft.Build.Tasks
                     {
                         return result.Value;
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
