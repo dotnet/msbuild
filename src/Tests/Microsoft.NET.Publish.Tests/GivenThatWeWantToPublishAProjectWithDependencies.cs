@@ -224,7 +224,8 @@ namespace Microsoft.NET.Publish.Tests
             kitchenSinkAsset.Restore(Log, "TestApp");
             
             var publishCommand = new PublishCommand(Log, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
-            var publishResult = publishCommand.Execute("/p:" + properties);
+            var publishArgs = properties.Split(';').Select(p => $"/p:{p}").ToArray();
+            var publishResult = publishCommand.Execute(publishArgs);
 
             publishResult.Should().Pass();
 
