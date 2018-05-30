@@ -108,7 +108,9 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] DestinationFiles { get; set; }
 
-        // Subset that were successfully copied
+        /// <summary>
+        /// The subset of files that were successfully copied.
+        /// </summary>
         [Output]
         public ITaskItem[] CopiedFiles { get; private set; }
 
