@@ -878,20 +878,16 @@ namespace Microsoft.Build.Tasks
         }
 
     	private static int GetParallelismFromEnvironment()
-        {
-            string parallelismSetting = Environment.GetEnvironmentVariable("MSBuildCopyThreadParallelism");
-            if (int.TryParse(parallelismSetting, out int parallelism) && parallelism >= 0)
-            {
-                if (parallelism == 0)
-                {
-                    parallelism = int.MaxValue;
-                }
-            }
-            else
-            {
-                parallelism = DefaultCopyParallelism;
-            }
-
+	    {
+	        int parallelism = Traits.Instance.CopyTaskParallelism;
+	        if (parallelism < 0)
+	        {
+	            parallelism = DefaultCopyParallelism;
+	        }
+            else if (parallelism == 0)
+	        {
+	            parallelism = int.MaxValue;
+	        }
             return parallelism;
         }
     }
