@@ -141,14 +141,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 foreach (KeyValuePair<string, double> measurement in measurements)
                 {
-                    if (eventMeasurements.ContainsKey(measurement.Key))
-                    {
-                        eventMeasurements[measurement.Key] = measurement.Value;
-                    }
-                    else
-                    {
-                        eventMeasurements.Add(measurement.Key, measurement.Value);
-                    }
+                    eventMeasurements[measurement.Key] = measurement.Value;
                 }
             }
             return eventMeasurements;
@@ -161,14 +154,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 var eventProperties = new Dictionary<string, string>(_commonProperties);
                 foreach (KeyValuePair<string, string> property in properties)
                 {
-                    if (eventProperties.ContainsKey(property.Key))
-                    {
-                        eventProperties[property.Key] = property.Value;
-                    }
-                    else
-                    {
-                        eventProperties.Add(property.Key, property.Value);
-                    }
+                    eventProperties[property.Key] = property.Value;
                 }
                 return eventProperties;
             }
