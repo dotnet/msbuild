@@ -1369,7 +1369,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(4, t.CopiedFiles.Length);
 
             // Copy calls to different destinations can come in any order when running in parallel.
-            filesActuallyCopied.Select(f => f.Key.Name).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
+            filesActuallyCopied.Select(f => Path.GetFileName(f.Key.Name)).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
