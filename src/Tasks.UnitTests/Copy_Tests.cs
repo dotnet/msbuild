@@ -2071,7 +2071,7 @@ namespace Microsoft.Build.UnitTests
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
 
                 string destinationFileContents = File.ReadAllText(destFile);
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents);
 
                 Assert.Equal(1, t.DestinationFiles.Length);
                 Assert.Equal(1, t.CopiedFiles.Length);
@@ -2125,7 +2125,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception)
             {
-                Console.WriteLine("CopyToDestinationFolderWithHardLinkFallbackNetwork test could not access the network as expected.");
+                Console.WriteLine("CopyToDestinationFolderWithHardLinkFallbackNetwork test could not access the network.");
                 // Something caused us to not be able to access our "network" share, don't fail.
                 return;
             }
