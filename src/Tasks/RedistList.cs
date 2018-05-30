@@ -3,24 +3,20 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Microsoft.Build.Tasks
 {
-    /*
-     * Class:   RedistList
-     *
-     */
     /// <summary>
     /// Defines list of redistributable assemblies for use in dependency analysis.
     /// The input is a set of XML files in a well known format consisting of
@@ -36,7 +32,8 @@ namespace Microsoft.Build.Tasks
     internal sealed class RedistList
     {
         // List of cached RedistList objects, the key is a semi-colon delimited list of data file paths
-        private readonly static Hashtable s_cachedRedistList = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, RedistList> s_cachedRedistList = new Dictionary<string, RedistList>(StringComparer.OrdinalIgnoreCase);
+
         // Process wide cache of redist lists found on disk under fx directories.
         // K: target framework directory, V: redist lists found on disk underneath K
         private static Dictionary<string, string[]> s_redistListPathCache;
@@ -48,33 +45,32 @@ namespace Microsoft.Build.Tasks
         /// When we check to see if an assembly is in this redist list we want to cache it so that if we ask again we do not
         /// have to re-scan bits of the redist list and do the assemblynameExtension comparisons.
         /// </summary>
-        private ConcurrentDictionary<AssemblyNameExtension, NGen<bool>> _assemblyNameInRedist = new ConcurrentDictionary<AssemblyNameExtension, NGen<bool>>(AssemblyNameComparer.GenericComparer);
+        private readonly ConcurrentDictionary<AssemblyNameExtension, NGen<bool>> _assemblyNameInRedist = new ConcurrentDictionary<AssemblyNameExtension, NGen<bool>>(AssemblyNameComparer.GenericComparer);
 
         /// <summary>
         /// AssemblyName to unified assemblyName. We make this kind of call a lot and also will ask for the same name multiple times.
         /// </summary>
-        private ConcurrentDictionary<string, AssemblyEntry> _assemblyNameToUnifiedAssemblyName = new ConcurrentDictionary<string, AssemblyEntry>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, AssemblyEntry> _assemblyNameToUnifiedAssemblyName = new ConcurrentDictionary<string, AssemblyEntry>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// AssemblyName to AssemblyNameExtension object. We make this kind of call a lot and also will ask for the same name multiple times.
         /// </summary>
-        private ConcurrentDictionary<string, AssemblyNameExtension> _assemblyNameToAssemblyNameExtension = new ConcurrentDictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, AssemblyNameExtension> _assemblyNameToAssemblyNameExtension = new ConcurrentDictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// When we check to see if an assembly is remapped we should cache the result because we may get asked the same question a number of times.
         /// Since the remapping list does not change between builds neither would the results of the remapping for a given fusion name.
         /// </summary>
-        private ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension> _remappingCache = new ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
+        private readonly ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension> _remappingCache = new ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
 
         // List of cached BlackList RedistList objects, the key is a semi-colon delimited list of data file paths
-        private ConcurrentDictionary<string, Hashtable> _cachedBlackList = new ConcurrentDictionary<string, Hashtable>(StringComparer.OrdinalIgnoreCase);
-
-
+        private readonly ConcurrentDictionary<string, Hashtable> _cachedBlackList = new ConcurrentDictionary<string, Hashtable>(StringComparer.OrdinalIgnoreCase);
+        
         /***************Fields which are only set in the constructor and should not be modified by the class. **********************/
         // Array of errors encountered while reading files.
-        private ReadOnlyCollection<Exception> _errors;
+        private readonly ReadOnlyCollection<Exception> _errors;
         // Array of files corresponding to the errors above.
-        private ReadOnlyCollection<String> _errorFilenames;
+        private readonly ReadOnlyCollection<String> _errorFilenames;
 
         // List of assembly entries loaded from the XML data files, one entry for each valid File element
         private readonly ReadOnlyCollection<AssemblyEntry> _assemblyList;
@@ -91,12 +87,12 @@ namespace Microsoft.Build.Tasks
 
         private RedistList(AssemblyTableInfo[] assemblyTableInfos)
         {
-            List<Exception> errors = new List<Exception>();
-            List<string> errorFilenames = new List<string>();
-            List<AssemblyEntry> assemblyList = new List<AssemblyEntry>();
-            List<AssemblyRemapping> remappingEntries = new List<AssemblyRemapping>();
+            var errors = new List<Exception>();
+            var errorFilenames = new List<string>();
+            var assemblyList = new List<AssemblyEntry>();
+            var remappingEntries = new List<AssemblyRemapping>();
 
-            if (assemblyTableInfos == null) throw new ArgumentNullException("assemblyTableInfos");
+            if (assemblyTableInfos == null) throw new ArgumentNullException(nameof(assemblyTableInfos));
             foreach (AssemblyTableInfo assemblyTableInfo in assemblyTableInfos)
             {
                 ReadFile(assemblyTableInfo, assemblyList, errors, errorFilenames, remappingEntries);
@@ -110,12 +106,14 @@ namespace Microsoft.Build.Tasks
             assemblyList.Sort(s_sortByVersionDescending);
             _assemblyList = new ReadOnlyCollection<AssemblyEntry>(assemblyList);
 
-            Dictionary<string, int> simpleNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var simpleNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             for (int i = 0; i < assemblyList.Count; ++i)
             {
                 AssemblyEntry entry = assemblyList[i];
                 if (!simpleNameMap.ContainsKey(entry.SimpleName))
+                {
                     simpleNameMap.Add(entry.SimpleName, i);
+                }
             }
 
             _simpleNameMap = new ReadOnlyDictionary<string, int>(simpleNameMap);
@@ -124,36 +122,17 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns any exceptions encountered while reading\parsing the XML.
         /// </summary>
-        internal Exception[] Errors
-        {
-            get
-            {
-                return _errors.ToArray();
-            }
-        }
+        internal Exception[] Errors => _errors.ToArray();
 
         /// <summary>
         /// Returns any exceptions encountered while reading\parsing the XML.
         /// </summary>
-        internal string[] ErrorFileNames
-        {
-            get
-            {
-                return _errorFilenames.ToArray();
-            }
-        }
-
+        internal string[] ErrorFileNames => _errorFilenames.ToArray();
 
         /// <summary>
         /// Returns the number of entries in the redist list
         /// </summary>
-        internal int Count
-        {
-            get
-            {
-                return _assemblyList.Count;
-            }
-        }
+        internal int Count => _assemblyList.Count;
 
         /// <summary>
         /// Determines whether or not the specified assembly is part of the Framework.
@@ -163,17 +142,18 @@ namespace Microsoft.Build.Tasks
         public bool IsFrameworkAssembly(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            if (entry != null && !String.IsNullOrEmpty(entry.RedistName)){
+            if (!String.IsNullOrEmpty(entry?.RedistName))
+            {
                 AssemblyNameExtension assembly = GetAssemblyNameExtension(assemblyName);
 
                 // The version of the checking assembly should be lower than the one of the unified assembly
-                if(assembly.Version <= entry.AssemblyNameExtension.Version)
+                if (assembly.Version <= entry.AssemblyNameExtension.Version)
+                {
                     return entry.RedistName.StartsWith("Microsoft-Windows-CLRCoreComp", StringComparison.OrdinalIgnoreCase);
-                else
-                    return false;
-            }
-            else
+                }
                 return false;
+            }
+            return false;
         }
 
         /// <summary>
@@ -184,10 +164,7 @@ namespace Microsoft.Build.Tasks
         public bool IsPrerequisiteAssembly(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            if (entry != null)
-                return entry.InGAC;
-            else
-                return false;
+            return entry != null && entry.InGAC;
         }
 
         /// <summary>
@@ -196,9 +173,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public AssemblyNameExtension RemapAssembly(AssemblyNameExtension extensionToRemap)
         {
-            AssemblyNameExtension remappedExtension = null;
-
-            if (!_remappingCache.TryGetValue(extensionToRemap, out remappedExtension))
+            if (!_remappingCache.TryGetValue(extensionToRemap, out AssemblyNameExtension remappedExtension))
             {
                 // We do not expect there to be more than a handfull of entries
                 foreach (AssemblyRemapping remapEntry in _remapEntries)
@@ -213,9 +188,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Important to clone since we tend to mutate assemblyNameExtensions in RAR
-            return remappedExtension != null ? remappedExtension.Clone() : null;
+            return remappedExtension?.Clone();
         }
-
 
         /// <summary>
         /// Determines whether or not the specified assembly is a redist root.
@@ -223,14 +197,7 @@ namespace Microsoft.Build.Tasks
         internal bool? IsRedistRoot(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            if (entry != null)
-            {
-                return entry.IsRedistRoot;
-            }
-            else
-            {
-                return null;
-            }
+            return entry?.IsRedistRoot;
         }
 
         /// <summary>
@@ -247,8 +214,7 @@ namespace Microsoft.Build.Tasks
                 redistListPaths = RedistList.GetRedistListPathsFromDisk(frameworkVersion20Path);
             }
 
-            AssemblyTableInfo[] assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
-
+            var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
             {
                 assemblyTableInfos[i] = new AssemblyTableInfo(redistListPaths[i], frameworkVersion20Path);
@@ -256,7 +222,6 @@ namespace Microsoft.Build.Tasks
 
             return GetRedistList(assemblyTableInfos);
         }
-
 
         /// <summary>
         /// Returns an instance of RedistList initialized from the framework folder for v3.0
@@ -281,14 +246,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// This is owned by chris mann
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
         public static RedistList GetRedistListFromPath(string path)
         {
-            string[] redistListPaths = (path == null) ? Array.Empty<string>(): RedistList.GetRedistListPathsFromDisk(path);
+            string[] redistListPaths = (path == null) ? Array.Empty<string>(): GetRedistListPathsFromDisk(path);
 
-            AssemblyTableInfo[] assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
-
+            var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
             {
                 assemblyTableInfos[i] = new AssemblyTableInfo(redistListPaths[i], path);
@@ -303,10 +265,9 @@ namespace Microsoft.Build.Tasks
 
             // On dogfood build machines, v3.5 is not formally installed, so this returns null.
             // We don't use redist lists in this case.            
-            string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>(): RedistList.GetRedistListPathsFromDisk(referenceAssembliesPath);
+            string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(referenceAssembliesPath);
 
-            AssemblyTableInfo[] assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
-
+            var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
             {
                 assemblyTableInfos[i] = new AssemblyTableInfo(redistListPaths[i], referenceAssembliesPath);
@@ -320,11 +281,10 @@ namespace Microsoft.Build.Tasks
         /// redist list files underneath that path.  A process-wide cache is used to
         /// avoid hitting the disk multiple times for the same framework directory.
         /// </summary>
-        /// <param name="frameworkDirectory"></param>
         /// <returns>Array of paths to redist lists under given framework directory.</returns>
         public static string[] GetRedistListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, "frameworkDirectory");
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
 
             lock (s_locker)
             {
@@ -333,21 +293,20 @@ namespace Microsoft.Build.Tasks
                     s_redistListPathCache = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
                 }
 
-                if (!s_redistListPathCache.ContainsKey(frameworkDirectory))
+                if (!s_redistListPathCache.TryGetValue(frameworkDirectory, out string[] results))
                 {
                     string redistDirectory = Path.Combine(frameworkDirectory, RedistListFolder);
 
                     if (Directory.Exists(redistDirectory))
                     {
-                        string[] results = Directory.GetFiles(redistDirectory, MatchPattern);
+                        results = Directory.GetFiles(redistDirectory, MatchPattern);
                         s_redistListPathCache.Add(frameworkDirectory, results);
-
-                        return s_redistListPathCache[frameworkDirectory];
+                        return results;
                     }
                 }
                 else
                 {
-                    return s_redistListPathCache[frameworkDirectory];
+                    return results;
                 }
             }
 
@@ -357,19 +316,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of this redist.
         /// </summary>
-        /// <param name="assemblyName"></param>
-        /// <returns></returns>
         internal string RedistName(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            if (entry != null)
-            {
-                return entry.RedistName;
-            }
-            else
-            {
-                return null;
-            }
+            return entry?.RedistName;
         }
 
         /// <summary>
@@ -379,10 +329,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static RedistList GetRedistList(AssemblyTableInfo[] assemblyTables)
         {
-            if (assemblyTables == null) throw new ArgumentNullException("assemblyTables");
+            if (assemblyTables == null) throw new ArgumentNullException(nameof(assemblyTables));
             Array.Sort(assemblyTables);
 
-            StringBuilder keyBuilder = assemblyTables.Length > 0 ? new StringBuilder(assemblyTables[0].Descriptor) : new StringBuilder();
+            var keyBuilder = assemblyTables.Length > 0 ? new StringBuilder(assemblyTables[0].Descriptor) : new StringBuilder();
             for (int i = 1; i < assemblyTables.Length; ++i)
             {
                 keyBuilder.Append(';');
@@ -392,10 +342,12 @@ namespace Microsoft.Build.Tasks
             string key = keyBuilder.ToString();
             lock (s_locker)
             {
-                if (s_cachedRedistList.ContainsKey(key))
-                    return (RedistList)s_cachedRedistList[key];
+                if (s_cachedRedistList.TryGetValue(key, out RedistList redistList))
+                {
+                    return redistList;
+                }
 
-                RedistList redistList = new RedistList(assemblyTables);
+                redistList = new RedistList(assemblyTables);
                 s_cachedRedistList.Add(key, redistList);
 
                 return redistList;
@@ -404,28 +356,28 @@ namespace Microsoft.Build.Tasks
 
         private static string GetSimpleName(string assemblyName)
         {
-            if (assemblyName == null) throw new ArgumentNullException("assemblyName");
+            if (assemblyName == null) throw new ArgumentNullException(nameof(assemblyName));
             int i = assemblyName.IndexOf(",", StringComparison.Ordinal);
             return i > 0 ? assemblyName.Substring(0, i) : assemblyName;
         }
 
         private AssemblyEntry GetUnifiedAssemblyEntry(string assemblyName)
         {
-            if (assemblyName == null) throw new ArgumentNullException("assemblyName");
-            AssemblyEntry unifiedEntry = null;
-            if (!_assemblyNameToUnifiedAssemblyName.TryGetValue(assemblyName, out unifiedEntry))
+            if (assemblyName == null) throw new ArgumentNullException(nameof(assemblyName));
+            if (!_assemblyNameToUnifiedAssemblyName.TryGetValue(assemblyName, out AssemblyEntry unifiedEntry))
             {
                 string simpleName = GetSimpleName(assemblyName);
-                if (_simpleNameMap.ContainsKey(simpleName))
+                if (_simpleNameMap.TryGetValue(simpleName, out int index))
                 {
                     // Provides the starting index into assemblyList of the simpleName
-                    int index = (int)_simpleNameMap[simpleName];
-                    AssemblyNameExtension highestVersionInRedist = new AssemblyNameExtension(_assemblyList[index].FullName);
+                    var highestVersionInRedist = new AssemblyNameExtension(_assemblyList[index].FullName);
                     for (int i = index; i < _assemblyList.Count; ++i)
                     {
                         AssemblyEntry entry = _assemblyList[i];
                         if (!string.Equals(simpleName, entry.SimpleName, StringComparison.OrdinalIgnoreCase))
+                        {
                             break;
+                        }
 
                         AssemblyNameExtension firstAssembly = GetAssemblyNameExtension(assemblyName);
                         AssemblyNameExtension secondAssembly = entry.AssemblyNameExtension;
@@ -450,7 +402,7 @@ namespace Microsoft.Build.Tasks
 
         private AssemblyNameExtension GetAssemblyNameExtension(string assemblyName)
         {
-            return _assemblyNameToAssemblyNameExtension.GetOrAdd(assemblyName, (key) => new AssemblyNameExtension(key));
+            return _assemblyNameToAssemblyNameExtension.GetOrAdd(assemblyName, key => new AssemblyNameExtension(key));
         }
 
         /// <summary>
@@ -458,16 +410,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool FrameworkAssemblyEntryInRedist(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, "assemblyName");
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
 
-            NGen<bool> isAssemblyNameInRedist = false;
-            if (!_assemblyNameInRedist.TryGetValue(assemblyName, out isAssemblyNameInRedist))
+            if (!_assemblyNameInRedist.TryGetValue(assemblyName, out NGen<bool> isAssemblyNameInRedist))
             {
                 string simpleName = GetSimpleName(assemblyName.Name);
-                if (_simpleNameMap.ContainsKey(simpleName))
+                if (_simpleNameMap.TryGetValue(simpleName, out int index))
                 {
                     // Provides the starting index into assemblyList of the simpleName
-                    int index = (int)_simpleNameMap[simpleName];
                     for (int i = index; i < _assemblyList.Count; ++i)
                     {
                         AssemblyEntry entry = _assemblyList[i];
@@ -507,10 +457,7 @@ namespace Microsoft.Build.Tasks
         public string GetUnifiedAssemblyName(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            if (entry != null)
-                return entry.FullName;
-            else
-                return assemblyName;
+            return entry?.FullName ?? assemblyName;
         }
 
         /// <summary>
@@ -523,11 +470,10 @@ namespace Microsoft.Build.Tasks
             string simpleName
         )
         {
-            List<AssemblyEntry> candidateNames = new List<AssemblyEntry>();
+            var candidateNames = new List<AssemblyEntry>();
 
-            if (_simpleNameMap.ContainsKey(simpleName))
+            if (_simpleNameMap.TryGetValue(simpleName, out int index))
             {
-                int index = (int)_simpleNameMap[simpleName];
                 for (int i = index; i < _assemblyList.Count; ++i)
                 {
                     AssemblyEntry entry = _assemblyList[i];
@@ -572,7 +518,7 @@ namespace Microsoft.Build.Tasks
             // Sort so that the same set of whiteListAssemblyTableInfo will generate the same key for the cache
             Array.Sort(whiteListAssemblyTableInfo);
 
-            StringBuilder keyBuilder = whiteListAssemblyTableInfo.Length > 0 ? new StringBuilder(whiteListAssemblyTableInfo[0].Descriptor) : new StringBuilder();
+            var keyBuilder = whiteListAssemblyTableInfo.Length > 0 ? new StringBuilder(whiteListAssemblyTableInfo[0].Descriptor) : new StringBuilder();
 
             // Concatenate the paths to the whitelist xml files together to get the key into the blacklist cache.
             for (int i = 1; i < whiteListAssemblyTableInfo.Length; ++i)
@@ -583,19 +529,17 @@ namespace Microsoft.Build.Tasks
 
             string key = keyBuilder.ToString();
 
-            Hashtable returnTable = null;
-
-            if (!_cachedBlackList.TryGetValue(key, out returnTable))
+            if (!_cachedBlackList.TryGetValue(key, out Hashtable returnTable))
             {
-                List<AssemblyEntry> whiteListAssemblies = new List<AssemblyEntry>();
+                var whiteListAssemblies = new List<AssemblyEntry>();
 
                 // Unique list of redist names in the subset files read in. We use this to make sure we are subtracting from the correct framework list.
-                Hashtable uniqueClientListNames = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                var uniqueClientListNames = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
                 // Get the assembly entries for the white list
                 foreach (AssemblyTableInfo info in whiteListAssemblyTableInfo)
                 {
-                    List<AssemblyEntry> whiteListAssembliesReadIn = new List<AssemblyEntry>();
+                    var whiteListAssembliesReadIn = new List<AssemblyEntry>();
 
                     // Need to know how many errors are in the list before the read file call so that if the redist name is null due to an error
                     // we do not get a "redist name is null or empty" error when in actual fact it was a file not found error.
@@ -603,7 +547,6 @@ namespace Microsoft.Build.Tasks
 
                     // Read in the subset list file. 
                     string redistName = ReadFile(info, whiteListAssembliesReadIn, whiteListErrors, whiteListErrorFileNames, null);
-
 
                     // Get the client subset name which has been read in.
                     if (!String.IsNullOrEmpty(redistName))
@@ -631,7 +574,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Dont care about the case of the assembly name
-                Hashtable blackList = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                var blackList = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
                 // Do we have any subset names?
                 bool uniqueClientNamesExist = uniqueClientListNames.Count > 0;
@@ -659,15 +602,14 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-
                 // Go through each of the white list assemblies and remove it from the black list. Do this based on the assembly name and the redist name
                 foreach (AssemblyEntry whiteListEntry in whiteListAssemblies)
                 {
                     blackList.Remove(whiteListEntry.FullName + "," + whiteListEntry.RedistName);
                 }
 
-                //The output hashtable needs to be just the full names and not the names + redist name
-                Hashtable blackListOfAssemblyNames = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                // The output hashtable needs to be just the full names and not the names + redist name
+                var blackListOfAssemblyNames = new Hashtable(StringComparer.OrdinalIgnoreCase);
                 foreach (string name in blackList.Values)
                 {
                     blackListOfAssemblyNames[name] = null;
@@ -696,12 +638,11 @@ namespace Microsoft.Build.Tasks
             // Keep track of what assembly entries we have read in from the redist list, we want to track this because we need to know if there are duplicate entries
             // if there are duplicate entries one with ingac = true and one with InGac=false we want to choose the one with ingac true.
             // The reason we want to take the ingac True over ingac false is that this indicates the assembly IS in the gac.
-            Dictionary<string, AssemblyEntry> assemblyEntries = new Dictionary<string, AssemblyEntry>(StringComparer.OrdinalIgnoreCase);
+            var assemblyEntries = new Dictionary<string, AssemblyEntry>(StringComparer.OrdinalIgnoreCase);
 
             try
             {
-                var readerSettings = new XmlReaderSettings();
-                readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 reader = XmlReader.Create(path, readerSettings);
 
                 while (reader.Read())
@@ -750,10 +691,7 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                if (reader != null)
-                {
-                    reader.Dispose();
-                }
+                reader?.Dispose();
             }
 
             foreach (AssemblyEntry entry in assemblyEntries.Values)
@@ -796,9 +734,9 @@ namespace Microsoft.Build.Tasks
 
                     if (fromEntry != null && toEntry != null)
                     {
-                        AssemblyRemapping pair = new AssemblyRemapping(fromEntry, toEntry);
+                        var pair = new AssemblyRemapping(fromEntry, toEntry);
 
-                        if (!mapping.Any<AssemblyRemapping>(x => x.From.Equals(pair.From)))
+                        if (!mapping.Any(x => x.From.Equals(pair.From)))
                         {
                             mapping.Add(pair);
                         }
@@ -839,10 +777,9 @@ namespace Microsoft.Build.Tasks
                             // We do not need to add the redistName and the framework directory because this will be the same for all entries in the current redist list being read.
                             string hashIndex = String.Format(CultureInfo.InvariantCulture, "{0},{1}", newEntry.FullName, newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString());
 
-                            AssemblyEntry dictionaryEntry = null;
-                            assemblyEntries.TryGetValue(hashIndex, out dictionaryEntry);
+                            assemblyEntries.TryGetValue(hashIndex, out AssemblyEntry dictionaryEntry);
                             // If the entry is not in the hashtable or the entry is in the hashtable but the new entry has the ingac flag true, make sure the hashtable contains the entry with the ingac true.
-                            if (dictionaryEntry == null || (dictionaryEntry != null && newEntry.InGAC))
+                            if (dictionaryEntry == null || newEntry.InGAC)
                             {
                                 assemblyEntries[hashIndex] = newEntry;
                             }
@@ -871,7 +808,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static AssemblyEntry ReadFileListEntry(AssemblyTableInfo assemblyTableInfo, string path, string redistName, XmlReader reader, bool fullFusionNameRequired)
         {
-            Dictionary<string, string> attributes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var attributes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             reader.MoveToFirstAttribute();
             do
@@ -881,39 +818,23 @@ namespace Microsoft.Build.Tasks
 
             reader.MoveToElement();
 
-            string name;
-            attributes.TryGetValue("AssemblyName", out name);
-
-            string version;
-            attributes.TryGetValue("Version", out version);
-
-            string publicKeyToken;
-            attributes.TryGetValue("PublicKeyToken", out publicKeyToken);
-
-            string culture;
-            attributes.TryGetValue("Culture", out culture);
-
-            string inGAC;
-            attributes.TryGetValue("InGAC", out inGAC);
-
-            string retargetable;
-            attributes.TryGetValue("Retargetable", out retargetable);
-
-            string isRedistRoot;
-            attributes.TryGetValue("IsRedistRoot", out isRedistRoot);
-
-            bool inGACFlag;
-            if (!bool.TryParse(inGAC, out inGACFlag))
+            attributes.TryGetValue("AssemblyName", out string name);
+            attributes.TryGetValue("Version", out string version);
+            attributes.TryGetValue("PublicKeyToken", out string publicKeyToken);
+            attributes.TryGetValue("Culture", out string culture);
+            attributes.TryGetValue("InGAC", out string inGAC);
+            attributes.TryGetValue("Retargetable", out string retargetable);
+            attributes.TryGetValue("IsRedistRoot", out string isRedistRoot);
+            if (!bool.TryParse(inGAC, out bool inGACFlag))
             {
                 inGACFlag = true;                           // true by default 
             }
-            bool retargetableFlag;
-            // The retargetable flag is Yes or No for some reason
-            retargetableFlag = "Yes".Equals(retargetable, StringComparison.OrdinalIgnoreCase);
 
-            bool isRedistRootAsBoolean;
+            // The retargetable flag is Yes or No for some reason
+            bool retargetableFlag = "Yes".Equals(retargetable, StringComparison.OrdinalIgnoreCase);
+
             bool? isRedistRootFlag = null;                  // null by default.
-            if (bool.TryParse(isRedistRoot, out isRedistRootAsBoolean))
+            if (bool.TryParse(isRedistRoot, out bool isRedistRootAsBoolean))
             {
                 isRedistRootFlag = isRedistRootAsBoolean;
             }
@@ -932,7 +853,7 @@ namespace Microsoft.Build.Tasks
         }
 
         #region Comparers
-        private readonly static IComparer<AssemblyEntry> s_sortByVersionDescending = new SortByVersionDescending();
+        private static readonly IComparer<AssemblyEntry> s_sortByVersionDescending = new SortByVersionDescending();
 
         /// <summary>
         /// The redist list is a collection of AssemblyEntry. We would like to have the redist list sorted on two keys.
@@ -992,41 +913,23 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal class AssemblyTableInfo : IComparable
     {
-        private readonly string _path;
-        private readonly string _frameworkDirectory;
         private string _descriptor;
 
         internal AssemblyTableInfo(string path, string frameworkDirectory)
         {
-            _path = path;
-            _frameworkDirectory = frameworkDirectory;
+            Path = path;
+            FrameworkDirectory = frameworkDirectory;
         }
 
-        internal string Path
-        {
-            get { return _path; }
-        }
+        internal string Path { get; }
 
-        internal string FrameworkDirectory
-        {
-            get { return _frameworkDirectory; }
-        }
+        internal string FrameworkDirectory { get; }
 
-        internal string Descriptor
-        {
-            get
-            {
-                if (null == _descriptor)
-                {
-                    _descriptor = _path + _frameworkDirectory;
-                }
-                return _descriptor;
-            }
-        }
+        internal string Descriptor => _descriptor ?? (_descriptor = Path + FrameworkDirectory);
 
         public int CompareTo(object obj)
         {
-            AssemblyTableInfo that = (AssemblyTableInfo)obj;
+            var that = (AssemblyTableInfo)obj;
             return String.Compare(Descriptor, that.Descriptor, StringComparison.OrdinalIgnoreCase);
         }
     }
@@ -1044,7 +947,7 @@ namespace Microsoft.Build.Tasks
         private static Dictionary<string, string[]> s_subsetListPathCache;
 
         // Locl for subsetListPathCache
-        private static Object s_subsetListPathCacheLock = new Object();
+        private static readonly Object s_subsetListPathCacheLock = new Object();
 
         // Folder to look for the subset lists in under the target framework directories
         private const string subsetListFolder = "SubsetList";
@@ -1052,7 +955,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The subset names to search for.
         /// </summary>
-        private string[] _subsetToSearchFor;
+        private readonly string[] _subsetToSearchFor;
 
         #endregion
 
@@ -1066,7 +969,7 @@ namespace Microsoft.Build.Tasks
         /// found in the target framework directories. This can happen if the the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, "subsetToSearchFor");
+            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));
             _subsetToSearchFor = subsetToSearchFor;
         }
 
@@ -1076,13 +979,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  Folder to look for the subset lists under the target framework directories
         /// </summary>
-        public static string SubsetListFolder
-        {
-            get
-            {
-                return subsetListFolder;
-            }
-        }
+        public static string SubsetListFolder => subsetListFolder;
 
         #endregion
 
@@ -1096,7 +993,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths locations to subset lists under the given framework directory.</returns>
         public string[] GetSubsetListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, "frameworkDirectory");
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
 
             // Make sure we have some subset names to search for it is possible that no subsets are asked for
             // so we should return as quickly as possible in that case.
@@ -1111,22 +1008,19 @@ namespace Microsoft.Build.Tasks
                         s_subsetListPathCache = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
                     }
 
-
                     // TargetFrameworkDirectory is not unique enough because a different invocation could ask for a different 
                     // set of subset files from the same TargetFrameworkDirectory
                     string concatenatedSubsetListNames = String.Join(";", _subsetToSearchFor);
 
                     string key = frameworkDirectory + ":" + concatenatedSubsetListNames;
 
-
-                    string[] subsetLists = null;
-                    s_subsetListPathCache.TryGetValue(key, out subsetLists);
+                    s_subsetListPathCache.TryGetValue(key, out string[] subsetLists);
                     if (subsetLists == null)
                     {
                         // Get the path to the subset folder under the target framework directory
                         string subsetDirectory = Path.Combine(frameworkDirectory, subsetListFolder);
 
-                        List<string> subsetFilesForFrameworkDirectory = new List<string>();
+                        var subsetFilesForFrameworkDirectory = new List<string>();
 
                         // Go through each of the subsets and see if it is in the target framework subset directory 
                         foreach (string subsetName in _subsetToSearchFor)
@@ -1161,72 +1055,68 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal class AssemblyEntry
     {
-        private readonly string _fullName;
-        private readonly bool _inGAC;
-        private readonly bool? _isRedistRoot;
-        private readonly string _redistName;
-        private readonly string _simpleName;
-        private readonly string _frameworkDirectory;
-        private readonly bool _retargetable;
         private AssemblyNameExtension _assemblyName;
+
         public AssemblyEntry(string name, string version, string publicKeyToken, string culture, bool inGAC, bool? isRedistRoot, string redistName, string frameworkDirectory, bool retargetable)
         {
             Debug.Assert(name != null && frameworkDirectory != null);
-            _simpleName = name;
+            SimpleName = name;
             if (name != null && version != null && publicKeyToken != null && culture != null)
             {
-                _fullName = string.Format(CultureInfo.InvariantCulture, "{0}, Version={1}, Culture={2}, PublicKeyToken={3}", name, version, culture, publicKeyToken);
+                FullName = $"{name}, Version={version}, Culture={culture}, PublicKeyToken={publicKeyToken}";
             }
             else if (name != null && version != null && publicKeyToken != null)
             {
-                _fullName = string.Format(CultureInfo.InvariantCulture, "{0}, Version={1}, PublicKeyToken={2}", name, version, publicKeyToken);
+                FullName = $"{name}, Version={version}, PublicKeyToken={publicKeyToken}";
             }
             else if (name != null && version != null && culture != null)
             {
-                _fullName = string.Format(CultureInfo.InvariantCulture, "{0}, Version={1}, Culture={2}", name, version, culture);
+                FullName = $"{name}, Version={version}, Culture={culture}";
             }
             else if (name != null && version != null)
             {
-                _fullName = string.Format(CultureInfo.InvariantCulture, "{0}, Version={1}", name, version);
+                FullName = $"{name}, Version={version}";
             }
             else if (name != null && publicKeyToken != null)
             {
-                _fullName = string.Format(CultureInfo.InvariantCulture, "{0}, PublicKeyToken={1}", name, version);
+                FullName = $"{name}, PublicKeyToken={version}";
             }
             else if (name != null && culture != null)
             {
-                _fullName = string.Format(CultureInfo.InvariantCulture, "{0}, Culture={1}", name, culture);
+                FullName = $"{name}, Culture={culture}";
             }
             else if (name != null)
             {
-                _fullName = string.Format(CultureInfo.InvariantCulture, "{0}", name);
+                FullName = $"{name}";
             }
 
             if (retargetable)
             {
-                _fullName += ", Retargetable=Yes";
+                FullName += ", Retargetable=Yes";
             }
 
-            _inGAC = inGAC;
-            _isRedistRoot = isRedistRoot;
-            _redistName = redistName;
-            _frameworkDirectory = frameworkDirectory;
-            _retargetable = retargetable;
+            InGAC = inGAC;
+            IsRedistRoot = isRedistRoot;
+            RedistName = redistName;
+            FrameworkDirectory = frameworkDirectory;
+            Retargetable = retargetable;
         }
-        public string FullName { get { return _fullName; } }
-        public bool InGAC { get { return _inGAC; } }
-        public bool? IsRedistRoot { get { return _isRedistRoot; } }
-        public string RedistName { get { return _redistName; } }
-        public string SimpleName { get { return _simpleName; } }
-        public string FrameworkDirectory { get { return _frameworkDirectory; } }
-        public bool Retargetable { get { return _retargetable; } }
+
+        public string FullName { get; }
+        public bool InGAC { get; }
+        public bool? IsRedistRoot { get;  }
+        public string RedistName { get; }
+        public string SimpleName { get; }
+        public string FrameworkDirectory { get; }
+        public bool Retargetable { get; }
+
         public AssemblyNameExtension AssemblyNameExtension
         {
             get
             {
                 if (_assemblyName == null)
                 {
-                    _assemblyName = new AssemblyNameExtension(_fullName, true);
+                    _assemblyName = new AssemblyNameExtension(FullName, true);
                     _assemblyName.MarkImmutable();
                 }
 

@@ -6,10 +6,11 @@ using System.Collections;
 
 namespace Microsoft.Build.Tasks
 {
-    /// <remarks>
+    /// <summary>
     /// Represents a cache of inputs to a compilation-style task.
-    /// </remarks>
-    [Serializable()]
+    /// </summary>
+    /// <remarks>On-disk serialization format, don't change field names or types or use readonly.</remarks>
+    [Serializable]
     internal class Dependencies
     {
         /// <summary>
@@ -32,8 +33,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add a new dependency file.
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
         internal void AddDependencyFile(string filename, DependencyFile file)
         {
             dependencies[filename] = file;

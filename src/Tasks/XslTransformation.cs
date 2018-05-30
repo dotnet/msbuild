@@ -496,7 +496,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    List<Type> types = new List<Type>();
+                    var types = new List<Type>();
                     foreach (Type type in loadedAssembly.GetTypes())
                     {
                         if (!type.Name.StartsWith("$", StringComparison.Ordinal))

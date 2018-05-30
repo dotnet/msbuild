@@ -8,8 +8,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Runtime.InteropServices.ComTypes;
+using System.Security;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -23,18 +23,6 @@ namespace Microsoft.Build.Tasks
     /// <comment>ITypeLibExporterNotifySink is necessary for the ITypeLibConverter.ConvertAssemblyToTypeLib call.</comment>
     public class RegisterAssembly : AppDomainIsolatedTaskExtension, ITypeLibExporterNotifySink
     {
-        #region Constructors
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public RegisterAssembly()
-        {
-            // do nothing
-        }
-
-        #endregion
-
         #region Properties
 
         [Required]
@@ -42,41 +30,23 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_assemblies, "assemblies");
+                ErrorUtilities.VerifyThrowArgumentNull(_assemblies, nameof(Assemblies));
                 return _assemblies;
             }
-            set { _assemblies = value; }
+            set => _assemblies = value;
         }
 
-        private ITaskItem[] _assemblies = null;
+        private ITaskItem[] _assemblies;
 
         [Output]
-        public ITaskItem[] TypeLibFiles
-        {
-            get { return _typeLibFiles; }
-            set { _typeLibFiles = value; }
-        }
+        public ITaskItem[] TypeLibFiles { get; set; }
 
-        private ITaskItem[] _typeLibFiles = null;
-
-        public bool CreateCodeBase
-        {
-            get { return _createCodeBase; }
-            set { _createCodeBase = value; }
-        }
-
-        private bool _createCodeBase = false;
+        public bool CreateCodeBase { get; set; }
 
         /// <summary>
         /// The cache file for Register/UnregisterAssembly. Necessary for UnregisterAssembly to do the proper clean up.
         /// </summary>
-        public ITaskItem AssemblyListFile
-        {
-            get { return _assemblyListFile; }
-            set { _assemblyListFile = value; }
-        }
-
-        private ITaskItem _assemblyListFile = null;
+        public ITaskItem AssemblyListFile { get; set; }
 
         #endregion
 
@@ -85,8 +55,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Task entry point
         /// </summary>
-        /// <returns></returns>
-        override public bool Execute()
+        public override bool Execute()
         {
             // TypeLibFiles isn't [Required], but if it is specified, it must have the same length as Assemblies
             if ((TypeLibFiles != null) && (TypeLibFiles.Length != Assemblies.Length))
@@ -97,19 +66,15 @@ namespace Microsoft.Build.Tasks
 
             if (TypeLibFiles == null)
             {
-                TypeLibFiles = new TaskItem[Assemblies.Length];
+                TypeLibFiles = new ITaskItem[Assemblies.Length];
             }
 
             AssemblyRegistrationCache cacheFile = null;
 
             if ((AssemblyListFile != null) && (AssemblyListFile.ItemSpec.Length > 0))
             {
-                cacheFile = (AssemblyRegistrationCache)StateFileBase.DeserializeCache(AssemblyListFile.ItemSpec, Log, typeof(AssemblyRegistrationCache));
-
-                if (cacheFile == null)
-                {
-                    cacheFile = new AssemblyRegistrationCache();
-                }
+                cacheFile = (AssemblyRegistrationCache)StateFileBase.DeserializeCache(AssemblyListFile.ItemSpec, Log, typeof(AssemblyRegistrationCache)) ??
+                            new AssemblyRegistrationCache();
             }
 
             bool taskReturnValue = true;
@@ -141,10 +106,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            if (cacheFile != null)
-                            {
-                                cacheFile.AddEntry(Assemblies[i].ItemSpec, tlbPath);
-                            }
+                            cacheFile?.AddEntry(Assemblies[i].ItemSpec, tlbPath);
                         }
                     }
                     catch (ArgumentException ex) // assembly path has invalid chars in it
@@ -165,10 +127,7 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                if (cacheFile != null)
-                {
-                    cacheFile.SerializeCache(AssemblyListFile.ItemSpec, Log);
-                }
+                cacheFile?.SerializeCache(AssemblyListFile.ItemSpec, Log);
             }
 
             return taskReturnValue;
@@ -178,14 +137,11 @@ namespace Microsoft.Build.Tasks
 
         #region ITypeLibExporterNotifySink methods
 
-        private bool _typeLibExportFailed = false;
+        private bool _typeLibExportFailed;
 
         /// <summary>
         /// Callback method for reporting type library export events
         /// </summary>
-        /// <param name="kind"></param>
-        /// <param name="code"></param>
-        /// <param name="msg"></param>
         public void ReportEvent(ExporterEventKind kind, int code, string msg)
         {
             // if we get an error, log it and remember we should fail ExportTypeLib
@@ -228,7 +184,7 @@ namespace Microsoft.Build.Tasks
         /// </comment>
         public object ResolveRef(Assembly assemblyToResolve)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve, "assemblyToResolve");
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve, nameof(assemblyToResolve));
 
             Log.LogErrorWithCodeFromResources("RegisterAssembly.AssemblyNotRegisteredForComInterop", assemblyToResolve.GetName().FullName);
             _typeLibExportFailed = true;
@@ -242,12 +198,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper registration method
         /// </summary>
-        /// <param name="assemblyPath"></param>
-        /// <param name="typeLibPath"></param>
-        /// <returns></returns>
         private bool Register(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, "typeLibPath");
+            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, nameof(typeLibPath));
 
             Log.LogMessageFromResources(MessageImportance.Low, "RegisterAssembly.RegisteringAssembly", assemblyPath);
 
@@ -264,10 +217,10 @@ namespace Microsoft.Build.Tasks
                 // Load the specified assembly. 
                 Assembly asm = Assembly.UnsafeLoadFrom(assemblyPath);
 
-                RegistrationServices comRegistrar = new RegistrationServices();
+                var comRegistrar = new RegistrationServices();
 
                 // Register the assembly
-                if (!comRegistrar.RegisterAssembly(asm, (CreateCodeBase) ? AssemblyRegistrationFlags.SetCodeBase : AssemblyRegistrationFlags.None))
+                if (!comRegistrar.RegisterAssembly(asm, CreateCodeBase ? AssemblyRegistrationFlags.SetCodeBase : AssemblyRegistrationFlags.None))
                 {
                     // If the assembly doesn't contain any types that could be registered for COM interop, 
                     // warn the user about it.  
@@ -287,7 +240,9 @@ namespace Microsoft.Build.Tasks
                     {
                         // if export failed the error message is already logged, so just exit
                         if (!ExportTypeLib(asm, typeLibPath))
+                        {
                             return false;
+                        }
                     }
                     catch (COMException ex)
                     {
@@ -296,7 +251,9 @@ namespace Microsoft.Build.Tasks
                     }
                 }
                 else
+                {
                     Log.LogMessageFromResources(MessageImportance.Low, "RegisterAssembly.TypeLibUpToDate", typeLibPath);
+                }
 
                 // Also register the type library
                 try
@@ -378,7 +335,9 @@ namespace Microsoft.Build.Tasks
                 convertedTypeLib = (ITypeLib)tlbConverter.ConvertAssemblyToTypeLib(asm, typeLibFileName, 0, this);
 
                 if (convertedTypeLib == null || _typeLibExportFailed)
+                {
                     return false;
+                }
 
                 // Persist the type library
                 UCOMICreateITypeLib createTypeLib = (UCOMICreateITypeLib)convertedTypeLib;
@@ -388,7 +347,9 @@ namespace Microsoft.Build.Tasks
             finally
             {
                 if (convertedTypeLib != null)
-                    Marshal.ReleaseComObject((ITypeLib)convertedTypeLib);
+                {
+                    Marshal.ReleaseComObject(convertedTypeLib);
+                }
             }
 
             return !_typeLibExportFailed;
