@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.Evaluation;
@@ -30,11 +31,12 @@ namespace Microsoft.Build.UnitTests
      **************************************************************************/
     internal sealed class MockEngine : IBuildEngine5
     {
+        private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
         private readonly StringBuilder _log = new StringBuilder();
         private readonly ProjectCollection _projectCollection = new ProjectCollection();
         private readonly bool _logToConsole;
-        private readonly Dictionary<object, object> _objectCashe = new Dictionary<object, object>();
+        private readonly ConcurrentDictionary<object, object> _objectCache = new ConcurrentDictionary<object, object>();
 
         internal MockEngine() : this(false)
         {
@@ -75,55 +77,71 @@ namespace Microsoft.Build.UnitTests
 
             message += eventArgs.Message;
 
-            if (_logToConsole)
+            lock (_lockObj)
             {
-                Console.WriteLine(message);
+                if (_logToConsole)
+                {
+                    Console.WriteLine(message);
+                }
+
+                _output?.WriteLine(message);
+                _log.AppendLine(message);
             }
-            _output?.WriteLine(message);
-            _log.AppendLine(message);
         }
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
-            string message = string.Empty;
-
-            if (!string.IsNullOrEmpty(eventArgs.File))
+            lock (_lockObj)
             {
-                message += $"{eventArgs.File}({eventArgs.LineNumber},{eventArgs.ColumnNumber}): ";
+                string message = string.Empty;
+
+                if (!string.IsNullOrEmpty(eventArgs.File))
+                {
+                    message += $"{eventArgs.File}({eventArgs.LineNumber},{eventArgs.ColumnNumber}): ";
+                }
+
+                message += "WARNING " + eventArgs.Code + ": ";
+                ++Warnings;
+
+                message += eventArgs.Message;
+
+                if (_logToConsole)
+                {
+                    Console.WriteLine(message);
+                }
+
+                _output?.WriteLine(message);
+                _log.AppendLine(message);
             }
-
-            message += "WARNING " + eventArgs.Code + ": ";
-            ++Warnings;
-
-            message += eventArgs.Message;
-
-            if (_logToConsole)
-            {
-                Console.WriteLine(message);
-            }
-            _output?.WriteLine(message);
-            _log.AppendLine(message);
         }
 
         public void LogCustomEvent(CustomBuildEventArgs eventArgs)
         {
-            if (_logToConsole)
+            lock (_lockObj)
             {
-                Console.WriteLine(eventArgs.Message);
+                if (_logToConsole)
+                {
+                    Console.WriteLine(eventArgs.Message);
+                }
+
+                _output?.WriteLine(eventArgs.Message);
+                _log.AppendLine(eventArgs.Message);
             }
-            _output?.WriteLine(eventArgs.Message);
-            _log.AppendLine(eventArgs.Message);
         }
 
         public void LogMessageEvent(BuildMessageEventArgs eventArgs)
         {
-            if (_logToConsole)
+            lock (_lockObj)
             {
-                Console.WriteLine(eventArgs.Message);
+                if (_logToConsole)
+                {
+                    Console.WriteLine(eventArgs.Message);
+                }
+
+                _output?.WriteLine(eventArgs.Message);
+                _log.AppendLine(eventArgs.Message);
+                ++Messages;
             }
-            _output?.WriteLine(eventArgs.Message);
-            _log.AppendLine(eventArgs.Message);
-            ++Messages;
         }
 
         public void LogTelemetry(string eventName, IDictionary<string, string> properties)
@@ -134,12 +152,16 @@ namespace Microsoft.Build.UnitTests
                 message += $"  Property '{key}' = '{properties[key]}'{Environment.NewLine}";
             }
 
-            if (_logToConsole)
+            lock (_lockObj)
             {
-                Console.WriteLine(message);
+                if (_logToConsole)
+                {
+                    Console.WriteLine(message);
+                }
+
+                _output?.WriteLine(message);
+                _log.AppendLine(message);
             }
-            _output?.WriteLine(message);
-            _log.AppendLine(message);
         }
 
         public bool ContinueOnError => false;
@@ -152,7 +174,13 @@ namespace Microsoft.Build.UnitTests
 
         internal string Log
         {
-            get => _log.ToString();
+            get
+            {
+                lock (_lockObj)
+                {
+                    return _log.ToString();
+                }
+            }
             set
             {
                 if (!string.IsNullOrEmpty(value))
@@ -160,7 +188,10 @@ namespace Microsoft.Build.UnitTests
                     throw new ArgumentException("Expected log setter to be used only to reset the log to empty.");
                 }
 
-                _log.Clear();
+                lock (_lockObj)
+                {
+                    _log.Clear();
+                }
             }
         }
 
@@ -270,7 +301,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                ProjectInstance instance = _projectCollection.LoadProject((string)projectFileNames[i], finalGlobalProperties, null).CreateProjectInstance();
+                ProjectInstance instance = _projectCollection.LoadProject(projectFileNames[i], finalGlobalProperties, null).CreateProjectInstance();
 
                 bool success = instance.Build(targetNames, loggers, out IDictionary<string, TargetResult> targetOutputs);
 
@@ -370,7 +401,11 @@ namespace Microsoft.Build.UnitTests
             // If we do not contain this string than pass it to
             // MockLogger. Since MockLogger is also registered as
             // a logger it may have this string.
-            var logText = _log.ToString();
+            string logText;
+            lock (_lockObj)
+            {
+                logText = _log.ToString();
+            }
             if (logText.IndexOf(contains, StringComparison.OrdinalIgnoreCase) == -1)
             {
                 if (_output == null)
@@ -393,8 +428,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal void AssertLogDoesntContain(string contains)
         {
-            var logText = _log.ToString();
-            
+            string logText;
+            lock (_lockObj)
+            {
+                logText = _log.ToString();
+            }
+
             if (_output == null)
             {
                 Console.WriteLine(logText);
@@ -419,19 +458,18 @@ namespace Microsoft.Build.UnitTests
 
         public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
         {
-            _objectCashe.TryGetValue(key, out object obj);
+            _objectCache.TryGetValue(key, out object obj);
             return obj;
         }
 
         public void RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection)
         {
-            _objectCashe[key] = obj;
+            _objectCache[key] = obj;
         }
 
         public object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
         {
-            var obj = _objectCashe[key];
-            _objectCashe.Remove(key);
+            _objectCache.TryRemove(key, out object obj);
             return obj;
         }
     }

@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
@@ -15,6 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,6 +28,16 @@ namespace Microsoft.Build.UnitTests
         public bool UseHardLinks { get; protected set; }
 
         public bool UseSymbolicLinks { get; protected set; }
+
+        public bool UseSingleThreadedCopy
+        {
+            get => _parallelismThreadCount == NoParallelismThreadCount;
+            protected set => _parallelismThreadCount = value ? NoParallelismThreadCount : DefaultParallelismThreadCount;
+        }
+
+        private const int NoParallelismThreadCount = 1;
+        private const int DefaultParallelismThreadCount = int.MaxValue;
+        private int _parallelismThreadCount = DefaultParallelismThreadCount;
 
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSOVERWRITEREADONLYFILES, so that we can run 
@@ -49,11 +62,11 @@ namespace Microsoft.Build.UnitTests
         public Copy_Tests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
-            _alwaysRetry = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
+            _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
+            _alwaysRetry = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", String.Empty);
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, String.Empty);
 
             Copy.RefreshInternalEnvironmentValues();
         }
@@ -63,18 +76,16 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void Dispose()
         {
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", _alwaysOverwriteReadOnlyFiles);
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", _alwaysRetry);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, _alwaysOverwriteReadOnlyFiles);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, _alwaysRetry);
 
             Copy.RefreshInternalEnvironmentValues();
         }
 
-        /*
-        * Method:   DontCopyOverSameFile
-        *
-        * If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
-        * have the same date and time.
-        */
+        /// <summary>
+        /// If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
+        /// have the same date and time.
+        /// </summary>
         [Fact]
         public void DontCopyOverSameFile()
         {
@@ -101,7 +112,7 @@ namespace Microsoft.Build.UnitTests
                     UseHardlinksIfPossible = UseHardLinks
                 };
 
-                t.Execute(m.CopyFile);
+                t.Execute(m.CopyFile, _parallelismThreadCount);
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -187,11 +198,11 @@ namespace Microsoft.Build.UnitTests
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
-            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
+            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", "1   ");
+                Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, "1   ");
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                 {
@@ -234,7 +245,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", oldAlwaysOverwriteValue);
+                Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, oldAlwaysOverwriteValue);
 
                 File.Delete(source);
                 File.Delete(destination);
@@ -252,11 +263,11 @@ namespace Microsoft.Build.UnitTests
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
-            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
+            string oldAlwaysRetryValue = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", "1   ");
+                Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, "1   ");
                 Copy.RefreshInternalEnvironmentValues();
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
@@ -302,7 +313,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", oldAlwaysOverwriteValue);
+                Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, oldAlwaysRetryValue);
                 Copy.RefreshInternalEnvironmentValues();
 
                 File.SetAttributes(destination, FileAttributes.Normal);
@@ -906,7 +917,7 @@ namespace Microsoft.Build.UnitTests
             */
             internal bool? CopyFile(FileState source, FileState destination)
             {
-                ++copyCount;
+                Interlocked.Increment(ref copyCount);
                 return true;
             }
         }
@@ -1346,15 +1357,19 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
             {
-                filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                lock (filesActuallyCopied)
+                {
+                    filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                }
                 return true;
-            });
+            }, _parallelismThreadCount);
 
             Assert.True(success);
             Assert.Equal(2, filesActuallyCopied.Count);
             Assert.Equal(4, t.CopiedFiles.Length);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), filesActuallyCopied[1].Key.Name);
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+            filesActuallyCopied.Select(f => Path.GetFileName(f.Key.Name)).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -1390,7 +1405,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // b.cs -> xa.cs should copy because it's a different source
                 new TaskItem(Path.Combine(tempPath, @"xb.cs")), // a.cs -> xb.cs should copy because it's a different destination
-                new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should copy because it's a different source
+                new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should copy because it's a different source from the b.cs copy done previously
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should not copy because it's the same source
             };
 
@@ -1407,21 +1422,29 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
             {
-                filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                lock (filesActuallyCopied)
+                {
+                    filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                }
                 return true;
-            });
+            }, _parallelismThreadCount);
 
             Assert.True(success);
             Assert.Equal(4, filesActuallyCopied.Count);
             Assert.Equal(5, t.CopiedFiles.Length);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), filesActuallyCopied[1].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[2].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[3].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[0].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[1].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xb.cs"), filesActuallyCopied[2].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[3].Value.Name);
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+            string xaPath = Path.Combine(tempPath, "xa.cs");
+            var xaCopies = filesActuallyCopied.Where(f => f.Value.Name == xaPath).ToList();
+            Assert.Equal(3, xaCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[0].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "b.cs"), xaCopies[1].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[2].Key.Name);
+
+            string xbPath = Path.Combine(tempPath, "xb.cs");
+            var xbCopies = filesActuallyCopied.Where(f => f.Value.Name == xbPath).ToList();
+            Assert.Equal(1, xbCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xbCopies[0].Key.Name);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -1644,7 +1667,7 @@ namespace Microsoft.Build.UnitTests
             };
             
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(false, result);
             engine.AssertLogDoesntContain("MSB3026");
@@ -1709,7 +1732,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(true, result);
             engine.AssertLogContains("MSB3026");
@@ -1734,13 +1757,15 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(true, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogDoesntContain("MSB3027");
-            Assert.Equal(copyFunctor.FilesCopiedSuccessfully[0].Name, FileUtilities.FixFilePath("c:\\source"));
-            Assert.Equal(copyFunctor.FilesCopiedSuccessfully[1].Name, FileUtilities.FixFilePath("c:\\source2"));
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+            Assert.True(copyFunctor.FilesCopiedSuccessfully.Any(f => f.Name == FileUtilities.FixFilePath("c:\\source")));
+            Assert.True(copyFunctor.FilesCopiedSuccessfully.Any(f => f.Name == FileUtilities.FixFilePath("c:\\source2")));
         }
 
         /// <summary>
@@ -1762,12 +1787,13 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(4, false /* do not throw */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(false, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogContains("MSB3027");
         }
+
 
         /// <summary>
         /// The copy delegate can return false, or throw on failure.
@@ -1788,7 +1814,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(3, true /* throw */);
-            bool result = t.Execute(copyFunctor.Copy);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(false, result);
             engine.AssertLogContains("MSB3026");
@@ -1802,6 +1828,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private class CopyFunctor
         {
+            /// <summary>
+            /// Protects the counts and lists below.
+            /// </summary>
+            private readonly object _lockObj = new object();
+
             /// <summary>
             /// On what attempt count should we stop failing?
             /// </summary>
@@ -1820,7 +1851,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Which files we actually copied
             /// </summary>
-            internal List<FileState> FilesCopiedSuccessfully { get; }
+            internal List<FileState> FilesCopiedSuccessfully { get; } = new List<FileState>();
 
             /// <summary>
             /// Constructor
@@ -1829,8 +1860,6 @@ namespace Microsoft.Build.UnitTests
             {
                 _countOfSuccess = countOfSuccess;
                 _throwOnFailure = throwOnFailure;
-                _tries = 0;
-                FilesCopiedSuccessfully = new List<FileState>();
             }
 
             /// <summary>
@@ -1838,14 +1867,17 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             internal bool? Copy(FileState source, FileState destination)
             {
-                _tries++;
-
-                // 2nd and subsequent copies always succeed
-                if (FilesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
+                lock (_lockObj)
                 {
-                    Console.WriteLine("Copied {0} to {1} OK", source, destination);
-                    FilesCopiedSuccessfully.Add(source);
-                    return true;
+                    _tries++;
+
+                    // 2nd and subsequent copies always succeed
+                    if (FilesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
+                    {
+                        Console.WriteLine("Copied {0} to {1} OK", source, destination);
+                        FilesCopiedSuccessfully.Add(source);
+                        return true;
+                    }
                 }
 
                 if (_throwOnFailure)
@@ -1855,6 +1887,15 @@ namespace Microsoft.Build.UnitTests
 
                 return null;
             }
+        }
+    }
+
+    public class CopySingleThreaded_Tests : Copy_Tests
+    {
+        public CopySingleThreaded_Tests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        {
+            UseSingleThreadedCopy = true;
         }
     }
 
@@ -1912,7 +1953,7 @@ namespace Microsoft.Build.UnitTests
         public CopyHardLink_Tests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            this.UseHardLinks = true;
+            UseHardLinks = true;
         }
 
         /// <summary>
@@ -1927,10 +1968,7 @@ namespace Microsoft.Build.UnitTests
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is a source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Don't create the dest folder, let task do that
 
@@ -1955,13 +1993,8 @@ namespace Microsoft.Build.UnitTests
 
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file."
+                string destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is a source temp file.", destinationFileContents);
 
                 Assert.Equal(1, t.DestinationFiles.Length);
                 Assert.Equal(1, t.CopiedFiles.Length);
@@ -1971,17 +2004,10 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is another source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
@@ -2006,10 +2032,12 @@ namespace Microsoft.Build.UnitTests
             int errorCode = Marshal.GetHRForLastWin32Error();
             Marshal.GetExceptionForHR(errorCode);
 
-            string sourceFile = FileUtilities.GetTemporaryFile();
+            string sourceFile1 = FileUtilities.GetTemporaryFile();
+            string sourceFile2 = FileUtilities.GetTemporaryFile();
             const string temp = @"\\localhost\c$\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            string destFile1 = Path.Combine(destFolder, Path.GetFileName(sourceFile1));
+            string destFile2 = Path.Combine(destFolder, Path.GetFileName(sourceFile2));
 
             try
             {
@@ -2027,12 +2055,15 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is a source temp file.");
-                }
+                // Create 2 files to ensure we test with parallel copy.
+                File.WriteAllText(sourceFile1, "This is source temp file 1."); // HIGHCHAR: Test writes in UTF8 without preamble.
+                File.WriteAllText(sourceFile2, "This is source temp file 2.");
 
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles =
+                {
+                    new TaskItem(sourceFile1),
+                    new TaskItem(sourceFile2)
+                };
 
                 var me = new MockEngine(true);
                 var t = new Copy
@@ -2048,52 +2079,47 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.True(success); // "success"
-                Assert.True(File.Exists(destFile)); // "destination exists"
+                Assert.True(File.Exists(destFile1)); // "destination exists"
+                Assert.True(File.Exists(destFile2)); // "destination exists"
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile1, destFile1);
 
                 // Can't do this below, because the real message doesn't end with String.Empty, it ends with a CLR exception string, and so matching breaks in PLOC.
-                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this
-                // The system cannot move the file to a different disk drive. (Exception from HRESULT: 0x80070011)
+                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this:
+                //   The system cannot move the file to a different disk drive. (Exception from HRESULT: 0x80070011)
                 // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
                 me.AssertLogContains("0x80070011");
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
+                string destinationFileContents = File.ReadAllText(destFile1);
+                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                destinationFileContents = File.ReadAllText(destFile2);
+                Assert.Equal("This is source temp file 2.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                Assert.Equal(2, t.DestinationFiles.Length);
+                Assert.Equal(2, t.CopiedFiles.Length);
+                Assert.Equal(destFile1, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile2, t.DestinationFiles[1].ItemSpec);
+                Assert.Equal(destFile1, t.CopiedFiles[0].ItemSpec);
+                Assert.Equal(destFile2, t.CopiedFiles[1].ItemSpec);
 
-                Assert.Equal(1, t.DestinationFiles.Length);
-                Assert.Equal(1, t.CopiedFiles.Length);
-                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                // Now we will write new content to the source file
+                // Now we will write new content to a source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is another source temp file.");
-                }
+                File.WriteAllText(sourceFile1, "This is another source temp file.");  // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
+                destinationFileContents = File.ReadAllText(destFile1);
+                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
             finally
             {
-                File.Delete(sourceFile);
-                File.Delete(destFile);
+                File.Delete(sourceFile1);
+                File.Delete(sourceFile2);
+                File.Delete(destFile1);
+                File.Delete(destFile2);
                 FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
@@ -2119,13 +2145,9 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
-                if (!Directory.Exists(destFolder))
-                {
-                    Directory.CreateDirectory(destFolder);
-                }
+                Directory.CreateDirectory(destFolder);
 
                 // Exhaust the number (1024) of directory entries that can be created for a file
                 // This is 1 + (1 x hard links)
@@ -2164,12 +2186,7 @@ namespace Microsoft.Build.UnitTests
                 // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
                 me.AssertLogContains("0x80070476");
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                string destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
@@ -2180,17 +2197,10 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                {
-                    sw.Write("This is another source temp file.");
-                }
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                {
-                    destinationFileContents = sr.ReadToEnd();
-                }
-
+                destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
@@ -2237,10 +2247,7 @@ namespace Microsoft.Build.UnitTests
                 string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
                 try
                 {
-                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                    {
-                        sw.Write("This is a source temp file.");
-                    }
+                    File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                     // Don't create the dest folder, let task do that
 
@@ -2266,11 +2273,7 @@ namespace Microsoft.Build.UnitTests
 
                     me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
 
-                    string destinationFileContents;
-
-                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                        destinationFileContents = sr.ReadToEnd();
-
+                    string destinationFileContents = File.ReadAllText(destFile);
                     Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
 
                     Assert.Equal(1, t.DestinationFiles.Length);
@@ -2282,21 +2285,13 @@ namespace Microsoft.Build.UnitTests
                     // we'll then check that the destination file automatically
                     // has the same content (i.e. it's been hard linked)
 
-                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false)) // HIGHCHAR: Test writes in UTF8 without preamble.
-                    {
-                        sw.Write("This is another source temp file.");
-                    }
+                    File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                     // Read the destination file (it should have the same modified content as the source)
-                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    {
-                        destinationFileContents = sr.ReadToEnd();
-                    }
-
+                    destinationFileContents = File.ReadAllText(destFile);
                     Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                     ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
-
                 }
                 finally
                 {
