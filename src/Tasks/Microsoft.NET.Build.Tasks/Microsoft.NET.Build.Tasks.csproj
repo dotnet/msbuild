@@ -7,7 +7,6 @@
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Sdk</PackageId>
     <TargetFrameworks>netcoreapp2.0;net46</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
