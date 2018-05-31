@@ -4,6 +4,11 @@
     <MicrosoftAspNetCoreAllPackageVersion>2.1.1-rtm-30818</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
     <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.1.0</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <DotnetEfPackageVersion>2.1.1-rtm-30818</DotnetEfPackageVersion>
+    <DotnetDevCertsPackageVersion>2.1.0</DotnetDevCertsPackageVersion>
+    <DotnetSqlCachePackageVersion>2.1.0</DotnetSqlCachePackageVersion>
+    <DotnetUserSecretsPackageVersion>2.1.0</DotnetUserSecretsPackageVersion>
+    <DotnetWatchPackageVersion>2.1.0</DotnetWatchPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.1.0</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.7.179</MicrosoftBuildPackageVersion>
