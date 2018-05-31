@@ -108,9 +108,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.5</DefaultNetCorePatchVersion>
     <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.2</DefaultNetCorePatchVersion>
 
+    <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.1'">2.1.0</DefaultNetCorePatchVersion>
+
     <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version
          provided by Microsoft.NETCoreSdk.BundledVersions.props -->
-    <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">$(BundledNETCoreAppPackageVersion)</DefaultNetCorePatchVersion>
+    <DefaultNetCorePatchVersion Condition="'$(DefaultNetCorePatchVersion)' == '' and '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">$(BundledNETCoreAppPackageVersion)</DefaultNetCorePatchVersion>
     <!-- If not covered by the previous cases use the target framework version for the default patch version -->
     <DefaultNetCorePatchVersion Condition="'$(DefaultNetCorePatchVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</DefaultNetCorePatchVersion>
   </PropertyGroup>
@@ -119,6 +121,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">$(LatestPatchVersionForNetCore1_0)</LatestNetCorePatchVersion>
     <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">$(LatestPatchVersionForNetCore1_1)</LatestNetCorePatchVersion>
     <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.0'">$(LatestPatchVersionForNetCore2_0)</LatestNetCorePatchVersion>
+    <LatestNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.1'">$(LatestPatchVersionForNetCore2_1)</LatestNetCorePatchVersion>
 
     <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version
          provided by Microsoft.NETCoreSdk.BundledVersions.props -->
