@@ -11,7 +11,7 @@ additionalargs=''
 packageSource=https://dotnet.myget.org/F/dotnet-cli/api/v3/index.json
 
 while (($# > 0)); do
-  lowerI="$(echo $1 | awk '{print tolower($0)}')"
+  lowerI="$(echo "$1" | awk '{print tolower($0)}')"
   case $lowerI in
     --install)
       install=true
@@ -45,7 +45,7 @@ IFS=',' read -ra testsArray <<< "$tests"
 if [ "$uninstall" = true ]; then
     for name in "${testsArray[@]}"
     do :
-        echo Uninstalling $name
+        echo Uninstalling "$name"
         dotnet tool uninstall -g "testSdk$name"
     done
 fi
@@ -53,8 +53,8 @@ fi
 if [ "$install" = true ]; then
     for name in "${testsArray[@]}"
     do :
-        echo Installing $name
-        dotnet tool install -g "testSdk$name" --version $packageVersion --add-source $packageSource
+        echo Installing "$name"
+        dotnet tool install -g "testSdk$name" --version "$packageVersion" --add-source "$packageSource"
     done
 fi
 
@@ -63,7 +63,7 @@ if [ "$run" = true ]; then
     passed=true
     for name in "${testsArray[@]}"
     do :
-        echo Running $name
+        echo Running "$name"
         cmd="testSdk$name"
         resultsFile="$name"
         resultsFile+="results.xml"
