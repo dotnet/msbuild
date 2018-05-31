@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Package reference Command</source>
-        <target state="translated">Comando de adicionar referência do pacote do .NET</target>
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="needs-review-translation">Comando de adicionar referência do pacote do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -18,28 +18,28 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Adds reference only when targeting a specific framework.</source>
-        <target state="translated">Adiciona referência apenas ao definir uma estrutura específica como destino.</target>
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Adiciona referência apenas ao definir uma estrutura específica como destino.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Adiciona referência sem executar a visualização da restauração e a verificação de compatibilidade.</target>
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Adiciona referência sem executar a visualização da restauração e a verificação de compatibilidade.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="translated">Especifica as fontes de pacote NuGet a serem usadas durante a restauração.</target>
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="needs-review-translation">Especifica as fontes de pacote NuGet a serem usadas durante a restauração.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restores the packages to the specified directory.</source>
-        <target state="translated">Restaura os pacotes para o diretório especificado.</target>
+        <source>The directory to restore packages to.</source>
+        <target state="needs-review-translation">Restaura os pacotes para o diretório especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>Version for the package to be added.</source>
-        <target state="translated">Versão do pacote a ser adicionada.</target>
+        <source>The version of the package to add.</source>
+        <target state="needs-review-translation">Versão do pacote a ser adicionada.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -63,8 +63,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
-        <source>PACKAGE_DIRECTORY</source>
-        <target state="translated">PACKAGE_DIRECTORY</target>
+        <source>PACKAGE_DIR</source>
+        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

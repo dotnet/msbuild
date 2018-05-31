@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Project to Project reference Command</source>
-        <target state="translated">.NET 프로젝트 간 참조 추가 명령</target>
+        <source>Add a project-to-project reference to the project.</source>
+        <target state="needs-review-translation">.NET 프로젝트 간 참조 추가 명령</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -12,14 +12,19 @@
         <target state="translated">프로젝트 간 참조 추가 명령</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Project to project references to add</source>
-        <target state="translated">추가할 프로젝트 간 참조입니다.</target>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">특정 프레임워크를 대상으로 지정할 때에만 참조를 추가합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targeting a specific framework</source>
-        <target state="translated">특정 프레임워크를 대상으로 지정할 때에만 참조를 추가합니다.</target>
+      <trans-unit id="ProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="new">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectPathArgumentDescription">
+        <source>The paths to the projects to add as references.</source>
+        <target state="new">The paths to the projects to add as references.</target>
         <note />
       </trans-unit>
     </body>

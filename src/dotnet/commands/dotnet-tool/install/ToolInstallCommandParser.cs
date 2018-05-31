@@ -13,33 +13,37 @@ namespace Microsoft.DotNet.Cli
             return Create.Command("install",
                 LocalizableStrings.CommandDescription,
                 Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageId)
-                    .With(name: LocalizableStrings.PackageIdArgumentName,
-                          description: LocalizableStrings.PackageIdArgumentDescription),
+                      .With(name: LocalizableStrings.PackageIdArgumentName,
+                            description: LocalizableStrings.PackageIdArgumentDescription),
                 Create.Option(
                     "-g|--global",
                     LocalizableStrings.GlobalOptionDescription,
                     Accept.NoArguments()),
                 Create.Option(
                     "--tool-path",
-                    LocalizableStrings.ToolPathDescription,
-                    Accept.ExactlyOneArgument()),
+                    LocalizableStrings.ToolPathOptionDescription,
+                    Accept.ExactlyOneArgument()
+                          .With(name: LocalizableStrings.ToolPathOptionName)),
                 Create.Option(
                     "--version",
                     LocalizableStrings.VersionOptionDescription,
-                    Accept.ExactlyOneArgument()),
+                    Accept.ExactlyOneArgument()
+                          .With(name: LocalizableStrings.VersionOptionName)),
                 Create.Option(
                     "--configfile",
                     LocalizableStrings.ConfigFileOptionDescription,
-                    Accept.ExactlyOneArgument()),
+                    Accept.ExactlyOneArgument()
+                          .With(name: LocalizableStrings.ConfigFileOptionName)),
                 Create.Option(
                     "--add-source",
                     LocalizableStrings.AddSourceOptionDescription,
                     Accept.OneOrMoreArguments()
-                        .With(name: LocalizableStrings.AddSourceOptionName)),
+                          .With(name: LocalizableStrings.AddSourceOptionName)),
                 Create.Option(
                     "--framework",
                     LocalizableStrings.FrameworkOptionDescription,
-                    Accept.ExactlyOneArgument()),
+                    Accept.ExactlyOneArgument()
+                          .With(name: LocalizableStrings.FrameworkOptionName)),
                 CommonOptions.HelpOption(),
                 CommonOptions.VerbosityOption());
         }

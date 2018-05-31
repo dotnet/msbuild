@@ -118,15 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppFullName" xml:space="preserve">
-    <value>.NET Add Project to Project reference Command</value>
+    <value>Add a project-to-project reference to the project.</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Command to add project to project reference</value>
   </data>
-  <data name="AppHelpText" xml:space="preserve">
-    <value>Project to project references to add</value>
+  <data name="ProjectPathArgumentName" xml:space="preserve">
+    <value>PROJECT_PATH</value>
+  </data>
+  <data name="ProjectPathArgumentDescription" xml:space="preserve">
+    <value>The paths to the projects to add as references.</value>
   </data>
   <data name="CmdFrameworkDescription" xml:space="preserve">
-    <value>Add reference only when targeting a specific framework</value>
+    <value>Add the reference only when targeting a specific framework.</value>
   </data>
 </root>

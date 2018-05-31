@@ -127,7 +127,7 @@
     <value>OUTPUT_DIR</value>
   </data>
   <data name="CmdOutputDirDescription" xml:space="preserve">
-    <value>Directory in which to place built packages.</value>
+    <value>The output directory to place built packages in.</value>
   </data>
   <data name="CmdNoBuildOptionDescription" xml:space="preserve">
     <value>Do not build the project before packing. Implies --no-restore.</value>
@@ -136,15 +136,18 @@
     <value>Include packages with symbols in addition to regular packages in output directory.</value>
   </data>
   <data name="CmdIncludeSourceDescription" xml:space="preserve">
-    <value>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</value>
+    <value>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</value>
   </data>
   <data name="CmdServiceableDescription" xml:space="preserve">
-    <value>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</value>
+    <value>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</value>
   </data>
   <data name="CmdArgumentProject" xml:space="preserve">
     <value>PROJECT</value>
   </data>
   <data name="CmdArgumentDescription" xml:space="preserve">
     <value>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</value>
+  </data>
+  <data name="ConfigurationOptionDescription" xml:space="preserve">
+    <value>The configuration to use for building the package. The default for most projects is 'Debug'.</value>
   </data>
 </root>

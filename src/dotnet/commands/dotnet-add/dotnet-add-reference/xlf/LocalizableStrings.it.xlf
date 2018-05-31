@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Project to Project reference Command</source>
-        <target state="translated">Comando Aggiungi riferimento P2P (da progetto a progetto) .NET</target>
+        <source>Add a project-to-project reference to the project.</source>
+        <target state="needs-review-translation">Comando Aggiungi riferimento P2P (da progetto a progetto) .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -12,14 +12,19 @@
         <target state="translated">Comando per aggiungere il riferimento P2P (da progetto a progetto)</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Project to project references to add</source>
-        <target state="translated">Riferimenti P2P (da progetto a progetto) da aggiungere</target>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Aggiunge il riferimento solo se destinato a un framework specifico</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targeting a specific framework</source>
-        <target state="translated">Aggiunge il riferimento solo se destinato a un framework specifico</target>
+      <trans-unit id="ProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="new">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectPathArgumentDescription">
+        <source>The paths to the projects to add as references.</source>
+        <target state="new">The paths to the projects to add as references.</target>
         <note />
       </trans-unit>
     </body>

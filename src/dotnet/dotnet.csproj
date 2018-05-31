@@ -29,7 +29,6 @@
     <EmbeddedResource Update="**\dotnet-list-reference\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectToProjectReferences" />
     <EmbeddedResource Update="**\dotnet-list\*.resx" Namespace="Microsoft.DotNet.Tools.List" />
     <EmbeddedResource Update="**\dotnet-migrate\*.resx" Namespace="Microsoft.DotNet.Tools.Migrate" />
-    <EmbeddedResource Update="**\dotnet-msbuild\*.resx" Namespace="Microsoft.DotNet.Tools.MSBuild" />
     <EmbeddedResource Update="**\dotnet-pack\*.resx" Namespace="Microsoft.DotNet.Tools.Pack" />
     <EmbeddedResource Update="**\dotnet-publish\*.resx" Namespace="Microsoft.DotNet.Tools.Publish" />
     <EmbeddedResource Update="**\dotnet-remove-package\*.resx" Namespace="Microsoft.DotNet.Tools.Remove.PackageReference" />

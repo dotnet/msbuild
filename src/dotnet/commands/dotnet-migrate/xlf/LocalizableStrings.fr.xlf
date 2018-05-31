@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <source>PATH</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -33,13 +33,15 @@ La valeur par défaut correspond au répertoire actif, si rien n'est spécifié.
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
-        <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="translated">Modèle MSBuild de base à utiliser pour l'application migrée. La valeur par défaut est le projet inclus dans dotnet new.</target>
+        <source>The base MSBuild template to use for the migrated project.
+The default is the project included in dotnet new.</source>
+        <target state="needs-review-translation">Modèle MSBuild de base à utiliser pour l'application migrée. La valeur par défaut est le projet inclus dans dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="translated">Version du package du SDK à référencer dans l'application migrée. La valeur par défaut est la version du SDK dans dotnet new.</target>
+        <source>The version of the SDK package that will be referenced in the migrated project.
+The default is the version of the SDK in dotnet new.</source>
+        <target state="needs-review-translation">Version du package du SDK à référencer dans l'application migrée. La valeur par défaut est la version du SDK dans dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

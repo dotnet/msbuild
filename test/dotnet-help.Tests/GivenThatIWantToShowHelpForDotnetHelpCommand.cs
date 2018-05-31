@@ -14,10 +14,10 @@ namespace Microsoft.DotNet.Help.Tests
 @"Usage: dotnet help [options] <COMMAND_NAME>
 
 Arguments:
-  <COMMAND_NAME>   CLI command for which to view more detailed help.
+  <COMMAND_NAME>   The SDK command to launch online help for.
 
 Options:
-  -h, --help   Show help information";
+  -h, --help   Show command line help.";
 
         [Theory]
         [InlineData("--help")]

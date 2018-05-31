@@ -609,64 +609,29 @@
         <target state="translated">'{0}' 솔루션이 잘못되었습니다. {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ArgumentsProjectDescription">
-        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="translated">수행할 프로젝트 파일입니다. 파일을 지정하지 않으면 명령이 현재 디렉터리에서 파일을 검색합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsSolutionDescription">
-        <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="translated">수행할 솔루션 파일입니다. 파일을 지정하지 않으면 명령이 현재 디렉터리에서 파일을 검색합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdSlnFile">
-        <source>SLN_FILE</source>
-        <target state="translated">SLN_FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdProjectFile">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
         <source>Invalid project `{0}`. {1}.</source>
         <target state="translated">'{0}' 프로젝트가 잘못되었습니다. {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
-        <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="translated">명령의 세부 정보 표시 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal], d[etailed] 및 diag[nostic]입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">게시할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에서 지정해야 합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="translated">지정된 런타임 동안 프로젝트를 게시합니다. 자체 포함 배포를 만들 때 사용됩니다. 기본값은 프레임워크 종속 앱을 게시하는 것입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">프로젝트 빌드에 사용할 구성입니다.  대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="needs-review-translation">명령의 세부 정보 표시 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal], d[etailed] 및 diag[nostic]입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">프로젝트에서 $(VersionSuffix) 속성의 값을 정의합니다.</target>
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="needs-review-translation">프로젝트에서 $(VersionSuffix) 속성의 값을 정의합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
-        <source>Show help information.</source>
-        <target state="translated">도움말 정보를 표시합니다.</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">도움말 정보를 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
-        <source>Does not do an implicit restore when executing the command.</source>
-        <target state="translated">명령을 실행할 때 암시적 복원을 수행하지 않습니다.</target>
+        <source>Do not restore the project before building.</source>
+        <target state="needs-review-translation">명령을 실행할 때 암시적 복원을 수행하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -891,6 +856,41 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToReadNuGetLockFile">
         <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
         <target state="translated">'{0}' 도구 패키지의 NuGet LockFile을 읽지 못했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="new">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="new">CONFIGURATION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="new">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

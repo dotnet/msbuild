@@ -20,8 +20,7 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
-";
+  -h, --help   Show command line help.";
 
         private const string ListCommandHelpText = @"Usage: dotnet list [options] <PROJECT> [command]
 
@@ -29,11 +28,10 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
+  -h, --help   Show command line help.
 
 Commands:
-  reference   .NET Core Project-to-Project dependency viewer
-";
+  reference   List all project-to-project references of the project.";
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";

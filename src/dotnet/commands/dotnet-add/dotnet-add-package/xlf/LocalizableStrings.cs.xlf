@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Package reference Command</source>
-        <target state="translated">Příkaz rozhraní .NET pro přidání odkazu na balíček</target>
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="needs-review-translation">Příkaz rozhraní .NET pro přidání odkazu na balíček</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -18,28 +18,28 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Adds reference only when targeting a specific framework.</source>
-        <target state="translated">Přidá odkaz jen v případě, že cílem je konkrétní architektura.</target>
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Přidá odkaz jen v případě, že cílem je konkrétní architektura.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Přidá odkaz bez provedení náhledu obnovení a kontroly kompatibility.</target>
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Přidá odkaz bez provedení náhledu obnovení a kontroly kompatibility.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="translated">Určuje zdroje balíčků NuGet, které se mají použít při obnovení.</target>
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="needs-review-translation">Určuje zdroje balíčků NuGet, které se mají použít při obnovení.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restores the packages to the specified directory.</source>
-        <target state="translated">Obnoví balíčky do zadaného adresáře.</target>
+        <source>The directory to restore packages to.</source>
+        <target state="needs-review-translation">Obnoví balíčky do zadaného adresáře.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>Version for the package to be added.</source>
-        <target state="translated">Verze balíčku, která se má přidat.</target>
+        <source>The version of the package to add.</source>
+        <target state="needs-review-translation">Verze balíčku, která se má přidat.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -63,8 +63,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
-        <source>PACKAGE_DIRECTORY</source>
-        <target state="translated">PACKAGE_DIRECTORY</target>
+        <source>PACKAGE_DIR</source>
+        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

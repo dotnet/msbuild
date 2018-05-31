@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.Cli
                 Accept
                     .OneOrMoreArguments()
                     .WithSuggestionsFrom(_ => Suggest.ProjectReferencesFromProjectFile())
-                    .With(name: "args",
-                          description: LocalizableStrings.AppHelpText),
+                    .With(name: LocalizableStrings.ProjectPathArgumentName,
+                          description: LocalizableStrings.ProjectPathArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-f|--framework",

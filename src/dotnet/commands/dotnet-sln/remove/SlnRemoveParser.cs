@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.Cli
             Create.Command("remove",
                            LocalizableStrings.RemoveAppFullName,
                            Accept.OneOrMoreArguments(o => CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove)
-                                 .With(name: "args",
-                                       description: LocalizableStrings.RemoveSubcommandHelpText),
+                                 .With(name: LocalizableStrings.RemoveProjectPathArgumentName,
+                                       description: LocalizableStrings.RemoveProjectPathArgumentDescription),
                            CommonOptions.HelpOption());
     }
 }

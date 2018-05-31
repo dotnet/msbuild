@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Remove Package reference Command.</source>
-        <target state="translated">Comando Rimuovi riferimento al pacchetto .NET.</target>
+        <source>Remove a NuGet package reference from the project.</source>
+        <target state="needs-review-translation">Comando Rimuovi riferimento al pacchetto .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
-        <source>Package reference to remove.</source>
-        <target state="translated">Riferimento al pacchetto da rimuovere.</target>
+        <source>The package reference to remove.</source>
+        <target state="needs-review-translation">Riferimento al pacchetto da rimuovere.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">

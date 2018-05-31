@@ -135,14 +135,17 @@
   <data name="OptionsDescription" xml:space="preserve">
     <value>Options common to all commands</value>
   </data>
-  <data name="CommonOptions" xml:space="preserve">
-    <value>Common options</value>
-  </data>
   <data name="DiagnosticsDefinition" xml:space="preserve">
     <value>Enable diagnostic output</value>
   </data>
+  <data name="SDKCommandUsageDescription" xml:space="preserve">
+    <value>Execute a .NET Core SDK command.</value>
+  </data>
+  <data name="ExecutionUsageDescription" xml:space="preserve">
+    <value>Execute a .NET Core application.</value>
+  </data>
   <data name="HelpDefinition" xml:space="preserve">
-    <value>Show help.</value>
+    <value>Show command line help.</value>
   </data>
   <data name="HostOptions" xml:space="preserve">
     <value>Host options (passed before the command)</value>
@@ -157,43 +160,43 @@
     <value>SDK commands</value>
   </data>
   <data name="NewDefinition" xml:space="preserve">
-    <value>Initialize .NET projects.</value>
+    <value>Create a new .NET project or file.</value>
   </data>
   <data name="RestoreDefinition" xml:space="preserve">
-    <value>Restore dependencies specified in the .NET project.</value>
+    <value>Restore dependencies specified in a .NET project.</value>
   </data>
   <data name="BuildDefinition" xml:space="preserve">
-    <value>Builds a .NET project.</value>
+    <value>Build a .NET project.</value>
   </data>
   <data name="PublishDefinition" xml:space="preserve">
-    <value>Publishes a .NET project for deployment (including the runtime).</value>
+    <value>Publish a .NET project for deployment.</value>
   </data>
   <data name="RunDefinition" xml:space="preserve">
-    <value>Compiles and immediately executes a .NET project.</value>
+    <value>Build and run a .NET project output.</value>
   </data>
   <data name="TestDefinition" xml:space="preserve">
-    <value>Runs unit tests using the test runner specified in the project.</value>
+    <value>Run unit tests using the test runner specified in a .NET project.</value>
   </data>
   <data name="PackDefinition" xml:space="preserve">
-    <value>Creates a NuGet package.</value>
+    <value>Create a NuGet package.</value>
   </data>
   <data name="MigrateDefinition" xml:space="preserve">
-    <value>Migrates a project.json based project to a msbuild based project.</value>
+    <value>Migrate a project.json project to an MSBuild project.</value>
   </data>
   <data name="StoreDefinition" xml:space="preserve">
-    <value>Stores the specified assemblies in the runtime store.</value>
+    <value>Store the specified assemblies in the runtime package store.</value>
   </data>
   <data name="ProjectModificationCommands" xml:space="preserve">
     <value>Project modification commands</value>
   </data>
   <data name="AddDefinition" xml:space="preserve">
-    <value>Add reference to the project.</value>
+    <value>Add a package or reference to a .NET project.</value>
   </data>
   <data name="RemoveDefinition" xml:space="preserve">
-    <value>Remove reference from the project.</value>
+    <value>Remove a package or reference from a .NET project.</value>
   </data>
   <data name="ListDefinition" xml:space="preserve">
-    <value>List references of a .NET project.</value>
+    <value>List project references of a .NET project.</value>
   </data>
   <data name="AdvancedCommands" xml:space="preserve">
     <value>Advanced Commands</value>
@@ -202,31 +205,31 @@
     <value>Provides additional NuGet commands.</value>
   </data>
   <data name="MsBuildDefinition" xml:space="preserve">
-    <value>Runs Microsoft Build Engine (MSBuild).</value>
+    <value>Run Microsoft Build Engine (MSBuild) commands.</value>
   </data>
   <data name="VsTestDefinition" xml:space="preserve">
-    <value>Runs Microsoft Test Execution Command Line Tool.</value>
+    <value>Run Microsoft Test Engine (VSTest) commands.</value>
   </data>
   <data name="CleanDefinition" xml:space="preserve">
-    <value>Clean build output(s).</value>
+    <value>Clean build outputs of a .NET project.</value>
   </data>
   <data name="SlnDefinition" xml:space="preserve">
-    <value>Modify solution (SLN) files.</value>
+    <value>Modify Visual Studio solution files.</value>
   </data>
   <data name="CommandDoesNotExist" xml:space="preserve">
-    <value>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</value>
+    <value>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</value>
   </data>
   <data name="AppFullName" xml:space="preserve">
     <value>.NET CLI help utility</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
-    <value>Utility to get more detailed help about each of the CLI commands.</value>
+    <value>Utility to get more detailed help about each of the SDK commands.</value>
   </data>
   <data name="CommandArgumentName" xml:space="preserve">
     <value>COMMAND_NAME</value>
   </data>
   <data name="CommandArgumentDescription" xml:space="preserve">
-    <value>CLI command for which to view more detailed help.</value>
+    <value>The SDK command to launch online help for.</value>
   </data>
   <data name="PathToApplicationDefinition" xml:space="preserve">
     <value>The path to an application .dll file to execute.</value>
@@ -247,7 +250,7 @@
     <value>Enable diagnostic output.</value>
   </data>
   <data name="RunDotnetCommandHelpForMore" xml:space="preserve">
-    <value>Run 'dotnet COMMAND --help' for more information on a command.</value>
+    <value>Run 'dotnet [command] --help' for more information on a command.</value>
   </data>
   <data name="AdditionalprobingpathDefinition" xml:space="preserve">
     <value>Path containing probing policy and assemblies to probe for.</value>
@@ -268,7 +271,7 @@
     <value>Path to additional deps.json file.</value>
   </data>
   <data name="ToolDefinition" xml:space="preserve">
-    <value>Install or work with tools that extend the .NET experience.</value>
+    <value>Install or manage tools that extend the .NET experience.</value>
   </data>
   <data name="BuildServerDefinition" xml:space="preserve">
     <value>Interact with servers started by a build.</value>
@@ -289,6 +292,6 @@
     <value>Start a file watcher that runs a command when files change.</value>
   </data>
   <data name="AdditionalTools" xml:space="preserve">
-    <value>Additional tools ('dotnet [tool-name] --help' for more information):</value>
+    <value>Additional commands from bundled tools:</value>
   </data>
 </root>

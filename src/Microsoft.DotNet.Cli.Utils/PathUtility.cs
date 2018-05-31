@@ -119,6 +119,11 @@ namespace Microsoft.DotNet.Tools.Common
         /// </summary>
         public static string GetRelativePath(string path1, string path2)
         {
+            if (!Path.IsPathRooted(path1) || !Path.IsPathRooted(path2))
+            {
+                throw new ArgumentException("both paths need to be rooted/full path");
+            }
+
             return GetRelativePath(path1, path2, Path.DirectorySeparatorChar, true);
         }
 

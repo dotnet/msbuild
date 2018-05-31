@@ -17,30 +17,19 @@ namespace Microsoft.DotNet.Configurer
 
         private readonly INuGetCacheSentinel _nuGetCacheSentinel;
 
-        private readonly CliFolderPathCalculator _cliFolderPathCalculator;
-
-        public NuGetCachePrimer(
-            INuGetPackagesArchiver nugetPackagesArchiver,
-            INuGetCacheSentinel nuGetCacheSentinel,
-            CliFolderPathCalculator cliFolderPathCalculator)
-            : this(nugetPackagesArchiver,
-                nuGetCacheSentinel,
-                cliFolderPathCalculator,
-                FileSystemWrapper.Default.File)
+        public NuGetCachePrimer(INuGetPackagesArchiver nugetPackagesArchiver, INuGetCacheSentinel nuGetCacheSentinel)
+            : this(nugetPackagesArchiver, nuGetCacheSentinel, FileSystemWrapper.Default.File)
         {
         }
 
         internal NuGetCachePrimer(
             INuGetPackagesArchiver nugetPackagesArchiver,
             INuGetCacheSentinel nuGetCacheSentinel,
-            CliFolderPathCalculator cliFolderPathCalculator,
             IFile file)
         {
             _nugetPackagesArchiver = nugetPackagesArchiver;
 
             _nuGetCacheSentinel = nuGetCacheSentinel;
-
-            _cliFolderPathCalculator = cliFolderPathCalculator;
 
             _file = file;
         }
@@ -52,7 +41,7 @@ namespace Microsoft.DotNet.Configurer
                 return;
             }
 
-            var nuGetFallbackFolder = _cliFolderPathCalculator.CliFallbackFolderPath;
+            var nuGetFallbackFolder = CliFolderPathCalculator.CliFallbackFolderPath;
 
             _nugetPackagesArchiver.ExtractArchive(nuGetFallbackFolder);
 

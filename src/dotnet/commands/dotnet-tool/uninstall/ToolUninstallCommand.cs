@@ -34,8 +34,6 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             IReporter reporter = null)
             : base(result)
         {
-            var pathCalculator = new CliFolderPathCalculator();
-
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;

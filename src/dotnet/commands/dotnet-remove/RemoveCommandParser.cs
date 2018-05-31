@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Cli
                            LocalizableStrings.NetRemoveCommand,
                            Accept.ExactlyOneArgument()
                                  .DefaultToCurrentDirectory()
-                                 .With(name: CommonLocalizableStrings.CmdProjectFile,
-                                       description: CommonLocalizableStrings.ArgumentsProjectDescription)
+                                 .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                                       description: CommonLocalizableStrings.ProjectArgumentDescription)
                                  .DefaultToCurrentDirectory(),
                            CommonOptions.HelpOption(),
                            RemovePackageParser.RemovePackage(),
