@@ -13,9 +13,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
-  </ItemGroup>
-
+  
 </Project>
