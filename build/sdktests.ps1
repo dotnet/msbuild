@@ -64,6 +64,7 @@ if ($run)
     if (@($failedTests).Count -gt 0)
     {
         Write-Error "Tests failed: $failedTests"
+        Exit 1
     }
     else
     {
