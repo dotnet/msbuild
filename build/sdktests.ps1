@@ -11,7 +11,7 @@ Param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 
-$lkgPackageVersion = "1.0.0-preview-62918-03"
+$lkgPackageVersion = "1.0.0-preview-62928-01"
 
 if ($packageVersion -eq "")
 {
@@ -47,10 +47,27 @@ if ($install)
 
 if ($run)
 {
+    $failedTests = @()
+
     foreach ( $name in $testNames )
     {
         $cmd = "testSdk$name"
         
         & $cmd -xml ($name + "results.xml") $additionalRunParams
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            $failedTests += $name
+        }
+    }
+
+    if (@($failedTests).Count -gt 0)
+    {
+        Write-Error "Tests failed: $failedTests"
+        Exit 1
+    }
+    else
+    {
+        Write-Output "Tests passed"
     }
 }
