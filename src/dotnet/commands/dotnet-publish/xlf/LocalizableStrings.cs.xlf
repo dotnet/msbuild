@@ -37,27 +37,51 @@
         <target state="translated">Cesta k cílovému souboru manifestu obsahujícímu seznam balíčků, které se mají vyloučit z kroku publikování</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publikuje spolu s aplikací modul runtime .NET Core, aby se tento modul nemusel instalovat na cílový počítač. Standardně se nastaví na True, pokud je zadaný identifikátor modulu runtime.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">Nesestavujte projekt, dokud ho nepublikujete. Implikuje možnost --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <source>The target runtime to publish the application for.
+The default is to publish a framework-dependent application without an executable.</source>
+        <target state="new">The target runtime to publish the application for.
+The default is to publish a framework-dependent application without an executable.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionDescription">
+        <source>The mode to use when publishing the application.
+The 'self-contained' mode publishes the application with the .NET Core runtime.
+The 'fx-dependent' mode publishes the application as framework-dependent with an executable if a target runtime is specified.
+The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
+The default is 'fx-dependent-no-exe' when a target runtime is not specified.
+The default is 'self-contained' when a target runtime is specified.</source>
+        <target state="new">The mode to use when publishing the application.
+The 'self-contained' mode publishes the application with the .NET Core runtime.
+The 'fx-dependent' mode publishes the application as framework-dependent with an executable if a target runtime is specified.
+The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
+The default is 'fx-dependent-no-exe' when a target runtime is not specified.
+The default is 'self-contained' when a target runtime is specified.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionName">
+        <source>MODE</source>
+        <target state="new">MODE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishModeAndSelfContainedOptionsConflict">
+        <source>The '--mode' and '--self-contained' options conflict. Specify only one of the options.</source>
+        <target state="new">The '--mode' and '--self-contained' options conflict. Specify only one of the options.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedPublishMode">
+        <source>The specified publish mode '{0}' is not supported.</source>
+        <target state="new">The specified publish mode '{0}' is not supported.</target>
         <note />
       </trans-unit>
     </body>
