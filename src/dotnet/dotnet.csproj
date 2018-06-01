@@ -77,7 +77,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
-    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
