@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
         protected override void ExecuteCore()
         {
-            var log = new MSBuildLog(Log);
+            var log = Log;
             var packageRanks = new PackageRank(PreferredPackages);
             var packageOverrides = new PackageOverrideResolver<ConflictItem>(PackageOverrides);
 

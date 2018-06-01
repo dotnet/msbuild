@@ -445,64 +445,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             public List<MockConflictItem> UnresolvedConflicts { get; set; } = new List<MockConflictItem>();
         }
 
-        class MockLog : ILog
+        class MockLog : Logger
         {
-            public void LogError(string message, params object[] messageArgs)
-            {
-            }
-
-            public void LogMessage(string message, params object[] messageArgs)
-            {
-            }
-
-            public void LogMessage(LogImportance importance, string message, params object[] messageArgs)
-            {
-            }
-
-            public void LogWarning(string message, params object[] messageArgs)
-            {
-            }
-
-            public void LogError(
-            string subcategory,
-            string errorCode,
-            string helpKeyword,
-            string file,
-            int lineNumber,
-            int columnNumber,
-            int endLineNumber,
-            int endColumnNumber,
-            string message,
-            params object[] messageArgs)
-            {
-            }
-
-            public void LogWarning(
-                string subcategory,
-                string warningCode,
-                string helpKeyword,
-                string file,
-                int lineNumber,
-                int columnNumber,
-                int endLineNumber,
-                int endColumnNumber,
-                string message,
-                params object[] messageArgs)
-            {
-            }
-
-            public void LogMessage(
-                string subcategory,
-                string code,
-                string helpKeyword,
-                string file,
-                int lineNumber,
-                int columnNumber,
-                int endLineNumber,
-                int endColumnNumber,
-                MessageImportance importance,
-                string message,
-                params object[] messageArgs)
+            protected override void LogCore(in Message message)
             {
             }
         }
