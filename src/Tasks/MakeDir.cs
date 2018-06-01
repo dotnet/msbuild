@@ -3,14 +3,9 @@
 
 using System;
 using System.IO;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
-using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -19,39 +14,22 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class MakeDir : TaskExtension
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public MakeDir()
-        {
-        }
-
         [Required]
         public ITaskItem[] Directories
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_directories, "directories");
+                ErrorUtilities.VerifyThrowArgumentNull(_directories, nameof(Directories));
                 return _directories;
             }
 
-            set
-            {
-                _directories = value;
-            }
+            set => _directories = value;
         }
 
         [Output]
-        public ITaskItem[] DirectoriesCreated
-        {
-            get
-            {
-                return _directoriesCreated;
-            }
-        }
+        public ITaskItem[] DirectoriesCreated { get; private set; }
 
         private ITaskItem[] _directories;
-        private ITaskItem[] _directoriesCreated;
 
         #region ITask Members
 
@@ -60,8 +38,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            ArrayList items = new ArrayList();
-            HashSet<string> directoriesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var items = new List<ITaskItem>();
+            var directoriesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ITaskItem directory in Directories)
             {
@@ -98,7 +76,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            _directoriesCreated = (ITaskItem[])items.ToArray(typeof(ITaskItem));
+            DirectoriesCreated = items.ToArray();
 
             return !Log.HasLoggedErrors;
         }

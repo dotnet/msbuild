@@ -20,61 +20,50 @@ namespace Microsoft.Build.Tasks
         private enum _FormatType { Version, Path }
 
         private _FormatType _formatType = _FormatType.Version;
-        private string _outputVersion;
-        private int _revision;
-        private string _version;
-
-        private string _specifiedFormatType = null;
 
         [Output]
-        public string OutputVersion
-        {
-            get { return _outputVersion; }
-            set { _outputVersion = value; }
-        }
+        public string OutputVersion { get; set; }
 
-        public string FormatType
-        {
-            get { return _specifiedFormatType; }
-            set { _specifiedFormatType = value; }
-        }
+        public string FormatType { get; set; }
 
-        public int Revision
-        {
-            get { return _revision; }
-            set { _revision = value; }
-        }
+        public int Revision { get; set; }
 
-        public string Version
-        {
-            get { return _version; }
-            set { _version = value; }
-        }
+        public string Version { get; set; }
 
         public override bool Execute()
         {
             if (!ValidateInputs())
+            {
                 return false;
+            }
 
             if (String.IsNullOrEmpty(Version))
+            {
                 OutputVersion = "1.0.0.0";
+            }
             else if (Version.EndsWith("*", StringComparison.Ordinal))
+            {
                 OutputVersion = Version.Substring(0, Version.Length - 1) + Revision.ToString("G", CultureInfo.InvariantCulture);
+            }
             else
+            {
                 OutputVersion = Version;
+            }
 
             if (_formatType == _FormatType.Path)
+            {
                 OutputVersion = OutputVersion.Replace('.', '_');
+            }
             return true;
         }
 
         private bool ValidateInputs()
         {
-            if (_specifiedFormatType != null)
+            if (FormatType != null)
             {
                 try
                 {
-                    _formatType = (_FormatType)Enum.Parse(typeof(_FormatType), _specifiedFormatType, true);
+                    _formatType = (_FormatType)Enum.Parse(typeof(_FormatType), FormatType, true);
                 }
                 catch (ArgumentException)
                 {

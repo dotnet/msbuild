@@ -6,13 +6,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
 
 namespace Microsoft.Build.Tasks
 {
@@ -35,11 +34,6 @@ namespace Microsoft.Build.Tasks
                                                           NativeMethods.MoveFileFlags.MOVEFILE_COPY_ALLOWED;      // Moving across volumes is allowed
 
         /// <summary>
-        /// Subset of specified files that were actually moved
-        /// </summary>
-        private ITaskItem[] _movedFiles;
-
-        /// <summary>
         /// Whether we should cancel.
         /// </summary>
         private bool _canceling;
@@ -48,50 +42,31 @@ namespace Microsoft.Build.Tasks
         /// List of files to move.
         /// </summary>
         [Required]
-        public ITaskItem[] SourceFiles
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] SourceFiles { get; set; }
 
         /// <summary>
         /// Destination folder for all the source files.
         /// </summary>
-        public ITaskItem DestinationFolder
-        {
-            get;
-            set;
-        }
+        public ITaskItem DestinationFolder { get; set; }
 
         /// <summary>
         /// Whether to overwrite files in the destination
         /// that have the read-only attribute set.
         /// Default is to not overwrite.
         /// </summary>
-        public bool OverwriteReadOnlyFiles
-        {
-            get;
-            set;
-        }
+        public bool OverwriteReadOnlyFiles { get; set; }
 
         /// <summary>
         /// Destination files matching each of the source files.
         /// </summary>
         [Output]
-        public ITaskItem[] DestinationFiles
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] DestinationFiles { get; set; }
 
         /// <summary>
         /// Subset that were successfully moved 
         /// </summary>
         [Output]
-        public ITaskItem[] MovedFiles
-        {
-            get { return _movedFiles; }
-        }
+        public ITaskItem[] MovedFiles { get; private set; }
 
         /// <summary>
         /// Stop and return (in an undefined state) as soon as possible.
@@ -111,8 +86,8 @@ namespace Microsoft.Build.Tasks
             // If there are no source files then just return success.
             if (SourceFiles == null || SourceFiles.Length == 0)
             {
-                DestinationFiles = Array.Empty<TaskItem>();
-                _movedFiles = Array.Empty<TaskItem>();
+                DestinationFiles = Array.Empty<ITaskItem>();
+                MovedFiles = Array.Empty<ITaskItem>();
                 return true;
             }
 
@@ -165,7 +140,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Build up the sucessfully moved subset
-            ArrayList destinationFilesSuccessfullyMoved = new ArrayList();
+            var destinationFilesSuccessfullyMoved = new List<ITaskItem>();
 
             // Now that we have a list of DestinationFolder files, move from source to DestinationFolder.
             for (int i = 0; i < SourceFiles.Length && !_canceling; ++i)
@@ -195,7 +170,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // MovedFiles contains only the copies that were successful.
-            _movedFiles = (ITaskItem[])destinationFilesSuccessfullyMoved.ToArray(typeof(ITaskItem));
+            MovedFiles = destinationFilesSuccessfullyMoved.ToArray();
 
             return success && !_canceling;
         }
@@ -205,7 +180,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void MakeWriteableIfReadOnly(string file)
         {
-            FileInfo info = new FileInfo(file);
+            var info = new FileInfo(file);
             if ((info.Attributes & FileAttributes.ReadOnly) != 0)
             {
                 info.Attributes = info.Attributes & ~FileAttributes.ReadOnly;
@@ -252,7 +227,7 @@ namespace Microsoft.Build.Tasks
 
             string destinationFolder = Path.GetDirectoryName(destinationFile);
 
-            if (destinationFolder != null && destinationFolder.Length > 0 && !Directory.Exists(destinationFolder))
+            if (!string.IsNullOrEmpty(destinationFolder) && !Directory.Exists(destinationFolder))
             {
                 Log.LogMessageFromResources(MessageImportance.Normal, "Move.CreatesDirectory", destinationFolder);
                 Directory.CreateDirectory(destinationFolder);
@@ -278,7 +253,7 @@ namespace Microsoft.Build.Tasks
                 // which is unfortunately internal.
                 // So try to get a nice message by using the BCL Move(), which will likely fail
                 // and throw. Otherwise use the "correct" method.
-                System.IO.File.Move(sourceFile, destinationFile);
+                File.Move(sourceFile, destinationFile);
 
                 // Apparently that didn't throw, so..
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());

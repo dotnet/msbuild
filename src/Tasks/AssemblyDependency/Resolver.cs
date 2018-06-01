@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Base class for all resolver types.
     /// </summary>
-    abstract internal class Resolver
+    internal abstract class Resolver
     {
         /// <summary>
         /// The corresponding element from the search path.
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Runtime we are targeting
         /// </summary>
-        protected Version targetedRuntimeVersion = null;
+        protected Version targetedRuntimeVersion;
 
         /// <summary>
         /// Processor architecture we are targeting.
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
         /// <returns>True if the file was resolved.</returns>
-        abstract public bool Resolve
+        public abstract bool Resolve
         (
             AssemblyNameExtension assemblyName,
             string sdkName,
@@ -97,22 +97,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The search path element that this resolver is based on.
         /// </summary>
-        public string SearchPath
-        {
-            get { return searchPathElement; }
-        }
+        public string SearchPath => searchPathElement;
 
         /// <summary>
         /// Resolve a single file.
         /// </summary>
-        /// <param name="fullPath"></param>
-        /// <param name="assemblyName"></param>
-        /// <param name="isPrimaryProjectReference"></param>
-        /// <param name="wantSpecificVersion"></param>
-        /// <param name="searchPath"></param>
-        /// <param name="assembliesConsideredAndRejected"></param>
-        /// <param name="fileExists"></param>
-        /// <param name="getAssemblyName"></param>
         /// <returns>True if the file was a match, false otherwise.</returns>
         protected bool ResolveAsFile
         (
@@ -127,9 +116,11 @@ namespace Microsoft.Build.Tasks
             ResolutionSearchLocation considered = null;
             if (assembliesConsideredAndRejected != null)
             {
-                considered = new ResolutionSearchLocation();
-                considered.FileNameAttempted = fullPath;
-                considered.SearchPath = searchPathElement;
+                considered = new ResolutionSearchLocation
+                {
+                    FileNameAttempted = fullPath,
+                    SearchPath = searchPathElement
+                };
             }
 
             if (FileMatchesAssemblyName(assemblyName, isPrimaryProjectReference, wantSpecificVersion, allowMismatchBetweenFusionNameAndFileName, fullPath, considered))
@@ -138,10 +129,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Record this as a location that was considered.
-            if (assembliesConsideredAndRejected != null)
-            {
-                assembliesConsideredAndRejected.Add(considered);
-            }
+            assembliesConsideredAndRejected?.Add(considered);
 
             return false;
         }
@@ -154,9 +142,6 @@ namespace Microsoft.Build.Tasks
         /// <param name="wantSpecificVersion">Whether the version needs to match exactly or loosely.</param>
         /// <param name="pathToCandidateAssembly">Path to a possible file.</param>
         /// <param name="searchLocation">Information about why the candidate file didn't match</param>
-        /// <param name="fileExists">Delegate for File.Exists.</param>
-        /// <param name="getAssemblyName">Delegate for AssemblyName.GetAssemblyName</param>
-        /// <returns></returns>
         protected bool FileMatchesAssemblyName
         (
             AssemblyNameExtension assemblyName,
@@ -194,7 +179,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            bool isSimpleAssemblyName = assemblyName == null ? false : assemblyName.IsSimpleName;
+            bool isSimpleAssemblyName = assemblyName != null && assemblyName.IsSimpleName;
 
             if (fileExists(pathToCandidateAssembly))
             {
@@ -221,7 +206,7 @@ namespace Microsoft.Build.Tasks
                 {
                     targetAssemblyName = getAssemblyName(pathToCandidateAssembly);
                 }
-                catch (System.IO.FileLoadException)
+                catch (FileLoadException)
                 {
                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
@@ -303,8 +288,6 @@ namespace Microsoft.Build.Tasks
         /// <param name="executableExtensions">The possible filename extensions of the assembly. Must be one of these or its no match.</param>
         /// <param name="directory">the directory to look in</param>
         /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
-        /// <param name="fileExists">Delegate for File.Exists.</param>
-        /// <param name="getAssemblyName">Delegate for AssemblyName.GetAssemblyName</param>
         /// <returns>'null' if the assembly wasn't found.</returns>
         protected string ResolveFromDirectory
         (
@@ -328,10 +311,10 @@ namespace Microsoft.Build.Tasks
             if (directory != null)
             {
                 string weakNameBase = assemblyName.Name;
-                for (int i = 0; i < executableExtensions.Length; ++i)
+                foreach (string executableExtension in executableExtensions)
                 {
-                    string baseName = weakNameBase + executableExtensions[i];
-                    string fullPath = null;
+                    string baseName = weakNameBase + executableExtension;
+                    string fullPath;
 
                     try
                     {
@@ -351,7 +334,6 @@ namespace Microsoft.Build.Tasks
                             candidateFullPath = fullPath;
                         }
 
-
                         /*
                          * After finding a file we now will check to see if it matches the type of processor architecture we want to return. The rules are as follows
                          * 
@@ -359,7 +341,6 @@ namespace Microsoft.Build.Tasks
                          * 
                          * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return 
                          * the first assembly which matches reguardless of its processor architecture.
-                         
                          */
 
                         if (targetProcessorArchitecture == ProcessorArchitecture.MSIL)
@@ -387,14 +368,14 @@ namespace Microsoft.Build.Tasks
                     string weakNameBaseExtension = Path.GetExtension(weakNameBase);
                     string weakNameBaseFileName = Path.GetFileNameWithoutExtension(weakNameBase);
 
-                    if (weakNameBaseExtension != null && weakNameBaseExtension.Length > 0 && weakNameBaseFileName != null && weakNameBaseFileName.Length > 0)
+                    if (!string.IsNullOrEmpty(weakNameBaseExtension) && !string.IsNullOrEmpty(weakNameBaseFileName))
                     {
-                        for (int i = 0; i < executableExtensions.Length; ++i)
+                        foreach (string executableExtension in executableExtensions)
                         {
-                            if (String.Compare(executableExtensions[i], weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase) == 0)
+                            if (String.Compare(executableExtension, weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase) == 0)
                             {
                                 string fullPath = Path.Combine(directory, weakNameBase);
-                                AssemblyNameExtension extensionlessAssemblyName = new AssemblyNameExtension(weakNameBaseFileName);
+                                var extensionlessAssemblyName = new AssemblyNameExtension(weakNameBaseFileName);
 
                                 if (ResolveAsFile(fullPath, extensionlessAssemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
                                 {

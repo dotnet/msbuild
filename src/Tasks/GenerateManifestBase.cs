@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Collections;
-using System.Security.Cryptography;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -20,21 +17,11 @@ namespace Microsoft.Build.Tasks
     public abstract class GenerateManifestBase : Task
     {
         private enum AssemblyType { Unspecified, Managed, Native, Satellite };
-        private enum DependencyType { Install, Prerequisite };
+        private enum DependencyType { Install };
 
-        private string _assemblyName = null;
-        private string _assemblyVersion = null;
-        private string _description = null;
-        private ITaskItem _entryPoint = null;
-        private ITaskItem _inputManifest = null;
-        private int _maxTargetPath = 0;
-        private ITaskItem _outputManifest = null;
-        private string _platform = null;
-        private string _processorArchitecture = null;
-        private int _startTime = 0;
-        private string _targetCulture = null;
+        private string _processorArchitecture;
+        private int _startTime;
         private string _targetFrameworkVersion = Constants.TargetFrameworkVersion20;
-        private string _targetFrameworkMoniker = null;
 
         private Manifest _manifest;
         protected abstract bool OnManifestLoaded(Manifest manifest);
@@ -46,90 +33,53 @@ namespace Microsoft.Build.Tasks
         {
         }
 
-        public string AssemblyName
-        {
-            get { return _assemblyName; }
-            set { _assemblyName = value; }
-        }
+        public string AssemblyName { get; set; }
 
-        public string AssemblyVersion
-        {
-            get { return _assemblyVersion; }
-            set { _assemblyVersion = value; }
-        }
+        public string AssemblyVersion { get; set; }
 
-        public string Description
-        {
-            get { return _description; }
-            set { _description = value; }
-        }
+        public string Description { get; set; }
 
-        public ITaskItem EntryPoint
-        {
-            get { return _entryPoint; }
-            set { _entryPoint = value; }
-        }
+        public ITaskItem EntryPoint { get; set; }
 
-        public ITaskItem InputManifest
-        {
-            get { return _inputManifest; }
-            set { _inputManifest = value; }
-        }
+        public ITaskItem InputManifest { get; set; }
 
-        public int MaxTargetPath
-        {
-            get { return _maxTargetPath; }
-            set { _maxTargetPath = value; }
-        }
+        public int MaxTargetPath { get; set; }
 
         [Output]
-        public ITaskItem OutputManifest
-        {
-            get { return _outputManifest; }
-            set { _outputManifest = value; }
-        }
+        public ITaskItem OutputManifest { get; set; }
 
-        public string Platform
-        {
-            get { return _platform; }
-            set { _platform = value; }
-        }
+        public string Platform { get; set; } = null;
 
-        public string TargetCulture
-        {
-            get { return _targetCulture; }
-            set { _targetCulture = value; }
-        }
+        public string TargetCulture { get; set; } = null;
 
         public string TargetFrameworkVersion
         {
             get
             {
                 if (string.IsNullOrEmpty(_targetFrameworkVersion))
+                {
                     return Constants.TargetFrameworkVersion35;
+                }
                 return _targetFrameworkVersion;
             }
-            set { _targetFrameworkVersion = value; }
+            set => _targetFrameworkVersion = value;
         }
 
-        public string TargetFrameworkMoniker
-        {
-            get
-            {
-                return _targetFrameworkMoniker;
-            }
-            set { _targetFrameworkMoniker = value; }
-        }
+        public string TargetFrameworkMoniker { get; set; }
 
         protected internal AssemblyReference AddAssemblyNameFromItem(ITaskItem item, AssemblyReferenceType referenceType)
         {
-            AssemblyReference assembly = new AssemblyReference();
-            assembly.AssemblyIdentity = AssemblyIdentity.FromAssemblyName(item.ItemSpec);
-            assembly.ReferenceType = referenceType;
+            var assembly = new AssemblyReference
+            {
+                AssemblyIdentity = AssemblyIdentity.FromAssemblyName(item.ItemSpec),
+                ReferenceType = referenceType
+            };
             _manifest.AssemblyReferences.Add(assembly);
             string hintPath = item.GetMetadata("HintPath");
             if (!String.IsNullOrEmpty(hintPath))
+            {
                 assembly.SourcePath = hintPath;
+            }
             SetItemAttributes(item, assembly);
             return assembly;
         }
@@ -138,7 +88,9 @@ namespace Microsoft.Build.Tasks
         {
             // if the assembly is a no-pia assembly and embed interop is turned on, then we don't write it to the manifest.
             if (IsEmbedInteropEnabledForAssembly(item))
+            {
                 return null;
+            }
 
             AssemblyReferenceType referenceType;
             AssemblyType assemblyType = GetItemAssemblyType(item);
@@ -171,8 +123,7 @@ namespace Microsoft.Build.Tasks
                 // If we interpreted the item as a strong name, then treat it as a Fusion display name...
                 if (identity.IsStrongName)
                 {
-                    assembly = new AssemblyReference();
-                    assembly.AssemblyIdentity = identity;
+                    assembly = new AssemblyReference { AssemblyIdentity = identity };
                 }
                 else // otherwise treat it as a file path...
                 {
@@ -210,21 +161,27 @@ namespace Microsoft.Build.Tasks
 
         private AssemblyIdentity CreateAssemblyIdentity(AssemblyIdentity baseIdentity, AssemblyIdentity entryPointIdentity)
         {
-            string name = _assemblyName;
-            string version = _assemblyVersion;
+            string name = AssemblyName;
+            string version = AssemblyVersion;
             string publicKeyToken = "0000000000000000";
-            string culture = _targetCulture;
+            string culture = TargetCulture;
 
             if (String.IsNullOrEmpty(name))
             {
-                if (baseIdentity != null && !String.IsNullOrEmpty(baseIdentity.Name))
+                if (!String.IsNullOrEmpty(baseIdentity?.Name))
+                {
                     name = baseIdentity.Name;
-                else if (entryPointIdentity != null && !String.IsNullOrEmpty(entryPointIdentity.Name))
+                }
+                else if (!String.IsNullOrEmpty(entryPointIdentity?.Name))
                 {
                     if (_manifest is DeployManifest)
+                    {
                         name = Path.GetFileNameWithoutExtension(entryPointIdentity.Name) + ".application";
+                    }
                     else if (_manifest is ApplicationManifest)
+                    {
                         name = entryPointIdentity.Name + ".exe";
+                    }
                 }
             }
             if (String.IsNullOrEmpty(name))
@@ -235,50 +192,75 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(version))
             {
-                if (baseIdentity != null && !String.IsNullOrEmpty(baseIdentity.Version))
+                if (!String.IsNullOrEmpty(baseIdentity?.Version))
+                {
                     version = baseIdentity.Version;
-                else if (entryPointIdentity != null && !String.IsNullOrEmpty(entryPointIdentity.Version))
+                }
+                else if (!String.IsNullOrEmpty(entryPointIdentity?.Version))
+                {
                     version = entryPointIdentity.Version;
+                }
             }
+
             if (String.IsNullOrEmpty(version))
+            {
                 version = "1.0.0.0";
+            }
 
             if (String.IsNullOrEmpty(culture))
             {
-                if (baseIdentity != null && !String.IsNullOrEmpty(baseIdentity.Culture))
+                if (!String.IsNullOrEmpty(baseIdentity?.Culture))
+                {
                     culture = baseIdentity.Culture;
-                else if (entryPointIdentity != null && !String.IsNullOrEmpty(entryPointIdentity.Culture))
+                }
+                else if (!String.IsNullOrEmpty(entryPointIdentity?.Culture))
+                {
                     culture = entryPointIdentity.Culture;
+                }
             }
+
             if (String.IsNullOrEmpty(culture)
-             || String.Equals(culture, "neutral", StringComparison.OrdinalIgnoreCase)
-             || String.Equals(culture, "*", StringComparison.OrdinalIgnoreCase))
+                || String.Equals(culture, "neutral", StringComparison.OrdinalIgnoreCase)
+                || String.Equals(culture, "*", StringComparison.OrdinalIgnoreCase))
+            {
                 culture = "neutral";
+            }
 
             if (String.IsNullOrEmpty(_processorArchitecture))
             {
-                if (baseIdentity != null && !String.IsNullOrEmpty(baseIdentity.ProcessorArchitecture))
+                if (!String.IsNullOrEmpty(baseIdentity?.ProcessorArchitecture))
+                {
                     _processorArchitecture = baseIdentity.ProcessorArchitecture;
-                else if (entryPointIdentity != null && !String.IsNullOrEmpty(entryPointIdentity.ProcessorArchitecture))
+                }
+                else if (!String.IsNullOrEmpty(entryPointIdentity?.ProcessorArchitecture))
+                {
                     _processorArchitecture = entryPointIdentity.ProcessorArchitecture;
+                }
             }
+
             if (String.IsNullOrEmpty(_processorArchitecture))
+            {
                 _processorArchitecture = "msil";
+            }
 
             // Fixup for non-ClickOnce case...
             if (_manifest is ApplicationManifest)
             {
-                ApplicationManifest applicationManifest = _manifest as ApplicationManifest;
+                var applicationManifest = _manifest as ApplicationManifest;
                 if (!applicationManifest.IsClickOnceManifest)
                 {
                     // Don't need publicKeyToken attribute for non-ClickOnce case
                     publicKeyToken = null;
                     // Language attribute should be omitted if neutral
                     if (String.Compare(culture, "neutral", StringComparison.OrdinalIgnoreCase) == 0)
+                    {
                         culture = null;
+                    }
                     // WinXP loader doesn't understand "msil"
                     if (String.Compare(_processorArchitecture, "msil", StringComparison.OrdinalIgnoreCase) == 0)
+                    {
                         _processorArchitecture = null;
+                    }
                 }
             }
 
@@ -291,16 +273,22 @@ namespace Microsoft.Build.Tasks
 
             Type manifestType = GetObjectType();
             if (!InitializeManifest(manifestType))
+            {
                 success = false;
+            }
 
             if (success && !BuildManifest())
+            {
                 success = false;
+            }
 
             if (_manifest != null)
             {
                 _manifest.OutputMessages.LogTaskMessages(this);
                 if (_manifest.OutputMessages.ErrorCount > 0)
+                {
                     success = false;
+                }
             }
 
             return success;
@@ -309,18 +297,26 @@ namespace Microsoft.Build.Tasks
         private bool BuildManifest()
         {
             if (!OnManifestLoaded(_manifest))
+            {
                 return false;
+            }
 
             if (!ResolveFiles())
+            {
                 return false;
+            }
 
             if (!ResolveIdentity())
+            {
                 return false;
+            }
 
             _manifest.SourcePath = GetOutputPath();
 
             if (!OnManifestResolved(_manifest))
+            {
                 return false;
+            }
 
             return WriteManifest();
         }
@@ -329,19 +325,26 @@ namespace Microsoft.Build.Tasks
         {
             string targetPath = item.GetMetadata(ItemMetadataNames.targetPath);
             if (String.IsNullOrEmpty(targetPath))
+            {
                 targetPath = BaseReference.GetDefaultTargetPath(item.ItemSpec);
+            }
             foreach (FileReference file in _manifest.FileReferences)
+            {
                 if (String.Compare(targetPath, file.TargetPath, StringComparison.OrdinalIgnoreCase) == 0)
+                {
                     return file;
+                }
+            }
             return AddFileFromItem(item);
         }
 
         private string GetDefaultFileName()
         {
             if (_manifest is DeployManifest)
+            {
                 return _manifest.AssemblyIdentity.Name;
-            else
-                return _manifest.AssemblyIdentity.Name + ".manifest";
+            }
+            return _manifest.AssemblyIdentity.Name + ".manifest";
         }
 
         // Returns assembly type (i.e. "Managed", "Native", or "Satellite") as specified by the item.
@@ -351,6 +354,7 @@ namespace Microsoft.Build.Tasks
         {
             string value = item.GetMetadata("AssemblyType");
             if (!String.IsNullOrEmpty(value))
+            {
                 try
                 {
                     return (AssemblyType)Enum.Parse(typeof(AssemblyType), value, true);
@@ -363,15 +367,14 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogWarningWithCodeFromResources("GenerateManifest.InvalidItemValue", "AssemblyType", item.ItemSpec);
                 }
+            }
             return AssemblyType.Unspecified;
         }
 
-        private bool IsEmbedInteropEnabledForAssembly(ITaskItem item)
+        private static bool IsEmbedInteropEnabledForAssembly(ITaskItem item)
         {
             string value = item.GetMetadata("EmbedInteropTypes");
-            bool result;
-
-            bool.TryParse(value, out result);
+            bool.TryParse(value, out bool result);
             return result;
         }
 
@@ -382,6 +385,7 @@ namespace Microsoft.Build.Tasks
         {
             string value = item.GetMetadata("DependencyType");
             if (!String.IsNullOrEmpty(value))
+            {
                 try
                 {
                     return (DependencyType)Enum.Parse(typeof(DependencyType), value, true);
@@ -394,15 +398,17 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogWarningWithCodeFromResources("GenerateManifest.InvalidItemValue", "DependencyType", item.ItemSpec);
                 }
+            }
             return DependencyType.Install;
         }
 
         private string GetOutputPath()
         {
             if (OutputManifest != null)
+            {
                 return OutputManifest.ItemSpec;
-            else
-                return GetDefaultFileName();
+            }
+            return GetDefaultFileName();
         }
 
         private bool InitializeManifest(Type manifestType)
@@ -410,18 +416,28 @@ namespace Microsoft.Build.Tasks
             _startTime = Environment.TickCount;
 
             if (!ValidateInputs())
+            {
                 return false;
+            }
 
             if (manifestType == null)
-                throw new ArgumentNullException("manifestType");
-            if (InputManifest == null || String.IsNullOrEmpty(InputManifest.ItemSpec))
+            {
+                throw new ArgumentNullException(nameof(manifestType));
+            }
+            if (String.IsNullOrEmpty(InputManifest?.ItemSpec))
             {
                 if (manifestType == typeof(ApplicationManifest))
-                    _manifest = new ApplicationManifest(this.TargetFrameworkVersion);
+                {
+                    _manifest = new ApplicationManifest(TargetFrameworkVersion);
+                }
                 else if (manifestType == typeof(DeployManifest))
-                    _manifest = new DeployManifest(this.TargetFrameworkMoniker);
+                {
+                    _manifest = new DeployManifest(TargetFrameworkMoniker);
+                }
                 else
-                    throw new ArgumentException(String.Empty /* no message */, "manifestType");
+                {
+                    throw new ArgumentException(String.Empty /* no message */, nameof(manifestType));
+                }
             }
             else
             {
@@ -442,31 +458,40 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            if (_manifest is DeployManifest)
+            if (_manifest is DeployManifest deployManifest)
             {
-                DeployManifest deployManifest = _manifest as DeployManifest;
                 if (string.IsNullOrEmpty(deployManifest.TargetFrameworkMoniker))
-                    deployManifest.TargetFrameworkMoniker = this.TargetFrameworkMoniker;
+                {
+                    deployManifest.TargetFrameworkMoniker = TargetFrameworkMoniker;
+                }
             }
-            else if (_manifest is ApplicationManifest)
+            else if (_manifest is ApplicationManifest applicationManifest)
             {
-                ApplicationManifest applicationManifest = _manifest as ApplicationManifest;
                 if (string.IsNullOrEmpty(applicationManifest.TargetFrameworkVersion))
-                    applicationManifest.TargetFrameworkVersion = this.TargetFrameworkVersion;
+                {
+                    applicationManifest.TargetFrameworkVersion = TargetFrameworkVersion;
+                }
             }
 
-            if (EntryPoint != null && !String.IsNullOrEmpty(EntryPoint.ItemSpec))
+            if (!String.IsNullOrEmpty(EntryPoint?.ItemSpec))
             {
                 AssemblyReferenceType referenceType = AssemblyReferenceType.Unspecified;
                 if (_manifest is DeployManifest)
+                {
                     referenceType = AssemblyReferenceType.ClickOnceManifest;
+                }
+
                 if (_manifest is ApplicationManifest)
+                {
                     referenceType = AssemblyReferenceType.ManagedAssembly;
+                }
                 _manifest.EntryPoint = AddEntryPointFromItem(EntryPoint, referenceType);
             }
 
             if (Description != null)
+            {
                 _manifest.Description = Description;
+            }
 
             return true;
         }
@@ -477,9 +502,11 @@ namespace Microsoft.Build.Tasks
 
             string[] searchPaths = { Directory.GetCurrentDirectory() };
             _manifest.ResolveFiles(searchPaths);
-            _manifest.UpdateFileInfo(this.TargetFrameworkVersion);
+            _manifest.UpdateFileInfo(TargetFrameworkVersion);
             if (_manifest.OutputMessages.ErrorCount > 0)
+            {
                 return false;
+            }
 
             Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifestBase.ResolveFiles t={0}", Environment.TickCount - t1));
             return true;
@@ -487,7 +514,7 @@ namespace Microsoft.Build.Tasks
 
         private bool ResolveIdentity()
         {
-            AssemblyIdentity entryPointIdentity = _manifest.EntryPoint != null ? _manifest.EntryPoint.AssemblyIdentity : null;
+            AssemblyIdentity entryPointIdentity = _manifest.EntryPoint?.AssemblyIdentity;
             _manifest.AssemblyIdentity = CreateAssemblyIdentity(_manifest.AssemblyIdentity, entryPointIdentity);
             return _manifest.AssemblyIdentity != null;
         }
@@ -496,36 +523,42 @@ namespace Microsoft.Build.Tasks
         {
             string targetPath = item.GetMetadata(ItemMetadataNames.targetPath);
             if (!String.IsNullOrEmpty(targetPath))
+            {
                 file.TargetPath = targetPath;
+            }
             else
+            {
                 file.TargetPath = Path.IsPathRooted(file.SourcePath) || file.SourcePath.StartsWith("..", StringComparison.Ordinal) ? Path.GetFileName(file.SourcePath) : file.SourcePath;
+            }
             file.Group = item.GetMetadata("Group");
             file.IsOptional = !String.IsNullOrEmpty(file.Group);
             if (Util.CompareFrameworkVersions(TargetFrameworkVersion, Constants.TargetFrameworkVersion35) >= 0)
+            {
                 file.IncludeHash = ConvertUtil.ToBoolean(item.GetMetadata("IncludeHash"), true);
+            }
         }
 
         protected internal virtual bool ValidateInputs()
         {
             bool valid = true;
-            if (!String.IsNullOrEmpty(_assemblyName) && !Util.IsValidAssemblyName(_assemblyName))
+            if (!String.IsNullOrEmpty(AssemblyName) && !Util.IsValidAssemblyName(AssemblyName))
             {
                 Log.LogErrorWithCodeFromResources("GenerateManifest.InvalidValue", "AssemblyName");
                 valid = false;
             }
-            if (!String.IsNullOrEmpty(_assemblyVersion) && !Util.IsValidVersion(_assemblyVersion, 4))
+            if (!String.IsNullOrEmpty(AssemblyVersion) && !Util.IsValidVersion(AssemblyVersion, 4))
             {
                 Log.LogErrorWithCodeFromResources("GenerateManifest.InvalidValue", "AssemblyVersion");
                 valid = false;
             }
-            if (!String.IsNullOrEmpty(_targetCulture) && !Util.IsValidCulture(_targetCulture))
+            if (!String.IsNullOrEmpty(TargetCulture) && !Util.IsValidCulture(TargetCulture))
             {
                 Log.LogErrorWithCodeFromResources("GenerateManifest.InvalidValue", "TargetCulture");
                 valid = false;
             }
-            if (!String.IsNullOrEmpty(_platform))
+            if (!String.IsNullOrEmpty(Platform))
             {
-                _processorArchitecture = Util.PlatformToProcessorArchitecture(_platform);
+                _processorArchitecture = Util.PlatformToProcessorArchitecture(Platform);
                 if (String.IsNullOrEmpty(_processorArchitecture))
                 {
                     Log.LogErrorWithCodeFromResources("GenerateManifest.InvalidValue", "Platform");
@@ -539,14 +572,18 @@ namespace Microsoft.Build.Tasks
         {
             _manifest.Validate();
             if (_manifest.OutputMessages.ErrorCount > 0)
+            {
                 return false;
+            }
 
             // Check length of manifest file name does not exceed maximum...
             if (MaxTargetPath > 0)
             {
                 string manifestFileName = Path.GetFileName(OutputManifest.ItemSpec);
                 if (manifestFileName.Length > MaxTargetPath)
+                {
                     Log.LogWarningWithCodeFromResources("GenerateManifest.TargetPathTooLong", manifestFileName, MaxTargetPath);
+                }
             }
 
             return true;
@@ -555,15 +592,19 @@ namespace Microsoft.Build.Tasks
         private bool WriteManifest()
         {
             if (OutputManifest == null)
+            {
                 OutputManifest = new TaskItem(GetDefaultFileName());
+            }
 
             if (!ValidateOutput())
+            {
                 return false;
+            }
 
             int t1 = Environment.TickCount;
             try
             {
-                ManifestWriter.WriteManifest(_manifest, OutputManifest.ItemSpec, this.TargetFrameworkVersion);
+                ManifestWriter.WriteManifest(_manifest, OutputManifest.ItemSpec, TargetFrameworkVersion);
             }
             catch (Exception ex)
             {

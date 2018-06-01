@@ -2,12 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using System.Globalization;
-using System.Resources;
 
 namespace Microsoft.Build.Tasks
 {
@@ -16,111 +11,37 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class Message : TaskExtension
     {
-        private string _text;
-
         /// <summary>
         /// Text to log.
         /// </summary>
-        public string Text
-        {
-            get
-            {
-                return _text;
-            }
-
-            set
-            {
-                _text = value;
-            }
-        }
-
-        private string _importance;
+        public string Text { get; set; }
 
         /// <summary>
         /// Importance: high, normal, low (default normal)
         /// </summary>
-        public string Importance
-        {
-            get
-            {
-                return _importance;
-            }
-
-            set
-            {
-                _importance = value;
-            }
-        }
-
-        private string _code;
+        public string Importance { get; set; }
 
         /// <summary>
         /// Message code
         /// </summary>
-        public string Code
-        {
-            get
-            {
-                return _code;
-            }
-            set
-            {
-                _code = value;
-            }
-        }
-
-        private string _file;
+        public string Code { get; set; }
 
         /// <summary>
         /// Relevant file if any.
         /// If none is provided and this is a critical message, the file containing the Message
         /// task will be used.
         /// </summary>
-        public string File
-        {
-            get
-            {
-                return _file;
-            }
-            set
-            {
-                _file = value;
-            }
-        }
-
-        private string _helpKeyword;
+        public string File { get; set; }
 
         /// <summary>
         /// Message help keyword
         /// </summary>
-        public string HelpKeyword
-        {
-            get
-            {
-                return _helpKeyword;
-            }
-            set
-            {
-                _helpKeyword = value;
-            }
-        }
-
-        private bool _isCritical;
+        public string HelpKeyword { get; set; }
 
         /// <summary>
         /// Indicates if this is a critical message
         /// </summary>
-        public bool IsCritical
-        {
-            get
-            {
-                return _isCritical;
-            }
-            set
-            {
-                _isCritical = value;
-            }
-        }
+        public bool IsCritical { get; set; }
 
         public override bool Execute()
         {

@@ -30,52 +30,32 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set of resolvedSDK references which we will use to find the reference assemblies.
         /// </summary>
-        private ITaskItem[] _resolvedSDKReferences = Array.Empty<TaskItem>();
-
-        /// <summary>
-        /// Set of the redist files for the resolved sdks
-        /// </summary>
-        private ITaskItem[] _sdkRedistFiles = Array.Empty<TaskItem>();
-
-        /// <summary>
-        /// Resolved reference assemblies from the SDK
-        /// </summary>
-        private ITaskItem[] _references = Array.Empty<TaskItem>();
-
-        /// <summary>
-        /// Redist files from the SDKs
-        /// </summary>
-        private ITaskItem[] _redistFiles = Array.Empty<TaskItem>();
+        private ITaskItem[] _resolvedSDKReferences = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Set of resolved reference assemblies. This removes any duplicate ones between sdks.
         /// </summary>
-        private HashSet<ResolvedReferenceAssembly> _resolvedReferences = new HashSet<ResolvedReferenceAssembly>();
+        private readonly HashSet<ResolvedReferenceAssembly> _resolvedReferences = new HashSet<ResolvedReferenceAssembly>();
 
         /// <summary>
         /// Set of resolved reference assemblies. This removes any duplicate ones between sdks.
         /// </summary>
-        private HashSet<ResolvedRedistFile> _resolveRedistFiles = new HashSet<ResolvedRedistFile>();
-
-        /// <summary>
-        /// Files to be copied locally
-        /// </summary>
-        private ITaskItem[] _copyLocalFiles = Array.Empty<TaskItem>();
+        private readonly HashSet<ResolvedRedistFile> _resolveRedistFiles = new HashSet<ResolvedRedistFile>();
 
         /// <summary>
         /// Set of reference assembly extensions to look for.
         /// </summary>
-        private string[] _referenceExtensions = new string[] { ".winmd", ".dll" };
+        private string[] _referenceExtensions = { ".winmd", ".dll" };
 
         /// <summary>
         /// Dictionary of SDK Identity to the cache file that contains the file information for it.
         /// </summary>
-        private ConcurrentDictionary<string, SDKInfo> _cacheFileForSDKs = new ConcurrentDictionary<string, SDKInfo>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, SDKInfo> _cacheFileForSDKs = new ConcurrentDictionary<string, SDKInfo>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Set of exceptions which were thrown while reading or writing to the cache file, this needs to be thread safe since TPL code will add exceptions into this structure at the same time.
         /// </summary>
-        private ConcurrentQueue<string> _exceptions = new ConcurrentQueue<string>();
+        private readonly ConcurrentQueue<string> _exceptions = new ConcurrentQueue<string>();
 
         /// <summary>
         /// Delegate to get the assembly name
@@ -118,14 +98,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string CacheFileFolderPath
         {
-            get
-            {
-                return _cacheFilePath;
-            }
+            get => _cacheFilePath;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "CacheFileFolderPath");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(CacheFileFolderPath));
                 _cacheFilePath = value;
             }
         }
@@ -135,14 +112,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] ResolvedSDKReferences
         {
-            get
-            {
-                return _resolvedSDKReferences;
-            }
+            get => _resolvedSDKReferences;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "ResolvedSDKReferences");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ResolvedSDKReferences));
                 _resolvedSDKReferences = value;
             }
         }
@@ -153,14 +127,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] ReferenceExtensions
         {
-            get
-            {
-                return _referenceExtensions;
-            }
+            get => _referenceExtensions;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "ReferenceExtensions");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ReferenceExtensions));
                 _referenceExtensions = value;
             }
         }
@@ -169,84 +140,51 @@ namespace Microsoft.Build.Tasks
         /// Should the references found as part of resolving the sdk be logged.
         /// The default is true
         /// </summary>
-        public bool LogReferencesList
-        {
-            get;
-            set;
-        }
+        public bool LogReferencesList { get; set; }
 
         /// <summary>
         /// Should the redist files found as part of resolving the sdk be logged.
         /// The default is true
         /// </summary>
-        public bool LogRedistFilesList
-        {
-            get;
-            set;
-        }
+        public bool LogRedistFilesList { get; set; }
 
         /// <summary>
         /// The targetted SDK identifier.
         /// </summary>
-        public string TargetSDKIdentifier
-        {
-            get;
-            set;
-        }
+        public string TargetSDKIdentifier { get; set; }
 
         /// <summary>
         /// The targeted SDK version.
         /// </summary>
-        public string TargetSDKVersion
-        {
-            get;
-            set;
-        }
+        public string TargetSDKVersion { get; set; }
 
         /// <summary>
         /// The targetted platform identifier.
         /// </summary>
-        public string TargetPlatformIdentifier
-        {
-            get;
-            set;
-        }
+        public string TargetPlatformIdentifier { get; set; }
 
         /// <summary>
         /// The targeted platform version.
         /// </summary>
-        public string TargetPlatformVersion
-        {
-            get;
-            set;
-        }
+        public string TargetPlatformVersion { get; set; }
 
         /// <summary>
         /// Resolved reference items.
         /// </summary>
         [Output]
-        public ITaskItem[] References
-        {
-            get { return _references; }
-        }
+        public ITaskItem[] References { get; private set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Resolved redist files.
         /// </summary>
         [Output]
-        public ITaskItem[] RedistFiles
-        {
-            get { return _redistFiles; }
-        }
+        public ITaskItem[] RedistFiles { get; private set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Files that need to be copied locally, this is the reference assemblies and the xml intellisense files.
         /// </summary>
         [Output]
-        public ITaskItem[] CopyLocalFiles
-        {
-            get { return _copyLocalFiles; }
-        }
+        public ITaskItem[] CopyLocalFiles { get; private set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Should conflicts between redist files within an SDK be logged as a message or a warning.
@@ -254,22 +192,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDKAs", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "SDKAs", Justification = "SDK and As are two different words")]
-        public bool LogRedistConflictWithinSDKAsWarning
-        {
-            get;
-            set;
-        }
+        public bool LogRedistConflictWithinSDKAsWarning { get; set; }
 
         /// <summary>
         /// Should conflicts between redist files across different referenced SDKs be logged as a message or a warning.
         /// The default is to log them as a warning.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDKs", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public bool LogRedistConflictBetweenSDKsAsWarning
-        {
-            get;
-            set;
-        }
+        public bool LogRedistConflictBetweenSDKsAsWarning { get; set; }
 
         /// <summary>
         /// Should conflicts between reference files within an SDK be logged as a message or a warning.
@@ -277,31 +207,19 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDKAs", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "SDKAs", Justification = "SDK and As are two different words")]
-        public bool LogReferenceConflictWithinSDKAsWarning
-        {
-            get;
-            set;
-        }
+        public bool LogReferenceConflictWithinSDKAsWarning { get; set; }
 
         /// <summary>
         /// Should conflicts between reference files across different referenced SDKs be logged as a message or a warning.
         /// The default is to log them as a warning.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDKs", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public bool LogReferenceConflictBetweenSDKsAsWarning
-        {
-            get;
-            set;
-        }
+        public bool LogReferenceConflictBetweenSDKsAsWarning { get; set; }
 
         /// <summary>
         /// Should we log exceptions which were hit when the cache file is being read and written to
         /// </summary>
-        public bool LogCacheFileExceptions
-        {
-            get;
-            set;
-        }
+        public bool LogCacheFileExceptions { get; set; }
         #endregion
 
         /// <summary>
@@ -309,7 +227,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            return Execute(new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx), new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion), new FileExists(FileUtilities.FileExistsNoThrow));
+            return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, FileUtilities.FileExistsNoThrow);
         }
 
         /// <summary>
@@ -383,7 +301,7 @@ namespace Microsoft.Build.Tasks
         private void FindRedistFiles(ITaskItem resolvedSDKReference, string sdkIdentity, string targetedConfiguration, string targetedArchitecture)
         {
             // Gather the redist files, order is important because we want the most specific match of config and architecture to be the file that returns if there is a collision in destination paths
-            HashSet<ResolvedRedistFile> resolvedRedistFileSet = new HashSet<ResolvedRedistFile>();
+            var resolvedRedistFileSet = new HashSet<ResolvedRedistFile>();
             IList<string> redistPaths = new List<string>();
 
             if (targetedConfiguration.Length > 0 && targetedArchitecture.Length > 0)
@@ -399,8 +317,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            SDKInfo sdkCacheInfo = null;
-            if (_cacheFileForSDKs.TryGetValue(sdkIdentity, out sdkCacheInfo) && sdkCacheInfo != null)
+            if (_cacheFileForSDKs.TryGetValue(sdkIdentity, out SDKInfo sdkCacheInfo) && sdkCacheInfo != null)
             {
                 foreach (string path in redistPaths)
                 {
@@ -422,7 +339,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    ResolvedRedistFile winner = _resolveRedistFiles.First<ResolvedRedistFile>(x => x.Equals(redist));
+                    ResolvedRedistFile winner = _resolveRedistFiles.First(x => x.Equals(redist));
 
                     if (!LogRedistConflictBetweenSDKsAsWarning)
                     {
@@ -442,18 +359,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void FindReferences(ITaskItem resolvedSDKReference, string sdkIdentity, string sdkName, string rootDirectory, string targetedConfiguration, string targetedArchitecture)
         {
-            bool expandSDK = false;
-
-            if (bool.TryParse(resolvedSDKReference.GetMetadata("ExpandReferenceAssemblies"), out expandSDK) && expandSDK)
+            if (bool.TryParse(resolvedSDKReference.GetMetadata("ExpandReferenceAssemblies"), out bool expandSDK) && expandSDK)
             {
                 Log.LogMessageFromResources("GetSDKReferenceFiles.GetSDKReferences", sdkName, rootDirectory);
 
                 // Gather the reference assemblies, order is important because we want the most specific match of config and architecture to be searched for last
                 // so it can overwrite any less specific matches.
-                HashSet<ResolvedReferenceAssembly> resolvedReferenceAssemblies = new HashSet<ResolvedReferenceAssembly>();
+                var resolvedReferenceAssemblies = new HashSet<ResolvedReferenceAssembly>();
 
                 // If the SDK is manifest driven we want to grab them from the ApiContracts in the manifest if possible- will only happen if TargetSdk is identified
-                string[] manifestReferencePaths = this.GetReferencePathsFromManifest(resolvedSDKReference);
+                string[] manifestReferencePaths = GetReferencePathsFromManifest(resolvedSDKReference);
 
                 if (manifestReferencePaths != null && manifestReferencePaths.Length > 0)
                 {
@@ -466,8 +381,7 @@ namespace Microsoft.Build.Tasks
                 else if (targetedConfiguration.Length > 0 && targetedArchitecture.Length > 0)
                 {
                     // Couldn't find any valid ApiContracts, look up references the traditional way
-                    IList<string> referencePaths = new List<string>();
-                    referencePaths = ToolLocationHelper.GetSDKReferenceFolders(resolvedSDKReference.ItemSpec, targetedConfiguration, targetedArchitecture);
+                    IList<string> referencePaths = ToolLocationHelper.GetSDKReferenceFolders(resolvedSDKReference.ItemSpec, targetedConfiguration, targetedArchitecture);
 
                     if (LogReferencesList)
                     {
@@ -477,8 +391,7 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    SDKInfo sdkCacheInfo = null;
-                    if (_cacheFileForSDKs.TryGetValue(sdkIdentity, out sdkCacheInfo) && sdkCacheInfo != null)
+                    if (_cacheFileForSDKs.TryGetValue(sdkIdentity, out SDKInfo sdkCacheInfo) && sdkCacheInfo != null)
                     {
                         foreach (string path in referencePaths)
                         {
@@ -507,7 +420,7 @@ namespace Microsoft.Build.Tasks
                             continue;
                         }
 
-                        ResolvedReferenceAssembly winner = _resolvedReferences.First<ResolvedReferenceAssembly>(x => x.Equals(reference));
+                        ResolvedReferenceAssembly winner = _resolvedReferences.First(x => x.Equals(reference));
 
                         if (!LogReferenceConflictBetweenSDKsAsWarning)
                         {
@@ -533,13 +446,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void GenerateOutputItems()
         {
-            List<ITaskItem> resolvedReferenceAssemblies = new List<ITaskItem>();
-            List<ITaskItem> copyLocalReferenceAssemblies = new List<ITaskItem>();
-            List<ITaskItem> redistReferenceItems = new List<ITaskItem>();
+            var resolvedReferenceAssemblies = new List<ITaskItem>();
+            var copyLocalReferenceAssemblies = new List<ITaskItem>();
+            var redistReferenceItems = new List<ITaskItem>();
 
             foreach (ResolvedReferenceAssembly reference in _resolvedReferences)
             {
-                ITaskItem outputItem = new TaskItem(reference.AssemblyLocation);
+                var outputItem = new TaskItem(reference.AssemblyLocation);
                 resolvedReferenceAssemblies.Add(outputItem);
 
                 if (outputItem.GetMetadata(ItemMetadataNames.msbuildReferenceSourceTarget).Length == 0)
@@ -557,18 +470,16 @@ namespace Microsoft.Build.Tasks
                 outputItem.SetMetadata("SDKRootPath", reference.SDKReferenceItem.ItemSpec);
                 outputItem.SetMetadata("ResolvedFrom", "GetSDKReferenceFiles");
 
-                SDKInfo sdkInfo = null;
-                if (_cacheFileForSDKs.TryGetValue(sdkIdentity, out sdkInfo) && sdkInfo != null)
+                if (_cacheFileForSDKs.TryGetValue(sdkIdentity, out SDKInfo sdkInfo) && sdkInfo != null)
                 {
-                    SdkReferenceInfo referenceInfo = null;
-                    if (sdkInfo.PathToReferenceMetadata != null && sdkInfo.PathToReferenceMetadata.TryGetValue(reference.AssemblyLocation, out referenceInfo))
+                    if (sdkInfo.PathToReferenceMetadata != null && sdkInfo.PathToReferenceMetadata.TryGetValue(reference.AssemblyLocation, out SdkReferenceInfo referenceInfo))
                     {
-                        if (referenceInfo != null && referenceInfo.FusionName != null)
+                        if (referenceInfo?.FusionName != null)
                         {
                             outputItem.SetMetadata(ItemMetadataNames.fusionName, referenceInfo.FusionName);
                         }
 
-                        if (referenceInfo != null && referenceInfo.ImageRuntime != null)
+                        if (referenceInfo?.ImageRuntime != null)
                         {
                             outputItem.SetMetadata(ItemMetadataNames.imageRuntime, referenceInfo.ImageRuntime);
                         }
@@ -604,7 +515,7 @@ namespace Microsoft.Build.Tasks
 
                     if (FileUtilities.FileExistsNoThrow(xmlFile))
                     {
-                        ITaskItem item = new TaskItem(xmlFile);
+                        var item = new TaskItem(xmlFile);
 
                         // Add the related item.
                         copyLocalReferenceAssemblies.Add(item);
@@ -619,12 +530,12 @@ namespace Microsoft.Build.Tasks
             resolvedReferenceAssemblies.Sort(TaskItemSpecFilenameComparer.GenericComparer);
             copyLocalReferenceAssemblies.Sort(TaskItemSpecFilenameComparer.GenericComparer);
 
-            _references = resolvedReferenceAssemblies.ToArray();
-            _copyLocalFiles = copyLocalReferenceAssemblies.ToArray();
+            References = resolvedReferenceAssemblies.ToArray();
+            CopyLocalFiles = copyLocalReferenceAssemblies.ToArray();
 
             foreach (ResolvedRedistFile file in _resolveRedistFiles)
             {
-                ITaskItem outputItem = new TaskItem(file.RedistFile);
+                var outputItem = new TaskItem(file.RedistFile);
 
                 if (outputItem.GetMetadata(ItemMetadataNames.msbuildReferenceSourceTarget).Length == 0)
                 {
@@ -648,7 +559,7 @@ namespace Microsoft.Build.Tasks
             }
 
             redistReferenceItems.Sort(TaskItemSpecFilenameComparer.GenericComparer);
-            _redistFiles = redistReferenceItems.ToArray();
+            RedistFiles = redistReferenceItems.ToArray();
         }
 
         /// <summary>
@@ -656,10 +567,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void GatherReferenceAssemblies(HashSet<ResolvedReferenceAssembly> resolvedFiles, ITaskItem sdkReference, string path, SDKInfo info)
         {
-            List<string> referenceFiles = null;
-            if (info.DirectoryToFileList != null && info.DirectoryToFileList.TryGetValue(FileUtilities.EnsureNoTrailingSlash(path), out referenceFiles) && referenceFiles != null)
+            if (info.DirectoryToFileList != null && info.DirectoryToFileList.TryGetValue(FileUtilities.EnsureNoTrailingSlash(path), out List<string> referenceFiles) && referenceFiles != null)
             {
-                foreach (var file in referenceFiles)
+                foreach (string file in referenceFiles)
                 {
                     // We only want to find files which match the extensions the user has asked for, this will usually be dll or winmd.
                     bool matchesExtension = false;
@@ -678,11 +588,11 @@ namespace Microsoft.Build.Tasks
                         continue;
                     }
 
-                    ResolvedReferenceAssembly resolvedReference = new ResolvedReferenceAssembly(sdkReference, file);
+                    var resolvedReference = new ResolvedReferenceAssembly(sdkReference, file);
                     bool success = resolvedFiles.Add(resolvedReference);
                     if (!success)
                     {
-                        ResolvedReferenceAssembly winner = resolvedFiles.First<ResolvedReferenceAssembly>(x => x.Equals(resolvedReference));
+                        ResolvedReferenceAssembly winner = resolvedFiles.First(x => x.Equals(resolvedReference));
 
                         if (!LogReferenceConflictWithinSDKAsWarning)
                         {
@@ -719,10 +629,10 @@ namespace Microsoft.Build.Tasks
                             string relativeToBase = FileUtilities.MakeRelative(redistFilePath, file);
                             string targetPath = Path.Combine(targetPathRoot, relativeToBase);
 
-                            ResolvedRedistFile redistFile = new ResolvedRedistFile(sdkReference, file, targetPath, targetPathRoot);
+                            var redistFile = new ResolvedRedistFile(sdkReference, file, targetPath, targetPathRoot);
                             if (!resolvedRedistFiles.Add(redistFile))
                             {
-                                ResolvedRedistFile winner = resolvedRedistFiles.First<ResolvedRedistFile>(x => x.Equals(redistFile));
+                                ResolvedRedistFile winner = resolvedRedistFiles.First(x => x.Equals(redistFile));
 
                                 if (!LogRedistConflictWithinSDKAsWarning)
                                 {
@@ -745,7 +655,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void PopulateReferencesForSDK(IEnumerable<ITaskItem> sdks)
         {
-            SDKFilesCache sdkFilesCache = new SDKFilesCache(_exceptions, _cacheFilePath, _getAssemblyName, _getRuntimeVersion, _fileExists);
+            var sdkFilesCache = new SDKFilesCache(_exceptions, _cacheFilePath, _getAssemblyName, _getRuntimeVersion, _fileExists);
 
             // Go through each sdk which has been resolved in this project
             foreach (ITaskItem sdk in sdks)
@@ -759,11 +669,11 @@ namespace Microsoft.Build.Tasks
 
                 if (info == null || !sdkFilesCache.IsAssemblyListCacheFileUpToDate(sdkIdentity, sdkRoot, _cacheFilePath))
                 {
-                    info = sdkFilesCache.GetCacheFileInfoFromSDK(sdkIdentity, sdkRoot, this.GetReferencePathsFromManifest(sdk));
+                    info = sdkFilesCache.GetCacheFileInfoFromSDK(sdkIdentity, sdkRoot, GetReferencePathsFromManifest(sdk));
 
                     // On a background thread save the file to disk
-                    SaveContext saveContext = new SaveContext(sdkIdentity, sdkRoot, info);
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(sdkFilesCache.SaveAssemblyListToCacheFile), saveContext);
+                    var saveContext = new SaveContext(sdkIdentity, sdkRoot, info);
+                    ThreadPool.QueueUserWorkItem(sdkFilesCache.SaveAssemblyListToCacheFile, saveContext);
                 }
 
                 _cacheFileForSDKs.TryAdd(sdkIdentity, info);
@@ -802,7 +712,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             ///  Is the reference copy local
             /// </summary>
-            private bool _copyLocal = false;
+            private readonly bool _copyLocal;
 
             /// <summary>
             /// Constructor
@@ -816,50 +726,31 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            ///  What is the file name
+            /// What is the file name
             /// </summary>
-            public string FileName
-            {
-                get;
-                private set;
-            }
+            private string FileName { get; }
 
             /// <summary>
             /// What is the location of the assembly on disk.
             /// </summary>
-            public string AssemblyLocation
-            {
-                get;
-                private set;
-            }
+            public string AssemblyLocation { get; }
 
             /// <summary>
             /// Is the assembly copy local or not.
             /// </summary>
-            public bool CopyLocal
-            {
-                get
-                {
-                    return _copyLocal;
-                }
-            }
+            public bool CopyLocal => _copyLocal;
 
             /// <summary>
             /// Original resolved SDK reference item passed in.
             /// </summary>
-            public ITaskItem SDKReferenceItem
-            {
-                get;
-                private set;
-            }
+            public ITaskItem SDKReferenceItem { get; }
 
             /// <summary>
             /// Override object equals to use the equals redist in this object.
             /// </summary>
             public override bool Equals(object obj)
             {
-                ResolvedReferenceAssembly reference = obj as ResolvedReferenceAssembly;
-                if (reference == null)
+                if (!(obj is ResolvedReferenceAssembly reference))
                 {
                     return false;
                 }
@@ -885,7 +776,7 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                if (Object.ReferenceEquals(other, this))
+                if (ReferenceEquals(other, this))
                 {
                     return true;
                 }
@@ -893,7 +784,7 @@ namespace Microsoft.Build.Tasks
                 // We only care about the file name and not the path because if they have the same file name but different paths then they will likely contain
                 // the same namespaces and the compiler does not like to have two references with the same namespace passed at once without aliasing and 
                 // we have no way to do aliasing per assembly since we are grabbing a bunch of files at once.)
-                return String.Equals(this.FileName, other.FileName, StringComparison.OrdinalIgnoreCase);
+                return String.Equals(FileName, other.FileName, StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -916,46 +807,29 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             ///  What is the file name
             /// </summary>
-            public string RedistFile
-            {
-                get;
-                private set;
-            }
+            public string RedistFile { get; }
 
             /// <summary>
             /// What is the targetPath for the redist file.
             /// </summary>
-            public string TargetPath
-            {
-                get;
-                private set;
-            }
+            public string TargetPath { get; }
 
             /// <summary>
             /// What is the root directory of the target path
             /// </summary>
-            public string TargetRoot
-            {
-                get;
-                private set;
-            }
+            public string TargetRoot { get; }
 
             /// <summary>
             /// Original resolved SDK reference item passed in.
             /// </summary>
-            public ITaskItem SDKReferenceItem
-            {
-                get;
-                private set;
-            }
+            public ITaskItem SDKReferenceItem { get; }
 
             /// <summary>
             /// Override object equals to use the equals redist in this object.
             /// </summary>
             public override bool Equals(object obj)
             {
-                ResolvedReferenceAssembly reference = obj as ResolvedReferenceAssembly;
-                if (reference == null)
+                if (!(obj is ResolvedReferenceAssembly reference))
                 {
                     return false;
                 }
@@ -981,14 +855,14 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                if (Object.ReferenceEquals(other, this))
+                if (ReferenceEquals(other, this))
                 {
                     return true;
                 }
 
                 // We only care about the target path since that is the location relative to the package root where the redist file
                 // will be copied.
-                return String.Equals(this.TargetPath, other.TargetPath, StringComparison.OrdinalIgnoreCase);
+                return String.Equals(TargetPath, other.TargetPath, StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -1002,27 +876,27 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             ///  Thread-safe queue which contains exceptions throws during cache file reading and writing.
             /// </summary>
-            private ConcurrentQueue<string> _exceptionMessages;
+            private readonly ConcurrentQueue<string> _exceptionMessages;
 
             /// <summary>
             /// Delegate to get the assembly name
             /// </summary>
-            private GetAssemblyName _getAssemblyName;
+            private readonly GetAssemblyName _getAssemblyName;
 
             /// <summary>
             /// Get the image runtime version from a afile
             /// </summary>
-            private GetAssemblyRuntimeVersion _getRuntimeVersion;
+            private readonly GetAssemblyRuntimeVersion _getRuntimeVersion;
 
             /// <summary>
             /// File exists delegate
             /// </summary>
-            private FileExists _fileExists;
+            private readonly FileExists _fileExists;
 
             /// <summary>
             /// Location for the cache files to be written to
             /// </summary>
-            private string _cacheFileDirectory;
+            private readonly string _cacheFileDirectory;
 
             /// <summary>
             /// Constructor
@@ -1041,7 +915,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             internal SDKInfo LoadAssemblyListFromCacheFile(string sdkIdentity, string sdkRoot)
             {
-                var cacheFile = Directory.GetFiles(_cacheFileDirectory, GetCacheFileName(sdkIdentity, sdkRoot, "*")).FirstOrDefault();
+                string cacheFile = Directory.EnumerateFiles(_cacheFileDirectory, GetCacheFileName(sdkIdentity, sdkRoot, "*")).FirstOrDefault();
 
                 try
                 {
@@ -1097,8 +971,8 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    using (FileStream fs = new FileStream(referencesCacheFile, FileMode.Create))
+                    var formatter = new BinaryFormatter();
+                    using (var fs = new FileStream(referencesCacheFile, FileMode.Create))
                     {
                         formatter.Serialize(fs, cacheFileInfo);
                     }
@@ -1120,10 +994,10 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             internal SDKInfo GetCacheFileInfoFromSDK(string sdkIdentity, string sdkRootDirectory, string[] sdkManifestReferences)
             {
-                ConcurrentDictionary<string, SdkReferenceInfo> references = new ConcurrentDictionary<string, SdkReferenceInfo>(StringComparer.OrdinalIgnoreCase);
-                ConcurrentDictionary<string, List<string>> directoryToFileList = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                var references = new ConcurrentDictionary<string, SdkReferenceInfo>(StringComparer.OrdinalIgnoreCase);
+                var directoryToFileList = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-                List<string> directoriesToHash = new List<string>();
+                var directoriesToHash = new List<string>();
 
                 var referenceDirectories = GetAllReferenceDirectories(sdkRootDirectory);
                 var redistDirectories = GetAllRedistDirectories(sdkRootDirectory);
@@ -1143,14 +1017,14 @@ namespace Microsoft.Build.Tasks
 
                 PopulateRedistDictionaryFromPaths(directoryToFileList, redistDirectories);
 
-                SDKInfo cacheInfo = new SDKInfo(references, directoryToFileList, FileUtilities.GetHexHash(sdkIdentity), FileUtilities.GetPathsHash(directoriesToHash));
+                var cacheInfo = new SDKInfo(references, directoryToFileList, FileUtilities.GetHexHash(sdkIdentity), FileUtilities.GetPathsHash(directoriesToHash));
                 return cacheInfo;
             }
 
             /// <summary>
             /// Populate an existing assembly dictionary for the given framework moniker utilizing provided manifest reference information
             /// </summary>
-            internal void PopulateReferencesDictionaryFromManifestPaths(ConcurrentDictionary<string, List<string>> referencesByDirectory, ConcurrentDictionary<string, SdkReferenceInfo> references, string[] sdkManifestReferences)
+            private void PopulateReferencesDictionaryFromManifestPaths(ConcurrentDictionary<string, List<string>> referencesByDirectory, ConcurrentDictionary<string, SdkReferenceInfo> references, string[] sdkManifestReferences)
             {
                 // Sort by directory
                 var groupedByDirectory =
@@ -1162,37 +1036,37 @@ namespace Microsoft.Build.Tasks
                     referencesByDirectory.TryAdd(group.Key, group.ToList());
                 }
 
-                Parallel.ForEach<string>(sdkManifestReferences, reference => { references.TryAdd(reference, GetSDKReferenceInfo(reference)); });
+                Parallel.ForEach(sdkManifestReferences, reference => { references.TryAdd(reference, GetSDKReferenceInfo(reference)); });
             }
 
             /// <summary>
             /// Populate an existing assembly dictionary for the given framework moniker
             /// </summary>
-            internal void PopulateReferencesDictionaryFromPaths(ConcurrentDictionary<string, List<string>> referencesByDirectory, ConcurrentDictionary<string, SdkReferenceInfo> references, IEnumerable<string> referenceDirectories)
+            private void PopulateReferencesDictionaryFromPaths(ConcurrentDictionary<string, List<string>> referencesByDirectory, ConcurrentDictionary<string, SdkReferenceInfo> references, IEnumerable<string> referenceDirectories)
             {
                 // Add each folder to the dictionary along with a list of all of files inside of it
-                Parallel.ForEach<string>(
+                Parallel.ForEach(
                 referenceDirectories,
                 path =>
                 {
                     List<string> files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly).ToList<string>();
                     referencesByDirectory.TryAdd(path, files);
 
-                    Parallel.ForEach<string>(files, filePath => { references.TryAdd(filePath, GetSDKReferenceInfo(filePath)); });
+                    Parallel.ForEach(files, filePath => { references.TryAdd(filePath, GetSDKReferenceInfo(filePath)); });
                 });
             }
 
             /// <summary>
             /// Populate an existing assembly dictionary for the given framework moniker
             /// </summary>
-            internal void PopulateRedistDictionaryFromPaths(ConcurrentDictionary<string, List<string>> redistFilesByDirectory, IEnumerable<string> redistDirectories)
+            private static void PopulateRedistDictionaryFromPaths(ConcurrentDictionary<string, List<string>> redistFilesByDirectory, IEnumerable<string> redistDirectories)
             {
                 // Add each folder to the dictionary along with a list of all of files inside of it
-                Parallel.ForEach<string>(
+                Parallel.ForEach(
                 redistDirectories,
                 path =>
                 {
-                    List<string> files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly).ToList<string>();
+                    List<string> files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly).ToList();
                     redistFilesByDirectory.TryAdd(path, files);
                 });
             }
@@ -1205,7 +1079,7 @@ namespace Microsoft.Build.Tasks
             internal bool IsAssemblyListCacheFileUpToDate(string sdkIdentity, string sdkRoot, string cacheFileFolder)
             {
                 // The hash is the hash of last modified times for the passed in reference paths. A directory gets modified if a file is added, deleted, or modified  inside of the inside of the directory itself (modifications to child folders are not seen however).
-                List<string> directoriesToHash = new List<string>();
+                var directoriesToHash = new List<string>();
                 directoriesToHash.AddRange(GetAllReferenceDirectories(sdkRoot));
                 directoriesToHash.AddRange(GetAllRedistDirectories(sdkRoot));
 
@@ -1219,7 +1093,7 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
-                    Uri codeBase = new Uri(currentAssembly);
+                    var codeBase = new Uri(currentAssembly);
                     DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
                     if (File.Exists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
                     {
@@ -1245,7 +1119,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Generate an SDKReferenceInfo object
             /// </summary>
-            internal SdkReferenceInfo GetSDKReferenceInfo(string referencePath)
+            private SdkReferenceInfo GetSDKReferenceInfo(string referencePath)
             {
                 string imageRuntimeVersion = null;
                 bool isManagedWinMD = false;
@@ -1276,7 +1150,7 @@ namespace Microsoft.Build.Tasks
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceString("GetSDKReferenceFiles.ProblemGettingAssemblyMetadata", referencePath, e.Message));
                 }
 
-                SdkReferenceInfo referenceInfo = new SdkReferenceInfo(fusionName, imageRuntimeVersion, isWinMDFile, isManagedWinMD);
+                var referenceInfo = new SdkReferenceInfo(fusionName, imageRuntimeVersion, isWinMDFile, isManagedWinMD);
                 return referenceInfo;
             }
 
@@ -1294,35 +1168,36 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Get all redist subdirectories under the given path
             /// </summary>
-            private IEnumerable<string> GetAllRedistDirectories(string sdkRoot)
+            private static IEnumerable<string> GetAllRedistDirectories(string sdkRoot)
             {
                 string redistPath = Path.Combine(sdkRoot, "Redist");
                 if (FileUtilities.DirectoryExistsNoThrow(redistPath))
                 {
-                    return Directory.GetDirectories(redistPath, "*", SearchOption.AllDirectories).ToList<string>();
+                    return Directory.GetDirectories(redistPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Array.Empty<string>();
+                return Enumerable.Empty<string>();
             }
 
             /// <summary>
             /// Get all reference subdirectories under the given path
             /// </summary>
-            private IEnumerable<string> GetAllReferenceDirectories(string sdkRoot)
+            private static IEnumerable<string> GetAllReferenceDirectories(string sdkRoot)
             {
                 string referencesPath = Path.Combine(sdkRoot, "References");
                 if (FileUtilities.DirectoryExistsNoThrow(referencesPath))
                 {
-                    return Directory.GetDirectories(referencesPath, "*", SearchOption.AllDirectories).ToList<string>();
+                    return Directory.GetDirectories(referencesPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Array.Empty<string>();
+                return Enumerable.Empty<string>();
             }
         }
 
         /// <summary>
         /// Class to contain some identity information about a file in an sdk
         /// </summary>
+        /// <remarks>This is a serialization format. Do not change member naming.</remarks>
         [Serializable]
         private class SdkReferenceInfo
         {
@@ -1331,55 +1206,40 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public SdkReferenceInfo(string fusionName, string imageRuntime, bool isWinMD, bool isManagedWinmd)
             {
-                this.FusionName = fusionName;
-                this.ImageRuntime = imageRuntime;
-                this.IsWinMD = isWinMD;
-                this.IsManagedWinmd = isManagedWinmd;
+                FusionName = fusionName;
+                ImageRuntime = imageRuntime;
+                IsWinMD = isWinMD;
+                IsManagedWinmd = isManagedWinmd;
             }
 
             #region Properties
             /// <summary>
             /// The fusionName
             /// </summary>
-            public string FusionName
-            {
-                get;
-                private set;
-            }
+            public string FusionName { get; private set; }
 
             /// <summary>
             /// Is the file a winmd or not
             /// </summary>
-            public bool IsWinMD
-            {
-                get;
-                private set;
-            }
+            public bool IsWinMD { get; private set; }
 
             /// <summary>
             /// Is the file a managed winmd or not
             /// </summary>
-            public bool IsManagedWinmd
-            {
-                get;
-                private set;
-            }
+            public bool IsManagedWinmd { get; private set; }
 
             /// <summary>
             /// What is the imageruntime information on it.
             /// </summary>
-            public string ImageRuntime
-            {
-                get;
-                private set;
-            }
+            public string ImageRuntime { get; private set; }
 
             #endregion
         }
 
         /// <summary>
-        /// Structure that contains the on disk representation of the SDK in memory
+        /// Structure that contains the on disk representation of the SDK in memory.
         /// </summary>
+        /// <remarks>This is a serialization format. Do not change member naming.</remarks>
         [Serializable]
         private class SDKInfo
         {
@@ -1423,14 +1283,16 @@ namespace Microsoft.Build.Tasks
 
             public static SDKInfo Deserialize(string cacheFile)
             {
-                using (FileStream fs = new FileStream(cacheFile, FileMode.Open))
+                using (var fs = new FileStream(cacheFile, FileMode.Open))
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
+                    var formatter = new BinaryFormatter();
                     var info = (SDKInfo)formatter.Deserialize(fs);
 
                     // If the serialization versions don't match, don't use the cache
                     if (info != null && info._serializedVersion != CurrentSerializationVersion)
+                    {
                         return null;
+                    }
 
                     return info;
                 }
@@ -1447,25 +1309,25 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public SaveContext(string sdkIdentity, string sdkRoot, SDKInfo assemblies)
             {
-                this.SdkIdentity = sdkIdentity;
-                this.SdkRoot = sdkRoot;
-                this.Assemblies = assemblies;
+                SdkIdentity = sdkIdentity;
+                SdkRoot = sdkRoot;
+                Assemblies = assemblies;
             }
 
             /// <summary>
             /// Identity of the sdk
             /// </summary>
-            public string SdkIdentity { get; private set; }
+            public string SdkIdentity { get; }
 
             /// <summary>
             /// Root path of the sdk
             /// </summary>
-            public string SdkRoot { get; private set; }
+            public string SdkRoot { get; }
 
             /// <summary>
             /// Assembly metadata information
             /// </summary>
-            public SDKInfo Assemblies { get; private set; }
+            public SDKInfo Assemblies { get; }
         }
         #endregion
     }

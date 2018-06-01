@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
@@ -14,14 +13,11 @@ using COMException = System.Runtime.InteropServices.COMException;
 
 namespace Microsoft.Build.Tasks
 {
-    /*
-     * Class:   ComReference
-     * 
-     * Abstract base class for COM reference wrappers providing common functionality. 
-     * This class hierarchy is used by the ResolveComReference task. Every class deriving from ComReference 
-     * provides functionality for wrapping Com type libraries in a given way (for example AxReference, or PiaReference).
-     *
-     */
+    /// <summary>
+    /// Abstract base class for COM reference wrappers providing common functionality. 
+    /// This class hierarchy is used by the ResolveComReference task.Every class deriving from ComReference
+    /// provides functionality for wrapping Com type libraries in a given way(for example AxReference, or PiaReference).
+    /// </summary>
     internal abstract class ComReference
     {
         #region Constructors
@@ -35,10 +31,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="itemName">reference name (for better logging experience)</param>
         internal ComReference(TaskLoggingHelper taskLoggingHelper, bool silent, ComReferenceInfo referenceInfo, string itemName)
         {
-            _referenceInfo = referenceInfo;
-            _itemName = itemName;
-            _log = taskLoggingHelper;
-            _silent = silent;
+            ReferenceInfo = referenceInfo;
+            ItemName = itemName;
+            Log = taskLoggingHelper;
+            Silent = silent;
         }
 
         #endregion
@@ -48,55 +44,23 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// various data for this reference (type lib attrs, name, path, ITypeLib pointer etc)
         /// </summary>
-        internal virtual ComReferenceInfo ReferenceInfo
-        {
-            get
-            {
-                return _referenceInfo;
-            }
-        }
-
-        private ComReferenceInfo _referenceInfo;
+        internal virtual ComReferenceInfo ReferenceInfo { get; }
 
         /// <summary>
         /// item name as it appears in the project file
         /// (used for logging purposes, we use the actual typelib name for interesting operations)
         /// </summary>
-        internal virtual string ItemName
-        {
-            get
-            {
-                return _itemName;
-            }
-        }
-
-        private string _itemName;
+        internal virtual string ItemName { get; }
 
         /// <summary>
         /// task used for logging messages
         /// </summary>
-        protected internal TaskLoggingHelper Log
-        {
-            get
-            {
-                return _log;
-            }
-        }
-
-        private TaskLoggingHelper _log;
+        protected internal TaskLoggingHelper Log { get; }
 
         /// <summary>
         /// True if this class should only log errors, but no messages or warnings.  
         /// </summary>
-        protected internal bool Silent
-        {
-            get
-            {
-                return _silent;
-            }
-        }
-
-        private bool _silent;
+        protected internal bool Silent { get; }
 
         /// <summary>
         /// lazy-init property, returns true if ADO 2.7 is installed on the machine
@@ -107,7 +71,9 @@ namespace Microsoft.Build.Tasks
             {
                 // if we already know the answer, return it
                 if (ado27PropertyInitialized)
+                {
                     return ado27Installed;
+                }
 
                 // not initialized? Find out if ADO 2.7 is installed
                 ado27Installed = true;
@@ -129,27 +95,23 @@ namespace Microsoft.Build.Tasks
                 finally
                 {
                     if (ado27 != null)
+                    {
                         Marshal.ReleaseComObject(ado27);
+                    }
                 }
 
                 return ado27Installed;
             }
         }
 
-        internal static bool ado27PropertyInitialized = false;
+        internal static bool ado27PropertyInitialized;
         internal static bool ado27Installed;
 
         /// <summary>
         /// Error message if Ado27 is not installed on the machine (usually something like "type lib not registered")
         /// Only contains valid data if ADO 2.7 is not installed and Ado27Installed was called before
         /// </summary>
-        internal static string Ado27ErrorMessage
-        {
-            get
-            {
-                return ado27ErrorMessage;
-            }
-        }
+        internal static string Ado27ErrorMessage => ado27ErrorMessage;
 
         internal static string ado27ErrorMessage;
 
@@ -157,21 +119,17 @@ namespace Microsoft.Build.Tasks
 
         #region Methods
 
-        /*
-         * Method:  UniqueKeyFromTypeLibAttr
-         * 
-         * Given a TYPELIBATTR structure, generates a key that can be used in hashtables to identify it.
-         */
+        /// <summary>
+        /// Given a TYPELIBATTR structure, generates a key that can be used in hashtables to identify it.
+        /// </summary>
         internal static string UniqueKeyFromTypeLibAttr(TYPELIBATTR attr)
         {
-            return String.Format(CultureInfo.InvariantCulture, @"{0}|{1}.{2}|{3}", attr.guid, attr.wMajorVerNum, attr.wMinorVerNum, attr.lcid);
+            return $@"{attr.guid}|{attr.wMajorVerNum}.{attr.wMinorVerNum}|{attr.lcid}";
         }
 
-        /*
-         * Method:  AreTypeLibAttrEqual
-         * 
-         * Compares two TYPELIBATTR structures
-         */
+        /// <summary>
+        /// Compares two TYPELIBATTR structures
+        /// </summary>
         internal static bool AreTypeLibAttrEqual(TYPELIBATTR attr1, TYPELIBATTR attr2)
         {
             return attr1.wMajorVerNum == attr2.wMajorVerNum &&
@@ -183,13 +141,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper method for retrieving type lib attributes for the given type lib
         /// </summary>
-        /// <param name="typeLib"></param>
-        /// <param name="typeLibAttr"></param>
-        /// <returns></returns>
         internal static void GetTypeLibAttrForTypeLib(ref ITypeLib typeLib, out TYPELIBATTR typeLibAttr)
         {
-            IntPtr pAttrs = IntPtr.Zero;
-            typeLib.GetLibAttr(out pAttrs);
+            typeLib.GetLibAttr(out IntPtr pAttrs);
 
             // GetLibAttr should never return null, this is just to be safe
             if (pAttrs == IntPtr.Zero)
@@ -216,8 +170,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal static void GetTypeAttrForTypeInfo(ITypeInfo typeInfo, out TYPEATTR typeAttr)
         {
-            IntPtr pAttrs = IntPtr.Zero;
-            typeInfo.GetTypeAttr(out pAttrs);
+            typeInfo.GetTypeAttr(out IntPtr pAttrs);
 
             // GetTypeAttr should never return null, this is just to be safe
             if (pAttrs == IntPtr.Zero)
@@ -242,16 +195,9 @@ namespace Microsoft.Build.Tasks
         /// It's not really possible to copy everything to a managed struct and then release the ptr immediately
         /// here, since VARDESCs contain other native pointers we may need to access.
         /// </summary>
-        /// <param name="typeInfo"></param>
-        /// <param name="varIndex"></param>
-        /// <param name="typeAttr"></param>
-        /// <param name="varDesc"></param>
-        /// <param name="varDescHandle"></param>
-        /// <returns></returns>
         internal static void GetVarDescForVarIndex(ITypeInfo typeInfo, int varIndex, out VARDESC varDesc, out IntPtr varDescHandle)
         {
-            IntPtr pVarDesc = IntPtr.Zero;
-            typeInfo.GetVarDesc(varIndex, out pVarDesc);
+            typeInfo.GetVarDesc(varIndex, out IntPtr pVarDesc);
 
             // GetVarDesc should never return null, this is just to be safe
             if (pVarDesc == IntPtr.Zero)
@@ -270,15 +216,9 @@ namespace Microsoft.Build.Tasks
         /// It's not really possible to copy everything to a managed struct and then release the ptr immediately
         /// here, since FUNCDESCs contain other native pointers we may need to access.
         /// </summary>
-        /// <param name="typeInfo"></param>
-        /// <param name="funcIndex"></param>
-        /// <param name="funcDesc"></param>
-        /// <param name="funcDescHandle"></param>
-        /// <returns></returns>
         internal static void GetFuncDescForDescIndex(ITypeInfo typeInfo, int funcIndex, out FUNCDESC funcDesc, out IntPtr funcDescHandle)
         {
-            IntPtr pFuncDesc = IntPtr.Zero;
-            typeInfo.GetFuncDesc(funcIndex, out pFuncDesc);
+            typeInfo.GetFuncDesc(funcIndex, out IntPtr pFuncDesc);
 
             // GetFuncDesc should never return null, this is just to be safe
             if (pFuncDesc == IntPtr.Zero)
@@ -291,19 +231,15 @@ namespace Microsoft.Build.Tasks
             funcDescHandle = pFuncDesc;
         }
 
-        /*
-         * Method:  GetTypeLibNameForITypeLib
-         * 
-         * Gets the name of given type library. 
-         */
+        /// <summary>
+        /// Gets the name of given type library. 
+        /// </summary>
         internal static bool GetTypeLibNameForITypeLib(TaskLoggingHelper log, bool silent, ITypeLib typeLib, string typeLibId, out string typeLibName)
         {
             typeLibName = "";
 
             // see if the type library supports ITypeLib2
-            ITypeLib2 typeLib2 = typeLib as ITypeLib2;
-
-            if (typeLib2 == null)
+            if (!(typeLib is ITypeLib2 typeLib2))
             {
                 // Looks like the type lib doesn't support it. Let's use the Marshal method.
                 typeLibName = Marshal.GetTypeLibName(typeLib);
@@ -314,9 +250,7 @@ namespace Microsoft.Build.Tasks
             // type library name.  
             try
             {
-                object data = null;
-
-                typeLib2.GetCustData(ref NativeMethods.GUID_TYPELIB_NAMESPACE, out data);
+                typeLib2.GetCustData(ref NativeMethods.GUID_TYPELIB_NAMESPACE, out object data);
 
                 // if returned namespace is null or its type is not System.String, fall back to the default 
                 // way of getting the type lib name (just to be safe)
@@ -351,11 +285,9 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        /*
-         * Method:  GetTypeLibNameForTypeLibAttrs
-         * 
-         * Gets the name of given type library. 
-         */
+        /// <summary>
+        /// Gets the name of given type library.
+        /// </summary>
         internal static bool GetTypeLibNameForTypeLibAttrs(TaskLoggingHelper log, bool silent, TYPELIBATTR typeLibAttr, out string typeLibName)
         {
             typeLibName = "";
@@ -386,7 +318,9 @@ namespace Microsoft.Build.Tasks
             finally
             {
                 if (typeLib != null)
+                {
                     Marshal.ReleaseComObject(typeLib);
+                }
             }
         }
 
@@ -398,7 +332,7 @@ namespace Microsoft.Build.Tasks
         internal static string StripTypeLibNumberFromPath(string typeLibPath, FileExists fileExists)
         {
             bool lastChance = false;
-            if (typeLibPath != null && typeLibPath.Length > 0)
+            if (!string.IsNullOrEmpty(typeLibPath))
             {
                 if (!fileExists(typeLibPath))
                 {
@@ -452,7 +386,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
+                        var sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
                         System.Runtime.InteropServices.HandleRef handleRef = new System.Runtime.InteropServices.HandleRef(sb, libraryHandle);
                         int len = NativeMethodsShared.GetModuleFileName(handleRef, sb, sb.Capacity);
                         if ((len != 0) &&
@@ -479,12 +413,10 @@ namespace Microsoft.Build.Tasks
             return typeLibPath;
         }
 
-        /*
-         * Method:  GetPathOfTypeLib
-         * 
-         * Gets the type lib path for given type lib attributes (reused almost verbatim from vsdesigner utils code)
-         * NOTE:  If there's a typelib number at the end of the path, does NOT strip it.  
-         */
+        /// <summary>
+        /// Gets the type lib path for given type lib attributes(reused almost verbatim from vsdesigner utils code)
+        /// NOTE:  If there's a typelib number at the end of the path, does NOT strip it.
+        /// </summary>
         internal static bool GetPathOfTypeLib(TaskLoggingHelper log, bool silent, ref TYPELIBATTR typeLibAttr, out string typeLibPath)
         {
             // Get which file the type library resides in.  If the appropriate
@@ -521,40 +453,36 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            if (typeLibPath != null && typeLibPath.Length > 0)
+            if (!string.IsNullOrEmpty(typeLibPath))
             {
                 return true;
             }
-            else
-            {
-                if (!silent)
-                {
-                    log.LogWarningWithCodeFromResources("ResolveComReference.CannotGetPathForTypeLib", typeLibAttr.guid, typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum, "");
-                }
 
-                return false;
+            if (!silent)
+            {
+                log.LogWarningWithCodeFromResources("ResolveComReference.CannotGetPathForTypeLib", typeLibAttr.guid, typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum, "");
             }
+
+            return false;
         }
 
         #region RemapAdoTypeLib guids
 
         // guids for RemapAdoTypeLib
-        private readonly static Guid s_guidADO20 = new Guid("{00000200-0000-0010-8000-00AA006D2EA4}");
-        private readonly static Guid s_guidADO21 = new Guid("{00000201-0000-0010-8000-00AA006D2EA4}");
-        private readonly static Guid s_guidADO25 = new Guid("{00000205-0000-0010-8000-00AA006D2EA4}");
-        private readonly static Guid s_guidADO26 = new Guid("{00000206-0000-0010-8000-00AA006D2EA4}");
+        private static readonly Guid s_guidADO20 = new Guid("{00000200-0000-0010-8000-00AA006D2EA4}");
+        private static readonly Guid s_guidADO21 = new Guid("{00000201-0000-0010-8000-00AA006D2EA4}");
+        private static readonly Guid s_guidADO25 = new Guid("{00000205-0000-0010-8000-00AA006D2EA4}");
+        private static readonly Guid s_guidADO26 = new Guid("{00000206-0000-0010-8000-00AA006D2EA4}");
         // unfortunately this cannot be readonly, since it's being passed by reference to LoadRegTypeLib
         private static Guid s_guidADO27 = new Guid("{EF53050B-882E-4776-B643-EDA472E8E3F2}");
 
         #endregion
 
-        /*
-         * Method:  RemapAdoTypeLib
-         * 
-         * Tries to remap an ADO type library to ADO 2.7. If the type library passed in is an older ADO tlb,
-         * then remap it to ADO 2.7 if it's registered on the machine (!). Otherwise don't modify the typelib.
-         * Returns true if the type library passed in was successfully remapped.
-         */
+        /// <summary>
+        /// Tries to remap an ADO type library to ADO 2.7. If the type library passed in is an older ADO tlb,
+        /// then remap it to ADO 2.7 if it's registered on the machine (!). Otherwise don't modify the typelib.
+        /// Returns true if the type library passed in was successfully remapped.
+        /// </summary>
         internal static bool RemapAdoTypeLib(TaskLoggingHelper log, bool silent, ref TYPELIBATTR typeLibAttr)
         {
             // we only care about ADO 2.0, 2.1, 2.5 or 2.6 here.
@@ -592,9 +520,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Finds an existing wrapper for the specified component
         /// </summary>
-        /// <param name="wrapperInfo"></param>
-        /// <param name="componentTimestamp"></param>
-        /// <returns></returns>
         internal abstract bool FindExistingWrapper(out ComReferenceWrapperInfo wrapperInfo, DateTime componentTimestamp);
 
         #endregion

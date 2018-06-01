@@ -3,14 +3,8 @@
 
 using System;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
 using System.Collections;
-using System.Globalization;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 
 namespace Microsoft.Build.Tasks
@@ -20,134 +14,41 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class GenerateBootstrapper : TaskExtension
     {
-        private string _applicationFile = null;
-        private string _applicationName = null;
-        private bool _applicationRequiresElevation = false;
-        private string _applicationUrl = null;
-        private ITaskItem[] _bootstrapperItems = null;
-        private string _componentsLocation = null;
-        private string _componentsUrl = null;
-        private bool _copyComponents = true;
-        private string _culture = Util.DefaultCultureInfo.Name;
-        private string _fallbackCulture = Util.DefaultCultureInfo.Name;
-        private string _outputPath = Directory.GetCurrentDirectory();
-        private string _path = null;
-        private string _supportUrl = null;
-        private bool _validate = true;
-        private string[] _bootstrapperComponentFiles = null;
-        private string _bootstrapperKeyFile = null;
-        private string _visualStudioVersion = null;
+        public string ApplicationName { get; set; }
 
-        public GenerateBootstrapper()
-        {
-        }
+        public string ApplicationFile { get; set; }
 
-        public string ApplicationName
-        {
-            get { return _applicationName; }
-            set { _applicationName = value; }
-        }
+        public bool ApplicationRequiresElevation { get; set; }
 
-        public string ApplicationFile
-        {
-            get { return _applicationFile; }
-            set { _applicationFile = value; }
-        }
+        public string ApplicationUrl { get; set; }
 
-        public bool ApplicationRequiresElevation
-        {
-            get { return _applicationRequiresElevation; }
-            set { _applicationRequiresElevation = value; }
-        }
+        public ITaskItem[] BootstrapperItems { get; set; }
 
-        public string ApplicationUrl
-        {
-            get { return _applicationUrl; }
-            set { _applicationUrl = value; }
-        }
+        public string ComponentsLocation { get; set; }
 
-        public ITaskItem[] BootstrapperItems
-        {
-            get { return _bootstrapperItems; }
-            set { _bootstrapperItems = value; }
-        }
+        public string ComponentsUrl { get; set; }
 
-        public string ComponentsLocation
-        {
-            get { return _componentsLocation; }
-            set { _componentsLocation = value; }
-        }
+        public bool CopyComponents { get; set; } = true;
 
-        public string ComponentsUrl
-        {
-            get { return _componentsUrl; }
-            set { _componentsUrl = value; }
-        }
+        public string Culture { get; set; } = Util.DefaultCultureInfo.Name;
 
-        public bool CopyComponents
-        {
-            get { return _copyComponents; }
-            set
-            {
-                _copyComponents = value;
-            }
-        }
+        public string FallbackCulture { get; set; } = Util.DefaultCultureInfo.Name;
 
-        public string Culture
-        {
-            get { return _culture; }
-            set { _culture = value; }
-        }
+        public string OutputPath { get; set; } = Directory.GetCurrentDirectory();
 
-        public string FallbackCulture
-        {
-            get { return _fallbackCulture; }
-            set { _fallbackCulture = value; }
-        }
+        public string Path { get; set; }
 
-        public string OutputPath
-        {
-            get { return _outputPath; }
-            set { _outputPath = value; }
-        }
+        public string SupportUrl { get; set; }
 
-        public string Path
-        {
-            get { return _path; }
-            set { _path = value; }
-        }
+        public string VisualStudioVersion { get; set; }
 
-        public string SupportUrl
-        {
-            get { return _supportUrl; }
-            set { _supportUrl = value; }
-        }
-
-        public string VisualStudioVersion
-        {
-            get { return _visualStudioVersion; }
-            set { _visualStudioVersion = value; }
-        }
-
-        public bool Validate
-        {
-            get { return _validate; }
-            set { _validate = value; }
-        }
+        public bool Validate { get; set; } = true;
 
         [Output]
-        public string BootstrapperKeyFile
-        {
-            get { return _bootstrapperKeyFile; }
-            set { _bootstrapperKeyFile = value; }
-        }
+        public string BootstrapperKeyFile { get; set; }
 
         [Output]
-        public string[] BootstrapperComponentFiles
-        {
-            get { return _bootstrapperComponentFiles; }
-            set { _bootstrapperComponentFiles = value; }
-        }
+        public string[] BootstrapperComponentFiles { get; set; }
 
         /// <summary>
         /// Generate the bootstrapper.
@@ -155,38 +56,40 @@ namespace Microsoft.Build.Tasks
         /// <returns> Return true on success, false on failure.</returns>
         public override bool Execute()
         {
-            if (_path == null)
+            if (Path == null)
             {
-                _path = Util.GetDefaultPath(_visualStudioVersion);
+                Path = Util.GetDefaultPath(VisualStudioVersion);
             }
 
-            BootstrapperBuilder bootstrapperBuilder = new BootstrapperBuilder();
-
-            bootstrapperBuilder.Validate = this.Validate;
-            bootstrapperBuilder.Path = this.Path;
+            var bootstrapperBuilder = new BootstrapperBuilder
+            {
+                Validate = Validate,
+                Path = Path
+            };
 
             ProductCollection products = bootstrapperBuilder.Products;
 
-            BuildSettings settings = new BuildSettings();
-
-            settings.ApplicationFile = ApplicationFile;
-            settings.ApplicationName = ApplicationName;
-            settings.ApplicationRequiresElevation = ApplicationRequiresElevation;
-            settings.ApplicationUrl = ApplicationUrl;
-            settings.ComponentsLocation = ConvertStringToComponentsLocation(this.ComponentsLocation);
-            settings.ComponentsUrl = ComponentsUrl;
-            settings.CopyComponents = CopyComponents;
-            settings.Culture = _culture;
-            settings.FallbackCulture = _fallbackCulture;
-            settings.OutputPath = this.OutputPath;
-            settings.SupportUrl = this.SupportUrl;
+            var settings = new BuildSettings
+            {
+                ApplicationFile = ApplicationFile,
+                ApplicationName = ApplicationName,
+                ApplicationRequiresElevation = ApplicationRequiresElevation,
+                ApplicationUrl = ApplicationUrl,
+                ComponentsLocation = ConvertStringToComponentsLocation(ComponentsLocation),
+                ComponentsUrl = ComponentsUrl,
+                CopyComponents = CopyComponents,
+                Culture = Culture,
+                FallbackCulture = FallbackCulture,
+                OutputPath = OutputPath,
+                SupportUrl = SupportUrl
+            };
 
             if (String.IsNullOrEmpty(settings.Culture) || settings.Culture == "*")
             {
                 settings.Culture = settings.FallbackCulture;
             }
 
-            if (this.BootstrapperItems != null)
+            if (BootstrapperItems != null)
             {
                 // The bootstrapper items may not be in the correct order, because XMake saves 
                 // items in alphabetical order.  So we will attempt to put items into the correct 
@@ -195,9 +98,9 @@ namespace Microsoft.Build.Tasks
                 // in order, looking to see if the item is built.  If it is, remove the item from 
                 // the hashtable.  All remaining items in the table can not be built, so errors 
                 // will be issued.
-                Hashtable items = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                var items = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
-                foreach (ITaskItem bootstrapperItem in this.BootstrapperItems)
+                foreach (ITaskItem bootstrapperItem in BootstrapperItems)
                 {
                     string installAttribute = bootstrapperItem.GetMetadata("Install");
                     if (String.IsNullOrEmpty(installAttribute) || Shared.ConversionUtilities.ConvertStringToBool(installAttribute))
@@ -236,30 +139,37 @@ namespace Microsoft.Build.Tasks
                 foreach (BuildMessage message in messages)
                 {
                     if (message.Severity == BuildMessageSeverity.Error)
+                    {
                         Log.LogError(null, message.HelpCode, message.HelpKeyword, null, 0, 0, 0, 0, message.Message);
+                    }
                     else if (message.Severity == BuildMessageSeverity.Warning)
+                    {
                         Log.LogWarning(null, message.HelpCode, message.HelpKeyword, null, 0, 0, 0, 0, message.Message);
+                    }
                 }
             }
 
-            this.BootstrapperKeyFile = results.KeyFile;
-            this.BootstrapperComponentFiles = results.ComponentFiles;
+            BootstrapperKeyFile = results.KeyFile;
+            BootstrapperComponentFiles = results.ComponentFiles;
 
             return results.Succeeded;
         }
 
         private ComponentsLocation ConvertStringToComponentsLocation(string parameterValue)
         {
-            if (parameterValue == null || parameterValue.Length == 0)
-                return Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation.HomeSite;
+            if (string.IsNullOrEmpty(parameterValue))
+            {
+                return Deployment.Bootstrapper.ComponentsLocation.HomeSite;
+            }
+
             try
             {
-                return (Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation)Enum.Parse(typeof(Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation), parameterValue, false);
+                return (ComponentsLocation)Enum.Parse(typeof(ComponentsLocation), parameterValue, false);
             }
             catch (FormatException)
             {
                 Log.LogWarningWithCodeFromResources("GenerateBootstrapper.InvalidComponentsLocation", parameterValue);
-                return Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation.HomeSite;
+                return Deployment.Bootstrapper.ComponentsLocation.HomeSite;
             }
         }
     }

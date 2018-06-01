@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
 namespace Microsoft.Build.Tasks
@@ -15,18 +14,6 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class LC : ToolTaskExtension
     {
-        #region Constructors
-
-        /// <summary>
-        /// public constructor
-        /// </summary>
-        public LC()
-        {
-            // do nothing
-        }
-
-        #endregion
-
         #region Input/output properties
 
         /// <summary>
@@ -35,8 +22,8 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem[] Sources
         {
-            set { Bag["Sources"] = value; }
-            get { return (ITaskItem[])Bag["Sources"]; }
+            set => Bag[nameof(Sources)] = value;
+            get => (ITaskItem[])Bag[nameof(Sources)];
         }
 
         /// <summary>
@@ -45,8 +32,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem OutputLicense
         {
-            set { Bag["OutputLicense"] = value; }
-            get { return (ITaskItem)Bag["OutputLicense"]; }
+            set => Bag[nameof(OutputLicense)] = value;
+            get => (ITaskItem)Bag[nameof(OutputLicense)];
         }
 
         /// <summary>
@@ -55,8 +42,8 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem LicenseTarget
         {
-            set { Bag["LicenseTarget"] = value; }
-            get { return (ITaskItem)Bag["LicenseTarget"]; }
+            set => Bag[nameof(LicenseTarget)] = value;
+            get => (ITaskItem)Bag[nameof(LicenseTarget)];
         }
 
         /// <summary>
@@ -65,8 +52,8 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public string OutputDirectory
         {
-            set { Bag["OutputDirectory"] = value; }
-            get { return (string)Bag["OutputDirectory"]; }
+            set => Bag[nameof(OutputDirectory)] = value;
+            get => (string)Bag[nameof(OutputDirectory)];
         }
 
         /// <summary>
@@ -75,8 +62,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] ReferencedAssemblies
         {
-            set { Bag["ReferencedAssemblies"] = value; }
-            get { return (ITaskItem[])Bag["ReferencedAssemblies"]; }
+            set => Bag[nameof(ReferencedAssemblies)] = value;
+            get => (ITaskItem[])Bag[nameof(ReferencedAssemblies)];
         }
 
         /// <summary>
@@ -84,24 +71,21 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool NoLogo
         {
-            set { Bag["NoLogo"] = value; }
-            get { return GetBoolParameterWithDefault("NoLogo", false); }
+            set => Bag[nameof(NoLogo)] = value;
+            get => GetBoolParameterWithDefault(nameof(NoLogo), false);
         }
 
         public string SdkToolsPath
         {
-            set { Bag["SdkToolsPath"] = value; }
-            get { return (string)Bag["SdkToolsPath"]; }
+            set => Bag[nameof(SdkToolsPath)] = value;
+            get => (string)Bag[nameof(SdkToolsPath)];
         }
 
         /// <summary>
         /// Targeted version of the framework (i.e. 4.5 or 2.0, etc.)
         /// </summary>
         [Required]
-        public string TargetFrameworkVersion
-        {
-            get; set;
-        }
+        public string TargetFrameworkVersion { get; set; }
         #endregion
 
         #region Class properties
@@ -109,13 +93,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the tool to execute
         /// </summary>
-        protected override string ToolName
-        {
-            get
-            {
-                return "lc.exe";
-            }
-        }
+        protected override string ToolName => "lc.exe";
 
         #endregion
 
@@ -137,7 +115,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to lc.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             return pathToTool;
         }
 
@@ -170,11 +148,12 @@ namespace Microsoft.Build.Tasks
             string outputPath = LicenseTarget.ItemSpec + ".licenses";
 
             if (OutputDirectory != null)
+            {
                 outputPath = Path.Combine(OutputDirectory, outputPath);
+            }
 
             OutputLicense = new TaskItem(outputPath);
         }
-
 
         /// <summary>
         /// Generates response file with arguments for lc.exe

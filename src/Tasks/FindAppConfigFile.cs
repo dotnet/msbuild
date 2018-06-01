@@ -3,9 +3,7 @@
 
 using System;
 using System.IO;
-using System.Resources;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -22,10 +20,8 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _secondaryList;
 
         // The target path metadata value to add to the found item
-        private string _targetPath;
 
         // The item found, if any
-        private ITaskItem _appConfigFileFound = null;
 
         // What we're looking for
         private const string appConfigFile = "app.config";
@@ -38,10 +34,10 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_primaryList, "primaryList");
+                ErrorUtilities.VerifyThrowArgumentNull(_primaryList, nameof(PrimaryList));
                 return _primaryList;
             }
-            set { _primaryList = value; }
+            set => _primaryList = value;
         }
 
         /// <summary>
@@ -52,31 +48,23 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_secondaryList, "secondaryList");
+                ErrorUtilities.VerifyThrowArgumentNull(_secondaryList, nameof(SecondaryList));
                 return _secondaryList;
             }
-            set { _secondaryList = value; }
+            set => _secondaryList = value;
         }
 
         /// <summary>
         /// The value to add as TargetPath metadata
         /// </summary>
         [Required]
-        public string TargetPath
-        {
-            get { return _targetPath; }
-            set { _targetPath = value; }
-        }
+        public string TargetPath { get; set; }
 
         /// <summary>
         /// The first matching item found in the list, if any
         /// </summary>
         [Output]
-        public ITaskItem AppConfigFile
-        {
-            get { return _appConfigFileFound; }
-            set { _appConfigFileFound = value; }
-        }
+        public ITaskItem AppConfigFile { get; set; }
 
         /// <summary>
         /// Find the app config
@@ -129,23 +117,22 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool IsMatchingItem(ITaskItem item, bool matchWholeItemSpec)
         {
-            string filename;
             try
             {
-                filename = (matchWholeItemSpec ? item.ItemSpec : Path.GetFileName(item.ItemSpec));
+                string filename = (matchWholeItemSpec ? item.ItemSpec : Path.GetFileName(item.ItemSpec));
 
                 if (String.Equals(filename, appConfigFile, StringComparison.OrdinalIgnoreCase))
                 {
-                    _appConfigFileFound = item;
+                    AppConfigFile = item;
 
                     // Originally the app.config was found in such a way that it's "OriginalItemSpec"
                     // metadata was cleared out. Although it doesn't really matter, for compatibility,
                     // we'll clear it out here.
-                    _appConfigFileFound.SetMetadata("OriginalItemSpec", item.ItemSpec);
+                    AppConfigFile.SetMetadata("OriginalItemSpec", item.ItemSpec);
 
-                    _appConfigFileFound.SetMetadata(ItemMetadataNames.targetPath, TargetPath);
+                    AppConfigFile.SetMetadata(ItemMetadataNames.targetPath, TargetPath);
 
-                    Log.LogMessageFromResources(MessageImportance.Low, "FindInList.Found", _appConfigFileFound.ItemSpec);
+                    Log.LogMessageFromResources(MessageImportance.Low, "FindInList.Found", AppConfigFile.ItemSpec);
                     return true;
                 }
             }
