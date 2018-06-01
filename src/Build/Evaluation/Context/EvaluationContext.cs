@@ -4,6 +4,8 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
@@ -34,6 +36,8 @@ namespace Microsoft.Build.Evaluation.Context
 
         internal virtual ISdkResolverService SdkResolverService { get; } = new CachingSdkResolverService();
         internal IFileSystemAbstraction FileSystem { get; } = ManagedFileSystem.Singleton();
+
+        internal ConcurrentDictionary<string, ImmutableArray<string>> FileMatcherCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
 
         internal EvaluationContext(SharingPolicy policy)
         {

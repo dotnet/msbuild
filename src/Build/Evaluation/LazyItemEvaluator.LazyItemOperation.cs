@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -45,10 +46,7 @@ namespace Microsoft.Build.Evaluation
                 _itemSpec.Expander = _expander;
             }
 
-            /// <summary>
-            /// Cache used for caching IO operation results
-            /// </summary>
-            protected ConcurrentDictionary<string, ImmutableArray<string>> EntriesCache => _lazyEvaluator._entriesCache;
+            protected EngineFileUtilities EngineFileUtilities => _lazyEvaluator.EngineFileUtilities;
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
