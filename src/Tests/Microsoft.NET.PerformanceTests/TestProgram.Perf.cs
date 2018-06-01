@@ -75,4 +75,15 @@ partial class Program
     {
         PerfTest.DisposeHarness();
     }
+
+    static partial void ShowAdditionalHelp()
+    {
+        Console.WriteLine(@"
+Perf test options:
+  --perf:iterations       : Number of iterations
+  --perf:outputdir        : Output directory for perf results
+  --perf:collect <types>  : Type of perf info to collect.  Default is ""stopwatch"".  Other options include:
+                            BranchMispredictions+CacheMisses+InstructionRetired
+");
+    }
 }
