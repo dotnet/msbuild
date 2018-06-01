@@ -447,6 +447,9 @@
     <Compile Include="ICscHostObject4.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Interop.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="InstalledSDKResolver.cs" />
     <Compile Include="RCWForCurrentContext.cs" />
     <Compile Include="InvalidParameterValueException.cs">

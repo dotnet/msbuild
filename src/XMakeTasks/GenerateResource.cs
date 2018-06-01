@@ -17,6 +17,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Win32;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Xml;
@@ -510,6 +511,22 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Static constructor checks the registry opt-out for mark-of-the-web rejection.
+        /// </summary>
+        static GenerateResource()
+        {
+            try
+            {
+                object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
+                if (allowUntrustedFiles is String)
+                {
+                    allowMOTW = ((string)allowUntrustedFiles).Equals("true", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
         /// passed to this task. Since this task is replacing Resgen, and we used
         /// to log the Resgen.exe command line, we need to continue logging an
@@ -694,6 +711,26 @@ namespace Microsoft.Build.Tasks
                         return false;
                     }
 
+                    // Check for the mark of the web on all possibly-exploitable files
+                    // to be processed.
+                    bool dangerousResourceFound = false;
+
+                    foreach (ITaskItem source in _sources)
+                    {
+                        if (IsDangerous(source.ItemSpec))
+                        {
+                            // Log.LogErrorWithCodeFromResources("GenerateResource.MOTW", source.ItemSpec);
+                            Log.LogError(null, "MSB3821", null, null, 0,0,0,0, string.Format("Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.", source.ItemSpec));
+                            dangerousResourceFound = true;
+                        }
+                    }
+
+                    if (dangerousResourceFound)
+                    {
+                        // Do no further processing
+                        return false;
+                    }
+
                     if (ExecuteAsTool)
                     {
                         outOfProcExecutionSucceeded = GenerateResourcesUsingResGen(inputsToProcess, outputsToProcess);
@@ -831,6 +868,99 @@ namespace Microsoft.Build.Tasks
             }
 
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
+        }
+
+        private static bool allowMOTW;
+
+        private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
+
+        private const uint ZoneLocalMachine = 0;
+
+        private const uint ZoneIntranet = 1;
+
+        private const uint ZoneTrusted = 2;
+
+        private const uint ZoneInternet = 3;
+
+        private const uint ZoneUntrusted = 4;
+
+        private static IInternetSecurityManager internetSecurityManager = null;
+
+        // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
+        // so check to see if we should trust them before analyzing them
+        private bool IsDangerous(String filename)
+        {
+            // If they are opted out, there's no work to do
+            if (allowMOTW)
+            {
+                return false;
+            }
+
+            // First check the zone, if they are not an untrusted zone, they aren't dangerous
+
+            if (internetSecurityManager == null)
+            {
+                Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
+                internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
+            }
+
+            Int32 zone = 0;
+            internetSecurityManager.MapUrlToZone(Path.GetFullPath(filename), out zone, 0);
+            if (zone < ZoneInternet)
+            {
+                return false;
+            }
+
+            // By default all file types that get here are considered dangerous
+            bool dangerous = true;
+
+            if (String.Equals(Path.GetExtension(filename), ".resx", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(Path.GetExtension(filename), ".resw", StringComparison.OrdinalIgnoreCase))
+            {
+                // XML files are only dangerous if there are unrecognized objects in them
+                dangerous = false;
+
+                FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                XmlTextReader reader = new XmlTextReader(stream);
+                reader.DtdProcessing = DtdProcessing.Ignore;
+                reader.XmlResolver = null;
+                try
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.NodeType == XmlNodeType.Element)
+                        {
+                            string s = reader.LocalName;
+
+                            // We only want to parse data nodes,
+                            // the mimetype attribute gives the serializer
+                            // that's requested.
+                            if (reader.LocalName.Equals("data"))
+                            {
+                                if (reader["mimetype"] != null)
+                                {
+                                    dangerous = true;
+                                }
+                            }
+                            else if (reader.LocalName.Equals("metadata"))
+                            {
+                                if (reader["mimetype"] != null)
+                                {
+                                    dangerous = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // If we hit an error while parsing assume there's a dangerous type in this file.
+                    dangerous = true;
+                }
+                stream.Close();
+            }
+
+            return dangerous;
         }
 
         /// <summary>
