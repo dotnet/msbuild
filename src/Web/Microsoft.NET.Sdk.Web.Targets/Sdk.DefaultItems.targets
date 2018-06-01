@@ -36,10 +36,20 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Choose>
     <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" >
 
-      <PropertyGroup>
-        <!-- These properties will allow the latest patch versions to be set in the CLI (via BundledVersions.props) or overridden by tests -->
-        <DefaultPatchVersionForAspNetCoreAll2_1 Condition="'$(DefaultPatchVersionForAspNetCoreAll2_1)' == ''">2.1.1</DefaultPatchVersionForAspNetCoreAll2_1>
-        <DefaultPatchVersionForAspNetCoreApp2_1 Condition="'$(DefaultPatchVersionForAspNetCoreApp2_1)' == ''">2.1.1</DefaultPatchVersionForAspNetCoreApp2_1>
+      <!-- 
+        These properties will allow the latest patch versions to be set in the CLI (via BundledVersions.props) 
+        or overridden by tests. Set the default baseline to ASP.NET Core 2.1.1
+      -->
+      <PropertyGroup Condition="'$(DefaultPatchVersionForAspNetCoreAll2_1)' == ''">
+        <DefaultPatchVersionForAspNetCoreAll2_1>2.1.1</DefaultPatchVersionForAspNetCoreAll2_1>
+        <!-- Check the bundled version. It will start with 2.1.1 until create the final version of the 2.1.1 runtimes.-->
+        <DefaultPatchVersionForAspNetCoreAll2_1 Condition="$(BundledAspNetCoreAllPackageVersion.StartsWith('2.1.1'))">$(BundledAspNetCoreAllPackageVersion)</DefaultPatchVersionForAspNetCoreAll2_1>
+      </PropertyGroup>
+
+      <PropertyGroup Condition="'$(DefaultPatchVersionForAspNetCoreApp2_1)' == ''">
+        <DefaultPatchVersionForAspNetCoreApp2_1>2.1.1</DefaultPatchVersionForAspNetCoreApp2_1>
+        <!-- Check the bundled version. It will start with 2.1.1 until create the final version of the 2.1.1 runtimes.-->
+        <DefaultPatchVersionForAspNetCoreApp2_1 Condition="$(BundledAspNetCoreAppPackageVersion.StartsWith('2.1.1'))">$(BundledAspNetCoreAppPackageVersion)</DefaultPatchVersionForAspNetCoreApp2_1>
       </PropertyGroup>
 
       <!-- Default patch version of .All Framework -->
