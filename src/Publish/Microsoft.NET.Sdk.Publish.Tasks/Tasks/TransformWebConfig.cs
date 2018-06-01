@@ -22,12 +22,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         [Required]
         public string PublishDir { get; set; }
 
-        /// <summary>
-        /// The application being published is a portable .NET Core application
-        /// </summary>
-        /// <returns></returns>
         [Required]
-        public bool IsPortable { get; set; }
+        public bool UseAppHost { get; set; }
 
         /// <summary>
         /// [optional] Transform is targeted for Azure
@@ -89,7 +85,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             string outputFile = Path.GetFileName(TargetPath);
-            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, IsPortable, ExecutableExtension, AspNetCoreModuleHostingModel);
+            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModuleHostingModel);
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);

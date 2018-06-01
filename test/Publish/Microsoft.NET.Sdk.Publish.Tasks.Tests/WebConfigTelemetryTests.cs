@@ -66,7 +66,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         public void WebConfigTelemetry_SetsProjectGuidIfNotOptedOut(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false, extension:".exe", aspNetCoreHostingModel:null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension:".exe", aspNetCoreHostingModel:null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
             
             //Act 
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         public void WebConfigTelemetry_DoesNotSetProjectGuidIfOptedOut_ThroughIgnoreProjectGuid(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel:null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel:null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
 
             //Act 
@@ -96,7 +96,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         public void WebConfigTelemetry_RemovesProjectGuidIfOptedOut_ThroughIgnoreProjectGuid(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel:null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel:null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
             // Adds Guid to the config
             XDocument transformedWebConfigWithGuid = WebConfigTelemetry.AddTelemetry(transformedWebConfig, projectGuid, false, null, null);
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             // Arrange
             string projectFullPath = GetTestProjectsFullPath();
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel: null);
             string previousValue = Environment.GetEnvironmentVariable(TelemetryOptout);
 
             //Act 
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             // Arrange
             string projectFullPath = GetTestProjectsFullPath();
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false, extension: ".exe", aspNetCoreHostingModel: null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel: null);
             string previousValue = Environment.GetEnvironmentVariable(TelemetryOptout);
 
             //Act 
