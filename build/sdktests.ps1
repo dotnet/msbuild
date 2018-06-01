@@ -11,7 +11,7 @@ Param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 
-$lkgPackageVersion = "1.0.0-preview-62928-01"
+$lkgPackageVersion = "2.1.400-preview-63001-03"
 
 if ($packageVersion -eq "")
 {

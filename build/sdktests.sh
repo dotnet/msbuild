@@ -4,9 +4,9 @@ install=false
 uninstall=false
 run=false
 # Default / LKG package version
-packageVersion=1.0.0-preview-62928-01
+packageVersion=2.1.400-preview-63001-03
 tests=Build,Clean,Pack,Perf,Publish,Rebuild,Restore,ToolPack
-additionalargs=''
+additionalargs=()
 
 packageSource=https://dotnet.myget.org/F/dotnet-cli/api/v3/index.json
 
@@ -34,7 +34,7 @@ while (($# > 0)); do
       shift 2
       ;;
     *)
-      additionalargs="$additionalargs $1"
+      additionalargs+=("$1")
       shift 1
       ;;
     esac
@@ -67,7 +67,10 @@ if [ "$run" = true ]; then
         cmd="testSdk$name"
         resultsFile="$name"
         resultsFile+="results.xml"
-        "$cmd" -xml $resultsFile $additionalargs
+
+        set -- "${additionalargs[@]}" # restore positional parameters
+        "$cmd" -xml "$resultsFile" "$@"
+
         lastexitcode=$?
         if [[ $lastexitcode != 0 ]]; then
             passed=false
