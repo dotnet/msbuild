@@ -8,6 +8,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Microsoft.DotNet.Cli.Utils;
+using System.Threading;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -79,7 +80,7 @@ namespace Microsoft.DotNet.ToolPackage
                             // Use the staging directory for uninstall
                             // This prevents cross-device moves when temp is mounted to a different device
                             var tempPath = _store.GetRandomStagingDirectory().Value;
-                            Directory.Move(PackageDirectory.Value, tempPath);
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(PackageDirectory.Value, tempPath));
                             tempPackageDirectory = tempPath;
                         }
 
@@ -111,7 +112,7 @@ namespace Microsoft.DotNet.ToolPackage
                     if (tempPackageDirectory != null)
                     {
                         Directory.CreateDirectory(rootDirectory.Value);
-                        Directory.Move(tempPackageDirectory, PackageDirectory.Value);
+                        FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempPackageDirectory, PackageDirectory.Value));
                     }
                 });
         }
