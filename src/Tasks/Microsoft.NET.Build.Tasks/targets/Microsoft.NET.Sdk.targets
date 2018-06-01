@@ -69,7 +69,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_NativeExecutableExtension Condition="'$(_NativeExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_NativeExecutableExtension>
 
     <_DotNetHostExecutableName>dotnet$(_NativeExecutableExtension)</_DotNetHostExecutableName>
-    <_DotNetAppHostExecutableName>apphost$(_NativeExecutableExtension)</_DotNetAppHostExecutableName>
+    <_DotNetAppHostExecutableNameWithoutExtension>apphost</_DotNetAppHostExecutableNameWithoutExtension>
+    <_DotNetAppHostExecutableName>$(_DotNetAppHostExecutableNameWithoutExtension)$(_NativeExecutableExtension)</_DotNetAppHostExecutableName>
 
     <_DotNetHostPolicyLibraryName>$(_NativeLibraryPrefix)hostpolicy$(_NativeLibraryExtension)</_DotNetHostPolicyLibraryName>
     <_DotNetHostFxrLibraryName>$(_NativeLibraryPrefix)hostfxr$(_NativeLibraryExtension)</_DotNetHostFxrLibraryName>

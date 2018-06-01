@@ -225,7 +225,7 @@ namespace Microsoft.NET.Build.Tests
 
                         target.Add(new XElement(ns + "FindUnderPath",
                             new XAttribute("Files", "@(_ConflictPackageFiles)"),
-                            new XAttribute("Path", TestContext.Current.ToolsetUnderTest.BuildExtensionsMSBuildPath),
+                            new XAttribute("Path", TestContext.Current.ToolsetUnderTest.GetMicrosoftNETBuildExtensionsPath(Log)),
                             new XElement(ns + "Output",
                                 new XAttribute("TaskParameter", "InPath"),
                                 new XAttribute("ItemName", "_ConflictsInSupportLibs"))
@@ -285,37 +285,19 @@ namespace Microsoft.NET.Build.Tests
                     {
                         AddReferenceToLibrary(project, ReferenceScenario.ProjectReference);
 
-                        // Add a target that replaces the facade folder with the set of netstandard support assemblies
-                        // this can be replaced by targeting the version of .NETFramework that includes netstandard inbox,
-                        // once available
-                        var facadesDir = Path.Combine(TestContext.Current.ToolsetUnderTest.BuildExtensionsMSBuildPath, "net461", "lib\\");
                         var ns = project.Root.Name.Namespace;
-                        var target = new XElement(ns + "Target",
-                            new XAttribute("Name", "ReplaceDesignTimeFacadeDirectories"),
-                            new XAttribute("AfterTargets", "GetReferenceAssemblyPaths"));
-                        project.Root.Add(target);
-
-                        var itemGroup = new XElement(ns + "ItemGroup");
-                        target.Add(itemGroup);
-
-                        itemGroup.Add(new XElement(ns + "_UpdateTargetFrameworkDirectory",
-                            new XAttribute("Include", "$(TargetFrameworkDirectory);" + facadesDir),
-                            new XAttribute("Exclude", "@(DesignTimeFacadeDirectories)")));
-
-                        itemGroup.Add(new XElement(ns + "DesignTimeFacadeDirectories",
-                            new XAttribute("Remove", "@(DesignTimeFacadeDirectories)")));
-                        itemGroup.Add(new XElement(ns + "DesignTimeFacadeDirectories",
-                            new XAttribute("Include", facadesDir)));
-
-                        var propertyGroup = new XElement(ns + "PropertyGroup");
-                        target.Add(propertyGroup);
-
-                        propertyGroup.Add(new XElement(ns + "TargetFrameworkDirectory", "@(_UpdateTargetFrameworkDirectory)"));
-
-                        // currently RAR doesn't detect when netstandard is referenced, directly set _HasReferenceToSystemRuntime
-                        // this will be fixed once netstandard is inbox
-                        // ISSUE: https://github.com/Microsoft/msbuild/issues/2199
-                        propertyGroup.Add(new XElement(ns + "_HasReferenceToSystemRuntime", "True"));
+                        if (isSdk)
+                        {
+                            project.Root.Element(ns + "PropertyGroup")
+                                        .Element(ns + "TargetFramework")
+                                        .Value = "net471";
+                        }
+                        else
+                        {
+                            project.Root.Element(ns + "PropertyGroup")
+                                        .Element(ns + "TargetFrameworkVersion")
+                                        .Value = "v4.7.1";
+                        }
                     }
                 });
 
@@ -328,14 +310,32 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             var outputDirectory = isSdk ?
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net471") :
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.exe",
                 "TestApp.pdb",
                 "TestLibrary.dll",
-                "TestLibrary.pdb"
+                "TestLibrary.pdb",
+
+                //  These DLLs are still included in the output folder when targeting .NET 4.7.1
+                //  With .NET 4.7.2, they are not included anymore
+                "System.Data.Common.dll",
+                "System.Diagnostics.StackTrace.dll",
+                "System.Diagnostics.Tracing.dll",
+                "System.Globalization.Extensions.dll",
+                "System.IO.Compression.dll",
+                "System.Net.Http.dll",
+                "System.Net.Sockets.dll",
+                "System.Runtime.Serialization.Primitives.dll",
+                "System.Security.Cryptography.Algorithms.dll",
+                "System.Security.SecureString.dll",
+                "System.Threading.Overlapped.dll",
+                "System.Xml.XPath.XDocument.dll",
+
+                //  Binding redirects are generated for .NET 4.7.1
+                "TestApp.exe.config",
             });
         }
 

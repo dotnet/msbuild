@@ -15,3 +15,5 @@ obj/
 
 # OS X Device Services Store
 .DS_Store
+
+*.binlog

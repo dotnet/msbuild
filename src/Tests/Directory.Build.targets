@@ -1,0 +1,31 @@
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>$(PackageId)</ToolCommandName>
+
+    <!-- Put packages for tests in subfolder so we don't try to sign them -->
+    <PackageOutputPath>$(PackageOutputPath)tests\</PackageOutputPath>
+  </PropertyGroup>
+  
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+
+    <!-- Note: These items are showing up in solution explorer even though Visible is set to false -->
+    <None Include="$(MSBuildThisFileDirectory)..\Assets\**\*.*" CopyToPublishDirectory="PreserveNewest" 
+          LinkBase="Assets" Visible="false" />
+    
+  </ItemGroup>
+
+  <Import Project="..\Directory.Build.targets" />
+
+</Project>

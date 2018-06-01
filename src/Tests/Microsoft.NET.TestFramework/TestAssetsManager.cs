@@ -15,8 +15,6 @@ namespace Microsoft.NET.TestFramework
     {
         public string ProjectsRoot { get; private set; }
 
-        private string BuildVersion { get; set; }
-
         private List<String> TestDestinationDirectories { get; } = new List<string>();
 
         public TestAssetsManager()
@@ -29,7 +27,6 @@ namespace Microsoft.NET.TestFramework
             }
 
             ProjectsRoot = testAssetsDirectory;
-            BuildVersion = TestContext.Current.BuildVersion;
         }
 
         public TestAsset CopyTestAsset(
@@ -43,7 +40,7 @@ namespace Microsoft.NET.TestFramework
                 GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
             TestDestinationDirectories.Add(testDestinationDirectory);
 
-            var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, BuildVersion);
+            var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, TestContext.Current.SdkVersion);
             return testAsset;
         }
 
@@ -56,7 +53,7 @@ namespace Microsoft.NET.TestFramework
                 GetTestDestinationDirectoryPath(testProject.Name, callingMethod, identifier);
             TestDestinationDirectories.Add(testDestinationDirectory);
 
-            var testAsset = new TestAsset(testDestinationDirectory, BuildVersion);
+            var testAsset = new TestAsset(testDestinationDirectory, TestContext.Current.SdkVersion);
 
             Stack<TestProject> projectStack = new Stack<TestProject>();
             projectStack.Push(testProject);
@@ -84,7 +81,7 @@ namespace Microsoft.NET.TestFramework
         public TestDirectory CreateTestDirectory([CallerMemberName] string testName = null, string identifier = null)
         {
             string dir = GetTestDestinationDirectoryPath(testName, testName, identifier ?? string.Empty);
-            return new TestDirectory(dir);
+            return new TestDirectory(dir, TestContext.Current.SdkVersion);
         }
 
         public string GetAndValidateTestProjectDirectory(string testProjectName)
