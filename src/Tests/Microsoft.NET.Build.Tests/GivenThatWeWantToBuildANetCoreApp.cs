@@ -40,6 +40,8 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp1.1", null, "1.1.2", "1.1.2")]
         [InlineData("netcoreapp1.1", "1.1.0", "1.1.0", "1.1.0")]
         [InlineData("netcoreapp1.1.1", null, "1.1.1", "1.1.1")]
+        [InlineData("netcoreapp2.0", null, "2.0.0", "2.0.0")]
+        [InlineData("netcoreapp2.1", null, "2.1.0", "2.1.0")]
         public void It_targets_the_right_shared_framework(string targetFramework, string runtimeFrameworkVersion,
             string expectedPackageVersion, string expectedRuntimeVersion)
         {
