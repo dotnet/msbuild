@@ -116,6 +116,13 @@
       <_AspNetCoreAllPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</_AspNetCoreAllPackageVersion>
       <_AspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</_AspNetCoreAppPackageVersion>
 
+      <!-- Default aspnetcore patch versions, specified as a stabilized version -->
+      <_DefaultPatchVersionForAspNetCoreAll2_1>2.1.1</_DefaultPatchVersionForAspNetCoreAll2_1>
+      <_DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreAll2_1)</_DefaultPatchVersionForAspNetCoreApp2_1>
+      <!-- If we are currently building a prerelease of the version that we intend to lock to, set the default version to the ingested version instead of the stabilized version. -->
+      <_DefaultPatchVersionForAspNetCoreAll2_1 Condition="$(_AspNetCoreAllPackageVersion.StartsWith('$(_DefaultPatchVersionForAspNetCoreAll2_1)-'))">$(_AspNetCoreAllPackageVersion)</_DefaultPatchVersionForAspNetCoreAll2_1>
+      <_DefaultPatchVersionForAspNetCoreApp2_1 Condition="$(_AspNetCoreAppPackageVersion.StartsWith('$(_DefaultPatchVersionForAspNetCoreApp2_1)-'))">$(_AspNetCoreAppPackageVersion)</_DefaultPatchVersionForAspNetCoreApp2_1>
+
       <!-- Use only major and minor in target framework version -->
       <_NETCoreAppTargetFrameworkVersion>$(_NETCoreAppPackageVersion.Split('.')[0]).$(_NETCoreAppPackageVersion.Split('.')[1])</_NETCoreAppTargetFrameworkVersion>
       <_NETStandardTargetFrameworkVersion>$(_NETStandardLibraryPackageVersion.Split('.')[0]).$(_NETStandardLibraryPackageVersion.Split('.')[1])</_NETStandardTargetFrameworkVersion>
@@ -169,6 +176,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     @(BundledVersionsVariable->'<%(Identity)>%(Value)</%(Identity)>', '%0A    ')
     <NETCoreSdkVersion>$(SdkVersion)</NETCoreSdkVersion>
     <_NETCoreSdkIsPreview>$(_NETCoreSdkIsPreview)</_NETCoreSdkIsPreview>
+
+    <!-- Default patch versions for each minor version of ASP.NET Core -->
+    <DefaultPatchVersionForAspNetCoreAll2_1>$(_DefaultPatchVersionForAspNetCoreAll2_1)</DefaultPatchVersionForAspNetCoreAll2_1>
+    <DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreApp2_1)</DefaultPatchVersionForAspNetCoreApp2_1>
 
     <!-- Latest patch versions for each minor version of .NET Core -->
     <LatestPatchVersionForNetCore1_0 Condition="'$(LatestPatchVersionForNetCore1_0)' == ''">1.0.11</LatestPatchVersionForNetCore1_0>
