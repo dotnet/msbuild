@@ -1,15 +1,6 @@
-﻿//--------------------------------------------------------------------------
-//
-// Copyright (C) 2015 Microsoft Corporation,
-// All rights reserved
-//
-// File:    MSBuildTasks.h
-//
-// Unmanaged C++ code that needs to use MSBuild should #include this header
-// file to get access to the MSBuildTasks interfaces.  See the generated
-// file MSBuildTasks.tlh for the interface definitions.
-//
-//---------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 #if (_MSC_VER > 1000) && !defined(NO_PRAGMA_ONCE)
 #pragma once
 #endif
