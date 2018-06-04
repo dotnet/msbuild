@@ -70,6 +70,11 @@ namespace Microsoft.Build.Logging
         public void Initialize(IEventSource eventSource)
         {
             eventSource.StatusEventRaised += ProjectEvaluationFinishedRaised;
+
+            if (eventSource is IEventSource3 eventSource3)
+            {
+                eventSource3.IncludeEvaluationProfiles();
+            }
         }
 
         /// <summary>

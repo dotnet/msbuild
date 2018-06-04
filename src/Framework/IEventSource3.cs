@@ -8,7 +8,7 @@ namespace Microsoft.Build.Framework
     /// Loggers use this interface to subscribe to the events they
     /// are interested in receiving.
     /// </summary>
-    public interface IEventSource3 : IEventSource
+    public interface IEventSource3 : IEventSource2
     {
         /// <summary>
         /// Should evaluation events include profiling information?

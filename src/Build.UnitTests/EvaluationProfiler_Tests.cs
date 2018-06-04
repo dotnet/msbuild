@@ -105,6 +105,42 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.True(profiledElements.Any(location => location.ElementName == elementName));
         }
 
+        /// <summary>
+        /// Verifies that a given element name shows up in a profiled MSBuild project
+        /// </summary>
+        [InlineData("Target", "<Target Name='test'/>")]
+        [InlineData("Message",
+            @"<Target Name='echo'>
+    <Message text='echo!'/>
+</Target>")]
+        [InlineData("appname",
+            @"<Target Name='test'/>
+<PropertyGroup>
+    <appname>Hello</appname>
+</PropertyGroup>")]
+        [InlineData("CSFile",
+            @"<Target Name='test'/>
+<ItemGroup>
+    <CSFile Include='file.cs'/>
+</ItemGroup>")]
+#if MONO
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+#else
+        [Theory]
+#endif
+        public void VerifySimpleProfiledDataWithoutProjectLoadSetting(string elementName, string body)
+        {
+            string contents = $@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+    {body}
+</Project>
+";
+            var result = BuildAndGetProfilerResult(contents, false);
+            var profiledElements = result.ProfiledLocations.Keys.ToList();
+
+            Assert.True(profiledElements.Any(location => location.ElementName == elementName));
+        }
+
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
@@ -242,7 +278,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <summary>
         /// Runs a build for a given project content with the profiler option on and returns the result of profiling it
         /// </summary>
-        private ProfilerResult BuildAndGetProfilerResult(string projectContent)
+        private ProfilerResult BuildAndGetProfilerResult(string projectContent, bool setProjectLoadSetting = true)
         {
             var content = CleanupFileContents(projectContent);
 
@@ -253,7 +289,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 Loggers = new ILogger[] { profilerLogger },
                 DisableInProcNode = true, // This is actually important since we also want to test the serialization of the events
                 EnableNodeReuse = false,
-                ProjectLoadSettings = ProjectLoadSettings.ProfileEvaluation
+                ProjectLoadSettings = setProjectLoadSetting ? ProjectLoadSettings.ProfileEvaluation : 0
             };
 
             using (var projectCollection = new ProjectCollection())

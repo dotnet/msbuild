@@ -220,7 +220,7 @@ namespace Microsoft.Build.Framework
     {
         event Microsoft.Build.Framework.TelemetryEventHandler TelemetryLogged;
     }
-    public partial interface IEventSource3 : Microsoft.Build.Framework.IEventSource
+    public partial interface IEventSource3 : Microsoft.Build.Framework.IEventSource, Microsoft.Build.Framework.IEventSource2
     {
         void IncludeEvaluationProfiles();
         void IncludeTaskInputs();

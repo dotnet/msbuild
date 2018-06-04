@@ -179,6 +179,7 @@ namespace Microsoft.Build.BackEnd.Logging
         bool IncludeEvaluationProfile
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -187,6 +188,7 @@ namespace Microsoft.Build.BackEnd.Logging
         bool IncludeTaskInputs
         {
             get;
+            set;
         }
 
         #endregion

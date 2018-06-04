@@ -39,6 +39,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LoggerDescription[] _forwardingLoggers;
 
+        /// <summary>
+        /// The logging configuration for the node.
+        /// </summary>
+        private LoggingNodeConfiguration _loggingNodeConfiguration;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Constructor
@@ -47,18 +52,21 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildParameters">The build parameters</param>
         /// <param name="forwardingLoggers">The forwarding loggers.</param>
         /// <param name="appDomainSetup">The AppDomain setup information.</param>
+        /// <param name="loggingNodeConfiguration">The logging configuration for the node.</param>
         public NodeConfiguration
             (
             int nodeId,
             BuildParameters buildParameters,
             LoggerDescription[] forwardingLoggers,
-            AppDomainSetup appDomainSetup
+            AppDomainSetup appDomainSetup,
+            LoggingNodeConfiguration loggingNodeConfiguration
             )
         {
             _nodeId = nodeId;
             _buildParameters = buildParameters;
             _forwardingLoggers = forwardingLoggers;
             _appDomainSetup = appDomainSetup;
+            _loggingNodeConfiguration = loggingNodeConfiguration;
         }
 #else
         /// <summary>
@@ -67,16 +75,19 @@ namespace Microsoft.Build.BackEnd
         /// <param name="nodeId">The node id.</param>
         /// <param name="buildParameters">The build parameters</param>
         /// <param name="forwardingLoggers">The forwarding loggers.</param>
+        /// <param name="loggingNodeConfiguration">The logging configuration for the node.</param>
         public NodeConfiguration
             (
             int nodeId,
             BuildParameters buildParameters,
-            LoggerDescription[] forwardingLoggers
+            LoggerDescription[] forwardingLoggers,
+            LoggingNodeConfiguration loggingNodeConfiguration
             )
         {
             _nodeId = nodeId;
             _buildParameters = buildParameters;
             _forwardingLoggers = forwardingLoggers;
+            _loggingNodeConfiguration = loggingNodeConfiguration;
         }
 #endif
 
@@ -133,6 +144,16 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
+        /// <summary>
+        /// The logging configuration for the node.
+        /// </summary>
+        public LoggingNodeConfiguration LoggingNodeConfiguration
+        {
+            [DebuggerStepThrough]
+            get
+            { return _loggingNodeConfiguration; }
+        }
+
 #region INodePacket Members
 
         /// <summary>
@@ -161,6 +182,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             translator.TranslateDotNet(ref _appDomainSetup);
 #endif
+            translator.Translate(ref _loggingNodeConfiguration);
         }
 
         /// <summary>
@@ -183,6 +205,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 , _appDomainSetup
 #endif
+                , _loggingNodeConfiguration
                 );
         }
     }

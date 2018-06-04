@@ -196,6 +196,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private int _nodeId = 0;
 
+        /// <summary>
+        /// Whether to include evaluation profiles in events.
+        /// </summary>
+        private bool _includeEvaluationProfile = false;
+
+        /// <summary>
+        /// Whether to include task inputs in task events.
+        /// </summary>
+        private bool _includeTaskInputs = false;
+
         #region LoggingThread Data
 
         /// <summary>
@@ -456,12 +466,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Should evaluation events include profiling information?
         /// </summary>
-        public bool IncludeEvaluationProfile => _centralForwardingLoggerSinkId != -1 && ((EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId]).IncludeEvaluationProfiles;
+        public bool IncludeEvaluationProfile
+        {
+            get => _includeEvaluationProfile || _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles);
+            set => _includeEvaluationProfile = value;
+        }
 
         /// <summary>
         /// Should task events include task inputs?
         /// </summary>
-        public bool IncludeTaskInputs => _centralForwardingLoggerSinkId != -1 && ((EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId]).IncludeTaskInputs;
+        public bool IncludeTaskInputs
+        {
+            get => _includeTaskInputs || _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs);
+            set => _includeTaskInputs = value;
+        }
 
         /// <summary>
         /// Determines if the specified submission has logged an errors.
