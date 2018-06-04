@@ -10,7 +10,8 @@ namespace Microsoft.DotNet.Cli
     {
         public static Command InternalReportinstallsuccess() =>
             Create.Command(
-                "internal-reportinstallsuccess", "internal only",
+                "internal-reportinstallsuccess",
+                "",
                 Accept.ExactlyOneArgument());
     }
 }

@@ -33,13 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
-        <source>Skip building the project prior to running. By default, the project will be built.</source>
-        <target state="translated">Überspringen Sie die Erstellung des Projekts vor dem Ausführen. Das Projekt wird standardmäßig erstellt.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandOptionNoBuild">
-        <source>Do not build the project before running.</source>
-        <target state="translated">Erstellen Sie das Projekt nicht vor dem Ausführen.</target>
+        <source>Do not build the project before running. Implies --no-restore.</source>
+        <target state="translated">Erstellt das Projekt nicht vor der Ausführung. Impliziert "--no-restore".</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
@@ -103,8 +98,8 @@ Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verw
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>Launch profile is not a JSON object.</source>
-        <target state="translated">Das Startprofil ist kein JSON-Objekt.</target>
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">Ein Profil mit dem angegebenen Namen wurde nicht gefunden oder ist kein gültiges JSON-Objekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

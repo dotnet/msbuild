@@ -36,14 +36,14 @@ namespace Microsoft.DotNet.Tools.Pack
           
             var msbuildArgs = new List<string>()
             {
-                "/t:pack"
+                "-target:pack"
             };
 
             msbuildArgs.AddRange(parsedPack.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(parsedPack.Arguments);
 
-            bool noRestore = parsedPack.HasOption("--no-restore");
+            bool noRestore = parsedPack.HasOption("--no-restore") || parsedPack.HasOption("--no-build");
 
             return new PackCommand(
                 msbuildArgs,

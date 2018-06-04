@@ -31,8 +31,8 @@ Options:
   -h, --help   Show help information.
 
 Commands:
-  package <PACKAGE_NAME>   .NET Remove Package reference Command.
-  reference <args>         .NET Remove Project to Project reference Command
+  package <PACKAGE_NAME>     Remove a NuGet package reference from the project.
+  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.
 ";
 
         [Theory]

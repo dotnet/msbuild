@@ -57,6 +57,11 @@
         <target state="translated">솔루션 파일을 만듭니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectsHeader">
+        <source>Project(s)</source>
+        <target state="new">Project(s)</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

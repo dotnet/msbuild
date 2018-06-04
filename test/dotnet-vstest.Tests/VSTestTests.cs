@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .Should().Pass();
 
             var outputDll = testRoot
-                .GetDirectory("bin", configuration, "netcoreapp2.0")
+                .GetDirectory("bin", configuration, "netcoreapp2.1")
                 .GetFile($"{testAppName}.dll");
 
             var argsForVstest = $"\"{outputDll.FullName}\" --logger:console;verbosity=normal";
@@ -42,8 +42,8 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             {
                 result.StdOut
                     .Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
-                    .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest")
-                    .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                    .And.Contain("Passed   VSTestPassTest")
+                    .And.Contain("Failed   VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);

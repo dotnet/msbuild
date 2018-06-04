@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
 
             var packageName = "Newtonsoft.Json";
             var packageVersion = "9.0.1";
-            var framework = "netcoreapp2.0";
+            var framework = "netcoreapp2.1";
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"add package {packageName} --version {packageVersion} --framework {framework}");

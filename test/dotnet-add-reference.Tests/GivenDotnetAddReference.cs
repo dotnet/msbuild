@@ -15,11 +15,11 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
 {
     public class GivenDotnetAddReference : TestBase
     {
-        private const string HelpText = @"Usage: dotnet add <PROJECT> reference [options] <args>
+        private const string HelpText = @"Usage: dotnet add <PROJECT> reference [options] <PROJECT_PATH>
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <args>      Project to project references to add
+  <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT_PATH>   Project to project references to add
 
 Options:
   -h, --help                    Show help information.
@@ -35,8 +35,8 @@ Options:
   -h, --help   Show help information.
 
 Commands:
-  package <PACKAGE_NAME>   .NET Add Package reference Command
-  reference <args>         .NET Add Project to Project reference Command
+  package <PACKAGE_NAME>     Add a NuGet package reference to the project.
+  reference <PROJECT_PATH>   Add a project-to-project reference to the project.
 ";
 
         const string FrameworkNet451Arg = "-f net451";
@@ -559,7 +559,7 @@ Commands:
                 .WithProject(lib.CsProjName)
                 .Execute("\"IDoNotExist.csproj\"");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ReferenceDoesNotExist, "IDoNotExist.csproj"));
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, "IDoNotExist.csproj"));
             lib.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -575,7 +575,7 @@ Commands:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\" \"IDoNotExist.csproj\"");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ReferenceDoesNotExist, "IDoNotExist.csproj"));
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, "IDoNotExist.csproj"));
             lib.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -692,6 +692,56 @@ Commands:
             cmd.StdErr.Should().MatchRegex(ProjectNotCompatibleErrorMessageRegEx);
             cmd.StdErr.Should().MatchRegex(" - net45");
             net45lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
+        }
+
+        [Fact]
+        public void WhenDirectoryContainingProjectIsGivenReferenceIsAdded()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+
+            var result = new AddReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute($"\"{Path.GetDirectoryName(setup.ValidRefCsprojPath)}\"");
+
+            result.Should().Pass();
+            result.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ReferenceAddedToTheProject, @"ValidRef\ValidRef.csproj"));
+            result.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsNoProjectsItCancelsWholeOperation()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+
+            var reference = "Empty";
+            var result = new AddReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute(reference);
+
+            result.Should().Fail();
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, reference));
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsMultipleProjectsItCancelsWholeOperation()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+
+            var reference = "MoreThanOne";
+            var result = new AddReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute(reference);
+
+            result.Should().Fail();
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, reference));
         }
     }
 }

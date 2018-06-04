@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="translated">Projeyi paketlemeden önce derlemeyi atlayın. Varsayılan olarak, proje derlenir.</target>
+        <source>Do not build the project before packing. Implies --no-restore.</source>
+        <target state="translated">Paketlemeden önce projeyi derlemeyin. --no-restore anlamına gelir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">

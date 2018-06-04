@@ -22,13 +22,15 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
     <GeneratedNuGetConfig>$(RepoRoot)/NuGet.Config</GeneratedNuGetConfig>
 
-    <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
-    <BuildTasksFeedDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
+    <RelativeCLIBuildBinaries>build_projects/dotnet-cli-build/bin</RelativeCLIBuildBinaries>
+    <RelativeCLIBuildDllName>dotnet-cli-build.dll</RelativeCLIBuildDllName>
+    <CLIBuildDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/$(RelativeCLIBuildDllName)</CLIBuildDll>
+    <BuildTasksFeedDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
-    <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
+    <CliTargetFramework>netcoreapp2.1</CliTargetFramework>
   </PropertyGroup>
 
   <Import Project="build/BranchInfo.props" />
@@ -36,11 +38,13 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
+
   <Import Project="build/Branding.props" />
 
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
   <Import Project="build/MSBuildExtensions.props" />
+
   <Import Project="build/OutputDirectories.props" />
 
   <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">

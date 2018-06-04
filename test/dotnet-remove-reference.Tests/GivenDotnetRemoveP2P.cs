@@ -14,11 +14,11 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 {
     public class GivenDotnetRemoveReference : TestBase
     {
-        private const string HelpText = @"Usage: dotnet remove <PROJECT> reference [options] <args>
+        private const string HelpText = @"Usage: dotnet remove <PROJECT> reference [options] <PROJECT_PATH>
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <args>      Project to project references to remove
+  <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT_PATH>   Project to project references to remove
 
 Options:
   -h, --help                    Show help information.
@@ -34,8 +34,8 @@ Options:
   -h, --help   Show help information.
 
 Commands:
-  package <PACKAGE_NAME>   .NET Remove Package reference Command.
-  reference <args>         .NET Remove Project to Project reference Command
+  package <PACKAGE_NAME>     Remove a NuGet package reference from the project.
+  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.
 ";
 
         const string FrameworkNet451Arg = "-f net451";
@@ -505,6 +505,57 @@ Commands:
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(validref.Name).Should().Be(0);
+        }
+
+        [Fact]
+        public void WhenDirectoryContainingProjectIsGivenReferenceIsRemoved()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+            var libref = AddLibRef(setup, lib);
+
+            var result = new RemoveReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute($"\"{libref.CsProjPath}\"");
+
+            result.Should().Pass();
+            result.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, Path.Combine("Lib", setup.LibCsprojName)));
+            result.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsNoProjectsItCancelsWholeOperation()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+
+            var reference = "Empty";
+            var result = new RemoveReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute(reference);
+
+            result.Should().Fail();
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsMultipleProjectsItCancelsWholeOperation()
+        {
+            var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
+
+            var reference = "MoreThanOne";
+            var result = new RemoveReferenceCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(lib.CsProjPath)
+                    .Execute(reference);
+
+            result.Should().Fail();
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
         }
     }
 }

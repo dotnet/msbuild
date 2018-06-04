@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -28,6 +29,8 @@ namespace Microsoft.DotNet.Tests
             _testDirectory = TestAssets.CreateTestDirectory("Dotnet_first_time_experience_tests").FullName;
             var testNuGetHome = Path.Combine(_testDirectory, "nuget_home");
             var cliTestFallbackFolder = Path.Combine(testNuGetHome, ".dotnet", "NuGetFallbackFolder");
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(_testDirectory);
@@ -35,6 +38,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = testNuGetHome;
             command.Environment["APPDATA"] = testNuGetHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = cliTestFallbackFolder;
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
@@ -56,7 +61,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void UsingDotnetForTheFirstTimeWithNonVerbsDoesNotPrintEula()
         {
-            string firstTimeNonVerbUseMessage = Cli.Utils.LocalizableStrings.DotNetCommandLineTools;
+            string firstTimeNonVerbUseMessage = Cli.Utils.LocalizableStrings.DotNetSdkInfoLabel;
 
             _firstDotnetNonVerbUseCommandResult.StdOut
                 .Should()
@@ -69,6 +74,15 @@ namespace Microsoft.DotNet.Tests
             _firstDotnetVerbUseCommandResult.StdOut
                 .Should()
                 .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage)
+                .And.NotContain("Restore completed in");
+        }
+
+        [Fact]
+        public void ItShowsTheAspNetCertificateGenerationMessageToTheUser()
+        {
+            _firstDotnetVerbUseCommandResult.StdOut
+                .Should()
+                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled)
                 .And.NotContain("Restore completed in");
         }
 
@@ -89,9 +103,19 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void ItDoesNotCreateAFirstUseSentinelFileUnderTheDotDotNetFolderWhenInternalReportInstallSuccessIsInvoked()
+        public void ItCreatesAnAspNetCertificateSentinelFileUnderTheDotDotNetFolder()
+        {
+            _dotDotnetFolder
+                .Should()
+                .HaveFile($"{GetDotnetVersion()}.aspNetCertificateSentinel");
+        }
+
+        [Fact]
+        public void ItDoesNotCreateAFirstUseSentinelFileNorAnAspNetCertificateSentinelFileUnderTheDotDotNetFolderWhenInternalReportInstallSuccessIsInvoked()
         {
             var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(_testDirectory);
@@ -100,6 +124,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             // Disable to prevent the creation of the .dotnet folder by optimizationdata.
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
@@ -109,6 +135,7 @@ namespace Microsoft.DotNet.Tests
             var homeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
             string[] fileEntries = Directory.GetFiles(homeFolder.ToString());
             fileEntries.Should().OnlyContain(x => !x.Contains(".dotnetFirstUseSentinel"));
+            fileEntries.Should().OnlyContain(x => !x.Contains(".aspNetCertificateSentinel"));
         }
 
         [Fact]
@@ -116,6 +143,8 @@ namespace Microsoft.DotNet.Tests
         {
             var newHome = Path.Combine(_testDirectory, "new_home");
             var newHomeFolder = new DirectoryInfo(Path.Combine(newHome, ".dotnet"));
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(_testDirectory);
@@ -123,6 +152,8 @@ namespace Microsoft.DotNet.Tests
             command.Environment["USERPROFILE"] = newHome;
             command.Environment["APPDATA"] = newHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
@@ -133,6 +164,77 @@ namespace Microsoft.DotNet.Tests
             result.StdOut
                 .Should()
                 .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage);
+        }
+
+        [Fact]
+        public void ItShowsTheAspNetCertificateGenerationMessageWhenInvokingACommandAfterInternalReportInstallSuccessHasBeenInvoked()
+        {
+            var newHome = Path.Combine(_testDirectory, "aspnet_home");
+            var newHomeFolder = new DirectoryInfo(Path.Combine(newHome, ".dotnet"));
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
+
+            var command = new DotnetCommand()
+                .WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = newHome;
+            command.Environment["USERPROFILE"] = newHome;
+            command.Environment["APPDATA"] = newHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            var result = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
+
+            result.StdOut
+                .Should()
+                .ContainVisuallySameFragment(Configurer.LocalizableStrings.AspNetCertificateInstalled);
+        }
+
+        [LinuxOnlyFact]
+        public void ItCreatesTheProfileFileOnLinuxWhenInvokedFromNativeInstaller()
+        {
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var profiled = Path.Combine(_testDirectory, "profile.d");
+
+            var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = emptyHome;
+            command.Environment["USERPROFILE"] = emptyHome;
+            command.Environment["APPDATA"] = emptyHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
+            command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            File.Exists(profiled).Should().BeTrue();
+            File.ReadAllText(profiled).Should().Be(
+                $"export PATH=\"$PATH:{new CliFolderPathCalculator().ToolsShimPathInUnix.PathWithDollar}\"");
+        }
+
+        [MacOsOnlyFact]
+        public void ItCreatesThePathDFileOnMacOSWhenInvokedFromNativeInstaller()
+        {
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+            var pathsd = Path.Combine(_testDirectory, "paths.d");
+
+            var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = emptyHome;
+            command.Environment["USERPROFILE"] = emptyHome;
+            command.Environment["APPDATA"] = emptyHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
+            command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            File.Exists(pathsd).Should().BeTrue();
+            File.ReadAllText(pathsd).Should().Be(new CliFolderPathCalculator().ToolsShimPathInUnix.PathWithTilde);
         }
 
         [Fact]

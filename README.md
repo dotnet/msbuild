@@ -13,7 +13,7 @@ If you are looking for the latest nightly of the .NET Core SDK, see https://gith
 
 Found an issue?
 ---------------
-You can consult the [Documents Index](Documentation/README.md) to find out the current issues and to see the workarounds.  
+You can consult the [Documents Index](Documentation/README.md) to find out the current issues and to see the workarounds.
 
 If you don't find your issue, please file one! However, given that this is a very high-frequency repo, we've setup some [basic guidelines](Documentation/project-docs/issue-filing-guide.md) to help you. Please consult those first.
 
@@ -21,11 +21,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 
 Build Status
 ------------
-
 |Windows x64 |
 |:------:|
 |[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7716/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7716)|
-
 
 Basic usage
 -----------

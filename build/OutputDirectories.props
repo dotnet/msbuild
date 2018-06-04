@@ -14,19 +14,17 @@
       <CliOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</CliOutputDirectory>
       <SdkOutputDirectory>$(BaseOutputDirectory)/dotnet</SdkOutputDirectory>
       <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
-      <CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
+      <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
-      <!-- The 'AspNetRuntimePackageStorePublishDirectory' needs to be very short due to path length constraints on Win8.1 -->
-      <AspNetRuntimePackageStorePublishDirectory>$(BaseOutputDirectory)/AspRT</AspNetRuntimePackageStorePublishDirectory>
-      <TestOutputDir>$(BaseOutputDirectory)/testpackages/</TestOutputDir>
+      <AspNetCoreSharedFxPublishDirectory>$(IntermediateDirectory)/aspnetSharedFxPublish</AspNetCoreSharedFxPublishDirectory>
+      <TestOutputDir>$(BaseOutputDirectory)/test/</TestOutputDir>
       <DotnetInOutputDirectory>$(BaseOutputDirectory)/dotnet/dotnet$(ExeExtension)</DotnetInOutputDirectory>
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
       <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
       <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
       <DotNetCoreSdkLKGPublishDirectory>$(IntermediateDirectory)/SdkLKG</DotNetCoreSdkLKGPublishDirectory>
-    
       <NextStagePropsPath>$(BaseOutputDirectory)/PreviousStage.props</NextStagePropsPath>
   </PropertyGroup>
 </Project>

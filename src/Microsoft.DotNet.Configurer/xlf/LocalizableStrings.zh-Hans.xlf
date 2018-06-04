@@ -5,22 +5,24 @@
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
---------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">欢迎使用 .NET Core!
 ---------------------
-若要详细了解 .NET Core，请访问 https://aka.ms/dotnet-docs。使用 dotnet --help 查看可用的命令或转到 https://aka.ms/dotnet-cli-docs。
+若要详细了解 NET Core: https://aka.ms/dotnet-docs
+请使用 “dotnet --help”查看可用的命令或访问: https://aka.ms/dotnet-cli-docs
 
 遥测
---------------
-.NET Core 收集使用情况数据，以便改善用户体验。数据是匿名的且不包含命令行参数。数据由 Microsoft 收集，并与社区共享。
-可选择使用你最喜爱的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 1，从而退出遥测。
-若要深入了解 .NET Core 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry。</target>
+---------
+.NET Core 工具收集用法数据，以便帮助改善用户体验。数据是匿名的，且不包括命令行参数。数据由 Microsoft 收集并与社区共享。可使用喜欢的 shell 将环境变量 DOTNET_CLI_TELEMETRY_OPTOUT 设置为 “1” 或 “true”，从而选择推出遥测。
+
+若要深入了解 .NET Core CLI 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -30,18 +32,18 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">正在配置...
--------------------
-正在运行一项命令，以初步填充本地包缓存，从而提高还原速度并启用脱机访问。此命令最长需要一分钟才能完成，且仅可运行一次。</target>
+--------------
+正在运行一项命令来填充本地包缓存，进而加快还原速度并实现脱机访问。此命令最多需要一分钟即可完成且仅运行一次。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -49,11 +51,24 @@ Here are some options to fix this error:
         <target state="translated">修改“{0}”文件夹的权限被拒绝。
 
 以下是修复该错误的选项:
----------------------
+----------------------------------------
 1. 以提升的访问权限重新运行该命令。
 2. 通过将环境变量 DOTNET_SKIP_FIRST_TIME_EXPERIENCE 设置为 true，禁用首次运行体验。
 3. 将 .NET Core SDK 复制到未受保护的位置并从该位置使用。
     </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AspNetCertificateInstalled">
+        <source>ASP.NET Core
+------------
+Successfully installed the ASP.NET Core HTTPS Development Certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
+For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
+        <target state="needs-review-translation">ASP.NET Core
+------------
+已成功安装 ASP.NET Core HTTPS 开发证书。
+要信任证书(仅限 Windows 和 macOS)，请首先通过运行 "dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final" 安装 dev-certs 工具，然后运行 "dotnet-dev-certs https --trust"。
+有关配置 HTTPS 的详细信息，请参阅 https://go.microsoft.com/fwlink/?linkid=848054。</target>
         <note />
       </trans-unit>
     </body>

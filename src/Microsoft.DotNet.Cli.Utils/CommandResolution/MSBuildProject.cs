@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             _projectRoot = msBuildExePath;
 
-            var globalProperties = new Dictionary<string, string>()
+            var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                { "MSBuildExtensionsPath", Path.GetDirectoryName(msBuildExePath) }
             };

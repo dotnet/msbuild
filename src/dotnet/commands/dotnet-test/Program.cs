@@ -30,9 +30,10 @@ namespace Microsoft.DotNet.Tools.Test
         {
             var msbuildArgs = new List<string>()
             {
-                "/t:VSTest",
-                "/v:quiet",
-                "/nologo"
+                "-target:VSTest",
+                "-verbosity:quiet",
+                "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
+                "-nologo"
             };
 
             var parser = Parser.Instance;
@@ -56,21 +57,20 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 var runSettingsArg = string.Join(";", runSettingsOptions);
 
-                msbuildArgs.Add($"/p:VSTestCLIRunSettings=\"{runSettingsArg}\"");
+                msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
-            var verbosityArg = msbuildArgs.LastOrDefault(arg => arg.StartsWith("/verbosity"));
-
-            if (!string.IsNullOrEmpty(verbosityArg))
+            var verbosityArg = parsedTest.ForwardedOptionValues("verbosity").SingleOrDefault();
+            if (verbosityArg != null)
             {
-                var verbosity = verbosityArg.Split(':');
+                var verbosity = verbosityArg.Split(':', 2);
                 if (verbosity.Length == 2)
                 {
-                    msbuildArgs.Add($"/p:VSTestVerbosity={verbosity[1]}");
+                    msbuildArgs.Add($"-property:VSTestVerbosity={verbosity[1]}");
                 }
             }
 
-            bool noRestore = parsedTest.HasOption("--no-restore");
+            bool noRestore = parsedTest.HasOption("--no-restore") || parsedTest.HasOption("--no-build");
 
             return new TestCommand(
                 msbuildArgs,
@@ -95,7 +95,23 @@ namespace Microsoft.DotNet.Tools.Test
                 return e.ExitCode;
             }
 
-            return cmd.Execute();
+            // Workaround for https://github.com/Microsoft/vstest/issues/1503
+            const string NodeWindowEnvironmentName = "MSBUILDENSURESTDOUTFORTASKPROCESSES";
+            string previousNodeWindowSetting = Environment.GetEnvironmentVariable(NodeWindowEnvironmentName);
+
+            int result = -1;
+
+            try
+            {
+                Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, "1");
+                result = cmd.Execute();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, previousNodeWindowSetting);
+            }
+
+            return result;
         }
 
         private static string GetSemiColonEscapedString(string arg)
@@ -106,19 +122,6 @@ namespace Microsoft.DotNet.Tools.Test
             }
 
             return arg;
-        }
-
-        private static string[] GetSemiColonEscapedArgs(List<string> args)
-        {
-            int counter = 0;
-            string[] array = new string[args.Count];
-
-            foreach (string arg in args)
-            {
-                array[counter++] = GetSemiColonEscapedString(arg);
-            }
-
-            return array;
         }
 
         private static void UpdateRunSettingsArgumentsText()

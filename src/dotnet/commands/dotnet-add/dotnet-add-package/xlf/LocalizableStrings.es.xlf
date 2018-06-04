@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Package reference Command</source>
-        <target state="translated">Comando de .NET para agregar referencia de paquete</target>
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="needs-review-translation">Comando de .NET para agregar referencia de paquete</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -75,6 +75,11 @@
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
         <target state="translated">PACKAGE_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDGFileIOException">
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
+        <target state="translated">No se puede generar un archivo temporal para el proyecto "{0}". No se puede agregar la referencia del paquete. Borre el directorio temporal e inténtelo de nuevo.</target>
         <note />
       </trans-unit>
     </body>

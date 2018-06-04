@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
@@ -62,7 +62,7 @@
         <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
       </MSBuildExtensionsContent>
     </ItemGroup>
-    
+
     <Copy SourceFiles="@(MSBuildExtensionsContent)"
           DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
   </Target>
@@ -107,12 +107,13 @@
   <Target Name="SeparateSymbolsFromPublishDir"
           AfterTargets="PublishMSBuildExtensions"
           Condition="'$(SeparateSymbolsArchive)' != 'false'">
+
     <ItemGroup>
       <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
       <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Move SourceFiles="@(PdbsToMove)" 
+    <Move SourceFiles="@(PdbsToMove)"
           DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

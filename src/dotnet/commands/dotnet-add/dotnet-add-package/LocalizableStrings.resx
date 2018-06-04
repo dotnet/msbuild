@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppFullName" xml:space="preserve">
-    <value>.NET Add Package reference Command</value>
+    <value>Add a NuGet package reference to the project.</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Command to add package reference</value>
@@ -161,5 +161,8 @@
   </data>
   <data name="CmdPackageDirectory" xml:space="preserve">
     <value>PACKAGE_DIRECTORY</value>
+  </data>
+  <data name="CmdDGFileIOException" xml:space="preserve">
+    <value>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</value>
   </data>
 </root>

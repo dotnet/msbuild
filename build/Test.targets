@@ -11,10 +11,11 @@
     <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
+    <RoslynDirectory>$(SdkOutputDirectory)/sdk/$(SdkVersion)/Roslyn</RoslynDirectory>
   </PropertyGroup>
 
   <Target Name="Test"
-          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
+          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' And !$(Architecture.StartsWith('arm')) "
           DependsOnTargets="BuildTests;">
 
     <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->
@@ -36,35 +37,6 @@
       </ProjectsToTest>
     </ItemGroup>
 
-    <!-- Begin Workaround lack of a stable package version for depedencies; copy into simulated stable version folders -->
- 
-    <PropertyGroup>
-        <StableSharedFrameworkDirectory>$(OutputDirectory)/shared/Microsoft.NETCore.App/$(SharedFrameworkStableVersion)</StableSharedFrameworkDirectory>
-        <StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes>$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/shared/Microsoft.NETCore.App/$(SharedFrameworkStableVersion)</StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes>
-    </PropertyGroup>
-
-    <ItemGroup>  
-        <Stabilize_SourceFiles_2_0 Include="$(OutputDirectory)/shared/Microsoft.NETCore.App/$(MicrosoftNETCoreAppPackageVersion)/*.*"/>
-        <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-                                          Include="$(StableSharedFrameworkDirectory)" />
-        <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-                                          Include="$(StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes)" />
-    </ItemGroup>
-
-    <Copy
-        Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-        SourceFiles="@(Stabilize_SourceFiles_2_0)"
-        DestinationFiles="@(Stabilize_SourceFiles_2_0->'$(StableSharedFrameworkDirectory)/%(RecursiveDir)%(Filename)%(Extension)')"
-    />
-
-    <Copy
-        Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-        SourceFiles="@(Stabilize_SourceFiles_2_0)"
-        DestinationFiles="@(Stabilize_SourceFiles_2_0->'$(StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes)/%(RecursiveDir)%(Filename)%(Extension)')"
-    />
- 
-    <!-- End Workaround lack of a stable package version for depedencies; copy into simulated stable versions -->
-
     <Message Text="Starting test execution" Importance="High" />
   
     <MSBuild
@@ -72,13 +44,9 @@
       Projects="@(ProjectsToTest)">
     </MSBuild>
 
+    <Exec Command="$(DotnetInOutputDirectory) exec $(RoslynDirectory)/bincore/VBCSCompiler.dll -shutdown" />
+
     <Message Text="Finished test execution" Importance="High" />
-
-    <!-- Begin Workaround lack of a stable package version for depedencies; remove simulated stable version folder. -->
-
-    <RemoveDir Directories="@(SimulatedStableSharedFrameworkDirectories)" />
- 
-    <!-- End Workaround lack of a stable package version for depedencies; remove simulated stable version folder. -->
   </Target>
 
   <Target Name="PrepareTests"
@@ -91,6 +59,7 @@
   <Target Name="RestoreTests"
           DependsOnTargets="PrepareTests;
                             CreateTestAssetPackageNuPkgs;">
+
     <DotNetRestore ToolPath="$(SdkOutputDirectory)"
                    ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
                    AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)" />
@@ -120,7 +89,6 @@
                 ToolPath="$(SdkOutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
-
   </Target>
 
   <Target Name="EnsureStageSeparation">
