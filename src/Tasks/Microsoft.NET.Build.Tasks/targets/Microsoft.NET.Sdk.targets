@@ -351,8 +351,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <_FrameworkReferenceAssemblies Include="@(ReferencePath)"
-                                     Condition="%(ReferencePath.FrameworkFile) == 'true' or
-                                                %(ReferencePath.ResolvedFrom) == 'ImplicitlyExpandDesignTimeFacades'" />
+                                     Condition="(%(ReferencePath.FrameworkFile) == 'true' or
+                                                %(ReferencePath.ResolvedFrom) == 'ImplicitlyExpandDesignTimeFacades')
+                                            and ('%(ReferencePath.NuGetSourceType)' == ''  or
+                                                 '%(ReferencePath.NuGetIsFrameworkReference)' == 'true')" />
 
       <!--
       "ReferenceOnly" assemblies are assemblies that are only used at compile-time, and they can't be resolved
