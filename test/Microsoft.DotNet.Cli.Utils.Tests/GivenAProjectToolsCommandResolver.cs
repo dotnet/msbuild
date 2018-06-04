@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tests
     public class GivenAProjectToolsCommandResolver : TestBase
     {
         private static readonly NuGetFramework s_toolPackageFramework =
-            NuGetFrameworks.NetCoreApp21;
+            NuGetFrameworks.NetCoreApp22;
 
         private const string TestProjectName = "AppWithToolDependency";
 
@@ -304,7 +304,7 @@ namespace Microsoft.DotNet.Tests
 
             result.Should().NotBeNull();
 
-            result.Args.Should().Contain("--fx-version 2.1.0");
+            result.Args.Should().Contain("--fx-version 2.2.0");
         }
 
         [Fact]
@@ -370,7 +370,7 @@ namespace Microsoft.DotNet.Tests
                 "dotnet-fallbackfoldertool",
                 "1.0.0",
                 "lib",
-                "netcoreapp2.1",
+                "netcoreapp2.2",
                 "dotnet-fallbackfoldertool.dll"));
         }
 
