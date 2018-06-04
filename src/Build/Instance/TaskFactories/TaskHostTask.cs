@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The wrapper task for tasks that wish to take advantage of the 
-// task host factory feature.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

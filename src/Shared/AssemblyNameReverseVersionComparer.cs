@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Compare the version numbers only for an AssemblyNameExtension and make sure they are in reverse order. This assumes the names are the same.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Reflection;

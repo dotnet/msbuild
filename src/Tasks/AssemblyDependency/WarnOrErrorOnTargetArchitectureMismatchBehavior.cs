@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Should a warning or error or nothing be emitted when there is a architecture mismatch</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Resources;

@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// <copyright file="GetReferenceAssemblyPaths_Tests.cs" company="Microsoft">
-// </copyright>
-// <summary>Tests for the task which gets the reference assembly paths for a given target framework version / moniker.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The location something in the registry</summary>
-//-----------------------------------------------------------------------
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;

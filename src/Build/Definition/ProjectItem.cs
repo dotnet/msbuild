@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Represents an evaluated item with a link to its source in the project file.</summary>
-//-----------------------------------------------------------------------
 
 using System.Diagnostics;
 using Microsoft.Build.Collections;

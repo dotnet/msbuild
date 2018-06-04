@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
-// <summary>Describes a remapping entry pair</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Shared;

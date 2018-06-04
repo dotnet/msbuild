@@ -1,12 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>
-// A custom string comparer restricted to valid item/property names and with the
-// ability to work on an indexed substring.
-// </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

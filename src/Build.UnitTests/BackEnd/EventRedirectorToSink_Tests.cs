@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Verify the event redirector to sink properly forwards message to the attached sink</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Framework;

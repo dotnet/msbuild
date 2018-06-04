@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The host allows task factories access to method to allow them to log message during the construction of the task factories.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Framework;

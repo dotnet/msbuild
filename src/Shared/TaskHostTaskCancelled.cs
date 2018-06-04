@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A packet which informs the task host that the task it is 
-// currently executing has been canceled.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

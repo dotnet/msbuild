@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary> Represents the schema of an enumeration property. </summary>
-//-----------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

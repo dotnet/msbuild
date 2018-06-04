@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A base class providing type-safe methods of logging in various contexts.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

@@ -1,13 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//-----------------------------------------------------------------------
-// <copyright file="UsingTask_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// <summary>Baseline Regression Tests for v9 OM Public Interface Compatibility: UsingTask Class</summary>
-//-----------------------------------------------------------------------
-
 using System;
 using System.IO;
 using System.Xml;

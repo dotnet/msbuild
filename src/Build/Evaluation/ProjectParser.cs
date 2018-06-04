@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Parses a project from raw XML into strongly typed objects</summary>
-//-----------------------------------------------------------------------
 
 using Microsoft.Build.Shared;
 using System;

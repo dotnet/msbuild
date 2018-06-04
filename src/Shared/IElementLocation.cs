@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An internal interface used to represent element locations for run-time error reporting.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Framework;

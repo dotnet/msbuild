@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Entry point class for MSBuildTaskHost.exe, which serves as the 
-// task host executable for CLR 2 tasks.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

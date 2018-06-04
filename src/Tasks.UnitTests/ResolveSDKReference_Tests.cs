@@ -1,10 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// <copyright file="ResolveSDKReferences_Tests.cs" company="Microsoft">
-// </copyright>
-// <summary>Tests for the task that resolves an SDKReference to a full path on disk</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

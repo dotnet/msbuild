@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A hack (leaking into public API) to prevent a certain case of Jitting in our NGen'd assemblies.</summary>
-//-----------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Construction;

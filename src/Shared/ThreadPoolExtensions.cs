@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Make an extension to the threadpool class to allow the setting of culture on queued work item.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Globalization;

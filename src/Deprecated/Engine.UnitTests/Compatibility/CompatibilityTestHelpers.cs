@@ -1,13 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//-----------------------------------------------------------------------
-// <copyright file="CompatibilityTestHelpers.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// <summary>Helper Methods for v9 OM Public Interface Compatibility Tests </summary>
-//-----------------------------------------------------------------------
-
 using System.Collections.Generic;
 using System;
 using System.IO;

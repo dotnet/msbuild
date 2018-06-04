@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// Copyright (c) 2015 All Right Reserved
-// </copyright>
-// <date>2008-12-28</date>
-// <summary>The unit tests for XslTransformation buildtask.</summary>
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;

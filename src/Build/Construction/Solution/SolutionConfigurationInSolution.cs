@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Represents a solution configuration (e.g. "Debug|x86")</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Globalization;

@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// Cache file state over file name.
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;

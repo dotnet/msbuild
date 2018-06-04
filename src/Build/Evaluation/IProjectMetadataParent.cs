@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface for the parent of a ProjectMetadata object.</summary>
-//-----------------------------------------------------------------------
 
 namespace Microsoft.Build.Evaluation
 {

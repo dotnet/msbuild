@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for the task that resolves an FindInvalidProjectReferences to a full path on disk</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;

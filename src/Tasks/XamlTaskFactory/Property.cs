@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary> Property description class for the XamlTaskFactory parser. </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

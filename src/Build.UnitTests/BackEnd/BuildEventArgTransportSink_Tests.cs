@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Transport sink correctly takes a buildEventArg and sends to the transport layer</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Framework;

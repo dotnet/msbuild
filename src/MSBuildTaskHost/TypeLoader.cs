@@ -1,10 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Determines if a type is in a given assembly and loads that type. 
-// This version is CLR 3.5-compatible.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
