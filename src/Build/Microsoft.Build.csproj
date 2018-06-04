@@ -60,29 +60,8 @@
        
        After retargeting to .NET Standard 2.0, many of these can probably be removed -->
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="..\Shared\Compat\Base64Encoder.cs">
-      <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\BinHexEncoder.cs">
-      <Link>SharedUtilities\Compat\BinHexEncoder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
-      <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Compat\TypeExtensions.cs">
       <Link>SharedUtilities\Compat\TypeExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\ValidateNames.cs">
-      <Link>SharedUtilities\Compat\ValidateNames.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlCharType.cs">
-      <Link>SharedUtilities\Compat\XmlCharType.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlReservedNs.cs">
-      <Link>SharedUtilities\Compat\XmlReservedNs.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\XmlTextEncoder.cs">
-      <Link>SharedUtilities\Compat\XmlTextEncoder.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Compat\defaultbinder.cs">
       <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
