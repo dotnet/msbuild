@@ -6,7 +6,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
     <DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>

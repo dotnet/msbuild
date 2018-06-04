@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput(
-                    $"-d dependency-tool-invoker -c {configuration} -f netcoreapp2.1 portable")
+                    $"-d dependency-tool-invoker -c {configuration} -f netcoreapp2.2 portable")
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello Portable World!");;
         }
