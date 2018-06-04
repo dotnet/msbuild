@@ -54,19 +54,6 @@
     <PackageReference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
 
-  <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
-       The code here was generally copied from the .NET Framework reference source and
-       modified to compile for .NET Core.
-       
-       After retargeting to .NET Standard 2.0, many of these can probably be removed -->
-  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="..\Shared\Compat\TypeExtensions.cs">
-      <Link>SharedUtilities\Compat\TypeExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\defaultbinder.cs">
-      <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared\BinaryWriterExtensions.cs" Link="BinaryWriterExtensions.cs" />
     <Compile Include="..\Shared\EncodingUtilities.cs">
