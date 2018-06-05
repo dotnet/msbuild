@@ -89,7 +89,7 @@
   </Target>
 
   <Target Name="TestsForBuildItself">
-    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/test/MsBuildScript.Tests/runtests.target"
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/test/MsBuildScript.Tests/runtests.target /p:PB_AssetRootUrl=$(PB_AssetRootUrl)"
                    ToolPath="$(PreviousStageDirectory)" />
   </Target>
 
