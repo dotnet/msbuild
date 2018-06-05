@@ -306,40 +306,33 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         public void ForceOutOfDate()
         {
             var folder = _env.CreateFolder();
-            string resxFile = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
+            string resxFileInput = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
 
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(_env.GetTempFile(".cache").Path);
-            t.Sources = new ITaskItem[] {new TaskItem(resxFile)};
+            t.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
 
             Utilities.ExecuteTask(t);
 
-            string resourcesFile = t.OutputResources[0].ItemSpec;
-            Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
-            resourcesFile = t.FilesWritten[0].ItemSpec;
-            Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+            t.OutputResources.Length.ShouldBe(1);
+            var resourceOutput = t.OutputResources[0].ItemSpec;
+            Path.GetExtension(resourceOutput).ShouldBe(".resources");
+            Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
 
 #if FEATURE_RESGENCACHE
-                Utilities.AssertStateFileWasWritten(t);
+            Utilities.AssertStateFileWasWritten(t);
 #endif
+
             GenerateResource t2 = Utilities.CreateTask(_output);
             t2.StateFile = new TaskItem(t.StateFile);
-            t2.Sources = new ITaskItem[] {new TaskItem(resxFile)};
+            t2.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
 
-            DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-
-            System.Threading.Thread.Sleep(200);
-            if (NativeMethodsShared.IsOSX)
-            {
-                // Must be > 1 sec for HFS+ timestamp granularity
-                System.Threading.Thread.Sleep(1100);
-            }
-
-            File.SetLastWriteTime(resxFile, DateTime.Now);
-
+            // Execute the task again when the input (5m ago) is newer than the previous outputs (10m ago)
+            File.SetLastWriteTime(resxFileInput, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)));
+            File.SetLastWriteTime(resourceOutput, DateTime.Now.Subtract(TimeSpan.FromMinutes(10)));
             Utilities.ExecuteTask(t2);
 
-            Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+            File.GetLastAccessTime(t2.OutputResources[0].ItemSpec).ShouldBe(DateTime.Now, TimeSpan.FromSeconds(5));
         }
 
         /// <summary>

@@ -2331,6 +2331,7 @@
 
  <!--
         MSB3751 - MSB3761   Task: CodeTaskFactory
+        MSB3911 - MSB3920   Task: CodeTaskFactory
         CodeTaskFactory Exception messagse
         If this bucket overflows, pls. contact 'vsppbdev'.
  -->
@@ -2342,6 +2343,10 @@
     <value>MSB3752: The "{0}" attribute has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
     <comment>{StrBegin="MSB3752: "}</comment>
   </data>
+  <data name="CodeTaskFactory.AttributeEmptyWithElement" xml:space="preserve">
+    <value>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
+    <comment>{StrBegin="MSB3752: "}</comment>
+  </data>
   <data name="CodeTaskFactory.NeedsITaskInterface" xml:space="preserve">
     <value>MSB3753: The task could not be instantiated because it does not implement the ITask interface. Make sure the task implements the Microsoft.Build.Framework.ITask interface.</value>
     <comment>{StrBegin="MSB3753: "}</comment>
@@ -2351,15 +2356,15 @@
     <comment>{StrBegin="MSB3754: "}</comment>
   </data>
   <data name="CodeTaskFactory.CouldNotFindReferenceAssembly" xml:space="preserve">
-    <value>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors."</value>
+    <value>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</value>
     <comment>{StrBegin="MSB3755: "}</comment>
   </data>
   <data name="CodeTaskFactory.InvalidElementLocation" xml:space="preserve">
-    <value>MSB3756: The xml element "{0}" is not valid under the xml element "{1}".</value>
+    <value>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</value>
     <comment>{StrBegin="MSB3756: "}</comment>
   </data>
   <data name="CodeTaskFactory.MultipleCodeNodes" xml:space="preserve">
-    <value>MSB3757: Multiple Code xml elements have been found, this is not allowed. To fix this issue remove any additional Code xml elements from the task.</value>
+    <value>MSB3757: Only one &lt;Code&gt; element can be specified.</value>
     <comment>{StrBegin="MSB3757: "}</comment>
   </data>
   <data name="CodeTaskFactory.CompilerError" xml:space="preserve">
@@ -2375,7 +2380,29 @@
   <data name="CodeTaskFactory.HaveReflectionOnlyAssembly" xml:space="preserve">
     <value>The reference assembly "{0}" is a metadata only assembly.</value>
   </data>
-
+  <data name="CodeTaskFactory.InvalidCodeType" xml:space="preserve">
+    <value>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</value>
+    <comment>{StrBegin="MSB3759: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.InvalidCodeLanguage" xml:space="preserve">
+    <value>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</value>
+    <comment>{StrBegin="MSB3759: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.NoSourceCode" xml:space="preserve">
+    <value>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</value>
+    <comment>{StrBegin="MSB3760: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.CompilingAssembly" xml:space="preserve">
+    <value>Compiling task source code</value>
+  </data>
+  <data name="CodeTaskFactory.InvalidTaskXml" xml:space="preserve">
+    <value>MSB3761: The specified task XML is invalid.  {0}</value>
+    <comment>{StrBegin="MSB3761: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.InvalidCodeElementAttribute" xml:space="preserve">
+    <value>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</value>
+    <comment>{StrBegin="MSB3756: "}</comment>
+  </data>
   <!--
         MSB3773 - MSB3783   Task: ResolveSDKReference
         MSB3841 - MSB3850   
@@ -2637,6 +2664,87 @@
     <value>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</value>
     <comment>{StrBegin="MSB4801: "}</comment>
   </data>
+
+  <!--
+        MSB3921 - MSB3930   Task: DownloadFile
+  -->
+  <data name="DownloadFile.ErrorInvalidUrl" xml:space="preserve">
+    <value>MSB3921: The specified URL "{0}" is not valid.</value>
+    <comment>{StrBegin="MSB3921: "}</comment>
+  </data>
+  <data name="DownloadFile.ErrorUnknownFileName" xml:space="preserve">
+    <value>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</value>
+    <comment>{StrBegin="MSB3922: "}</comment>
+  </data>
+  <data name="DownloadFile.ErrorDownloading" xml:space="preserve">
+    <value>MSB3923: Failed to download file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB3923: "}</comment>
+  </data>
+  <data name="DownloadFile.Retrying" xml:space="preserve">
+    <value>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</value>
+    <comment>{StrBegin="MSB3924: "}</comment>
+  </data>
+  <data name="DownloadFile.DidNotDownloadBecauseOfFileMatch">
+    <value>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</value>
+  </data>
+  <data name="DownloadFile.Downloading">
+    <value>Downloading from "{0}" to "{1}" ({2:N0} bytes).</value>
+  </data>
+
+  <!--
+        MSB3931 - MSB3940   Task: Unzip
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Unzip.ErrorCouldNotCreateDestinationDirectory">
+    <value>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</value>
+    <comment>{StrBegin="MSB3931: "}</comment>
+  </data>
+  <data name="Unzip.ErrorFileDoesNotExist">
+    <value>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3932: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotOpenFile">
+    <value>MSB3933: Failed to open zip file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB3933: "}</comment>
+  </data>
+  <data name="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+    <value>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</value>
+    <comment>{StrBegin="MSB3934: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotMakeFileWriteable">
+    <value>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</value>
+    <comment>{StrBegin="MSB3935: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotExtractFile">
+    <value>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</value>
+    <comment>{StrBegin="MSB3936: "}</comment>
+  </data>
+  <data name="Unzip.DidNotUnzipBecauseOfFileMatch">
+    <value>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
+  </data>
+  <data name="Unzip.FileComment">
+    <value>Unzipping file "{0}" to "{1}".</value>
+  </data>
+
+  <!--
+        MSB3941 - MSB3950   Task: ZipDirectory
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ZipDirectory.ErrorDirectoryDoesNotExist">
+    <value>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3941: "}</comment>
+  </data>
+  <data name="ZipDirectory.ErrorFileExists">
+    <value>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</value>
+    <comment>{StrBegin="MSB3942: "}</comment>
+  </data>
+  <data name="ZipDirectory.ErrorFailed">
+    <value>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</value>
+    <comment>{StrBegin="MSB3943: "}</comment>
+  </data>
+  <data name="ZipDirectory.Comment">
+    <value>Zipping directory "{0}" to "{1}".</value>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -2715,6 +2823,10 @@
             MSB3881 - MSB3890   Task: Compiler
             MSB3891 - MSB3900   Overflow: Copy
             MSB3901 - MSB3910   Task: Telemetry
+            MSB3911 - MSB3920   Task: CodeTaskFactory
+            MSB3921 - MSB3930   Task: DownloadFile
+            MSB3931 - MSB3940   Task: Unzip
+            MSB3941 - MSB3950   Task: ZipDirectory
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

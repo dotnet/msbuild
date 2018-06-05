@@ -19,13 +19,11 @@
   </PropertyGroup>
 
   <Import Project="build\NuGet.props"/>
-  <Import Project="build\Versions.props"/>
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <RepoToolsetDir>$(NuGetPackageRoot)roslyntools.repotoolset\$(RoslynToolsRepoToolsetVersion)\tools\</RepoToolsetDir>
     <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
 
     <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\</DOTNET_INSTALL_DIR>

@@ -28,7 +28,9 @@ namespace Microsoft.Build.Logging
         //   - new EvaluationFinished.ProfilerResult
         // version 6:
         //   -  Ids and parent ids for the evaluation locations
-        internal const int FileFormatVersion = 6;
+        // version 7:
+        //   -  Include ProjectStartedEventArgs.GlobalProperties
+        internal const int FileFormatVersion = 7;
 
         private Stream stream;
         private BinaryWriter binaryWriter;

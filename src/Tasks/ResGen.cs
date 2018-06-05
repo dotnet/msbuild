@@ -99,8 +99,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public ITaskItem[] InputFiles
             {
-                get { return (ITaskItem[])Bag["InputFiles"]; }
-                set { Bag["InputFiles"] = value; }
+                get => (ITaskItem[])Bag[nameof(InputFiles)];
+                set => Bag[nameof(InputFiles)] = value;
             }
 
             /// <summary>
@@ -111,8 +111,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public ITaskItem[] OutputFiles
             {
-                get { return (ITaskItem[])Bag["OutputFiles"]; }
-                set { Bag["OutputFiles"] = value; }
+                get => (ITaskItem[])Bag[nameof(OutputFiles)];
+                set => Bag[nameof(OutputFiles)] = value;
             }
 
             /// <summary>
@@ -121,8 +121,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool PublicClass
             {
-                get { return GetBoolParameterWithDefault("PublicClass", false); }
-                set { Bag["PublicClass"] = value; }
+                get => GetBoolParameterWithDefault(nameof(PublicClass), false);
+                set => Bag[nameof(PublicClass)] = value;
             }
 
             /// <summary>
@@ -130,8 +130,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public ITaskItem[] References
             {
-                get { return (ITaskItem[])Bag["References"]; }
-                set { Bag["References"] = value; }
+                get => (ITaskItem[])Bag[nameof(References)];
+                set => Bag[nameof(References)] = value;
             }
 
             /// <summary>
@@ -139,8 +139,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string SdkToolsPath
             {
-                get { return (string)Bag["SdkToolsPath"]; }
-                set { Bag["SdkToolsPath"] = value; }
+                get => (string)Bag[nameof(SdkToolsPath)];
+                set => Bag[nameof(SdkToolsPath)] = value;
             }
 
             /// <summary>
@@ -149,8 +149,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string StronglyTypedLanguage
             {
-                get { return (string)Bag["StronglyTypedLanguage"]; }
-                set { Bag["StronglyTypedLanguage"] = value; }
+                get => (string)Bag[nameof(StronglyTypedLanguage)];
+                set => Bag[nameof(StronglyTypedLanguage)] = value;
             }
 
             /// <summary>
@@ -159,8 +159,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string StronglyTypedNamespace
             {
-                get { return (string)Bag["StronglyTypedNamespace"]; }
-                set { Bag["StronglyTypedNamespace"] = value; }
+                get => (string)Bag[nameof(StronglyTypedNamespace)];
+                set => Bag[nameof(StronglyTypedNamespace)] = value;
             }
 
             /// <summary>
@@ -169,8 +169,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string StronglyTypedClassName
             {
-                get { return (string)Bag["StronglyTypedClassName"]; }
-                set { Bag["StronglyTypedClassName"] = value; }
+                get => (string)Bag[nameof(StronglyTypedClassName)];
+                set => Bag[nameof(StronglyTypedClassName)] = value;
             }
 
             /// <summary>
@@ -179,8 +179,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string StronglyTypedFileName
             {
-                get { return (string)Bag["StronglyTypedFileName"]; }
-                set { Bag["StronglyTypedFileName"] = value; }
+                get => (string)Bag[nameof(StronglyTypedFileName)];
+                set => Bag[nameof(StronglyTypedFileName)] = value;
             }
 
             /// <summary>
@@ -189,8 +189,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool UseSourcePath
             {
-                get { return GetBoolParameterWithDefault("UseSourcePath", false); }
-                set { Bag["UseSourcePath"] = value; }
+                get => GetBoolParameterWithDefault(nameof(UseSourcePath), false);
+                set => Bag[nameof(UseSourcePath)] = value;
             }
 
             #endregion // Properties
@@ -200,13 +200,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Returns the name of the tool to execute
             /// </summary>
-            protected override string ToolName
-            {
-                get
-                {
-                    return "resgen.exe";
-                }
-            }
+            protected override string ToolName => "resgen.exe";
 
             /// <summary>
             /// Tracker.exe wants Unicode response files, and ResGen.exe doesn't care, 
@@ -216,10 +210,7 @@ namespace Microsoft.Build.Tasks
             /// We no longer use Tracker.exe in ResGen, but given that as ResGen doesn't care, 
             /// there doesn't really seem to be a particular reason to change it back, either...
             /// </comment>
-            protected override Encoding ResponseFileEncoding
-            {
-                get { return Encoding.Unicode; }
-            }
+            protected override Encoding ResponseFileEncoding => Encoding.Unicode;
 
             /// <summary>
             /// Invokes the ToolTask with the given parameters
@@ -228,18 +219,18 @@ namespace Microsoft.Build.Tasks
             public override bool Execute()
             {
                 // If there aren't any input resources, well, we've already succeeded!
-                if (ResGen.IsNullOrEmpty(InputFiles))
+                if (IsNullOrEmpty(InputFiles))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "ResGen.NoInputFiles");
                     return !Log.HasLoggedErrors;
                 }
 
-                if (ResGen.IsNullOrEmpty(OutputFiles))
+                if (IsNullOrEmpty(OutputFiles))
                 {
                     GenerateOutputFileNames();
                 }
 
-                bool success = false;
+                bool success;
 
                 // if command line is too long, fail
                 string commandLineCommands = GenerateCommandLineCommands();
@@ -262,8 +253,8 @@ namespace Microsoft.Build.Tasks
                     {
                         // One or more of the generated resources was not, in fact generated --
                         // only keep in OutputFiles the ones that actually exist.
-                        ITaskItem[] outputFiles = this.OutputFiles;
-                        List<ITaskItem> successfullyGenerated = new List<ITaskItem>();
+                        ITaskItem[] outputFiles = OutputFiles;
+                        var successfullyGenerated = new List<ITaskItem>();
 
                         for (int i = 0; i < outputFiles.Length; i++)
                         {
@@ -273,7 +264,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        this.OutputFiles = successfullyGenerated.ToArray();
+                        OutputFiles = successfullyGenerated.ToArray();
                     }
                 }
                 else
@@ -286,7 +277,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (!File.Exists(outputFile.ItemSpec))
                         {
-                            this.OutputFiles = Array.Empty<ITaskItem>();
+                            OutputFiles = Array.Empty<ITaskItem>();
                         }
                     }
 
@@ -299,7 +290,7 @@ namespace Microsoft.Build.Tasks
                     // Default the filename if we need to - regardless of whether the STR was successfully generated
                     if (StronglyTypedFileName == null)
                     {
-                        CodeDomProvider provider = null;
+                        CodeDomProvider provider;
                         try
                         {
                             provider = CodeDomProvider.CreateProvider(StronglyTypedLanguage);
@@ -343,10 +334,11 @@ namespace Microsoft.Build.Tasks
                         ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(
                             "resgen.exe",
                             TargetDotNetFrameworkVersion.Version35),
-                        StringComparison.OrdinalIgnoreCase) && String.IsNullOrEmpty(StronglyTypedLanguage))
+                            StringComparison.OrdinalIgnoreCase)
+                    && String.IsNullOrEmpty(StronglyTypedLanguage))
                 {
                     // 4.0 resgen.exe does support response files, so we can return the resgen arguments here!
-                    CommandLineBuilderExtension resGenArguments = new CommandLineBuilderExtension();
+                    var resGenArguments = new CommandLineBuilderExtension();
                     GenerateResGenCommands(resGenArguments, true /* arguments must be line-delimited */);
 
                     commandLine.AppendTextUnquoted(resGenArguments.ToString());
@@ -369,19 +361,17 @@ namespace Microsoft.Build.Tasks
             /// <param name="commandLine">Gets filled with command line options</param>
             protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
             {
-                ErrorUtilities.VerifyThrow(!ResGen.IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
+                ErrorUtilities.VerifyThrow(!IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
 
-                CommandLineBuilderExtension resGenArguments = new CommandLineBuilderExtension();
+                var resGenArguments = new CommandLineBuilderExtension();
                 GenerateResGenCommands(resGenArguments, false /* don't line-delimit arguments; spaces are just fine */);
 
                 string pathToResGen = GenerateResGenFullPath();
 
-                if (
-                        pathToResGen != null &&
-                        NativeMethodsShared.IsWindows &&
-                        !pathToResGen.Equals(NativeMethodsShared.GetLongFilePath(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35)), StringComparison.OrdinalIgnoreCase) &&
-                        String.IsNullOrEmpty(StronglyTypedLanguage)
-                   )
+                if (pathToResGen != null &&
+                    NativeMethodsShared.IsWindows &&
+                    !pathToResGen.Equals(NativeMethodsShared.GetLongFilePath(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35)), StringComparison.OrdinalIgnoreCase) &&
+                    String.IsNullOrEmpty(StronglyTypedLanguage))
                 {
                     // 4.0 resgen.exe does support response files (at least as long as you're not building an STR), so we can 
                     // make use of them here by returning nothing!
@@ -399,10 +389,8 @@ namespace Microsoft.Build.Tasks
             /// <returns>A string containing the full path of this tool, or null if the tool was not found</returns>
             protected override string GenerateFullPathToTool()
             {
-                string pathToTool = null;
-
                 // Use ToolPath if it exists.
-                pathToTool = GenerateResGenFullPath();
+                string pathToTool = GenerateResGenFullPath();
                 return pathToTool;
             }
 
@@ -412,10 +400,10 @@ namespace Microsoft.Build.Tasks
             /// <returns>True if parameters are valid</returns>
             protected override bool ValidateParameters()
             {
-                ErrorUtilities.VerifyThrow(!ResGen.IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
+                ErrorUtilities.VerifyThrow(!IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
 
                 // make sure that if the output resources were set, they exactly match the number of input sources
-                if (!ResGen.IsNullOrEmpty(OutputFiles) && (OutputFiles.Length != InputFiles.Length))
+                if (!IsNullOrEmpty(OutputFiles) && (OutputFiles.Length != InputFiles.Length))
                 {
                     Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", InputFiles.Length, OutputFiles.Length, "InputFiles", "OutputFiles");
                     return false;
@@ -482,7 +470,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private void GenerateOutputFileNames()
             {
-                ErrorUtilities.VerifyThrow(!ResGen.IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
+                ErrorUtilities.VerifyThrow(!IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
 
                 ITaskItem[] inputFiles = InputFiles;
                 ITaskItem[] outputFiles = new ITaskItem[inputFiles.Length];
@@ -490,9 +478,7 @@ namespace Microsoft.Build.Tasks
                 // Set the default OutputFiles values
                 for (int i = 0; i < inputFiles.Length; i++)
                 {
-                    ITaskItem2 inputFileAsITaskItem2 = inputFiles[i] as ITaskItem2;
-
-                    if (inputFileAsITaskItem2 != null)
+                    if (inputFiles[i] is ITaskItem2 inputFileAsITaskItem2)
                     {
                         outputFiles[i] = new TaskItem(Path.ChangeExtension(inputFileAsITaskItem2.EvaluatedIncludeEscaped, ".resources"));
                     }
@@ -502,7 +488,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                Bag["OutputFiles"] = outputFiles;
+                Bag[nameof(OutputFiles)] = outputFiles;
             }
 
             /// <summary>
@@ -511,11 +497,8 @@ namespace Microsoft.Build.Tasks
             /// <returns>The path to ResGen.exe, or null.</returns>
             private string GenerateResGenFullPath()
             {
-                string pathToTool = null;
-
                 // Use ToolPath if it exists.
-                pathToTool = (string)Bag["ToolPathWithFile"];
-
+                var pathToTool = (string)Bag["ToolPathWithFile"];
                 if (pathToTool == null)
                 {
                     // First see if the user has set ToolPath
@@ -560,7 +543,7 @@ namespace Microsoft.Build.Tasks
             {
                 resGenArguments = resGenArguments ?? new CommandLineBuilderExtension();
 
-                if (ResGen.IsNullOrEmpty(OutputFiles))
+                if (IsNullOrEmpty(OutputFiles))
                 {
                     GenerateOutputFileNames();
                 }
@@ -620,7 +603,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 resGenArguments.AppendFileNamesIfNotNull
                                 (
-                                    new ITaskItem[] { inputFiles[i], outputFiles[i] },
+                                    new[] { inputFiles[i], outputFiles[i] },
                                     ","
                                 );
                             }
@@ -637,7 +620,7 @@ namespace Microsoft.Build.Tasks
                     resGenArguments.AppendSwitchIfNotNull
                     (
                         "/str:",
-                        new string[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
+                        new[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
                         ","
                     );
                 }

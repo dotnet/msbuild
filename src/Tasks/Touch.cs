@@ -17,67 +17,32 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class Touch : TaskExtension
     {
-        private bool _forceTouch;
-        private bool _alwaysCreate;
-        private string _specificTime;
-        private ITaskItem[] _files;
-        private ITaskItem[] _touchedFiles;
+        /// <summary>
+        /// Forces a touch even if the file to be touched is read-only.
+        /// </summary>
+        public bool ForceTouch { get; set; }
 
-        //-----------------------------------------------------------------------------------
-        // Constructor
-        //-----------------------------------------------------------------------------------
-        public Touch()
-        {
-            _alwaysCreate = false;
-            _forceTouch = false;
-        }
+        /// <summary>
+        /// Creates the file if it doesn't exist.
+        /// </summary>
+        public bool AlwaysCreate { get; set; }
 
-        //-----------------------------------------------------------------------------------
-        // Property:  force touch even if the file to be touched is read-only
-        //-----------------------------------------------------------------------------------
-        public bool ForceTouch
-        {
-            get { return _forceTouch; }
-            set { _forceTouch = value; }
-        }
+        /// <summary>
+        /// Specifies a specific time other than current.
+        /// </summary>
+        public string Time { get; set; }
 
-        //-----------------------------------------------------------------------------------
-        // Property:  create the file if it doesn't exist
-        //-----------------------------------------------------------------------------------
-        public bool AlwaysCreate
-        {
-            get { return _alwaysCreate; }
-            set { _alwaysCreate = value; }
-        }
-
-        //-----------------------------------------------------------------------------------
-        // Property:  specifies a specific time other than current 
-        //-----------------------------------------------------------------------------------
-        public string Time
-        {
-            get { return _specificTime; }
-            set { _specificTime = value; }
-        }
-
-        //-----------------------------------------------------------------------------------
-        // Property:  file(s) to touch
-        //-----------------------------------------------------------------------------------
+        /// <summary>
+        /// File(s) to touch.
+        /// </summary>
         [Required]
-        public ITaskItem[] Files
-        {
-            get { return _files; }
-            set { _files = value; }
-        }
+        public ITaskItem[] Files { get; set; }
 
-        //-----------------------------------------------------------------------------------
-        // Output of this task -- which files were touched
-        //-----------------------------------------------------------------------------------
+        /// <summary>
+        /// Output of this task - which files were touched.
+        /// </summary>
         [Output]
-        public ITaskItem[] TouchedFiles
-        {
-            get { return _touchedFiles; }
-            set { _touchedFiles = value; }
-        }
+        public ITaskItem[] TouchedFiles { get; set; }
 
         /// <summary>
         /// Implementation of the execute method.
@@ -91,7 +56,6 @@ namespace Microsoft.Build.Tasks
             SetAttributes fileSetAttributes,
             SetLastAccessTime fileSetLastAccessTime,
             SetLastWriteTime fileSetLastWriteTime
-
         )
         {
             // See what time we are touching all files to
@@ -108,8 +72,8 @@ namespace Microsoft.Build.Tasks
 
             // Go through all files and touch 'em
             bool retVal = true;
-            ArrayList touchedItems = new ArrayList();
-            HashSet<string> touchedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var touchedItems = new ArrayList();
+            var touchedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ITaskItem file in Files)
             {
@@ -134,7 +98,6 @@ namespace Microsoft.Build.Tasks
                         fileSetAttributes,
                         fileSetLastAccessTime,
                         fileSetLastWriteTime
-
                     )
                 )
                 {
@@ -163,12 +126,12 @@ namespace Microsoft.Build.Tasks
         {
             return ExecuteImpl
             (
-                new FileExists(File.Exists),
-                new FileCreate(File.Create),
-                new GetAttributes(File.GetAttributes),
-                new SetAttributes(File.SetAttributes),
-                new SetLastAccessTime(File.SetLastAccessTime),
-                new SetLastWriteTime(File.SetLastWriteTime)
+                File.Exists,
+                File.Create,
+                File.GetAttributes,
+                File.SetAttributes,
+                File.SetLastAccessTime,
+                File.SetLastWriteTime
             );
         }
 
@@ -202,14 +165,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper method touches a file.
         /// </summary>
-        /// <param name="file"></param>
-        /// <param name="dt"></param>
-        /// <param name="fileExists"></param>
-        /// <param name="fileCreate"></param>
-        /// <param name="fileGetAttributes"></param>
-        /// <param name="fileSetAttributes"></param>
-        /// <param name="fileSetLastAccessTime"></param>
-        /// <param name="fileSetLastWriteTime"></param>
         /// <returns>"True" if the file was touched.</returns>
         private bool TouchFile
         (
@@ -307,10 +262,12 @@ namespace Microsoft.Build.Tasks
         {
             // If we have a specified time to which files need to be built then attempt
             // to parse it from the Time property.  Otherwise, we get the current time.
-            if (Time == null || Time.Length == 0)
+            if (string.IsNullOrEmpty(Time))
+            {
                 return DateTime.Now;
-            else
-                return DateTime.Parse(Time, DateTimeFormatInfo.InvariantInfo);
+            }
+
+            return DateTime.Parse(Time, DateTimeFormatInfo.InvariantInfo);
         }
     }
 }

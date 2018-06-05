@@ -24,13 +24,10 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "BuildAssemblyName");
-                Bag["BuildAssemblyName"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(BuildAssemblyName));
+                Bag[nameof(BuildAssemblyName)] = value;
             }
-            get
-            {
-                return (string)Bag["BuildAssemblyName"];
-            }
+            get => (string)Bag[nameof(BuildAssemblyName)];
         }
 
         [Required]
@@ -38,13 +35,13 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "BuildAssemblyPath");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(BuildAssemblyPath));
                 _buildAssemblyPath = value;
             }
 
             get
             {
-                string thisPath = null;
+                string thisPath;
                 try
                 {
                     thisPath = Path.GetFullPath(_buildAssemblyPath);
@@ -63,95 +60,53 @@ namespace Microsoft.Build.Tasks
         [Required]
         public bool ShouldGenerateSerializer
         {
-            set
-            {
-                Bag["ShouldGenerateSerializer"] = value;
-            }
-            get
-            {
-                return GetBoolParameterWithDefault("ShouldGenerateSerializer", false);
-            }
+            set => Bag[nameof(ShouldGenerateSerializer)] = value;
+            get => GetBoolParameterWithDefault(nameof(ShouldGenerateSerializer), false);
         }
 
         [Required]
         public bool UseProxyTypes
         {
-            set
-            {
-                Bag["UseProxyTypes"] = value;
-            }
-            get
-            {
-                return GetBoolParameterWithDefault("UseProxyTypes", false);
-            }
+            set => Bag[nameof(UseProxyTypes)] = value;
+            get => GetBoolParameterWithDefault(nameof(UseProxyTypes), false);
         }
 
 
         public bool UseKeep
         {
-            set
-            {
-                Bag["UseKeep"] = value;
-            }
-            get
-            {
-                return GetBoolParameterWithDefault("UseKeep", false);
-            }
+            set => Bag[nameof(UseKeep)] = value;
+            get => GetBoolParameterWithDefault(nameof(UseKeep), false);
         }
 
         public string[] References
         {
-            set
-            {
-                Bag["References"] = value;
-            }
-            get
-            {
-                return (string[])Bag["References"];
-            }
+            set => Bag[nameof(References)] = value;
+            get => (string[])Bag[nameof(References)];
         }
 
         public string KeyContainer
         {
-            set
-            {
-                Bag["KeyContainer"] = value;
-            }
-            get
-            {
-                return (string)Bag["KeyContainer"];
-            }
+            set => Bag[nameof(KeyContainer)] = value;
+            get => (string)Bag[nameof(KeyContainer)];
         }
 
         public string KeyFile
         {
-            set
-            {
-                Bag["KeyFile"] = value;
-            }
-            get
-            {
-                return (string)Bag["KeyFile"];
-            }
+            set => Bag[nameof(KeyFile)] = value;
+            get => (string)Bag[nameof(KeyFile)];
         }
 
         public bool DelaySign
         {
-            set
-            {
-                Bag["DelaySign"] = value;
-            }
-            get
-            {
-                return GetBoolParameterWithDefault("DelaySign", false);
-            }
+            set => Bag[nameof(DelaySign)] = value;
+            get => GetBoolParameterWithDefault(nameof(DelaySign), false);
         }
 
         [Output]
         public ITaskItem[] SerializationAssembly
         {
-            set { Bag["SerializationAssembly"] = value; }
-            get { return (ITaskItem[])Bag["SerializationAssembly"]; }
+            set => Bag[nameof(SerializationAssembly)] = value;
+            get => (ITaskItem[])Bag[nameof(SerializationAssembly)];
         }
 
         public string SerializationAssemblyName
@@ -159,7 +114,7 @@ namespace Microsoft.Build.Tasks
             get
             {
                 Debug.Assert(BuildAssemblyName.Length > 0, "Build assembly name is blank");
-                string prunedAssemblyName = null;
+                string prunedAssemblyName;
                 try
                 {
                     prunedAssemblyName = Path.GetFileNameWithoutExtension(BuildAssemblyName);
@@ -183,18 +138,12 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private string AssemblyFullPath
-        {
-            get
-            {
-                return Path.Combine(BuildAssemblyPath, BuildAssemblyName);
-            }
-        }
+        private string AssemblyFullPath => Path.Combine(BuildAssemblyPath, BuildAssemblyName);
 
         public string SdkToolsPath
         {
-            set { Bag["SdkToolsPath"] = value; }
-            get { return (string)Bag["SdkToolsPath"]; }
+            set => Bag[nameof(SdkToolsPath)] = value;
+            get => (string)Bag[nameof(SdkToolsPath)];
         }
 
         /// <summary>
@@ -202,8 +151,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string Platform
         {
-            set { Bag["Platform"] = value; }
-            get { return (string)Bag["Platform"]; }
+            set => Bag[nameof(Platform)] = value;
+            get => (string)Bag[nameof(Platform)];
         }
 
         /// <summary>
@@ -211,8 +160,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] Types
         {
-            set { Bag["Types"] = value; }
-            get { return (string[])Bag["Types"]; }
+            set => Bag[nameof(Types)] = value;
+            get => (string[])Bag[nameof(Types)];
         }
 
         #endregion
@@ -221,18 +170,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the tool to execute.
         /// </summary>
-        override protected string ToolName
-        {
-            get
-            {
-                return "sgen.exe";
-            }
-        }
+        protected override string ToolName => "sgen.exe";
 
         /// <summary>
         /// The full path of the tool to execute.
         /// </summary>
-        override protected string GenerateFullPathToTool()
+        protected override string GenerateFullPathToTool()
         {
             string pathToTool = null;
 
@@ -245,7 +188,7 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(pathToTool) || !File.Exists(pathToTool))
             {
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             }
 
             return pathToTool;
@@ -254,7 +197,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Validate parameters, log errors and warnings and return true if Execute should proceed.
         /// </summary>
-        override protected bool ValidateParameters()
+        protected override bool ValidateParameters()
         {
             // Ensure the references exist before passing them to SGen.exe
             if (References != null)
@@ -276,7 +219,7 @@ namespace Microsoft.Build.Tasks
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
         /// </summary>
         /// <returns></returns>
-        override protected bool SkipTaskExecution()
+        protected override bool SkipTaskExecution()
         {
             return SerializationAssembly == null && !ShouldGenerateSerializer;
         }
@@ -286,9 +229,9 @@ namespace Microsoft.Build.Tasks
         /// must go directly onto the command line.
         /// Called after ValidateParameters and SkipTaskExecution
         /// </summary>
-        override protected string GenerateCommandLineCommands()
+        protected override string GenerateCommandLineCommands()
         {
-            CommandLineBuilderExtension commandLineBuilder = new CommandLineBuilderExtension();
+            var commandLineBuilder = new CommandLineBuilderExtension();
             bool serializationAssemblyPathExists = false;
             try
             {
@@ -296,7 +239,7 @@ namespace Microsoft.Build.Tasks
                 {
                     Debug.Assert(ShouldGenerateSerializer, "GenerateCommandLineCommands() should not be called if ShouldGenerateSerializer is true and SerializationAssembly is null.");
 
-                    SerializationAssembly = new TaskItem[] { new TaskItem(SerializationAssemblyPath) };
+                    SerializationAssembly = new ITaskItem[] { new TaskItem(SerializationAssemblyPath) };
                 }
 
                 // Add the assembly switch
@@ -385,4 +328,3 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 }
-

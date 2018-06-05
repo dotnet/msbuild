@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Resources;
@@ -16,8 +17,10 @@ namespace Microsoft.Build.Tasks
     /// <remarks>
     /// This class is a caching mechanism for the resgen task to keep track of linked
     /// files within processed .resx files.
+    /// 
+    /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    [Serializable()]
+    [Serializable]
     internal sealed class ResGenDependencies : StateFileBase
     {
         /// <summary>
@@ -35,7 +38,7 @@ namespace Microsoft.Build.Tasks
         /// What would be the point in saving the default?
         /// </summary>
         [NonSerialized]
-        private bool isDirty = false;
+        private bool _isDirty;
 
         /// <summary>
         ///  This is the directory that will be used for resolution of files linked within a .resx.
@@ -44,19 +47,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private string baseLinkedFileDirectory;
 
-        /// <summary>
-        /// Construct.
-        /// </summary>
-        internal ResGenDependencies()
-        {
-        }
-
         internal string BaseLinkedFileDirectory
         {
-            get
-            {
-                return baseLinkedFileDirectory;
-            }
+            get => baseLinkedFileDirectory;
             set
             {
                 if (value == null && baseLinkedFileDirectory == null)
@@ -64,15 +57,15 @@ namespace Microsoft.Build.Tasks
                     // No change
                     return;
                 }
-                else if ((value == null && baseLinkedFileDirectory != null) ||
-                         (value != null && baseLinkedFileDirectory == null) ||
-                         (String.Compare(baseLinkedFileDirectory, value, StringComparison.OrdinalIgnoreCase) != 0))
+                if ((value == null && baseLinkedFileDirectory != null) ||
+                     (value != null && baseLinkedFileDirectory == null) ||
+                     (String.Compare(baseLinkedFileDirectory, value, StringComparison.OrdinalIgnoreCase) != 0))
                 {
                     // Ok, this is slightly complicated.  Changing the base directory in any manner may
                     // result in changes to how we find .resx files.  Therefore, we must clear our out
                     // cache whenever the base directory changes.  
                     resXFiles.Clear();
-                    isDirty = true;
+                    _isDirty = true;
                     baseLinkedFileDirectory = value;
                 }
             }
@@ -97,9 +90,8 @@ namespace Microsoft.Build.Tasks
 
         internal ResXFile GetResXFileInfo(string resxFile)
         {
-            // First, try to retrieve the resx information from our hashtable.  
-            ResXFile retVal = (ResXFile)resXFiles.GetDependencyFile(resxFile);
-
+            // First, try to retrieve the resx information from our hashtable.
+            var retVal = (ResXFile)resXFiles.GetDependencyFile(resxFile);
             if (retVal == null)
             {
                 // Ok, the file wasn't there.  Add it to our cache and return it to the caller.  
@@ -112,7 +104,7 @@ namespace Microsoft.Build.Tasks
                 if (retVal.HasFileChanged())
                 {
                     resXFiles.RemoveDependencyFile(resxFile);
-                    isDirty = true;
+                    _isDirty = true;
                     retVal = AddResxFile(resxFile);
                 }
             }
@@ -125,23 +117,23 @@ namespace Microsoft.Build.Tasks
             // This method adds a .resx file "file" to our .resx cache.  The method causes the file
             // to be cracked for contained files.
 
-            ResXFile resxFile = new ResXFile(file, BaseLinkedFileDirectory);
+            var resxFile = new ResXFile(file, BaseLinkedFileDirectory);
             resXFiles.AddDependencyFile(file, resxFile);
-            isDirty = true;
+            _isDirty = true;
             return resxFile;
         }
 
         internal PortableLibraryFile TryGetPortableLibraryInfo(string libraryPath)
         {
             // First, try to retrieve the portable library information from our hashtable.  
-            PortableLibraryFile retVal = (PortableLibraryFile)portableLibraries.GetDependencyFile(libraryPath);
+            var retVal = (PortableLibraryFile)portableLibraries.GetDependencyFile(libraryPath);
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
             // this entry from the cache and rebuild all the state at a later point.
             if (retVal != null && retVal.HasFileChanged())
             {
                 portableLibraries.RemoveDependencyFile(libraryPath);
-                isDirty = true;
+                _isDirty = true;
                 retVal = null;
             }
 
@@ -150,39 +142,30 @@ namespace Microsoft.Build.Tasks
 
         internal void UpdatePortableLibrary(PortableLibraryFile library)
         {
-            PortableLibraryFile cached = (PortableLibraryFile)portableLibraries.GetDependencyFile(library.FileName);
+            var cached = (PortableLibraryFile)portableLibraries.GetDependencyFile(library.FileName);
             if (cached == null || !library.Equals(cached))
             {
                 // Add a new entry or replace the existing one.
                 portableLibraries.AddDependencyFile(library.FileName, library);
-                isDirty = true;
+                _isDirty = true;
             }
         }
 
         /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
-        /// <param name="stateFile"></param>
-        override internal void SerializeCache(string stateFile, TaskLoggingHelper log)
+        internal override void SerializeCache(string stateFile, TaskLoggingHelper log)
         {
             base.SerializeCache(stateFile, log);
-            isDirty = false;
+            _isDirty = false;
         }
 
         /// <summary>
         /// Reads the .cache file from disk into a ResGenDependencies object.
         /// </summary>
-        /// <param name="stateFile"></param>
-        /// <param name="useSourcePath"></param>
-        /// <returns></returns>
         internal static ResGenDependencies DeserializeCache(string stateFile, bool useSourcePath, TaskLoggingHelper log)
         {
-            ResGenDependencies retVal = (ResGenDependencies)StateFileBase.DeserializeCache(stateFile, log, typeof(ResGenDependencies));
-
-            if (retVal == null)
-            {
-                retVal = new ResGenDependencies();
-            }
+            var retVal = (ResGenDependencies)DeserializeCache(stateFile, log, typeof(ResGenDependencies)) ?? new ResGenDependencies();
 
             // Ensure that the cache is properly initialized with respect to how resgen will 
             // resolve linked files within .resx files.  ResGen has two different
@@ -200,17 +183,16 @@ namespace Microsoft.Build.Tasks
 
         /// <remarks>
         /// Represents a single .resx file in the dependency cache.
+        /// 
+        /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        [Serializable()]
+        [Serializable]
         internal sealed class ResXFile : DependencyFile
         {
-            // Files contained within this resx file.  
+            // Files contained within this resx file.
             private string[] linkedFiles;
 
-            internal string[] LinkedFiles
-            {
-                get { return linkedFiles; }
-            }
+            internal string[] LinkedFiles => linkedFiles;
 
             internal ResXFile(string filename, string baseLinkedFileDirectory) : base(filename)
             {
@@ -221,27 +203,24 @@ namespace Microsoft.Build.Tasks
 
                 if (File.Exists(FileName))
                 {
-                    linkedFiles = ResXFile.GetLinkedFiles(filename, baseLinkedFileDirectory);
+                    linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory);
                 }
             }
 
             /// <summary>
             /// Given a .RESX file, returns all the linked files that are referenced within that .RESX.
             /// </summary>
-            /// <param name="filename"></param>
-            /// <param name="baseLinkedFileDirectory"></param>
-            /// <returns></returns>
             /// <exception cref="ArgumentException">May be thrown if Resx is invalid. May contain XmlException.</exception>
             /// <exception cref="XmlException">May be thrown if Resx is invalid</exception>
-            internal static string[] GetLinkedFiles(string filename, string baseLinkedFileDirectory)
+            private static string[] GetLinkedFiles(string filename, string baseLinkedFileDirectory)
             {
                 // This method finds all linked .resx files for the .resx file that is passed in.
                 // filename is the filename of the .resx file that is to be examined.
 
                 // Construct the return array
-                ArrayList retVal = new ArrayList();
+                var retVal = new List<string>();
 
-                using (ResXResourceReader resxReader = new ResXResourceReader(filename))
+                using (var resxReader = new ResXResourceReader(filename))
                 {
                     // Tell the reader to return ResXDataNode's instead of the object type
                     // the resource becomes at runtime so we can figure out which files
@@ -262,24 +241,28 @@ namespace Microsoft.Build.Tasks
 
                     foreach (DictionaryEntry dictEntry in resxReader)
                     {
-                        if ((dictEntry.Value != null) && (dictEntry.Value is ResXDataNode))
+                        if (dictEntry.Value is ResXDataNode node)
                         {
-                            ResXFileRef resxFileRef = ((ResXDataNode)dictEntry.Value).FileRef;
+                            ResXFileRef resxFileRef = node.FileRef;
                             if (resxFileRef != null)
+                            {
                                 retVal.Add(FileUtilities.MaybeAdjustFilePath(resxFileRef.FileName));
+                            }
                         }
                     }
                 }
 
-                return (string[])retVal.ToArray(typeof(string));
+                return retVal.ToArray();
             }
         }
 
         /// <remarks>
         /// Represents a single assembly in the dependency cache, which may produce 
         /// 0 to many ResW files.
+        /// 
+        /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        [Serializable()]
+        [Serializable]
         internal sealed class PortableLibraryFile : DependencyFile
         {
             private string[] outputFiles;
@@ -293,20 +276,20 @@ namespace Microsoft.Build.Tasks
 
             internal string[] OutputFiles
             {
-                get { return outputFiles; }
-                set { outputFiles = value; }
+                get => outputFiles;
+                set => outputFiles = value;
             }
 
             internal string NeutralResourceLanguage
             {
-                get { return neutralResourceLanguage; }
-                set { neutralResourceLanguage = value; }
+                get => neutralResourceLanguage;
+                set => neutralResourceLanguage = value;
             }
 
             internal string AssemblySimpleName
             {
-                get { return assemblySimpleName; }
-                set { assemblySimpleName = value; }
+                get => assemblySimpleName;
+                set => assemblySimpleName = value;
             }
 
             internal bool AllOutputFilesAreUpToDate()
@@ -314,8 +297,8 @@ namespace Microsoft.Build.Tasks
                 Debug.Assert(outputFiles != null, "OutputFiles hasn't been set");
                 foreach (string outputFileName in outputFiles)
                 {
-                    FileInfo outputFile = new FileInfo(FileUtilities.FixFilePath(outputFileName));
-                    if (!outputFile.Exists || outputFile.LastWriteTime < this.LastModified)
+                    var outputFile = new FileInfo(FileUtilities.FixFilePath(outputFileName));
+                    if (!outputFile.Exists || outputFile.LastWriteTime < LastModified)
                     {
                         return false;
                     }
@@ -354,17 +337,10 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
         }
-
-
+        
         /// <summary>
         /// Whether this cache is dirty or not.
         /// </summary>
-        internal bool IsDirty
-        {
-            get
-            {
-                return isDirty;
-            }
-        }
+        internal bool IsDirty => _isDirty;
     }
 }

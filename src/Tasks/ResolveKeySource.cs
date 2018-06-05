@@ -4,7 +4,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Collections;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -21,88 +20,35 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class ResolveKeySource : TaskExtension
     {
-        private string _keyFile;
-        private string _certificateThumbprint;
-        private string _certificateFile;
-        private string _resolvedKeyContainer = String.Empty;
-        private string _resolvedKeyFile = String.Empty;
-        private string _resolvedThumbprint = String.Empty;
         private const string pfxFileExtension = ".pfx";
         private const string pfxFileContainerPrefix = "VS_KEY_";
-        private bool _suppressAutoClosePasswordPrompt = false;
-        private bool _showImportDialogDespitePreviousFailures = false;
-        private int _autoClosePasswordPromptTimeout = 20;
-        private int _autoClosePasswordPromptShow = 15;
-        static private Hashtable s_pfxKeysToIgnore = new Hashtable(StringComparer.OrdinalIgnoreCase);
-
-
+        
         #region Properties
 
-        public string KeyFile
-        {
-            get { return _keyFile; }
-            set { _keyFile = value; }
-        }
+        public string KeyFile { get; set; }
 
-        public string CertificateThumbprint
-        {
-            get { return _certificateThumbprint; }
-            set { _certificateThumbprint = value; }
-        }
+        public string CertificateThumbprint { get; set; }
 
-        public string CertificateFile
-        {
-            get { return _certificateFile; }
-            set { _certificateFile = value; }
-        }
+        public string CertificateFile { get; set; }
 
-        public bool SuppressAutoClosePasswordPrompt
-        {
-            get { return _suppressAutoClosePasswordPrompt; }
-            set { _suppressAutoClosePasswordPrompt = value; }
-        }
+        public bool SuppressAutoClosePasswordPrompt { get; set; } = false;
 
-        public bool ShowImportDialogDespitePreviousFailures
-        {
-            get { return _showImportDialogDespitePreviousFailures; }
-            set { _showImportDialogDespitePreviousFailures = value; }
-        }
+        public bool ShowImportDialogDespitePreviousFailures { get; set; } = false;
 
-        public int AutoClosePasswordPromptTimeout
-        {
-            get { return _autoClosePasswordPromptTimeout; }
-            set { _autoClosePasswordPromptTimeout = value; }
-        }
+        public int AutoClosePasswordPromptTimeout { get; set; } = 20;
 
-        public int AutoClosePasswordPromptShow
-        {
-            get { return _autoClosePasswordPromptShow; }
-            set { _autoClosePasswordPromptShow = value; }
-        }
+        public int AutoClosePasswordPromptShow { get; set; } = 15;
 
         [Output]
-        public string ResolvedThumbprint
-        {
-            get { return _resolvedThumbprint; }
-            set { _resolvedThumbprint = value; }
-        }
+        public string ResolvedThumbprint { get; set; } = String.Empty;
 
         [Output]
-        public string ResolvedKeyContainer
-        {
-            get { return _resolvedKeyContainer; }
-            set { _resolvedKeyContainer = value; }
-        }
+        public string ResolvedKeyContainer { get; set; } = String.Empty;
 
         [Output]
-        public string ResolvedKeyFile
-        {
-            get { return _resolvedKeyFile; }
-            set { _resolvedKeyFile = value; }
-        }
+        public string ResolvedKeyFile { get; set; } = String.Empty;
 
         #endregion
-
 
         #region ITask Members
 
@@ -118,7 +64,7 @@ namespace Microsoft.Build.Tasks
         // hash would give good enough results. This code needs to be kept in sync with the code  in compsvcpkgs
         // to prevent double prompt for newly created keys. The magic numbers here are just random primes
         // in the range 10m/20m.
-        static private UInt64 HashFromBlob(byte[] data)
+        private static UInt64 HashFromBlob(byte[] data)
         {
             UInt32 dw1 = 17339221;
             UInt32 dw2 = 19619429;
@@ -141,7 +87,7 @@ namespace Microsoft.Build.Tasks
         private bool ResolveAssemblyKey()
         {
             bool pfxSuccess = true;
-            if (KeyFile != null && KeyFile.Length > 0)
+            if (!string.IsNullOrEmpty(KeyFile))
             {
                 string keyFileExtension = String.Empty;
                 try
@@ -164,10 +110,9 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_PFX_SIGNING
                         pfxSuccess = false;
                         // it is .pfx file. It is being imported into key container with name = "VS_KEY_<MD5 check sum of the encrypted file>"
-                        System.IO.FileStream fs = null;
+                        FileStream fs = null;
                         try
                         {
-                            string hashedContainerName = String.Empty;
                             string currentUserName = Environment.UserDomainName + "\\" + Environment.UserName;
                             // we use the curent user name to randomize the associated container name, i.e different user on the same machine will export to different keys
                             // this is because SNAPI by default will create keys in "per-machine" crypto store (visible for all the user) but will set the permission such only
@@ -175,30 +120,24 @@ namespace Microsoft.Build.Tasks
                             // Now different users will use different container name. We use ToLower(invariant) because this is what the native equivalent of this function (Create new key, or VC++ import-er).
                             // use as well and we want to keep the hash (and key container name the same) otherwise user could be prompt for a password twice.
                             byte[] userNameBytes = System.Text.Encoding.Unicode.GetBytes(currentUserName.ToLower(CultureInfo.InvariantCulture));
-                            fs = System.IO.File.OpenRead(KeyFile);
+                            fs = File.OpenRead(KeyFile);
                             int fileLength = (int)fs.Length;
-                            byte[] keyBytes = new byte[fileLength];
+                            var keyBytes = new byte[fileLength];
                             fs.Read(keyBytes, 0, fileLength);
 
                             UInt64 hash = HashFromBlob(keyBytes);
                             hash ^= HashFromBlob(userNameBytes); // modify it with the username hash, so each user would get different hash for the same key
 
-                            hashedContainerName = pfxFileContainerPrefix + hash.ToString("X016", CultureInfo.InvariantCulture);
+                            string hashedContainerName = pfxFileContainerPrefix + hash.ToString("X016", CultureInfo.InvariantCulture);
 
-                            IntPtr publicKeyBlob = IntPtr.Zero;
-                            int publicKeyBlobSize = 0;
-                            if (StrongNameHelpers.StrongNameGetPublicKey(hashedContainerName, IntPtr.Zero, 0, out publicKeyBlob, out publicKeyBlobSize) && publicKeyBlob != IntPtr.Zero)
+                            if (StrongNameHelpers.StrongNameGetPublicKey(hashedContainerName, IntPtr.Zero, 0, out IntPtr publicKeyBlob, out _) && publicKeyBlob != IntPtr.Zero)
                             {
                                 StrongNameHelpers.StrongNameFreeBuffer(publicKeyBlob);
                                 pfxSuccess = true;
                             }
                             else
                             {
-                                if (ShowImportDialogDespitePreviousFailures || !s_pfxKeysToIgnore.Contains(hashedContainerName))
-                                {
-                                    Log.LogErrorWithCodeFromResources("ResolveKeySource.KeyFileForSignAssemblyNotImported", KeyFile, hashedContainerName);
-                                }
-
+                                Log.LogErrorWithCodeFromResources("ResolveKeySource.KeyFileForSignAssemblyNotImported", KeyFile, hashedContainerName);
                                 Log.LogErrorWithCodeFromResources("ResolveKeySource.KeyImportError", KeyFile);
                             }
                             if (pfxSuccess)
@@ -212,10 +151,7 @@ namespace Microsoft.Build.Tasks
                         }
                         finally
                         {
-                            if (fs != null)
-                            {
-                                fs.Close();
-                            }
+                            fs?.Close();
                         }
 #else
                         Log.LogError("PFX signing not supported on .NET Core");
@@ -235,7 +171,7 @@ namespace Microsoft.Build.Tasks
             if (!string.IsNullOrEmpty(CertificateThumbprint))
             {
                 // look for cert in the cert store
-                X509Store personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                 try
                 {
                     personalStore.Open(OpenFlags.ReadWrite);
@@ -276,8 +212,8 @@ namespace Microsoft.Build.Tasks
                     {
                         bool imported = false;
                         // first try it with no password
-                        X509Certificate2 cert = new X509Certificate2();
-                        X509Store personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                        var cert = new X509Certificate2();
+                        var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         try
                         {
                             personalStore.Open(OpenFlags.ReadWrite);
@@ -306,10 +242,10 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        X509Store personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                        var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         try
                         {
-                            X509Certificate2 cert = new X509Certificate2(CertificateFile);
+                            var cert = new X509Certificate2(CertificateFile);
                             personalStore.Open(OpenFlags.ReadWrite);
                             personalStore.Add(cert);
                             ResolvedThumbprint = cert.Thumbprint;
@@ -333,10 +269,11 @@ namespace Microsoft.Build.Tasks
             {
                 // no file and not in store, error out
                 Log.LogErrorWithCodeFromResources("ResolveKeySource.CertificateNotInStore");
-                certSuccess = false;
             }
             else
+            {
                 certSuccess = true;
+            }
 
             return certSuccess;
         }

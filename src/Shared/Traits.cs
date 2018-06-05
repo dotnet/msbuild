@@ -13,7 +13,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     internal class Traits
     {
-        private static Traits _instance = new Traits();
+        private static readonly Traits _instance = new Traits();
         public static Traits Instance
         {
             get
@@ -26,6 +26,11 @@ namespace Microsoft.Build.Utilities
 #endif
                 return _instance;
             }
+        }
+
+        public Traits()
+        {
+            EscapeHatches = new EscapeHatches();
         }
 
         public EscapeHatches EscapeHatches { get; }
@@ -47,17 +52,27 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool MSBuildCacheFileEnumerations = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileEnumerations"));
 
-        public Traits()
-        {
-            EscapeHatches = new EscapeHatches();
-        }
-
         public readonly bool EnableAllPropertyFunctions = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1";
 
         /// <summary>
         /// Enable restore first functionality in MSBuild.exe
         /// </summary>
         public readonly bool EnableRestoreFirst = Environment.GetEnvironmentVariable("MSBUILDENABLERESTOREFIRST") == "1";
+
+        /// <summary>
+        /// Setting the associated environment variable to 1 restores the pre-15.8 single
+        /// threaded (slower) copy behavior. Zero implies Int32.MaxValue, less than zero
+        /// (default) uses the empirical default in Copy.cs, greater than zero can allow
+        /// perf tuning beyond the defaults chosen.
+        /// </summary>
+        public readonly int CopyTaskParallelism = ParseIntFromEnvironmentVariableOrDefault("MSBUILDCOPYTASKPARALLELISM", -1);
+
+        private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
+        {
+            return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
+                ? result
+                : defaultValue;
+        }
     }
 
     internal class EscapeHatches
@@ -106,10 +121,12 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool WarnOnUninitializedProperty = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY"));
 
-        // MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
-        // for https://github.com/Microsoft/msbuild/issues/1751. It should
-        // be removed (permanently set to false) after establishing that
-        // it's unneeded (at least by the 16.0 timeframe).
+        /// <summary>
+        /// MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
+        /// for https://github.com/Microsoft/msbuild/issues/1751. It should
+        /// be removed (permanently set to false) after establishing that
+        /// it's unneeded (at least by the 16.0 timeframe).
+        /// </summary>
         public readonly bool UseCaseSensitiveItemNames = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1";
 
         /// <summary>
@@ -132,7 +149,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool EnsureStdOutForChildNodesIsPrimaryStdout = Environment.GetEnvironmentVariable("MSBUILDENSURESTDOUTFORTASKPROCESSES") == "1";
 
-
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
@@ -142,8 +158,7 @@ namespace Microsoft.Build.Utilities
                 return null;
             }
 
-            bool result;
-            if (bool.TryParse(value, out result))
+            if (bool.TryParse(value, out bool result))
             {
                 return result;
             }

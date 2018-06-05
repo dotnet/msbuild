@@ -7,6 +7,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -26,55 +27,40 @@ namespace Microsoft.Build.Evaluation
     public struct ResolvedImport
     {
         /// <summary>
-        /// Element doing the import
-        /// </summary>
-        private ProjectImportElement _importingElement;
-
-        /// <summary>
-        /// One of the files it causes to import
-        /// </summary>
-        private ProjectRootElement _importedProject;
-
-        /// <summary>
-        /// Whether the importing element is itself imported.
-        /// </summary>
-        private bool _isImported;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedImport"/> struct.
         /// </summary>
-        internal ResolvedImport(Project project, ProjectImportElement importingElement, ProjectRootElement importedProject)
+        internal ResolvedImport(Project project, ProjectImportElement importingElement, ProjectRootElement importedProject, int versionEvaluated, SdkResult sdkResult)
         {
-            ErrorUtilities.VerifyThrowInternalNull(importingElement, "parent");
             ErrorUtilities.VerifyThrowInternalNull(importedProject, "child");
 
-            _importingElement = importingElement;
-            _importedProject = importedProject;
-            _isImported = !ReferenceEquals(project.Xml, importingElement.ContainingProject);
+            ImportingElement = importingElement;
+            ImportedProject = importedProject;
+            SdkResult = sdkResult;
+            VersionEvaluated = versionEvaluated;
+            IsImported = importingElement != null && !ReferenceEquals(project.Xml, importingElement.ContainingProject);
         }
 
         /// <summary>
         /// Gets the element doing the import.
+        /// Null if this is the top project
         /// </summary>
-        public ProjectImportElement ImportingElement
-        {
-            get { return _importingElement; }
-        }
+        public ProjectImportElement ImportingElement { get; }
 
         /// <summary>
         /// Gets one of the imported projects.
         /// </summary>
-        public ProjectRootElement ImportedProject
-        {
-            get { return _importedProject; }
-        }
+        public ProjectRootElement ImportedProject { get; }
+
+        /// <summary>
+        /// Non null if this import was an sdk import.
+        /// </summary>
+        public SdkResult SdkResult { get; }
+
+        internal int VersionEvaluated { get; }
 
         /// <summary>
         /// Whether the importing element is itself imported.
         /// </summary>
-        public bool IsImported
-        {
-            get { return _isImported; }
-        }
+        public bool IsImported { get; }
     }
 }

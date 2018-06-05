@@ -34,6 +34,7 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -692,17 +693,17 @@ namespace Microsoft.Build.Evaluation
                     return true;
                 }
 
-                foreach (Triple<ProjectImportElement, ProjectRootElement, int> triple in _data.ImportClosure)
+                foreach (var import in _data.ImportClosure)
                 {
-                    if (triple.Second.Version != triple.Third || _evaluatedVersion < triple.Third)
+                    if (import.ImportedProject.Version != import.VersionEvaluated || _evaluatedVersion < import.VersionEvaluated)
                     {
                         if (s_debugEvaluation)
                         {
-                            string reason = triple.Second.LastDirtyReason;
+                            string reason = import.ImportedProject.LastDirtyReason;
 
                             if (reason != null)
                             {
-                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, (triple.Second.FullPath == FullPath ? String.Empty : triple.Second.FullPath), _projectCollection.GetHashCode()));
+                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, (import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath), _projectCollection.GetHashCode()));
                             }
                         }
 
@@ -861,11 +862,11 @@ namespace Microsoft.Build.Evaluation
             {
                 List<ResolvedImport> imports = new List<ResolvedImport>(_data.ImportClosure.Count - 1 /* outer project */);
 
-                foreach (Triple<ProjectImportElement, ProjectRootElement, int> import in _data.ImportClosure)
+                foreach (var import in _data.ImportClosure)
                 {
-                    if (import.First != null) // Exclude outer project itself
+                    if (import.ImportingElement != null) // Exclude outer project itself
                     {
-                        imports.Add(new ResolvedImport(this, import.First, import.Second));
+                        imports.Add(import);
                     }
                 }
 
@@ -884,11 +885,11 @@ namespace Microsoft.Build.Evaluation
 
                 List<ResolvedImport> imports = new List<ResolvedImport>(_data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
 
-                foreach (Triple<ProjectImportElement, ProjectRootElement, int> import in _data.ImportClosureWithDuplicates)
+                foreach (var import in _data.ImportClosureWithDuplicates)
                 {
-                    if (import.First != null) // Exclude outer project itself
+                    if (import.ImportingElement != null) // Exclude outer project itself
                     {
-                        imports.Add(new ResolvedImport(this, import.First, import.Second));
+                        imports.Add(import);
                     }
                 }
 
@@ -1679,7 +1680,7 @@ namespace Microsoft.Build.Evaluation
         {
             // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Top
             // imports need to be returned before walking the project XML
-            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.First?.ImplicitImportLocation == ImplicitImportLocation.Top).Select(i => i.Second))
+            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.ImportingElement?.ImplicitImportLocation == ImplicitImportLocation.Top).Select(i => i.ImportedProject))
             {
                 foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
                 {
@@ -1694,7 +1695,7 @@ namespace Microsoft.Build.Evaluation
 
             // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Bottom
             // imports need to be returned before walking the project XML
-            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.First?.ImplicitImportLocation == ImplicitImportLocation.Bottom).Select(i => i.Second))
+            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.ImportingElement?.ImplicitImportLocation == ImplicitImportLocation.Bottom).Select(i => i.ImportedProject))
             {
                 foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
                 {
@@ -2393,12 +2394,12 @@ namespace Microsoft.Build.Evaluation
         /// <returns>True if this project is or imports the xml file; false otherwise.</returns>
         internal bool UsesProjectRootElement(ProjectRootElement xmlRootElement)
         {
-            if (Object.ReferenceEquals(this.Xml, xmlRootElement))
+            if (object.ReferenceEquals(this.Xml, xmlRootElement))
             {
                 return true;
             }
 
-            if (_data.ImportClosure.Any(triple => Object.ReferenceEquals(triple.Second, xmlRootElement)))
+            if (_data.ImportClosure.Any(import => object.ReferenceEquals(import.ImportedProject, xmlRootElement)))
             {
                 return true;
             }
@@ -2757,9 +2758,11 @@ namespace Microsoft.Build.Evaluation
 
             if (_data.ImportClosure != null)
             {
-                foreach (Triple<ProjectImportElement, ProjectRootElement, int> triple in _data.ImportClosure)
+                foreach (var import in _data.ImportClosure)
                 {
-                    highestXmlVersion = (highestXmlVersion < triple.Third) ? triple.Third : highestXmlVersion;
+                    highestXmlVersion = (highestXmlVersion < import.VersionEvaluated)
+                        ? import.VersionEvaluated
+                        : highestXmlVersion;
                 }
             }
 
@@ -2944,7 +2947,7 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // Get the project root elements of all the imports resulting from this import statement (there could be multiple if there is a wild card).
-                    IEnumerable<ProjectRootElement> children = _data.ImportClosure.Where(triple => Object.ReferenceEquals(triple.First, import)).Select(triple => triple.Second);
+                    IEnumerable<ProjectRootElement> children = _data.ImportClosure.Where(resolvedImport => object.ReferenceEquals(resolvedImport.ImportingElement, import)).Select(triple => triple.ImportedProject);
 
                     foreach (ProjectRootElement child in children)
                     {
@@ -3359,7 +3362,7 @@ namespace Microsoft.Build.Evaluation
             /// Complete list of all imports pulled in during evaluation.
             /// This includes the outer project itself.
             /// </summary>
-            internal List<Triple<ProjectImportElement, ProjectRootElement, int>> ImportClosure
+            internal List<ResolvedImport> ImportClosure
             {
                 get;
                 private set;
@@ -3369,7 +3372,7 @@ namespace Microsoft.Build.Evaluation
             /// Complete list of all imports pulled in during evaluation including duplicate imports.
             /// This includes the outer project itself.
             /// </summary>
-            internal List<Triple<ProjectImportElement, ProjectRootElement, int>> ImportClosureWithDuplicates
+            internal List<ResolvedImport> ImportClosureWithDuplicates
             {
                 get;
                 private set;
@@ -3416,8 +3419,8 @@ namespace Microsoft.Build.Evaluation
                 this.Expander = new Expander<ProjectProperty, ProjectItem>(this.Properties, _items);
                 this.ItemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinition>(MSBuildNameIgnoreCaseComparer.Default);
                 this.Targets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
-                this.ImportClosure = new List<Triple<ProjectImportElement, ProjectRootElement, int>>();
-                this.ImportClosureWithDuplicates = new List<Triple<ProjectImportElement, ProjectRootElement, int>>();
+                this.ImportClosure = new List<ResolvedImport>();
+                this.ImportClosureWithDuplicates = new List<ResolvedImport>();
                 this.AllEvaluatedProperties = new List<ProjectProperty>();
                 this.AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 this.AllEvaluatedItems = new List<ProjectItem>();
@@ -3431,7 +3434,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Include the main project in the list of imports, as this list is 
                 // used to figure out if any of them have changed.
-                RecordImport(null, _project._xml, _project._xml.Version);
+                RecordImport(null, _project._xml, _project._xml.Version, null);
 
                 string toolsVersionToUse = ExplicitToolsVersion;
                 ElementLocation toolsVersionLocation = _project._xml.ProjectFileLocation;
@@ -3648,9 +3651,9 @@ namespace Microsoft.Build.Evaluation
             /// If they are dirtied, though, they might affect the evaluated project; and that's why we record them. 
             /// Mostly these will be common imports, so they'll be shared anyway.
             /// </remarks>
-            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
+            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
             {
-                ImportClosure.Add(new Triple<ProjectImportElement, ProjectRootElement, int>(importElement, import, versionEvaluated));
+                ImportClosure.Add(new ResolvedImport(Project, importElement, import, versionEvaluated, sdkResult));
                 RecordImportWithDuplicates(importElement, import, versionEvaluated);
             }
 
@@ -3659,7 +3662,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public void RecordImportWithDuplicates(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
             {
-                ImportClosureWithDuplicates.Add(new Triple<ProjectImportElement, ProjectRootElement, int>(importElement, import, versionEvaluated));
+                ImportClosureWithDuplicates.Add(new ResolvedImport(Project, importElement, import, versionEvaluated, null));
             }
 
             /// <summary>

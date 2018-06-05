@@ -6475,22 +6475,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Verify that the method will not crash if there are empty string array elements, and that when we call the
-        /// method twice with the same set of SubsetToSearchFor and TargetFrameworkDirectory that we get the exact same array back.
+        /// Verify that the method will not crash if there are empty string array elements
         /// </summary>
         [Fact]
-        public void SubsetListFinderVerifyEmptyInSubsetsToSearchForAndCaching()
+        public void SubsetListFinderVerifyEmptyInSubsetsToSearchFor()
         {
-            // Verify the program will not crash when an empty string is passed in and that when we call the method twice that we get the
-            // exact same array of strings back.
+            // Verify the program will not crash when an empty string is passed in
             SubsetListFinder finder = new SubsetListFinder(new string[] { "Clent", string.Empty, "Bar" });
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
             string[] returnArray2 = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
 
-            Assert.True(Object.ReferenceEquals(returnArray, returnArray2)); // "Expected the string arrays to be the exact same reference"
-            // Verify that if i call the method again with a different target framework directory that I get a different array back
-            string[] returnArray3 = finder.GetSubsetListPathsFromDisk("FrameworkDirectory2");
-            Assert.False(Object.ReferenceEquals(returnArray2, returnArray3)); // "Expected the string arrays to not be the exact same reference"
+            Assert.Equal(returnArray.Length, 0);
+            Assert.Equal(returnArray.Length, returnArray2.Length);
         }
 
         /// <summary>

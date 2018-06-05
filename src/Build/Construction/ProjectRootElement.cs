@@ -1914,13 +1914,13 @@ namespace Microsoft.Build.Construction
         {
             var nodes = new List<ProjectImportElement>();
 
-            string sdk = Sdk;
-            if (!string.IsNullOrWhiteSpace(sdk))
+            string sdkAttribute = Sdk;
+            if (!string.IsNullOrWhiteSpace(sdkAttribute))
             {
-                foreach (var referencedSdk in ParseSdks(sdk, SdkLocation))
+                foreach (var referencedSdk in ParseSdks(sdkAttribute, SdkLocation))
                 {
-                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk));
-                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, this));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, this));
                 }
             }
 
@@ -1931,8 +1931,8 @@ namespace Microsoft.Build.Construction
                     sdkNode.XmlElement.GetAttribute("Version"),
                     sdkNode.XmlElement.GetAttribute("MinimumVersion"));
 
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk));
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk));
+                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
+                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
             }
 
             return nodes;

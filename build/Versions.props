@@ -29,18 +29,14 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup>
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
-
     <UsingToolVSSDK>true</UsingToolVSSDK>
-    <!-- Tell repo toolset not to define the GetBuildVersion target, as it would conflict with NerdBank.GitVersioning -->
-    <DefineGetBuildVersionTargetForVsix Condition="'$(DisableNerdbankVersioning)' != 'true'">false</DefineGetBuildVersionTargetForVsix>
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.300-preview2-008530</DotNetCliVersion>
+    <DotNetCliVersion>2.1.300</DotNetCliVersion>
     <!-- We are pretty much always on a preview SDK. No need to warn about it. -->
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
-    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62705-01</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
     <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
@@ -51,10 +47,9 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <VisualStudioSetupInteropVersion>1.16.30</VisualStudioSetupInteropVersion>
-    <MicrosoftNETCoreAppVersion>2.1.0-preview2-26406-04</MicrosoftNETCoreAppVersion>
 
     <!-- MSBuild custom overall switch -->
-    <NuGetPackageVersion>4.7.0-rtm.5148</NuGetPackageVersion>
+    <NuGetPackageVersion>4.8.0-preview1.5185</NuGetPackageVersion>
 
     <!-- Prodcon-overrideable, using repo-toolset naming convention -->
     <NuGetBuildTasksVersion>$(NuGetPackageVersion)</NuGetBuildTasksVersion>
@@ -64,10 +59,8 @@
 
   <!-- Test Dependencies -->
   <PropertyGroup>
-    <MicrosoftNetCompilersVersion>2.4.0</MicrosoftNetCompilersVersion>
-    <MicrosoftNetCoreCompilersVersion>2.6.0-beta3-62309-01</MicrosoftNetCoreCompilersVersion>
     <MicrosoftCodeAnalysisBuildTasksVersion>3.0.0-beta1-61516-01</MicrosoftCodeAnalysisBuildTasksVersion>
-    <MicrosoftExtensionsDependencyModelVersion>2.0.0</MicrosoftExtensionsDependencyModelVersion>
+    <MicrosoftExtensionsDependencyModelVersion>2.1.0</MicrosoftExtensionsDependencyModelVersion>
     <ShouldlyVersion>3.0.0</ShouldlyVersion>
   </PropertyGroup>
 

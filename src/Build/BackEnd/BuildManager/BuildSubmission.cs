@@ -48,7 +48,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Flag indicating if logging is done.
         /// </summary>
-        private bool _loggingCompleted;
+        internal bool LoggingCompleted { get; private set; }
 
         /// <summary>
         /// True if it has been invoked
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Execution
             SubmissionId = submissionId;
             BuildRequestData = requestData;
             _completionEvent = new ManualResetEvent(false);
-            _loggingCompleted = false;
+            LoggingCompleted = false;
             _completionInvoked = 0;
             _legacyThreadingSemantics = legacyThreadingSemantics;
         }
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Execution
                 ((Microsoft.Build.BackEnd.Logging.LoggingService)((IBuildComponentHost)BuildManager).LoggingService).WaitForThreadToProcessEvents();
             }
 
-            _loggingCompleted = true;
+            LoggingCompleted = true;
             CheckForCompletion();
         }
 
@@ -250,7 +250,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CheckForCompletion()
         {
-            if (BuildResult != null && _loggingCompleted)
+            if (BuildResult != null && LoggingCompleted)
             {
                 bool hasCompleted = (Interlocked.Exchange(ref _completionInvoked, 1) == 1);
                 if (!hasCompleted)

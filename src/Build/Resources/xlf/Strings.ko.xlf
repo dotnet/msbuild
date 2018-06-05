@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료합니다. 진단 정보는 “{1}”의 파일에서 MSBuild_*.failure.txt 이름으로 찾을 수 있습니다. 이 위치는 MSBUILDDEBUGPATH 환경 변수를 다른 디렉터리로 설정하여 변경할 수 있습니다.</target>
+        <target state="translated">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료하는 중입니다. 진단 정보는 "{1}"의 파일에서 MSBuild_*.failure.txt 이름으로 찾을 수 있습니다. 이 위치는 MSBUILDDEBUGPATH 환경 변수를 다른 디렉터리로 설정하여 변경할 수 있습니다.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -806,7 +806,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: 프로젝트의 기본 XML 네임스페이스는 MSBuild XML 네임스페이스여야 하거나 네임스페이스가 없어야 합니다. 프로젝트를 MSBuild 2003 형식으로 작성한 경우에는 &lt;Project&gt; 요소에 xmlns="{0}"을(를) 추가하고, 프로젝트를 이전 1.0 또는 1.2 형식으로 작성한 경우에는 MSBuild 2003 형식으로 변환하세요.</target>
+        <target state="translated">MSB4041: 프로젝트의 기본 XML 네임스페이스는 MSBuild XML 네임스페이스이거나 없어야 합니다. 프로젝트를 MSBuild 2003 형식으로 작성한 경우에는 &lt;Project&gt; 요소에 xmlns="{0}"을(를) 추가하고, 프로젝트를 이전 1.0 또는 1.2 형식으로 작성한 경우에는 MSBuild 2003 형식으로 변환하세요.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1948,7 +1948,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: "{1}"에서 "{0}" 작업을 인스턴스화할 수 없습니다. 이 MSBuild 버전은 {2}을(를) 지원하지 않습니다.</target>
+        <target state="translated">MSB4802: "{1}"에서 "{0}" 작업을 인스턴스화할 수 없습니다. 이 버전의 MSBuild는 {2}을(를) 지원하지 않습니다.</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -2043,7 +2043,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="translated">"{0}" 대상을 건너뜁니다. 대상이 프로젝트에 없고 SkipNonexistentTargets가 true로 설정되어 있습니다.</target>
+        <target state="translated">"{0}" 대상을 건너뛰었습니다. 대상이 프로젝트에 없고 SkipNonexistentTargets가 true로 설정되어 있습니다.</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
@@ -2068,7 +2068,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: NuGet 어셈블리를 찾을 수 없어 NuGet 기반 SDK 확인자를 실행하지 못했습니다.  MSBuild 설치를 확인하거나 환경 변수 "{0}"을(를) 필요한 NuGet 어셈블리가 포함된 폴더로 설정하세요. {1}</target>
+        <target state="translated">MSB4243: NuGet 어셈블리를 찾을 수 없어 NuGet 기반 SDK 확인자를 실행하지 못했습니다. MSBuild 설치를 확인하거나 환경 변수 "{0}"을(를) 필요한 NuGet 어셈블리가 포함된 폴더로 설정하세요. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2098,14 +2098,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: 동일한 SDK "{0}"의 여러 버전을 지정할 수 없습니다. "{2}" 위치에서 이전에 확인된 SDK 버전 "{1}"이 사용되고 "{3}" 버전은 무시됩니다.</target>
+        <target state="translated">MSB4240: 동일한 SDK "{0}"의 여러 버전을 지정할 수 없습니다. "{2}" 위치에서 이전에 확인된 SDK 버전 "{1}"이(가) 사용되고 "{3}" 버전은 무시됩니다.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: SDK 참조 "{0}" 버전 "{1}"이(가) 대신 "{2}" 버전으로 확인되었습니다.  참조된 버전을 일치하도록 업데이트하지 않는 경우 예상과 다른 버전을 사용할 수 있습니다.</target>
+        <target state="translated">MSB4241: SDK 참조 "{0}" 버전 "{1}"이(가) 대신 "{2}" 버전으로 확인되었습니다. 참조된 버전을 일치하도록 업데이트하지 않는 경우 예상과 다른 버전을 사용할 수 있습니다.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2116,6 +2116,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
+      </trans-unit>
+      <trans-unit id="SdkResolverManifestInvalid">
+        <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
+        <target state="translated">MSB4245: SDK 확인자 매니페스트 파일이 잘못되었습니다. MSBuild가 손상되었거나 잘못 설치되었을 수 있습니다. 매니페스트 파일 경로 '{0}'. 메시지: {1}</target>
+        <note>{StrBegin="MSB4245: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverNoDllOrManifest">
+        <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
+        <target state="translated">MSB4246: SDK 확인자 폴더가 있지만 SDK 확인자 DLL 또는 매니페스트 파일이 없습니다. MSBuild가 손상되었거나 잘못 설치되었을 수 있습니다. SDK 확인자 경로: {0}</target>
+        <note>{StrBegin="MSB4246: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverDllInManifestMissing">
+        <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
+        <target state="translated">MSB4247: SDK 확인자를 로드할 수 없습니다. 매니페스트 파일이 있지만 SDK 확인자 DLL 파일에 대한 경로를 찾을 수 없습니다. 매니페스트 파일 경로 '{0}'. SDK 확인자 경로: {1}</target>
+        <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>
   </file>

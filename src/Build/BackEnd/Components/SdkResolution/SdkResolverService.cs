@@ -168,7 +168,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
             }
 
-            return null;
+            return new SdkResult(sdk, null, null);
         }
 
         /// <summary>

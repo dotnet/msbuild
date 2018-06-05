@@ -85,8 +85,11 @@ namespace Microsoft.Build.UnitTests
             string input = FileUtilities.GetTemporaryFile();
             string output = FileUtilities.GetTemporaryFile();
 
+            string _initialLoadFilesWriteable = Environment.GetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE");
             try
             {
+                Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
+
                 string content = ObjectModelHelpers.CleanupFileContents(@"
 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
@@ -124,6 +127,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(input);
                 File.Delete(output);
+                Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", _initialLoadFilesWriteable);
             }
         }
 

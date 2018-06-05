@@ -1,23 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#region Using directives
-
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 using System.IO;
-using System.Security;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.ComponentModel;
-
-
-#endregion
+using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -33,36 +24,15 @@ namespace Microsoft.Build.Tasks
         {
         }
 
-        private string _certificateThumbprint;
-        private ITaskItem _sigingTarget;
-        private string _targetFrameVersion;
-        private string _timestampUrl;
+        [Required]
+        public string CertificateThumbprint { get; set; }
 
-        [Required()]
-        public string CertificateThumbprint
-        {
-            get { return _certificateThumbprint; }
-            set { _certificateThumbprint = value; }
-        }
+        [Required]
+        public ITaskItem SigningTarget { get; set; }
 
-        [Required()]
-        public ITaskItem SigningTarget
-        {
-            get { return _sigingTarget; }
-            set { _sigingTarget = value; }
-        }
+        public String TargetFrameworkVersion { get; set; }
 
-        public String TargetFrameworkVersion
-        {
-            get { return _targetFrameVersion; }
-            set { _targetFrameVersion = value; }
-        }
-
-        public string TimestampUrl
-        {
-            get { return _timestampUrl; }
-            set { _timestampUrl = value; }
-        }
+        public string TimestampUrl { get; set; }
 
         public override bool Execute()
         {

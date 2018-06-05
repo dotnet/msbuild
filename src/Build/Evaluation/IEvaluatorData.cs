@@ -13,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.SdkResolution;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -289,7 +290,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Record an import opened during evaluation, if appropriate.
         /// </summary>
-        void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated);
+        void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult);
 
         /// <summary>
         /// Record an import opened during evaluation, if appropriate.

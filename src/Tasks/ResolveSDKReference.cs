@@ -7,14 +7,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Linq;
-using System.Globalization;
-using System.Diagnostics.CodeAnalysis;
-
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -39,12 +38,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// SimpleName group
         /// </summary>
-        private static readonly string s_SDKsimpleNameGroup = "SDKSIMPLENAME";
+        private const string SDKsimpleNameGroup = "SDKSIMPLENAME";
 
         /// <summary>
         /// Version group
         /// </summary>
-        private static readonly string s_SDKVersionGroup = "SDKVERSION";
+        private const string SDKVersionGroup = "SDKVERSION";
 
         /// <summary>
         /// Delimiter used to delimit the dependent sdk's in the warning message
@@ -54,7 +53,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Split char for the appx attribute
         /// </summary>
-        private static readonly char[] s_appxSplitChar = new char[] { '-' };
+        private static readonly char[] s_appxSplitChar = { '-' };
 
         /// <summary>
         /// SDKName
@@ -74,7 +73,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Default target platform version
         /// </summary>
-        private static Version s_defaultTargetPlatformVersion = new Version("7.0");
+        private static readonly Version s_defaultTargetPlatformVersion = new Version("7.0");
 
         /// <summary>
         ///  Set of sdk references to resolve to paths on disk.
@@ -87,39 +86,24 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _installedSDKs = Array.Empty<ITaskItem>();
 
         /// <summary>
-        /// Should resolution errors be logged as warnings or errors.
-        /// </summary>
-        private bool _logResolutionErrorsAsWarnings = false;
-
-        /// <summary>
-        /// The value of the prefer32bit flag used in the build
-        /// </summary>
-        private bool _prefer32Bit = false;
-
-        /// <summary>
         /// stores value of TargetPlatformVersion property
         /// </summary>
-        private Version _targetPlatformVersion = null;
+        private Version _targetPlatformVersion;
 
         /// <summary>
         /// Stores TargetPlatform property
         /// </summary>
-        private string _targetPlatformIdentifier = null;
+        private string _targetPlatformIdentifier;
 
         /// <summary>
         /// Stores ProjectName property
         /// </summary>
-        private string _projectName = null;
+        private string _projectName;
 
         /// <summary>
         /// Stores dictionary with runtime only reference dependencies
         /// </summary>
         private Dictionary<string, string> _runtimeReferenceOnlyDependenciesByName;
-
-        /// <summary>
-        /// Stores flag to enable warning if SDK's max platform version is not specified in the manifest
-        /// </summary>
-        private bool _enableMaxPlatformVersionEmptyWarning = false;
 
         #endregion
 
@@ -132,14 +116,11 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem[] SDKReferences
         {
-            get
-            {
-                return _sdkReferences;
-            }
+            get => _sdkReferences;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "SDKReferences");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(SDKReferences));
                 _sdkReferences = value;
             }
         }
@@ -151,14 +132,11 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem[] InstalledSDKs
         {
-            get
-            {
-                return _installedSDKs;
-            }
+            get => _installedSDKs;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledSDKs");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(InstalledSDKs));
                 _installedSDKs = value;
             }
         }
@@ -175,10 +153,7 @@ namespace Microsoft.Build.Tasks
                 return _targetPlatformIdentifier;
             }
 
-            set
-            {
-                _targetPlatformIdentifier = value;
-            }
+            set => _targetPlatformIdentifier = value;
         }
 
         /// <summary>
@@ -193,10 +168,7 @@ namespace Microsoft.Build.Tasks
                 return _projectName;
             }
 
-            set
-            {
-                _projectName = value;
-            }
+            set => _projectName = value;
         }
 
         /// <summary>
@@ -205,15 +177,11 @@ namespace Microsoft.Build.Tasks
         [Required]
         public string TargetPlatformVersion
         {
-            get
-            {
-                return TargetPlatformAsVersion.ToString();
-            }
+            get => TargetPlatformAsVersion.ToString();
 
             set
             {
-                Version versionValue;
-                if (Version.TryParse(value, out versionValue))
+                if (Version.TryParse(value, out Version versionValue))
                 {
                     TargetPlatformAsVersion = versionValue;
                 }
@@ -224,113 +192,56 @@ namespace Microsoft.Build.Tasks
         /// Reference may be passed in so their SDKNames can be resolved and then sdkroot paths can be tacked onto the reference
         /// so RAR can find the assembly correctly in the sdk location.
         /// </summary>
-        public ITaskItem[] References
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] References { get; set; }
 
         /// <summary>
         /// List of disallowed dependencies passed from the targets file (deprecated)
         /// For instance "VCLibs 11" should be disallowed in projects targeting Win 8.1 or higher.
         /// </summary>
-        public ITaskItem[] DisallowedSDKDependencies
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] DisallowedSDKDependencies { get; set; }
 
         /// <summary>
         /// List of dependencies passed from the targets file that will have the metadata RuntimeReferenceOnly set as true. 
         /// For instance "VCLibs 11" should have such a metadata set to true in projects targeting Win 8.1 or higher.
         /// </summary>
-        public ITaskItem[] RuntimeReferenceOnlySDKDependencies
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] RuntimeReferenceOnlySDKDependencies { get; set; }
 
         /// <summary>
         /// Configuration for SDK's which are resolved
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public string TargetedSDKConfiguration
-        {
-            get;
-            set;
-        }
+        public string TargetedSDKConfiguration { get; set; }
 
         /// <summary>
         /// Architecture of the SDK's we are targeting
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public string TargetedSDKArchitecture
-        {
-            get;
-            set;
-        }
+        public string TargetedSDKArchitecture { get; set; }
 
         /// <summary>
         /// Enables warning when MaxPlatformVersion is not present in the manifest and the ESDK platform version (from its path) 
         /// is different than the target platform version (from the project)
         /// </summary>
-        public bool WarnOnMissingPlatformVersion
-        {
-            get
-            {
-                return _enableMaxPlatformVersionEmptyWarning;
-            }
-
-            set
-            {
-                _enableMaxPlatformVersionEmptyWarning = value;
-            }
-        }
+        public bool WarnOnMissingPlatformVersion { get; set; }
 
         /// <summary>
         /// Should problems resolving SDKs be logged as a warning or an error.
         /// If the resolution problem is logged as an error the build will fail.
         /// If the resolution problem is logged as a warning we will warn and continue.
         /// </summary>
-        public bool LogResolutionErrorsAsWarnings
-        {
-            get
-            {
-                return _logResolutionErrorsAsWarnings;
-            }
-
-            set
-            {
-                _logResolutionErrorsAsWarnings = value;
-            }
-        }
+        public bool LogResolutionErrorsAsWarnings { get; set; }
 
         /// <summary>
         /// The prefer32bit flag used during the build
         /// </summary>
-        public bool Prefer32Bit
-        {
-            get
-            {
-                return _prefer32Bit;
-            }
-
-            set
-            {
-                _prefer32Bit = value;
-            }
-        }
+        public bool Prefer32Bit { get; set; }
 
         /// <summary>
         /// Resolved SDK References
         /// </summary>
         [Output]
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public ITaskItem[] ResolvedSDKReferences
-        {
-            get;
-            private set;
-        }
+        public ITaskItem[] ResolvedSDKReferences { get; private set; }
 
         /// <summary>
         /// Version object containing target platform version
@@ -343,10 +254,7 @@ namespace Microsoft.Build.Tasks
                 return _targetPlatformVersion;
             }
 
-            set
-            {
-                _targetPlatformVersion = value;
-            }
+            set => _targetPlatformVersion = value;
         }
 
         #endregion
@@ -356,7 +264,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            ResolvedSDKReferences = Array.Empty<TaskItem>();
+            ResolvedSDKReferences = Array.Empty<ITaskItem>();
 
             if (InstalledSDKs.Length == 0)
             {
@@ -370,10 +278,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (ITaskItem runtimeDependencyOnlyItem in RuntimeReferenceOnlySDKDependencies)
                 {
-                    string dependencyName;
-                    string dependencyVersion;
-
-                    if (ParseSDKReference(runtimeDependencyOnlyItem.ItemSpec, out dependencyName, out dependencyVersion))
+                    if (ParseSDKReference(runtimeDependencyOnlyItem.ItemSpec, out string dependencyName, out string dependencyVersion))
                     {
                         _runtimeReferenceOnlyDependenciesByName[dependencyName] = dependencyVersion;
                     }
@@ -381,30 +286,22 @@ namespace Microsoft.Build.Tasks
             }
 
             // Convert the list of installed SDK's to a dictionary for faster lookup
-            Dictionary<string, ITaskItem> sdkItems = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
+            var sdkItems = new Dictionary<string, ITaskItem>(InstalledSDKs.Length, StringComparer.OrdinalIgnoreCase);
 
             foreach (ITaskItem installedsdk in InstalledSDKs)
             {
                 string installLocation = installedsdk.ItemSpec;
                 string sdkName = installedsdk.GetMetadata(SDKName);
-                string sdkPlatformVersion = installedsdk.GetMetadata(SDKPlatformVersion);
 
                 if (installLocation.Length > 0 && sdkName.Length > 0)
                 {
-                    if (!sdkItems.ContainsKey(sdkName))
-                    {
-                        sdkItems.Add(sdkName, installedsdk);
-                    }
-                    else
-                    {
-                        sdkItems[sdkName] = installedsdk;
-                    }
+                    sdkItems[sdkName] = installedsdk;
                 }
             }
 
             // We need to check to see if there are any SDKNames on any of the reference items in the project. If there are 
             // then we do not want those SDKs to expand their reference assemblies by default because we are going to use RAR to look inside of them for certain reference assemblies only.
-            HashSet<string> sdkNamesOnReferenceItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var sdkNamesOnReferenceItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (References != null)
             {
                 foreach (ITaskItem referenceItem in References)
@@ -418,16 +315,16 @@ namespace Microsoft.Build.Tasks
             }
 
             // The set of reference items declared in the project file, without duplicate entries.
-            HashSet<SDKReference> sdkReferenceItems = new HashSet<SDKReference>();
+            var sdkReferenceItems = new HashSet<SDKReference>();
 
             // Maps a product family name to a set of SDKs with that product family name
-            Dictionary<string, HashSet<SDKReference>> productFamilyNameToSDK = new Dictionary<string, HashSet<SDKReference>>(StringComparer.OrdinalIgnoreCase);
+            var productFamilyNameToSDK = new Dictionary<string, HashSet<SDKReference>>(StringComparer.OrdinalIgnoreCase);
 
             // Maps a sdk name (no version) to a set of SDKReferences with the same name
-            Dictionary<string, HashSet<SDKReference>> sdkNameToSDK = new Dictionary<string, HashSet<SDKReference>>(StringComparer.OrdinalIgnoreCase);
+            var sdkNameToSDK = new Dictionary<string, HashSet<SDKReference>>(StringComparer.OrdinalIgnoreCase);
 
             // Set of sdks which are not compatible with other sdks of the same product famuily or with the same sdk name
-            HashSet<SDKReference> sdksNotCompatibleWithOtherSDKs = new HashSet<SDKReference>();
+            var sdksNotCompatibleWithOtherSDKs = new HashSet<SDKReference>();
 
             // Go through each reference passed in and determine if it is in the set of installed SDKs. 
             // Also create new output items if the item is in an installed SDK and set the metadata correctly.
@@ -447,13 +344,12 @@ namespace Microsoft.Build.Tasks
                 if (!sdkReferenceItems.Contains(reference) /* filter out duplicate sdk reference entries*/)
                 {
                     sdkReferenceItems.Add(reference);
-                    reference.Resolve(sdkItems, TargetedSDKConfiguration, TargetedSDKArchitecture, sdkNamesOnReferenceItems, _logResolutionErrorsAsWarnings, _prefer32Bit, TargetPlatformIdentifier, TargetPlatformAsVersion, ProjectName, _enableMaxPlatformVersionEmptyWarning);
+                    reference.Resolve(sdkItems, TargetedSDKConfiguration, TargetedSDKArchitecture, sdkNamesOnReferenceItems, LogResolutionErrorsAsWarnings, Prefer32Bit, TargetPlatformIdentifier, TargetPlatformAsVersion, ProjectName, WarnOnMissingPlatformVersion);
                     if (reference.Resolved)
                     {
                         if (!String.IsNullOrEmpty(reference.ProductFamilyName))
                         {
-                            HashSet<SDKReference> sdksWithProductFamilyName = null;
-                            if (!productFamilyNameToSDK.TryGetValue(reference.ProductFamilyName, out sdksWithProductFamilyName))
+                            if (!productFamilyNameToSDK.TryGetValue(reference.ProductFamilyName, out HashSet<SDKReference> sdksWithProductFamilyName))
                             {
                                 productFamilyNameToSDK.Add(reference.ProductFamilyName, new HashSet<SDKReference> { reference });
                             }
@@ -468,8 +364,7 @@ namespace Microsoft.Build.Tasks
                             sdksNotCompatibleWithOtherSDKs.Add(reference);
                         }
 
-                        HashSet<SDKReference> sdksWithSimpleName = null;
-                        if (!sdkNameToSDK.TryGetValue(reference.SimpleName, out sdksWithSimpleName))
+                        if (!sdkNameToSDK.TryGetValue(reference.SimpleName, out HashSet<SDKReference> sdksWithSimpleName))
                         {
                             sdkNameToSDK.Add(reference.SimpleName, new HashSet<SDKReference> { reference });
                         }
@@ -494,16 +389,15 @@ namespace Microsoft.Build.Tasks
                 // If we have already error or warned about an sdk not being compatible with one of the notCompatibleReferences then do not log it again
                 // an sdk could be incompatible because the productfamily is the same but also be incompatible at the same time due to the sdk name
                 // we only want to log one of those cases so we do not get 2 warings or errors for the same sdks.
-                HashSet<SDKReference> sdksAlreadyErrorOrWarnedFor = new HashSet<SDKReference>();
+                var sdksAlreadyErrorOrWarnedFor = new HashSet<SDKReference>();
 
                 // Check to see if a productfamily was set, we want to emit this warning or error first.
                 if (!String.IsNullOrEmpty(notCompatibleReference.ProductFamilyName))
                 {
-                    HashSet<SDKReference> referenceInProductFamily = null;
-                    if (productFamilyNameToSDK.TryGetValue(notCompatibleReference.ProductFamilyName, out referenceInProductFamily))
+                    if (productFamilyNameToSDK.TryGetValue(notCompatibleReference.ProductFamilyName, out HashSet<SDKReference> referenceInProductFamily))
                     {
                         // We want to build a list of incompatible reference names so we can emit them in the error or warnings.
-                        List<string> listOfIncompatibleReferences = new List<string>();
+                        var listOfIncompatibleReferences = new List<string>();
                         foreach (SDKReference incompatibleReference in referenceInProductFamily)
                         {
                             if (!sdksAlreadyErrorOrWarnedFor.Contains(incompatibleReference) && incompatibleReference != notCompatibleReference /*cannot be incompatible with self*/)
@@ -529,11 +423,10 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                HashSet<SDKReference> referenceWithSameName = null;
-                if (sdkNameToSDK.TryGetValue(notCompatibleReference.SimpleName, out referenceWithSameName))
+                if (sdkNameToSDK.TryGetValue(notCompatibleReference.SimpleName, out HashSet<SDKReference> referenceWithSameName))
                 {
                     // We want to build a list of incompatible reference names so we can emit them in the error or warnings.
-                    List<string> listOfIncompatibleReferences = new List<string>();
+                    var listOfIncompatibleReferences = new List<string>();
                     foreach (SDKReference incompatibleReference in referenceWithSameName)
                     {
                         if (!sdksAlreadyErrorOrWarnedFor.Contains(incompatibleReference) && incompatibleReference != notCompatibleReference /*cannot be incompatible with self*/)
@@ -576,7 +469,7 @@ namespace Microsoft.Build.Tasks
         {
             if (referencesToAddMetadata != null)
             {
-                foreach (var referenceItem in sdkReferenceItems)
+                foreach (SDKReference referenceItem in sdkReferenceItems)
                 {
                     string sdkSimpleName = referenceItem.SimpleName;
                     string rawSdkVersion = referenceItem.Version;
@@ -594,7 +487,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void VerifySDKDependsOn(TaskLoggingHelper log, HashSet<SDKReference> sdkReferenceItems)
         {
-            foreach (var reference in sdkReferenceItems)
+            foreach (SDKReference reference in sdkReferenceItems)
             {
                 List<string> dependentSDKs = ParseDependsOnSDK(reference.DependsOnSDK);
                 if (dependentSDKs.Count > 0)
@@ -620,9 +513,7 @@ namespace Microsoft.Build.Tasks
         {
             string[] unresolvedDependencyIdentities = dependentSDKs.Where(x =>
             {
-                string simpleName;
-                string sdkVersion;
-                bool parseSuccessful = ParseSDKReference(x, out simpleName, out sdkVersion);
+                bool parseSuccessful = ParseSDKReference(x, out string simpleName, out string sdkVersion);
                 if (!parseSuccessful)
                 {
                     // If a dependency could not be parsed as an SDK identity then ignore it from the list of unresolved dependencies
@@ -636,13 +527,13 @@ namespace Microsoft.Build.Tasks
                 return resolvedReference == null;
             })
             .Select(y => String.Format(CultureInfo.CurrentCulture, "\"{0}\"", y))
-            .ToArray<string>();
+            .ToArray();
 
             return unresolvedDependencyIdentities;
         }
 
         /// <summary>
-        ///  Parse out the sdk identities
+        /// Parse out the sdk identities
         /// </summary>
         internal static List<string> ParseDependsOnSDK(string dependsOnSDK)
         {
@@ -659,9 +550,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal SDKReference ParseSDKReference(ITaskItem referenceItem)
         {
-            string sdkSimpleName;
-            string rawSdkVersion;
-            bool splitSuccessful = ParseSDKReference(referenceItem.ItemSpec, out sdkSimpleName, out rawSdkVersion);
+            bool splitSuccessful = ParseSDKReference(referenceItem.ItemSpec, out string sdkSimpleName, out string rawSdkVersion);
 
             if (!splitSuccessful)
             {
@@ -669,7 +558,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            SDKReference reference = new SDKReference(referenceItem, sdkSimpleName, rawSdkVersion);
+            var reference = new SDKReference(referenceItem, sdkSimpleName, rawSdkVersion);
             return reference;
         }
 
@@ -686,11 +575,10 @@ namespace Microsoft.Build.Tasks
 
             if (match.Success)
             {
-                sdkSimpleName = match.Groups[s_SDKsimpleNameGroup].Value.Trim();
+                sdkSimpleName = match.Groups[SDKsimpleNameGroup].Value.Trim();
 
-                rawSdkVersion = match.Groups[s_SDKVersionGroup].Value.Trim();
-                Version sdkVersion = null;
-                parsedVersion = Version.TryParse(rawSdkVersion, out sdkVersion);
+                rawSdkVersion = match.Groups[SDKVersionGroup].Value.Trim();
+                parsedVersion = Version.TryParse(rawSdkVersion, out _);
             }
 
             return sdkSimpleName.Length > 0 && parsedVersion;
@@ -745,7 +633,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogErrorOrWarning(Tuple<string, object[]> errorOrWarning)
         {
-            if (_logResolutionErrorsAsWarnings)
+            if (LogResolutionErrorsAsWarnings)
             {
                 Log.LogWarningWithCodeFromResources(errorOrWarning.Item1, errorOrWarning.Item2);
             }
@@ -763,7 +651,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Delimiter for supported architectures
             /// </summary>
-            private static readonly char[] s_supportedArchitecturesSplitChars = new Char[] { ';' };
+            private static readonly char[] s_supportedArchitecturesSplitChars = { ';' };
 
             /// <summary>
             /// Delimiter used to delimit the supported architectures in the error message
@@ -823,7 +711,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// SDKManifest object encapsulating all the information contained in the manifest xml file
             /// </summary>
-            private SDKManifest _sdkManifest = null;
+            private SDKManifest _sdkManifest;
 
             /// <summary>
             /// What should happen if this sdk is resolved with other sdks of the same productfamily or same sdk name.
@@ -833,7 +721,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Value of the prefer32Bit property from the project.
             /// </summary>
-            private bool _prefer32BitFromProject = false;
+            private bool _prefer32BitFromProject;
 
             #region Constructor
             /// <summary>
@@ -841,9 +729,9 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public SDKReference(ITaskItem taskItem, string sdkName, string sdkVersion)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(taskItem, "taskItem");
-                ErrorUtilities.VerifyThrowArgumentLength(sdkName, "sdkName");
-                ErrorUtilities.VerifyThrowArgumentLength(sdkVersion, "sdkVersion");
+                ErrorUtilities.VerifyThrowArgumentNull(taskItem, nameof(taskItem));
+                ErrorUtilities.VerifyThrowArgumentLength(sdkName, nameof(sdkName));
+                ErrorUtilities.VerifyThrowArgumentLength(sdkVersion, nameof(sdkVersion));
 
                 ReferenceItem = taskItem;
                 SimpleName = sdkName;
@@ -862,281 +750,156 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             ///  Sdk reference item passed in from the build
             /// </summary>
-            public ITaskItem ReferenceItem
-            {
-                get;
-                private set;
-            }
+            public ITaskItem ReferenceItem { get; }
 
             /// <summary>
             /// Parsed simple name
             /// </summary>
-            public string SimpleName
-            {
-                get;
-                private set;
-            }
+            public string SimpleName { get; }
 
             /// <summary>
             /// Parsed version.
             /// </summary>
-            public string Version
-            {
-                get;
-                private set;
-            }
+            public string Version { get; }
 
             /// <summary>
             /// Resolved full path to the root of the sdk.
             /// </summary>
-            public string ResolvedPath
-            {
-                get;
-                private set;
-            }
+            public string ResolvedPath { get; private set; }
 
             /// <summary>
             /// Has the reference been resolved
             /// </summary>
-            public bool Resolved
-            {
-                get
-                {
-                    return !String.IsNullOrEmpty(ResolvedPath);
-                }
-            }
+            public bool Resolved => !String.IsNullOrEmpty(ResolvedPath);
 
             /// <summary>
             /// Messages which may be warnings or errors depending on the logging setting.
             /// </summary>
-            public List<Tuple<string, object[]>> ResolutionErrors
-            {
-                get;
-                private set;
-            }
+            public List<Tuple<string, object[]>> ResolutionErrors { get; }
 
             /// <summary>
             /// Warning messages only
             /// </summary>
-            public List<Tuple<string, object[]>> ResolutionWarnings
-            {
-                get;
-                private set;
-            }
+            public List<Tuple<string, object[]>> ResolutionWarnings { get; }
 
             /// <summary>
             /// Messages generated during resolution
             /// </summary>
-            public List<Tuple<string, object[]>> StatusMessages
-            {
-                get;
-                private set;
-            }
+            public List<Tuple<string, object[]>> StatusMessages { get; }
 
             /// <summary>
             /// SDKName, this is a formatted name based on the SimpleName and the Version
             /// </summary>
-            public string SDKName
-            {
-                get;
-                private set;
-            }
+            public string SDKName { get; }
 
             /// <summary>
             /// Resolved item which will be output by the task.
             /// </summary>
-            public ITaskItem ResolvedItem
-            {
-                get;
-                set;
-            }
+            public ITaskItem ResolvedItem { get; set; }
 
             /// <summary>
             /// SDKType found in the sdk manifest
             /// </summary>
-            public SDKType SDKType
-            {
-                get;
-                set;
-            }
+            public SDKType SDKType { get; set; }
 
             /// <summary>
             /// The target platform in the sdk manifest
             /// </summary>
-            public string TargetPlatform
-            {
-                get;
-                set;
-            }
+            public string TargetPlatform { get; set; }
 
             /// <summary>
             /// The target platform min version in the sdk manifest
             /// </summary>
-            public string TargetPlatformMinVersion
-            {
-                get;
-                set;
-            }
+            public string TargetPlatformMinVersion { get; set; }
 
             /// <summary>
             /// The target platform max version in the sdk manifest
             /// </summary>
-            public string TargetPlatformVersion
-            {
-                get;
-                set;
-            }
+            public string TargetPlatformVersion { get; set; }
 
             /// <summary>
             /// DisplayName found in the sdk manifest
             /// </summary>
-            public string DisplayName
-            {
-                get;
-                set;
-            }
+            public string DisplayName { get; set; }
 
             /// <summary>
             /// Support Prefer32bit found in the sdk manifest
             /// </summary>
-            public string SupportPrefer32Bit
-            {
-                get;
-                set;
-            }
+            public string SupportPrefer32Bit { get; set; }
 
             /// <summary>
             /// CopyRedistToSubDirectory specifies where the redist files should be copied to relative to the root of the package.
             /// </summary>
-            public string CopyRedistToSubDirectory
-            {
-                get;
-                set;
-            }
+            public string CopyRedistToSubDirectory { get; set; }
 
             /// <summary>
             /// ProductFamilyName specifies the product family for the SDK. This is offered up as metadata on the resolved sdkreference and is used to detect sdk conflicts.
             /// </summary>
-            public string ProductFamilyName
-            {
-                get;
-                set;
-            }
+            public string ProductFamilyName { get; set; }
 
             /// <summary>
             /// SupportsMultipleVersions specifies what should happen if multiple versions of the product family or sdk name are detected
             /// </summary>
             public MultipleVersionSupport SupportsMultipleVersions
             {
-                get
-                {
-                    return _supportsMultipleVersions;
-                }
-
-                set
-                {
-                    _supportsMultipleVersions = value;
-                }
+                get => _supportsMultipleVersions;
+                set => _supportsMultipleVersions = value;
             }
 
             /// <summary>
             /// Supported Architectures is a semicolon delimited list of architectures that the SDK supports.
             /// </summary>
-            public string SupportedArchitectures
-            {
-                get;
-                set;
-            }
+            public string SupportedArchitectures { get; set; }
 
             /// <summary>
             /// DependsOnSDK is a semicolon delimited list of SDK identities that the SDK requires be resolved in order to function.
             /// </summary>
-            public string DependsOnSDK
-            {
-                get;
-                set;
-            }
+            public string DependsOnSDK { get; set; }
 
             /// <summary>
             /// MaxPlatformVersion as in the manifest
             /// </summary>
-            public string MaxPlatformVersion
-            {
-                get;
-                set;
-            }
+            public string MaxPlatformVersion { get; set; }
 
             /// <summary>
             /// MinOSVersion as in the manifest
             /// </summary>
-            public string MinOSVersion
-            {
-                get;
-                set;
-            }
+            public string MinOSVersion { get; set; }
 
             /// <summary>
             /// MaxOSVersionTested as in the manifest
             /// </summary>
-            public string MaxOSVersionTested
-            {
-                get;
-                set;
-            }
+            public string MaxOSVersionTested { get; set; }
 
             /// <summary>
             /// MoreInfo as in the manifest
             /// </summary>
-            public string MoreInfo
-            {
-                get;
-                set;
-            }
+            public string MoreInfo { get; set; }
 
             /// <summary>
             /// What ever framework identities we found in the manifest.
             /// </summary>
-            private Dictionary<string, string> FrameworkIdentitiesFromManifest
-            {
-                get;
-                set;
-            }
+            private Dictionary<string, string> FrameworkIdentitiesFromManifest { get; }
 
             /// <summary>
             /// The frameworkIdentity for the sdk, this may be a single name or a | delimited name
             /// </summary>
-            private string FrameworkIdentity
-            {
-                get;
-                set;
-            }
+            private string FrameworkIdentity { get; set; }
 
             /// <summary>
             /// PlatformIdentity if it exists in the appx manifest for this sdk.
             /// </summary>
-            private string PlatformIdentity
-            {
-                get;
-                set;
-            }
+            private string PlatformIdentity { get; set; }
 
             /// <summary>
             /// Whatever appx locations we found in the manifest
             /// </summary>
-            private Dictionary<string, string> AppxLocationsFromManifest
-            {
-                get;
-                set;
-            }
+            private Dictionary<string, string> AppxLocationsFromManifest { get; }
 
             /// <summary>
             /// The appxlocation for the sdk can be a single name or a | delimited list
             /// </summary>
-            private string AppxLocation
-            {
-                get;
-                set;
-            }
+            private string AppxLocation { get; set; }
 
             #endregion
 
@@ -1154,8 +917,7 @@ namespace Microsoft.Build.Tasks
                     // There must be a trailing slash or else the ExpandSDKReferenceAssemblies will not work.
                     ResolvedPath = FileUtilities.EnsureTrailingSlash(sdks[SDKName].ItemSpec);
 
-                    Version targetPlatformVersionFromItem;
-                    System.Version.TryParse(sdks[SDKName].GetMetadata(SDKPlatformVersion), out targetPlatformVersionFromItem);
+                    System.Version.TryParse(sdks[SDKName].GetMetadata(SDKPlatformVersion), out Version targetPlatformVersionFromItem);
 
                     GetSDKManifestAttributes();
 
@@ -1178,8 +940,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public override bool Equals(object obj)
             {
-                SDKReference reference = obj as SDKReference;
-                if (reference == null)
+                if (!(obj is SDKReference reference))
                 {
                     return false;
                 }
@@ -1210,7 +971,7 @@ namespace Microsoft.Build.Tasks
                     return true;
                 }
 
-                bool simpleNameMatches = String.Equals(this.SimpleName, other.SimpleName, StringComparison.OrdinalIgnoreCase);
+                bool simpleNameMatches = String.Equals(SimpleName, other.SimpleName, StringComparison.OrdinalIgnoreCase);
                 bool versionMatches = Version.Equals(other.Version, StringComparison.OrdinalIgnoreCase);
 
                 return simpleNameMatches && versionMatches;
@@ -1235,10 +996,10 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Get a piece of metadata off an item and make sureit is trimmed
             /// </summary>
-            private string GetItemMetadataTrimmed(ITaskItem item, string metadataName)
+            private static string GetItemMetadataTrimmed(ITaskItem item, string metadataName)
             {
                 string metadataValue = item.GetMetadata(metadataName);
-                return metadataValue = metadataValue != null ? metadataValue.Trim() : metadataValue;
+                return metadataValue?.Trim();
             }
 
             /// <summary>
@@ -1361,8 +1122,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    SDKType sdkType = SDKType.Unspecified;
-                    Enum.TryParse<SDKType>(sdkTypeFromMetadata, out sdkType);
+                    Enum.TryParse<SDKType>(sdkTypeFromMetadata, out SDKType sdkType);
                     SDKType = sdkType;
                 }
 
@@ -1449,7 +1209,7 @@ namespace Microsoft.Build.Tasks
                 AddStatusMessage("ResolveSDKReference.TargetedConfigAndArchitecture", sdkConfiguration, sdkArchitecture);
 
                 string[] supportedArchitectures = null;
-                if (SupportedArchitectures != null && SupportedArchitectures.Length > 0)
+                if (!string.IsNullOrEmpty(SupportedArchitectures))
                 {
                     supportedArchitectures = SupportedArchitectures.Split(s_supportedArchitecturesSplitChars, StringSplitOptions.RemoveEmptyEntries);
                 }
@@ -1490,9 +1250,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!String.IsNullOrEmpty(MaxPlatformVersion))
                 {
-                    Version maxPlatformVersionAsVersion;
-
-                    if (System.Version.TryParse(MaxPlatformVersion, out maxPlatformVersionAsVersion) && (maxPlatformVersionAsVersion < targetPlatformVersion))
+                    if (System.Version.TryParse(MaxPlatformVersion, out Version maxPlatformVersionAsVersion) && (maxPlatformVersionAsVersion < targetPlatformVersion))
                     {
                         AddResolutionWarning("ResolveSDKReference.MaxPlatformVersionLessThanTargetPlatformVersion", projectName, DisplayName, Version, targetPlatformIdentifier, MaxPlatformVersion, targetPlatformIdentifier, targetPlatformVersion.ToString());
                     }
@@ -1509,9 +1267,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!String.IsNullOrEmpty(TargetPlatformMinVersion))
                 {
-                    Version targetPlatformMinVersionAsVersion;
-
-                    if (System.Version.TryParse(TargetPlatformMinVersion, out targetPlatformMinVersionAsVersion) && (targetPlatformVersion < targetPlatformMinVersionAsVersion))
+                    if (System.Version.TryParse(TargetPlatformMinVersion, out Version targetPlatformMinVersionAsVersion) && (targetPlatformVersion < targetPlatformMinVersionAsVersion))
                     {
                         AddResolutionErrorOrWarning("ResolveSDKReference.PlatformVersionIsLessThanMinVersion", projectName, DisplayName, Version, targetPlatformVersion.ToString(), targetPlatformMinVersionAsVersion.ToString());
                     }
@@ -1519,8 +1275,7 @@ namespace Microsoft.Build.Tasks
 
                 if (String.Equals(NeutralArch, sdkArchitecture, StringComparison.OrdinalIgnoreCase) && !String.IsNullOrEmpty(SupportPrefer32Bit) && _prefer32BitFromProject)
                 {
-                    bool supportPrefer32Bit = true;
-                    bool.TryParse(SupportPrefer32Bit, out supportPrefer32Bit);
+                    bool.TryParse(SupportPrefer32Bit, out bool supportPrefer32Bit);
 
                     if (!supportPrefer32Bit)
                     {
@@ -1588,7 +1343,7 @@ namespace Microsoft.Build.Tasks
                         AppxLocation = null;
 
                         // For testing especially it's nice to have a set order of what the generated appxlocation string will be at the end
-                        SortedDictionary<string, string> architectureLocations = new SortedDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+                        var architectureLocations = new SortedDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
                         List<string> appxLocationComponents = new List<string>();
 
                         foreach (var appxLocation in AppxLocationsFromManifest)
@@ -1604,7 +1359,7 @@ namespace Microsoft.Build.Tasks
                                 }
 
                                 string configurationComponent = null;
-                                string architectureComponent = null;
+                                string architectureComponent;
                                 switch (appxComponents.Length)
                                 {
                                     case 1:

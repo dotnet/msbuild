@@ -1126,6 +1126,15 @@ namespace Microsoft.Build.BackEnd
                     // Do we have a matching configuration?
                     BuildRequestConfiguration matchingConfig = globalConfigCache.GetMatchingConfiguration(request.Config);
                     BuildRequest newRequest = null;
+
+                    BuildRequestDataFlags buildRequestDataFlags = request.BuildRequestDataFlags;
+
+                    if (issuingEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
+                    {
+                        // If the issuing build requested to ignore missing, empty, and invalid imports, this entry should also
+                        buildRequestDataFlags |= BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports;
+                    }
+
                     if (matchingConfig == null)
                     {
                         // No configuration locally, are we already waiting for it?
@@ -1151,7 +1160,7 @@ namespace Microsoft.Build.BackEnd
                         newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(),
                             request.Config.ConfigurationId, request.Targets, issuingEntry.Request.HostServices,
                             issuingEntry.Request.BuildEventContext, issuingEntry.Request,
-                            request.BuildRequestDataFlags);
+                            buildRequestDataFlags);
 
                         issuingEntry.WaitForResult(newRequest);
 
@@ -1168,7 +1177,7 @@ namespace Microsoft.Build.BackEnd
                         newRequest = new BuildRequest(issuingEntry.Request.SubmissionId, GetNextBuildRequestId(),
                             matchingConfig.ConfigurationId, request.Targets, issuingEntry.Request.HostServices,
                             issuingEntry.Request.BuildEventContext, issuingEntry.Request,
-                            request.BuildRequestDataFlags);
+                            buildRequestDataFlags);
 
                         IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
                         ResultsCacheResponse response = resultsCache.SatisfyRequest(newRequest, matchingConfig.ProjectInitialTargets, matchingConfig.ProjectDefaultTargets, matchingConfig.GetAfterTargetsForDefaultTargets(newRequest), skippedResultsAreOK: false);

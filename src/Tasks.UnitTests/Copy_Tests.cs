@@ -3,7 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
@@ -12,11 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.Text;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,22 +25,33 @@ namespace Microsoft.Build.UnitTests
 {
     public class Copy_Tests : IDisposable
     {
-        public bool useHardLinks = false;
+        public bool UseHardLinks { get; protected set; }
 
-        public bool useSymbolicLinks = false;
+        public bool UseSymbolicLinks { get; protected set; }
+
+        public bool UseSingleThreadedCopy
+        {
+            get => _parallelismThreadCount == NoParallelismThreadCount;
+            protected set => _parallelismThreadCount = value ? NoParallelismThreadCount : DefaultParallelismThreadCount;
+        }
+
+        private const int NoParallelismThreadCount = 1;
+        private const int DefaultParallelismThreadCount = int.MaxValue;
+        private int _parallelismThreadCount = DefaultParallelismThreadCount;
+
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSOVERWRITEREADONLYFILES, so that we can run 
         /// the tests isolated from the current state of the environment, but put it back how it belongs
         /// once we're done. 
         /// </summary>
-        private string _alwaysOverwriteReadOnlyFiles = null;
+        private readonly string _alwaysOverwriteReadOnlyFiles;
 
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSRETRY, so that we can run 
         /// the tests isolated from the current state of the environment, but put it back how it belongs
         /// once we're done. 
         /// </summary>
-        private string _alwaysRetry = null;
+        private readonly string _alwaysRetry;
 
         private readonly ITestOutputHelper _testOutputHelper;
 
@@ -50,11 +62,11 @@ namespace Microsoft.Build.UnitTests
         public Copy_Tests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
-            _alwaysRetry = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
+            _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
+            _alwaysRetry = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", String.Empty);
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, String.Empty);
 
             Copy.RefreshInternalEnvironmentValues();
         }
@@ -64,50 +76,43 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void Dispose()
         {
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", _alwaysOverwriteReadOnlyFiles);
-            Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", _alwaysRetry);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, _alwaysOverwriteReadOnlyFiles);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, _alwaysRetry);
 
             Copy.RefreshInternalEnvironmentValues();
         }
 
-        /*
-        * Method:   DontCopyOverSameFile
-        *
-        * If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
-        * have the same date and time.
-        */
+        /// <summary>
+        /// If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
+        /// have the same date and time.
+        /// </summary>
         [Fact]
         public void DontCopyOverSameFile()
         {
             string file = FileUtilities.GetTemporaryFile();
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(file, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a temp file.");
-
-                ITaskItem f = new TaskItem(file);
-                ITaskItem[] sourceFiles = new ITaskItem[] { f };
-                ITaskItem[] destinationFiles = new ITaskItem[] { f };
-
-                CopyMonitor m = new CopyMonitor();
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                using (StreamWriter sw = FileUtilities.OpenWrite(file, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
+                    sw.Write("This is a temp file.");
                 }
 
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
+                ITaskItem f = new TaskItem(file);
+                ITaskItem[] sourceFiles = { f };
+                ITaskItem[] destinationFiles = { f };
 
-                t.Execute
-                (
-                    new Microsoft.Build.Tasks.CopyFileWithState(m.CopyFile)
-                );
+                CopyMonitor m = new CopyMonitor();
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
+
+                t.Execute(m.CopyFile, _parallelismThreadCount);
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -134,29 +139,32 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
                     sw.Write("This is a source file.");
+                }
+
                 using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
                     sw.Write("This is a destination file.");
+                }
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
 
                 ITaskItem sourceItem = new TaskItem(source);
                 ITaskItem destinationItem = new TaskItem(destination);
-                ITaskItem[] sourceFiles = new ITaskItem[] { sourceItem };
-                ITaskItem[] destinationFiles = new ITaskItem[] { destinationItem };
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
-                // OverwriteReadOnlyFiles defaults to false
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    // OverwriteReadOnlyFiles defaults to false
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 // Should fail: target is readonly
                 Assert.False(t.Execute());
@@ -190,36 +198,39 @@ namespace Microsoft.Build.UnitTests
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
-            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
+            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", "1   ");
+                Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, "1   ");
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
                     sw.Write("This is a source file.");
+                }
+
                 using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
                     sw.Write("This is a destination file.");
+                }
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
 
                 ITaskItem sourceItem = new TaskItem(source);
                 ITaskItem destinationItem = new TaskItem(destination);
-                ITaskItem[] sourceFiles = new ITaskItem[] { sourceItem };
-                ITaskItem[] destinationFiles = new ITaskItem[] { destinationItem };
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
-                t.OverwriteReadOnlyFiles = false;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    OverwriteReadOnlyFiles = false,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 // Should not fail although target is readonly
                 Assert.True(t.Execute());
@@ -234,7 +245,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", oldAlwaysOverwriteValue);
+                Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, oldAlwaysOverwriteValue);
 
                 File.Delete(source);
                 File.Delete(destination);
@@ -252,38 +263,41 @@ namespace Microsoft.Build.UnitTests
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
-            string oldAlwaysOverwriteValue = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
+            string oldAlwaysRetryValue = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", "1   ");
+                Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, "1   ");
                 Copy.RefreshInternalEnvironmentValues();
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
                     sw.Write("This is a source file.");
+                }
+
                 using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
                     sw.Write("This is a destination file.");
+                }
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
 
                 ITaskItem sourceItem = new TaskItem(source);
                 ITaskItem destinationItem = new TaskItem(destination);
-                ITaskItem[] sourceFiles = new ITaskItem[] { sourceItem };
-                ITaskItem[] destinationFiles = new ITaskItem[] { destinationItem };
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
-                t.OverwriteReadOnlyFiles = false;
-                t.Retries = 5;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    OverwriteReadOnlyFiles = false,
+                    Retries = 5,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 // The file is read-only, so the retries will all fail. 
                 Assert.False(t.Execute());
@@ -299,7 +313,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", oldAlwaysOverwriteValue);
+                Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, oldAlwaysRetryValue);
                 Copy.RefreshInternalEnvironmentValues();
 
                 File.SetAttributes(destination, FileAttributes.Normal);
@@ -323,29 +337,32 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
                     sw.Write("This is a source file.");
+                }
+
                 using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
                     sw.Write("This is a destination file.");
+                }
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
 
                 ITaskItem sourceItem = new TaskItem(source);
                 ITaskItem destinationItem = new TaskItem(destination);
-                ITaskItem[] sourceFiles = new ITaskItem[] { sourceItem };
-                ITaskItem[] destinationFiles = new ITaskItem[] { destinationItem };
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
-                t.OverwriteReadOnlyFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    OverwriteReadOnlyFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 // Should not fail although target is readonly
                 Assert.True(t.Execute());
@@ -381,13 +398,24 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(destinationFolder);
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source1, true))
+                {
                     sw.Write("This is a source file1.");
+                }
+
                 using (StreamWriter sw = FileUtilities.OpenWrite(source2, true))
+                {
                     sw.Write("This is a source file2.");
+                }
+
                 using (StreamWriter sw = FileUtilities.OpenWrite(destination1, true))
+                {
                     sw.Write("This is a destination file1.");
+                }
+
                 using (StreamWriter sw = FileUtilities.OpenWrite(destination2, true))
+                {
                     sw.Write("This is a destination file2.");
+                }
 
                 // Set one destination readonly.
                 File.SetAttributes(destination1, FileAttributes.ReadOnly);
@@ -396,17 +424,15 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem sourceItem2 = new TaskItem(source2);
                 ITaskItem[] sourceFiles = new ITaskItem[] { sourceItem1, sourceItem2 };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destinationFolder);
-                t.OverwriteReadOnlyFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destinationFolder),
+                    OverwriteReadOnlyFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 // Should not fail although one target is readonly
                 Assert.True(t.Execute());
@@ -449,26 +475,28 @@ namespace Microsoft.Build.UnitTests
             string destinationFile = FileUtilities.GetTemporaryFile();
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
-
-                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a destination temp file.");
-
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
-
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
+                    sw.Write("This is a source temp file.");
                 }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
+
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
+                    sw.Write("This is a destination temp file.");
+                }
+
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
+
+                var t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 t.Execute();
 
@@ -501,28 +529,30 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a source temp file.");
+                }
 
-                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
                 File.Delete(destinationFile);
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 t.Execute();
 
@@ -554,21 +584,19 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks,
+                };
 
                 bool result = t.Execute();
                 Assert.False(result);
@@ -594,26 +622,26 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
                 File.Delete(destinationFile);
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool result = t.Execute();
                 Assert.False(result);
@@ -639,26 +667,26 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
                 File.Delete(destinationFile);
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool result = t.Execute();
                 Assert.False(result);
@@ -689,19 +717,17 @@ namespace Microsoft.Build.UnitTests
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true)) // Keep it locked
                 {
-                    ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+                    ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
-                    Copy t = new Copy();
-                    t.RetryDelayMilliseconds = 1; // speed up tests!
-                    // Allow the task's default (false) to have a chance
-                    if (useHardLinks)
+                    var engine = new MockEngine(_testOutputHelper);
+                    var t = new Copy
                     {
-                        t.UseHardlinksIfPossible = useHardLinks;
-                    }
-                    MockEngine engine = new MockEngine(_testOutputHelper);
-                    t.BuildEngine = engine;
-                    t.SourceFiles = sourceFiles;
-                    t.DestinationFiles = new TaskItem[] { new TaskItem(destinationFile) };
+                        RetryDelayMilliseconds = 1,  // speed up tests!
+                        BuildEngine = engine,
+                        SourceFiles = sourceFiles,
+                        DestinationFiles = new ITaskItem[] { new TaskItem(destinationFile) },
+                        UseHardlinksIfPossible = UseHardLinks
+                    };
 
                     bool result = t.Execute();
                     Assert.False(result);
@@ -744,10 +770,10 @@ namespace Microsoft.Build.UnitTests
             File.WriteAllText(destinationFile, "Destination");
             File.WriteAllText(sourceFile, "SourceFile");
 
-            string userAccount = string.Format(@"{0}\{1}", System.Environment.UserDomainName, System.Environment.UserName);
+            string userAccount = $@"{Environment.UserDomainName}\{Environment.UserName}";
 
-            FileSystemAccessRule denyFile = new FileSystemAccessRule(userAccount, FileSystemRights.Write | FileSystemRights.Delete | FileSystemRights.DeleteSubdirectoriesAndFiles | FileSystemRights.WriteData, AccessControlType.Deny);
-            FileSystemAccessRule denyDirectory = new FileSystemAccessRule(userAccount, FileSystemRights.DeleteSubdirectoriesAndFiles, AccessControlType.Deny);
+            var denyFile = new FileSystemAccessRule(userAccount, FileSystemRights.Write | FileSystemRights.Delete | FileSystemRights.DeleteSubdirectoriesAndFiles | FileSystemRights.WriteData, AccessControlType.Deny);
+            var denyDirectory = new FileSystemAccessRule(userAccount, FileSystemRights.DeleteSubdirectoriesAndFiles, AccessControlType.Deny);
 
             FileSecurity fSecurity = File.GetAccessControl(destinationFile);
             DirectorySecurity dSecurity = Directory.GetAccessControl(tempDirectory);
@@ -760,17 +786,15 @@ namespace Microsoft.Build.UnitTests
                 dSecurity.AddAccessRule(denyDirectory);
                 Directory.SetAccessControl(tempDirectory, dSecurity);
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = new TaskItem[] { new TaskItem(sourceFile) };
-                t.DestinationFiles = new TaskItem[] { new TaskItem(destinationFile) };
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(destinationFile) },
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool result = t.Execute();
                 Assert.False(result);
@@ -809,22 +833,22 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
-                    sw.Write("This is a destination temp file.");
-
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
+                    sw.Write("This is a destination temp file.");
                 }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destinationFile);
-                t.SkipUnchangedFiles = true;
+
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+
+                var engine = new MockEngine();
+                var t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destinationFile),
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool result = t.Execute();
                 Assert.False(result);
@@ -855,21 +879,19 @@ namespace Microsoft.Build.UnitTests
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a destination temp file.");
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool result = t.Execute();
                 Assert.False(result);
@@ -886,7 +908,7 @@ namespace Microsoft.Build.UnitTests
 
         internal class CopyMonitor
         {
-            internal int copyCount = 0;
+            internal int copyCount;
 
             /*
             * Method:   CopyFile
@@ -895,7 +917,7 @@ namespace Microsoft.Build.UnitTests
             */
             internal bool? CopyFile(FileState source, FileState destination)
             {
-                ++copyCount;
+                Interlocked.Increment(ref copyCount);
                 return true;
             }
         }
@@ -912,7 +934,7 @@ namespace Microsoft.Build.UnitTests
             string temp = Path.GetTempPath();
             string inFile1 = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A392");
             string inFile2 = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A393");
-            string invalidFile = "!@#$%^&*()|";
+            const string invalidFile = "!@#$%^&*()|";
             string validOutFile = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A394");
 
             try
@@ -927,29 +949,27 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Dispose();
-                    fs2.Dispose();
+                    fs?.Dispose();
+                    fs2?.Dispose();
                 }
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 ITaskItem i1 = new TaskItem(inFile1);
                 i1.SetMetadata("Locale", "en-GB");
                 i1.SetMetadata("Color", "taupe");
-                t.SourceFiles = new ITaskItem[] { new TaskItem(inFile2), i1 };
+                t.SourceFiles = new[] { new TaskItem(inFile2), i1 };
 
                 ITaskItem o1 = new TaskItem(validOutFile);
                 o1.SetMetadata("Locale", "fr");
                 o1.SetMetadata("Flavor", "Pumpkin");
-                t.DestinationFiles = new ITaskItem[] { new TaskItem(invalidFile), o1 };
+                t.DestinationFiles = new[] { new TaskItem(invalidFile), o1 };
 
                 bool success = t.Execute();
 
@@ -1010,21 +1030,20 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Dispose();
+                    fs?.Dispose();
                 }
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = new ITaskItem[] { new TaskItem(file) };
-                t.DestinationFiles = new ITaskItem[] { new TaskItem(file) };
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(file) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(file) },
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
+
                 bool success = t.Execute();
 
                 Assert.True(success);
@@ -1033,17 +1052,15 @@ namespace Microsoft.Build.UnitTests
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries, nothing to do
 
-                t = new Copy();
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
-                {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
                 engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = new ITaskItem[] { new TaskItem(file) };
-                t.DestinationFiles = new ITaskItem[] { new TaskItem(file) };
-                t.SkipUnchangedFiles = false;
+                t = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(file) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(file) },
+                    SkipUnchangedFiles = false,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 success = t.Execute();
 
@@ -1082,21 +1099,20 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Dispose();
+                    fs?.Dispose();
                 }
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = new ITaskItem[] { new TaskItem(file) };
-                t.DestinationFiles = new ITaskItem[] { new TaskItem(filename.ToLowerInvariant()) };
-                t.SkipUnchangedFiles = false;
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(file) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(filename.ToLowerInvariant()) },
+                    SkipUnchangedFiles = false,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
+
                 bool success = t.Execute();
 
                 Assert.True(success);
@@ -1124,7 +1140,7 @@ namespace Microsoft.Build.UnitTests
             string temp = Path.GetTempPath();
             string file = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A395");
             string invalidFile = NativeMethodsShared.IsUnixLike ? Path.Combine(temp, "!@#$%^&*()|") : "!@#$%^&*()|";
-            string dest2 = "whatever";
+            const string dest2 = "whatever";
 
             try
             {
@@ -1136,21 +1152,20 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Dispose();
+                    fs?.Dispose();
                 }
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-                t.SourceFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(invalidFile) };
-                t.DestinationFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(dest2) };
-                t.SkipUnchangedFiles = false;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(invalidFile) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(dest2) },
+                    SkipUnchangedFiles = false,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
+
                 bool success = t.Execute();
 
                 // Since on Unix there are no invalid file names, the copy will succeed
@@ -1190,26 +1205,25 @@ namespace Microsoft.Build.UnitTests
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 // Don't create the dest folder, let task do that
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var me = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine me = new MockEngine();
-
-                t.BuildEngine = me;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destFolder);
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool success = t.Execute();
 
@@ -1220,14 +1234,14 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                if (!useHardLinks)
+                if (!UseHardLinks)
                 {
-                    Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+                    MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
                     me.AssertLogDoesntContainMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
                 }
                 else
                 {
-                    Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+                    MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
                     me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
                 }
 
@@ -1267,19 +1281,17 @@ namespace Microsoft.Build.UnitTests
 
                 // Don't create the dest folder, let task do that
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFileEscaped) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFileEscaped) };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destFolder);
-                t.SkipUnchangedFiles = true;
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool success = t.Execute();
 
@@ -1316,7 +1328,7 @@ namespace Microsoft.Build.UnitTests
         {
             string tempPath = Path.GetTempPath();
 
-            ITaskItem[] sourceFiles = new ITaskItem[]
+            ITaskItem[] sourceFiles =
             {
                 new TaskItem(Path.Combine(tempPath, "a.cs")),
                 new TaskItem(Path.Combine(tempPath, "b.cs")),
@@ -1334,28 +1346,30 @@ namespace Microsoft.Build.UnitTests
 
             var filesActuallyCopied = new List<KeyValuePair<FileState, FileState>>();
 
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            t.BuildEngine = new MockEngine();
-            t.SourceFiles = sourceFiles;
-            t.DestinationFolder = new TaskItem(Path.Combine(tempPath, "foo"));
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = new MockEngine(),
+                SourceFiles = sourceFiles,
+                DestinationFolder = new TaskItem(Path.Combine(tempPath, "foo")),
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
             {
-                filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                lock (filesActuallyCopied)
+                {
+                    filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                }
                 return true;
-            });
+            }, _parallelismThreadCount);
 
             Assert.True(success);
             Assert.Equal(2, filesActuallyCopied.Count);
             Assert.Equal(4, t.CopiedFiles.Length);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), filesActuallyCopied[1].Key.Name);
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+            filesActuallyCopied.Select(f => Path.GetFileName(f.Key.Name)).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -1369,7 +1383,7 @@ namespace Microsoft.Build.UnitTests
         {
             string tempPath = Path.GetTempPath();
 
-            ITaskItem[] sourceFiles = new ITaskItem[]
+            ITaskItem[] sourceFiles =
             {
                 new TaskItem(Path.Combine(tempPath, "a.cs")),
                 new TaskItem(Path.Combine(tempPath, "b.cs")),
@@ -1386,45 +1400,51 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            ITaskItem[] destFiles = new ITaskItem[]
+            ITaskItem[] destFiles =
             {
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // b.cs -> xa.cs should copy because it's a different source
                 new TaskItem(Path.Combine(tempPath, @"xb.cs")), // a.cs -> xb.cs should copy because it's a different destination
-                new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should copy because it's a different source
+                new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should copy because it's a different source from the b.cs copy done previously
                 new TaskItem(Path.Combine(tempPath, @"xa.cs")), // a.cs -> xa.cs should not copy because it's the same source
             };
 
             var filesActuallyCopied = new List<KeyValuePair<FileState, FileState>>();
 
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            t.BuildEngine = new MockEngine();
-            t.SourceFiles = sourceFiles;
-            t.DestinationFiles = destFiles;
+                RetryDelayMilliseconds = 1,  // speed up tests!
+                BuildEngine = new MockEngine(),
+                SourceFiles = sourceFiles,
+                DestinationFiles = destFiles,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
             {
-                filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                lock (filesActuallyCopied)
+                {
+                    filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
+                }
                 return true;
-            });
+            }, _parallelismThreadCount);
 
             Assert.True(success);
             Assert.Equal(4, filesActuallyCopied.Count);
             Assert.Equal(5, t.CopiedFiles.Length);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), filesActuallyCopied[1].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[2].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), filesActuallyCopied[3].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[0].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[1].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xb.cs"), filesActuallyCopied[2].Value.Name);
-            Assert.Equal(Path.Combine(tempPath, "xa.cs"), filesActuallyCopied[3].Value.Name);
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+            string xaPath = Path.Combine(tempPath, "xa.cs");
+            var xaCopies = filesActuallyCopied.Where(f => f.Value.Name == xaPath).ToList();
+            Assert.Equal(3, xaCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[0].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "b.cs"), xaCopies[1].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[2].Key.Name);
+
+            string xbPath = Path.Combine(tempPath, "xb.cs");
+            var xbCopies = filesActuallyCopied.Where(f => f.Value.Name == xbPath).ToList();
+            Assert.Equal(1, xbCopies.Count);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xbCopies[0].Key.Name);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -1453,22 +1473,19 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Dispose();
-                    fs2.Dispose();
+                    fs?.Dispose();
+                    fs2?.Dispose();
                 }
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                var engine = new MockEngine();
+                var t = new Copy
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
-                }
-                MockEngine engine = new MockEngine();
-                t.BuildEngine = engine;
-
-                t.SourceFiles = new ITaskItem[] { new TaskItem(inFile1), new TaskItem(inFile2) };
-                t.DestinationFiles = new ITaskItem[] { new TaskItem(outFile1) };
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(inFile1), new TaskItem(inFile2) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(outFile1) },
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool success = t.Execute();
 
@@ -1496,26 +1513,26 @@ namespace Microsoft.Build.UnitTests
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
-            string destinationFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string destinationFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
-
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-                ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
-
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-                // Allow the task's default (false) to have a chance
-                if (useHardLinks)
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true)) // HIGHCHAR: Test writes in UTF8 without preamble.
                 {
-                    t.UseHardlinksIfPossible = useHardLinks;
+                    sw.Write("This is a source temp file.");
                 }
-                t.BuildEngine = new MockEngine();
-                t.SourceFiles = sourceFiles;
-                t.DestinationFiles = destinationFiles;
+
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
+
+                var t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    UseHardlinksIfPossible = UseHardLinks
+                };
 
                 bool result = t.Execute();
 
@@ -1538,23 +1555,21 @@ namespace Microsoft.Build.UnitTests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
-            string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string destinationFile = FileUtilities.GetTemporaryFile();
             File.Delete(destinationFile);
 
-            ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
-            ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
+            ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+            ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
 
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            t.BuildEngine = new MockEngine();
-            t.SourceFiles = sourceFiles;
-            t.DestinationFiles = destinationFiles;
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = new MockEngine(),
+                SourceFiles = sourceFiles,
+                DestinationFiles = destinationFiles,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
             bool result = t.Execute();
 
@@ -1571,16 +1586,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExitGracefullyOnInvalidPathCharacters()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            t.BuildEngine = new MockEngine();
-            t.SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") }; ;
-            t.DestinationFolder = new TaskItem("dest");
+                RetryDelayMilliseconds = 1,  // speed up tests!
+                BuildEngine = new MockEngine(),
+                SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") },
+                DestinationFolder = new TaskItem("dest"),
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
             bool result = t.Execute();
 
@@ -1595,18 +1608,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidRetryCount()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var engine = new MockEngine(true /* log to console */);
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            MockEngine engine = new MockEngine(true /* log to console */);
-            t.BuildEngine = engine;
-            t.SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") };
-            t.DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") };
-            t.Retries = -1;
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                Retries = -1,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
             bool result = t.Execute();
 
@@ -1620,19 +1631,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidRetryDelayCount()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var engine = new MockEngine(true /* log to console */);
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            MockEngine engine = new MockEngine(true /* log to console */);
-            t.BuildEngine = engine;
-            t.SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") };
-            t.DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") };
-            t.Retries = 1;
-            t.RetryDelayMilliseconds = -1;
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                Retries = 1,
+                RetryDelayMilliseconds = -1,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
             bool result = t.Execute();
 
@@ -1647,21 +1655,19 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FailureWithNoRetries()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var engine = new MockEngine(true /* log to console */);
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            MockEngine engine = new MockEngine(true /* log to console */);
-            t.BuildEngine = engine;
-            t.SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") };
-            t.DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") };
-            t.Retries = 0;
-
-            CopyFunctor copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+                RetryDelayMilliseconds = 1,  // speed up tests!
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                Retries = 0,
+                UseHardlinksIfPossible = UseHardLinks
+            };
+            
+            var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(false, result);
             engine.AssertLogDoesntContain("MSB3026");
@@ -1674,8 +1680,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DefaultRetriesIs10()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
+            var t = new Copy
+            {
+                RetryDelayMilliseconds = 1,  // speed up tests!
+            };
 
             Assert.Equal(10, t.Retries);
         }
@@ -1686,7 +1694,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DefaultRetryDelayIs1000()
         {
-            Copy t = new Copy();
+            var t = new Copy();
 
             Assert.Equal(1000, t.RetryDelayMilliseconds);
         }
@@ -1697,9 +1705,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DefaultNoHardlink()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-
+            var t = new Copy
+            {
+                RetryDelayMilliseconds = 1,  // speed up tests!
+            };
+            
             Assert.Equal(false, t.UseHardlinksIfPossible);
         }
 
@@ -1710,22 +1720,19 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SuccessAfterOneRetry()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var engine = new MockEngine(true /* log to console */);
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            MockEngine engine = new MockEngine(true /* log to console */);
-            t.BuildEngine = engine;
-            t.SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") };
-            t.DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") };
-            t.Retries = 1;
-            t.RetryDelayMilliseconds = 0; // Can't really test the delay, but at least try passing in a value
+                RetryDelayMilliseconds = 0, // Can't really test the delay, but at least try passing in a value
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                Retries = 1,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
-            CopyFunctor copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(true, result);
             engine.AssertLogContains("MSB3026");
@@ -1738,28 +1745,27 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SuccessAfterOneRetryContinueToNextFile()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var engine = new MockEngine(true /* log to console */);
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            MockEngine engine = new MockEngine(true /* log to console */);
-            t.BuildEngine = engine;
-            t.SourceFiles = new ITaskItem[] { new TaskItem("c:\\source"), new TaskItem("c:\\source2") };
-            t.DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination"), new TaskItem("c:\\destination2") };
-            t.Retries = 1;
-            t.RetryDelayMilliseconds = 1; // Can't really test the delay, but at least try passing in a value
+                RetryDelayMilliseconds = 1, // Can't really test the delay, but at least try passing in a value
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source"), new TaskItem("c:\\source2") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination"), new TaskItem("c:\\destination2") },
+                Retries = 1,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
-            CopyFunctor copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy);
+            var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(true, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogDoesntContain("MSB3027");
-            Assert.Equal(copyFunctor.FilesCopiedSuccessfully[0].Name, FileUtilities.FixFilePath("c:\\source"));
-            Assert.Equal(copyFunctor.FilesCopiedSuccessfully[1].Name, FileUtilities.FixFilePath("c:\\source2"));
+
+            // Copy calls to different destinations can come in any order when running in parallel.
+            Assert.True(copyFunctor.FilesCopiedSuccessfully.Any(f => f.Name == FileUtilities.FixFilePath("c:\\source")));
+            Assert.True(copyFunctor.FilesCopiedSuccessfully.Any(f => f.Name == FileUtilities.FixFilePath("c:\\source2")));
         }
 
         /// <summary>
@@ -1769,26 +1775,25 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TooFewRetriesReturnsFalse()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var engine = new MockEngine(true /* log to console */);
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            MockEngine engine = new MockEngine(true /* log to console */);
-            t.BuildEngine = engine;
-            t.SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") };
-            t.DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") };
-            t.Retries = 2;
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                Retries = 2,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
-            CopyFunctor copyFunctor = new CopyFunctor(4, false /* do not throw */);
-            bool result = t.Execute(copyFunctor.Copy);
+            var copyFunctor = new CopyFunctor(4, false /* do not throw */);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(false, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogContains("MSB3027");
         }
+
 
         /// <summary>
         /// The copy delegate can return false, or throw on failure.
@@ -1797,21 +1802,19 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TooFewRetriesThrows()
         {
-            Copy t = new Copy();
-            t.RetryDelayMilliseconds = 1; // speed up tests!
-            // Allow the task's default (false) to have a chance
-            if (useHardLinks)
+            var engine = new MockEngine(true /* log to console */);
+            var t = new Copy
             {
-                t.UseHardlinksIfPossible = useHardLinks;
-            }
-            MockEngine engine = new MockEngine(true /* log to console */);
-            t.BuildEngine = engine;
-            t.SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") };
-            t.DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") };
-            t.Retries = 1;
+                RetryDelayMilliseconds = 1,  // speed up tests!
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                Retries = 1,
+                UseHardlinksIfPossible = UseHardLinks
+            };
 
-            CopyFunctor copyFunctor = new CopyFunctor(3, true /* throw */);
-            bool result = t.Execute(copyFunctor.Copy);
+            var copyFunctor = new CopyFunctor(3, true /* throw */);
+            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
 
             Assert.Equal(false, result);
             engine.AssertLogContains("MSB3026");
@@ -1826,14 +1829,19 @@ namespace Microsoft.Build.UnitTests
         private class CopyFunctor
         {
             /// <summary>
+            /// Protects the counts and lists below.
+            /// </summary>
+            private readonly object _lockObj = new object();
+
+            /// <summary>
             /// On what attempt count should we stop failing?
             /// </summary>
-            private int _countOfSuccess;
+            private readonly int _countOfSuccess;
 
             /// <summary>
             /// Should we throw when we fail, instead of just returning false?
             /// </summary>
-            private bool _throwOnFailure;
+            private readonly bool _throwOnFailure;
 
             /// <summary>
             /// How many tries have we done so far
@@ -1841,17 +1849,9 @@ namespace Microsoft.Build.UnitTests
             private int _tries;
 
             /// <summary>
-            /// Which files we actually copied.
-            /// </summary>
-            private List<FileState> _filesCopiedSuccessfully;
-
-            /// <summary>
             /// Which files we actually copied
             /// </summary>
-            internal List<FileState> FilesCopiedSuccessfully
-            {
-                get { return _filesCopiedSuccessfully; }
-            }
+            internal List<FileState> FilesCopiedSuccessfully { get; } = new List<FileState>();
 
             /// <summary>
             /// Constructor
@@ -1860,8 +1860,6 @@ namespace Microsoft.Build.UnitTests
             {
                 _countOfSuccess = countOfSuccess;
                 _throwOnFailure = throwOnFailure;
-                _tries = 0;
-                _filesCopiedSuccessfully = new List<FileState>();
             }
 
             /// <summary>
@@ -1869,25 +1867,35 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             internal bool? Copy(FileState source, FileState destination)
             {
-                _tries++;
-
-                // 2nd and subsequent copies always succeed
-                if (_filesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
+                lock (_lockObj)
                 {
-                    Console.WriteLine("Copied {0} to {1} OK", source, destination);
-                    _filesCopiedSuccessfully.Add(source);
-                    return true;
+                    _tries++;
+
+                    // 2nd and subsequent copies always succeed
+                    if (FilesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
+                    {
+                        Console.WriteLine("Copied {0} to {1} OK", source, destination);
+                        FilesCopiedSuccessfully.Add(source);
+                        return true;
+                    }
                 }
 
                 if (_throwOnFailure)
                 {
                     throw new IOException("oops");
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
+        }
+    }
+
+    public class CopySingleThreaded_Tests : Copy_Tests
+    {
+        public CopySingleThreaded_Tests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        {
+            UseSingleThreadedCopy = true;
         }
     }
 
@@ -1896,7 +1904,7 @@ namespace Microsoft.Build.UnitTests
         public CopyNotHardLink_Tests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            this.useHardLinks = false;
+            UseHardLinks = false;
         }
     }
 
@@ -1945,7 +1953,7 @@ namespace Microsoft.Build.UnitTests
         public CopyHardLink_Tests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            this.useHardLinks = true;
+            UseHardLinks = true;
         }
 
         /// <summary>
@@ -1960,38 +1968,33 @@ namespace Microsoft.Build.UnitTests
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Don't create the dest folder, let task do that
 
-                ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
-                Copy t = new Copy();
-                t.RetryDelayMilliseconds = 1; // speed up tests!
-
-                // Allow the task's default (false) to have a chance
-                t.UseHardlinksIfPossible = true;
-
-                MockEngine me = new MockEngine(true);
-                t.BuildEngine = me;
-                t.SourceFiles = sourceFiles;
-                t.DestinationFolder = new TaskItem(destFolder);
-                t.SkipUnchangedFiles = true;
+                var me = new MockEngine(true);
+                var t = new Copy
+                {
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true,
+                    UseHardlinksIfPossible = true
+                };
 
                 bool success = t.Execute();
 
                 Assert.True(success); // "success"
                 Assert.True(File.Exists(destFile)); // "destination exists"
-                Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file."
+                string destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is a source temp file.", destinationFileContents);
 
                 Assert.Equal(1, t.DestinationFiles.Length);
                 Assert.Equal(1, t.CopiedFiles.Length);
@@ -2001,13 +2004,10 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is another source temp file.");
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
+                destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
@@ -2032,18 +2032,16 @@ namespace Microsoft.Build.UnitTests
             int errorCode = Marshal.GetHRForLastWin32Error();
             Marshal.GetExceptionForHR(errorCode);
 
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = @"\\localhost\c$\temp";
+            string sourceFile1 = FileUtilities.GetTemporaryFile();
+            string sourceFile2 = FileUtilities.GetTemporaryFile();
+            const string temp = @"\\localhost\c$\temp";
             string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            string destFile1 = Path.Combine(destFolder, Path.GetFileName(sourceFile1));
+            string destFile2 = Path.Combine(destFolder, Path.GetFileName(sourceFile2));
 
             try
             {
-                if (!Directory.Exists(destFolder))
-                {
-                    Directory.CreateDirectory(destFolder);
-                }
-
+                Directory.CreateDirectory(destFolder);
                 string nothingFile = Path.Combine(destFolder, "nothing.txt");
                 File.WriteAllText(nothingFile, "nothing");
                 File.Delete(nothingFile);
@@ -2057,13 +2055,18 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
+                // Create 2 files to ensure we test with parallel copy.
+                File.WriteAllText(sourceFile1, "This is source temp file 1."); // HIGHCHAR: Test writes in UTF8 without preamble.
+                File.WriteAllText(sourceFile2, "This is source temp file 2.");
 
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles =
+                {
+                    new TaskItem(sourceFile1),
+                    new TaskItem(sourceFile2)
+                };
 
-                MockEngine me = new MockEngine(true);
-                Copy t = new Copy
+                var me = new MockEngine(true);
+                var t = new Copy
                 {
                     RetryDelayMilliseconds = 1, // speed up tests!
                     UseHardlinksIfPossible = true,
@@ -2076,46 +2079,47 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.True(success); // "success"
-                Assert.True(File.Exists(destFile)); // "destination exists"
+                Assert.True(File.Exists(destFile1)); // "destination exists"
+                Assert.True(File.Exists(destFile2)); // "destination exists"
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile1, destFile1);
 
                 // Can't do this below, because the real message doesn't end with String.Empty, it ends with a CLR exception string, and so matching breaks in PLOC.
-                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this
-                // The system cannot move the file to a different disk drive. (Exception from HRESULT: 0x80070011)
+                // Instead look for the HRESULT that CLR unfortunately puts inside its exception string. Something like this:
+                //   The system cannot move the file to a different disk drive. (Exception from HRESULT: 0x80070011)
                 // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
                 me.AssertLogContains("0x80070011");
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    destinationFileContents = sr.ReadToEnd();
+                string destinationFileContents = File.ReadAllText(destFile1);
+                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                destinationFileContents = File.ReadAllText(destFile2);
+                Assert.Equal("This is source temp file 2.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                Assert.Equal(2, t.DestinationFiles.Length);
+                Assert.Equal(2, t.CopiedFiles.Length);
+                Assert.Equal(destFile1, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile2, t.DestinationFiles[1].ItemSpec);
+                Assert.Equal(destFile1, t.CopiedFiles[0].ItemSpec);
+                Assert.Equal(destFile2, t.CopiedFiles[1].ItemSpec);
 
-                Assert.Equal(1, t.DestinationFiles.Length);
-                Assert.Equal(1, t.CopiedFiles.Length);
-                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                // Now we will write new content to the source file
+                // Now we will write new content to a source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is another source temp file.");
+                File.WriteAllText(sourceFile1, "This is another source temp file.");  // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
+                destinationFileContents = File.ReadAllText(destFile1);
+                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
             finally
             {
-                File.Delete(sourceFile);
-                File.Delete(destFile);
+                File.Delete(sourceFile1);
+                File.Delete(sourceFile2);
+                File.Delete(destFile1);
+                File.Delete(destFile2);
                 FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
@@ -2141,13 +2145,9 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is a source temp file.");
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
-                if (!Directory.Exists(destFolder))
-                {
-                    Directory.CreateDirectory(destFolder);
-                }
+                Directory.CreateDirectory(destFolder);
 
                 // Exhaust the number (1024) of directory entries that can be created for a file
                 // This is 1 + (1 x hard links)
@@ -2186,10 +2186,7 @@ namespace Microsoft.Build.UnitTests
                 // me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.RetryingAsFileCopy", sourceFile, destFile, String.Empty);
                 me.AssertLogContains("0x80070476");
 
-                string destinationFileContents;
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
+                string destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
 
                 Assert.Equal(1, t.DestinationFiles.Length);
@@ -2200,13 +2197,10 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                    sw.Write("This is another source temp file.");
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                    destinationFileContents = sr.ReadToEnd();
-
+                destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
@@ -2225,7 +2219,7 @@ namespace Microsoft.Build.UnitTests
         public CopySymbolicLink_Tests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper)
         {
-            useSymbolicLinks = true;
+            UseSymbolicLinks = true;
         }
 
         /// <summary>
@@ -2253,24 +2247,22 @@ namespace Microsoft.Build.UnitTests
                 string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
                 try
                 {
-                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                        sw.Write("This is a source temp file.");
+                    File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                     // Don't create the dest folder, let task do that
 
-                    ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
+                    ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
-                    Copy t = new Copy();
-                    t.RetryDelayMilliseconds = 1; // speed up tests!
-
-                    // Allow the task's default (false) to have a chance
-                    t.UseSymboliclinksIfPossible = true;
-
-                    MockEngine me = new MockEngine(true);
-                    t.BuildEngine = me;
-                    t.SourceFiles = sourceFiles;
-                    t.DestinationFolder = new TaskItem(destFolder);
-                    t.SkipUnchangedFiles = true;
+                    var me = new MockEngine(true);
+                    var t = new Copy
+                    {
+                        RetryDelayMilliseconds = 1,  // speed up tests!
+                        BuildEngine = me,
+                        SourceFiles = sourceFiles,
+                        DestinationFolder = new TaskItem(destFolder),
+                        SkipUnchangedFiles = true,
+                        UseSymboliclinksIfPossible = true
+                    };
 
                     bool success = t.Execute();
 
@@ -2281,11 +2273,7 @@ namespace Microsoft.Build.UnitTests
 
                     me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
 
-                    string destinationFileContents;
-
-                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                        destinationFileContents = sr.ReadToEnd();
-
+                    string destinationFileContents = File.ReadAllText(destFile);
                     Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
 
                     Assert.Equal(1, t.DestinationFiles.Length);
@@ -2297,17 +2285,13 @@ namespace Microsoft.Build.UnitTests
                     // we'll then check that the destination file automatically
                     // has the same content (i.e. it's been hard linked)
 
-                    using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
-                        sw.Write("This is another source temp file.");
+                    File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                     // Read the destination file (it should have the same modified content as the source)
-                    using (StreamReader sr = FileUtilities.OpenRead(destFile))
-                        destinationFileContents = sr.ReadToEnd();
-
+                    destinationFileContents = File.ReadAllText(destFile);
                     Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                     ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
-
                 }
                 finally
                 {

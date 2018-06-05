@@ -936,7 +936,7 @@ namespace Microsoft.Build.Evaluation
 
                 UpdateDefaultTargets(currentProjectOrImport);
 
-                // Get all the implicit imports (e.g. <Project Sdk="" />, but not <Import Sdk="" />)
+                // Get all the implicit imports (e.g. <Project Sdk="" />, or <Sdk Name="" />, but not <Import Sdk="" />)
                 List<ProjectImportElement> implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
 
                 // Evaluate the "top" implicit imports as if they were the first entry in the file.
@@ -1823,12 +1823,12 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(importElement))
             {
-                List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement);
+                List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement, out var sdkResult);
 
                 foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                 {
-                    _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version);
-
+                    _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
+                    
                     PerformDepthFirstPass(importedProjectRootElement);
                 }
             }
@@ -1934,16 +1934,17 @@ namespace Microsoft.Build.Evaluation
         /// in those additional paths if the default fails.
         /// </remarks>
         /// </summary>
-        private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, ProjectImportElement importElement)
+        private List<ProjectRootElement> ExpandAndLoadImports(string directoryOfImportingFile, ProjectImportElement importElement, out SdkResult sdkResult)
         {
             var fallbackSearchPathMatch = _data.Toolset.GetProjectImportSearchPaths(importElement.Project);
+            sdkResult = null;
 
             // no reference or we need to lookup only the default path,
             // so, use the Import path
             if (fallbackSearchPathMatch.Equals(ProjectImportPathMatch.None))
             {
                 List<ProjectRootElement> projects;
-                ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, out projects);
+                ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, out projects, out sdkResult);
                 return projects;
             }
 
@@ -2091,10 +2092,15 @@ namespace Microsoft.Build.Evaluation
         /// Caches the parsed import into the provided collection, so future
         /// requests can be satisfied without re-parsing it.
         /// </summary>
-        private void ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(string directoryOfImportingFile,
-            ProjectImportElement importElement, out List<ProjectRootElement> projects,
+        private void ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(
+            string directoryOfImportingFile,
+            ProjectImportElement importElement,
+            out List<ProjectRootElement> projects,
+            out SdkResult sdkResult,
             bool throwOnFileNotExistsError = true)
         {
+            sdkResult = null;
+
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
                 ParserOptions.AllowProperties, _projectRootElementCache))
             {
@@ -2139,9 +2145,9 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                var sdkRootPath = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath)?.Path;
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
 
-                if (string.IsNullOrEmpty(sdkRootPath))
+                if (!sdkResult.Success)
                 {
                     if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports))
                     {
@@ -2168,7 +2174,7 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.ParsedSdkReference.ToString());
                 }
 
-                project = Path.Combine(sdkRootPath, project);
+                project = Path.Combine(sdkResult.Path, project);
             }
 
             ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,

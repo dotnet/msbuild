@@ -2,9 +2,6 @@
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
-  <!-- Import common project settings provided by RepoToolset -->
-  <Import Project="$(RepoToolsetDir)Settings.props" />
-
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4'))" />
 
   <!-- Override project defaults provided by Repo toolset -->
@@ -25,11 +22,13 @@
     <!-- Defaults for target frameworks and architecture -->
     <LibraryTargetFrameworks>netstandard2.0</LibraryTargetFrameworks>
     <LibraryTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">net461</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
     <RuntimeOutputTargetFrameworks>netcoreapp2.0;netcoreapp2.1</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">net461</RuntimeOutputTargetFrameworks>
 
     <!-- Don't automatically append target framework to output path, since we want to put the Platform Target beforehand, if it's not AnyCPU -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -63,7 +62,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppVersion)" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
     <PackageReference Condition="'$(DisableNerdbankVersioning)' != 'true'" Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
   </ItemGroup>
   

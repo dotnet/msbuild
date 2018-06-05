@@ -13,27 +13,15 @@ namespace Microsoft.Build.Tasks
     public sealed class RequiresFramework35SP1Assembly : TaskExtension
     {
         #region Fields
-        private string _errorReportUrl;
+
         private string _targetFrameworkVersion = Constants.TargetFrameworkVersion20;
         private bool? _createDesktopShortcut;
-        private bool _signingManifests;
-        private bool _outputRequiresMinimumFramework35SP1;
 
-        private ITaskItem[] _referencedAssemblies;
-        private ITaskItem[] _assemblies;
-        private ITaskItem _deploymentManifestEntryPoint;
-        private ITaskItem _entryPoint;
-        private ITaskItem[] _files;
-        private string _suiteName;
         #endregion
 
         #region Properties
 
-        public string ErrorReportUrl
-        {
-            get { return _errorReportUrl; }
-            set { _errorReportUrl = value; }
-        }
+        public string ErrorReportUrl { get; set; }
 
         public string TargetFrameworkVersion
         {
@@ -45,7 +33,7 @@ namespace Microsoft.Build.Tasks
                 }
                 return _targetFrameworkVersion;
             }
-            set { _targetFrameworkVersion = value; }
+            set => _targetFrameworkVersion = value;
         }
 
         public bool CreateDesktopShortcut
@@ -62,57 +50,25 @@ namespace Microsoft.Build.Tasks
                 }
                 return (bool)_createDesktopShortcut;
             }
-            set { _createDesktopShortcut = value; }
+            set => _createDesktopShortcut = value;
         }
 
-        public bool SigningManifests
-        {
-            get { return _signingManifests; }
-            set { _signingManifests = value; }
-        }
+        public bool SigningManifests { get; set; }
 
-        public ITaskItem[] ReferencedAssemblies
-        {
-            get { return _referencedAssemblies; }
-            set { _referencedAssemblies = value; }
-        }
+        public ITaskItem[] ReferencedAssemblies { get; set; }
 
-        public ITaskItem[] Assemblies
-        {
-            get { return _assemblies; }
-            set { _assemblies = value; }
-        }
+        public ITaskItem[] Assemblies { get; set; }
 
-        public ITaskItem DeploymentManifestEntryPoint
-        {
-            get { return _deploymentManifestEntryPoint; }
-            set { _deploymentManifestEntryPoint = value; }
-        }
+        public ITaskItem DeploymentManifestEntryPoint { get; set; }
 
-        public ITaskItem EntryPoint
-        {
-            get { return _entryPoint; }
-            set { _entryPoint = value; }
-        }
+        public ITaskItem EntryPoint { get; set; }
 
-        public ITaskItem[] Files
-        {
-            get { return _files; }
-            set { _files = value; }
-        }
+        public ITaskItem[] Files { get; set; }
 
-        public string SuiteName
-        {
-            get { return _suiteName; }
-            set { _suiteName = value; }
-        }
+        public string SuiteName { get; set; }
 
         [Output]
-        public bool RequiresMinimumFramework35SP1
-        {
-            get { return _outputRequiresMinimumFramework35SP1; }
-            set { _outputRequiresMinimumFramework35SP1 = value; }
-        }
+        public bool RequiresMinimumFramework35SP1 { get; set; }
 
         #endregion
 
@@ -157,11 +113,11 @@ namespace Microsoft.Build.Tasks
 
         private bool ExcludeReferenceFromHashing()
         {
-            if (HasExcludedFileOrSP1File(_referencedAssemblies) ||
-                HasExcludedFileOrSP1File(_assemblies) ||
-                HasExcludedFileOrSP1File(_files) ||
-                IsExcludedFileOrSP1File(_deploymentManifestEntryPoint) ||
-                IsExcludedFileOrSP1File(_entryPoint))
+            if (HasExcludedFileOrSP1File(ReferencedAssemblies) ||
+                HasExcludedFileOrSP1File(Assemblies) ||
+                HasExcludedFileOrSP1File(Files) ||
+                IsExcludedFileOrSP1File(DeploymentManifestEntryPoint) ||
+                IsExcludedFileOrSP1File(EntryPoint))
             {
                 return true;
             }
@@ -189,8 +145,6 @@ namespace Microsoft.Build.Tasks
         /// Is this file System.Data.Entity.dll?
         /// Is this file Client Sentinel Assembly? 
         /// </summary>
-        /// <param name="file"></param>
-        /// <returns></returns>
         private static bool IsExcludedFileOrSP1File(ITaskItem candidateFile)
         {
             if (candidateFile != null &&
@@ -211,18 +165,9 @@ namespace Microsoft.Build.Tasks
 
         #endregion
 
-        public RequiresFramework35SP1Assembly()
-        {
-        }
-
         public override bool Execute()
         {
-            _outputRequiresMinimumFramework35SP1 = false;
-
-            if (HasErrorUrl() || HasCreatedShortcut() || UncheckedSigning() || ExcludeReferenceFromHashing() || HasSuiteName())
-            {
-                _outputRequiresMinimumFramework35SP1 = true;
-            }
+            RequiresMinimumFramework35SP1 = HasErrorUrl() || HasCreatedShortcut() || UncheckedSigning() || ExcludeReferenceFromHashing() || HasSuiteName();
 
             return true;
         }

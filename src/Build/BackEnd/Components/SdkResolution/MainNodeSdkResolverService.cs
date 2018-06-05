@@ -109,7 +109,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         _requests = new ConcurrentQueue<SdkResolverRequest>();
 
                         // Create the thread which processes requests
-                        _requestHandler = Task.Run((Action) RequestHandlerPumpProc);
+                        _requestHandler = Task.Factory.StartNew(RequestHandlerPumpProc, TaskCreationOptions.LongRunning);
+                        
                     }
                 }
             }
@@ -164,7 +165,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         // Get the node manager and send the response back to the node that requested the SDK
                         INodeManager nodeManager = Host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                        nodeManager.SendData(request.NodeId, response ?? new SdkResult());
+                        nodeManager.SendData(request.NodeId, response);
                     }
                 }));
             }

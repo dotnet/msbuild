@@ -14,6 +14,8 @@ Param(
   [switch] $bootstrapOnly,
   [string] $verbosity = "minimal",
   [string] $hostType,
+  [switch] $DotNetBuildFromSource,
+  [string] $DotNetCoreSdkDir = "",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -116,13 +118,14 @@ function InstallNuGet {
 }
 
 function InstallRepoToolset {
-  $RepoToolsetVersion = GetVersionsPropsVersion -Name "RoslynToolsRepoToolsetVersion"
+  $GlobalJson = Get-Content(Join-Path $RepoRoot "global.json") | ConvertFrom-Json
+  $RepoToolsetVersion = $GlobalJson.'msbuild-sdks'.'RoslynTools.RepoToolset'
   $RepoToolsetDir = Join-Path $NuGetPackageRoot "roslyntools.repotoolset\$RepoToolsetVersion\tools"
   $RepoToolsetBuildProj = Join-Path $RepoToolsetDir "Build.proj"
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
-    $ToolsetProj = Join-Path $PSScriptRoot "Toolset.proj"
-    $msbuildArgs = "/t:restore", "/m", "/clp:Summary", "/warnaserror", "/v:$verbosity"
+    $ToolsetProj = Join-Path $PSScriptRoot "Toolset.csproj"
+    $msbuildArgs = "/t:build", "/m", "/clp:Summary", "/warnaserror", "/v:$verbosity"
     $msbuildArgs = AddLogCmd "Toolset" $msbuildArgs
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)
@@ -178,7 +181,13 @@ function KillProcessesFromRepo {
 }
 
 function Build {
-  InstallDotNetCli
+  if (![string]::IsNullOrEmpty($DotNetCoreSdkDir) -and (Test-Path -Path $DotNetCoreSdkDir)) {
+    $env:DOTNET_INSTALL_DIR = $DotNetCoreSdkDir
+  }
+  else {
+    InstallDotNetCli
+  }
+
   $env:DOTNET_HOST_PATH = Join-Path $env:DOTNET_INSTALL_DIR "dotnet.exe"
 
   if ($prepareMachine) {
@@ -207,14 +216,28 @@ function Build {
 
   $RepoToolsetBuildProj = InstallRepoToolset
 
-  $solution = Join-Path $RepoRoot "MSBuild.sln"
+  echo "Repo toolset used from: $RepoToolsetBuildProj"
 
-  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:SolutionPath=$solution", "/p:CIBuild=$ci"
+  if ($DotNetBuildFromSource)
+  {
+    $solution = Join-Path $RepoRoot "MSBuild.SourceBuild.sln"
+  }
+  else
+  {
+    $solution = Join-Path $RepoRoot "MSBuild.sln"
+  }
+
+  $commonMSBuildArgs = "/m", "/clp:Summary", "/v:$verbosity", "/p:Configuration=$configuration", "/p:Projects=$solution", "/p:CIBuild=$ci", "/p:RepoRoot=$reporoot"
   if ($ci)
   {
     # Only enable warnaserror on CI runs.  For local builds, we will generate a warning if we can't run EditBin because
     # the C++ tools aren't installed, and we don't want this to fail the build
     $commonMSBuildArgs = $commonMSBuildArgs + "/warnaserror"
+  }
+
+  if ($DotnetBuildFromSource)
+  {
+    $commonMSBuildArgs = $commonMSBuildArgs + "/p:CreateTlb=false"
   }
 
   if ($hostType -ne 'full')
@@ -285,12 +308,17 @@ function CallMSBuild
 {
   try 
   {
+    Write-Host "=========================="
+    Write-Host "$msbuildHost $msbuildToUse $args"
+    Write-Host "=========================="
+
     if ($msbuildHost)
     {
       & $msbuildHost $msbuildToUse $args
     }
     else
     {
+      
       & $msbuildToUse $args
     }
 
