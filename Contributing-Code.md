@@ -1,4 +1,4 @@
-###Contributing Code
+### Contributing Code
 Before submitting a feature or substantial code contribution please discuss it with the team and ensure it follows the product roadmap. The team rigorously reviews and tests all code submissions. The submissions must meet an extremely high bar for quality, design, backwards compatibility, and roadmap appropriateness.
 
 Because our focus right now is on maintaining backwards compatibility, the team has set the following limits on pull requests:
@@ -13,13 +13,13 @@ When you are ready to proceed with making a change, get set up to [[build|Buildi
 
 You must sign a Contributor License Agreement (CLA) before submitting your pull request. To complete the CLA, submit a request via the form and electronically sign the CLA when you receive the email containing the link to the document. You need to complete the CLA only once to cover all Microsoft Open Technologies OSS projects.
 
-###Developer Workflow
+### Developer Workflow
 
 1. Work item is assigned to a developer during the triage process
 2. Both Microsoft and external contributors are expected to do their work in a local fork and submit code for consideration via a pull request.
 3. When the pull request process deems the change ready it will be merged directly into the tree. 
 
-###Creating New Issues
+### Creating New Issues
 
 Please follow these guidelines when creating new issues in the issue tracker:
 
@@ -32,13 +32,5 @@ Please follow these guidelines when creating new issues in the issue tracker:
     - Specify any relevant exception messages and stack traces.
 - Subscribe to notifications for the created issue in case there are any follow up questions.
 
-###Coding Conventions
+### Coding Conventions
 - Use the coding style outlined in the [.Net Foundation Coding Guidelines](https://github.com/dotnet/corefx/wiki/Contributing#c-coding-style)
-
-##Code Formatter
-
-The MSBuild team regularly uses the [.NET code formatter tool](https://github.com/dotnet/codeformatter) to ensure the code base maintains a consistent style over time.  Run:
-```
-CodeFormatter.exe <path to MSBuild.sln>
-```
-This should be done before starting a pull request.
