@@ -199,12 +199,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Whether to include evaluation profiles in events.
         /// </summary>
-        private bool _includeEvaluationProfile = false;
+        private bool? _includeEvaluationProfile;
 
         /// <summary>
         /// Whether to include task inputs in task events.
         /// </summary>
-        private bool _includeTaskInputs = false;
+        private bool? _includeTaskInputs;
 
         #region LoggingThread Data
 
@@ -468,7 +468,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationProfile
         {
-            get => _includeEvaluationProfile || new Lazy<bool>(() => _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles)).Value;
+            get => (_includeEvaluationProfile = _includeEvaluationProfile ??_eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles)).Value;
             set => _includeEvaluationProfile = value;
         }
 
@@ -477,7 +477,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeTaskInputs
         {
-            get => _includeTaskInputs || new Lazy<bool>(() => _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs)).Value;
+            get => (_includeTaskInputs = _includeTaskInputs ?? _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs)).Value;
             set => _includeTaskInputs = value;
         }
 
