@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Theory]
-        [InlineData("console", "microsoft.netcore.app")]
+        // [InlineData("console", "microsoft.netcore.app")] re-enable when this issue is resolved: "https://github.com/dotnet/cli/issues/9420"
         [InlineData("classlib", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
         {
