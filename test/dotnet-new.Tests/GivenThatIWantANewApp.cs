@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Theory]
-        // [InlineData("console", "microsoft.netcore.app")] re-enable when this issue is resolved: "https://github.com/dotnet/cli/issues/9420"
+        [InlineData("console", "microsoft.netcore.app")]
         [InlineData("classlib", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
         {
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.New.Tests
                 var sharedFxDir = dotnetDir
                     .GetDirectory("shared", "Microsoft.NETCore.App")
                     .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.1."));
+                    .Single(d => d.Name.StartsWith("2.1.1"));
 
                 if (packageName == "microsoft.netcore.app")
                 {
