@@ -10,7 +10,6 @@ branch = GithubBranchName
 // What this repo is using for its machine images at the current time
 imageVersionMap = ['Windows_NT':'latest-dev15-5',
                     'OSX10.13':'latest-or-auto',
-                    'Ubuntu14.04':'latest-or-auto',
                     'Ubuntu16.04':'20170731',
                     'RHEL7.2' : 'latest']
 
@@ -76,7 +75,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
 }
 
 [true, false].each { isPR ->
-    ['Windows_NT', 'OSX10.13', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
+    ['Windows_NT', 'OSX10.13', 'Ubuntu16.04'].each {osName ->
         def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
@@ -84,10 +83,10 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
         }
 
         // TODO: make this !windows once RHEL builds are working
-        if (osName.startsWith('Ubuntu') || osName.startsWith('OSX')) {
-            runtimes.add('Mono')
-            runtimes.add('MonoTest')
-        }
+        //if (osName.startsWith('Ubuntu') || osName.startsWith('OSX')) {
+            //runtimes.add('Mono')
+            //runtimes.add('MonoTest')
+        //}
 
         def script = "NA"
         def machineAffinityOverride = null
