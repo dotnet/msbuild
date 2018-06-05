@@ -468,7 +468,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationProfile
         {
-            get => _includeEvaluationProfile || _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles);
+            get => _includeEvaluationProfile || new Lazy<bool>(() => _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles)).Value;
             set => _includeEvaluationProfile = value;
         }
 
@@ -477,7 +477,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeTaskInputs
         {
-            get => _includeTaskInputs || _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs);
+            get => _includeTaskInputs || new Lazy<bool>(() => _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs)).Value;
             set => _includeTaskInputs = value;
         }
 
