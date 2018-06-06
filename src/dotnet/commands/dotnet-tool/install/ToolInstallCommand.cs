@@ -60,8 +60,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
 
-            var cliFolderPathCalculator = new CliFolderPathCalculator();
-
             _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoreAndInstaller;
 
             _environmentPathInstruction = environmentPathInstruction

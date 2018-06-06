@@ -14,15 +14,9 @@ namespace Microsoft.DotNet.ShellShim
     internal static class EnvironmentPathFactory
     {
         public static IEnvironmentPath CreateEnvironmentPath(
-            CliFolderPathCalculator cliFolderPathCalculator = null,
             bool hasSuperUserAccess = false,
             IEnvironmentProvider environmentProvider = null)
         {
-            if (cliFolderPathCalculator == null)
-            {
-                cliFolderPathCalculator = new CliFolderPathCalculator();
-            }
-
             if (environmentProvider == null)
             {
                 environmentProvider = new EnvironmentProvider();
@@ -32,14 +26,14 @@ namespace Microsoft.DotNet.ShellShim
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 environmentPath = new WindowsEnvironmentPath(
-                    cliFolderPathCalculator.ToolsShimPath,
+                    CliFolderPathCalculator.ToolsShimPath,
                     Reporter.Output,
                     environmentProvider);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && hasSuperUserAccess)
             {
                 environmentPath = new LinuxEnvironmentPath(
-                    cliFolderPathCalculator.ToolsShimPathInUnix,
+                    CliFolderPathCalculator.ToolsShimPathInUnix,
                     Reporter.Output,
                     environmentProvider,
                     new FileWrapper());
@@ -47,7 +41,7 @@ namespace Microsoft.DotNet.ShellShim
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && hasSuperUserAccess)
             {
                 environmentPath = new OSXEnvironmentPath(
-                    executablePath: cliFolderPathCalculator.ToolsShimPathInUnix,
+                    executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
                     reporter: Reporter.Output,
                     environmentProvider: environmentProvider,
                     fileSystem: new FileWrapper());
@@ -57,10 +51,9 @@ namespace Microsoft.DotNet.ShellShim
         }
 
         public static IEnvironmentPathInstruction CreateEnvironmentPathInstruction(
-            CliFolderPathCalculator cliFolderPathCalculator = null,
             IEnvironmentProvider environmentProvider = null)
         {
-            return CreateEnvironmentPath(cliFolderPathCalculator, true, environmentProvider);
+            return CreateEnvironmentPath(true, environmentProvider);
         }
     }
 }

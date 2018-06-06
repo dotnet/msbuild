@@ -88,15 +88,14 @@ namespace Microsoft.DotNet.Cli
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
-            var cliFallbackFolderPathCalculator = new CliFolderPathCalculator();
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
-            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel(cliFallbackFolderPathCalculator))
+            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel())
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
-                new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
+                new FirstTimeUseNoticeSentinel())
             {
                 IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = disposableFirstTimeUseNoticeSentinel;
-                IAspNetCertificateSentinel aspNetCertificateSentinel = new AspNetCertificateSentinel(cliFallbackFolderPathCalculator);
+                IAspNetCertificateSentinel aspNetCertificateSentinel = new AspNetCertificateSentinel();
                 IFileSentinel toolPathSentinel = new FileSentinel(
                     new FilePath(
                         Path.Combine(
@@ -174,7 +173,6 @@ namespace Microsoft.DotNet.Cli
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
-                            cliFallbackFolderPathCalculator,
                             hasSuperUserAccess,
                             dotnetFirstRunConfiguration,
                             environmentProvider);
@@ -241,7 +239,6 @@ namespace Microsoft.DotNet.Cli
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
-            CliFolderPathCalculator cliFolderPathCalculator,
             bool hasSuperUserAccess,
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
             IEnvironmentProvider environmentProvider)
@@ -249,15 +246,11 @@ namespace Microsoft.DotNet.Cli
             using (PerfTrace.Current.CaptureTiming())
             {
                 var nugetPackagesArchiver = new NuGetPackagesArchiver();
-                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(
-                    cliFolderPathCalculator,
-                    hasSuperUserAccess,
-                    environmentProvider);
+                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
                 var nugetCachePrimer = new NuGetCachePrimer(
                     nugetPackagesArchiver,
-                    nugetCacheSentinel,
-                    cliFolderPathCalculator);
+                    nugetCacheSentinel);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                     nugetCachePrimer,
@@ -268,7 +261,7 @@ namespace Microsoft.DotNet.Cli
                     toolPathSentinel,
                     dotnetFirstRunConfiguration,
                     Reporter.Output,
-                    cliFolderPathCalculator.CliFallbackFolderPath,
+                    CliFolderPathCalculator.CliFallbackFolderPath,
                     environmentPath);
 
                 dotnetConfigurer.Configure();
