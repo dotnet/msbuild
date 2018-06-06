@@ -2046,6 +2046,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <ResolveAssemblyReferencesDependsOn>
+      ResolveProjectReferences;
+      FindInvalidProjectReferences;
       GetFrameworkPaths;
       GetReferenceAssemblyPaths;
       PrepareForBuild;
