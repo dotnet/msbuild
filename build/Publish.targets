@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">  
+  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(NuGetPackagesDir)/microsoft.dotnet.build.tasks.feed/$(BuildTasksFeedToolVersion)/build/Microsoft.DotNet.Build.Tasks.Feed.targets" />
+
   <PropertyGroup>
     <OverwriteOnPublish Condition="'$(OverwriteOnPublish)' == ''">false</OverwriteOnPublish>
   </PropertyGroup>
-  
+
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
+                            SetBadgeProps;
                             Package;
+                            PublishArtifacts;
+                            FinishBuild" />
+
+  <Target Name="PublishWithoutPackage"
+          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
+          DependsOnTargets="Init;
+                            SetBadgeProps;
+                            EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
 
@@ -26,7 +37,8 @@
 
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </ForPublishing>
     </ItemGroup>
   </Target>
@@ -56,4 +68,5 @@
                         GitHubPassword="$(GITHUB_PASSWORD)"
                         Condition=" '$(GITHUB_PASSWORD)' != '' " />
   </Target>
+
 </Project>

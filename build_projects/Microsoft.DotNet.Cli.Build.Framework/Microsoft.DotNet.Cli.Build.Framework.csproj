@@ -12,7 +12,7 @@
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.1.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.0.1-beta-000933" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.0.3" />
   </ItemGroup>
 
 </Project>

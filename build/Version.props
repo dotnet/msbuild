@@ -1,22 +1,25 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>0</VersionMinor>
-    <VersionPatch>3</VersionPatch>
+    <VersionMinor>2</VersionMinor>
+    <VersionPatch>100</VersionPatch>
     <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">refac</ReleaseSuffix>
 
-    <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
-    <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 
-    <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</SimpleVersion> 
+    <MajorMinorVersion>$(VersionMajor).$(VersionMinor)</MajorMinorVersion>
+    <CliVersionNoSuffix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>
+    <CliVersionPrefix>$(CliVersionNoSuffix)-$(ReleaseSuffix)</CliVersionPrefix>
+    <CliBrandingVersion>$(CliVersionNoSuffix) - $(ReleaseSuffix)</CliBrandingVersion>
+    <SimpleVersion Condition=" '$(DropSuffix)' != 'true' ">$(CliVersionNoSuffix).$(CommitCount)</SimpleVersion>
+    <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(CliVersionNoSuffix)</SimpleVersion>
 
-    <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix> 
+    <VersionSuffix Condition=" '$(DropSuffix)' != 'true' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
 
-    <FullNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion> 
+    <FullNugetVersion>$(CliVersionNoSuffix)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion>
 
-    <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(FullNugetVersion)</NugetVersion> 
-    <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</NugetVersion> 
+    <NugetVersion Condition=" '$(DropSuffix)' != 'true' ">$(FullNugetVersion)</NugetVersion>
+    <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(CliVersionNoSuffix)</NugetVersion>
 
     <SdkVersion>$(NugetVersion)</SdkVersion>
-    <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion> 
+    <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion>
   </PropertyGroup>
 </Project>

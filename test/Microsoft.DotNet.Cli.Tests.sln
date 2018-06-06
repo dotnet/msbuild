@@ -1,8 +1,7 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
-MinimumVisualStudioVersion = 15.0.26124.0
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.TestFramework", "Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj", "{BEA33DFA-8559-4680-B40A-B522FBF37567}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Tools.Tests.Utilities", "Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj", "{770FE8B9-6381-4328-AA36-D6A21114701E}"
@@ -58,5 +57,8 @@ Global
 		{AEB7B217-D4C4-46F1-9495-87F869F0ABE4}.Release|x64.Build.0 = Release|x64
 		{AEB7B217-D4C4-46F1-9495-87F869F0ABE4}.Release|x86.ActiveCfg = Release|x86
 		{AEB7B217-D4C4-46F1-9495-87F869F0ABE4}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7AF6777A-0133-453A-B302-FDD974B8F39C}
 	EndGlobalSection
 EndGlobal

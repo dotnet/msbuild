@@ -1,6 +1,6 @@
 # .NET CLI Tab Completion
 
-In version 2.0 of the .NET Core CLI, we have added support for providing suggestions when you press `tab`. While it's not yet enabled by default, you can try it out today by installing a [preview build](https://github.com/dotnet/cli#installers-and-binaries) from the master branch or by building from source. 
+In version 2.0 of the .NET Core CLI, we have added support for providing suggestions when you press `tab`. While it's not yet enabled by default, you can try it out in PowerShell, bash, or zsh by following the instructions below. 
 
 Here are some examples of what it provides:
 
@@ -26,17 +26,18 @@ If you just installed `dotnet` you may see the first-run output:
 ```
 Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
---------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
 
 Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.
 Decompressing 100% 4936 ms
 Expanding 100% 17195 ms
 ```
@@ -68,4 +69,4 @@ To enable tab completion in zsh, edit your `.zshrc` file to add the contents of 
 
 ## How it works
 
-Each of these scripts provides a hook for completions for its respective shell. The logic that determines which suggestions to provide is in the CLI itself, configured using [our new parser](https://github.com/dotnet/CliCommandLineParser). You can see a code example [here](https://github.com/dotnet/cli/blob/master/src/dotnet/commands/dotnet-add/dotnet-add-package/AddPackageParser.cs#L23). 
+Each of these scripts provides a hook for completions for its respective shell. The logic that determines which suggestions to provide is in the CLI itself, configured using [our new parser](https://github.com/dotnet/CliCommandLineParser). You can see a code example [here](https://github.com/dotnet/cli/blob/master/src/dotnet/commands/dotnet-add/dotnet-add-package/AddPackageParser.cs). 

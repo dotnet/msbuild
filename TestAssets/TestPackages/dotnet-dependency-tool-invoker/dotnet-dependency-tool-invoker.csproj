@@ -6,16 +6,16 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
     <DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Frameworks" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(CLI_ArchiveVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(CliCommandLineParserVersion)" />
+    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(SdkNugetVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 

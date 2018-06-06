@@ -22,11 +22,6 @@
       <Output TaskParameter="RelativePath" ItemName="SdkRelativeOutputFiles" />
     </MakeRelative>
     <MakeRelative
-      Path1="$(SymbolsDirectory)"
-      Path2="%(SdkDebugLayoutInput.Identity)" >
-      <Output TaskParameter="RelativePath" ItemName="SdkDebugRelativeOutputFiles" />
-    </MakeRelative>
-    <MakeRelative
       Path1="$(OutputDirectory)/"
       Path2="%(SdkLanguagePackInput.Identity)" >
       <Output TaskParameter="RelativePath" ItemName="SdkLanguagePackRelativeOutputFiles" />

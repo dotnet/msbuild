@@ -4,6 +4,7 @@
 using Microsoft.DotNet.VersionTools;
 using Microsoft.DotNet.VersionTools.Automation;
 using Microsoft.DotNet.VersionTools.Dependencies;
+using Microsoft.DotNet.VersionTools.Dependencies.BuildOutput;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,13 +24,11 @@ namespace Microsoft.DotNet.Scripts
 
             bool onlyUpdate = args.Length > 0 && string.Equals("--Update", args[0], StringComparison.OrdinalIgnoreCase);
 
-            List<BuildInfo> buildInfos = new List<BuildInfo>();
-
-            buildInfos.Add(GetBuildInfo("CoreSetup", s_config.CoreSetupVersionFragment, fetchLatestReleaseFile: false));
-
+            List<BuildInfo> buildInfos = new List<BuildInfo>(s_config.VersionFragments.Select<KeyValuePair<string, string>, BuildInfo>(fragment => 
+                    GetBuildInfo(fragment.Key, fragment.Value, fetchLatestReleaseFile: false)));
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
             var dependencyBuildInfos = buildInfos.Select(buildInfo =>
-                new DependencyBuildInfo(
+                new BuildDependencyInfo(
                     buildInfo,
                     upgradeStableVersions: true,
                     disabledPackages: Enumerable.Empty<string>()));
@@ -50,11 +49,14 @@ namespace Microsoft.DotNet.Scripts
                     body += PullRequestCreator.NotificationString(s_config.GitHubPullRequestNotifications);
                 }
 
-                new PullRequestCreator(gitHubAuth, origin, upstreamBranch)
+                new PullRequestCreator(gitHubAuth)
                     .CreateOrUpdateAsync(
                         suggestedMessage,
                         suggestedMessage + $" ({upstreamBranch.Name})",
-                        body)
+                        body,
+                        upstreamBranch,
+                        origin,
+                        new PullRequestOptions())
                     .Wait();
             }
         }
@@ -81,9 +83,55 @@ namespace Microsoft.DotNet.Scripts
         private static IEnumerable<IDependencyUpdater> GetUpdaters()
         {
             string dependencyVersionsPath = Path.Combine("build", "DependencyVersions.props");
-            yield return CreateRegexUpdater(dependencyVersionsPath, "CLI_SharedFrameworkVersion", "Microsoft.NETCore.App");
-            yield return CreateRegexUpdater(dependencyVersionsPath, "PlatformAbstractionsVersion", "Microsoft.DotNet.PlatformAbstractions");
-            yield return CreateRegexUpdater(dependencyVersionsPath, "DependencyModelVersion", "Microsoft.Extensions.DependencyModel");
+            
+            if (s_config.HasVersionFragment("aspnet"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreAppPackageVersion", "Microsoft.AspNetCore.App");
+            }
+            if (s_config.HasVersionFragment("clicommandlineparser"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetCliCommandLinePackageVersion", "Microsoft.DotNet.Cli.CommandLine");
+            }
+            if (s_config.HasVersionFragment("climigrate"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetProjectJsonMigrationPackageVersion", "Microsoft.DotNet.ProjectJsonMigration");
+            }
+            if (s_config.HasVersionFragment("coresetup"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETCoreAppPackageVersion", "Microsoft.NETCore.App");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetPlatformAbstractionsPackageVersion", "Microsoft.DotNet.PlatformAbstractions");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftExtensionsDependencyModelPackageVersion", "Microsoft.Extensions.DependencyModel");
+            }
+            if (s_config.HasVersionFragment("fsharp"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftFSharpCompilerPackageVersion", "Microsoft.FSharp.Compiler");
+            }
+            if (s_config.HasVersionFragment("msbuild"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftBuildPackageVersion", "Microsoft.Build");
+            }
+            if (s_config.HasVersionFragment("nugetclient"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "NuGetBuildTasksPackageVersion", "NuGet.Build.Tasks");
+            }
+            if (s_config.HasVersionFragment("roslyn"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftCodeAnalysisCSharpPackageVersion", "Microsoft.CodeAnalysis.CSharp");
+            }
+            if (s_config.HasVersionFragment("sdk"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETSdkPackageVersion", "Microsoft.NET.Sdk");
+            }
+            if (s_config.HasVersionFragment("templating"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetCommonItemTemplatesPackageVersion", "Microsoft.DotNet.Common.ItemTemplates");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetTestProjectTemplates20PackageVersion", "Microsoft.DotNet.Test.ProjectTemplates.2.0");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftTemplateEngineCliPackageVersion", "Microsoft.TemplateEngine.Cli");
+            }
+            if (s_config.HasVersionFragment("websdk"))
+            {
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETSdkWebPackageVersion", "Microsoft.NET.Sdk.Web");
+            }
         }
 
         private static IDependencyUpdater CreateRegexUpdater(string repoRelativePath, string propertyName, string packageId)

@@ -14,8 +14,8 @@
   </PropertyGroup>
 
   <Target Name="Test"
-          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
-          DependsOnTargets="BuildTests;">
+          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' And !$(Architecture.StartsWith('arm')) "
+          DependsOnTargets="TestsForBuildItself;BuildTests;">
 
     <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->
     <MakeDir Directories="$(TestPackagesDir)" />
@@ -42,6 +42,8 @@
       BuildInParallel="True"
       Projects="@(ProjectsToTest)">
     </MSBuild>
+
+    <Exec Command="$(DotnetInOutputDirectory) exec $(RoslynDirectory)/bincore/VBCSCompiler.dll -shutdown" />
 
     <Message Text="Finished test execution" Importance="High" />
   </Target>
@@ -85,7 +87,11 @@
                 ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
+  </Target>
 
+  <Target Name="TestsForBuildItself">
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/test/MsBuildScript.Tests/runtests.target"
+                   ToolPath="$(PreviousStageDirectory)" />
   </Target>
 
   <Target Name="EnsureStageSeparation">
