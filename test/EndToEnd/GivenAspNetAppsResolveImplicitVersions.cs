@@ -209,7 +209,7 @@ namespace EndToEnd
                 ?.Version;
         }
 
-        public static string LatestSupportedAspNetCoreAppVersion = "2.1";
+        public static string LatestSupportedAspNetCoreAppVersion = "2.2";
 
         public static IEnumerable<object[]> SupportedAspNetCoreAppVersions
         {
