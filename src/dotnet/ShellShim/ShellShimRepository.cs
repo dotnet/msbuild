@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.ShellShim
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
                             var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                            _fileSystem.File.Move(file.Value, tempPath);
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(file.Value, tempPath));
                             files[file.Value] = tempPath;
                         }
                     }
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.ShellShim
                 rollback: () => {
                     foreach (var kvp in files)
                     {
-                        _fileSystem.File.Move(kvp.Value, kvp.Key);
+                        FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(kvp.Value, kvp.Key));
                     }
                 });
         }
