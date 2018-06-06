@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private static Lookup CreateLookup(ItemDictionary<ProjectItemInstance> itemsByType, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            return new Lookup(itemsByType, properties, null);
+            return new Lookup(itemsByType, properties);
         }
     }
 }

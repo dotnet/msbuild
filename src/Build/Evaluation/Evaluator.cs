@@ -165,11 +165,6 @@ namespace Microsoft.Build.Evaluation
         private readonly int _maxNodeCount;
 
         /// <summary>
-        /// This optional ProjectInstance is only exposed when doing debugging. It is not used by the evaluator.
-        /// </summary>
-        private readonly ProjectInstance _projectInstanceIfAnyForDebuggerOnly;
-
-        /// <summary>
         /// The <see cref="ISdkResolverService"/> to use.
         /// </summary>
         private readonly ISdkResolverService _sdkResolverService;
@@ -217,7 +212,6 @@ namespace Microsoft.Build.Evaluation
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
             ProjectRootElementCache projectRootElementCache,
-            ProjectInstance projectInstanceIfAnyForDebuggerOnly,
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
@@ -247,7 +241,6 @@ namespace Microsoft.Build.Evaluation
             _environmentProperties = environmentProperties;
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
-            _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationContext = evaluationContext;
@@ -335,15 +328,13 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Evaluates the project data passed in.
-        /// If debugging is enabled, returns a dictionary of name/value pairs such as properties, for debugger display.
         /// </summary>
         /// <remarks>
         /// This is the only non-private member of this class.
         /// This is a helper static method so that the caller can just do "Evaluator.Evaluate(..)" without
         /// newing one up, yet the whole class need not be static.
-        /// The optional ProjectInstance is only exposed when doing debugging. It is not used by the evaluator.
         /// </remarks>
-        internal static IDictionary<string, object> Evaluate(
+        internal static void Evaluate(
             IEvaluatorData<P, I, M, D> data,
             ProjectRootElement root,
             ProjectLoadSettings loadSettings,
@@ -354,7 +345,6 @@ namespace Microsoft.Build.Evaluation
             IToolsetProvider toolsetProvider,
             ProjectRootElementCache projectRootElementCache,
             BuildEventContext buildEventContext,
-            ProjectInstance projectInstanceIfAnyForDebuggerOnly,
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext = null)
@@ -380,13 +370,12 @@ namespace Microsoft.Build.Evaluation
                     itemFactory,
                     toolsetProvider,
                     projectRootElementCache,
-                    projectInstanceIfAnyForDebuggerOnly,
                     sdkResolverService,
                     submissionId,
                     evaluationContext,
                     profileEvaluation);
 
-                return evaluator.Evaluate(loggingService, buildEventContext);
+                evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
             }
             finally
@@ -680,9 +669,8 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Do the evaluation.
         /// Called by the static helper method.
-        /// If debugging is enabled, returns a dictionary of name/value pairs such as properties, for debugger display.
         /// </summary>
-        private IDictionary<string, object> Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
+        private void Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
         {
             string projectFile;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
@@ -908,8 +896,6 @@ namespace Microsoft.Build.Evaluation
                 ProjectFile = projectFile,
                 ProfilerResult = _evaluationProfiler.ProfiledResult
             });
-
-            return null;
         }
 
         /// <summary>
