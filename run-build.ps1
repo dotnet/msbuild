@@ -106,12 +106,12 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
 Write-Output "$dotnetInstallPath -version ""$dotnetCliVersion"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 Invoke-Expression "$dotnetInstallPath -version ""$dotnetCliVersion"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 
-Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -SharedRuntime -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
-
 if ($LastExitCode -ne 0)
 {
     Copy-Item -Recurse -Force $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
 }
+
+Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -Runtime ""dotnet"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
