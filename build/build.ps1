@@ -122,6 +122,10 @@ function InstallRepoToolset {
   $RepoToolsetVersion = $GlobalJson.'msbuild-sdks'.'RoslynTools.RepoToolset'
   $RepoToolsetDir = Join-Path $NuGetPackageRoot "roslyntools.repotoolset\$RepoToolsetVersion\tools"
   $RepoToolsetBuildProj = Join-Path $RepoToolsetDir "Build.proj"
+  if ($DotNetBuildFromSource)
+  {
+    $RepoToolsetDir = Join-Path $env:RESOLVE_REPO_TOOLSET_PACKAGE_DIR "tools"
+  }
 
   if (!(Test-Path -Path $RepoToolsetBuildProj)) {
     $ToolsetProj = Join-Path $PSScriptRoot "Toolset.csproj"
